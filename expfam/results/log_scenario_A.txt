@@ -1,0 +1,323 @@
+
+=================================================================
+SCENARIO A: True X=Poisson, True Y=Bernoulli
+=================================================================
+
+--- Exp 1: k variation ---
+  [  1/60] Exp1 k=1 t=0  RMSE(Z)=0.7609  BIC=20844.9
+  [  2/60] Exp1 k=1 t=1  RMSE(Z)=1.4104  BIC=21129.3
+  [  3/60] Exp1 k=1 t=2  RMSE(Z)=0.7385  BIC=20546.6
+  [  4/60] Exp1 k=1 t=3  RMSE(Z)=1.0960  BIC=21184.5
+  [  5/60] Exp1 k=1 t=4  RMSE(Z)=1.3987  BIC=22258.0
+  [  6/60] Exp1 k=1 t=5  RMSE(Z)=0.6900  BIC=20691.4
+  [  7/60] Exp1 k=1 t=6  RMSE(Z)=0.9868  BIC=20776.3
+  [  8/60] Exp1 k=1 t=7  RMSE(Z)=0.8926  BIC=21124.2
+  [  9/60] Exp1 k=1 t=8  RMSE(Z)=0.7835  BIC=21364.4
+  [ 10/60] Exp1 k=1 t=9  RMSE(Z)=0.7691  BIC=20760.8
+  [ 11/60] Exp1 k=2 t=0  RMSE(Z)=0.5167  BIC=18415.1
+  [ 12/60] Exp1 k=2 t=1  RMSE(Z)=0.5729  BIC=18699.6
+  [ 13/60] Exp1 k=2 t=2  RMSE(Z)=0.7338  BIC=18450.1
+  [ 14/60] Exp1 k=2 t=3  RMSE(Z)=0.9506  BIC=19216.2
+  [ 15/60] Exp1 k=2 t=4  RMSE(Z)=0.7871  BIC=19515.6
+  [ 16/60] Exp1 k=2 t=5  RMSE(Z)=0.7817  BIC=18828.5
+  [ 17/60] Exp1 k=2 t=6  RMSE(Z)=0.6542  BIC=18494.6
+  [ 18/60] Exp1 k=2 t=7  RMSE(Z)=0.7363  BIC=18383.9
+  [ 19/60] Exp1 k=2 t=8  RMSE(Z)=0.9325  BIC=19073.2
+  [ 20/60] Exp1 k=2 t=9  RMSE(Z)=0.9897  BIC=18949.7
+  [ 21/60] Exp1 k=3 t=0  RMSE(Z)=0.3038  BIC=17146.5
+  [ 22/60] Exp1 k=3 t=1  RMSE(Z)=0.2744  BIC=16709.2
+  [ 23/60] Exp1 k=3 t=2  RMSE(Z)=0.2656  BIC=16692.6
+  [ 24/60] Exp1 k=3 t=3  RMSE(Z)=0.2682  BIC=16861.4
+  [ 25/60] Exp1 k=3 t=4  RMSE(Z)=0.2871  BIC=17140.0
+  [ 26/60] Exp1 k=3 t=5  RMSE(Z)=0.2810  BIC=16964.1
+  [ 27/60] Exp1 k=3 t=6  RMSE(Z)=0.2706  BIC=16805.9
+  [ 28/60] Exp1 k=3 t=7  RMSE(Z)=0.2713  BIC=16535.6
+  [ 29/60] Exp1 k=3 t=8  RMSE(Z)=0.2722  BIC=16880.5
+  [ 30/60] Exp1 k=3 t=9  RMSE(Z)=0.2901  BIC=16803.9
+  [ 31/60] Exp1 k=4 t=0  RMSE(Z)=0.5293  BIC=17592.8
+  [ 32/60] Exp1 k=4 t=1  RMSE(Z)=0.7139  BIC=17215.0
+  [ 33/60] Exp1 k=4 t=2  RMSE(Z)=0.3530  BIC=17169.4
+  [ 34/60] Exp1 k=4 t=3  RMSE(Z)=0.4747  BIC=17330.3
+  [ 35/60] Exp1 k=4 t=4  RMSE(Z)=0.5252  BIC=17593.6
+  [ 36/60] Exp1 k=4 t=5  RMSE(Z)=0.5781  BIC=17453.7
+  [ 37/60] Exp1 k=4 t=6  RMSE(Z)=0.4473  BIC=17252.7
+  [ 38/60] Exp1 k=4 t=7  RMSE(Z)=0.4239  BIC=16957.3
+  [ 39/60] Exp1 k=4 t=8  RMSE(Z)=0.5167  BIC=17262.3
+  [ 40/60] Exp1 k=4 t=9  RMSE(Z)=0.4883  BIC=17319.3
+  [ 41/60] Exp1 k=5 t=0  RMSE(Z)=0.7088  BIC=18097.1
+  [ 42/60] Exp1 k=5 t=1  RMSE(Z)=0.6846  BIC=17727.1
+  [ 43/60] Exp1 k=5 t=2  RMSE(Z)=0.8721  BIC=17651.8
+  [ 44/60] Exp1 k=5 t=3  RMSE(Z)=0.7246  BIC=17882.2
+  [ 45/60] Exp1 k=5 t=4  RMSE(Z)=0.7230  BIC=18088.8
+  [ 46/60] Exp1 k=5 t=5  RMSE(Z)=0.6741  BIC=17908.4
+  [ 47/60] Exp1 k=5 t=6  RMSE(Z)=0.7216  BIC=17667.2
+  [ 48/60] Exp1 k=5 t=7  RMSE(Z)=0.5733  BIC=17418.8
+  [ 49/60] Exp1 k=5 t=8  RMSE(Z)=0.7217  BIC=17831.5
+  [ 50/60] Exp1 k=5 t=9  RMSE(Z)=0.6645  BIC=17756.9
+  [ 51/60] Exp1 k=6 t=0  RMSE(Z)=0.6741  BIC=18566.2
+  [ 52/60] Exp1 k=6 t=1  RMSE(Z)=0.6165  BIC=18197.7
+  [ 53/60] Exp1 k=6 t=2  RMSE(Z)=0.8257  BIC=18164.3
+  [ 54/60] Exp1 k=6 t=3  RMSE(Z)=0.5073  BIC=18406.5
+  [ 55/60] Exp1 k=6 t=4  RMSE(Z)=0.7253  BIC=18518.0
+  [ 56/60] Exp1 k=6 t=5  RMSE(Z)=0.6726  BIC=18378.7
+  [ 57/60] Exp1 k=6 t=6  RMSE(Z)=0.7700  BIC=18199.1
+  [ 58/60] Exp1 k=6 t=7  RMSE(Z)=0.6905  BIC=17961.5
+  [ 59/60] Exp1 k=6 t=8  RMSE(Z)=0.8015  BIC=18305.4
+  [ 60/60] Exp1 k=6 t=9  RMSE(Z)=0.6339  BIC=18251.2
+  [Exp1] BIC best k=3  (pass=True)
+
+--- Exp 2&3: n/d variation ---
+  [  1/60] Exp2 n=50 t=0  RMSE(Z)=0.4922
+  [  2/60] Exp2 n=50 t=1  RMSE(Z)=0.3742
+  [  3/60] Exp2 n=50 t=2  RMSE(Z)=0.4103
+  [  4/60] Exp2 n=50 t=3  RMSE(Z)=0.4095
+  [  5/60] Exp2 n=50 t=4  RMSE(Z)=0.4285
+  [  6/60] Exp2 n=50 t=5  RMSE(Z)=0.3769
+  [  7/60] Exp2 n=50 t=6  RMSE(Z)=0.4411
+  [  8/60] Exp2 n=50 t=7  RMSE(Z)=0.3901
+  [  9/60] Exp2 n=50 t=8  RMSE(Z)=0.3520
+  [ 10/60] Exp2 n=50 t=9  RMSE(Z)=0.3813
+  [ 11/60] Exp2 n=100 t=0  RMSE(Z)=0.3105
+  [ 12/60] Exp2 n=100 t=1  RMSE(Z)=0.3382
+  [ 13/60] Exp2 n=100 t=2  RMSE(Z)=0.3219
+  [ 14/60] Exp2 n=100 t=3  RMSE(Z)=0.3407
+  [ 15/60] Exp2 n=100 t=4  RMSE(Z)=0.3252
+  [ 16/60] Exp2 n=100 t=5  RMSE(Z)=0.3162
+  [ 17/60] Exp2 n=100 t=6  RMSE(Z)=0.2992
+  [ 18/60] Exp2 n=100 t=7  RMSE(Z)=0.3072
+  [ 19/60] Exp2 n=100 t=8  RMSE(Z)=0.3217
+  [ 20/60] Exp2 n=100 t=9  RMSE(Z)=0.3132
+  [ 21/60] Exp2 n=150 t=0  RMSE(Z)=0.2653
+  [ 22/60] Exp2 n=150 t=1  RMSE(Z)=0.2805
+  [ 23/60] Exp2 n=150 t=2  RMSE(Z)=0.2852
+  [ 24/60] Exp2 n=150 t=3  RMSE(Z)=0.2781
+  [ 25/60] Exp2 n=150 t=4  RMSE(Z)=0.2816
+  [ 26/60] Exp2 n=150 t=5  RMSE(Z)=0.2733
+  [ 27/60] Exp2 n=150 t=6  RMSE(Z)=0.2862
+  [ 28/60] Exp2 n=150 t=7  RMSE(Z)=0.2693
+  [ 29/60] Exp2 n=150 t=8  RMSE(Z)=0.2826
+  [ 30/60] Exp2 n=150 t=9  RMSE(Z)=0.2832
+  [ 31/60] Exp2 n=200 t=0  RMSE(Z)=0.2443
+  [ 32/60] Exp2 n=200 t=1  RMSE(Z)=0.2522
+  [ 33/60] Exp2 n=200 t=2  RMSE(Z)=0.2341
+  [ 34/60] Exp2 n=200 t=3  RMSE(Z)=0.2512
+  [ 35/60] Exp2 n=200 t=4  RMSE(Z)=0.2554
+  [ 36/60] Exp2 n=200 t=5  RMSE(Z)=0.2355
+  [ 37/60] Exp2 n=200 t=6  RMSE(Z)=0.2411
+  [ 38/60] Exp2 n=200 t=7  RMSE(Z)=0.2453
+  [ 39/60] Exp2 n=200 t=8  RMSE(Z)=0.2502
+  [ 40/60] Exp2 n=200 t=9  RMSE(Z)=0.2596
+  [ 41/60] Exp2 n=250 t=0  RMSE(Z)=0.2334
+  [ 42/60] Exp2 n=250 t=1  RMSE(Z)=0.2125
+  [ 43/60] Exp2 n=250 t=2  RMSE(Z)=0.2229
+  [ 44/60] Exp2 n=250 t=3  RMSE(Z)=0.2333
+  [ 45/60] Exp2 n=250 t=4  RMSE(Z)=0.2184
+  [ 46/60] Exp2 n=250 t=5  RMSE(Z)=0.2206
+  [ 47/60] Exp2 n=250 t=6  RMSE(Z)=0.2181
+  [ 48/60] Exp2 n=250 t=7  RMSE(Z)=0.2300
+  [ 49/60] Exp2 n=250 t=8  RMSE(Z)=0.2278
+  [ 50/60] Exp2 n=250 t=9  RMSE(Z)=0.2279
+  [ 51/60] Exp2 n=300 t=0  RMSE(Z)=0.1973
+  [ 52/60] Exp2 n=300 t=1  RMSE(Z)=0.2152
+  [ 53/60] Exp2 n=300 t=2  RMSE(Z)=0.2056
+  [ 54/60] Exp2 n=300 t=3  RMSE(Z)=0.2000
+  [ 55/60] Exp2 n=300 t=4  RMSE(Z)=0.2101
+  [ 56/60] Exp2 n=300 t=5  RMSE(Z)=0.2113
+  [ 57/60] Exp2 n=300 t=6  RMSE(Z)=0.2071
+  [ 58/60] Exp2 n=300 t=7  RMSE(Z)=0.2089
+  [ 59/60] Exp2 n=300 t=8  RMSE(Z)=0.2061
+  [ 60/60] Exp2 n=300 t=9  RMSE(Z)=0.2139
+  [  1/60] Exp3 d=5 t=0  RMSE(Z)=0.2938
+  [  2/60] Exp3 d=5 t=1  RMSE(Z)=0.3288
+  [  3/60] Exp3 d=5 t=2  RMSE(Z)=0.3110
+  [  4/60] Exp3 d=5 t=3  RMSE(Z)=0.3427
+  [  5/60] Exp3 d=5 t=4  RMSE(Z)=0.2965
+  [  6/60] Exp3 d=5 t=5  RMSE(Z)=0.3401
+  [  7/60] Exp3 d=5 t=6  RMSE(Z)=0.3277
+  [  8/60] Exp3 d=5 t=7  RMSE(Z)=0.3107
+  [  9/60] Exp3 d=5 t=8  RMSE(Z)=0.3227
+  [ 10/60] Exp3 d=5 t=9  RMSE(Z)=0.3451
+  [ 11/60] Exp3 d=10 t=0  RMSE(Z)=0.2967
+  [ 12/60] Exp3 d=10 t=1  RMSE(Z)=0.2825
+  [ 13/60] Exp3 d=10 t=2  RMSE(Z)=0.2939
+  [ 14/60] Exp3 d=10 t=3  RMSE(Z)=0.2921
+  [ 15/60] Exp3 d=10 t=4  RMSE(Z)=0.2955
+  [ 16/60] Exp3 d=10 t=5  RMSE(Z)=0.3058
+  [ 17/60] Exp3 d=10 t=6  RMSE(Z)=0.3047
+  [ 18/60] Exp3 d=10 t=7  RMSE(Z)=0.3032
+  [ 19/60] Exp3 d=10 t=8  RMSE(Z)=0.3083
+  [ 20/60] Exp3 d=10 t=9  RMSE(Z)=0.3102
+  [ 21/60] Exp3 d=15 t=0  RMSE(Z)=0.2653
+  [ 22/60] Exp3 d=15 t=1  RMSE(Z)=0.2805
+  [ 23/60] Exp3 d=15 t=2  RMSE(Z)=0.2852
+  [ 24/60] Exp3 d=15 t=3  RMSE(Z)=0.2781
+  [ 25/60] Exp3 d=15 t=4  RMSE(Z)=0.2816
+  [ 26/60] Exp3 d=15 t=5  RMSE(Z)=0.2733
+  [ 27/60] Exp3 d=15 t=6  RMSE(Z)=0.2862
+  [ 28/60] Exp3 d=15 t=7  RMSE(Z)=0.2693
+  [ 29/60] Exp3 d=15 t=8  RMSE(Z)=0.2826
+  [ 30/60] Exp3 d=15 t=9  RMSE(Z)=0.2832
+  [ 31/60] Exp3 d=20 t=0  RMSE(Z)=0.2569
+  [ 32/60] Exp3 d=20 t=1  RMSE(Z)=0.2628
+  [ 33/60] Exp3 d=20 t=2  RMSE(Z)=0.2748
+  [ 34/60] Exp3 d=20 t=3  RMSE(Z)=0.2580
+  [ 35/60] Exp3 d=20 t=4  RMSE(Z)=0.2639
+  [ 36/60] Exp3 d=20 t=5  RMSE(Z)=0.2709
+  [ 37/60] Exp3 d=20 t=6  RMSE(Z)=0.2819
+  [ 38/60] Exp3 d=20 t=7  RMSE(Z)=0.2500
+  [ 39/60] Exp3 d=20 t=8  RMSE(Z)=0.2596
+  [ 40/60] Exp3 d=20 t=9  RMSE(Z)=0.2578
+  [ 41/60] Exp3 d=25 t=0  RMSE(Z)=0.2686
+  [ 42/60] Exp3 d=25 t=1  RMSE(Z)=0.2571
+  [ 43/60] Exp3 d=25 t=2  RMSE(Z)=0.2426
+  [ 44/60] Exp3 d=25 t=3  RMSE(Z)=0.2508
+  [ 45/60] Exp3 d=25 t=4  RMSE(Z)=0.2537
+  [ 46/60] Exp3 d=25 t=5  RMSE(Z)=0.2539
+  [ 47/60] Exp3 d=25 t=6  RMSE(Z)=0.2633
+  [ 48/60] Exp3 d=25 t=7  RMSE(Z)=0.2563
+  [ 49/60] Exp3 d=25 t=8  RMSE(Z)=0.2565
+  [ 50/60] Exp3 d=25 t=9  RMSE(Z)=0.2500
+  [ 51/60] Exp3 d=30 t=0  RMSE(Z)=0.2457
+  [ 52/60] Exp3 d=30 t=1  RMSE(Z)=0.2442
+  [ 53/60] Exp3 d=30 t=2  RMSE(Z)=0.2486
+  [ 54/60] Exp3 d=30 t=3  RMSE(Z)=0.2317
+  [ 55/60] Exp3 d=30 t=4  RMSE(Z)=0.2408
+  [ 56/60] Exp3 d=30 t=5  RMSE(Z)=0.2280
+  [ 57/60] Exp3 d=30 t=6  RMSE(Z)=0.2267
+  [ 58/60] Exp3 d=30 t=7  RMSE(Z)=0.2339
+  [ 59/60] Exp3 d=30 t=8  RMSE(Z)=0.2219
+  [ 60/60] Exp3 d=30 t=9  RMSE(Z)=0.2413
+  Figure saved: C:\Œ¤‹†2\expfam\results\fig_scenario_A_exp2_n.png
+  Figure saved: C:\Œ¤‹†2\expfam\results\fig_scenario_A_exp3_d.png
+
+--- Exp 4: Mismatch + Ablation ---
+  [Exp4-grid] X=gaus Y=gaus t=0  RMSE(Z)=0.6426
+  [Exp4-grid] X=gaus Y=gaus t=1  RMSE(Z)=0.8077
+  [Exp4-grid] X=gaus Y=gaus t=2  RMSE(Z)=0.6748
+  [Exp4-grid] X=gaus Y=gaus t=3  RMSE(Z)=0.6252
+  [Exp4-grid] X=gaus Y=gaus t=4  RMSE(Z)=0.6543
+  [Exp4-grid] X=gaus Y=gaus t=5  RMSE(Z)=0.8185
+  [Exp4-grid] X=gaus Y=gaus t=6  RMSE(Z)=0.7838
+  [Exp4-grid] X=gaus Y=gaus t=7  RMSE(Z)=0.5996
+  [Exp4-grid] X=gaus Y=gaus t=8  RMSE(Z)=0.7903
+  [Exp4-grid] X=gaus Y=gaus t=9  RMSE(Z)=0.7434
+  [Exp4-grid] X=gaus Y=bern t=0  RMSE(Z)=0.6798
+  [Exp4-grid] X=gaus Y=bern t=1  RMSE(Z)=0.7654
+  [Exp4-grid] X=gaus Y=bern t=2  RMSE(Z)=0.6603
+  [Exp4-grid] X=gaus Y=bern t=3  RMSE(Z)=0.6487
+  [Exp4-grid] X=gaus Y=bern t=4  RMSE(Z)=0.6743
+  [Exp4-grid] X=gaus Y=bern t=5  RMSE(Z)=0.7710
+  [Exp4-grid] X=gaus Y=bern t=6  RMSE(Z)=0.7586
+  [Exp4-grid] X=gaus Y=bern t=7  RMSE(Z)=0.5968
+  [Exp4-grid] X=gaus Y=bern t=8  RMSE(Z)=0.7554
+  [Exp4-grid] X=gaus Y=bern t=9  RMSE(Z)=0.7106
+  [Exp4-grid] X=gaus Y=pois t=0  RMSE(Z)=0.7262
+  [Exp4-grid] X=gaus Y=pois t=1  RMSE(Z)=0.8299
+  [Exp4-grid] X=gaus Y=pois t=2  RMSE(Z)=0.7302
+  [Exp4-grid] X=gaus Y=pois t=3  RMSE(Z)=0.7604
+  [Exp4-grid] X=gaus Y=pois t=4  RMSE(Z)=0.8019
+  [Exp4-grid] X=gaus Y=pois t=5  RMSE(Z)=0.8183
+  [Exp4-grid] X=gaus Y=pois t=6  RMSE(Z)=0.7949
+  [Exp4-grid] X=gaus Y=pois t=7  RMSE(Z)=0.7041
+  [Exp4-grid] X=gaus Y=pois t=8  RMSE(Z)=0.8028
+  [Exp4-grid] X=gaus Y=pois t=9  RMSE(Z)=0.7897
+  [Exp4-grid] X=bern Y=gaus t=0  RMSE(Z)=0.6075
+  [Exp4-grid] X=bern Y=gaus t=1  RMSE(Z)=0.6412
+  [Exp4-grid] X=bern Y=gaus t=2  RMSE(Z)=0.9975
+  [Exp4-grid] X=bern Y=gaus t=3  RMSE(Z)=0.5640
+  [Exp4-grid] X=bern Y=gaus t=4  RMSE(Z)=0.7613
+  [Exp4-grid] X=bern Y=gaus t=5  RMSE(Z)=0.8754
+  [Exp4-grid] X=bern Y=gaus t=6  RMSE(Z)=0.8512
+  [Exp4-grid] X=bern Y=gaus t=7  RMSE(Z)=1.3273
+  [Exp4-grid] X=bern Y=gaus t=8  RMSE(Z)=0.6855
+  [Exp4-grid] X=bern Y=gaus t=9  RMSE(Z)=0.5873
+  [Exp4-grid] X=bern Y=bern t=0  RMSE(Z)=0.9750
+  [Exp4-grid] X=bern Y=bern t=1  RMSE(Z)=0.7836
+  [Exp4-grid] X=bern Y=bern t=2  RMSE(Z)=1.0113
+  [Exp4-grid] X=bern Y=bern t=3  RMSE(Z)=0.9851
+  [Exp4-grid] X=bern Y=bern t=4  RMSE(Z)=0.9413
+  [Exp4-grid] X=bern Y=bern t=5  RMSE(Z)=0.9864
+  [Exp4-grid] X=bern Y=bern t=6  RMSE(Z)=0.9810
+  [Exp4-grid] X=bern Y=bern t=7  RMSE(Z)=0.9140
+  [Exp4-grid] X=bern Y=bern t=8  RMSE(Z)=1.0100
+  [Exp4-grid] X=bern Y=bern t=9  RMSE(Z)=0.9023
+  [Exp4-grid] X=bern Y=pois t=0  RMSE(Z)=0.6238
+  [Exp4-grid] X=bern Y=pois t=1  RMSE(Z)=0.5896
+  [Exp4-grid] X=bern Y=pois t=2  RMSE(Z)=1.1530
+  [Exp4-grid] X=bern Y=pois t=3  RMSE(Z)=0.7092
+  [Exp4-grid] X=bern Y=pois t=4  RMSE(Z)=0.7161
+  [Exp4-grid] X=bern Y=pois t=5  RMSE(Z)=0.8531
+  [Exp4-grid] X=bern Y=pois t=6  RMSE(Z)=0.6731
+  [Exp4-grid] X=bern Y=pois t=7  RMSE(Z)=1.2736
+  [Exp4-grid] X=bern Y=pois t=8  RMSE(Z)=0.5136
+  [Exp4-grid] X=bern Y=pois t=9  RMSE(Z)=0.7197
+  [Exp4-grid] X=pois Y=gaus t=0  RMSE(Z)=0.2737
+  [Exp4-grid] X=pois Y=gaus t=1  RMSE(Z)=0.2902
+  [Exp4-grid] X=pois Y=gaus t=2  RMSE(Z)=0.3055
+  [Exp4-grid] X=pois Y=gaus t=3  RMSE(Z)=0.2866
+  [Exp4-grid] X=pois Y=gaus t=4  RMSE(Z)=0.2807
+  [Exp4-grid] X=pois Y=gaus t=5  RMSE(Z)=0.3227
+  [Exp4-grid] X=pois Y=gaus t=6  RMSE(Z)=0.2918
+  [Exp4-grid] X=pois Y=gaus t=7  RMSE(Z)=0.3060
+  [Exp4-grid] X=pois Y=gaus t=8  RMSE(Z)=0.2981
+  [Exp4-grid] X=pois Y=gaus t=9  RMSE(Z)=0.3016
+  [Exp4-grid] X=pois Y=bern t=0  RMSE(Z)=0.2559  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=1  RMSE(Z)=0.2915  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=2  RMSE(Z)=0.2763  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=3  RMSE(Z)=0.2725  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=4  RMSE(Z)=0.2786  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=5  RMSE(Z)=0.2917  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=6  RMSE(Z)=0.2838  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=7  RMSE(Z)=0.2799  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=8  RMSE(Z)=0.2839  [CORRECT]
+  [Exp4-grid] X=pois Y=bern t=9  RMSE(Z)=0.2726  [CORRECT]
+  [Exp4-grid] X=pois Y=pois t=0  RMSE(Z)=0.3446
+  [Exp4-grid] X=pois Y=pois t=1  RMSE(Z)=0.3652
+  [Exp4-grid] X=pois Y=pois t=2  RMSE(Z)=0.3786
+  [Exp4-grid] X=pois Y=pois t=3  RMSE(Z)=0.3645
+  [Exp4-grid] X=pois Y=pois t=4  RMSE(Z)=0.3806
+  [Exp4-grid] X=pois Y=pois t=5  RMSE(Z)=0.3808
+  [Exp4-grid] X=pois Y=pois t=6  RMSE(Z)=0.3784
+  [Exp4-grid] X=pois Y=pois t=7  RMSE(Z)=0.3779
+  [Exp4-grid] X=pois Y=pois t=8  RMSE(Z)=0.3759
+  [Exp4-grid] X=pois Y=pois t=9  RMSE(Z)=0.3873
+  [Exp4-abl] Y-only (fix_x) t=0  RMSE(Z)=0.3301
+  [Exp4-abl] Y-only (fix_x) t=1  RMSE(Z)=0.3484
+  [Exp4-abl] Y-only (fix_x) t=2  RMSE(Z)=0.3620
+  [Exp4-abl] Y-only (fix_x) t=3  RMSE(Z)=0.3399
+  [Exp4-abl] Y-only (fix_x) t=4  RMSE(Z)=0.3384
+  [Exp4-abl] Y-only (fix_x) t=5  RMSE(Z)=0.3584
+  [Exp4-abl] Y-only (fix_x) t=6  RMSE(Z)=0.3331
+  [Exp4-abl] Y-only (fix_x) t=7  RMSE(Z)=0.3344
+  [Exp4-abl] Y-only (fix_x) t=8  RMSE(Z)=0.3545
+  [Exp4-abl] Y-only (fix_x) t=9  RMSE(Z)=0.3777
+  [Exp4-abl] X-only (fix_w) t=0  RMSE(Z)=0.5275
+  [Exp4-abl] X-only (fix_w) t=1  RMSE(Z)=0.5418
+  [Exp4-abl] X-only (fix_w) t=2  RMSE(Z)=0.6171
+  [Exp4-abl] X-only (fix_w) t=3  RMSE(Z)=0.5020
+  [Exp4-abl] X-only (fix_w) t=4  RMSE(Z)=0.6061
+  [Exp4-abl] X-only (fix_w) t=5  RMSE(Z)=0.6184
+  [Exp4-abl] X-only (fix_w) t=6  RMSE(Z)=0.8321
+  [Exp4-abl] X-only (fix_w) t=7  RMSE(Z)=0.5930
+  [Exp4-abl] X-only (fix_w) t=8  RMSE(Z)=0.5548
+  [Exp4-abl] X-only (fix_w) t=9  RMSE(Z)=0.5880
+
+  === Scenario A Mismatch Summary ===
+  Proposed (Pois,Bern): 0.2787
+  X=Gauss (Y=Bern)         : 0.7021 (2.52x)
+  X=Bern (Y=Bern)          : 0.9490 (3.41x)
+  Y=Gauss (X=Pois)         : 0.2957 (1.06x)
+  Y=Pois (X=Pois)          : 0.3734 (1.34x)
+  No X (fix_x)             : 0.3477 (1.25x)
+  No Y (fix_w)             : 0.5981 (2.15x)
+
+Scenario A total: 92.0 min
+
+=== Scenario A Complete ===
+  scenario: A
+  true_fx: poisson
+  true_fy: bernoulli
+  elapsed_min: 91.96569482999998
+  proposed: 0.27865990209894764
+  max_ratio: 3.4055650176584567
+  worst_label: X=Bern (Y=Bern)

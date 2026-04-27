@@ -1,0 +1,81 @@
+  [  1/60] k_est=1  trial=0   RMSE(Z)=0.7609  BIC=20844.9
+  [  2/60] k_est=1  trial=1   RMSE(Z)=1.4104  BIC=21129.3
+  [  3/60] k_est=1  trial=2   RMSE(Z)=0.7385  BIC=20546.6
+  [  4/60] k_est=1  trial=3   RMSE(Z)=1.0960  BIC=21184.5
+  [  5/60] k_est=1  trial=4   RMSE(Z)=1.3987  BIC=22258.0
+  [  6/60] k_est=1  trial=5   RMSE(Z)=0.6900  BIC=20691.4
+  [  7/60] k_est=1  trial=6   RMSE(Z)=0.9868  BIC=20776.3
+  [  8/60] k_est=1  trial=7   RMSE(Z)=0.8926  BIC=21124.2
+  [  9/60] k_est=1  trial=8   RMSE(Z)=0.7835  BIC=21364.4
+  [ 10/60] k_est=1  trial=9   RMSE(Z)=0.7691  BIC=20760.8
+  [ 11/60] k_est=2  trial=0   RMSE(Z)=0.5167  BIC=18415.1
+  [ 12/60] k_est=2  trial=1   RMSE(Z)=0.5729  BIC=18699.6
+  [ 13/60] k_est=2  trial=2   RMSE(Z)=0.7338  BIC=18450.1
+  [ 14/60] k_est=2  trial=3   RMSE(Z)=0.9506  BIC=19216.2
+  [ 15/60] k_est=2  trial=4   RMSE(Z)=0.7871  BIC=19515.6
+  [ 16/60] k_est=2  trial=5   RMSE(Z)=0.7817  BIC=18828.5
+  [ 17/60] k_est=2  trial=6   RMSE(Z)=0.6542  BIC=18494.6
+  [ 18/60] k_est=2  trial=7   RMSE(Z)=0.7363  BIC=18383.9
+  [ 19/60] k_est=2  trial=8   RMSE(Z)=0.9325  BIC=19073.2
+  [ 20/60] k_est=2  trial=9   RMSE(Z)=0.9897  BIC=18949.7
+  [ 21/60] k_est=3  trial=0   RMSE(Z)=0.3038  BIC=17146.5
+  [ 22/60] k_est=3  trial=1   RMSE(Z)=0.2744  BIC=16709.2
+  [ 23/60] k_est=3  trial=2   RMSE(Z)=0.2656  BIC=16692.6
+  [ 24/60] k_est=3  trial=3   RMSE(Z)=0.2682  BIC=16861.4
+  [ 25/60] k_est=3  trial=4   RMSE(Z)=0.2871  BIC=17140.0
+  [ 26/60] k_est=3  trial=5   RMSE(Z)=0.2810  BIC=16964.1
+  [ 27/60] k_est=3  trial=6   RMSE(Z)=0.2706  BIC=16805.9
+  [ 28/60] k_est=3  trial=7   RMSE(Z)=0.2713  BIC=16535.6
+  [ 29/60] k_est=3  trial=8   RMSE(Z)=0.2722  BIC=16880.5
+  [ 30/60] k_est=3  trial=9   RMSE(Z)=0.2901  BIC=16803.9
+  [ 31/60] k_est=4  trial=0   RMSE(Z)=0.5293  BIC=17592.8
+  [ 32/60] k_est=4  trial=1   RMSE(Z)=0.7139  BIC=17215.0
+  [ 33/60] k_est=4  trial=2   RMSE(Z)=0.3530  BIC=17169.4
+  [ 34/60] k_est=4  trial=3   RMSE(Z)=0.4747  BIC=17330.3
+  [ 35/60] k_est=4  trial=4   RMSE(Z)=0.5252  BIC=17593.6
+  [ 36/60] k_est=4  trial=5   RMSE(Z)=0.5781  BIC=17453.7
+  [ 37/60] k_est=4  trial=6   RMSE(Z)=0.4473  BIC=17252.7
+  [ 38/60] k_est=4  trial=7   RMSE(Z)=0.4239  BIC=16957.3
+  [ 39/60] k_est=4  trial=8   RMSE(Z)=0.5167  BIC=17262.3
+  [ 40/60] k_est=4  trial=9   RMSE(Z)=0.4883  BIC=17319.3
+  [ 41/60] k_est=5  trial=0   RMSE(Z)=0.7088  BIC=18097.1
+  [ 42/60] k_est=5  trial=1   RMSE(Z)=0.6846  BIC=17727.1
+  [ 43/60] k_est=5  trial=2   RMSE(Z)=0.8721  BIC=17651.8
+  [ 44/60] k_est=5  trial=3   RMSE(Z)=0.7246  BIC=17882.2
+  [ 45/60] k_est=5  trial=4   RMSE(Z)=0.7230  BIC=18088.8
+  [ 46/60] k_est=5  trial=5   RMSE(Z)=0.6741  BIC=17908.4
+  [ 47/60] k_est=5  trial=6   RMSE(Z)=0.7216  BIC=17667.2
+  [ 48/60] k_est=5  trial=7   RMSE(Z)=0.5733  BIC=17418.8
+  [ 49/60] k_est=5  trial=8   RMSE(Z)=0.7217  BIC=17831.5
+  [ 50/60] k_est=5  trial=9   RMSE(Z)=0.6645  BIC=17756.9
+  [ 51/60] k_est=6  trial=0   RMSE(Z)=0.6741  BIC=18566.2
+  [ 52/60] k_est=6  trial=1   RMSE(Z)=0.6165  BIC=18197.7
+  [ 53/60] k_est=6  trial=2   RMSE(Z)=0.8257  BIC=18164.3
+  [ 54/60] k_est=6  trial=3   RMSE(Z)=0.5073  BIC=18406.5
+  [ 55/60] k_est=6  trial=4   RMSE(Z)=0.7253  BIC=18518.0
+  [ 56/60] k_est=6  trial=5   RMSE(Z)=0.6726  BIC=18378.7
+  [ 57/60] k_est=6  trial=6   RMSE(Z)=0.7700  BIC=18199.1
+  [ 58/60] k_est=6  trial=7   RMSE(Z)=0.6905  BIC=17961.5
+  [ 59/60] k_est=6  trial=8   RMSE(Z)=0.8015  BIC=18305.4
+  [ 60/60] k_est=6  trial=9   RMSE(Z)=0.6339  BIC=18251.2
+
+CSV saved: C:\å§ãÜ2\expfam\results\exp_dual_1_k.csv
+Figure saved: C:\å§ãÜ2\expfam\results\fig_dual_1_k.png
+
+Total time: 17.4 min
+
+=== RMSE(Z) mean ===
+  k=1: 0.9526 Å} 0.2683
+  k=2: 0.7655 Å} 0.1586
+  k=3: 0.2784 Å} 0.0120 <-- k*
+  k=4: 0.5050 Å} 0.0968
+  k=5: 0.7068 Å} 0.0742
+  k=6: 0.6917 Å} 0.0948
+
+=== BIC mean ===
+  k=1: 21068.0 Å} 490.7
+  k=2: 18802.6 Å} 384.5
+  k=3: 16854.0 Å} 192.5 <-- BEST
+  k=4: 17314.6 Å} 194.4
+  k=5: 17803.0 Å} 206.3
+  k=6: 18294.9 Å} 180.0

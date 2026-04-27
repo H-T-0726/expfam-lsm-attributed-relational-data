@@ -1,0 +1,87 @@
+
+============================================================
+Scenario A: X=poisson, Y=bernoulli
+  [  25/250] Scen=A k*=1 k_est= 5  BIC=19738  elapsed=5.9m  ETA=52.9m
+  [  50/250] Scen=A k*=1 k_est=10  BIC=22049  elapsed=12.0m  ETA=47.8m
+  [  75/250] Scen=A k*=3 k_est= 5  BIC=17825  elapsed=17.4m  ETA=40.5m
+  [ 100/250] Scen=A k*=3 k_est=10  BIC=20352  elapsed=23.3m  ETA=34.9m
+  [ 125/250] Scen=A k*=5 k_est= 5  BIC=16660  elapsed=28.7m  ETA=28.7m
+  [ 150/250] Scen=A k*=5 k_est=10  BIC=19103  elapsed=34.5m  ETA=23.0m
+  [ 175/250] Scen=A k*=7 k_est= 5  BIC=18442  elapsed=39.9m  ETA=17.1m
+  [ 200/250] Scen=A k*=7 k_est=10  BIC=18603  elapsed=45.8m  ETA=11.4m
+  [ 225/250] Scen=A k*=9 k_est= 5  BIC=19793  elapsed=51.1m  ETA=5.7m
+  [ 250/250] Scen=A k*=9 k_est=10  BIC=18800  elapsed=57.0m  ETA=0.0m
+  Saved: C:\kennkyu\expfam\results\exp2_bic_A.csv
+
+=== Scenario A: BIC 次元同定の精度 ===
+  k*    BIC 最小 k_est          判定
+------------------------------------
+Traceback (most recent call last):
+  File "C:\kennkyu\expfam\src\run_exp2_bic_v2.py", line 103, in <module>
+    print_bic_accuracy(df, tag)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\kennkyu\expfam\src\run_exp2_bic_v2.py", line 89, in print_bic_accuracy
+    print(f"{k_t:>4}  {best_k:>14}  {ok:>10}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'cp932' codec can't encode character '\u2713' in position 26: illegal multibyte sequence
+
+============================================================
+Scenario A: X=poisson, Y=bernoulli
+  Already exists: C:\kennkyu\expfam\results\exp2_bic_A.csv
+
+=== Scenario A: BIC 次元同定の精度 ===
+  k*    BIC 最小 k_est          判定
+------------------------------------
+   1               1        PASS
+   3               3        PASS
+   5               5        PASS
+   7               7        PASS
+   9               9        PASS
+
+============================================================
+Scenario B: X=gaussian, Y=poisson
+  [  25/250] Scen=B k*=1 k_est= 5  BIC=32940  elapsed=4.8m  ETA=43.1m
+  [  50/250] Scen=B k*=1 k_est=10  BIC=35040  elapsed=9.8m  ETA=39.3m
+  [  75/250] Scen=B k*=3 k_est= 5  BIC=33438  elapsed=14.1m  ETA=32.8m
+  [ 100/250] Scen=B k*=3 k_est=10  BIC=35551  elapsed=18.8m  ETA=28.3m
+  [ 125/250] Scen=B k*=5 k_est= 5  BIC=33471  elapsed=23.1m  ETA=23.1m
+  [ 150/250] Scen=B k*=5 k_est=10  BIC=35519  elapsed=27.9m  ETA=18.6m
+  [ 175/250] Scen=B k*=7 k_est= 5  BIC=43484  elapsed=32.1m  ETA=13.7m
+  [ 200/250] Scen=B k*=7 k_est=10  BIC=36626  elapsed=36.8m  ETA=9.2m
+  [ 225/250] Scen=B k*=9 k_est= 5  BIC=52756  elapsed=41.0m  ETA=4.6m
+  [ 250/250] Scen=B k*=9 k_est=10  BIC=37937  elapsed=45.8m  ETA=0.0m
+  Saved: C:\kennkyu\expfam\results\exp2_bic_B.csv
+
+=== Scenario B: BIC 次元同定の精度 ===
+  k*    BIC 最小 k_est          判定
+------------------------------------
+   1               1        PASS
+   3               3        PASS
+   5               5        PASS
+   7               7        PASS
+   9              10  FAIL (->k=10)
+
+============================================================
+Scenario C: X=bernoulli, Y=gaussian
+  [  25/250] Scen=C k*=1 k_est= 5  BIC=-34682  elapsed=4.1m  ETA=37.3m
+  [  50/250] Scen=C k*=1 k_est=10  BIC=-32450  elapsed=8.9m  ETA=35.8m
+  [  75/250] Scen=C k*=3 k_est= 5  BIC=-34789  elapsed=13.0m  ETA=30.4m
+  [ 100/250] Scen=C k*=3 k_est=10  BIC=-32408  elapsed=17.8m  ETA=26.7m
+  [ 125/250] Scen=C k*=5 k_est= 5  BIC=-34575  elapsed=21.9m  ETA=21.9m
+  [ 150/250] Scen=C k*=5 k_est=10  BIC=-32254  elapsed=26.6m  ETA=17.8m
+  [ 175/250] Scen=C k*=7 k_est= 5  BIC=5143  elapsed=30.9m  ETA=13.2m
+  [ 200/250] Scen=C k*=7 k_est=10  BIC=-31371  elapsed=35.5m  ETA=8.9m
+  [ 225/250] Scen=C k*=9 k_est= 5  BIC=12433  elapsed=39.8m  ETA=4.4m
+  [ 250/250] Scen=C k*=9 k_est=10  BIC=-31521  elapsed=44.5m  ETA=0.0m
+  Saved: C:\kennkyu\expfam\results\exp2_bic_C.csv
+
+=== Scenario C: BIC 次元同定の精度 ===
+  k*    BIC 最小 k_est          判定
+------------------------------------
+   1               1        PASS
+   3               3        PASS
+   5               5        PASS
+   7               7        PASS
+   9               9        PASS
+
+All done.

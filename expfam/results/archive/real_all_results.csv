@@ -1,0 +1,4 @@
+dataset,data_type,family,metric,score
+20 Newsgroups,Continuous (cosine sim),gaussian,Accuracy,0.26
+Wine (UCI),Binary (same-class),bernoulli,NMI,1.0
+MovieLens 100K,Count (co-rating),poisson,Spearman,0.8985

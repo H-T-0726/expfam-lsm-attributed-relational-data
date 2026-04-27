@@ -1,0 +1,146 @@
+
+=== Exp Dual-2: n variation ===
+  [  1/60] n=50  trial=0   RMSE(Z)=0.4922
+  [  2/60] n=50  trial=1   RMSE(Z)=0.3742
+  [  3/60] n=50  trial=2   RMSE(Z)=0.4103
+  [  4/60] n=50  trial=3   RMSE(Z)=0.4095
+  [  5/60] n=50  trial=4   RMSE(Z)=0.4285
+  [  6/60] n=50  trial=5   RMSE(Z)=0.3769
+  [  7/60] n=50  trial=6   RMSE(Z)=0.4411
+  [  8/60] n=50  trial=7   RMSE(Z)=0.3901
+  [  9/60] n=50  trial=8   RMSE(Z)=0.3520
+  [ 10/60] n=50  trial=9   RMSE(Z)=0.3813
+  [ 11/60] n=100  trial=0   RMSE(Z)=0.3105
+  [ 12/60] n=100  trial=1   RMSE(Z)=0.3382
+  [ 13/60] n=100  trial=2   RMSE(Z)=0.3219
+  [ 14/60] n=100  trial=3   RMSE(Z)=0.3407
+  [ 15/60] n=100  trial=4   RMSE(Z)=0.3252
+  [ 16/60] n=100  trial=5   RMSE(Z)=0.3162
+  [ 17/60] n=100  trial=6   RMSE(Z)=0.2992
+  [ 18/60] n=100  trial=7   RMSE(Z)=0.3072
+  [ 19/60] n=100  trial=8   RMSE(Z)=0.3217
+  [ 20/60] n=100  trial=9   RMSE(Z)=0.3132
+  [ 21/60] n=150  trial=0   RMSE(Z)=0.2653
+  [ 22/60] n=150  trial=1   RMSE(Z)=0.2805
+  [ 23/60] n=150  trial=2   RMSE(Z)=0.2852
+  [ 24/60] n=150  trial=3   RMSE(Z)=0.2781
+  [ 25/60] n=150  trial=4   RMSE(Z)=0.2816
+  [ 26/60] n=150  trial=5   RMSE(Z)=0.2733
+  [ 27/60] n=150  trial=6   RMSE(Z)=0.2862
+  [ 28/60] n=150  trial=7   RMSE(Z)=0.2693
+  [ 29/60] n=150  trial=8   RMSE(Z)=0.2826
+  [ 30/60] n=150  trial=9   RMSE(Z)=0.2832
+  [ 31/60] n=200  trial=0   RMSE(Z)=0.2443
+  [ 32/60] n=200  trial=1   RMSE(Z)=0.2522
+  [ 33/60] n=200  trial=2   RMSE(Z)=0.2341
+  [ 34/60] n=200  trial=3   RMSE(Z)=0.2512
+  [ 35/60] n=200  trial=4   RMSE(Z)=0.2554
+  [ 36/60] n=200  trial=5   RMSE(Z)=0.2355
+  [ 37/60] n=200  trial=6   RMSE(Z)=0.2411
+  [ 38/60] n=200  trial=7   RMSE(Z)=0.2453
+  [ 39/60] n=200  trial=8   RMSE(Z)=0.2502
+  [ 40/60] n=200  trial=9   RMSE(Z)=0.2596
+  [ 41/60] n=250  trial=0   RMSE(Z)=0.2334
+  [ 42/60] n=250  trial=1   RMSE(Z)=0.2125
+  [ 43/60] n=250  trial=2   RMSE(Z)=0.2229
+  [ 44/60] n=250  trial=3   RMSE(Z)=0.2333
+  [ 45/60] n=250  trial=4   RMSE(Z)=0.2184
+  [ 46/60] n=250  trial=5   RMSE(Z)=0.2206
+  [ 47/60] n=250  trial=6   RMSE(Z)=0.2181
+  [ 48/60] n=250  trial=7   RMSE(Z)=0.2300
+  [ 49/60] n=250  trial=8   RMSE(Z)=0.2278
+  [ 50/60] n=250  trial=9   RMSE(Z)=0.2279
+  [ 51/60] n=300  trial=0   RMSE(Z)=0.1973
+  [ 52/60] n=300  trial=1   RMSE(Z)=0.2152
+  [ 53/60] n=300  trial=2   RMSE(Z)=0.2056
+  [ 54/60] n=300  trial=3   RMSE(Z)=0.2000
+  [ 55/60] n=300  trial=4   RMSE(Z)=0.2101
+  [ 56/60] n=300  trial=5   RMSE(Z)=0.2113
+  [ 57/60] n=300  trial=6   RMSE(Z)=0.2071
+  [ 58/60] n=300  trial=7   RMSE(Z)=0.2089
+  [ 59/60] n=300  trial=8   RMSE(Z)=0.2061
+  [ 60/60] n=300  trial=9   RMSE(Z)=0.2139
+CSV saved: C:\Œ¤‹†2\expfam\results\exp_dual_2_n.csv
+  Figure saved: C:\Œ¤‹†2\expfam\results\fig_dual_2_n.png
+
+=== Exp Dual-3: d variation ===
+  [  1/60] d=5  trial=0   RMSE(Z)=0.2938
+  [  2/60] d=5  trial=1   RMSE(Z)=0.3288
+  [  3/60] d=5  trial=2   RMSE(Z)=0.3110
+  [  4/60] d=5  trial=3   RMSE(Z)=0.3427
+  [  5/60] d=5  trial=4   RMSE(Z)=0.2965
+  [  6/60] d=5  trial=5   RMSE(Z)=0.3401
+  [  7/60] d=5  trial=6   RMSE(Z)=0.3277
+  [  8/60] d=5  trial=7   RMSE(Z)=0.3107
+  [  9/60] d=5  trial=8   RMSE(Z)=0.3227
+  [ 10/60] d=5  trial=9   RMSE(Z)=0.3451
+  [ 11/60] d=10  trial=0   RMSE(Z)=0.2967
+  [ 12/60] d=10  trial=1   RMSE(Z)=0.2825
+  [ 13/60] d=10  trial=2   RMSE(Z)=0.2939
+  [ 14/60] d=10  trial=3   RMSE(Z)=0.2921
+  [ 15/60] d=10  trial=4   RMSE(Z)=0.2955
+  [ 16/60] d=10  trial=5   RMSE(Z)=0.3058
+  [ 17/60] d=10  trial=6   RMSE(Z)=0.3047
+  [ 18/60] d=10  trial=7   RMSE(Z)=0.3032
+  [ 19/60] d=10  trial=8   RMSE(Z)=0.3083
+  [ 20/60] d=10  trial=9   RMSE(Z)=0.3102
+  [ 21/60] d=15  trial=0   RMSE(Z)=0.2653
+  [ 22/60] d=15  trial=1   RMSE(Z)=0.2805
+  [ 23/60] d=15  trial=2   RMSE(Z)=0.2852
+  [ 24/60] d=15  trial=3   RMSE(Z)=0.2781
+  [ 25/60] d=15  trial=4   RMSE(Z)=0.2816
+  [ 26/60] d=15  trial=5   RMSE(Z)=0.2733
+  [ 27/60] d=15  trial=6   RMSE(Z)=0.2862
+  [ 28/60] d=15  trial=7   RMSE(Z)=0.2693
+  [ 29/60] d=15  trial=8   RMSE(Z)=0.2826
+  [ 30/60] d=15  trial=9   RMSE(Z)=0.2832
+  [ 31/60] d=20  trial=0   RMSE(Z)=0.2569
+  [ 32/60] d=20  trial=1   RMSE(Z)=0.2628
+  [ 33/60] d=20  trial=2   RMSE(Z)=0.2748
+  [ 34/60] d=20  trial=3   RMSE(Z)=0.2580
+  [ 35/60] d=20  trial=4   RMSE(Z)=0.2639
+  [ 36/60] d=20  trial=5   RMSE(Z)=0.2709
+  [ 37/60] d=20  trial=6   RMSE(Z)=0.2819
+  [ 38/60] d=20  trial=7   RMSE(Z)=0.2500
+  [ 39/60] d=20  trial=8   RMSE(Z)=0.2596
+  [ 40/60] d=20  trial=9   RMSE(Z)=0.2578
+  [ 41/60] d=25  trial=0   RMSE(Z)=0.2686
+  [ 42/60] d=25  trial=1   RMSE(Z)=0.2571
+  [ 43/60] d=25  trial=2   RMSE(Z)=0.2426
+  [ 44/60] d=25  trial=3   RMSE(Z)=0.2508
+  [ 45/60] d=25  trial=4   RMSE(Z)=0.2537
+  [ 46/60] d=25  trial=5   RMSE(Z)=0.2539
+  [ 47/60] d=25  trial=6   RMSE(Z)=0.2633
+  [ 48/60] d=25  trial=7   RMSE(Z)=0.2563
+  [ 49/60] d=25  trial=8   RMSE(Z)=0.2565
+  [ 50/60] d=25  trial=9   RMSE(Z)=0.2500
+  [ 51/60] d=30  trial=0   RMSE(Z)=0.2457
+  [ 52/60] d=30  trial=1   RMSE(Z)=0.2442
+  [ 53/60] d=30  trial=2   RMSE(Z)=0.2486
+  [ 54/60] d=30  trial=3   RMSE(Z)=0.2317
+  [ 55/60] d=30  trial=4   RMSE(Z)=0.2408
+  [ 56/60] d=30  trial=5   RMSE(Z)=0.2280
+  [ 57/60] d=30  trial=6   RMSE(Z)=0.2267
+  [ 58/60] d=30  trial=7   RMSE(Z)=0.2339
+  [ 59/60] d=30  trial=8   RMSE(Z)=0.2219
+  [ 60/60] d=30  trial=9   RMSE(Z)=0.2413
+CSV saved: C:\Œ¤‹†2\expfam\results\exp_dual_3_d.csv
+  Figure saved: C:\Œ¤‹†2\expfam\results\fig_dual_3_d.png
+
+Total: 40.8 min
+
+--- Exp 2 RMSE(Z) summary ---
+  n=50: 0.4056 +- 0.0406
+  n=100: 0.3194 +- 0.0131
+  n=150: 0.2785 +- 0.0070
+  n=200: 0.2469 +- 0.0083
+  n=250: 0.2245 +- 0.0071
+  n=300: 0.2076 +- 0.0057
+
+--- Exp 3 RMSE(Z) summary ---
+  d=5: 0.3219 +- 0.0184
+  d=10: 0.2993 +- 0.0086
+  d=15: 0.2785 +- 0.0070
+  d=20: 0.2637 +- 0.0096
+  d=25: 0.2553 +- 0.0071
+  d=30: 0.2363 +- 0.0091

@@ -1,0 +1,55 @@
+=================================================================
+  Step 3.6 -- ExpFam Generality Proof
+  families=['bernoulli', 'poisson', 'gaussian']
+  n=150, d=15, k=3, L=10, num_iter=10, n_trials=5
+=================================================================
+
+=================================================================
+  Family: Bernoulli (NOLTA 2024)
+=================================================================
+  trial=0  RMSE(Z)=0.1987  RMSE(X)=0.3003  w0=-0.949  w=1.430  (33.6s)
+  trial=1  RMSE(Z)=0.1731  RMSE(X)=0.3127  w0=-1.026  w=1.494  (33.2s)
+  trial=2  RMSE(Z)=0.1945  RMSE(X)=0.3122  w0=-1.013  w=1.398  (33.0s)
+  trial=3  RMSE(Z)=0.1711  RMSE(X)=0.3105  w0=-1.030  w=1.484  (33.0s)
+  trial=4  RMSE(Z)=0.1748  RMSE(X)=0.2997  w0=-0.953  w=1.521  (34.1s)
+
+=================================================================
+  Family: Poisson (new extension)
+=================================================================
+  trial=0  RMSE(Z)=0.2409  RMSE(X)=0.3026  w0=0.099  w=0.424  (27.3s)
+  trial=1  RMSE(Z)=0.1595  RMSE(X)=0.3126  w0=0.003  w=0.498  (27.1s)
+  trial=2  RMSE(Z)=0.1801  RMSE(X)=0.3124  w0=0.034  w=0.482  (27.3s)
+  trial=3  RMSE(Z)=0.1545  RMSE(X)=0.3095  w0=0.006  w=0.496  (27.0s)
+  trial=4  RMSE(Z)=0.1551  RMSE(X)=0.3004  w0=0.005  w=0.495  (27.0s)
+
+=================================================================
+  Family: Gaussian (SMC 2022)
+=================================================================
+  trial=0  RMSE(Z)=0.0275  RMSE(X)=0.3081  w0=0.000  w=0.500  sigma_y: true=0.100 est=0.102  (20.3s)
+  trial=1  RMSE(Z)=0.0300  RMSE(X)=0.3130  w0=0.000  w=0.499  sigma_y: true=0.100 est=0.102  (20.6s)
+  trial=2  RMSE(Z)=0.0301  RMSE(X)=0.3145  w0=-0.000  w=0.500  sigma_y: true=0.100 est=0.102  (20.4s)
+  trial=3  RMSE(Z)=0.0288  RMSE(X)=0.3147  w0=0.003  w=0.501  sigma_y: true=0.100 est=0.103  (20.5s)
+  trial=4  RMSE(Z)=0.0273  RMSE(X)=0.3068  w0=-0.002  w=0.500  sigma_y: true=0.100 est=0.101  (24.4s)
+
+======================================================================
+  SUMMARY: RMSE(Z) per family  (n=150, d=15, k=3, num_iter=10)
+======================================================================
+Family                      RMSE(Z) mean  RMSE(Z) std   RMSE(X) mean   NaN
+----------------------------------------------------------------------
+bernoulli                         0.1824       0.0131         0.3071     0
+gaussian                          0.0287       0.0013         0.3114     0
+poisson                           0.1780       0.0367         0.3075     0
+----------------------------------------------------------------------
+
+  w0/w recovery:
+  bernoulli   : w0 true=-1.00 est=-0.994 | w true=1.50 est=1.465
+  gaussian    : w0 true=0.00 est=0.000 | w true=0.50 est=0.500 | sigma_y true=0.100 est=0.102
+  poisson     : w0 true=0.00 est=0.029 | w true=0.50 est=0.479
+
+  Total time: 409.7s (6.8 min)
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_families_trials.csv
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_families_summary.csv
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_families_plot.png
+  Gemini report saved: C:\Œ¤‹†2\expfam\results\GEMINI_REPORT_STEP3_6.md
+
+[experiment_synthetic_families DONE]

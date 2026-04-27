@@ -1,0 +1,115 @@
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:288: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  bm = float(b["rmse_Z_mean"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:289: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  pm = float(p["rmse_Z_mean"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:290: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  bs = float(b["rmse_Z_std"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:291: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  ps = float(p["rmse_Z_std"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:308: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  qb = float(row_b["Q_delta_mean"]) if not row_b.empty else float("nan")
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:309: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  qp = float(row_p["Q_delta_mean"]) if not row_p.empty else float("nan")
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:387: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  bm    = float(b["rmse_Z_mean"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:388: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  pm    = float(p["rmse_Z_mean"])
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:406: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  qb = float(rb["Q_delta_mean"]) if not rb.empty else float("nan")
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:407: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  qp = float(rp["Q_delta_mean"]) if not rp.empty else float("nan")
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:465: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  print(f"  d={d:2d}: Bern={float(b['rmse_Z_mean']):.4f}  "
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:466: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  f"Pois={float(p['rmse_Z_mean']):.4f}  "
+C:\å§ãÜ2\expfam\src\experiment_synthetic_d.py:467: FutureWarning: Calling float on a single element Series is deprecated and will raise a TypeError in the future. Use float(ser.iloc[0]) instead
+  f"delta={float(b['rmse_Z_mean'])-float(p['rmse_Z_mean']):+.4f}")
+====================================================================
+  Experiment: RMSE vs d  (Bernoulli vs Poisson, n=150, k=3)
+  d=[5, 10, 15, 20, 25, 30], n_trials=5, L=10, num_iter=30
+  Alpha decay: 0.5 -> 0.35 after iter 15
+====================================================================
+
+--- d=5 ---
+  trial=0  Bern=0.2992  Pois=0.1910  delta=+0.1082  Poisson  (103+87s)
+  trial=1  Bern=0.2973  Pois=0.1898  delta=+0.1075  Poisson  (101+82s)
+  trial=2  Bern=0.3329  Pois=0.2056  delta=+0.1273  Poisson  (100+82s)
+  trial=3  Bern=0.2909  Pois=0.1932  delta=+0.0977  Poisson  (100+87s)
+  trial=4  Bern=0.3160  Pois=0.1940  delta=+0.1220  Poisson  (109+97s)
+
+--- d=10 ---
+  trial=0  Bern=0.2195  Pois=0.1650  delta=+0.0545  Poisson  (108+83s)
+  trial=1  Bern=0.2299  Pois=0.1722  delta=+0.0577  Poisson  (100+167s)
+  trial=2  Bern=0.2349  Pois=0.1889  delta=+0.0459  Poisson  (148+235s)
+  trial=3  Bern=0.2437  Pois=0.1832  delta=+0.0605  Poisson  (275+226s)
+  trial=4  Bern=0.2430  Pois=0.1777  delta=+0.0654  Poisson  (280+209s)
+
+--- d=15 ---
+  trial=0  Bern=0.2038  Pois=0.1561  delta=+0.0478  Poisson  (164+183s)
+  trial=1  Bern=0.1892  Pois=0.1558  delta=+0.0334  Poisson  (156+226s)
+  trial=2  Bern=0.2076  Pois=0.1500  delta=+0.0577  Poisson  (282+229s)
+  trial=3  Bern=0.2264  Pois=0.1712  delta=+0.0552  Poisson  (281+229s)
+  trial=4  Bern=0.1918  Pois=0.1516  delta=+0.0401  Poisson  (278+229s)
+
+--- d=20 ---
+  trial=0  Bern=0.1703  Pois=0.1395  delta=+0.0309  Poisson  (278+232s)
+  trial=1  Bern=0.1785  Pois=0.1516  delta=+0.0269  Poisson  (275+230s)
+  trial=2  Bern=0.1811  Pois=0.1459  delta=+0.0353  Poisson  (280+232s)
+  trial=3  Bern=0.1841  Pois=0.1470  delta=+0.0371  Poisson  (278+228s)
+  trial=4  Bern=0.1628  Pois=0.1382  delta=+0.0245  Poisson  (281+228s)
+
+--- d=25 ---
+  trial=0  Bern=0.1534  Pois=0.1307  delta=+0.0227  Poisson  (279+231s)
+  trial=1  Bern=0.1545  Pois=0.1323  delta=+0.0222  Poisson  (280+229s)
+  trial=2  Bern=0.1621  Pois=0.1406  delta=+0.0215  Poisson  (279+235s)
+  trial=3  Bern=0.1626  Pois=0.1367  delta=+0.0259  Poisson  (281+227s)
+  trial=4  Bern=0.1551  Pois=0.1334  delta=+0.0217  Poisson  (279+234s)
+
+--- d=30 ---
+  trial=0  Bern=0.1479  Pois=0.1279  delta=+0.0200  Poisson  (282+229s)
+  trial=1  Bern=0.1440  Pois=0.1246  delta=+0.0194  Poisson  (268+247s)
+  trial=2  Bern=0.1484  Pois=0.1301  delta=+0.0183  Poisson  (295+308s)
+  trial=3  Bern=0.1413  Pois=0.1253  delta=+0.0159  Poisson  (324+232s)
+  trial=4  Bern=0.1469  Pois=0.1277  delta=+0.0192  Poisson  (288+232s)
+
+====================================================================
+  SUMMARY: RMSE(Z) vs d  (mean Å} std, 5 trials)
+====================================================================
+   d    Bernoulli mean    Poisson mean   Delta B-P      Winner
+--------------------------------------------------------------------
+   5    0.307257Å}0.0171   0.194704Å}0.0063     +0.1126     Poisson
+  10    0.234194Å}0.0101   0.177386Å}0.0093     +0.0568     Poisson
+  15    0.203769Å}0.0149   0.156923Å}0.0084     +0.0468     Poisson
+  20    0.175370Å}0.0087   0.144421Å}0.0055     +0.0309     Poisson
+  25    0.157543Å}0.0044   0.134743Å}0.0040     +0.0228     Poisson
+  30    0.145685Å}0.0030   0.127145Å}0.0022     +0.0185     Poisson
+--------------------------------------------------------------------
+  Poisson wins all d: True
+
+  Q_delta convergence (|mean(Q[-5:])-mean(Q[-10:-5])|, smaller=better):
+  d= 5  Bernoulli Q_delta=    3.57  Poisson Q_delta=    4.12
+  d=10  Bernoulli Q_delta=    2.84  Poisson Q_delta=    3.90
+  d=15  Bernoulli Q_delta=    2.99  Poisson Q_delta=    3.77
+  d=20  Bernoulli Q_delta=    3.15  Poisson Q_delta=    4.06
+  d=25  Bernoulli Q_delta=    4.44  Poisson Q_delta=    4.19
+  d=30  Bernoulli Q_delta=    2.40  Poisson Q_delta=   79.60
+
+  Total time : 12834.9s  (213.9 min)
+  Saved      : C:\å§ãÜ2\expfam\results\synthetic_d_trials.csv
+  Saved      : C:\å§ãÜ2\expfam\results\synthetic_d_summary.csv
+  Saved      : C:\å§ãÜ2\expfam\results\synthetic_d_plot.png
+
+  Gemini report saved: C:\å§ãÜ2\expfam\results\GEMINI_REPORT_STEP3_5.md
+
+--- Gemini Report Summary (ASCII) ---
+  Status     : Step 3.5 COMPLETE - 60 trials, 0 NaN
+  Poisson wins all d: True
+  d= 5: Bern=0.3073  Pois=0.1947  delta=+0.1126
+  d=10: Bern=0.2342  Pois=0.1774  delta=+0.0568
+  d=15: Bern=0.2038  Pois=0.1569  delta=+0.0468
+  d=20: Bern=0.1754  Pois=0.1444  delta=+0.0309
+  d=25: Bern=0.1575  Pois=0.1347  delta=+0.0228
+  d=30: Bern=0.1457  Pois=0.1271  delta=+0.0185
+--------------------------------------
+
+[experiment_synthetic_d DONE]

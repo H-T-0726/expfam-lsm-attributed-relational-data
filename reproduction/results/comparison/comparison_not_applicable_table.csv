@@ -1,0 +1,3 @@
+scenario,true_family_y,baseline_applicable,reason
+B_Gauss_Pois,poisson,False,"Y=Poisson is non-binary (values 0,1,2,...). Baseline requires Y in {0,1}."
+C_Bern_Gauss,gaussian,False,"Y=Gaussian is continuous real-valued. Baseline requires Y in {0,1}."

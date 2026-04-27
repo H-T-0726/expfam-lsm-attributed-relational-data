@@ -1,0 +1,53 @@
+=================================================================
+  Step 3.7 -- RMSE(Z) vs k, all 3 families
+  k_list=[1, 2, 3, 4, 5, 6], n_trials=5
+  n=150, d=15, k_true=3, L=10, num_iter=10
+=================================================================
+
+--- Family: Bernoulli (NOLTA 2024) ---
+  k=1  RMSE(Z) mean=1.0786  std=0.1033
+  k=2  RMSE(Z) mean=0.7609  std=0.1764
+  k=3  RMSE(Z) mean=0.1786  std=0.0094 <-- k_true
+  k=4  RMSE(Z) mean=0.4689  std=0.0827
+  k=5  RMSE(Z) mean=0.6251  std=0.0459
+  k=6  RMSE(Z) mean=0.6503  std=0.0665
+
+--- Family: Poisson (new) ---
+  k=1  RMSE(Z) mean=1.0356  std=0.2134
+  k=2  RMSE(Z) mean=0.7603  std=0.1577
+  k=3  RMSE(Z) mean=0.1593  std=0.0042 <-- k_true
+  k=4  RMSE(Z) mean=0.4789  std=0.1527
+  k=5  RMSE(Z) mean=0.5328  std=0.1179
+  k=6  RMSE(Z) mean=0.6306  std=0.1149
+
+--- Family: Gaussian (SMC 2022) ---
+  k=1  RMSE(Z) mean=1.0184  std=0.0855
+  k=2  RMSE(Z) mean=0.6849  std=0.1097
+  k=3  RMSE(Z) mean=0.0284  std=0.0009 <-- k_true
+  k=4  RMSE(Z) mean=0.4194  std=0.1168
+  k=5  RMSE(Z) mean=0.5752  std=0.0853
+  k=6  RMSE(Z) mean=0.4653  std=0.1061
+
+======================================================================
+  SUMMARY: RMSE(Z) mean  (rows=family, cols=k_est)
+======================================================================
+Family                  k=1  k=2  k=3  k=4  k=5  k=6
+----------------------------------------------------------------------
+bernoulli               1.0786   0.7609   0.1786*  0.4689   0.6251   0.6503 
+poisson                 1.0356   0.7603   0.1593*  0.4789   0.5328   0.6306 
+gaussian                1.0184   0.6849   0.0284*  0.4194   0.5752   0.4653 
+
+  * = k_true (3)
+
+  L-shape check (RMSE(Z) at k=3 <= RMSE at k=1,2):
+  bernoulli   : k=1=1.0786  k=2=0.7609  k=3=0.1786  OK
+  poisson     : k=1=1.0356  k=2=0.7603  k=3=0.1593  OK
+  gaussian    : k=1=1.0184  k=2=0.6849  k=3=0.0284  OK
+
+  Total time: 2468.3s (41.1 min)
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_k_all_trials.csv
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_k_all_summary.csv
+  Saved: C:\Œ¤‹†2\expfam\results\synthetic_k_all_plot.png
+  Gemini report: C:\Œ¤‹†2\expfam\results\GEMINI_REPORT_STEP3_7.md
+
+[experiment_synthetic_k_all DONE]

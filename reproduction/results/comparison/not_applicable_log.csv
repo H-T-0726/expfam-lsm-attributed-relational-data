@@ -1,0 +1,3 @@
+scenario,model,reason,applicable
+B_Gauss_Pois,baseline,"Y=Poisson is non-binary; Baseline requires Y∈{0,1}",False
+C_Bern_Gauss,baseline,"Y=Gaussian is continuous; Baseline requires Y∈{0,1}",False

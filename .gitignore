@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+tmp/
+temp/
+*.tmp
+
+# Secrets
+.env
+.env.*
+credentials.json
+secrets.json
+
+# Large experiment artifacts
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+# Ignore raw / temporary experiment outputs
+reproduction/results/raw/
+reproduction/results/tmp/
+expfam/results/raw/
+expfam/results/tmp/

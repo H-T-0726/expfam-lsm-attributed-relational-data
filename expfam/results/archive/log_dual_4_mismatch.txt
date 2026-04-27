@@ -1,0 +1,142 @@
+=== Part A: 3x3 Model Mismatch Grid ===
+  X=gaussian  Y=gaussian  [mismatch] trial=0   RMSE(Z)=0.6426
+  X=gaussian  Y=gaussian  [mismatch] trial=1   RMSE(Z)=0.8077
+  X=gaussian  Y=gaussian  [mismatch] trial=2   RMSE(Z)=0.6748
+  X=gaussian  Y=gaussian  [mismatch] trial=3   RMSE(Z)=0.6252
+  X=gaussian  Y=gaussian  [mismatch] trial=4   RMSE(Z)=0.6543
+  X=gaussian  Y=gaussian  [mismatch] trial=5   RMSE(Z)=0.8185
+  X=gaussian  Y=gaussian  [mismatch] trial=6   RMSE(Z)=0.7838
+  X=gaussian  Y=gaussian  [mismatch] trial=7   RMSE(Z)=0.5996
+  X=gaussian  Y=gaussian  [mismatch] trial=8   RMSE(Z)=0.7903
+  X=gaussian  Y=gaussian  [mismatch] trial=9   RMSE(Z)=0.7434
+  X=gaussian  Y=bernoulli [mismatch] trial=0   RMSE(Z)=0.6798
+  X=gaussian  Y=bernoulli [mismatch] trial=1   RMSE(Z)=0.7654
+  X=gaussian  Y=bernoulli [mismatch] trial=2   RMSE(Z)=0.6603
+  X=gaussian  Y=bernoulli [mismatch] trial=3   RMSE(Z)=0.6487
+  X=gaussian  Y=bernoulli [mismatch] trial=4   RMSE(Z)=0.6743
+  X=gaussian  Y=bernoulli [mismatch] trial=5   RMSE(Z)=0.7710
+  X=gaussian  Y=bernoulli [mismatch] trial=6   RMSE(Z)=0.7586
+  X=gaussian  Y=bernoulli [mismatch] trial=7   RMSE(Z)=0.5968
+  X=gaussian  Y=bernoulli [mismatch] trial=8   RMSE(Z)=0.7554
+  X=gaussian  Y=bernoulli [mismatch] trial=9   RMSE(Z)=0.7106
+  X=gaussian  Y=poisson   [mismatch] trial=0   RMSE(Z)=0.7262
+  X=gaussian  Y=poisson   [mismatch] trial=1   RMSE(Z)=0.8299
+  X=gaussian  Y=poisson   [mismatch] trial=2   RMSE(Z)=0.7302
+  X=gaussian  Y=poisson   [mismatch] trial=3   RMSE(Z)=0.7604
+  X=gaussian  Y=poisson   [mismatch] trial=4   RMSE(Z)=0.8019
+  X=gaussian  Y=poisson   [mismatch] trial=5   RMSE(Z)=0.8183
+  X=gaussian  Y=poisson   [mismatch] trial=6   RMSE(Z)=0.7949
+  X=gaussian  Y=poisson   [mismatch] trial=7   RMSE(Z)=0.7041
+  X=gaussian  Y=poisson   [mismatch] trial=8   RMSE(Z)=0.8028
+  X=gaussian  Y=poisson   [mismatch] trial=9   RMSE(Z)=0.7897
+  X=bernoulli Y=gaussian  [mismatch] trial=0   RMSE(Z)=0.6075
+  X=bernoulli Y=gaussian  [mismatch] trial=1   RMSE(Z)=0.6412
+  X=bernoulli Y=gaussian  [mismatch] trial=2   RMSE(Z)=0.9975
+  X=bernoulli Y=gaussian  [mismatch] trial=3   RMSE(Z)=0.5640
+  X=bernoulli Y=gaussian  [mismatch] trial=4   RMSE(Z)=0.7613
+  X=bernoulli Y=gaussian  [mismatch] trial=5   RMSE(Z)=0.8754
+  X=bernoulli Y=gaussian  [mismatch] trial=6   RMSE(Z)=0.8512
+  X=bernoulli Y=gaussian  [mismatch] trial=7   RMSE(Z)=1.3273
+  X=bernoulli Y=gaussian  [mismatch] trial=8   RMSE(Z)=0.6855
+  X=bernoulli Y=gaussian  [mismatch] trial=9   RMSE(Z)=0.5873
+  X=bernoulli Y=bernoulli [mismatch] trial=0   RMSE(Z)=0.9750
+  X=bernoulli Y=bernoulli [mismatch] trial=1   RMSE(Z)=0.7836
+  X=bernoulli Y=bernoulli [mismatch] trial=2   RMSE(Z)=1.0113
+  X=bernoulli Y=bernoulli [mismatch] trial=3   RMSE(Z)=0.9851
+  X=bernoulli Y=bernoulli [mismatch] trial=4   RMSE(Z)=0.9413
+  X=bernoulli Y=bernoulli [mismatch] trial=5   RMSE(Z)=0.9864
+  X=bernoulli Y=bernoulli [mismatch] trial=6   RMSE(Z)=0.9810
+  X=bernoulli Y=bernoulli [mismatch] trial=7   RMSE(Z)=0.9140
+  X=bernoulli Y=bernoulli [mismatch] trial=8   RMSE(Z)=1.0100
+  X=bernoulli Y=bernoulli [mismatch] trial=9   RMSE(Z)=0.9023
+  X=bernoulli Y=poisson   [mismatch] trial=0   RMSE(Z)=0.6238
+  X=bernoulli Y=poisson   [mismatch] trial=1   RMSE(Z)=0.5896
+  X=bernoulli Y=poisson   [mismatch] trial=2   RMSE(Z)=1.1530
+  X=bernoulli Y=poisson   [mismatch] trial=3   RMSE(Z)=0.7092
+  X=bernoulli Y=poisson   [mismatch] trial=4   RMSE(Z)=0.7161
+  X=bernoulli Y=poisson   [mismatch] trial=5   RMSE(Z)=0.8531
+  X=bernoulli Y=poisson   [mismatch] trial=6   RMSE(Z)=0.6731
+  X=bernoulli Y=poisson   [mismatch] trial=7   RMSE(Z)=1.2736
+  X=bernoulli Y=poisson   [mismatch] trial=8   RMSE(Z)=0.5136
+  X=bernoulli Y=poisson   [mismatch] trial=9   RMSE(Z)=0.7197
+  X=poisson   Y=gaussian  [mismatch] trial=0   RMSE(Z)=0.2737
+  X=poisson   Y=gaussian  [mismatch] trial=1   RMSE(Z)=0.2902
+  X=poisson   Y=gaussian  [mismatch] trial=2   RMSE(Z)=0.3055
+  X=poisson   Y=gaussian  [mismatch] trial=3   RMSE(Z)=0.2866
+  X=poisson   Y=gaussian  [mismatch] trial=4   RMSE(Z)=0.2807
+  X=poisson   Y=gaussian  [mismatch] trial=5   RMSE(Z)=0.3227
+  X=poisson   Y=gaussian  [mismatch] trial=6   RMSE(Z)=0.2918
+  X=poisson   Y=gaussian  [mismatch] trial=7   RMSE(Z)=0.3060
+  X=poisson   Y=gaussian  [mismatch] trial=8   RMSE(Z)=0.2981
+  X=poisson   Y=gaussian  [mismatch] trial=9   RMSE(Z)=0.3016
+  X=poisson   Y=bernoulli [CORRECT] trial=0   RMSE(Z)=0.2559
+  X=poisson   Y=bernoulli [CORRECT] trial=1   RMSE(Z)=0.2915
+  X=poisson   Y=bernoulli [CORRECT] trial=2   RMSE(Z)=0.2763
+  X=poisson   Y=bernoulli [CORRECT] trial=3   RMSE(Z)=0.2725
+  X=poisson   Y=bernoulli [CORRECT] trial=4   RMSE(Z)=0.2786
+  X=poisson   Y=bernoulli [CORRECT] trial=5   RMSE(Z)=0.2917
+  X=poisson   Y=bernoulli [CORRECT] trial=6   RMSE(Z)=0.2838
+  X=poisson   Y=bernoulli [CORRECT] trial=7   RMSE(Z)=0.2799
+  X=poisson   Y=bernoulli [CORRECT] trial=8   RMSE(Z)=0.2839
+  X=poisson   Y=bernoulli [CORRECT] trial=9   RMSE(Z)=0.2726
+  X=poisson   Y=poisson   [mismatch] trial=0   RMSE(Z)=0.3446
+  X=poisson   Y=poisson   [mismatch] trial=1   RMSE(Z)=0.3652
+  X=poisson   Y=poisson   [mismatch] trial=2   RMSE(Z)=0.3786
+  X=poisson   Y=poisson   [mismatch] trial=3   RMSE(Z)=0.3645
+  X=poisson   Y=poisson   [mismatch] trial=4   RMSE(Z)=0.3806
+  X=poisson   Y=poisson   [mismatch] trial=5   RMSE(Z)=0.3808
+  X=poisson   Y=poisson   [mismatch] trial=6   RMSE(Z)=0.3784
+  X=poisson   Y=poisson   [mismatch] trial=7   RMSE(Z)=0.3779
+  X=poisson   Y=poisson   [mismatch] trial=8   RMSE(Z)=0.3759
+  X=poisson   Y=poisson   [mismatch] trial=9   RMSE(Z)=0.3873
+
+=== Part B: Ablation Study ===
+  [Y-only (fix_x=True)] trial=0   RMSE(Z)=0.3301
+  [Y-only (fix_x=True)] trial=1   RMSE(Z)=0.3484
+  [Y-only (fix_x=True)] trial=2   RMSE(Z)=0.3620
+  [Y-only (fix_x=True)] trial=3   RMSE(Z)=0.3399
+  [Y-only (fix_x=True)] trial=4   RMSE(Z)=0.3384
+  [Y-only (fix_x=True)] trial=5   RMSE(Z)=0.3584
+  [Y-only (fix_x=True)] trial=6   RMSE(Z)=0.3331
+  [Y-only (fix_x=True)] trial=7   RMSE(Z)=0.3344
+  [Y-only (fix_x=True)] trial=8   RMSE(Z)=0.3545
+  [Y-only (fix_x=True)] trial=9   RMSE(Z)=0.3777
+  [X-only (fix_w=True)] trial=0   RMSE(Z)=0.5275
+  [X-only (fix_w=True)] trial=1   RMSE(Z)=0.5418
+  [X-only (fix_w=True)] trial=2   RMSE(Z)=0.6171
+  [X-only (fix_w=True)] trial=3   RMSE(Z)=0.5020
+  [X-only (fix_w=True)] trial=4   RMSE(Z)=0.6061
+  [X-only (fix_w=True)] trial=5   RMSE(Z)=0.6184
+  [X-only (fix_w=True)] trial=6   RMSE(Z)=0.8321
+  [X-only (fix_w=True)] trial=7   RMSE(Z)=0.5930
+  [X-only (fix_w=True)] trial=8   RMSE(Z)=0.5548
+  [X-only (fix_w=True)] trial=9   RMSE(Z)=0.5880
+
+CSV saved: C:\Œ¤‹†2\expfam\results\exp_dual_4_mismatch.csv
+Figure 4 saved: C:\Œ¤‹†2\expfam\results\fig_dual_4_heatmap.png
+Figure 5 saved: C:\Œ¤‹†2\expfam\results\fig_dual_5_barchart.png
+
+Total: 28.2 min
+
+=== 3x3 Mismatch Matrix (RMSE(Z) mean) ===
+              Y=Gaussian    Y=Bernoulli   Y=Poisson   
+X=Gaussian    0.714      0.702      0.776    
+X=Bernoulli   0.790      0.949      0.782    
+X=Poisson     0.296      0.279 [*]  0.373    
+
+=== Bar Chart Summary ===
+  Proposed (Pois, Bern)    : 0.2787 +- 0.0105
+  X=Gaussian (Y=Bern)      : 0.7021 +- 0.0595
+  X=Bernoulli (Y=Bern)     : 0.9490 +- 0.0690
+  Y=Gaussian (X=Pois)      : 0.2957 +- 0.0142
+  Y=Poisson (X=Pois)       : 0.3734 +- 0.0123
+  No X (fix_x)             : 0.3477 +- 0.0153
+  No Y (fix_w)             : 0.5981 +- 0.0913
+
+=== Mismatch penalty vs Proposed ===
+  X=Gaussian (Y=Bern)      : 2.52x proposed
+  X=Bernoulli (Y=Bern)     : 3.41x proposed
+  Y=Gaussian (X=Pois)      : 1.06x proposed
+  Y=Poisson (X=Pois)       : 1.34x proposed
+  No X (fix_x)             : 1.25x proposed
+  No Y (fix_w)             : 2.15x proposed
