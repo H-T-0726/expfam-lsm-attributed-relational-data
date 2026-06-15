@@ -1,0 +1,361 @@
+Running distribution mismatch experiment (Fixed model)...
+  N=150, D=15, K_TRUE=3, L=5, NITER=8, N_TRIALS=10
+  Scenarios: ['A', 'B', 'C']
+
+============================================================
+Scenario A: X=Poisson, Y=Bernoulli
+============================================================
+  [   1/270] Scen=A X=Gauss Y=Gauss t=0 RMSE(Z)=0.2777    [0.2min]
+  [   2/270] Scen=A X=Gauss Y=Gauss t=1 RMSE(Z)=0.3032    [0.4min]
+  [   3/270] Scen=A X=Gauss Y=Gauss t=2 RMSE(Z)=0.5529    [0.7min]
+  [   4/270] Scen=A X=Gauss Y=Gauss t=3 RMSE(Z)=0.2777    [0.9min]
+  [   5/270] Scen=A X=Gauss Y=Gauss t=4 RMSE(Z)=0.2836    [1.1min]
+  [   6/270] Scen=A X=Gauss Y=Gauss t=5 RMSE(Z)=0.8031    [1.4min]
+  [   7/270] Scen=A X=Gauss Y=Gauss t=6 RMSE(Z)=0.2871    [1.6min]
+  [   8/270] Scen=A X=Gauss Y=Gauss t=7 RMSE(Z)=0.4360    [1.8min]
+  [   9/270] Scen=A X=Gauss Y=Gauss t=8 RMSE(Z)=0.3040    [2.0min]
+  [  10/270] Scen=A X=Gauss Y=Gauss t=9 RMSE(Z)=0.3350    [2.2min]
+  [  11/270] Scen=A X=Gauss Y=Bern  t=0 RMSE(Z)=0.2484 [CONV]   [2.5min]
+  [  12/270] Scen=A X=Gauss Y=Bern  t=1 RMSE(Z)=0.2665 [CONV]   [2.9min]
+  [  13/270] Scen=A X=Gauss Y=Bern  t=2 RMSE(Z)=0.5775 [CONV]   [3.2min]
+  [  14/270] Scen=A X=Gauss Y=Bern  t=3 RMSE(Z)=0.2655 [CONV]   [3.5min]
+  [  15/270] Scen=A X=Gauss Y=Bern  t=4 RMSE(Z)=0.2841 [CONV]   [3.8min]
+  [  16/270] Scen=A X=Gauss Y=Bern  t=5 RMSE(Z)=0.7453 [CONV]   [4.1min]
+  [  17/270] Scen=A X=Gauss Y=Bern  t=6 RMSE(Z)=0.7048 [CONV]   [4.4min]
+  [  18/270] Scen=A X=Gauss Y=Bern  t=7 RMSE(Z)=0.4817 [CONV]   [4.8min]
+  [  19/270] Scen=A X=Gauss Y=Bern  t=8 RMSE(Z)=0.6571 [CONV]   [5.1min]
+  [  20/270] Scen=A X=Gauss Y=Bern  t=9 RMSE(Z)=0.6240 [CONV]   [5.4min]
+  [  21/270] Scen=A X=Gauss Y=Pois  t=0 RMSE(Z)=0.6696    [5.6min]
+  [  22/270] Scen=A X=Gauss Y=Pois  t=1 RMSE(Z)=0.7670    [5.9min]
+  [  23/270] Scen=A X=Gauss Y=Pois  t=2 RMSE(Z)=0.6589    [6.1min]
+  [  24/270] Scen=A X=Gauss Y=Pois  t=3 RMSE(Z)=0.6595    [6.4min]
+  [  25/270] Scen=A X=Gauss Y=Pois  t=4 RMSE(Z)=0.6464    [6.6min]
+  [  26/270] Scen=A X=Gauss Y=Pois  t=5 RMSE(Z)=0.7546    [6.9min]
+  [  27/270] Scen=A X=Gauss Y=Pois  t=6 RMSE(Z)=0.7215    [7.1min]
+  [  28/270] Scen=A X=Gauss Y=Pois  t=7 RMSE(Z)=0.5847    [7.4min]
+  [  29/270] Scen=A X=Gauss Y=Pois  t=8 RMSE(Z)=0.7475    [7.6min]
+  [  30/270] Scen=A X=Gauss Y=Pois  t=9 RMSE(Z)=0.7064    [7.9min]
+  [  31/270] Scen=A X=Bern  Y=Gauss t=0 RMSE(Z)=0.4374    [8.2min]
+  [  32/270] Scen=A X=Bern  Y=Gauss t=1 RMSE(Z)=0.4577    [8.4min]
+  [  33/270] Scen=A X=Bern  Y=Gauss t=2 RMSE(Z)=0.7023    [8.7min]
+  [  34/270] Scen=A X=Bern  Y=Gauss t=3 RMSE(Z)=0.5150    [8.9min]
+  [  35/270] Scen=A X=Bern  Y=Gauss t=4 RMSE(Z)=0.5321    [9.2min]
+  [  36/270] Scen=A X=Bern  Y=Gauss t=5 RMSE(Z)=0.5872    [9.4min]
+  [  37/270] Scen=A X=Bern  Y=Gauss t=6 RMSE(Z)=0.6803    [9.7min]
+  [  38/270] Scen=A X=Bern  Y=Gauss t=7 RMSE(Z)=1.3071    [9.9min]
+  [  39/270] Scen=A X=Bern  Y=Gauss t=8 RMSE(Z)=0.4355    [10.2min]
+  [  40/270] Scen=A X=Bern  Y=Gauss t=9 RMSE(Z)=0.4415    [10.4min]
+  [  41/270] Scen=A X=Bern  Y=Bern  t=0 RMSE(Z)=0.9487    [10.8min]
+  [  42/270] Scen=A X=Bern  Y=Bern  t=1 RMSE(Z)=0.9958    [11.2min]
+  [  43/270] Scen=A X=Bern  Y=Bern  t=2 RMSE(Z)=1.0284    [11.7min]
+  [  44/270] Scen=A X=Bern  Y=Bern  t=3 RMSE(Z)=0.9251    [12.1min]
+  [  45/270] Scen=A X=Bern  Y=Bern  t=4 RMSE(Z)=1.1514    [12.5min]
+  [  46/270] Scen=A X=Bern  Y=Bern  t=5 RMSE(Z)=1.0929    [12.8min]
+  [  47/270] Scen=A X=Bern  Y=Bern  t=6 RMSE(Z)=1.0629    [13.2min]
+  [  48/270] Scen=A X=Bern  Y=Bern  t=7 RMSE(Z)=0.8979    [13.6min]
+  [  49/270] Scen=A X=Bern  Y=Bern  t=8 RMSE(Z)=0.9481    [14.0min]
+  [  50/270] Scen=A X=Bern  Y=Bern  t=9 RMSE(Z)=1.0201    [14.4min]
+  [  51/270] Scen=A X=Bern  Y=Pois  t=0 RMSE(Z)=0.3452    [14.7min]
+  [  52/270] Scen=A X=Bern  Y=Pois  t=1 RMSE(Z)=0.4039    [15.0min]
+  [  53/270] Scen=A X=Bern  Y=Pois  t=2 RMSE(Z)=1.0871    [15.3min]
+  [  54/270] Scen=A X=Bern  Y=Pois  t=3 RMSE(Z)=0.5068    [15.6min]
+  [  55/270] Scen=A X=Bern  Y=Pois  t=4 RMSE(Z)=0.5807    [15.8min]
+  [  56/270] Scen=A X=Bern  Y=Pois  t=5 RMSE(Z)=0.9408    [16.2min]
+  [  57/270] Scen=A X=Bern  Y=Pois  t=6 RMSE(Z)=0.5279    [16.5min]
+  [  58/270] Scen=A X=Bern  Y=Pois  t=7 RMSE(Z)=0.6538    [16.8min]
+  [  59/270] Scen=A X=Bern  Y=Pois  t=8 RMSE(Z)=0.4104    [17.1min]
+  [  60/270] Scen=A X=Bern  Y=Pois  t=9 RMSE(Z)=1.2066    [17.3min]
+  [  61/270] Scen=A X=Pois  Y=Gauss t=0 RMSE(Z)=0.2370    [17.6min]
+  [  62/270] Scen=A X=Pois  Y=Gauss t=1 RMSE(Z)=0.2678    [17.8min]
+  [  63/270] Scen=A X=Pois  Y=Gauss t=2 RMSE(Z)=0.2874    [18.1min]
+  [  64/270] Scen=A X=Pois  Y=Gauss t=3 RMSE(Z)=0.2562    [18.3min]
+  [  65/270] Scen=A X=Pois  Y=Gauss t=4 RMSE(Z)=0.2522    [18.6min]
+  [  66/270] Scen=A X=Pois  Y=Gauss t=5 RMSE(Z)=0.2849    [18.8min]
+  [  67/270] Scen=A X=Pois  Y=Gauss t=6 RMSE(Z)=0.2600    [19.0min]
+  [  68/270] Scen=A X=Pois  Y=Gauss t=7 RMSE(Z)=0.2712    [19.3min]
+  [  69/270] Scen=A X=Pois  Y=Gauss t=8 RMSE(Z)=0.2695    [19.5min]
+  [  70/270] Scen=A X=Pois  Y=Gauss t=9 RMSE(Z)=0.2787    [19.7min]
+  [  71/270] Scen=A X=Pois  Y=Bern  t=0 RMSE(Z)=0.2181 [ORACLE]   [20.0min]
+  [  72/270] Scen=A X=Pois  Y=Bern  t=1 RMSE(Z)=0.2437 [ORACLE]   [20.3min]
+  [  73/270] Scen=A X=Pois  Y=Bern  t=2 RMSE(Z)=0.2365 [ORACLE]   [20.6min]
+  [  74/270] Scen=A X=Pois  Y=Bern  t=3 RMSE(Z)=0.2283 [ORACLE]   [20.9min]
+  [  75/270] Scen=A X=Pois  Y=Bern  t=4 RMSE(Z)=0.2361 [ORACLE]   [21.2min]
+  [  76/270] Scen=A X=Pois  Y=Bern  t=5 RMSE(Z)=0.2379 [ORACLE]   [21.5min]
+  [  77/270] Scen=A X=Pois  Y=Bern  t=6 RMSE(Z)=0.2273 [ORACLE]   [21.8min]
+  [  78/270] Scen=A X=Pois  Y=Bern  t=7 RMSE(Z)=0.2353 [ORACLE]   [22.1min]
+  [  79/270] Scen=A X=Pois  Y=Bern  t=8 RMSE(Z)=0.2268 [ORACLE]   [22.4min]
+  [  80/270] Scen=A X=Pois  Y=Bern  t=9 RMSE(Z)=0.2299 [ORACLE]   [22.7min]
+  [  81/270] Scen=A X=Pois  Y=Pois  t=0 RMSE(Z)=0.3006    [22.9min]
+  [  82/270] Scen=A X=Pois  Y=Pois  t=1 RMSE(Z)=0.3177    [23.1min]
+  [  83/270] Scen=A X=Pois  Y=Pois  t=2 RMSE(Z)=0.3372    [23.4min]
+  [  84/270] Scen=A X=Pois  Y=Pois  t=3 RMSE(Z)=0.2922    [23.6min]
+  [  85/270] Scen=A X=Pois  Y=Pois  t=4 RMSE(Z)=0.3107    [23.8min]
+  [  86/270] Scen=A X=Pois  Y=Pois  t=5 RMSE(Z)=0.3304    [24.1min]
+  [  87/270] Scen=A X=Pois  Y=Pois  t=6 RMSE(Z)=0.3029    [24.3min]
+  [  88/270] Scen=A X=Pois  Y=Pois  t=7 RMSE(Z)=0.3178    [24.6min]
+  [  89/270] Scen=A X=Pois  Y=Pois  t=8 RMSE(Z)=0.3282    [24.8min]
+  [  90/270] Scen=A X=Pois  Y=Pois  t=9 RMSE(Z)=0.3156    [25.1min]
+
+============================================================
+Scenario B: X=Gaussian, Y=Poisson
+============================================================
+  [  91/270] Scen=B X=Gauss Y=Gauss t=0 RMSE(Z)=0.2317    [25.3min]
+  [  92/270] Scen=B X=Gauss Y=Gauss t=1 RMSE(Z)=0.5371    [25.5min]
+  [  93/270] Scen=B X=Gauss Y=Gauss t=2 RMSE(Z)=0.7527    [25.7min]
+  [  94/270] Scen=B X=Gauss Y=Gauss t=3 RMSE(Z)=0.2063    [25.9min]
+  [  95/270] Scen=B X=Gauss Y=Gauss t=4 RMSE(Z)=0.2509    [26.0min]
+  [  96/270] Scen=B X=Gauss Y=Gauss t=5 RMSE(Z)=0.2760    [26.2min]
+  [  97/270] Scen=B X=Gauss Y=Gauss t=6 RMSE(Z)=0.2048    [26.4min]
+  [  98/270] Scen=B X=Gauss Y=Gauss t=7 RMSE(Z)=0.6209    [26.6min]
+  [  99/270] Scen=B X=Gauss Y=Gauss t=8 RMSE(Z)=0.3394    [26.8min]
+  [ 100/270] Scen=B X=Gauss Y=Gauss t=9 RMSE(Z)=0.3767    [27.0min]
+  [ 101/270] Scen=B X=Gauss Y=Bern  t=0 RMSE(Z)=1.0268 [CONV]   [27.4min]
+  [ 102/270] Scen=B X=Gauss Y=Bern  t=1 RMSE(Z)=1.0854 [CONV]   [27.7min]
+  [ 103/270] Scen=B X=Gauss Y=Bern  t=2 RMSE(Z)=1.3167 [CONV]   [28.0min]
+  [ 104/270] Scen=B X=Gauss Y=Bern  t=3 RMSE(Z)=1.0396 [CONV]   [28.3min]
+  [ 105/270] Scen=B X=Gauss Y=Bern  t=4 RMSE(Z)=1.1889 [CONV]   [28.6min]
+  [ 106/270] Scen=B X=Gauss Y=Bern  t=5 RMSE(Z)=1.0090 [CONV]   [28.9min]
+  [ 107/270] Scen=B X=Gauss Y=Bern  t=6 RMSE(Z)=0.9655 [CONV]   [29.2min]
+  [ 108/270] Scen=B X=Gauss Y=Bern  t=7 RMSE(Z)=1.0234 [CONV]   [29.5min]
+  [ 109/270] Scen=B X=Gauss Y=Bern  t=8 RMSE(Z)=1.2375 [CONV]   [29.8min]
+  [ 110/270] Scen=B X=Gauss Y=Bern  t=9 RMSE(Z)=1.1383 [CONV]   [30.1mi
+
+  [ 111/270] Scen=B X=Gauss Y=Pois  t=0 RMSE(Z)=0.1297 [ORACLE]   [30.3min]
+  [ 112/270] Scen=B X=Gauss Y=Pois  t=1 RMSE(Z)=0.1334 [ORACLE]   [30.5min]
+  [ 113/270] Scen=B X=Gauss Y=Pois  t=2 RMSE(Z)=0.1445 [ORACLE]   [30.7min]
+  [ 114/270] Scen=B X=Gauss Y=Pois  t=3 RMSE(Z)=0.1395 [ORACLE]   [30.9min]
+  [ 115/270] Scen=B X=Gauss Y=Pois  t=4 RMSE(Z)=0.1428 [ORACLE]   [31.1min]
+  [ 116/270] Scen=B X=Gauss Y=Pois  t=5 RMSE(Z)=0.1353 [ORACLE]   [31.3min]
+  [ 117/270] Scen=B X=Gauss Y=Pois  t=6 RMSE(Z)=0.1430 [ORACLE]   [31.5min]
+  [ 118/270] Scen=B X=Gauss Y=Pois  t=7 RMSE(Z)=0.1411 [ORACLE]   [31.7min]
+  [ 119/270] Scen=B X=Gauss Y=Pois  t=8 RMSE(Z)=0.1676 [ORACLE]   [31.9min]
+  [ 120/270] Scen=B X=Gauss Y=Pois  t=9 RMSE(Z)=0.1368 [ORACLE]   [32.1min]
+  [ 121/270] Scen=B X=Bern  Y=Gauss t=0 RMSE(Z)=0.3523    [32.4min]
+  [ 122/270] Scen=B X=Bern  Y=Gauss t=1 RMSE(Z)=0.5927    [32.6min]
+  [ 123/270] Scen=B X=Bern  Y=Gauss t=2 RMSE(Z)=0.6945    [32.8min]
+  [ 124/270] Scen=B X=Bern  Y=Gauss t=3 RMSE(Z)=0.3635    [33.0min]
+  [ 125/270] Scen=B X=Bern  Y=Gauss t=4 RMSE(Z)=0.3412    [33.2min]
+  [ 126/270] Scen=B X=Bern  Y=Gauss t=5 RMSE(Z)=0.3840    [33.4min]
+  [ 127/270] Scen=B X=Bern  Y=Gauss t=6 RMSE(Z)=0.3690    [33.6min]
+  [ 128/270] Scen=B X=Bern  Y=Gauss t=7 RMSE(Z)=0.6061    [33.8min]
+  [ 129/270] Scen=B X=Bern  Y=Gauss t=8 RMSE(Z)=0.4310    [34.0min]
+  [ 130/270] Scen=B X=Bern  Y=Gauss t=9 RMSE(Z)=0.7479    [34.2min]
+  [ 131/270] Scen=B X=Bern  Y=Bern  t=0 RMSE(Z)=1.0131    [34.5min]
+  [ 132/270] Scen=B X=Bern  Y=Bern  t=1 RMSE(Z)=1.0416    [34.8min]
+  [ 133/270] Scen=B X=Bern  Y=Bern  t=2 RMSE(Z)=1.2222    [35.2min]
+  [ 134/270] Scen=B X=Bern  Y=Bern  t=3 RMSE(Z)=1.1175    [35.5min]
+  [ 135/270] Scen=B X=Bern  Y=Bern  t=4 RMSE(Z)=0.9517    [35.8min]
+  [ 136/270] Scen=B X=Bern  Y=Bern  t=5 RMSE(Z)=0.9536    [36.2min]
+  [ 137/270] Scen=B X=Bern  Y=Bern  t=6 RMSE(Z)=1.0570    [36.5min]
+  [ 138/270] Scen=B X=Bern  Y=Bern  t=7 RMSE(Z)=1.0807    [36.8min]
+  [ 139/270] Scen=B X=Bern  Y=Bern  t=8 RMSE(Z)=1.0594    [37.1min]
+  [ 140/270] Scen=B X=Bern  Y=Bern  t=9 RMSE(Z)=1.0456    [37.5min]
+  [ 141/270] Scen=B X=Bern  Y=Pois  t=0 RMSE(Z)=0.1498    [37.7min]
+  [ 142/270] Scen=B X=Bern  Y=Pois  t=1 RMSE(Z)=0.1581    [37.9min]
+  [ 143/270] Scen=B X=Bern  Y=Pois  t=2 RMSE(Z)=0.1918    [38.1min]
+  [ 144/270] Scen=B X=Bern  Y=Pois  t=3 RMSE(Z)=0.1743    [38.4min]
+  [ 145/270] Scen=B X=Bern  Y=Pois  t=4 RMSE(Z)=0.1791    [38.6min]
+  [ 146/270] Scen=B X=Bern  Y=Pois  t=5 RMSE(Z)=0.1639    [38.8min]
+  [ 147/270] Scen=B X=Bern  Y=Pois  t=6 RMSE(Z)=0.2378    [39.1min]
+  [ 148/270] Scen=B X=Bern  Y=Pois  t=7 RMSE(Z)=0.2016    [39.3min]
+  [ 149/270] Scen=B X=Bern  Y=Pois  t=8 RMSE(Z)=0.1577    [39.5min]
+  [ 150/270] Scen=B X=Bern  Y=Pois  t=9 RMSE(Z)=0.1677    [39.7min]
+  [ 151/270] Scen=B X=Pois  Y=Gauss t=0 RMSE(Z)=0.7465    [39.9min]
+  [ 152/270] Scen=B X=Pois  Y=Gauss t=1 RMSE(Z)=0.7772    [40.1min]
+  [ 153/270] Scen=B X=Pois  Y=Gauss t=2 RMSE(Z)=0.8323    [40.3min]
+  [ 154/270] Scen=B X=Pois  Y=Gauss t=3 RMSE(Z)=0.7678    [40.5min]
+  [ 155/270] Scen=B X=Pois  Y=Gauss t=4 RMSE(Z)=0.7386    [40.7min]
+  [ 156/270] Scen=B X=Pois  Y=Gauss t=5 RMSE(Z)=0.8281    [40.8min]
+  [ 157/270] Scen=B X=Pois  Y=Gauss t=6 RMSE(Z)=0.7159    [41.0min]
+  [ 158/270] Scen=B X=Pois  Y=Gauss t=7 RMSE(Z)=0.7518    [41.2min]
+  [ 159/270] Scen=B X=Pois  Y=Gauss t=8 RMSE(Z)=0.8290    [41.3min]
+  [ 160/270] Scen=B X=Pois  Y=Gauss t=9 RMSE(Z)=0.8555    [41.5min]
+  [ 161/270] Scen=B X=Pois  Y=Bern  t=0 RMSE(Z)=1.2595    [41.8min]
+  [ 162/270] Scen=B X=Pois  Y=Bern  t=1 RMSE(Z)=1.2100    [42.1min]
+  [ 163/270] Scen=B X=Pois  Y=Bern  t=2 RMSE(Z)=1.2155    [42.3min]
+  [ 164/270] Scen=B X=Pois  Y=Bern  t=3 RMSE(Z)=1.2979    [42.6min]
+  [ 165/270] Scen=B X=Pois  Y=Bern  t=4 RMSE(Z)=1.1039    [42.9min]
+  [ 166/270] Scen=B X=Pois  Y=Bern  t=5 RMSE(Z)=1.4036    [43.2min]
+  [ 167/270] Scen=B X=Pois  Y=Bern  t=6 RMSE(Z)=1.1756    [43.4min]
+  [ 168/270] Scen=B X=Pois  Y=Bern  t=7 RMSE(Z)=1.3311    [43.7min]
+  [ 169/270] Scen=B X=Pois  Y=Bern  t=8 RMSE(Z)=1.3231    [44.0min]
+  [ 170/270] Scen=B X=Pois  Y=Bern  t=9 RMSE(Z)=1.1158    [44.2min]
+  [ 171/270] Scen=B X=Pois  Y=Pois  t=0 RMSE(Z)=0.1819    [44.4min]
+  [ 172/270] Scen=B X=Pois  Y=Pois  t=1 RMSE(Z)=0.1827    [44.6min]
+  [ 173/270] Scen=B X=Pois  Y=Pois  t=2 RMSE(Z)=0.4177    [44.8min]
+  [ 174/270] Scen=B X=Pois  Y=Pois  t=3 RMSE(Z)=0.1833    [45.0min]
+  [ 175/270] Scen=B X=Pois  Y=Pois  t=4 RMSE(Z)=0.1890    [45.2min]
+  [ 176/270] Scen=B X=Pois  Y=Pois  t=5 RMSE(Z)=0.1782    [45.4min]
+  [ 177/270] Scen=B X=Pois  Y=Pois  t=6 RMSE(Z)=0.2210    [45.5min]
+  [ 178/270] Scen=B X=Pois  Y=Pois  t=7 RMSE(Z)=0.4595    [45.7min]
+  [ 179/270] Scen=B X=Pois  Y=Pois  t=8 RMSE(Z)=0.1880    [45.9min]
+  [ 180/270] Scen=B X=Pois  Y=Pois  t=9 RMSE(Z)=0.1824    [46.1min]
+
+============================================================
+Scenario C: X=Bernoulli, Y=Gaussian
+============================================================
+  [ 181/270] Scen=C X=Gauss Y=Gauss t=0 RMSE(Z)=0.0224    [46.2min]
+  [ 182/270] Scen=C X=Gauss Y=Gauss t=1 RMSE(Z)=0.0233    [46.4min]
+  [ 183/270] Scen=C X=Gauss Y=Gauss t=2 RMSE(Z)=0.0233    [46.5min]
+  [ 184/270] Scen=C X=Gauss Y=Gauss t=3 RMSE(Z)=0.0216    [46.7min]
+  [ 185/270] Scen=C X=Gauss Y=Gauss t=4 RMSE(Z)=0.0223    [46.8min]
+  [ 186/270] Scen=C X=Gauss Y=Gauss t=5 RMSE(Z)=0.0215    [46.9min]
+  [ 187/270] Scen=C X=Gauss Y=Gauss t=6 RMSE(Z)=0.0241    [47.1min]
+  [ 188/270] Scen=C X=Gauss Y=Gauss t=7 RMSE(Z)=0.0237    [47.2min]
+  [ 189/270] Scen=C X=Gauss Y=Gauss t=8 RMSE(Z)=0.0222    [47.3min]
+  [ 190/270] Scen=C X=Gauss Y=Gauss t=9 RMSE(Z)=0.0234    [47.5min]
+  [ 191/270] Scen=C X=Gauss Y=Bern  t=0 RMSE(Z)=0.8368 [CONV]   [47.7min]
+  [ 192/270] Scen=C X=Gauss Y=Bern  t=1 RMSE(Z)=0.4498 [CONV]   [48.0min]
+  [ 193/270] Scen=C X=Gauss Y=Bern  t=2 RMSE(Z)=0.8219 [CONV]   [48.3min]
+  [ 194/270] Scen=C X=Gauss Y=Bern  t=3 RMSE(Z)=0.8058 [CONV]   [48.5min]
+  [ 195/270] Scen=C X=Gauss Y=Bern  t=4 RMSE(Z)=0.8555 [CONV]   [48.8min]
+  [ 196/270] Scen=C X=Gauss Y=Bern  t=5 RMSE(Z)=0.4502 [CONV]   [49.1min]
+  [ 197/270] Scen=C X=Gauss Y=Bern  t=6 RMSE(Z)=0.4463 [CONV]   [49.3min]
+  [ 198/270] Scen=C X=Gauss Y=Bern  t=7 RMSE(Z)=0.4487 [CONV]   [49.6min]
+  [ 199/270] Scen=C X=Gauss Y=Bern  t=8 RMSE(Z)=0.4452 [CONV]   [49.9min]
+  [ 200/270] Scen=C X=Gauss Y=Bern  t=9 RMSE(Z)=0.4462 [CONV]   [50.1min]
+  [ 201/270] Scen=C X=Gauss Y=Pois  t=0 RMSE(Z)=0.2847    [50.3min]
+  [ 202/270] Scen=C X=Gauss Y=Pois  t=1 RMSE(Z)=0.2955    [50.5min]
+  [ 203/270] Scen=C X=Gauss Y=Pois  t=2 RMSE(Z)=0.3362    [50.7min]
+  [ 204/270] Scen=C X=Gauss Y=Pois  t=3 RMSE(Z)=0.2922    [50.9min]
+  [ 205/270] Scen=C X=Gauss Y=Pois  t=4 RMSE(Z)=0.2717    [51.0min]
+  [ 206/270] Scen=C X=Gauss Y=Pois  t=5 RMSE(Z)=1.6276    [51.2min]
+  [ 207/270] Scen=C X=Gauss Y=Pois  t=6 RMSE(Z)=0.2848    [51.4min]
+  [ 208/270] Scen=C X=Gauss Y=Pois  t=7 RMSE(Z)=0.2988    [51.6min]
+  [ 209/270] Scen=C X=Gauss Y=Pois  t=8 RMSE(Z)=0.3109    [51.8min]
+  [ 210/270] Scen=C X=Gauss Y=Pois  t=9 RMSE(Z)=0.3032    [52.0min]
+  [ 211/270] Scen=C X=Bern  Y=Gauss t=0 RMSE(Z)=0.0222 [ORACLE]   [52.1min]
+  [ 212/270] Scen=C X=Bern  Y=Gauss t=1 RMSE(Z)=0.0229 [ORACLE]   [52.3min]
+  [ 213/270] Scen=C X=Bern  Y=Gauss t=2 RMSE(Z)=0.0218 [ORACLE]   [52.4min]
+  [ 214/270] Scen=C X=Bern  Y=Gauss t=3 RMSE(Z)=0.0241 [ORACLE]   [52.6min]
+  [ 215/270] Scen=C X=Bern  Y=Gauss t=4 RMSE(Z)=0.0229 [ORACLE]   [52.7min]
+  [ 216/270] Scen=C X=Bern  Y=Gauss t=5 RMSE(Z)=0.0229 [ORACLE]   [52.9min]
+  [ 217/270] Scen=C X=Bern  Y=Gauss t=6 RMSE(Z)=0.0240 [ORACLE]   [53.1min]
+  [ 218/270] Scen=C X=Bern  Y=Gauss t=7 RMSE(Z)=0.0234 [ORACLE]   [53.2min]
+  [ 219/270] Scen=C X=Bern  Y=Gauss t=8 RMSE(Z)=0.0243 [ORACLE]   [53.4min]
+  [ 220/270] Scen=C X=Bern  Y=Gauss t=9 RMSE(Z)=0.0235 [ORACLE]   [53.5min]
+  [ 221/270] Scen=C X=Bern  Y=Bern  t=0 RMSE(Z)=0.4503    [53.8min]
+  [ 222/270] Scen=C X=Bern  Y=Bern  t=1 RMSE(Z)=0.4460    [54.1min]
+  [ 223/270] Scen=C X=Bern  Y=Bern  t=2 RMSE(Z)=0.4547    [54.4min]
+  [ 224/270] Scen=C X=Bern  Y=Bern  t=3 RMSE(Z)=0.4414    [54.7mi
+
+  [ 225/270] Scen=C X=Bern  Y=Bern  t=4 RMSE(Z)=0.4342    [55.0min]
+  [ 226/270] Scen=C X=Bern  Y=Bern  t=5 RMSE(Z)=0.4516    [55.3min]
+  [ 227/270] Scen=C X=Bern  Y=Bern  t=6 RMSE(Z)=0.4618    [55.6min]
+  [ 228/270] Scen=C X=Bern  Y=Bern  t=7 RMSE(Z)=0.4532    [55.9min]
+  [ 229/270] Scen=C X=Bern  Y=Bern  t=8 RMSE(Z)=0.4470    [56.2min]
+  [ 230/270] Scen=C X=Bern  Y=Bern  t=9 RMSE(Z)=0.4427    [56.5min]
+  [ 231/270] Scen=C X=Bern  Y=Pois  t=0 RMSE(Z)=0.2842    [56.7min]
+  [ 232/270] Scen=C X=Bern  Y=Pois  t=1 RMSE(Z)=0.2960    [56.9min]
+  [ 233/270] Scen=C X=Bern  Y=Pois  t=2 RMSE(Z)=0.3422    [57.1min]
+  [ 234/270] Scen=C X=Bern  Y=Pois  t=3 RMSE(Z)=0.2839    [57.3min]
+  [ 235/270] Scen=C X=Bern  Y=Pois  t=4 RMSE(Z)=0.2693    [57.5min]
+  [ 236/270] Scen=C X=Bern  Y=Pois  t=5 RMSE(Z)=0.3229    [57.7min]
+  [ 237/270] Scen=C X=Bern  Y=Pois  t=6 RMSE(Z)=0.2800    [57.9min]
+  [ 238/270] Scen=C X=Bern  Y=Pois  t=7 RMSE(Z)=0.2957    [58.1min]
+  [ 239/270] Scen=C X=Bern  Y=Pois  t=8 RMSE(Z)=0.3091    [58.3min]
+  [ 240/270] Scen=C X=Bern  Y=Pois  t=9 RMSE(Z)=0.3026    [58.5min]
+  [ 241/270] Scen=C X=Pois  Y=Gauss t=0 RMSE(Z)=0.0222    [58.7min]
+  [ 242/270] Scen=C X=Pois  Y=Gauss t=1 RMSE(Z)=0.0224    [58.8min]
+  [ 243/270] Scen=C X=Pois  Y=Gauss t=2 RMSE(Z)=0.0220    [59.0min]
+  [ 244/270] Scen=C X=Pois  Y=Gauss t=3 RMSE(Z)=0.0244    [59.1min]
+  [ 245/270] Scen=C X=Pois  Y=Gauss t=4 RMSE(Z)=0.0229    [59.3min]
+  [ 246/270] Scen=C X=Pois  Y=Gauss t=5 RMSE(Z)=0.0230    [59.4min]
+  [ 247/270] Scen=C X=Pois  Y=Gauss t=6 RMSE(Z)=0.0241    [59.5min]
+  [ 248/270] Scen=C X=Pois  Y=Gauss t=7 RMSE(Z)=0.0231    [59.7min]
+  [ 249/270] Scen=C X=Pois  Y=Gauss t=8 RMSE(Z)=0.0236    [59.8min]
+  [ 250/270] Scen=C X=Pois  Y=Gauss t=9 RMSE(Z)=0.0236    [60.0min]
+  [ 251/270] Scen=C X=Pois  Y=Bern  t=0 RMSE(Z)=1.0206    [60.3min]
+  [ 252/270] Scen=C X=Pois  Y=Bern  t=1 RMSE(Z)=0.9395    [60.5min]
+  [ 253/270] Scen=C X=Pois  Y=Bern  t=2 RMSE(Z)=0.8664    [60.8min]
+  [ 254/270] Scen=C X=Pois  Y=Bern  t=3 RMSE(Z)=0.9184    [61.1min]
+  [ 255/270] Scen=C X=Pois  Y=Bern  t=4 RMSE(Z)=0.8494    [61.3min]
+  [ 256/270] Scen=C X=Pois  Y=Bern  t=5 RMSE(Z)=0.8746    [61.6min]
+  [ 257/270] Scen=C X=Pois  Y=Bern  t=6 RMSE(Z)=0.8844    [61.9min]
+  [ 258/270] Scen=C X=Pois  Y=Bern  t=7 RMSE(Z)=0.8654    [62.1min]
+  [ 259/270] Scen=C X=Pois  Y=Bern  t=8 RMSE(Z)=1.0418    [62.4min]
+  [ 260/270] Scen=C X=Pois  Y=Bern  t=9 RMSE(Z)=0.7777    [62.7min]
+  [ 261/270] Scen=C X=Pois  Y=Pois  t=0 RMSE(Z)=0.2871    [62.8min]
+  [ 262/270] Scen=C X=Pois  Y=Pois  t=1 RMSE(Z)=0.2965    [63.0min]
+  [ 263/270] Scen=C X=Pois  Y=Pois  t=2 RMSE(Z)=0.3395    [63.2min]
+  [ 264/270] Scen=C X=Pois  Y=Pois  t=3 RMSE(Z)=0.2874    [63.4min]
+  [ 265/270] Scen=C X=Pois  Y=Pois  t=4 RMSE(Z)=0.2668    [63.5min]
+  [ 266/270] Scen=C X=Pois  Y=Pois  t=5 RMSE(Z)=0.3193    [63.7min]
+  [ 267/270] Scen=C X=Pois  Y=Pois  t=6 RMSE(Z)=0.2827    [63.9min]
+  [ 268/270] Scen=C X=Pois  Y=Pois  t=7 RMSE(Z)=0.3023    [64.1min]
+  [ 269/270] Scen=C X=Pois  Y=Pois  t=8 RMSE(Z)=0.3095    [64.2min]
+  [ 270/270] Scen=C X=Pois  Y=Pois  t=9 RMSE(Z)=0.3028    [64.4min]
+
+Saved: D:\tento\kennkyu\expfam\results\distribution_mismatch_fixed\mismatch_fixed_all_trials.csv  (270 rows)
+Saved: D:\tento\kennkyu\expfam\results\distribution_mismatch_fixed\mismatch_fixed_summary.csv
+
+======================================================================
+Scenario A: True X=Poisson, True Y=Bernoulli
+Oracle RMSE(Z) = 0.23198
+
+  RMSE(Z) mean [est_X rows Å~ est_Y cols]:
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian         0.3860Å}0.1713    0.4855Å}0.2016Åı   0.6916Å}0.0577  
+  Bernoulli        0.6096Å}0.2639    1.0071Å}0.0800    0.6663Å}0.3044  
+  Poisson          0.2665Å}0.0156    0.2320Å}0.0073*   0.3153Å}0.0142  
+
+  à´âªî{ó¶ (ÅÄ 0.23198):
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian            1.664x            2.093xÅı           2.981x       
+  Bernoulli           2.628x            4.341x            2.872x       
+  Poisson             1.149x            1.000x*           1.359x       
+  Worst: X=Bernoulli, Y=Bernoulli Å® 4.341x
+  Conv-like (Gauss-Bern): 2.093x
+  * = Oracle,  Åı = Conv-like
+
+======================================================================
+Scenario B: True X=Gaussian, True Y=Poisson
+Oracle RMSE(Z) = 0.14136
+
+  RMSE(Z) mean [est_X rows Å~ est_Y cols]:
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian         0.3797Å}0.1925    1.1031Å}0.1138Åı   0.1414Å}0.0103* 
+  Bernoulli        0.4882Å}0.1559    1.0542Å}0.0785    0.1782Å}0.0263  
+  Poisson          0.7843Å}0.0482    1.2436Å}0.0973    0.2384Å}0.1067  
+
+  à´âªî{ó¶ (ÅÄ 0.14136):
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian            2.686x            7.804xÅı           1.000x*      
+  Bernoulli           3.454x            7.458x            1.261x       
+  Poisson             5.548x            8.798x            1.686x       
+  Worst: X=Poisson, Y=Bernoulli Å® 8.798x
+  Conv-like (Gauss-Bern): 7.804x
+  * = Oracle,  Åı = Conv-like
+
+======================================================================
+Scenario C: True X=Bernoulli, True Y=Gaussian
+Oracle RMSE(Z) = 0.02319
+
+  RMSE(Z) mean [est_X rows Å~ est_Y cols]:
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian         0.0228Å}0.0009    0.6006Å}0.1978Åı   0.4306Å}0.4209  
+  Bernoulli        0.0232Å}0.0008*   0.4483Å}0.0078    0.2986Å}0.0217  
+  Poisson          0.0231Å}0.0008    0.9038Å}0.0797    0.2994Å}0.0205  
+
+  à´âªî{ó¶ (ÅÄ 0.02319):
+  est_X \ est_Y      Gaussian    Bernoulli      Poisson
+  Gaussian            0.982x           25.898xÅı          18.564x       
+  Bernoulli           1.000x*          19.329x           12.874x       
+  Poisson             0.997x           38.971x           12.909x       
+  Worst: X=Poisson, Y=Bernoulli Å® 38.971x
+  Conv-like (Gauss-Bern): 25.898x
+  * = Oracle,  Åı = Conv-like
+  Fig saved: heatmap_rmse_scenario_A.png
+  Fig saved: heatmap_ratio_scenario_A.png
+  Fig saved: boxplot_scenario_A.png
+  Fig saved: heatmap_rmse_scenario_B.png
+  Fig saved: heatmap_ratio_scenario_B.png
+  Fig saved: boxplot_scenario_B.png
+  Fig saved: heatmap_rmse_scenario_C.png
+  Fig saved: heatmap_ratio_scenario_C.png
+  Fig saved: boxplot_scenario_C.png
+  Fig saved: bar_oracle_conv_worst.png
+
+Done in 64.5 min
+Results: D:\tento\kennkyu\expfam\results\distribution_mismatch_fixed
+Figures: D:\tento\kennkyu\expfam\figures\distribution_mismatch_fixed
