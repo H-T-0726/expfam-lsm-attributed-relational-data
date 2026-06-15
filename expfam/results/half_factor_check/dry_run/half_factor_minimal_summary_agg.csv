@@ -1,0 +1,2 @@
+scenario,condition_name,true_x,true_y,est_x,est_y,n_trials,old_rmse_z_mean,old_rmse_z_std,fixed_rmse_z_mean,fixed_rmse_z_std,diff_fixed_old_rmse_z_mean,ratio_fixed_old_rmse_z_mean,old_success_rate,fixed_success_rate,note
+C,oracle_C,bernoulli,gaussian,bernoulli,gaussian,1,0.0277529196021621,,0.022082363484583898,,-0.005670556117578201,0.795677132393075,1.0,1.0,Scenario C oracle (correct family)
