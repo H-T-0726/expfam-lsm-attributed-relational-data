@@ -1,0 +1,4 @@
+scenario,family_x,family_y,best_k_by_bic_mean,k_true,bic_at_k1,bic_at_k2,bic_at_k3,bic_at_k4,bic_at_k5,bic_at_k6,selected_correctly,note
+A,poisson,bernoulli,3,3,20683.600683746077,18263.179020267165,16459.434405780845,16797.617843827476,17159.618276291294,17493.274045908885,True,"fixed_official quick, BIC mean over 3 trials"
+B,gaussian,poisson,3,3,44038.68462190509,37493.10350665374,32191.436754176142,32498.28974324263,32854.89717131027,33200.75176883485,True,"fixed_official quick, BIC mean over 3 trials"
+C,bernoulli,gaussian,3,3,6391.167473715316,-1877.885012162584,-36281.46728980719,-35953.051798781504,-35616.66853931195,-35314.50714474968,True,"fixed_official quick, BIC mean over 3 trials"
