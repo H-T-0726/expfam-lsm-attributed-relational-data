@@ -1,0 +1,2 @@
+n,d,family_x,family_y,subset_strategy,n_upper_pairs,n_train_pairs,n_test_pairs,test_pair_ratio,y_count_mean,y_count_max,high_count_threshold,test_hc_density_expected,evaluation_mode,k_values,split_trials,model_trials
+100,19,bernoulli,poisson,genre_stratified_mp100,4950,3960,990,0.2,45.220808080808084,144.0,80,0.06868686868686869,masked_evaluation_not_strict_held_out,"[3, 5]","[0, 1, 2]","[0, 1]"
