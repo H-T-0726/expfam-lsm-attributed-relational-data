@@ -1,0 +1,4 @@
+scenario,d_min,d_max,rmse_z_at_d_min,rmse_z_at_d_max,absolute_change,relative_change_rate,trend_direction,note
+A,5,30,0.26392340898466377,0.204550847626998,-0.059372561357665776,-0.22496133096369575,decreasing,"fixed_official exp3 d_sweep, relative = (rmse_d30 - rmse_d5) / rmse_d5"
+B,5,30,0.1695238320654957,0.16652690281972576,-0.0029969292457699415,-0.017678512863088622,decreasing,"fixed_official exp3 d_sweep, relative = (rmse_d30 - rmse_d5) / rmse_d5"
+C,5,30,0.023224311096899562,0.02314494377785436,-7.936731904520378e-05,-0.003417424039578909,decreasing,"fixed_official exp3 d_sweep, relative = (rmse_d30 - rmse_d5) / rmse_d5"
