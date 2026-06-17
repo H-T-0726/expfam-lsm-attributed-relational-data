@@ -1,0 +1,4 @@
+strategy,unknown,Action,Adventure,Animation,Children's,Comedy,Crime,Documentary,Drama,Fantasy,Film-Noir,Horror,Musical,Mystery,Romance,Sci-Fi,Thriller,War,Western
+top_rated_100,0,36,17,3,7,22,9,0,42,1,2,4,6,7,23,19,30,13,1
+mid_popular_100,0,23,12,3,6,35,10,0,37,2,1,3,7,5,22,10,25,10,1
+genre_stratified_mp100,0,30,20,0,2,27,14,0,30,3,3,14,4,16,22,21,36,7,0

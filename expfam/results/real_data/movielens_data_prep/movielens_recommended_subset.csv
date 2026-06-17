@@ -1,0 +1,2 @@
+recommended_strategy,n,d_genre,Y_count_mean_all,Y_count_density_pos,var_over_mean_all,recommended_threshold,threshold_density,family_y_poisson,family_y_bernoulli,family_x,note
+genre_stratified_mp100,100,19,45.22,1.0,9.89,10,0.9911,yes,yes,bernoulli,Primary genre is a convenience label (multi-label data). Poisson Y: var/mean=9.9 (overdispersion expected). Recommended threshold for Bernoulli Y: 10.

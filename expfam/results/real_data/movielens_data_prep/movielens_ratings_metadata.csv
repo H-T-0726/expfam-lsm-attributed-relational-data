@@ -1,0 +1,2 @@
+total_users,total_movies,total_ratings,rating_min,rating_max,rating_mean,ratings_per_user_mean,ratings_per_user_max,ratings_per_movie_mean,ratings_per_movie_median,ratings_per_movie_max
+943,1682,100000,1,5,3.52986,106.04453870625663,737,59.45303210463734,27.0,583
