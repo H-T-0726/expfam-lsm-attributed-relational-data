@@ -1,0 +1,4 @@
+scenario,n_min,n_max,rmse_z_at_n_min,rmse_z_at_n_max,absolute_improvement,relative_improvement_rate,note
+A,50,300,0.3417316824119715,0.17332891916732765,0.16840276324464384,0.49279236287382755,"fixed_official exp2 n_sweep, relative = (rmse_n50 - rmse_n300) / rmse_n50"
+B,50,300,0.19024103457532465,0.11178556735532816,0.0784554672199965,0.41240033936491544,"fixed_official exp2 n_sweep, relative = (rmse_n50 - rmse_n300) / rmse_n50"
+C,50,300,0.03979685335331627,0.016456427024683792,0.02334042632863248,0.5864892412828795,"fixed_official exp2 n_sweep, relative = (rmse_n50 - rmse_n300) / rmse_n50"
