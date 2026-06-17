@@ -1,0 +1,2 @@
+n,d,threshold,family_x,family_y,y_density,n_positive,n_upper_pairs,random_ap_insample,heldout_test_edge_ratio,heldout_neg_ratio,random_ap_heldout
+100,19,80,bernoulli,bernoulli,0.06868686868686869,340,4950,0.06868686868686869,0.2,5,0.16666666666666666

@@ -1,0 +1,2 @@
+best_k_by_BIC_insample,best_k_by_AP_insample,best_k_by_AUC_insample,best_k_by_NMI_insample,best_k_by_ARI_insample,best_k_by_test_AP_heldout,best_k_by_test_AUC_heldout
+2,5,5,3,3,3,3
