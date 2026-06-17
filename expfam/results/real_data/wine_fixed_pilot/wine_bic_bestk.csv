@@ -1,0 +1,2 @@
+best_k,bic_mean_at_best_k,family_x,family_y,n_trials,note
+3,6324.772245865344,gaussian,bernoulli,5,wine_fixed_pilot BIC best k
