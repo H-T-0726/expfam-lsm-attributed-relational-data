@@ -1,0 +1,2 @@
+dataset,n_full,n_subset,d_full,d_subset,n_classes_full,n_classes_subset,n_edges_subset,y_density,family_x,family_y,subset_method,feature_select,note
+Cora_subset,2708,300,1433,50,7,6,620,0.013823857302118171,bernoulli,bernoulli,BFS from highest-degree node,top frequency words,Cora citation network (LINQS). Y=citation Y_ij=1 if undirected edge. NOT a label-derived matrix (unlike Wine pilot).
