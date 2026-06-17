@@ -1,0 +1,2 @@
+strategy,per_class,n_subset,d_subset,n_edges,y_density,n_isolated,lcc_size,n_classes,family_x,family_y,class_counts
+balanced_degree,40,280,50,433,0.011085509472606246,26,221,7,bernoulli,bernoulli,"{'Neural_Networks': 40, 'Rule_Learning': 40, 'Reinforcement_Learning': 40, 'Probabilistic_Methods': 40, 'Theory': 40, 'Genetic_Algorithms': 40, 'Case_Based': 40}"

@@ -1,0 +1,2 @@
+best_k_by_BIC,best_k_by_AP,best_k_by_AUC,best_k_by_NMI,best_k_by_ARI,bic_at_best_k,ap_at_best_k,auc_at_best_k,nmi_at_best_k,ari_at_best_k
+1,6,6,3,3,14811.943224405133,0.2867742828697369,0.9125268928328222,0.3081625885761854,0.19285847519108676
