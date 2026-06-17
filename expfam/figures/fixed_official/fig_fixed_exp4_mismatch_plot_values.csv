@@ -1,0 +1,4 @@
+scenario,selected_condition,est_x,est_y,ratio_vs_oracle,note
+A,XBern_YBern,bernoulli,bernoulli,4.341358572659535,"3x3 grid max (ablation excluded), est_x=bernoulli, est_y=bernoulli"
+B,XPois_YBern,poisson,bernoulli,9.040538775954325,"3x3 grid max (ablation excluded), est_x=poisson, est_y=bernoulli"
+C,XPois_YBern,poisson,bernoulli,40.37061146832195,"3x3 grid max (ablation excluded), est_x=poisson, est_y=bernoulli"
