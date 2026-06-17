@@ -1,0 +1,2 @@
+n,d,family_x,family_y,subset_strategy,y_count_mean,y_count_var_over_mean,y_count_max,y_count_density_pos,high_count_threshold,high_count_density,random_ap_baseline,n_unique_primary_genres
+100,19,bernoulli,poisson,genre_stratified_mp100,45.220808080808084,9.887794823906383,144.0,1.0,80,0.06868686868686869,0.06868686868686869,11
