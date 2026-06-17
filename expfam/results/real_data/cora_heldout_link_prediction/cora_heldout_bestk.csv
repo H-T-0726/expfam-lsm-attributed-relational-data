@@ -1,0 +1,2 @@
+best_k_by_test_AP,best_k_by_test_AUC,best_k_by_NMI,best_k_by_ARI,test_ap_at_best_k,test_auc_at_best_k,nmi_at_best_k,ari_at_best_k,random_ap_baseline
+6,6,3,3,0.4630887293075621,0.7503470344330269,0.27129892304251524,0.16112147533395804,0.16666666666666666
