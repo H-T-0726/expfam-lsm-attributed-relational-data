@@ -1,0 +1,2 @@
+full_n,full_pair_count,pair_ratio_vs_n280,pair_ratio_vs_n700,dense_matrix_lower_bound_memory_mb_float64,notes
+2708,3665278,93.83712237583205,14.981720825669324,55.9483642578125,"Lower bound is for a single dense n x n float64 matrix (e.g. Y). Actual peak usage during MC-EM is a multiple of this (Y, mu_y, eta_y, gradient/precision buffers per Newton step, L=5 MC samples kept simultaneously). Current implementation has no pair mask and no sparse representation, so all O(n^2) pair terms are computed densely every Newton iteration; full Cora was NOT executed in this script."
