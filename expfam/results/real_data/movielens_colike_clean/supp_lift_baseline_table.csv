@@ -1,0 +1,6 @@
+method,AP_sampled,NDCG_at_10,short_interpretation,include_in_main
+popularity,0.2,0.04,人気度だけではlift関係をほとんど説明できない（ランダムよりわずかに上）,yes
+genre_cosine,0.265,0.138,ベースライン中で最強だが、提案手法の半分以下,yes
+popularity_genre,0.24,0.173,人気度+ジャンルでも提案手法に届かない,yes
+item_item,0.167,0.0,評価設計上の床効果（test positiveをtrain score上で0にする）でランダム相当。参考値として記録するが本文では除外,no
+proposed_dual_expfam,0.677,0.408,全ベースラインに対しAP_sampled/NDCG@10とも最も高い値を示した,yes

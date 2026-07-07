@@ -1,0 +1,209 @@
+factor,attribute,pearson_corr,spearman_corr,abs_pearson_rank,interpretation_hint
+0,rating_count,0.2457225096893092,0.24217273296045075,5,suggestive: weak/no clear interpretation
+0,log_rating_count,0.23952282544461406,0.24217273296045075,7,suggestive: weak/no clear interpretation
+0,like_count,0.3451106802516691,0.3490490770047636,1,suggestive: popularity-related
+0,log_like_count,0.33738140256954036,0.3490490770047636,2,suggestive: popularity-related
+0,avg_rating,0.24406192352053357,0.2905490549054905,6,suggestive: weak/no clear interpretation
+0,high_rating_rate,0.32251944548063977,0.34723072307230723,3,suggestive: high-rating-related
+0,release_year,0.046278209345689804,0.2643588508470579,19,suggestive: weak/no clear interpretation
+0,genre_unknown,,,23,suggestive: weak/no clear interpretation
+0,genre_Action,-0.08910186567269737,-0.12549047971992036,16,suggestive: weak/no clear interpretation
+0,genre_Adventure,-0.24605880544756922,-0.2693473682820755,4,suggestive: weak/no clear interpretation
+0,genre_Animation,,,24,suggestive: weak/no clear interpretation
+0,genre_Children's,-0.08969366732074008,-0.10145376297257784,15,suggestive: weak/no clear interpretation
+0,genre_Comedy,-0.17508093669231506,-0.14786937627810479,9,suggestive: weak/no clear interpretation
+0,genre_Crime,0.13280665152554774,0.12879197577107274,12,suggestive: weak/no clear interpretation
+0,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+0,genre_Drama,0.03834736202642664,0.04460203797274278,20,suggestive: weak/no clear interpretation
+0,genre_Fantasy,-0.15841612770808078,-0.14723255575621247,10,suggestive: weak/no clear interpretation
+0,genre_Film-Noir,0.0662682711865118,0.09443191507122593,18,suggestive: weak/no clear interpretation
+0,genre_Horror,0.07962731854299825,0.08985486681702749,17,suggestive: weak/no clear interpretation
+0,genre_Musical,-0.012786467598408376,-0.015910698131493258,22,suggestive: weak/no clear interpretation
+0,genre_Mystery,0.1081972552321473,0.1332391388592528,13,suggestive: weak/no clear interpretation
+0,genre_Romance,-0.1821173740418135,-0.18063730625265212,8,suggestive: weak/no clear interpretation
+0,genre_Sci-Fi,-0.022257548651317627,-0.031044309910369893,21,suggestive: weak/no clear interpretation
+0,genre_Thriller,0.1414173096797851,0.13712754548122816,11,suggestive: weak/no clear interpretation
+0,genre_War,-0.09099755082560622,-0.09572182310641401,14,suggestive: weak/no clear interpretation
+0,genre_Western,,,26,suggestive: weak/no clear interpretation
+1,rating_count,-0.27918355678527335,-0.2969531137614567,4,suggestive: popularity-related
+1,log_rating_count,-0.26298785666381835,-0.2969531137614567,5,suggestive: popularity-related
+1,like_count,-0.0886143857109641,-0.08260366045792827,16,suggestive: weak/no clear interpretation
+1,log_like_count,-0.11535950886437722,-0.08260366045792827,12,suggestive: weak/no clear interpretation
+1,avg_rating,-0.015954712319244356,0.05282928292829283,21,suggestive: weak/no clear interpretation
+1,high_rating_rate,0.042967447611735626,0.08264026402640262,19,suggestive: weak/no clear interpretation
+1,release_year,-0.03148041077493998,0.059625401586554806,20,suggestive: weak/no clear interpretation
+1,genre_unknown,,,23,suggestive: weak/no clear interpretation
+1,genre_Action,0.10209305644918769,0.06728104033176455,13,suggestive: weak/no clear interpretation
+1,genre_Adventure,-0.0003722310330940451,-0.005196412249814962,22,suggestive: weak/no clear interpretation
+1,genre_Animation,,,24,suggestive: weak/no clear interpretation
+1,genre_Children's,-0.08136977120276136,-0.0915558348776922,18,suggestive: weak/no clear interpretation
+1,genre_Comedy,-0.4205620829401475,-0.4123955955829994,1,suggestive: romance/drama-related
+1,genre_Crime,0.22563727274558462,0.19967748181561668,6,suggestive: weak/no clear interpretation
+1,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+1,genre_Drama,0.1389520652056912,0.11490694528571022,11,suggestive: weak/no clear interpretation
+1,genre_Fantasy,-0.14357689035266585,-0.1797252577162042,9,suggestive: weak/no clear interpretation
+1,genre_Film-Noir,0.09145995956981993,0.1309862047762166,15,suggestive: weak/no clear interpretation
+1,genre_Horror,0.21712293132427654,0.25658556413306743,7,suggestive: weak/no clear interpretation
+1,genre_Musical,-0.08795812412707639,-0.08132134600541,17,suggestive: weak/no clear interpretation
+1,genre_Mystery,0.2886062814202177,0.24568919222273564,3,suggestive: weak/no clear interpretation
+1,genre_Romance,-0.3232175408586188,-0.32029670506836005,2,suggestive: romance/drama-related
+1,genre_Sci-Fi,0.16431869629966717,0.13140673646992188,8,suggestive: weak/no clear interpretation
+1,genre_Thriller,0.14236699006229983,0.13496237371047196,10,suggestive: weak/no clear interpretation
+1,genre_War,0.09436995146209742,0.12830797565327834,14,suggestive: weak/no clear interpretation
+1,genre_Western,,,26,suggestive: weak/no clear interpretation
+2,rating_count,0.2242858958150937,0.20415414045668512,6,suggestive: weak/no clear interpretation
+2,log_rating_count,0.22149994833850115,0.20415414045668512,7,suggestive: weak/no clear interpretation
+2,like_count,0.41974720840608254,0.487634061551006,5,suggestive: popularity-related
+2,log_like_count,0.43431403157164095,0.487634061551006,4,suggestive: popularity-related
+2,avg_rating,0.4929231503842275,0.5759375937593758,2,suggestive: high-rating-related
+2,high_rating_rate,0.4662944278959398,0.559003900390039,3,suggestive: high-rating-related
+2,release_year,-0.5182199974136934,-0.8003398234683755,1,suggestive: weak/no clear interpretation
+2,genre_unknown,,,23,suggestive: weak/no clear interpretation
+2,genre_Action,-0.19070827729984807,-0.2532488596757429,8,suggestive: weak/no clear interpretation
+2,genre_Adventure,-0.0815154331339432,-0.13077637495367656,18,suggestive: weak/no clear interpretation
+2,genre_Animation,,,24,suggestive: weak/no clear interpretation
+2,genre_Children's,-0.06378566689256418,-0.03711723035582116,20,suggestive: weak/no clear interpretation
+2,genre_Comedy,0.1437568644340966,0.11509621636422405,13,suggestive: weak/no clear interpretation
+2,genre_Crime,-0.09651282197433701,-0.04892098304482609,16,suggestive: weak/no clear interpretation
+2,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+2,genre_Drama,-0.04634875047385029,0.01058353443421015,21,suggestive: weak/no clear interpretation
+2,genre_Fantasy,0.039671117707295804,0.015230954043746118,22,suggestive: weak/no clear interpretation
+2,genre_Film-Noir,0.183693397069181,0.23049510452869124,9,suggestive: weak/no clear interpretation
+2,genre_Horror,-0.07825189283940617,-0.04093388377220141,19,suggestive: weak/no clear interpretation
+2,genre_Musical,0.09214301031914755,0.09192847809307218,17,suggestive: weak/no clear interpretation
+2,genre_Mystery,-0.11238816600352956,-0.03118362824365491,15,suggestive: weak/no clear interpretation
+2,genre_Romance,0.12794859677119425,0.08195581487388848,14,suggestive: weak/no clear interpretation
+2,genre_Sci-Fi,-0.17492506388369453,-0.22921757591355302,10,suggestive: weak/no clear interpretation
+2,genre_Thriller,-0.17427269838676032,-0.12413651485669076,11,suggestive: weak/no clear interpretation
+2,genre_War,0.1457256699062735,0.2043423315959618,12,suggestive: weak/no clear interpretation
+2,genre_Western,,,26,suggestive: weak/no clear interpretation
+3,rating_count,0.4975083255315798,0.42550816822446613,4,suggestive: popularity-related
+3,log_rating_count,0.5089021854708744,0.42550816822446613,3,suggestive: popularity-related
+3,like_count,0.5177658751508607,0.5095812851992655,2,suggestive: popularity-related
+3,log_like_count,0.5513324175276366,0.5095812851992655,1,suggestive: popularity-related
+3,avg_rating,0.45929057833214304,0.4378277827782778,5,suggestive: high-rating-related
+3,high_rating_rate,0.42072036406066693,0.4191179117911791,6,suggestive: high-rating-related
+3,release_year,-0.3437698870398577,-0.5175322644662249,8,suggestive: weak/no clear interpretation
+3,genre_unknown,,,23,suggestive: weak/no clear interpretation
+3,genre_Action,0.2739314344355529,0.28424349623307266,11,suggestive: sci-fi/action-related
+3,genre_Adventure,0.3407644039292266,0.34209713977948497,9,suggestive: sci-fi/action-related
+3,genre_Animation,,,24,suggestive: weak/no clear interpretation
+3,genre_Children's,0.024028648290231283,0.017321374166049876,21,suggestive: weak/no clear interpretation
+3,genre_Comedy,0.08321874116872523,0.07920180312521181,17,suggestive: weak/no clear interpretation
+3,genre_Crime,-0.14454341521209563,-0.14077262468000976,15,suggestive: weak/no clear interpretation
+3,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+3,genre_Drama,-0.17648884103246779,-0.18143201887217403,13,suggestive: weak/no clear interpretation
+3,genre_Fantasy,-0.04827685798164393,-0.07209318247373162,19,suggestive: weak/no clear interpretation
+3,genre_Film-Noir,-0.008109665556571395,-0.021323335661244565,22,suggestive: weak/no clear interpretation
+3,genre_Horror,-0.2991234565721344,-0.28354202417817564,10,suggestive: weak/no clear interpretation
+3,genre_Musical,0.07591534689489542,0.08132134600541,18,suggestive: weak/no clear interpretation
+3,genre_Mystery,-0.41668860612825487,-0.3571942871545926,7,suggestive: weak/no clear interpretation
+3,genre_Romance,0.043777628749507316,0.01588939267963144,20,suggestive: weak/no clear interpretation
+3,genre_Sci-Fi,0.14762837709080726,0.15862366570641054,14,suggestive: weak/no clear interpretation
+3,genre_Thriller,-0.13767963997887722,-0.12485823878027617,16,suggestive: weak/no clear interpretation
+3,genre_War,0.19634275345743443,0.21656213880103592,12,suggestive: weak/no clear interpretation
+3,genre_Western,,,26,suggestive: weak/no clear interpretation
+4,rating_count,0.5470368369810436,0.573837691874517,5,suggestive: popularity-related
+4,log_rating_count,0.527912329799076,0.573837691874517,6,suggestive: popularity-related
+4,like_count,0.7311895259727006,0.7176988191545137,2,suggestive: popularity-related
+4,log_like_count,0.7526558920525599,0.7176988191545137,1,suggestive: popularity-related
+4,avg_rating,0.6389185058928806,0.6226102610261026,4,suggestive: high-rating-related
+4,high_rating_rate,0.6508118989808492,0.6366396639663965,3,suggestive: high-rating-related
+4,release_year,-0.09419095856675475,-0.17346506791889899,18,suggestive: weak/no clear interpretation
+4,genre_unknown,,,23,suggestive: weak/no clear interpretation
+4,genre_Action,-0.38483535267194885,-0.3734475721785582,10,suggestive: sci-fi/action-related
+4,genre_Adventure,-0.41037715743355613,-0.3949273309859371,9,suggestive: sci-fi/action-related
+4,genre_Animation,,,24,suggestive: weak/no clear interpretation
+4,genre_Children's,0.051903927245062716,0.0692854966641995,21,suggestive: weak/no clear interpretation
+4,genre_Comedy,0.09418549772969446,0.1104143363765268,19,suggestive: weak/no clear interpretation
+4,genre_Crime,0.021268329980168525,-0.004991937045390416,22,suggestive: weak/no clear interpretation
+4,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+4,genre_Drama,0.42994974749613335,0.41880557689660175,7,suggestive: romance/drama-related
+4,genre_Fantasy,-0.14653291416148187,-0.16550970060870782,14,suggestive: weak/no clear interpretation
+4,genre_Film-Noir,-0.12983747501077583,-0.14723255575621247,16,suggestive: weak/no clear interpretation
+4,genre_Horror,-0.05522952008699291,-0.03694033413588908,20,suggestive: weak/no clear interpretation
+4,genre_Musical,0.10336255148902057,0.13435700644372087,17,suggestive: weak/no clear interpretation
+4,genre_Mystery,-0.20484808567377827,-0.23151481574834706,11,suggestive: weak/no clear interpretation
+4,genre_Romance,0.16892893083795474,0.1940178474565523,13,suggestive: weak/no clear interpretation
+4,genre_Sci-Fi,-0.42619870410940375,-0.38486438998472267,8,suggestive: sci-fi/action-related
+4,genre_Thriller,-0.13697292557736598,-0.13712754548122816,15,suggestive: weak/no clear interpretation
+4,genre_War,0.19255891347752244,0.2016268188837231,12,suggestive: weak/no clear interpretation
+4,genre_Western,,,26,suggestive: weak/no clear interpretation
+5,rating_count,0.32532787470741803,0.40350119447366756,9,suggestive: popularity-related
+5,log_rating_count,0.28000331765337144,0.40350119447366756,12,suggestive: popularity-related
+5,like_count,0.6951491610077658,0.7141339706866258,3,suggestive: popularity-related
+5,log_like_count,0.6672829205652362,0.7141339706866258,4,suggestive: popularity-related
+5,avg_rating,0.7709089196069182,0.7835943594359435,2,suggestive: high-rating-related
+5,high_rating_rate,0.7780100992247301,0.7853705370537053,1,suggestive: high-rating-related
+5,release_year,-0.4596661823976332,-0.19811781999097672,5,suggestive: weak/no clear interpretation
+5,genre_unknown,,,23,suggestive: weak/no clear interpretation
+5,genre_Action,-0.4345146871456881,-0.43846071227442057,6,suggestive: sci-fi/action-related
+5,genre_Adventure,-0.2759152509872134,-0.2935972921145453,13,suggestive: sci-fi/action-related
+5,genre_Animation,,,24,suggestive: weak/no clear interpretation
+5,genre_Children's,0.08169444042021146,0.08413238880652796,20,suggestive: weak/no clear interpretation
+5,genre_Comedy,0.07473291015862561,0.07686086313136319,21,suggestive: weak/no clear interpretation
+5,genre_Crime,-0.024790903835422196,0.0019967748181561667,22,suggestive: weak/no clear interpretation
+5,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+5,genre_Drama,0.3182740612166299,0.3379171351494241,10,suggestive: romance/drama-related
+5,genre_Fantasy,-0.20934575760399168,-0.2426798677636881,16,suggestive: weak/no clear interpretation
+5,genre_Film-Noir,0.29639960311244545,0.2731417758511804,11,suggestive: weak/no clear interpretation
+5,genre_Horror,-0.3520578062229994,-0.3564243050408757,8,suggestive: weak/no clear interpretation
+5,genre_Musical,0.09361707847764048,0.10430346552867803,19,suggestive: weak/no clear interpretation
+5,genre_Mystery,0.22528689896859752,0.21450556397908074,15,suggestive: weak/no clear interpretation
+5,genre_Romance,0.22900905230078197,0.22412406516532768,14,suggestive: weak/no clear interpretation
+5,genre_Sci-Fi,-0.3906726740900891,-0.4146329063371322,7,suggestive: sci-fi/action-related
+5,genre_Thriller,-0.1528855692802135,-0.1378492694048136,18,suggestive: weak/no clear interpretation
+5,genre_War,0.19749757953982655,0.2070578443082005,17,suggestive: weak/no clear interpretation
+5,genre_Western,,,26,suggestive: weak/no clear interpretation
+6,rating_count,0.22659700524228815,0.1861020605432949,4,suggestive: weak/no clear interpretation
+6,log_rating_count,0.24246099209508393,0.1861020605432949,3,suggestive: weak/no clear interpretation
+6,like_count,0.041557826961178435,0.06414326670839418,19,suggestive: weak/no clear interpretation
+6,log_like_count,0.13217277221793738,0.06414326670839418,10,suggestive: weak/no clear interpretation
+6,avg_rating,-0.055932547444561616,-0.03557155715571557,17,suggestive: weak/no clear interpretation
+6,high_rating_rate,-0.057111373411204105,-0.05125712571257125,16,suggestive: weak/no clear interpretation
+6,release_year,0.47253689994147907,0.5424271255692094,1,suggestive: weak/no clear interpretation
+6,genre_unknown,,,23,suggestive: weak/no clear interpretation
+6,genre_Action,0.13319946854746753,0.1345620806635291,9,suggestive: weak/no clear interpretation
+6,genre_Adventure,-0.05581802412933798,-0.05542839733135959,18,suggestive: weak/no clear interpretation
+6,genre_Animation,,,24,suggestive: weak/no clear interpretation
+6,genre_Children's,-0.07236464302687919,-0.07423446071164232,15,suggestive: weak/no clear interpretation
+6,genre_Comedy,-0.10343068681983272,-0.09168681642573781,13,suggestive: weak/no clear interpretation
+6,genre_Crime,0.2226503786046632,0.2196452299971783,6,suggestive: weak/no clear interpretation
+6,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+6,genre_Drama,0.10265699630974193,0.10961517806860514,14,suggestive: weak/no clear interpretation
+6,genre_Fantasy,0.032412169002068725,0.04772365600373784,21,suggestive: weak/no clear interpretation
+6,genre_Film-Noir,-0.2260042345565669,-0.24877224938118658,5,suggestive: weak/no clear interpretation
+6,genre_Horror,-0.19435697018429784,-0.18070812104313308,7,suggestive: weak/no clear interpretation
+6,genre_Musical,-0.12742085586451019,-0.14142842783549564,11,suggestive: weak/no clear interpretation
+6,genre_Mystery,-0.13841020654301603,-0.15969797494477816,8,suggestive: weak/no clear interpretation
+6,genre_Romance,-0.013986790475602546,0.010035405902925119,22,suggestive: weak/no clear interpretation
+6,genre_Sci-Fi,-0.12345302832477015,-0.1101435105039151,12,suggestive: weak/no clear interpretation
+6,genre_Thriller,0.30175176247183544,0.3103412871417269,2,suggestive: weak/no clear interpretation
+6,genre_War,-0.03397717537459953,-0.03869605614940141,20,suggestive: weak/no clear interpretation
+6,genre_Western,,,26,suggestive: weak/no clear interpretation
+7,rating_count,0.049628954731648516,0.056958873157575356,21,suggestive: weak/no clear interpretation
+7,log_rating_count,0.038326253606202766,0.056958873157575356,22,suggestive: weak/no clear interpretation
+7,like_count,0.15747080264462582,0.16824404368479812,11,suggestive: weak/no clear interpretation
+7,log_like_count,0.1435725867819065,0.16824404368479812,13,suggestive: weak/no clear interpretation
+7,avg_rating,0.2449081345250276,0.245988598859886,3,suggestive: weak/no clear interpretation
+7,high_rating_rate,0.19516096766344118,0.19458745874587458,6,suggestive: weak/no clear interpretation
+7,release_year,-0.39672462058787245,-0.5098937245411176,1,suggestive: weak/no clear interpretation
+7,genre_unknown,,,23,suggestive: weak/no clear interpretation
+7,genre_Action,0.15367098318587336,0.129270313446424,12,suggestive: weak/no clear interpretation
+7,genre_Adventure,0.1407419079892612,0.11432106949592916,14,suggestive: weak/no clear interpretation
+7,genre_Animation,,,24,suggestive: weak/no clear interpretation
+7,genre_Children's,-0.0680637989038791,-0.08908135285397079,20,suggestive: weak/no clear interpretation
+7,genre_Comedy,-0.24311948228617905,-0.22824164940024094,4,suggestive: weak/no clear interpretation
+7,genre_Crime,-0.17835037499866777,-0.20167425663377284,7,suggestive: weak/no clear interpretation
+7,genre_Documentary,,,25,suggestive: weak/no clear interpretation
+7,genre_Drama,-0.11948933577961138,-0.12171064599341676,17,suggestive: weak/no clear interpretation
+7,genre_Fantasy,-0.1254734995861513,-0.12489382315871816,16,suggestive: weak/no clear interpretation
+7,genre_Film-Noir,0.1624875726096273,0.17769446384370471,10,suggestive: weak/no clear interpretation
+7,genre_Horror,-0.07919642154390528,-0.09285002904426173,18,suggestive: weak/no clear interpretation
+7,genre_Musical,-0.1779671416419998,-0.1644105473587637,8,suggestive: weak/no clear interpretation
+7,genre_Mystery,0.1274317497888354,0.14174376474388595,15,suggestive: weak/no clear interpretation
+7,genre_Romance,-0.19841555160898663,-0.17394703565070208,5,suggestive: weak/no clear interpretation
+7,genre_Sci-Fi,-0.07425414492482042,-0.0693181166491821,19,suggestive: weak/no clear interpretation
+7,genre_Thriller,0.34951627822848985,0.33993196800872877,2,suggestive: weak/no clear interpretation
+7,genre_War,0.1779352166011732,0.19348028074700702,9,suggestive: weak/no clear interpretation
+7,genre_Western,,,26,suggestive: weak/no clear interpretation

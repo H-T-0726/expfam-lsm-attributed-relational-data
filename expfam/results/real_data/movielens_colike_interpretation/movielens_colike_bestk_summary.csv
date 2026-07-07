@@ -1,0 +1,2 @@
+best_k_for_interpretation,candidates,selection_rule,representative_trial,bic,w0,w
+8,"[5, 8]","max mean Pearson(Y,Y_hat) among candidate k in {5,8}",2,28807.741732934443,2.0186894353747724,0.19263673795350286

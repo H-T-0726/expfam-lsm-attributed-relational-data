@@ -1,0 +1,10 @@
+k,BIC_mean,BIC_std,success_rate,short_interpretation
+1,13410.76,17.57,1.0,underfit relative to BIC minimum
+2,6423.21,19.72,1.0,underfit relative to BIC minimum
+3,6324.77,38.7,1.0,BIC minimum; corresponds to label-derived 3-class structure
+4,6691.07,73.77,1.0,BIC increasing; added complexity not justified by fit
+5,6961.1,70.18,1.0,BIC increasing; added complexity not justified by fit
+6,7501.89,158.5,1.0,BIC increasing; added complexity not justified by fit
+7,8103.31,121.74,1.0,BIC increasing; added complexity not justified by fit
+8,8752.13,81.21,1.0,BIC increasing; added complexity not justified by fit
+9,9435.92,121.63,1.0,BIC increasing; added complexity not justified by fit

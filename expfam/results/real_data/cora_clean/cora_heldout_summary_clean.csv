@@ -1,0 +1,3 @@
+k,n_trials,train_AUC_mean,train_AP_mean,test_AUC_mean,test_AP_mean,random_AP_baseline_mean,test_positive_edges_mean,test_negative_edges_mean,NMI_mean,ARI_mean,silhouette_mean,success_rate,runtime_mean,short_interpretation
+3,6,0.8693,0.652,0.7371,0.4319,0.1667,86.0,430.0,0.2713,0.1611,-0.031,1.0,47.92,best label-structure (NMI)
+6,6,0.9078,0.7394,0.7503,0.4631,0.1667,86.0,430.0,0.2208,0.122,-0.0495,1.0,51.87,best held-out AUC

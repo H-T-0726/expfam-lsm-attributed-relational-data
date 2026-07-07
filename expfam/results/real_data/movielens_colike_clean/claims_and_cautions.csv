@@ -1,0 +1,12 @@
+claim_level,statement,evidence,caution
+strong,Bernoulli X / Poisson Y の実データ適用において、全fit(Poisson 12件+Bernoulli 9件=21件)が成功し、NaN・エラーは発生しなかった,"movielens_colike_poisson_summary.csv / movielens_colike_lift_heldout_summary.csv で success=True, nan_occurred=False が全件",n=100 subsetでの結果。大規模データでの安定性は未確認
+strong,"liftで定義した強い共高評価ペアのランキングにおいて、提案手法は4つのベースライン（popularity, genre cosine, popularity+genre, item-item）全てに対しAP_sampled/NDCG@10で上回った","movielens_colike_baseline_metrics.csv: 提案手法 AP_sampled=0.677,NDCG@10=0.408 / 最良ベースライン(genre_cosine) AP_sampled=0.265,NDCG@10=0.138",item-itemベースラインは評価設計上の床効果(test positiveをtrain score上で0にする)があるため比較から除外して判断
+moderate,Bernoulli X / Poisson Y の実データ適用例を示した,"MovieLens co-like countデータ(n=100,d=19)で全fit成功",n=100 subsetの結果であり、MovieLens全体の結論ではない
+moderate,共高評価人数(Y_colike_count)をPoisson関係としてin-sampleで再構成できた,"movielens_colike_poisson_agg.csv: Pearson(Y,Y_hat)=0.907(k=2)~0.963(k=8)",in-sample reconstructionであり、strict held-outではない
+moderate,BICで比較するとk=5が最もバランスが良い,"movielens_colike_poisson_agg.csv: BIC_mean k=2:31809.5, k=3:29435.1, k=5:28667.3(最小), k=8:28812.1",BICはモデル選択指標の一つであり、唯一の基準ではない
+weak,"Kの一部因子(factor 2,4,5)は、人気度・高評価率・公開年(古さ)と関連する可能性がある",movielens_colike_factor_correlations.csv: |pearson_corr|>=0.47の属性相関が存在,回転不定性があり、n=100の探索的な相関分析に基づく暫定的な解釈
+weak,提案手法の推薦例は、ジャンル類似度だけでは説明できない構造を示している可能性がある,Citizen Kane/Vertigo等の推薦例で、提案手法とgenre_cosineのTop5が大きく異なる,少数(4件)の質的な事例観察に基づく。一般化はできない
+do_not_claim,ユーザー個人への映画推薦ができた,なし,movie-node projectionでありuser-level推薦ではない
+do_not_claim,商用推薦システムとして使える,なし,n=100 subset、held-out評価も限定的(zero-filled edge hiding)
+do_not_claim,Kの意味が完全に同定された,なし,回転不定性のためZの各次元の意味は確定できない
+do_not_claim,未知映画ペアの共高評価人数を厳密に予測できた,なし,Poisson実験はin-sample reconstructionであり、strict held-outではない

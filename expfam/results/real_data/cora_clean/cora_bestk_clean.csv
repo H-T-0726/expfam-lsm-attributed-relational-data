@@ -1,0 +1,8 @@
+criterion,best_k,value,interpretation,caution
+BIC,1,14811.94,In-sample BIC is minimized at the simplest model (k=1),Based on cora_balanced_k_sweep (in-sample fit); conflicts with the link/structure criteria below
+in_sample_AUC,6,0.9125,Larger k reconstructs the observed citation links best (in-sample),"In-sample reconstruction only, not a held-out generalization measure"
+in_sample_AP,6,0.2868,Same direction as in-sample AUC,Absolute AP is low (~0.29) due to extreme edge sparsity (y_density~1.1%)
+heldout_AUC,6,0.7503,k=6 generalizes better to held-out citation links than k=3,"Based on cora_heldout_link_prediction (test_edge_ratio=0.2, 3 splits x 2 model trials); only k=3,6 tested"
+heldout_AP,6,0.4631,k=6 best among tested k for held-out AP; well above random baseline,"Random AP baseline = 0.1667; only k=3 and k=6 were tested, not a full sweep"
+NMI,3,0.3082,k=3 best recovers the 7-class label structure among tested k (in-sample k-sweep),"Absolute NMI (~0.31) is moderate, not a clean recovery of the 7 classes; held-out k-sweep shows the same k=3 pattern (NMI~0.27)"
+ARI,3,0.1929,Same direction as NMI,"Absolute ARI (~0.19) is low; label structure is only partially recovered, not fully identified"

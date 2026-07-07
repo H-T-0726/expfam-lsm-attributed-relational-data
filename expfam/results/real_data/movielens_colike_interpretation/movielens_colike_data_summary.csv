@@ -1,0 +1,2 @@
+subset_strategy,n,d,family_x,n_users_full_ml100k,like_threshold_rating,Y_colike_count_density_pos,Y_colike_count_mean,Y_colike_count_max,Y_lift_binary_min_support,Y_lift_binary_lift_threshold,Y_lift_binary_density,Y_lift_binary_n_positive,lift_selection_reason,high_colike_threshold,high_colike_density
+genre_stratified_mp100,100,19,bernoulli,943,4,0.9933333333333333,14.745252525252525,99.0,20,3.0,0.06707070707070707,332,"density in [0.05,0.15] and positive_edges>=200; picked closest to target density 0.10",28.0,0.10828282828282829

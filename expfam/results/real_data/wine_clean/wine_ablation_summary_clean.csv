@@ -1,0 +1,4 @@
+condition,BIC_mean,BIC_std,AUC_Y_mean,AUC_Y_std,AP_Y_mean,AP_Y_std,silhouette_mean,silhouette_std,short_interpretation
+X+Y,6330.4752,34.869,1.0,0.0,1.0,0.0,0.7751,0.0052,uses both attributes and relation; best balanced condition
+X_only,26219.8629,54.295,0.5,0.0,0.338,0.0,0.2786,0.0612,cannot reconstruct Y because relation data is not used
+Y_only,9030.1297,79.0682,0.9997,0.0003,0.9996,0.0004,0.7614,0.0071,very strong because Y is label-derived from class labels

@@ -1,0 +1,321 @@
+query_movie_id,query_title,query_genres,method,rank,recommended_movie_id,recommended_title,recommended_genres,observed_colike_count,lift,score,hit_in_test_if_applicable,top_contributing_factor,contribution_explanation
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,1,682,I Know What You Did Last Summer (1997),Horror|Mystery|Thriller,14.0,7.175,17.558852445083637,,2,factor 2 contributes 0.629 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,2,358,Spawn (1997),Action|Adventure|Sci-Fi|Thriller,8.0,5.125,14.729652082960794,,2,factor 2 contributes 0.559 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,3,332,Kiss the Girls (1997),Crime|Drama|Thriller,15.0,4.212328767123288,14.689506072637446,,2,factor 2 contributes 0.489 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,4,312,Midnight in the Garden of Good and Evil (1997),Comedy|Crime|Drama|Mystery,1.0,0.6612903225806451,14.609008790256834,,2,factor 2 contributes 0.767 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,5,307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,17.0,3.2268518518518516,13.77257714158378,,2,factor 2 contributes 0.302 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,6,326,G.I. Jane (1997),Action|Drama|War,12.0,2.8275862068965516,13.599501400014468,,2,factor 2 contributes 0.410 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,7,260,Event Horizon (1997),Action|Mystery|Sci-Fi|Thriller,7.0,4.220588235294118,13.252360536463266,,2,factor 2 contributes 0.299 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,8,343,Alien: Resurrection (1997),Action|Horror|Sci-Fi,13.0,5.670212765957447,13.076439378927084,,2,factor 2 contributes 0.390 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,9,315,Apt Pupil (1998),Drama|Thriller,14.0,2.296,13.030337031747509,,2,factor 2 contributes 0.465 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,proposed_poisson_colike,10,327,Cop Land (1997),Crime|Drama|Mystery,9.0,2.2228915662650603,13.023670253530565,,2,factor 2 contributes 0.322 to w*z_i.z_j
+895,Scream 2 (1997),Horror|Thriller,popularity,1,272,Good Will Hunting (1997),Drama,21.0,2.625,7544.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,2,134,Citizen Kane (1941),Drama,6.0,0.7592592592592593,7452.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,3,479,Vertigo (1958),Mystery|Thriller,4.0,0.5061728395061729,7452.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,3.0,0.3993506493506494,7084.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,5,480,North by Northwest (1959),Comedy|Thriller,4.0,0.5324675324675325,7084.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,6,527,Gandhi (1982),Drama,6.0,0.8424657534246576,6716.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,7,23,Taxi Driver (1976),Drama|Thriller,5.0,0.702054794520548,6716.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,8,511,Lawrence of Arabia (1962),Adventure|War,1.0,0.1413793103448276,6670.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,9,124,Lone Star (1996),Drama|Mystery,5.0,0.7118055555555556,6624.0,,,
+895,Scream 2 (1997),Horror|Thriller,popularity,10,208,Young Frankenstein (1974),Comedy|Horror,4.0,0.5815602836879433,6486.0,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,1,682,I Know What You Did Last Summer (1997),Horror|Mystery|Thriller,14.0,7.175,0.816496580927726,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,2,219,"Nightmare on Elm Street, A (1984)",Horror,7.0,2.928571428571429,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,3,307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,17.0,3.2268518518518516,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,4,218,Cape Fear (1991),Thriller,8.0,1.9294117647058824,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,5,443,"Birds, The (1963)",Horror,5.0,0.9490740740740741,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,6,665,Alien 3 (1992),Action|Horror|Sci-Fi|Thriller,2.0,1.413793103448276,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,7,447,Carrie (1976),Horror,4.0,1.2615384615384615,0.7071067811865475,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,8,23,Taxi Driver (1976),Drama|Thriller,5.0,0.702054794520548,0.4999999999999999,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,9,159,Basic Instinct (1992),Mystery|Thriller,4.0,2.1025641025641026,0.4999999999999999,,,
+895,Scream 2 (1997),Horror|Thriller,genre_cosine,10,208,Young Frankenstein (1974),Comedy|Horror,4.0,0.5815602836879433,0.4999999999999999,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,1,272,Good Will Hunting (1997),Drama,21.0,2.625,21.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,2,307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,17.0,3.2268518518518516,17.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,3,332,Kiss the Girls (1997),Crime|Drama|Thriller,15.0,4.212328767123288,15.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,4,315,Apt Pupil (1998),Drama|Thriller,14.0,2.296,14.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,5,682,I Know What You Did Last Summer (1997),Horror|Mystery|Thriller,14.0,7.175,14.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,6,298,Face/Off (1997),Action|Sci-Fi|Thriller,13.0,2.065891472868217,13.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,7,340,Boogie Nights (1997),Drama,13.0,2.3377192982456143,13.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,8,343,Alien: Resurrection (1997),Action|Horror|Sci-Fi,13.0,5.670212765957447,13.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,9,326,G.I. Jane (1997),Action|Drama|War,12.0,2.8275862068965516,12.0,,,
+895,Scream 2 (1997),Horror|Thriller,item_item_full_colike,10,304,Fly Away Home (1996),Adventure|Children's,11.0,2.81875,11.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,1,479,Vertigo (1958),Mystery|Thriller,59.0,2.4357324227300587,69.71321062104478,,3,factor 3 contributes 0.643 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,2,134,Citizen Kane (1941),Drama,68.0,2.807284826197356,68.90596963083392,,3,factor 3 contributes 0.684 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,61.0,2.6491203831629364,62.337796255497935,,3,factor 3 contributes 0.769 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,4,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,61.0,3.021959548200683,59.2246136295853,,3,factor 3 contributes 0.844 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,5,480,North by Northwest (1959),Comedy|Thriller,54.0,2.345122962144239,57.256824456342684,,3,factor 3 contributes 0.674 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,6,527,Gandhi (1982),Drama,61.0,2.7942776644321383,57.097388086745354,,3,factor 3 contributes 0.725 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,7,511,Lawrence of Arabia (1962),Adventure|War,53.0,2.444558571777941,56.8670672468764,,3,factor 3 contributes 0.919 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,8,23,Taxi Driver (1976),Drama|Thriller,57.0,2.611046342174293,55.849969341627954,,2,factor 2 contributes 0.647 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,9,83,Much Ado About Nothing (1993),Comedy|Romance,53.0,2.550079085667636,53.967893213438934,,3,factor 3 contributes 0.677 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,proposed_poisson_colike,10,651,Glory (1989),Action|Drama|War,48.0,2.4136938089905615,52.86128093060766,,3,factor 3 contributes 0.761 to w*z_i.z_j
+208,Young Frankenstein (1974),Comedy|Horror,popularity,1,272,Good Will Hunting (1997),Drama,22.0,0.8971631205673759,23124.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,2,134,Citizen Kane (1941),Drama,68.0,2.807284826197356,22842.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,3,479,Vertigo (1958),Mystery|Thriller,59.0,2.4357324227300587,22842.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,61.0,2.6491203831629364,21714.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,5,480,North by Northwest (1959),Comedy|Thriller,54.0,2.345122962144239,21714.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,6,527,Gandhi (1982),Drama,61.0,2.7942776644321383,20586.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,7,23,Taxi Driver (1976),Drama|Thriller,57.0,2.611046342174293,20586.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,8,511,Lawrence of Arabia (1962),Adventure|War,53.0,2.444558571777941,20445.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,9,124,Lone Star (1996),Drama|Mystery,38.0,1.764873916469661,20304.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,popularity,10,83,Much Ado About Nothing (1993),Comedy|Romance,53.0,2.550079085667636,19599.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,1,123,"Frighteners, The (1996)",Comedy|Horror,16.0,2.140141843971631,0.9999999999999998,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,2,13,Mighty Aphrodite (1995),Comedy,30.0,2.134449977365324,0.7071067811865475,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,3,219,"Nightmare on Elm Street, A (1984)",Horror,17.0,2.3203068461427123,0.7071067811865475,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,4,393,Mrs. Doubtfire (1993),Comedy,44.0,3.0337062221247346,0.7071067811865475,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,5,447,Carrie (1976),Horror,25.0,2.5722858701582108,0.7071067811865475,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,6,443,"Birds, The (1963)",Horror,45.0,2.7866430260047284,0.7071067811865475,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,7,184,Army of Darkness (1993),Action|Adventure|Comedy|Horror|Sci-Fi,24.0,2.5888812628689086,0.6324555320336758,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,8,83,Much Ado About Nothing (1993),Comedy|Romance,53.0,2.550079085667636,0.4999999999999999,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,9,255,My Best Friend's Wedding (1997),Comedy|Romance,11.0,0.8863539263436726,0.4999999999999999,,,
+208,Young Frankenstein (1974),Comedy|Horror,genre_cosine,10,284,Tin Cup (1996),Comedy|Romance,18.0,1.5433715220949265,0.4999999999999999,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,1,134,Citizen Kane (1941),Drama,68.0,2.807284826197356,68.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,2,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,61.0,3.021959548200683,61.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,3,527,Gandhi (1982),Drama,61.0,2.7942776644321383,61.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,61.0,2.6491203831629364,61.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,5,479,Vertigo (1958),Mystery|Thriller,59.0,2.4357324227300587,59.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,6,23,Taxi Driver (1976),Drama|Thriller,57.0,2.611046342174293,57.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,7,514,Annie Hall (1977),Comedy|Romance,56.0,2.949014351929413,56.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,8,480,North by Northwest (1959),Comedy|Thriller,54.0,2.345122962144239,54.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,9,511,Lawrence of Arabia (1962),Adventure|War,53.0,2.444558571777941,53.0,,,
+208,Young Frankenstein (1974),Comedy|Horror,item_item_full_colike,10,83,Much Ado About Nothing (1993),Comedy|Romance,53.0,2.550079085667636,53.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,1,566,Clear and Present Danger (1994),Action|Adventure|Thriller,41.0,3.985054627911771,44.40751392660844,,3,factor 3 contributes 0.831 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,2,227,Star Trek VI: The Undiscovered Country (1991),Action|Adventure|Sci-Fi,50.0,6.266613503455609,41.878588962795156,,3,factor 3 contributes 1.061 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,3,684,In the Line of Fire (1993),Action|Thriller,42.0,3.6702807895468443,38.28475886667887,,3,factor 3 contributes 0.853 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,4,208,Young Frankenstein (1974),Comedy|Horror,37.0,2.4995343505981804,35.64476794030802,,3,factor 3 contributes 0.979 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,5,431,Highlander (1986),Action|Adventure,35.0,3.922162804515746,34.863507540937796,,3,factor 3 contributes 1.092 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,6,651,Glory (1989),Action|Drama|War,33.0,2.363408521303258,34.024251941642675,,3,factor 3 contributes 0.849 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,7,732,Dave (1993),Comedy|Romance,37.0,3.3248522965504095,33.97106297635171,,3,factor 3 contributes 0.836 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,8,31,Crimson Tide (1995),Drama|Thriller|War,32.0,3.2775062452481807,32.10225700602897,,3,factor 3 contributes 0.730 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,9,226,Die Hard 2 (1990),Action|Thriller,31.0,4.101150392817059,31.820557805514554,,3,factor 3 contributes 0.676 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,proposed_poisson_colike,10,229,Star Trek III: The Search for Spock (1984),Action|Adventure|Sci-Fi,40.0,7.188869830379264,31.623579043537845,,3,factor 3 contributes 0.891 to w*z_i.z_j
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,1,272,Good Will Hunting (1997),Drama,15.0,0.8712121212121213,16236.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,2,134,Citizen Kane (1941),Drama,25.0,1.4699463773537846,16038.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,3,479,Vertigo (1958),Mystery|Thriller,32.0,1.8815313630128443,16038.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,24.0,1.4844549390003934,15246.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,5,480,North by Northwest (1959),Comedy|Thriller,26.0,1.6081595172504262,15246.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,6,527,Gandhi (1982),Drama,33.0,2.15296803652968,14454.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,7,23,Taxi Driver (1976),Drama|Thriller,18.0,1.174346201743462,14454.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,8,511,Lawrence of Arabia (1962),Adventure|War,35.0,2.2991988854057817,14355.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,9,124,Lone Star (1996),Drama|Mystery,12.0,0.7937710437710437,14256.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,popularity,10,208,Young Frankenstein (1974),Comedy|Horror,37.0,2.4995343505981804,13959.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,1,62,Stargate (1994),Action|Adventure|Sci-Fi,22.0,4.873385012919897,1.0000000000000002,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,2,227,Star Trek VI: The Undiscovered Country (1991),Action|Adventure|Sci-Fi,50.0,6.266613503455609,1.0000000000000002,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,3,229,Star Trek III: The Search for Spock (1984),Action|Adventure|Sci-Fi,40.0,7.188869830379264,1.0000000000000002,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,4,380,Star Trek: Generations (1994),Action|Adventure|Sci-Fi,33.0,6.163398692810457,1.0000000000000002,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,5,449,Star Trek: The Motion Picture (1979),Action|Adventure|Sci-Fi,25.0,6.435981435981437,1.0000000000000002,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,6,252,"Lost World: Jurassic Park, The (1997)",Action|Adventure|Sci-Fi|Thriller,13.0,2.6346443154953794,0.8660254037844388,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,7,164,"Abyss, The (1989)",Action|Adventure|Sci-Fi|Thriller,32.0,3.585977421271539,0.8660254037844388,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,8,358,Spawn (1997),Action|Adventure|Sci-Fi|Thriller,5.0,1.4883207070707072,0.8660254037844388,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,9,431,Highlander (1986),Action|Adventure,35.0,3.922162804515746,0.816496580927726,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,genre_cosine,10,250,"Fifth Element, The (1997)",Action|Sci-Fi,25.0,2.1453271453271454,0.816496580927726,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,1,227,Star Trek VI: The Undiscovered Country (1991),Action|Adventure|Sci-Fi,50.0,6.266613503455609,50.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,2,684,In the Line of Fire (1993),Action|Thriller,42.0,3.6702807895468443,42.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,3,566,Clear and Present Danger (1994),Action|Adventure|Thriller,41.0,3.985054627911771,41.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,4,229,Star Trek III: The Search for Spock (1984),Action|Adventure|Sci-Fi,40.0,7.188869830379264,40.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,5,208,Young Frankenstein (1974),Comedy|Horror,37.0,2.4995343505981804,37.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,6,732,Dave (1993),Comedy|Romance,37.0,3.3248522965504095,37.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,7,393,Mrs. Doubtfire (1993),Comedy,35.0,3.4369467874622512,35.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,8,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,35.0,2.4695099139543584,35.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,9,431,Highlander (1986),Action|Adventure,35.0,3.922162804515746,35.0,,,
+230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,item_item_full_colike,10,511,Lawrence of Arabia (1962),Adventure|War,35.0,2.2991988854057817,35.0,,,
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,1,479,Vertigo (1958),Mystery|Thriller,92.0,3.3057460752934,88.28188759799902,,2,factor 2 contributes 0.580 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,2,480,North by Northwest (1959),Comedy|Thriller,87.0,3.2884800384800386,84.3163399159884,,5,factor 5 contributes 0.587 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,83.0,3.137285553952221,83.18934944322146,,2,factor 2 contributes 0.625 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,4,23,Taxi Driver (1976),Drama|Thriller,82.0,3.2693218332487737,77.94154528406125,,2,factor 2 contributes 0.593 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,5,511,Lawrence of Arabia (1962),Adventure|War,74.0,2.970710940825883,73.14017389215873,,3,factor 3 contributes 0.716 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,6,654,Chinatown (1974),Film-Noir|Mystery|Thriller,71.0,3.723334445556668,69.22381152813162,,5,factor 5 contributes 0.689 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,7,208,Young Frankenstein (1974),Comedy|Horror,68.0,2.807284826197356,68.90596963083392,,3,factor 3 contributes 0.684 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,8,498,"African Queen, The (1951)",Action|Adventure|Romance|War,71.0,3.3329848665870174,68.00331468812676,,5,factor 5 contributes 0.628 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,9,527,Gandhi (1982),Drama,62.0,2.4719262641637068,66.78989734534844,,4,factor 4 contributes 0.572 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,proposed_poisson_colike,10,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,65.0,2.802697759487883,62.81907639898911,,3,factor 3 contributes 0.658 to w*z_i.z_j
+134,Citizen Kane (1941),Drama,popularity,1,272,Good Will Hunting (1997),Drama,29.0,1.029320987654321,26568.0,,,
+134,Citizen Kane (1941),Drama,popularity,2,479,Vertigo (1958),Mystery|Thriller,92.0,3.3057460752934,26244.0,,,
+134,Citizen Kane (1941),Drama,popularity,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,83.0,3.137285553952221,24948.0,,,
+134,Citizen Kane (1941),Drama,popularity,4,480,North by Northwest (1959),Comedy|Thriller,87.0,3.2884800384800386,24948.0,,,
+134,Citizen Kane (1941),Drama,popularity,5,527,Gandhi (1982),Drama,62.0,2.4719262641637068,23652.0,,,
+134,Citizen Kane (1941),Drama,popularity,6,23,Taxi Driver (1976),Drama|Thriller,82.0,3.2693218332487737,23652.0,,,
+134,Citizen Kane (1941),Drama,popularity,7,511,Lawrence of Arabia (1962),Adventure|War,74.0,2.970710940825883,23490.0,,,
+134,Citizen Kane (1941),Drama,popularity,8,124,Lone Star (1996),Drama|Mystery,53.0,2.1424468449931413,23328.0,,,
+134,Citizen Kane (1941),Drama,popularity,9,208,Young Frankenstein (1974),Comedy|Horror,68.0,2.807284826197356,22842.0,,,
+134,Citizen Kane (1941),Drama,popularity,10,83,Much Ado About Nothing (1993),Comedy|Romance,54.0,2.261390887290168,22518.0,,,
+134,Citizen Kane (1941),Drama,genre_cosine,1,340,Boogie Nights (1997),Drama,22.0,1.123348494693524,1.0,,,
+134,Citizen Kane (1941),Drama,genre_cosine,2,272,Good Will Hunting (1997),Drama,29.0,1.029320987654321,1.0,,,
+134,Citizen Kane (1941),Drama,genre_cosine,3,527,Gandhi (1982),Drama,62.0,2.4719262641637068,1.0,,,
+134,Citizen Kane (1941),Drama,genre_cosine,4,23,Taxi Driver (1976),Drama|Thriller,82.0,3.2693218332487737,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,5,283,Emma (1996),Drama|Romance,30.0,1.5591931216931219,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,6,293,Donnie Brasco (1997),Crime|Drama,26.0,1.498472069429165,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,7,124,Lone Star (1996),Drama|Mystery,53.0,2.1424468449931413,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,8,14,"Postino, Il (1994)",Drama|Romance,45.0,1.9695071010860483,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,9,582,"Piano, The (1993)",Drama|Romance,46.0,2.732300327538423,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,genre_cosine,10,1101,Six Degrees of Separation (1993),Drama|Mystery,24.0,2.7940740740740737,0.7071067811865475,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,1,479,Vertigo (1958),Mystery|Thriller,92.0,3.3057460752934,92.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,2,480,North by Northwest (1959),Comedy|Thriller,87.0,3.2884800384800386,87.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,83.0,3.137285553952221,83.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,4,23,Taxi Driver (1976),Drama|Thriller,82.0,3.2693218332487737,82.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,5,511,Lawrence of Arabia (1962),Adventure|War,74.0,2.970710940825883,74.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,6,654,Chinatown (1974),Film-Noir|Mystery|Thriller,71.0,3.723334445556668,71.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,7,498,"African Queen, The (1951)",Action|Adventure|Romance|War,71.0,3.3329848665870174,71.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,8,514,Annie Hall (1977),Comedy|Romance,71.0,3.2542529406046468,71.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,9,484,"Maltese Falcon, The (1941)",Film-Noir|Mystery,70.0,3.6381172839506175,70.0,,,
+134,Citizen Kane (1941),Drama,item_item_full_colike,10,208,Young Frankenstein (1974),Comedy|Horror,68.0,2.807284826197356,68.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,1,134,Citizen Kane (1941),Drama,83.0,3.137285553952221,83.18934944322146,,2,factor 2 contributes 0.625 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,2,479,Vertigo (1958),Mystery|Thriller,74.0,2.7970979637646303,80.76559145973096,,2,factor 2 contributes 0.648 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,3,480,North by Northwest (1959),Comedy|Thriller,84.0,3.340023612750885,80.61284945065616,,3,factor 3 contributes 0.591 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,4,23,Taxi Driver (1976),Drama|Thriller,76.0,3.187511119017968,77.93776732608445,,2,factor 2 contributes 0.663 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,5,511,Lawrence of Arabia (1962),Adventure|War,76.0,3.2094939543215406,73.25658415735525,,3,factor 3 contributes 0.806 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,6,498,"African Queen, The (1951)",Action|Adventure|Romance|War,68.0,3.3579807289484704,67.67906334967955,,3,factor 3 contributes 0.651 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,7,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,63.0,2.8575757575757574,67.60366752416328,,3,factor 3 contributes 0.740 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,8,654,Chinatown (1974),Film-Noir|Mystery|Thriller,67.0,3.696092196092196,67.26086052507858,,2,factor 2 contributes 0.731 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,9,208,Young Frankenstein (1974),Comedy|Horror,61.0,2.6491203831629364,62.337796255497935,,3,factor 3 contributes 0.769 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,proposed_poisson_colike,10,484,"Maltese Falcon, The (1941)",Film-Noir|Mystery,65.0,3.5537453617810764,59.44339087267478,,5,factor 5 contributes 0.579 to w*z_i.z_j
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,1,272,Good Will Hunting (1997),Drama,29.0,1.0827922077922076,25256.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,2,134,Citizen Kane (1941),Drama,83.0,3.137285553952221,24948.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,3,479,Vertigo (1958),Mystery|Thriller,74.0,2.7970979637646303,24948.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,4,480,North by Northwest (1959),Comedy|Thriller,84.0,3.340023612750885,23716.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,5,23,Taxi Driver (1976),Drama|Thriller,76.0,3.187511119017968,22484.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,6,527,Gandhi (1982),Drama,63.0,2.6422789539227893,22484.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,7,511,Lawrence of Arabia (1962),Adventure|War,76.0,3.2094939543215406,22330.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,8,124,Lone Star (1996),Drama|Mystery,44.0,1.8710317460317458,22176.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,9,208,Young Frankenstein (1974),Comedy|Horror,61.0,2.6491203831629364,21714.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,popularity,10,83,Much Ado About Nothing (1993),Comedy|Romance,46.0,2.026441184714566,21406.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,1,38,"Net, The (1995)",Sci-Fi|Thriller,3.0,0.6123376623376623,0.4999999999999999,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,2,109,Mystery Science Theater 3000: The Movie (1996),Comedy|Sci-Fi,19.0,1.7364799379724751,0.4999999999999999,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,3,250,"Fifth Element, The (1997)",Action|Sci-Fi,30.0,1.654966654966655,0.4999999999999999,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,4,511,Lawrence of Arabia (1962),Adventure|War,76.0,3.2094939543215406,0.4999999999999999,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,5,229,Star Trek III: The Search for Spock (1984),Action|Adventure|Sci-Fi,17.0,1.964101935800049,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,6,230,Star Trek IV: The Voyage Home (1986),Action|Adventure|Sci-Fi,24.0,1.4844549390003934,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,7,227,Star Trek VI: The Undiscovered Country (1991),Action|Adventure|Sci-Fi,22.0,1.7725563909774436,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,8,62,Stargate (1994),Action|Adventure|Sci-Fi,8.0,1.1392328601630928,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,9,298,Face/Off (1997),Action|Sci-Fi|Thriller,18.0,0.8544246451223195,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,genre_cosine,10,326,G.I. Jane (1997),Action|Drama|War,7.0,0.4926854754440961,0.408248290463863,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,1,480,North by Northwest (1959),Comedy|Thriller,84.0,3.340023612750885,84.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,2,134,Citizen Kane (1941),Drama,83.0,3.137285553952221,83.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,3,511,Lawrence of Arabia (1962),Adventure|War,76.0,3.2094939543215406,76.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,4,23,Taxi Driver (1976),Drama|Thriller,76.0,3.187511119017968,76.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,5,479,Vertigo (1958),Mystery|Thriller,74.0,2.7970979637646303,74.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,6,498,"African Queen, The (1951)",Action|Adventure|Romance|War,68.0,3.3579807289484704,68.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,7,654,Chinatown (1974),Film-Noir|Mystery|Thriller,67.0,3.696092196092196,67.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,8,484,"Maltese Falcon, The (1941)",Film-Noir|Mystery,65.0,3.5537453617810764,65.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,9,514,Annie Hall (1977),Comedy|Romance,63.0,3.037580529706514,63.0,,,
+474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,item_item_full_colike,10,527,Gandhi (1982),Drama,63.0,2.6422789539227893,63.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,1,272,Good Will Hunting (1997),Drama,43.0,2.2893518518518516,42.95284017122727,,4,factor 4 contributes 0.887 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,2,315,Apt Pupil (1998),Drama|Thriller,33.0,2.305111111111111,29.553274453948266,,4,factor 4 contributes 0.759 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,3,326,G.I. Jane (1997),Action|Drama|War,32.0,3.2115793954874414,25.477301200979138,,4,factor 4 contributes 0.445 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,4,298,Face/Off (1997),Action|Sci-Fi|Thriller,31.0,2.0982629916738444,24.259305992860824,,0,factor 0 contributes 0.538 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,5,147,"Long Kiss Goodnight, The (1996)",Action|Thriller,20.0,1.7639356528245416,24.135379733899917,,0,factor 0 contributes 0.475 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,6,332,Kiss the Girls (1997),Crime|Drama|Thriller,27.0,3.2294520547945202,23.706846121212408,,4,factor 4 contributes 0.368 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,7,340,Boogie Nights (1997),Drama,27.0,2.067982456140351,23.61887365900118,,4,factor 4 contributes 0.644 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,8,751,Tomorrow Never Dies (1997),Action|Romance|Thriller,24.0,2.3813131313131315,21.248062541933756,,4,factor 4 contributes 0.346 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,9,327,Cop Land (1997),Crime|Drama|Mystery,21.0,2.209170013386881,20.061855967366927,,0,factor 0 contributes 0.480 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,proposed_poisson_colike,10,270,Gattaca (1997),Drama|Sci-Fi|Thriller,21.0,2.321026722925457,20.02571529224361,,4,factor 4 contributes 0.385 to w*z_i.z_j
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,1,272,Good Will Hunting (1997),Drama,43.0,2.2893518518518516,17712.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,2,134,Citizen Kane (1941),Drama,10.0,0.5389803383630544,17496.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,3,479,Vertigo (1958),Mystery|Thriller,12.0,0.6467764060356653,17496.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,15.0,0.8504689754689755,16632.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,5,480,North by Northwest (1959),Comedy|Thriller,12.0,0.6803751803751804,16632.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,6,527,Gandhi (1982),Drama,17.0,1.0166793505834602,15768.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,7,23,Taxi Driver (1976),Drama|Thriller,16.0,0.9568746829020801,15768.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,8,511,Lawrence of Arabia (1962),Adventure|War,10.0,0.6021711366538953,15660.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,9,124,Lone Star (1996),Drama|Mystery,12.0,0.7276234567901235,15552.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,popularity,10,208,Young Frankenstein (1974),Comedy|Horror,14.0,0.8669556080903599,15228.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,1,682,I Know What You Did Last Summer (1997),Horror|Mystery|Thriller,17.0,3.7108796296296296,0.8660254037844388,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,2,159,Basic Instinct (1992),Mystery|Thriller,7.0,1.5671889838556505,0.7071067811865475,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,3,291,Absolute Power (1997),Mystery|Thriller,19.0,2.764969135802469,0.7071067811865475,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,4,156,Reservoir Dogs (1992),Crime|Thriller,18.0,1.4159159159159158,0.7071067811865475,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,5,479,Vertigo (1958),Mystery|Thriller,12.0,0.6467764060356653,0.7071067811865475,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,6,895,Scream 2 (1997),Horror|Thriller,17.0,3.2268518518518516,0.7071067811865475,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,7,332,Kiss the Girls (1997),Crime|Drama|Thriller,27.0,3.2294520547945202,0.5773502691896258,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,8,356,"Client, The (1994)",Drama|Mystery|Thriller,9.0,1.637152777777778,0.5773502691896258,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,9,659,Arsenic and Old Lace (1944),Comedy|Mystery|Thriller,6.0,0.5886392009987516,0.5773502691896258,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,genre_cosine,10,327,Cop Land (1997),Crime|Drama|Mystery,21.0,2.209170013386881,0.5773502691896258,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,1,272,Good Will Hunting (1997),Drama,43.0,2.2893518518518516,43.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,2,315,Apt Pupil (1998),Drama|Thriller,33.0,2.305111111111111,33.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,3,326,G.I. Jane (1997),Action|Drama|War,32.0,3.2115793954874414,32.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,4,298,Face/Off (1997),Action|Sci-Fi|Thriller,31.0,2.0982629916738444,31.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,5,332,Kiss the Girls (1997),Crime|Drama|Thriller,27.0,3.2294520547945202,27.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,6,340,Boogie Nights (1997),Drama,27.0,2.067982456140351,27.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,7,751,Tomorrow Never Dies (1997),Action|Romance|Thriller,24.0,2.3813131313131315,24.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,8,628,Sleepers (1996),Crime|Drama,22.0,2.087962962962963,22.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,9,327,Cop Land (1997),Crime|Drama|Mystery,21.0,2.209170013386881,21.0,,,
+307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,item_item_full_colike,10,270,Gattaca (1997),Drama|Sci-Fi|Thriller,21.0,2.321026722925457,21.0,,,
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,1,134,Citizen Kane (1941),Drama,92.0,3.3057460752934,88.28188759799902,,2,factor 2 contributes 0.580 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,2,480,North by Northwest (1959),Comedy|Thriller,99.0,3.742063492063492,84.50645731798033,,5,factor 5 contributes 0.586 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,74.0,2.7970979637646303,80.76559145973096,,2,factor 2 contributes 0.648 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,4,23,Taxi Driver (1976),Drama|Thriller,72.0,2.87062404870624,76.47307470382388,,2,factor 2 contributes 0.615 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,5,511,Lawrence of Arabia (1962),Adventure|War,73.0,2.93056619838229,73.27702889930231,,3,factor 3 contributes 0.674 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,6,208,Young Frankenstein (1974),Comedy|Horror,59.0,2.4357324227300587,69.71321062104478,,3,factor 3 contributes 0.643 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,7,527,Gandhi (1982),Drama,55.0,2.1928378149839336,69.67481827291405,,4,factor 4 contributes 0.568 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,8,654,Chinatown (1974),Film-Noir|Mystery|Thriller,63.0,3.303803803803804,68.62143140330666,,5,factor 5 contributes 0.688 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,9,498,"African Queen, The (1951)",Action|Adventure|Romance|War,74.0,3.473815213062525,68.27004836363704,,5,factor 5 contributes 0.627 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,proposed_poisson_colike,10,484,"Maltese Falcon, The (1941)",Film-Noir|Mystery,69.0,3.58614417989418,61.00315670474166,,5,factor 5 contributes 0.632 to w*z_i.z_j
+479,Vertigo (1958),Mystery|Thriller,popularity,1,272,Good Will Hunting (1997),Drama,35.0,1.242283950617284,26568.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,2,134,Citizen Kane (1941),Drama,92.0,3.3057460752934,26244.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,3,480,North by Northwest (1959),Comedy|Thriller,99.0,3.742063492063492,24948.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,74.0,2.7970979637646303,24948.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,5,23,Taxi Driver (1976),Drama|Thriller,72.0,2.87062404870624,23652.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,6,527,Gandhi (1982),Drama,55.0,2.1928378149839336,23652.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,7,511,Lawrence of Arabia (1962),Adventure|War,73.0,2.93056619838229,23490.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,8,124,Lone Star (1996),Drama|Mystery,54.0,2.1828703703703707,23328.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,9,208,Young Frankenstein (1974),Comedy|Horror,59.0,2.4357324227300587,22842.0,,,
+479,Vertigo (1958),Mystery|Thriller,popularity,10,83,Much Ado About Nothing (1993),Comedy|Romance,57.0,2.387023714361844,22518.0,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,1,159,Basic Instinct (1992),Mystery|Thriller,5.0,0.7462804685026907,0.9999999999999998,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,2,291,Absolute Power (1997),Mystery|Thriller,12.0,1.1641975308641974,0.9999999999999998,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,3,356,"Client, The (1994)",Drama|Mystery|Thriller,14.0,1.6977880658436215,0.816496580927726,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,4,654,Chinatown (1974),Film-Noir|Mystery|Thriller,63.0,3.303803803803804,0.816496580927726,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,5,682,I Know What You Did Last Summer (1997),Horror|Mystery|Thriller,1.0,0.14552469135802468,0.816496580927726,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,6,659,Arsenic and Old Lace (1944),Comedy|Mystery|Thriller,44.0,2.87779164932723,0.816496580927726,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,7,260,Event Horizon (1997),Action|Mystery|Sci-Fi|Thriller,4.0,0.6848220769789397,0.7071067811865475,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,8,218,Cape Fear (1991),Thriller,28.0,1.9175018155410313,0.7071067811865475,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,9,324,Lost Highway (1997),Mystery,13.0,1.3513007054673722,0.7071067811865475,,,
+479,Vertigo (1958),Mystery|Thriller,genre_cosine,10,307,"Devil's Advocate, The (1997)",Crime|Horror|Mystery|Thriller,12.0,0.6467764060356653,0.7071067811865475,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,1,480,North by Northwest (1959),Comedy|Thriller,99.0,3.742063492063492,99.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,2,134,Citizen Kane (1941),Drama,92.0,3.3057460752934,92.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,3,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,74.0,2.7970979637646303,74.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,4,498,"African Queen, The (1951)",Action|Adventure|Romance|War,74.0,3.473815213062525,74.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,5,511,Lawrence of Arabia (1962),Adventure|War,73.0,2.93056619838229,73.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,6,23,Taxi Driver (1976),Drama|Thriller,72.0,2.87062404870624,72.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,7,484,"Maltese Falcon, The (1941)",Film-Noir|Mystery,69.0,3.58614417989418,69.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,8,514,Annie Hall (1977),Comedy|Romance,64.0,2.9334111013901043,64.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,9,654,Chinatown (1974),Film-Noir|Mystery|Thriller,63.0,3.303803803803804,63.0,,,
+479,Vertigo (1958),Mystery|Thriller,item_item_full_colike,10,208,Young Frankenstein (1974),Comedy|Horror,59.0,2.4357324227300587,59.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,1,208,Young Frankenstein (1974),Comedy|Horror,46.0,2.822434771292862,47.61779336919896,,3,factor 3 contributes 0.632 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,2,479,Vertigo (1958),Mystery|Thriller,44.0,2.349756484313059,42.65228634885577,,4,factor 4 contributes 0.503 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,3,527,Gandhi (1982),Drama,37.0,2.1924720371999498,42.61648827031061,,4,factor 4 contributes 0.577 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,4,651,Glory (1989),Action|Drama|War,36.0,2.3417258743188247,42.332583808945515,,4,factor 4 contributes 0.658 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,5,134,Citizen Kane (1941),Drama,39.0,2.082738702004757,40.419760086555854,,4,factor 4 contributes 0.506 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,6,83,Much Ado About Nothing (1993),Comedy|Romance,41.0,2.5518447627219323,40.18570667607782,,4,factor 4 contributes 0.546 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,7,133,Gone with the Wind (1939),Drama|Romance|War,45.0,3.3561372983233153,39.922178147924264,,4,factor 4 contributes 0.497 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,8,511,Lawrence of Arabia (1962),Adventure|War,36.0,2.147927870926922,38.623564176780434,,3,factor 3 contributes 0.662 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,9,732,Dave (1993),Comedy|Romance,36.0,2.938203219664185,38.21164067139402,,3,factor 3 contributes 0.540 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,proposed_poisson_colike,10,480,North by Northwest (1959),Comedy|Thriller,44.0,2.4718217562254257,36.68539070429926,,4,factor 4 contributes 0.497 to w*z_i.z_j
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,1,272,Good Will Hunting (1997),Drama,25.0,1.3188073394495414,17876.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,2,134,Citizen Kane (1941),Drama,39.0,2.082738702004757,17658.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,3,479,Vertigo (1958),Mystery|Thriller,44.0,2.349756484313059,17658.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,4,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,38.0,2.134755153103777,16786.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,5,480,North by Northwest (1959),Comedy|Thriller,44.0,2.4718217562254257,16786.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,6,527,Gandhi (1982),Drama,37.0,2.1924720371999498,15914.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,7,23,Taxi Driver (1976),Drama|Thriller,28.0,1.6591680281513133,15914.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,8,511,Lawrence of Arabia (1962),Adventure|War,36.0,2.147927870926922,15805.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,9,124,Lone Star (1996),Drama|Mystery,21.0,1.2616590214067278,15696.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,popularity,10,208,Young Frankenstein (1974),Comedy|Horror,46.0,2.822434771292862,15369.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,1,209,This Is Spinal Tap (1984),Comedy|Drama|Musical,30.0,1.9225280326197756,0.6666666666666669,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,2,319,Everyone Says I Love You (1996),Comedy|Musical|Romance,9.0,1.038165137614679,0.6666666666666669,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,3,451,Grease (1978),Comedy|Musical|Romance,38.0,3.7787619951492144,0.6666666666666669,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,4,393,Mrs. Doubtfire (1993),Comedy,35.0,3.1216305684290173,0.5773502691896258,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,5,13,Mighty Aphrodite (1995),Comedy,15.0,1.3805387468280303,0.5773502691896258,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,6,109,Mystery Science Theater 3000: The Movie (1996),Comedy|Sci-Fi,13.0,1.6786252225112968,0.408248290463863,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,7,83,Much Ado About Nothing (1993),Comedy|Romance,41.0,2.5518447627219323,0.408248290463863,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,8,66,While You Were Sleeping (1995),Comedy|Romance,30.0,3.0534268753372906,0.408248290463863,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,9,255,My Best Friend's Wedding (1997),Comedy|Romance,19.0,1.9804355034818173,0.408248290463863,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,genre_cosine,10,284,Tin Cup (1996),Comedy|Romance,14.0,1.5528111032698189,0.408248290463863,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,1,208,Young Frankenstein (1974),Comedy|Horror,46.0,2.822434771292862,46.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,2,133,Gone with the Wind (1939),Drama|Romance|War,45.0,3.3561372983233153,45.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,3,480,North by Northwest (1959),Comedy|Thriller,44.0,2.4718217562254257,44.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,4,479,Vertigo (1958),Mystery|Thriller,44.0,2.349756484313059,44.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,5,83,Much Ado About Nothing (1993),Comedy|Romance,41.0,2.5518447627219323,41.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,6,443,"Birds, The (1963)",Horror,41.0,3.2843187223921166,41.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,7,498,"African Queen, The (1951)",Action|Adventure|Romance|War,40.0,2.7907664989641905,40.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,8,134,Citizen Kane (1941),Drama,39.0,2.082738702004757,39.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,9,474,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,38.0,2.134755153103777,38.0,,,
+419,Mary Poppins (1964),Children's|Comedy|Musical,item_item_full_colike,10,451,Grease (1978),Comedy|Musical|Romance,38.0,3.7787619951492144,38.0,,,

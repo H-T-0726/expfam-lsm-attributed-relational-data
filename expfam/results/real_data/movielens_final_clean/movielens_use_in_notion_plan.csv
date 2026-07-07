@@ -1,0 +1,12 @@
+item,file_path,where_to_use,importance,caution
+Poisson k-sweep metrics figure (6-panel),expfam/figures/real_data/movielens_colike_interpretation/movielens_colike_poisson_k_metrics.png,本文：結果1 Poissonカウント関係の再構成,必須,BIC/RMSE_Y/Pearson/AP/NMI/runtimeの6パネル。最も網羅的なk-sweep図
+Poisson main table (movielens_main_poisson_table.csv),expfam/results/real_data/movielens_final_clean/movielens_main_poisson_table.csv,本文：結果1の数値表（フル指標）,必須,本文に出すのはRMSE_Y/Pearson/BICの3列で十分（movielens_colike_clean/main_poisson_table.csvでも可）。フル指標は確認・付録用
+K interpretation table (movielens_main_k_interpretation_table.csv),expfam/results/real_data/movielens_final_clean/movielens_main_k_interpretation_table.csv,"本文：結果2 Kの解釈（factor 2,4,5の3つに絞る）",必須,回転不定性の注意を必ず添える。全8factorは本文に入れない
+K interpretation summary image (3-factor),expfam/figures/real_data/movielens_colike_clean/main_k_interpretation_summary.png,本文：結果2 の図,必須,既存clean図をそのまま使用可
+"Z by factor (detailed, all 8 factors)",expfam/figures/real_data/movielens_colike_interpretation/movielens_colike_z_by_factor.png,トグル・補助（factor詳細）,推奨,本文では使わず、詳細を見たい読者向けのトグルに回す
+Factor correlation heatmap (all 8 factors x attributes),expfam/figures/real_data/movielens_colike_interpretation/movielens_colike_factor_correlation_heatmap.png,トグル・補助（factor詳細）,推奨,本文では使わず、詳細を見たい読者向けのトグルに回す
+Supp lift baseline comparison figure (item-item excluded),expfam/figures/real_data/movielens_colike_clean/supp_lift_baseline_comparison.png,本文後半：結果3 補助ランキング評価,必須,item-item baselineは既に除外済み。本文で強調しない方針と一致
+Supp lift baseline table (movielens_supp_lift_baseline_table.csv),expfam/results/real_data/movielens_final_clean/movielens_supp_lift_baseline_table.csv,本文：結果3の数値表,必須,item_item行は表に残すが、本文の文章では強調しない（floor effectの注記つき）
+"Recommendation examples (CSV only, no figure)",expfam/results/real_data/movielens_colike_clean/main_recommendation_examples.csv,補足（推薦例として1-2件引用する場合）,任意,図は未作成。CSVのみ
+Y true vs predicted scatter (NOT FOUND),(does not exist),本文またはトグル候補だったが作成不可,優先度A/Bのギャップとして報告,既存保存物には全ペアのY_predが含まれておらず(top-50のみtop_predicted_pairs.csvに存在)、代表的な散布図を既存データだけから作ることはできない。新規に作るには再実行が必要
+Baseline comparison figure WITH item_item (detailed),expfam/figures/real_data/movielens_colike_interpretation/movielens_colike_baseline_comparison.png,使わない（本文では上記item-item除外版を使う）,使用不可（本文では）,item_item baselineを含むため、本文用には不適。詳細確認用としてのみ保持
