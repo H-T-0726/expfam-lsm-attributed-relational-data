@@ -1,0 +1,6 @@
+method,AP_sampled_mean,AUC_sampled_mean,AP_all_mean,AUC_all_mean,precision_at_10_mean,recall_at_10_mean,NDCG_at_10_mean,MAP_at_10_mean,hit_rate_at_10_mean,short_interpretation,caution
+popularity,0.1997,0.5669,0.0185,0.5572,0.013,0.066,0.0402,0.0244,0.1181,weak; popularity alone barely explains lift-defined strong co-like pairs,
+genre_cosine,0.2654,0.5978,0.0367,0.5949,0.0548,0.2131,0.1383,0.0828,0.3967,"strongest simple baseline, but still far below proposed",
+popularity_genre,0.24,0.6212,0.0222,0.6178,0.0587,0.2703,0.1733,0.1159,0.4656,"slightly better than popularity alone, still well below proposed",
+item_item,0.1667,0.003,0.0141,0.0036,0.0,0.0,0.0,0.0,0.0,near-random / floor effect by evaluation design (test positives forced to 0 in train score); not a fair generalization measure,Do not emphasize in main text -- floor effect from leakage-prevention design (test positives zeroed in train score)
+proposed_dual_expfam,0.6765,0.867,0.2384,0.8692,0.142,0.5356,0.4077,0.3151,0.6842,highest AP/AUC/NDCG/MAP/hit-rate among all compared methods,"In-sample/zero-filled-edge-hiding evaluation, not strict missing-pair CV"

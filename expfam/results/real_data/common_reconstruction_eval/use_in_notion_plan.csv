@@ -1,0 +1,12 @@
+dataset,item,file_path,where_to_use,importance,caution
+all,Common reconstruction overview figure,expfam/figures/real_data/common_reconstruction_eval/common_reconstruction_overview.png,実データ実験 共通方針の説明図（本文冒頭）,必須,X/Yの指標はfamilyごとに異なるため、3データセットを単純な値の大小で比較しない
+all,Common reconstruction overview table,expfam/results/real_data/common_reconstruction_eval/common_reconstruction_overview.csv,実データ実験 共通方針の説明表（本文冒頭）,必須,dataset別にX/Y再構成・BIC・factor解釈・補助評価をまとめた一覧
+wine,Wine reconstruction k=3/k=6 figure,expfam/figures/real_data/common_reconstruction_eval/wine_reconstruction_k3_k6.png,Wine章：主結果（再構成評価）,必須,K=3とK=6を直接比較。BIC最小はK=3
+wine,"Wine F heatmap (k=3, k=6)",expfam/figures/real_data/common_reconstruction_eval/wine_F_heatmap_k3.png / wine_F_heatmap_k6.png,Wine章：主結果（factor解釈）,必須,13化学成分×factor。回転不定性に注意
+wine,Existing BIC k-sweep / ablation (X+Y/X_only/Y_only),"expfam/results/real_data/wine_fixed_pilot/ , expfam/results/real_data/wine_clean/",Wine章：補足,補足,新しい再構成評価が主結果になったため、既存のBIC/ablationは補足に位置づけを変更
+cora,Cora reconstruction k-metrics figure,expfam/figures/real_data/common_reconstruction_eval/cora_reconstruction_k_metrics.png,Cora章：主結果（再構成評価）,必須,"K=1,3,6を中心に、BIC/X再構成/Y再構成の関係を見せる"
+cora,"Cora F heatmap / top words (k=1,3,6)","expfam/figures/real_data/common_reconstruction_eval/cora_F_heatmap_k{1,3,6}.png , expfam/results/real_data/common_reconstruction_eval/cora_factor_top_words.csv",Cora章：主結果（factor解釈）,必須,LINQS Cora公開データには単語名が含まれないため、word_index表記。単語の意味は復元できない
+cora,Existing held-out link prediction,"expfam/results/real_data/cora_heldout_link_prediction/ , expfam/results/real_data/cora_clean/",Cora章：補助評価,補助,新しい再構成評価が主結果。held-outは「未知リンクへの汎化」を見る補助評価として残す
+movielens,MovieLens reconstruction k-metrics figure,expfam/figures/real_data/common_reconstruction_eval/movielens_reconstruction_k_metrics.png,MovieLens章：主結果（再構成評価）,必須,"K=5,8を中心に、BIC/X再構成/Y再構成(Poisson)の関係を見せる"
+movielens,"MovieLens F heatmap (k=5,8)",expfam/figures/real_data/common_reconstruction_eval/movielens_F_heatmap_k5.png / movielens_F_heatmap_k8.png,MovieLens章：主結果（factor解釈）,必須,19ジャンル×factor。既存のfactor_interpretation_summary.csvとの整合性を確認した上で使う
+movielens,Existing lift-based popularity-corrected ranking,"expfam/results/real_data/movielens_colike_interpretation/ , expfam/results/real_data/movielens_colike_clean/",MovieLens章：補助評価,補助,新しい再構成評価が主結果。ランキング評価はあくまで補助実験として位置づける。item-item baselineは強調しない

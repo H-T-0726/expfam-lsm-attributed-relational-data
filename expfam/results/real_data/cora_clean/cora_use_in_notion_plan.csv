@@ -1,0 +1,11 @@
+item,file_path,where_to_use,importance,caution
+k-sweep metrics figure,expfam/figures/real_data/cora_clean/cora_k_sweep_metrics_clean.png,本文：結果1 k-sweep,必須,BIC・リンク性能・ラベル構造でbest_kが一致しない
+k-sweep summary table (cora_k_sweep_summary_clean.csv),expfam/results/real_data/cora_clean/cora_k_sweep_summary_clean.csv,本文：結果1 k-sweepの数値表,必須,"18/18 fit success。k=1..6, 3trial平均"
+held-out metrics figure,expfam/figures/real_data/cora_clean/cora_heldout_metrics_clean.png,本文：結果2 held-out link prediction,必須,in-sampleとheld-outの差、random baselineとの比較を明示
+held-out summary table (cora_heldout_summary_clean.csv),expfam/results/real_data/cora_clean/cora_heldout_summary_clean.csv,本文：結果2 held-outの数値表,必須,"k=3,6のみ。test_edge_ratio=0.2, 3 split x 2 model trial"
+best-k disagreement table (cora_bestk_clean.csv),expfam/results/real_data/cora_clean/cora_bestk_clean.csv,本文：結果1/結果2のまとめ。「best_kは目的によって変わる」の根拠,必須,"BIC->k=1, AUC/AP->k=6, NMI/ARI->k=3 で一致しないことを明示する表"
+Z visualization k=3 (clean copy),expfam/figures/real_data/cora_clean/cora_z_k3_clean.png,トグル・補助（潜在空間の直感的な可視化）,推奨（必須ではない）,既存図(cora_heldout_z_k3.png)のコピー。再生成はしていない
+Z visualization k=6 (clean copy),expfam/figures/real_data/cora_clean/cora_z_k6_clean.png,トグル・補助（潜在空間の直感的な可視化）,推奨（必須ではない）,既存図(cora_heldout_z_k6.png)のコピー。再生成はしていない
+BFS pilot (cora_subset_pilot),expfam/results/real_data/cora_subset_pilot/,使わない,使用不可,非balanced・6/7クラスのみのBFS subset。balanced_degreeに上書きされた古い結果
+balanced subset strategy comparison,expfam/results/real_data/cora_balanced_subset_pilot/,使わない（必要ならbalanced_degree選定理由の脚注のみ）,任意,"balanced_randomがいかに退化しているか(79 edges, 181 isolated)を示す手法選定の根拠資料"
+cora_scaling_heldout (n=280/490/700/980),expfam/results/real_data/cora_scaling_heldout/,今回のCora章では使わない（次のステップ・別章向け）,任意（将来用）,評価指標体系が異なる(all-candidate AP/AUC)別の拡張研究。今回依頼された設計とは別物として扱う

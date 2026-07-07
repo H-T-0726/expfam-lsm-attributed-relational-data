@@ -1,0 +1,9 @@
+item,file_path,where_to_use,importance,caution
+BIC vs K figure,expfam/figures/real_data/wine_clean/wine_bic_k_summary_clean.png,本文：結果1 BICによるK選択,必須,K=3はラベル由来Yの影響が大きい。「未知構造の発見」とは言わない
+Ablation bar chart,expfam/figures/real_data/wine_clean/wine_ablation_bar_clean.png,本文：結果2 X+Y/X_only/Y_only比較,必須,Y_onlyが強いのはYがラベル由来のため。「属性Xが不要」とは言わない
+Z ablation comparison (clean copy),expfam/figures/real_data/wine_clean/wine_z_ablation_comparison_clean.png,トグル・補助（潜在空間の直感的な可視化）,推奨（必須ではない）,既存図のコピーであり再生成はしていない（X_only/Y_onlyの生Zが保存されていないため再生成不可）
+wine_bic_summary_clean.csv,expfam/results/real_data/wine_clean/wine_bic_summary_clean.csv,本文の表データ源（BIC vs Kの数値表）,必須,"k=1〜9, 5trial平均。fixed版のみ"
+wine_ablation_summary_clean.csv,expfam/results/real_data/wine_clean/wine_ablation_summary_clean.csv,本文の表データ源（ablationの数値表）,必須,"k=3固定, 5trial平均。fixed版のみ"
+F heatmap (旧版wine_F.npy由来),(未作成),使用しない,使用不可,fixed版のFは保存されていない。旧版Fを使うとfixed版結果と混同するため今回は作成しない
+旧版 wine_dual_results.csv,expfam/results/wine_dual_results.csv,使用しない（必要なら混同注意の脚注のみ）,使用不可,k=6固定・旧実装(model_dual_expfam.py)。fixed版のk-sweep結果と混同しないこと
+reproduction/results_real_wine.csv,reproduction/results/results_real_wine.csv,使用しない（必要なら混同注意の脚注のみ）,使用不可,元論文再現(Bernoulli-Y固定モデル)。BICを持たず指標体系が異なるため直接比較不可

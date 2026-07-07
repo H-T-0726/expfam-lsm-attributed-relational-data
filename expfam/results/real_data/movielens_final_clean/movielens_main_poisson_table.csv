@@ -1,0 +1,5 @@
+k,BIC_mean,RMSE_Y_mean,MAE_Y_mean,Pearson_mean,Spearman_mean,high_colike_AP_mean,NMI_mean,ARI_mean,success_rate,runtime_mean,short_interpretation
+2,31809.51,4.8347,3.5724,0.9065,0.863,0.8409,0.2668,0.044,1.0,7.22,underfit; weakest reconstruction among tested k
+3,29435.11,3.9585,3.0008,0.9388,0.9084,0.8971,0.2815,0.0458,1.0,7.55,improves over k=2 but still below k=5/8 on RMSE/Pearson/AP
+5,28667.27,3.3486,2.5829,0.9565,0.928,0.9339,0.2657,0.0359,1.0,7.86,BIC minimum; balanced complexity vs reconstruction
+8,28812.07,3.1066,2.3929,0.9626,0.9366,0.9523,0.2545,0.0323,1.0,8.14,"best RMSE_Y/Pearson/AP/BIC among tested k for reconstruction, but BIC is slightly worse than k=5"
