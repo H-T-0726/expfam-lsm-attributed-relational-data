@@ -124,6 +124,52 @@ A_i = I_k + F^T V_X(m_i) F + (w^Y)^2 Σ_{j≠i} A_Y''(η_ij^Y) z_j z_j^T
 
 ---
 
+## 8b. 実データ実験フェーズ（Wine / Cora / MovieLens、2026-06-17〜2026-07-07）
+
+人工データ実験（シナリオA/B/C）と学会予稿完成後、`DualExpFamLSMFixed`（0.5除去版）を用いて
+3つの実データセットに提案手法を適用した追加フェーズ。修論フェーズに向けた検証であり、
+学会予稿（`conference_submission_final_draft.md`）には含まれない。
+
+計画・総括は `reports/real_data_experiment_plan.md`、`reports/movielens_pilot_design.md`、
+`reports/real_data_experiment_summary.md` を参照。実験行の詳細は `EXPERIMENT_REGISTRY.md`
+「実データ実験フェーズ」節を参照。
+
+### 対象データセット
+
+| データセット | X | Y | family_x | family_y | Yの起源 | 評価方法 |
+|---|---|---|---|---|---|---|
+| Wine (sklearn) | 化学成分13種 | 同クラス関係 | gaussian | bernoulli | ラベル由来（人工） | in-sample再構成 |
+| Cora | BoW上位50語 | 引用関係 | bernoulli | bernoulli | 自然ネットワーク | held-out link prediction |
+| MovieLens 100K（movie-node投影） | ジャンルmulti-hot(d=19) | 共評価数 | bernoulli | **poisson** | 共評価カウント（投影） | in-sample count regression |
+
+### 系譜（pilot → audit → clean/final）
+
+各データセットで「pilot（試行・設計探索）→ audit（Wineのみ、既存CSVとの読取専用突合）→
+clean/final_clean（本文・スライド用の最終整形）」という段階を踏んでいる。
+Coraは pilotの中でもサブセット設計自体を試行錯誤しており（BFSサブセット→偏りが判明し不採用→
+balanced_degreeサブセットを採用→n=280→700までスケーリング検証）、その経緯は
+`reports/real_data_experiment_summary.md` に記録されている。整形（clean/final_clean）系スクリプトは
+いずれも既存CSVを読み込むのみでモデルの再学習は行わない設計になっている。
+
+### 主な結果（すべて実データ・探索的検証であり、学会予稿の主張とは独立）
+
+- Wine: BIC最小 k=3 が真のクラス数（3）と一致。X_only/Y_onlyのablationからYが分離の主要因であることを確認
+  （ただしWineのYはラベル由来の人工的な関係であり、自然ネットワークではない）。
+- Cora: held-out link predictionでtest_AP ≈ 0.43〜0.46（random基準の約2.6〜2.8倍）。
+  自然な引用ネットワークでの汎化性能を確認。ただしBICは疎な密度（0.011）でk=1を選択する限界がある。
+- MovieLens: Bernoulli-X / Poisson-Y という新規の分布族組み合わせが数値的に安定に収束し、
+  in-sample再構成でPearson ≈ 0.96 を達成。ただしPoisson overdispersion（var/mean ≈ 10）があり、
+  strict held-out評価（未知ペア予測）は現在のAPIでは未対応（pair mask非対応）。
+
+### まだ言えないこと（実データ実験フェーズ固有）
+
+- 「MovieLensで未知ペアの共評価数を予測できた」（strict held-outは未実装、in-sample再構成のみ）
+- 「Wineで自然ネットワークの実験を行った」（Wineの Y はラベル由来）
+- 「Cora（n=280 balanced subset）の結果がfull Cora（n=2708）に一般化する」（未確認）
+- 「BICが実データで常に適切なkを選ぶ」（Coraでは疎密度によりk=1を選択）
+
+---
+
 ## 9. 現時点で確認できた結果
 
 （出所はすべて`reports/claims_and_evidence.md`および`EXPERIMENT_REGISTRY.md`の該当行を参照）

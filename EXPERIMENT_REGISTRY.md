@@ -40,3 +40,43 @@
 | 提出用図 fig1b | 誤指定（3シナリオ統合、提出用） | 同上 | Scen.A/B/C Exp4 CSV由来 | `figures/fig1b_misspecification_color.pdf/png` | current_main | ✓ | 灰色バー＝23.6倍（Scen.C, Fixed Gauss-X/Bern-Y）。CLAUDE.md「図1(b)と誤指定倍率の扱い」参照 |
 | GEMINI_REPORT系 | AI生成の実験レポート（フェーズ別・ステップ別） | — | — | `expfam/results/GEMINI_REPORT_MULTI_SCENARIO.md`, `GEMINI_REPORT_PHASE2_FINAL.md`, `expfam/results/archive/GEMINI_REPORT_*.md`（STEP2〜STEP4_5, EXP1〜EXP5, BIC, ULTIMATE） | ai_generated | ✗ | KI-007。研究者による検証未完了。一次CSVで再確認が必要 |
 | archive（初期実装） | 初期シングルシナリオ実装の実験群 | `expfam/src/archive/experiment_*.py` | `expfam/results/archive/*.csv` | `expfam/results/archive/*.png` | archive | ✗ | 現行のシナリオA/B/C構成とは異なる。参照のみ |
+
+---
+
+## fixed版 official再実験（人工データ、2026-06中旬）
+
+0.5係数を除去した `DualExpFamLSMFixed` で、シナリオA/B/CのExp1-4を正式に再実行したもの。本文（原稿）は0.5あり版
+（`model_dual_expfam.py`）の結果で書かれているため、以下はいずれも「原稿未採用・KI-001の検証材料」の位置づけ。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| fixed official Exp1 (BIC, k1-9) | fixed版でのBIC k選択（k=1〜9に拡張） | `run_fixed_official_exp1_bic_full.py`, `run_fixed_official_exp1_bic_k9_extension.py`, `run_fixed_official_exp1_bic_quick.py` | `expfam/results/fixed_official/{exp1,exp1_k9,quick}/*.csv` | `expfam/figures/fixed_official/*` | current_support | ✗ | k=9まで拡張しても3シナリオとも過大次元に誤らないことを確認 |
+| fixed official Exp2 (n-sweep) | fixed版でのn=50→300 RMSE(Z)推移 | `run_fixed_official_exp2_n_sweep.py` | `expfam/results/fixed_official/exp2/*.csv` | 同上 | current_support | ✗ | A:-40%, B:-17%, C:-62%（`reports/real_data_experiment_plan.md` §2） |
+| fixed official Exp3 (d-sweep) | fixed版でのd変化 | `run_fixed_official_exp3_d_sweep.py` | `expfam/results/fixed_official/exp3/*.csv` | 同上 | current_support | ✗ | A:-22.5%、CはflatでBは中央値改善もoutlierあり |
+| fixed official Exp4 (mismatch) | fixed版での誤指定3×3grid | `run_fixed_official_exp4_scen_ab.py`, `run_fixed_official_exp4_scen_c.py` | `expfam/results/fixed_official/exp4/*.csv` | 同上 | current_support | ✗ | A最大4.34×, B最大9.04×, C最大40.37×（0.5あり旧版の23.6/41.5倍とは別条件、混同注意） |
+| half-factor check | 0.5係数問題の追加検証（dry_run/full/scenario_c_extra） | `run_half_factor_minimal_check.py`, `run_half_factor_scenario_c_extra.py` | `expfam/results/half_factor_check/{dry_run,full,scenario_c_extra}/*.csv` | なし | current_support | ✗ | KI-001関連の補助検証。原稿数値との対応整理は未実施 |
+
+---
+
+## 実データ実験フェーズ（Wine / Cora / MovieLens、2026-06-17〜2026-07-07、fixed版使用）
+
+`reports/real_data_experiment_plan.md`（計画）、`reports/movielens_pilot_design.md`（MovieLens設計）、
+`reports/real_data_experiment_summary.md`（総括）を参照。いずれも `DualExpFamLSMFixed` を使用し、
+「pilot（試行）→ audit（既存CSV突合、Wineのみ）→ clean/final_clean（本文・スライド用整形）」という系譜を持つ。
+整形系スクリプト（`summarize_*.py`, `audit_*.py`）はいずれも**既存CSVの読み込みのみでモデルの再学習は行わない**
+（docstringに明記）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| Wine fixed pilot | Wine実データ、BIC k=1-9、ablation（X+Y/X_only/Y_only） | `run_fixed_real_wine_pilot.py` | `expfam/results/real_data/wine_fixed_pilot/*.csv` | `expfam/figures/real_data/wine_fixed_pilot/*` | current_support | ✗ | KI-006（Wine未評価）はこの実験で実質解消。BIC最小k=3が真のクラス数（3）と一致 |
+| Wine old05 audit | 旧0.5版・fixed版・論文再現の3者突合（読取専用） | `audit_wine_old05_vs_fixed.py` | `expfam/results/real_data/wine_old05_audit/*.csv` | なし | current_support | ✗ | 既存CSVの再集計のみ、モデル再実行なし |
+| Wine clean | Wine 最終整形（figures/スライド用） | `summarize_wine_for_figures.py` | `expfam/results/real_data/wine_clean/*.csv` | `expfam/figures/real_data/wine_clean/*` | current_support | △ | 発表資料への転記候補 |
+| Cora subset pilot (BFS, 不採用) | Cora BFSサブセット | `run_fixed_real_cora_subset_pilot.py` | `expfam/results/real_data/cora_subset_pilot/*.csv` | `expfam/figures/real_data/cora_subset_pilot/*` | archive | ✗ | max-degreeノードからのBFSで1クラスが78%を占め不適切と判断。balanced_degree版に置き換え済み |
+| Cora balanced subset / k-sweep / held-out / scaling | balanced_degreeサブセット（採用）での一連の検証（n=280→700） | `run_fixed_real_cora_balanced_subset_pilot.py`, `run_fixed_real_cora_balanced_k_sweep.py`, `run_fixed_real_cora_heldout_link_prediction.py`, `run_fixed_real_cora_scaling_heldout.py` | `expfam/results/real_data/cora_balanced_subset_pilot/`, `cora_balanced_k_sweep/`, `cora_heldout_link_prediction/`, `cora_scaling_heldout/` | 対応図一式 | current_support | △ | held-out test_AP≈2.6〜2.8×random（n=280）。自然ネットワークでの汎化性能を確認。BICは疎密度でk=1を選択する限界あり |
+| Cora clean | Cora 最終整形 | `summarize_cora_for_figures.py`, `summarize_cora_factor_interpretation_for_text.py` | `expfam/results/real_data/cora_clean/*.csv` | `expfam/figures/real_data/cora_clean/*` | current_support | △ | 発表資料への転記候補 |
+| MovieLens data prep | movie-nodeプロジェクション、genre-stratified subset作成 | `prepare_movielens_data.py` | `expfam/results/real_data/movielens_data_prep/*.csv` | `expfam/figures/real_data/movielens_data_prep/*` | current_support | — | 前処理のみ。出力: `expfam/data/movielens_pilot/*.npy` |
+| MovieLens Poisson / heldout count / Bernoulli t80 / colike interpretation | Bernoulli-X / Poisson-Y の新規組み合わせの主実験一式 | `run_fixed_real_movielens_poisson_pilot.py`, `run_fixed_real_movielens_heldout_count.py`, `run_fixed_real_movielens_bernoulli_t80_pilot.py`, `run_fixed_real_movielens_colike_interpretation.py` | `expfam/results/real_data/movielens_{poisson_pilot,heldout_count,bernoulli_t80_pilot,colike_interpretation}/*.csv` | 対応図一式 | current_support | △ | in-sample評価でありstrict held-outではない（pair mask未対応）。Poisson overdispersion（var/mean≈10）あり。t80は補助でCora比較用 |
+| MovieLens colike clean / final clean | 本文/Notion用3指標に縮約した版（clean）と、監査用フル指標版（final_clean、cleanを上書きしない） | `summarize_movielens_colike_for_notion.py`, `summarize_movielens_final_for_figures.py` | `expfam/results/real_data/movielens_colike_clean/*.csv`, `movielens_final_clean/*.csv` | `expfam/figures/real_data/movielens_colike_clean/*` | current_support | △ | 両者は役割が異なる（縮約版／フル版）。名前が紛らわしいため参照時は用途を明記すること |
+| 3データセット横断再構成比較 | Wine/Cora/MovieLensのF行列再構成の統一評価 | `run_common_realdata_reconstruction_eval.py`, `summarize_common_realdata_reconstruction_eval.py` | `expfam/results/real_data/common_reconstruction_eval/*.csv` | `expfam/figures/real_data/common_reconstruction_eval/*` | current_support | △ | 3データセットの横並び比較。発表・スライド向き |
+
+**原稿採用の凡例：** ✓=既に採用済み／△=採用候補（未確定、本文・スライドへの転記は今後の判断）／✗=未採用（補助・監査用途のみ）。

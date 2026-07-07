@@ -112,7 +112,18 @@ docs/teacher/teacher_reply_draft.md              Q1/Q2/Q4 返答案
 docs/teacher/half_factor_teacher_reply.md        Q3 返答案（正しい版）
 docs/math_notes/half_factor_math_explanation.md  1/2 不要の数学的証明
 docs/math_notes/half_factor_literature_code_check.md  MATLAB vs Python 照合表
+
+expfam/src/model_dual_expfam_fixed.py  0.5除去版（実データ実験フェーズはこちらを使用）
+expfam/results/real_data/              実データ実験（Wine/Cora/MovieLens）結果一式
+expfam/figures/real_data/              同・図一式
+reports/real_data_experiment_summary.md  実データ実験フェーズの総括（詳細は RESEARCH_MASTER.md §8b, EXPERIMENT_REGISTRY.md参照）
 ```
+
+**注：** 実データ実験フェーズ（Wine/Cora/MovieLens、2026-06-17〜2026-07-07、`main`にマージ済み）は
+学会予稿（`conference_submission_final_draft.md`）には含まれない修論フェーズ向けの追加検証。
+本ファイル（root CLAUDE.md）は主に人工データ実験フェーズ・原稿の確定事項を扱うため、
+実データ実験フェーズの詳細は `RESEARCH_MASTER.md`「8b. 実データ実験フェーズ」と
+`EXPERIMENT_REGISTRY.md`「実データ実験フェーズ」節を参照すること。
 
 ---
 
@@ -121,3 +132,6 @@ docs/math_notes/half_factor_literature_code_check.md  MATLAB vs Python 照合表
 - [ ] **先生への返答を送る**（`docs/teacher/teacher_reply_draft.md` + `docs/teacher/half_factor_teacher_reply.md` を参照）
 - [ ] **Word 文書に原稿内容を反映する**（.docx はリポジトリ外にある）
 - [ ] Python 実装の 1/2 修正（修論フェーズで対応、今は不要）
+- [x] 実データ実験フェーズ（Wine/Cora/MovieLens、fixed版使用）の実施・`main`へのマージ（2026-07-07完了）
+- [ ] 実データ実験フェーズの残課題：MovieLens pair mask対応（strict held-out）、Cora full-graphへの拡張、
+      Cora実データでのBICペナルティ過大問題への対処（詳細は`KNOWN_ISSUES.md` KI-011, KI-012）
