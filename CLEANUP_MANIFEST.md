@@ -11,6 +11,8 @@
 - `archive_candidate`：将来archiveフォルダへ移動する候補
 - `ignore_candidate`：研究内容と無関係。.gitignore等で除外する候補
 - `delete_candidate_later`：将来的に削除を検討する候補（今は削除しない）
+- `review_required`：削除・archive・リネームいずれの判断も、実施前に人間（またはCodexへの確認タスク経由）の
+  内容確認が必須のもの（2026-07-07追加。名称衝突・参照未確認・provenance不明などが該当）
 
 ---
 
@@ -38,3 +40,57 @@
 | `reproduction/`（先行研究再現実装一式） | keep | 維持 | Control比較の根拠（`comparison/comparison_main_table.csv`等） | なし | 維持 |
 | `Mato Lab Program/`（MATLAB原実装） | keep | 維持 | 1/2不要の根拠（calcEtaNewton.m） | なし | 維持 |
 | `paper/`（PDF） | keep | 維持 | 先行研究論文PDF（読み込み不可だが原典として保持） | なし | 維持 |
+
+### 実データ実験フェーズの追加分類（2026-07-07、`main`マージ後）
+
+2026-06-17〜2026-07-07に追加され、`save-realdata-results-20260707`ブランチ経由で`main`にマージ済みの
+Wine/Cora/MovieLens実データ実験一式。マージによりgit履歴の保護下に入ったため、大半を`keep`に分類する。
+
+| パス | 分類 | 推奨操作 | 理由 | リスク | 実施可否 |
+|----|----|------|----|-----|------|
+| `expfam/src/run_fixed_official_*.py`, `run_half_factor_*.py`, `run_fixed_real_*.py`, `prepare_movielens_data.py`, `audit_wine_old05_vs_fixed.py`, `run_common_realdata_reconstruction_eval.py`, `summarize_*.py`（6ファイル） | keep | 維持 | 実データ実験フェーズの現行スクリプト一式。`main`にマージ済み | なし | 維持 |
+| `expfam/results/fixed_official/**`, `expfam/results/half_factor_check/**` | keep | 維持 | fixed版での人工データ正式再実験・0.5係数問題の追加検証（KI-001関連） | なし | 維持 |
+| `expfam/results/real_data/**`（`cora_subset_pilot`を除く）, `expfam/figures/real_data/**` | keep | 維持 | Wine/Cora/MovieLens実データ実験の一次結果・図。`EXPERIMENT_REGISTRY.md`に対応行を追加済み | なし | 維持 |
+| `expfam/data/cora/`, `expfam/data/movielens_pilot/` | keep | 維持 | 実データ実験の入力データ。再生成にコスト（前処理・ダウンロード）がかかる | なし | 維持 |
+| `reports/real_data_experiment_plan.md`, `reports/movielens_pilot_design.md`, `reports/real_data_experiment_summary.md`, `reports/movielens_colike_clean/movielens_colike_notion_summary.md` | keep | 維持 | 実データ実験の設計意図・結論の一次記録 | なし | 維持 |
+| `expfam/results/real_data/cora_subset_pilot/`（+対応図） | archive_candidate | 将来archiveへ移動する候補（優先度高） | Cora BFSサブセットが1クラス78%偏りで不適切と判明し、`cora_balanced_subset_pilot/`以降に完全に置き換わっている（`reports/real_data_experiment_summary.md`に明記） | 低（既に不採用と文書化済み） | **archive移動前に本文・スライドからの参照ゼロを`grep`で確認すること（review_required寄り）** |
+| `expfam/results/real_data/{wine_fixed_pilot, cora_balanced_subset_pilot, cora_balanced_k_sweep, movielens_poisson_pilot, movielens_bernoulli_t80_pilot, movielens_heldout_count, movielens_colike_interpretation}/` | support | 維持（pilot段階・`_clean`版のソースとして現役） | `_clean`/`_final_clean`版の入力元。監査スクリプト（`audit_wine_old05_vs_fixed.py`等）からも参照される | 中：`_clean`版が全指標を引き継いでいるか未確認のままarchiveすると根拠を失う | 現状維持。archive検討は`_clean`との指標突合後 |
+| `expfam/results/real_data/movielens_colike_clean/` と `movielens_final_clean/` | review_required | 統合・注記追加を検討 | 名前が類似し役割が異なる（本文用3指標縮約 vs 監査用フル指標、KI-013） | 中：引用時の取り違えリスク | 統合・リネームは今回実施しない。`EXPERIMENT_REGISTRY.md`に役割差を明記済み |
+| `reports/movielens_colike_clean/`（`expfam/results/real_data/movielens_colike_clean/`と同名ディレクトリ） | review_required | 名称衝突の解消方法を検討 | 同名だが前者はNotion用Markdown1本、後者はCSV+図一式で内容が異なる | 低（実害は今のところないが混乱を招く） | リネーム案の作成のみ次回検討 |
+| リポジトリ直下 `tatus`（存在する場合） | review_required（削除候補寄り） | 中身確認後に削除を判断 | `git status`/`git log`出力の断片と見られる誤操作の残骸。研究内容とは無関係 | なし（内容確認前提） | 中身確認まで削除しない |
+
+---
+
+## 今後の安全なcleanup手順（2026-07-07追加）
+
+ファイル移動・削除を伴わない「文書更新のみ」のステップを先に、実ファイル操作を伴うものは最後に回す。
+
+### Step 1（最も安全・今回完了）: ドキュメント更新のみ
+`EXPERIMENT_REGISTRY.md`, `RESEARCH_MASTER.md`, `START_HERE.md`, `KNOWN_ISSUES.md`, `CLEANUP_MANIFEST.md`（本ファイル）,
+`CLAUDE.md` の更新で完了。ファイルの移動・削除・コード変更は一切行っていない。
+
+### Step 2（安全・確認のみ、次にやるべき作業）
+1. `cora_subset_pilot/` が原稿・スライド・レポートのどこからも参照されていないことを`grep`で確認する
+   （参照ゼロを確認できて初めて`archive_candidate`から実施可能に格上げできる）。
+2. `movielens_colike_clean/` と `movielens_final_clean/` の内容差分を突合し、
+   「cleanに無くfinal_cleanにだけある指標」が本文・スライドで必要かどうかを確認する。
+3. リポジトリ直下に `tatus` のような不審な未追跡ファイルが無いか `git status -uall` で確認する。
+
+### Step 3（ここで初めてファイル操作を検討。今回は実施しない）
+4. Step 2で「参照ゼロ」を確認できたものに限り、`archive/` への移動を提案・実施する。
+5. 名称衝突（`movielens_colike_clean`等）のリネーム案を実施する（実施前に必ずユーザー承認を得る）。
+
+---
+
+## Codexへ渡す場合の安全な小タスク案（2026-07-07追加）
+
+いずれも「読む・確認する・文書を追記する」レベルで、ファイルの移動・削除を伴わない：
+
+1. `cora_subset_pilot/` への参照が原稿・レポート・スライド資料に一切ないことを`grep`で確認し、結果を報告する。
+2. `movielens_colike_clean/` と `movielens_final_clean/` の各CSVの列・行数を比較し、差分表を作成する。
+3. `expfam/results/fixed_official/`・`half_factor_check/`の実行結果を`KNOWN_ISSUES.md`のKI-001に追記する
+   （0.5係数問題の検証にどう使われたかの一次資料として）。
+4. `paper/2.pdf`のタイトル・著者だけを抽出し、`paper/`ディレクトリの役割を明確化する（要約・解釈は不要）。
+5. `reports/movielens_colike_clean/`と`expfam/results/real_data/movielens_colike_clean/`の同名衝突について、
+   リネーム案を1つ作成する（実施はしない、案のみ）。
+6. リポジトリ直下の未追跡ファイル（`tatus`等）の中身を確認し、削除してよいか報告する（削除は実施しない）。

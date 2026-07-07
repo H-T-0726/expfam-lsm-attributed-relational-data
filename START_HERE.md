@@ -18,6 +18,7 @@
 6. **`conference_submission_final_draft.md`** — 提出予定の原稿本体
 7. **`expfam/README.md`** — `expfam/`フォルダ（実装・実験の本体）の使い方
 8. **`reports/claims_and_evidence.md`** — 個々の研究主張と根拠CSVの対応表
+9. **`reports/real_data_experiment_summary.md`** — 実データ実験フェーズ（Wine/Cora/MovieLens、学会予稿には未収録・修論フェーズ向け）の総括。「今回言えること」「まだ言えないこと」を必ず確認
 
 ---
 
@@ -30,6 +31,9 @@
 - `expfam/results/exp_scenario_{A,B,C}_exp{1,2,3,4}*.csv` — 本文採用実験の結果CSV
 - `reports/claims_and_evidence.md` — 主張と根拠CSVの対応表
 - `docs/teacher/teacher_reply_draft.md`, `docs/teacher/half_factor_teacher_reply.md` — 先生への返答案（Q1/Q2/Q3/Q4対応）
+- `expfam/src/model_dual_expfam_fixed.py` — 0.5除去版の実装本体。実データ実験フェーズはすべてこちらを使用
+- `expfam/results/real_data/**`, `expfam/figures/real_data/**` — 実データ実験（Wine/Cora/MovieLens）の結果・図一式。
+  詳細は`EXPERIMENT_REGISTRY.md`「実データ実験フェーズ」節、系譜は`reports/real_data_experiment_summary.md`を参照
 
 ## 低信頼・参考扱いファイル
 
@@ -37,8 +41,11 @@
 - `expfam/results/GEMINI_REPORT_*.md`, `expfam/results/archive/GEMINI_REPORT_*.md` — AI生成・未検証（KI-007）
 - `docs_for_notebooklm/*` — NotebookLM向け資料。一部はAI生成の調査結果を含むため、数値は元CSVで再確認すること
 - `archive/notion_scripts/*`, `archive/misc/*`, `archive/paper_writing_examples/*` — 研究本体と無関係（KI-009）
-- `expfam/results/wine_dual_results.csv`, `wine_F.npy` — 未評価（KI-006）
+- `expfam/results/wine_dual_results.csv`, `wine_F.npy` — 旧0.5版・未評価（KI-006）。fixed版での評価は
+  `expfam/results/real_data/wine_fixed_pilot/`・`wine_old05_audit/`で実施済みだが、このファイル自体は旧版のまま
 - `expfam/results/distribution_mismatch_fixed/*` — fixed版（0.5なし）の補助実験。本文には未採用（KI-002）
+- `expfam/results/real_data/cora_subset_pilot/` — Cora BFSサブセット。1クラスが78%を占め不適切と判明し不採用
+  （`cora_balanced_subset_pilot/`以降に置き換え済み。参照のみ）
 
 ---
 
@@ -48,6 +55,8 @@
 - **23.6倍 / 41.5倍 / 38.97倍**：いずれもScen.Cの誤指定実験の数値だが、出所が異なる3つの独立した値（KI-003）。
 - **原稿式と現行Python実装**：原稿式（1/2なし）が正しいとされているが、現行Python実装の旧版には0.5が残っている（KI-001）。「実装が正しい」と早合点しない。
 - **本文採用実験と補助実験**：Exp1-4（`exp_scenario_*`系）は本文採用。`distribution_mismatch_fixed/*`、Wine実験、`results/archive/*`は補助・未採用。
+- **実データ実験フェーズは学会予稿には未収録**：`expfam/results/real_data/*`はすべて2026-06-17以降の修論フェーズ向け追加検証であり、`conference_submission_final_draft.md`の主張には含まれない。
+- **`movielens_colike_clean/`と`movielens_final_clean/`は役割が異なる**：前者は本文/Notion用に3指標へ縮約した版、後者は監査用のフル指標版（`summarize_movielens_final_for_figures.py`のdocstringに明記、前者を上書きしない）。名前だけでは区別できないため注意。
 
 ---
 
