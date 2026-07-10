@@ -80,3 +80,23 @@
 | 3データセット横断再構成比較 | Wine/Cora/MovieLensのF行列再構成の統一評価 | `run_common_realdata_reconstruction_eval.py`, `summarize_common_realdata_reconstruction_eval.py` | `expfam/results/real_data/common_reconstruction_eval/*.csv` | `expfam/figures/real_data/common_reconstruction_eval/*` | current_support | △ | 3データセットの横並び比較。発表・スライド向き |
 
 **原稿採用の凡例：** ✓=既に採用済み／△=採用候補（未確定、本文・スライドへの転記は今後の判断）／✗=未採用（補助・監査用途のみ）。
+
+---
+
+## 過分散・共有Z・per-column family フェーズ（2026-07-08〜、branch: research/overdispersion-z-ablation、fixed系列 experimental 使用）
+
+`reports/research_direction/phase0_current_state_20260708.md`（開始時監査）、
+`reports/overdispersion/`（診断・NB設計・pair mask設計）、
+`reports/mismatch_audit/mismatch_audit_report_20260708.md`（既存ミスマッチ監査）を参照。
+すべて `DualExpFamLSMFixed` を継承する experimental モデル
+（`expfam/src/experimental/`: masked / NB / per-column）を使用。旧0.5版は不使用。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| MovieLens 過分散診断 | 周辺 vs 条件付き過分散の分離診断 + plug-in PPC | `tools/overdispersion/diagnose_movielens_overdispersion.py` | `expfam/results/overdispersion/movielens_overdispersion_diagnostics.csv`, `movielens_ppc_summary.csv` | `figures/overdispersion/movielens_y_distribution.*`, `movielens_mean_variance.*` | current_support | ✗ | 周辺 var/mean=9.89 だが条件付き Pearson 過分散は k=3:1.14 / k=5:0.76。KI-012 の再解釈 |
+| MovieLens strict held-out | pair mask による strict held-out で Poisson/NB/full(リーク参照) 比較 | `tools/overdispersion/run_movielens_strict_heldout.py` | `expfam/results/overdispersion/movielens_strict_heldout_{summary,agg}.csv` | `figures/overdispersion/movielens_strict_heldout_comparison_k{3,5}.*` | current_support | ✗ | k=5 poisson_strict に発散1fitあり（平均汚染、summary参照）。従来 masked evaluation の楽観を定量化 |
+| Poisson誤指定（人工NB-Y） | r_true∈{2,5,20,∞} で Poisson/NB oracle/NB moment 比較（strict held-out + RMSE(Z)） | `tools/overdispersion/run_poisson_misspecification_check.py` | `expfam/results/overdispersion/poisson_misspecification_{summary,agg}.csv` | `figures/overdispersion/poisson_misspec_{rmse_z,heldout_ll}.*` | current_support | ✗ | 生成は gamma-Poisson 混合（正確な NB2） |
+| MovieLens 共有Z ablation | Proposed/fix_x(Y-only)/fix_w(X-only) の strict held-out 比較 | `tools/shared_z_ablation/run_movielens_shared_z_ablation.py` | `expfam/results/shared_z_ablation/movielens_shared_z_ablation_{summary,agg}.csv` | `figures/shared_z_ablation/movielens_shared_z_ablation.*` | current_support | ✗ | NMI はフルZ KMeans（既存 pilot の PCA→2D と手続きが異なるため絶対値比較不可） |
+| 既存 ablation 棚卸し | 旧/fixed Exp4 + Wine の ablation を tidy CSV に集約（読取専用） | `tools/shared_z_ablation/audit_existing_ablation_results.py` | `expfam/results/shared_z_ablation/existing_ablation_audit.csv` | なし | current_support | ✗ | モデル再実行なし |
+| ミスマッチ監査 | 41.5×/23.6×/3.41×/7.35× の根拠CSV・条件特定（KI-003解消）、fixed版対応表 | `tools/research_audit/audit_mismatch_experiments.py` | `expfam/results/mismatch_audit/mismatch_audit_{summary,old05_conditions}.csv` | なし | current_support | ✗ | 読取専用。41.5×=exp_scenario_C_exp4_mismatch.csv の XGauss/YPois 条件（41.45×）と特定 |
+| per-column family デモ | 混在X（gauss/bern/pois 各3列）で per-column 正指定 vs 全列共通強制の比較 | `tools/research_audit/run_per_column_family_demo.py`, `expfam/src/experimental/model_dual_expfam_percolumn.py` | `expfam/results/per_column_family/per_column_demo_{summary,agg}.csv` | なし | current_support | ✗ | プロトタイプ。設計書 `reports/research_direction/per_column_family_design_20260708.md` |
