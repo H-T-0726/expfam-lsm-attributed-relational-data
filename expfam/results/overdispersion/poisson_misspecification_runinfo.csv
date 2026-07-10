@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d,k_true,w0_true,w_true,r_true_list,n_trials,test_ratio,data_seed_base,split_seed_base,model_seed_base,L,num_iter,note
+tools/overdispersion/run_poisson_misspecification_check.py,2026-07-08T18:26:27,02311e7,research/overdispersion-z-ablation,100,15,3,1.5,0.3,"[2.0, 5.0, 20.0, inf]",5,0.2,51000,52000,53000,5,8,"55 fits all completed and CSVs saved; original run crashed only in figure code (std column-name bug, fixed); figures regenerated from saved agg CSV"

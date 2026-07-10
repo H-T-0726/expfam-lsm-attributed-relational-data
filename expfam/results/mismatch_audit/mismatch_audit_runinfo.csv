@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,inputs,note
+tools/research_audit/audit_mismatch_experiments.py,2026-07-08T18:11:55,02311e7,research/overdispersion-z-ablation,exp_scenario_*_exp4_mismatch.csv; fixed_official/exp4; distribution_mismatch_fixed,read-only audit; no experiment executed

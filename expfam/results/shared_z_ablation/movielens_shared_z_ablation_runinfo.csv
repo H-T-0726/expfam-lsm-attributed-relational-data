@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d,k_list,split_trials,model_trials,test_ratio,family_y,split_seed_base,model_seed_base,L,num_iter,total_runtime_s
+tools/shared_z_ablation/run_movielens_shared_z_ablation.py,2026-07-08T18:23:54,02311e7,research/overdispersion-z-ablation,100,19,[5],"[0, 1, 2]","[0, 1]",0.2,poisson,41000,61000,5,8,195.9

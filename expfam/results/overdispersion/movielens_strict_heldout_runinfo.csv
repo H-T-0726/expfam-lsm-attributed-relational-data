@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d,k_list,split_trials,model_trials,test_ratio,split_seed_base,model_seed_base,L,num_iter,model_classes,total_runtime_s
+tools/overdispersion/run_movielens_strict_heldout.py,2026-07-08T18:15:47,02311e7,research/overdispersion-z-ablation,100,19,"[3, 5]","[0, 1, 2]","[0, 1]",0.2,41000,42000,5,8,DualExpFamLSMMasked / DualExpFamLSMNB (fixed-lineage),318.7
