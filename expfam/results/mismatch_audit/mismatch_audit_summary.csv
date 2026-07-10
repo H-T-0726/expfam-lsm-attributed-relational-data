@@ -1,0 +1,15 @@
+source,scenario,condition_set,max_ratio,max_condition,est_x,est_y,fix_w,fix_x,oracle_rmse,rmse_at_max,n_trials,documented_value,matches_documented
+old05_manuscript_exp4,A,misspec_only,3.4055650176584575,"X=Bernoulli, Y=Bernoulli",bernoulli,bernoulli,False,False,0.2786599020989476,0.9489944144123065,10.0,3.41,1.0
+old05_manuscript_exp4,A,incl_ablation,3.4055650176584575,"X=Bernoulli, Y=Bernoulli",bernoulli,bernoulli,False,False,0.2786599020989476,0.9489944144123065,10.0,3.41,1.0
+old05_manuscript_exp4,B,misspec_only,7.345107593529346,"X=Poisson, Y=Bernoulli",poisson,bernoulli,False,False,0.17751829899162516,1.303891005913799,10.0,7.35,1.0
+old05_manuscript_exp4,B,incl_ablation,7.345107593529346,"X=Poisson, Y=Bernoulli",poisson,bernoulli,False,False,0.17751829899162516,1.303891005913799,10.0,7.35,1.0
+old05_manuscript_exp4,C,misspec_only,41.45036610704531,"X=Gaussian, Y=Poisson",gaussian,poisson,False,False,0.02872314578386056,1.1905849084870552,10.0,41.5,1.0
+old05_manuscript_exp4,C,incl_ablation,41.45036610704531,"X=Gaussian, Y=Poisson",gaussian,poisson,False,False,0.02872314578386056,1.1905849084870552,10.0,41.5,1.0
+old05_manuscript_exp4,C,check:documented 41.5x (text),41.45036610704531,"X=Gaussian, Y=Poisson",gaussian,poisson,False,False,0.02872314578386056,1.1905849084870552,10.0,41.5,1.0
+old05_manuscript_exp4,C,check:documented 23.6x (fig1b gray bar),23.553109673618778,"X=Gaussian, Y=Bernoulli",gaussian,bernoulli,False,False,0.02872314578386056,0.6765194028186086,10.0,41.5,0.0
+fixed_official_exp4,A,misspec_only,4.341358572659535,XBern_YBern,bernoulli,bernoulli,False,False,0.2319846634550504,1.0071286074161203,,4.34,1.0
+fixed_official_exp4,B,misspec_only,9.040538775954325,XPois_YBern,poisson,bernoulli,False,False,0.1398629154943076,1.2644361108443112,,9.04,1.0
+fixed_official_exp4,C,misspec_only,40.37061146832195,XPois_YBern,poisson,bernoulli,False,False,0.0231431994960484,0.9343051149888358,,40.37,1.0
+distribution_mismatch_fixed,A,misspec_only,4.341358572659535,"X=bernoulli, Y=bernoulli",bernoulli,bernoulli,False,False,0.2319846634550504,1.0071286074161203,,,
+distribution_mismatch_fixed,B,misspec_only,8.797581978880244,"X=poisson, Y=bernoulli",poisson,bernoulli,False,False,0.1413576778170042,1.2436057589392358,,,
+distribution_mismatch_fixed,C,misspec_only,38.97060831888937,"X=poisson, Y=bernoulli",poisson,bernoulli,False,False,0.0231923248337144,0.9038190070991352,,38.97,1.0

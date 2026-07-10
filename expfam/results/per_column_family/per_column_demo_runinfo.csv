@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d,k_true,fam_list_true,n_trials,data_seed_base,model_seed_base,L,num_iter,total_runtime_s
+tools/research_audit/run_per_column_family_demo.py,2026-07-08T18:26:14,02311e7,research/overdispersion-z-ablation,80,9,2,"['gaussian', 'gaussian', 'gaussian', 'bernoulli', 'bernoulli', 'bernoulli', 'poisson', 'poisson', 'poisson']",5,71000,72000,5,8,136.6

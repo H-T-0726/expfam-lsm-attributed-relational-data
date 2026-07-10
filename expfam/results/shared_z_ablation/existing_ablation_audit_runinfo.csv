@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,inputs,note
+tools/shared_z_ablation/audit_existing_ablation_results.py,2026-07-08T19:06:01,02311e7,research/overdispersion-z-ablation,exp_scenario_*_exp4_mismatch.csv; fixed_official/exp4; real_data/wine_fixed_pilot/wine_ablation_metrics.csv,read-only audit; no experiment executed
