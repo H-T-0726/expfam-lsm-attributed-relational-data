@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d,k_list,model_seed_base,ppc_seed,L,num_iter,n_ppc,model_class,total_runtime_s
+tools/overdispersion/diagnose_movielens_overdispersion.py,2026-07-08T18:07:17,02311e7,research/overdispersion-z-ablation,100,19,"[3, 5]",21000,31000,5,8,300,"DualExpFamLSMMasked (fixed-lineage, full mask)",17.9
