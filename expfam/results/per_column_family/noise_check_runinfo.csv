@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d_informative,k_true,w0_true,w_true,n_trials,L,num_iter,test_ratio,noise_note,data_seed_base,model_seed_base,split_seed_base,noise_seed_base,total_runtime_s
+tools/research_audit/run_per_column_noise_check.py,2026-07-11T03:06:52,54513a3,research/per-column-validation,80,9,2,1.2,0.3,3,5,8,0.2,"ノイズ列は Z_true と無関係（gauss: N(0,1) / bern: p=0.5 / pois: rate=2.0）。family は各ノイズの真の分布を正指定",88000,89000,90000,91000,169.3

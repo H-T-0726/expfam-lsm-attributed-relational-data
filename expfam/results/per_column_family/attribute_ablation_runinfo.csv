@@ -1,0 +1,2 @@
+script,datetime,git_head,branch,n,d_full,k_true,w0_true,w_true,n_trials,L,num_iter,test_ratio,n_noise_cols,noise_note,data_seed_base,model_seed_base,split_seed_base,noise_seed_base,total_runtime_s
+tools/research_audit/run_per_column_attribute_ablation.py,2026-07-11T03:03:59,54513a3,research/per-column-validation,80,9,2,1.2,0.3,3,5,8,0.2,3,"noise 列は Z_true と無関係な N(0,1)。family は gaussian 正指定（family が正しくても情報がない属性の効果を見る）",84000,85000,86000,87000,105.0

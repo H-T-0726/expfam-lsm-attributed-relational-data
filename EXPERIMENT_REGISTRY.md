@@ -100,3 +100,19 @@
 | 既存 ablation 棚卸し | 旧/fixed Exp4 + Wine の ablation を tidy CSV に集約（読取専用） | `tools/shared_z_ablation/audit_existing_ablation_results.py` | `expfam/results/shared_z_ablation/existing_ablation_audit.csv` | なし | current_support | ✗ | モデル再実行なし |
 | ミスマッチ監査 | 41.5×/23.6×/3.41×/7.35× の根拠CSV・条件特定（KI-003解消）、fixed版対応表 | `tools/research_audit/audit_mismatch_experiments.py` | `expfam/results/mismatch_audit/mismatch_audit_{summary,old05_conditions}.csv` | なし | current_support | ✗ | 読取専用。41.5×=exp_scenario_C_exp4_mismatch.csv の XGauss/YPois 条件（41.45×）と特定 |
 | per-column family デモ | 混在X（gauss/bern/pois 各3列）で per-column 正指定 vs 全列共通強制の比較 | `tools/research_audit/run_per_column_family_demo.py`, `expfam/src/experimental/model_dual_expfam_percolumn.py` | `expfam/results/per_column_family/per_column_demo_{summary,agg}.csv` | なし | current_support | ✗ | プロトタイプ。設計書 `reports/research_direction/per_column_family_design_20260708.md` |
+
+---
+
+## per-column family 検証フェーズ（2026-07-11、branch: research/per-column-validation、experimental 使用）
+
+「別々に属性を回せばよいのでは？」（ゼミの問い）に答える検証フェーズ。
+per-column は **prototype** の位置づけを維持。総括は
+`reports/per_column_family/per_column_final_summary_20260711.md` を参照。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| per-column 数式監査 | 勾配/precision の数値微分照合（Y 3family × mask 有無）、列和構造、全列同一family≡既存モデル、scipy照合、ブロック重み診断 | `tools/research_audit/audit_per_column_math.py` | `expfam/results/per_column_family/per_column_math_audit_summary.csv` | なし | current_support | ✗ | 31/31 PASS。M-step Adam 収束性は未監査 |
+| 単独 vs 同時統合 | 人工mixed-X（gauss/bern/pois各3列+Poisson-Y、strict held-out）で single_{g,b,p}/per_column_all/all_{g,b,p}/binarized/y_only の9条件×3seed | `tools/research_audit/run_per_column_single_vs_joint.py` | `expfam/results/per_column_family/single_vs_joint_{summary,agg,runinfo}.csv` | `figures/per_column_family/single_vs_joint_{rmse_z,heldout_ll}.*` | current_support | ✗ | all_* は比較用の誤指定モデル（変換は runinfo 明記）。joint 0.235 vs all_gaussian 0.234 は誤差内、all_bernoulli は1/3 trialで崩壊 |
+| 属性追加 ablation | Y-only→+Bern→+Gauss→+Pois→+noise3 の5条件×3seed | `tools/research_audit/run_per_column_attribute_ablation.py` | `expfam/results/per_column_family/attribute_ablation_{summary,agg,runinfo}.csv` | `figures/per_column_family/attribute_ablation_lines.*` | current_support | ✗ | 改善は情報の濃い属性（+Gauss −22%）のみ。+Bern 無効果、+noise 無効果〜微悪化 |
+| ノイズ属性チェック | informative9列+ノイズ（gauss3/6/12, bern3, pois3、全て正指定）の6条件×3seed | `tools/research_audit/run_per_column_noise_check.py` | `expfam/results/per_column_family/noise_check_{summary,agg,runinfo}.csv` | `figures/per_column_family/noise_check_lines.*` | current_support | ✗ | 改善なし。悪化は seed 依存（trial1 で +13%）。用量反応は3seedでは確定できず |
+| MovieLens mixed-X pilot | genre19(Bern)+平均評価/公開年(z-score Gauss)+評価件数(Pois) の6条件×4fit、strict held-out | `tools/research_audit/run_movielens_mixed_x_percolumn.py` | `expfam/results/per_column_family/movielens_mixed_x_{summary,agg,runinfo}.csv` | なし | current_support | ✗ | **ネガティブ結果**: mixed_percolumn −3.815 < genre_only −3.423。X切片なしのため評価件数（平均154）のPoisson列がZ推定を強く支配した可能性がある。評価件数はYと同源（リーク懸念も記録）。切片/スケーリングが実用化の前提と特定 |

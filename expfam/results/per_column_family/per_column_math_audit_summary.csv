@@ -1,0 +1,35 @@
+datetime,check,detail,max_abs_diff,tol,result,extra
+2026-07-11T02:56:26,A_family_basics,bernoulli: A'(η) vs FD[A],2.138524912709272e-10,1e-06,PASS,
+2026-07-11T02:56:26,A_family_basics,bernoulli: A''(η) vs FD[A'],6.686862175087072e-11,1e-06,PASS,
+2026-07-11T02:56:26,A_family_basics,poisson: A'(η) vs FD[A],2.930029552317137e-09,1e-06,PASS,
+2026-07-11T02:56:26,A_family_basics,poisson: A''(η) vs FD[A'],2.930029552317137e-09,1e-06,PASS,
+2026-07-11T02:56:26,A_family_basics,gaussian: A'(η) vs FD[A],4.193339009361807e-10,1e-06,PASS,
+2026-07-11T02:56:26,A_family_basics,gaussian: A''(η) vs FD[A'],1.397779669787269e-10,1e-06,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=poisson, mask=none (_calc_gradient vs FD[独立実装])",2.7405566704885587e-09,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=poisson, mask=none (_calc_precision vs FD[_calc_gradient])",2.4654389640943464e-10,0.0001,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=poisson, mask=70% (_calc_gradient vs FD[独立実装])",2.768597795466121e-09,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=poisson, mask=70% (_calc_precision vs FD[_calc_gradient])",3.200797404900868e-10,0.0001,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=bernoulli, mask=none (_calc_gradient vs FD[独立実装])",1.5094738792242879e-09,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=bernoulli, mask=none (_calc_precision vs FD[_calc_gradient])",2.78886025384395e-10,0.0001,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=bernoulli, mask=70% (_calc_gradient vs FD[独立実装])",8.745839608081951e-10,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=bernoulli, mask=70% (_calc_precision vs FD[_calc_gradient])",4.1144643248003376e-10,0.0001,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=gaussian, mask=none (_calc_gradient vs FD[独立実装])",1.0417813278706944e-09,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=gaussian, mask=none (_calc_precision vs FD[_calc_gradient])",3.016222827056936e-10,0.0001,PASS,
+2026-07-11T02:56:26,B_gradient,"Y=gaussian, mask=70% (_calc_gradient vs FD[独立実装])",7.711382643549314e-10,1e-05,PASS,
+2026-07-11T02:56:26,C_precision,"Y=gaussian, mask=70% (_calc_precision vs FD[_calc_gradient])",3.8427261372930843e-10,0.0001,PASS,
+2026-07-11T02:56:26,D_column_sum,gradient_X(z_i) = Σ_l gradient_l(z_i),4.440892098500626e-16,1e-10,PASS,
+2026-07-11T02:56:26,D_column_sum,precision_X(z_i) = Σ_l precision_l(z_i),8.881784197001252e-16,1e-10,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-gaussian: gradient ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-gaussian: precision ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-gaussian: llX ≡ scalar model,0.0,1e-06,PASS,llX=-140.5888
+2026-07-11T02:56:26,E_uniform_equiv,all-bernoulli: gradient ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-bernoulli: precision ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-bernoulli: llX ≡ scalar model,0.0,1e-06,PASS,llX=-96.8373
+2026-07-11T02:56:26,E_uniform_equiv,all-poisson: gradient ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-poisson: precision ≡ scalar model,0.0,1e-12,PASS,
+2026-07-11T02:56:26,E_uniform_equiv,all-poisson: llX ≡ scalar model,0.0,1e-06,PASS,llX=-126.8130
+2026-07-11T02:56:26,E_uniform_equiv,all-bernoulli: _calc_F_adam_weighted ≡ _calc_F_adam,0.0,1e-12,PASS,
+2026-07-11T02:56:26,F_loglik_scipy,calc_log_likelihood_X（−ln(x!)補正後）vs scipy,2.842170943040401e-14,1e-06,PASS,"model=-97.7847, scipy=-114.6558, corr=-16.8711"
+2026-07-11T02:56:26,G_block_weights,gaussian block (3 cols): llX,-25.39310568333831,,INFO,mean|grad|=1.5581
+2026-07-11T02:56:26,G_block_weights,bernoulli block (3 cols): llX,-30.941192898494744,,INFO,mean|grad|=0.3029
+2026-07-11T02:56:26,G_block_weights,poisson block (3 cols): llX,-41.45036945756692,,INFO,mean|grad|=1.0595
