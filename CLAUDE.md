@@ -30,6 +30,10 @@ A_i = I_k  +  F^T V_X(m_i) F  +  (w^Y)^2 Σ_{j≠i} A_Y''(η_ij^Y) z_j z_j^T
 ```
 
 **1/2 は不要**（先生の指摘通り。MATLAB calcAi も 1/2 なし）。  
+（2026-07-19更新：主根拠は対称関係尤度からの独立した数式導出である。
+MATLABは補助的な実装比較としてのみ参照する。手元コードにはY側勾配のw欠落等、
+追加確認が必要な箇所があるため、MATLABを単独のゴールドスタンダードとは扱わず、
+先行研究全体が誤りとも断定しない。）
 証明：`(1/2)Σ_{i≠j}` で Q 関数を書いても z_i 微分で両側から寄与が合算され 1/2 が消える。
 
 ```
@@ -135,3 +139,6 @@ reports/real_data_experiment_summary.md  実データ実験フェーズの総括
 - [x] 実データ実験フェーズ（Wine/Cora/MovieLens、fixed版使用）の実施・`main`へのマージ（2026-07-07完了）
 - [ ] 実データ実験フェーズの残課題：MovieLens pair mask対応（strict held-out）、Cora full-graphへの拡張、
       Cora実データでのBICペナルティ過大問題への対処（詳細は`KNOWN_ISSUES.md` KI-011, KI-012）
+      （2026-07-19更新：pair maskはexperimental系列（`model_dual_expfam_masked.py`）で対応済み・
+      strict held-out実験も実施済み。fixed本体APIへの統合が残課題。BICの位置づけは
+      `reports/theory_audit/`の理論監査（現行基準はSchwarz BICではなくQベース完全データ型基準）を参照）

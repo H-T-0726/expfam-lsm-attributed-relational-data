@@ -29,6 +29,24 @@
 | KI-009 | 低 | archive/Notion系ファイルは研究本体ではない | `archive/notion_scripts/`, `archive/misc/`にNotion投稿用スクリプト・katex調査メモ・論文執筆参考PDFが存在する | 研究の数式・実験ロジックとは無関係。誤って参照すると混乱を招く | 研究内容の確認時は参照しない。整理候補としてCLEANUP_MANIFEST.mdに記載 | `archive/notion_scripts/*`, `archive/misc/*`, `archive/paper_writing_examples/*` |
 | KI-010 | 低 | BICのパラメータ数定義の確認余地 | `expfam/CLAUDE.md`に記載のnum_params定義（`k*d - k*(k-1)//2 + ...`）の検証は完了していない | BIC値・k選択結果の解釈に影響する可能性がある | `utils_expfam.py`の`calc_bic_dual`実装とBIC定義の手計算照合を別途行う | `expfam/src/utils_expfam.py` |
 
+**（2026-07-19 更新注記：KI-010 / KI-012 の現在地）**
+
+- KI-012：「現在のモデルAPIはpair maskに対応しておらず」は2026-06時点の記述。
+  **experimental系列（`expfam/src/experimental/model_dual_expfam_masked.py`、
+  2026-07-10コミット16d456c以降）でpair mask（strict held-out）対応済み**であり、
+  per-columnフェーズのMovieLens pilotはstrict held-outで実施されている。
+  ただしfixed本体API（`model_dual_expfam_fixed.py`）には未統合のままであり、
+  overdispersion（NB対応）はexperimentalのNB版で試行段階。KI-012は
+  「fixed本体APIへの統合と正式化」が残課題として継続。
+- KI-010：理論監査（2026-07-18、`reports/theory_audit/theory_audit_report_20260718.md`
+  §6-7）で次を確認済み：(i) `kd − k(k−1)/2` は観測分布を不変にする直交群 O(k) の
+  次元と整合する（導出あり）。(ii) w0・w（2個）はkに依存しない定数のため
+  **k選択の順位には影響しない**。(iii) 一方、Q_strictは周辺尤度ではなく
+  EMのQ関数のMC近似であるため、現行基準はSchwarz BICではなく
+  「Qベース完全データ型基準（ICL-type）」として扱う。この位置づけの問題は
+  パラメータ数の定義とは別問題として未解決（`reports/theory_audit/
+  diagnostic_designs_20260719.md` §1参照）。
+
 ---
 
 ## 今すぐ主張してよいこと
