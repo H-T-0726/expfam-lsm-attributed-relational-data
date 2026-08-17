@@ -115,4 +115,54 @@ per-column は **prototype** の位置づけを維持。総括は
 | 単独 vs 同時統合 | 人工mixed-X（gauss/bern/pois各3列+Poisson-Y、strict held-out）で single_{g,b,p}/per_column_all/all_{g,b,p}/binarized/y_only の9条件×3seed | `tools/research_audit/run_per_column_single_vs_joint.py` | `expfam/results/per_column_family/single_vs_joint_{summary,agg,runinfo}.csv` | `figures/per_column_family/single_vs_joint_{rmse_z,heldout_ll}.*` | current_support | ✗ | all_* は比較用の誤指定モデル（変換は runinfo 明記）。joint 0.235 vs all_gaussian 0.234 は誤差内、all_bernoulli は1/3 trialで崩壊 |
 | 属性追加 ablation | Y-only→+Bern→+Gauss→+Pois→+noise3 の5条件×3seed | `tools/research_audit/run_per_column_attribute_ablation.py` | `expfam/results/per_column_family/attribute_ablation_{summary,agg,runinfo}.csv` | `figures/per_column_family/attribute_ablation_lines.*` | current_support | ✗ | 改善は情報の濃い属性（+Gauss −22%）のみ。+Bern 無効果、+noise 無効果〜微悪化 |
 | ノイズ属性チェック | informative9列+ノイズ（gauss3/6/12, bern3, pois3、全て正指定）の6条件×3seed | `tools/research_audit/run_per_column_noise_check.py` | `expfam/results/per_column_family/noise_check_{summary,agg,runinfo}.csv` | `figures/per_column_family/noise_check_lines.*` | current_support | ✗ | 改善なし。悪化は seed 依存（trial1 で +13%）。用量反応は3seedでは確定できず |
-| MovieLens mixed-X pilot | genre19(Bern)+平均評価/公開年(z-score Gauss)+評価件数(Pois) の6条件×4fit、strict held-out | `tools/research_audit/run_movielens_mixed_x_percolumn.py` | `expfam/results/per_column_family/movielens_mixed_x_{summary,agg,runinfo}.csv` | なし | current_support | ✗ | **ネガティブ結果**: mixed_percolumn −3.815 < genre_only −3.423。X切片なしのため評価件数（平均154）のPoisson列がZ推定を強く支配した可能性がある。評価件数はYと同源（リーク懸念も記録）。切片/スケーリングが実用化の前提と特定 |
+| MovieLens mixed-X pilot | genre19(Bern)+平均評価/公開年(z-score Gauss)+評価件数(Pois) の6条件×4fit、strict held-out | `tools/research_audit/run_movielens_mixed_x_percolumn.py` | `expfam/results/per_column_family/movielens_mixed_x_{summary,agg,runinfo}.csv` | `figures/per_column_family/movielens_mixed_x_test_y_ll.*`（`plot_per_column_figures.py` の `fig_movielens_mixed_x()`、2026-07-14 追加） | current_support | ✗ | **ネガティブ結果**: mixed_percolumn −3.815 < genre_only −3.423。X切片なしのため評価件数（平均154）のPoisson列がZ推定を強く支配した可能性がある。評価件数はYと同源（リーク懸念も記録）。切片/スケーリングが実用化の前提と特定 |
+
+---
+
+## story diagnostics フェーズ（2026-07-13、branch: research/story-diagnostics、experimental 使用）
+
+per-column family 検証フェーズで残った2つの未検証仮説
+（「人工データで改善幅が小さかったのは Y 側の情報が濃い設定だったからではないか」
+「MovieLens で mixed_percolumn が悪化したのはどの属性・どの処理が原因か」）を、
+仮説そのものを検証する追加診断実験として実施したフェーズ。
+統括は `reports/story_diagnostics/story_diagnostics_summary_20260713.md` を参照。
+per-column は引き続き **prototype**。complementary blocks 実験は未着手
+（設計メモのみ `story_diagnostics_next_plan_20260713.md` に保持）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| Y sparsity stress（smoke） | Y の学習観測率 y_obs_rate∈{1.0,0.5,0.2,0.1} × 4条件（y_only/single_gaussian/per_column_all/all_gaussian）、trials 少数の軽量確認 | `tools/research_audit/run_y_sparsity_stress.py` | `expfam/results/story_diagnostics/y_sparsity_stress_20260713_{,agg,runinfo}.csv` | `figures/story_diagnostics/y_sparsity_{rmse_z,test_y_ll}.png` | archive | ✗ | 動作確認用の予備実行。結論の根拠には trials10 版を使うこと |
+| Y sparsity stress（trials=10） | 同上を trials=10（160 fits、NaN・発散なし）で再実行 | 同上（`TRIALS` 定数を変更） | `expfam/results/story_diagnostics/y_sparsity_stress_20260713_trials10{,_agg,_runinfo}.csv` | `figures/story_diagnostics/y_sparsity_{rmse_z,test_y_ll}_trials10.png` | current_support | ✗ | **ポジティブ結果**: y_obs_rate=0.1 で RMSE_Z per_column_all 0.343±0.026 < all_gaussian 0.769±0.133 < y_only 1.176±0.086。y_obs_rate=1.0 では差は小さい（0.221〜0.235）。**生成設定は1つのみ**（n=80, d=9, k*=2, gauss3+bern3+pois3, Poisson-Y）であり他設定への一般化は未確認 |
+| MovieLens attribute diagnosis（smoke） | genre に属性を1つずつ足す11条件、count 処理3通り（raw Poisson / log-Gaussian / zscore-Gaussian）、1 fit/条件の軽量版 | `tools/research_audit/run_movielens_attribute_diagnosis.py` | `expfam/results/story_diagnostics/movielens_attribute_diagnosis_20260713_smoke{,_agg,_runinfo}.csv` | `figures/story_diagnostics/movielens_{attribute_test_y_ll,count_treatment_comparison}_smoke.png` | archive | ✗ | 動作確認用の予備実行。結論の根拠には trials4 版を使うこと |
+| MovieLens attribute diagnosis（trials=4） | 同上を 4 fits/条件（44 fits、NaN・発散なし）で再実行 | 同上 | `expfam/results/story_diagnostics/movielens_attribute_diagnosis_20260713_trials4{,_agg,_runinfo}.csv` | `figures/story_diagnostics/movielens_{attribute_test_y_ll,count_treatment_comparison}_trials4.png` | current_support | ✗ | **診断結果**: test_y_ll は genre_only −3.417±0.017 に対し genre+count(raw,Poisson) −3.792±0.057、count を log/z-score で Gaussian 化すると −3.415/−3.416（差 +0.002、std 内）。mixed_percolumn の悪化はほぼ count 列1つの扱いで説明できる。⚠ **リーク注意**: mean_rating・ratings_count は pair split 前に全 u.data から計算され Y と同源。厳密な汎化性能の証拠ではなく**悪化要因の切り分け診断**として扱う。「log count 版が genre_only を上回った」とは言わない（差 +0.003 < std 0.014） |
+
+**このフェーズの結論（`story_diagnostics_summary_20260713.md` §6）:** 属性ごとに分布を変えるだけでは不十分。
+ただし Y が疎な人工条件では有効性が見えた。MovieLens の悪化要因は count 属性の扱いと特定。
+次フェーズの実装優先項目は **X側切片・スケーリング・属性ブロック重み** の3点。
+
+---
+
+## 理論監査フェーズ（2026-07-18〜19、read-only）
+
+実験ではなくリポジトリ内のコード・CSV・文書に対する読み取り専用の理論監査。
+モデル変更・再学習は一切行っていない。
+
+| 成果物 | 内容 | 参照 |
+|---|---|---|
+| `reports/theory_audit/theory_audit_report_20260718.md` | 本体。同時分布の確定、1/2 不要の導出、旧0.5系列の tempering 解釈、MATLAB `calcGrad`/`calcAi` の不整合、現行 BIC が Schwarz BIC ではなく ICL 型（完全データ型）基準であること、識別可能性が O(k) に一致すること、修論スコープ推奨 | KI-010 |
+| `reports/theory_audit/math_code_correspondence_20260718.md` | 数式とコードの対応表 | 同上 |
+| `reports/theory_audit/fix_and_experiment_plan_20260718.md` | 修正・実験計画 | `diagnostic_designs_20260719.md` の実験計画2 が参照 |
+| `docs/theory_audit/CLAUDE_FABLE_5_THEORY_AUDIT_MASTER_PROMPT.md` | 上記監査の実施に用いたマスタープロンプト（来歴記録）。2026-08-17 に root から移動 | 報告書冒頭 |
+| `reports/theory_audit/diagnostic_designs_20260719.md` | 上記監査の再検証と診断設計（すでに main 収録済み） | — |
+
+---
+
+## クリーンアップ監査（2026-07-07、read-only、dry-run）
+
+削除・移動・リネームを一切行わない dry-run の棚卸し。実行結果ではなく**候補一覧**である点に注意。
+
+| 成果物 | 内容 | 注意 |
+|---|---|---|
+| `tools/cleanup_audit.py` | ツリーを走査し cleanup 候補を CSV 出力する dry-run スクリプト | 削除・移動・編集は行わない（docstring に明記） |
+| `reports/cleanup_audit/cleanup_candidates_20260707.csv` | 753行。KEEP 597 / ARCHIVE_CANDIDATE 131 / DELETE_CANDIDATE 13 / REVIEW_REQUIRED 12 | 自動分類であり**実行判断ではない** |
+| `reports/cleanup_audit/cleanup_review_20260707.md` | 上記CSVの人間レビュー用サマリ | DELETE_CANDIDATE 13件は主に `__pycache__` 系 |
