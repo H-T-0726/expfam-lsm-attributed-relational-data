@@ -3,13 +3,15 @@ per-column 検証フェーズの図を作成する。
 
 入力（すべて expfam/results/per_column_family/）:
     single_vs_joint_summary.csv / attribute_ablation_summary.csv /
-    noise_check_summary.csv
+    noise_check_summary.csv / movielens_mixed_x_agg.csv
 
 出力（figures/per_column_family/、png + pdf）:
     single_vs_joint_rmse_z          条件別 RMSE_Z（seed 別点 + 平均バー）
     single_vs_joint_heldout_ll      条件別 strict held-out test Y 対数尤度
     attribute_ablation_lines        属性追加 ablation の折れ線（RMSE_Z / test ll）
     noise_check_lines               ノイズ列数に対する性能変化
+    movielens_mixed_x_test_y_ll     MovieLens pilot の条件別 strict held-out
+                                    test Y 対数尤度（横向きドットプロット）
 
 配色は dataviz ルールに従い「役割」で固定:
     per-column（本命 prototype）= blue、単独属性 = aqua、
@@ -54,6 +56,20 @@ ROLE = {
 ORDER = ["per_column_all", "single_gaussian", "single_poisson",
          "single_bernoulli", "all_gaussian", "all_poisson",
          "all_bernoulli_binarized", "all_bernoulli", "y_only"]
+
+# MovieLens pilot（movielens_mixed_x_agg.csv）専用の表示名・配色・並び順。
+# 役割は既存 ROLE と同じ色定数を再利用（per-column=blue, 全列強制=yellow,
+# y_only=gray, 単独属性ブロック=aqua）。
+ROLE_ML = {
+    "genre_only": ("Genre only", C_SINGLE),
+    "y_only": ("Y only", C_YONLY),
+    "mixed_all_gaussian": ("Mixed X: forced Gaussian", C_FORCED),
+    "mixed_percolumn": ("Mixed X: per-column", C_PERCOL),
+    "rating_stats_only": ("Rating statistics only", C_SINGLE),
+    "mixed_all_bernoulli": ("Mixed X: forced Bernoulli", C_FORCED),
+}
+ORDER_ML = ["genre_only", "y_only", "mixed_all_gaussian",
+            "mixed_percolumn", "rating_stats_only", "mixed_all_bernoulli"]
 
 plt.rcParams.update({
     "font.family": "DejaVu Sans", "figure.dpi": 150,
@@ -194,8 +210,61 @@ def fig_noise():
     save(fig, "noise_check_lines")
 
 
+def fig_movielens_mixed_x():
+    """MovieLens pilot: 条件別 strict held-out test Y log-likelihood。
+
+    値は全条件が負であり 0 起点の棒グラフは比較を歪めるため、
+    横向きドットプロット（平均点 + agg CSV の標準偏差によるエラーバー）にする。
+    数値は movielens_mixed_x_agg.csv（集計済み）からのみ読み込み、
+    ソースコードへのハードコードは行わない。
+    """
+    df = pd.read_csv(RES_DIR / "movielens_mixed_x_agg.csv")
+
+    present = list(df["condition"])
+    conds = [c for c in ORDER_ML if c in present]
+    missing = [c for c in ORDER_ML if c not in present]
+    extra = [c for c in present if c not in ORDER_ML]
+    for c in missing:
+        print(f"[warn] fig_movielens_mixed_x: condition '{c}' not found in "
+              f"movielens_mixed_x_agg.csv — skipped")
+    if extra:
+        print(f"[warn] fig_movielens_mixed_x: unexpected condition(s) in CSV "
+              f"not in ORDER_ML (NOT plotted): {extra}")
+
+    fig, ax = plt.subplots(figsize=(6.8, 3.8))
+    ypos = np.arange(len(conds))[::-1]
+    for y, c in zip(ypos, conds):
+        row = df.loc[df["condition"] == c].iloc[0]
+        mean = float(row["test_y_ll_mean"])
+        std = row.get("test_y_ll_std", np.nan)
+        label, color = ROLE_ML[c]
+        if pd.notna(std):
+            ax.errorbar([mean], [y], xerr=[float(std)], fmt="o",
+                        color=color, ecolor=color, elinewidth=1.3,
+                        capsize=4, markersize=8, markeredgecolor="white",
+                        markeredgewidth=1.0, zorder=3)
+        else:
+            ax.scatter([mean], [y], s=70, color=color, zorder=3,
+                       edgecolors="white", linewidths=1.0)
+        ax.text(mean, y + 0.30, f"{mean:.3f}", va="bottom", ha="center",
+                fontsize=8.5, color=INK)
+
+    ax.set_yticks(ypos)
+    ax.set_yticklabels([ROLE_ML[c][0] for c in conds])
+    ax.set_ylim(min(ypos) - 0.7, max(ypos) + 0.7)
+    ax.margins(x=0.15)
+    ax.set_xlabel("test Y log-likelihood / pair  (higher is better)")
+    ax.set_title("MovieLens: held-out Y prediction by attribute condition",
+                 loc="left")
+    ax.grid(axis="x", color=GRID, linewidth=0.7, zorder=0)
+    ax.set_axisbelow(True)
+    fig.tight_layout()
+    save(fig, "movielens_mixed_x_test_y_ll")
+
+
 if __name__ == "__main__":
     fig_single_vs_joint()
     fig_ablation()
     fig_noise()
+    fig_movielens_mixed_x()
     print("done")
