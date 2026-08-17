@@ -1,3 +1,7 @@
+> ⚠ **DEPRECATED (2026-04 時点の記録・historical evidence)** — 式・パス・作業ディレクトリはすべて古い。確定事項は root `CLAUDE.md` を正とする（KI-008）。
+> Claude Code の自動ロードからは `.claude/settings.json` の `claudeMdExcludes` で除外済み（2026-08-18, Phase 1, #7）。
+> 本文は当時の理解を示す一次記録として保存しており、内容は変更していない。
+
 # CLAUDE.md — Dual-ExpFam LSM プロジェクト
 
 ## このプロジェクトの目的
