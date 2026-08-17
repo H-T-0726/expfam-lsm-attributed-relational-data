@@ -38,5 +38,15 @@ secrets.json
 reproduction/results/raw/
 reproduction/results/tmp/
 expfam/results/raw/
-expfam/results/tmp/archive/paper_writing_examples/
+expfam/results/tmp/
 /archive/paper_writing_examples/**
+
+# Claude Code (machine-local; never commit)
+# settings.local.json holds per-machine paths and permission approvals.
+# Shared project settings belong in .claude/settings.json instead.
+.claude/settings.local.json
+CLAUDE.local.md
+.claude/worktrees/
+
+# pytest
+.pytest_cache/
