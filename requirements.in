@@ -1,0 +1,20 @@
+# Runtime dependencies (Phase 2 environment baseline, Issue #9).
+#
+# Policy: direct dependencies are pinned to the versions observed in the
+# best-known current system environment (2026-08-20 measurement), so that
+# Phase 2 records the existing environment rather than upgrading it.
+# Exception: psutil was NOT installed in the current system environment;
+# it is a newly declared dependency (see reports/environment/baseline_20260818.md).
+#
+# Source of truth for the package set: AST import inventory over active sources
+#   expfam/src/ (archive excluded), expfam/src/experimental/,
+#   tools/, reproduction/src/, reproduction/scripts/
+# Compile with:
+#   uv pip compile --upgrade requirements.in -o requirements.txt --generate-hashes
+
+numpy==2.3.5
+pandas==2.3.3
+scipy==1.16.3
+matplotlib==3.10.7
+scikit-learn==1.8.0
+psutil==7.2.2

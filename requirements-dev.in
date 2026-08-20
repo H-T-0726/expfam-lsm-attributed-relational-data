@@ -1,0 +1,9 @@
+# Development dependencies (Phase 2 environment baseline, Issue #9).
+#
+# pytest is pinned to the version observed in the current system environment.
+# Compile with:
+#   uv pip compile --upgrade requirements-dev.in -o requirements-dev.txt --generate-hashes
+
+-r requirements.in
+
+pytest==9.0.2
