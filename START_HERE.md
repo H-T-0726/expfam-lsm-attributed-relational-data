@@ -1,69 +1,43 @@
-# START_HERE.md
+# START_HERE.md — DEPRECATED（入口は README.md に移動しました）
 
-## このリポジトリの目的
-
-先行研究（Mikawa et al., 2024, NOLTA IEICE vol.15 no.2、Bernoulli-Y + Gaussian-X 固定の潜在構造モデル）を、
-**指数型分布族（Gaussian / Bernoulli / Poisson）に一般化した潜在構造モデル（Dual-ExpFam LSM）**の研究。
-学会予稿としての主要成果は `conference_submission_final_draft.md` にまとまっている。
-
----
-
-## まず読むファイル（優先順位つき）
-
-1. **START_HERE.md**（このファイル）— 全体の入口
-2. **`CLAUDE.md`**（root）— 確定済みの数式・記号・過去に直した誤り・残タスクの正本
-3. **`KNOWN_ISSUES.md`** — 既知の問題点・混同しやすい数値の一覧。作業前に必ず確認
-4. **`RESEARCH_MASTER.md`** — 研究内容（目的・手法・実装対応表・主張の安全レベル）の正本
-5. **`EXPERIMENT_REGISTRY.md`** — 実験結果ファイルの対応表（どのCSVがどの図・どの主張に対応するか）
-6. **`conference_submission_final_draft.md`** — 提出予定の原稿本体
-7. **`expfam/README.md`** — `expfam/`フォルダ（実装・実験の本体）の使い方
-8. **`reports/claims_and_evidence.md`** — 個々の研究主張と根拠CSVの対応表
-9. **`reports/real_data_experiment_summary.md`** — 実データ実験フェーズ（Wine/Cora/MovieLens、学会予稿には未収録・修論フェーズ向け）の総括。「今回言えること」「まだ言えないこと」を必ず確認
+> ⚠ **このファイルは入口としては非推奨です。**
+> かつてはリポジトリ全体の入口でしたが、案内層の刷新（2026-08-20）により
+> その役割は `README.md`（人間向け）と `CLAUDE.md`（Claude Code 向け）に分割されました。
+> **ここに書かれていた高信頼／低信頼ファイルの一覧・混同注意事項は、下表の各正本へ移設済みです。**
+>
+> このファイルは、凍結済み文書（`CLEANUP_MANIFEST.md`、
+> `docs/theory_audit/CLAUDE_FABLE_5_THEORY_AUDIT_MASTER_PROMPT.md`）からの参照を
+> 壊さないために stub として残しています。**削除しないでください。**
 
 ---
 
-## 高信頼ファイル
+## 現在の入口
 
-- `CLAUDE.md`（root）— 確定式・記号・過去の誤り修正履歴の正本
-- `conference_submission_final_draft.md` — 提出原稿
-- `figures/fig1a_n_sweep_color.*`, `figures/fig1b_misspecification_color.*` — 提出用の最終図
-- `expfam/src/model_dual_expfam.py`, `model_expfam.py`, `utils_expfam.py` — 提案手法の実装本体（コードは直接確認可能な一次情報）
-- `expfam/results/exp_scenario_{A,B,C}_exp{1,2,3,4}*.csv` — 本文採用実験の結果CSV
-- `reports/claims_and_evidence.md` — 主張と根拠CSVの対応表
-- `docs/teacher/teacher_reply_draft.md`, `docs/teacher/half_factor_teacher_reply.md` — 先生への返答案（Q1/Q2/Q3/Q4対応）
-- `expfam/src/model_dual_expfam_fixed.py` — 0.5除去版の実装本体。実データ実験フェーズはすべてこちらを使用
-- `expfam/results/real_data/**`, `expfam/figures/real_data/**` — 実データ実験（Wine/Cora/MovieLens）の結果・図一式。
-  詳細は`EXPERIMENT_REGISTRY.md`「実データ実験フェーズ」節、系譜は`reports/real_data_experiment_summary.md`を参照
+| 知りたいこと | 現在の正本 |
+|---|---|
+| リポジトリの入口・環境構築・ディレクトリ規約・実験の回し方 | **`README.md`** |
+| 研究内容（目的・従来手法・提案手法・数式・フェーズ史・先生対応） | **`RESEARCH_MASTER.md`** |
+| Claude Code での作業規約（確定式・実装系列・表現の限定条件・安全ルール） | **`CLAUDE.md`** |
+| 実験の provenance（実験 → スクリプト → CSV → 図 → 主張） | **`EXPERIMENT_REGISTRY.md`** |
+| 既知のリスク・混同しやすい数値・まだ主張してはいけないこと | **`KNOWN_ISSUES.md`** |
 
-## 低信頼・参考扱いファイル
+補助:
 
-- `expfam/CLAUDE.md` — 旧Geminiセッション向け。確定事項はroot `CLAUDE.md`を優先（KI-008）
-- `expfam/results/GEMINI_REPORT_*.md`, `expfam/results/archive/GEMINI_REPORT_*.md` — AI生成・未検証（KI-007）
-- `docs_for_notebooklm/*` — NotebookLM向け資料。一部はAI生成の調査結果を含むため、数値は元CSVで再確認すること
-- `archive/notion_scripts/*`, `archive/misc/*`, `archive/paper_writing_examples/*` — 研究本体と無関係（KI-009）
-- `expfam/results/wine_dual_results.csv`, `wine_F.npy` — 旧0.5版・未評価（KI-006）。fixed版での評価は
-  `expfam/results/real_data/wine_fixed_pilot/`・`wine_old05_audit/`で実施済みだが、このファイル自体は旧版のまま
-- `expfam/results/distribution_mismatch_fixed/*` — fixed版（0.5なし）の補助実験。本文には未採用（KI-002）
-- `expfam/results/real_data/cora_subset_pilot/` — Cora BFSサブセット。1クラスが78%を占め不適切と判明し不採用
-  （`cora_balanced_subset_pilot/`以降に置き換え済み。参照のみ）
+- 学会予稿本体 — `conference_submission_final_draft.md`
+- 実データ実験フェーズの総括 — `reports/real_data_experiment_summary.md`
+- 実行環境ベースライン — `reports/environment/baseline_20260818.md`
+- 補助資料の地図 — `docs/README.md`
+- 外部 AI ツール向け派生資料の注意 — `docs_for_notebooklm/README.md`
 
 ---
 
-## 絶対に混同してはいけないこと
+## かつてここにあった注意事項の移設先
 
-- **旧版とfixed版**：`model_dual_expfam.py`（0.5あり、本文採用）と`model_dual_expfam_fixed.py`（0.5なし、補助実験のみ）は異なる実装。結果を混在させない（KI-002）。
-- **23.6倍 / 41.5倍 / 38.97倍**：いずれもScen.Cの誤指定実験の数値だが、出所が異なる3つの独立した値（KI-003）。
-- **原稿式と現行Python実装**：原稿式（1/2なし）が正しいとされているが、現行Python実装の旧版には0.5が残っている（KI-001）。「実装が正しい」と早合点しない。
-- **本文採用実験と補助実験**：Exp1-4（`exp_scenario_*`系）は本文採用。`distribution_mismatch_fixed/*`、Wine実験、`results/archive/*`は補助・未採用。
-- **実データ実験フェーズは学会予稿には未収録**：`expfam/results/real_data/*`はすべて2026-06-17以降の修論フェーズ向け追加検証であり、`conference_submission_final_draft.md`の主張には含まれない。
-- **`movielens_colike_clean/`と`movielens_final_clean/`は役割が異なる**：前者は本文/Notion用に3指標へ縮約した版、後者は監査用のフル指標版（`summarize_movielens_final_for_figures.py`のdocstringに明記、前者を上書きしない）。名前だけでは区別できないため注意。
-
----
-
-## Claude Codeに作業させる前のルール
-
-- 数値主張は必ずCSV・実行ログ等の一次データに紐づける。AI生成レポート（GEMINI_REPORT_*等）を根拠にしない（KI-007）。
-- コード修正・実験再実行・CSV再生成・ファイル移動・削除を行う前に、必ず目的とスコープをユーザーに確認する。
-- `KNOWN_ISSUES.md`の「まだ主張してはいけないこと」に該当する内容を、報告書や原稿案に書かない。
-- 既存の正本ファイル（root `CLAUDE.md`, `conference_submission_final_draft.md`, `README.md`）は、明示的な指示がない限り編集しない。
-- 0.5係数問題（KI-001）に触れる際は、「Newton方向が正しいとは断定できない」という限定条件を必ず付記する。
+| 旧内容 | 現在の正本 |
+|---|---|
+| 高信頼／低信頼ファイルの一覧 | `README.md`（ディレクトリ規約・source of truth）＋ `KNOWN_ISSUES.md` |
+| 旧版と fixed 版を混同しない | `CLAUDE.md` §3（実装系列）、`KNOWN_ISSUES.md` KI-002 |
+| 23.6× / 41.45× / 38.97× の混同注意 | `KNOWN_ISSUES.md` KI-003 |
+| 原稿式と Python 実装の 0.5 差 | `CLAUDE.md` §2・§5、`KNOWN_ISSUES.md` KI-001 |
+| 実データ実験フェーズは学会予稿に未収録 | `README.md`（現在の位置づけ）、`RESEARCH_MASTER.md` §8b |
+| Claude Code に作業させる前のルール | `CLAUDE.md` §4〜§6 |

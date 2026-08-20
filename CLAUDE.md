@@ -1,144 +1,131 @@
-# CLAUDE.md — Dual-ExpFam LSM プロジェクト
+# CLAUDE.md — Dual-ExpFam LSM（Claude Code 向け作業規約）
 
-## 概要
-
-先行研究[1]（Bernoulli-Y + Gaussian-X 固定）を**指数型分布族に一般化**した潜在構造モデルの学会予稿。
-
-- **メイン原稿：** `conference_submission_final_draft.md`（完成済み）
-- **提出用図：** `figures/fig1a_n_sweep_color.pdf/png`（n-RMSE）, `figures/fig1b_misspecification_color.pdf/png`（誤指定）
-- **先行研究：** Mikawa et al. (2024), NOLTA IEICE vol.15 no.2 — PDF は `paper/` にあるが読み込み不可
+人間向けの入口・環境構築・ディレクトリ規約は `README.md` を参照。
+このファイルには **Claude Code が毎セッション守る制約だけ** を書く。
+実験数値・ファイル一覧・先生対応履歴・TODO はここに置かない（正本は §6）。
 
 ---
 
-## 生成モデル（確定式）
+## 1. 確定した生成モデルと確定式
+
+これに反する式を書かない。
 
 ```
 z_i  ~ N(0, I_k)
 y_ij ~ ExpFam_Y( η_ij^Y = w_0^Y + w^Y z_i^T z_j )   i < j
-x_il ~ ExpFam_X( η_il^X = f_l^T z_i )                バイアスなし
+x_il ~ ExpFam_X( η_il^X = f_l^T z_i )               バイアスなし
 ```
 
-- `w_0^Y, w^Y ∈ R`：**スカラー**（行列 W_Y ではない）
-- **θ = { F, w^0_Y, w^Y }**、Gaussian-X のときのみ対角 Σ を追加で推定
+- `w_0^Y, w^Y ∈ R` は **スカラー**（行列 W_Y ではない）。
+- **X は per-component**：X の尤度は列 `l` ごとに因子分解する。
+  ただし標準の `DualExpFamLSM` では **`family_x` は全 X 列で共通の1種類**である。
+  列ごとに異なる family を指定できるのは `experimental/model_dual_expfam_percolumn.py`
+  （`family_x_list`）だけであり、**prototype・本文採用不可**。
+- **θ = { F, w_0^Y, w^Y }**
+  **＋ Gaussian-X のとき Σ_X（対角）／＋ Gaussian-Y のとき σ_Y²**。
+  σ_Y² は M-step で MLE 推定される（`calc_sigma_y`）。
+  **数理上は `σ_Y²` を dispersion として扱うが、実装は標準偏差 `σ_Y` を `self.sigma_y` に保持し、
+  使用時に二乗する**（`self.sigma_y ** 2`）。
+
+E-step（分散パラメータ φ を落とさない）:
+
+```
+V_Y(η) = A_Y''(η) / φ_Y        φ_Y = 1（Bernoulli/Poisson）, φ_Y = σ_Y²（Gaussian）
+V_X    = Σ_X^{-1}              （Gaussian-X）
+V_X    = diag(A_X''(F m_i))    （Bernoulli/Poisson-X）
+
+gradient : ... + w^Y Σ_{j≠i} [ T_Y(y_ij) − A_Y'(η_ij^Y) ] / φ_Y · z_j
+A_i      = I_k + F^T V_X(m_i) F + (w^Y)^2 Σ_{j≠i} V_Y(η_ij^Y) z_j z_j^T
+```
 
 ---
 
-## 精度行列（確定式）
+## 2. 1/2 係数（5系統を絶対に混同しない）
 
-```
-A_i = I_k  +  F^T V_X(m_i) F  +  (w^Y)^2 Σ_{j≠i} A_Y''(η_ij^Y) z_j z_j^T
-```
+| 系統 | 1/2 |
+|---|:---:|
+| **Mikawa et al. 2024 の印刷された原論文式**（Eq.19/20/22/23、Appendix A-1/A-3/A-5） | **あり** |
+| old 0.5 Python 系列（`model_expfam.py` / `model_dual_expfam.py`） | あり |
+| **本研究の独立再導出・採用式**（unique undirected-pair conditional） | **extra 1/2 なし** |
+| fixed Python 系列（`model_dual_expfam_fixed.py`） | なし |
+| MATLAB `calcAi` | なし |
 
-**1/2 は不要**（先生の指摘通り。MATLAB calcAi も 1/2 なし）。  
-（2026-07-19更新：主根拠は対称関係尤度からの独立した数式導出である。
-MATLABは補助的な実装比較としてのみ参照する。手元コードにはY側勾配のw欠落等、
-追加確認が必要な箇所があるため、MATLABを単独のゴールドスタンダードとは扱わず、
-先行研究全体が誤りとも断定しない。）
-証明：`(1/2)Σ_{i≠j}` で Q 関数を書いても z_i 微分で両側から寄与が合算され 1/2 が消える。
-
-```
-V_X = Σ^{-1}              （Gaussian-X）
-V_X = diag(A_X''(F m_i))  （Bernoulli/Poisson-X）
-```
-
-**⚠ Python 実装（model_expfam.py L.135、model_dual_expfam.py L.159, 200）には spurious な 0.5 が残っている。**  
-現行 Python 実装では，E-step の Y 側 Term3 の gradient と precision の両方に 0.5 が残っている。  
-ただし，0.5 が掛かっているのは Y 側項のみであり，Z 事前分布項（Term1）および X 側項（Term2）には掛かっていない。  
-そのため，Y 側が支配的な場合には近似的に打ち消される可能性があるが，  
-**posterior 全体の Newton 方向が正しいとは断定できない**（Term1・Term2 と Term3 のスケールが異なるため）。  
-また，Laplace 近似のサンプリング分散は Y 側が支配的な方向で大きくなりやすい（2 倍と断定はできない）。  
-本研究の原稿では，再導出および MATLAB 実装との照合に基づき，1/2 を含まない式を採用する。  
-論文の式は正しい。実装修正は今後の課題（今は触らない）。
+- **原論文の印刷式には 1/2 がある**（2026-08-18 に原論文を直接確認）。
+  **「原論文にも 1/2 がない」と書かない。**
+- 本研究が採用式で 1/2 を外しているのは、**原論文の印刷式と本研究の採用式の意図的な差**である。
+  根拠は独立な再導出であり、MATLAB は補助的な実装比較としてのみ参照する（単独の正解として扱わない）。
+- 一次確認: `docs/math_notes/half_factor_primary_source_confirmation_20260818.md`
+- 導出: `docs/math_notes/half_factor_math_explanation.md`
+- 詳細: `RESEARCH_MASTER.md` §6 / `KNOWN_ISSUES.md` KI-001
 
 ---
 
-## 図1(b) と誤指定倍率の扱い（重要）
-
-`figures/fig1b_misspecification_color.png` は以下の3条件のバーのみを表示する。
-
-- X-side misspec.：Y を正解に固定し X のみ誤指定した場合の最大値
-- Y-side misspec.：X を正解に固定し Y のみ誤指定した場合の最大値
-- Fixed Gauss-X/Bern-Y：先行研究固定条件（X=Gaussian, Y=Bernoulli）
-
-| 値 | 条件 | 図に表示 | 原稿本文 |
-|---:|---|:---:|:---:|
-| **23.6×** | Scen.C の Fixed Gauss-X/Bern-Y（X=Gaussian, Y=Bernoulli） | ✓ 灰色バー（図の視覚最大値） | 記載なし |
-| **41.5×** | Scen.C の X=Gaussian, Y=Poisson（**X・Y 両方誤指定**） | ✗ バーなし | L.83「最大41.5倍」|
-
-**方針：**
-- 原稿本文の「41.5倍」は CSV 全条件中の最大値として事実上正確だが，図中に対応するバーがない。
-- NotebookLM 用資料では 23.6× と 41.5× を必ず分けて説明し，混同しない。
-- Scen.A の最大値 3.41× は X-only 誤指定（図に表示あり）。  
-  Scen.B の 7.35× と Scen.C の 41.5× は両方誤指定（図に表示なし）。  
-  本文の「最大悪化倍率」はシナリオごとに異なる種別の条件から来ている点に注意。
-
----
-
-## 過去に直した誤り（再発防止）
-
-| 式 | 誤（旧） | 正（現在） |
-|----|---------|-----------|
-| eq(1) | `σ(z_i^T W_Y z_j)` 行列 | `σ(w_0 + w z_i^T z_j)` スカラー |
-| eq(2) | `N(w_{0l} + z_i^T w_l, σ_l²)` バイアスあり | `N(f_l^T z_i, σ_l²)` バイアスなし |
-| eq(6) | `(w^Y)^2/2 Σ_{j≠i}` | `(w^Y)^2 Σ_{j≠i}` |
-| θ | `{Z, W_Y, w_0, W_X}` | `{F, w_0^Y, w^Y}`（+Gaussian-X ときのみ Σ）|
-
----
-
-## 先生の指摘と対応状況
-
-| # | 指摘 | 結論 | 原稿反映 |
-|---|------|------|---------|
-| Q1 | 指数型分布族の式はスカラーか | OK。「各次元独立適用」を追記 | ✓ |
-| Q2 | X は per-component か | Yes。先行研究の対角 Σ と同構造 | ✓ |
-| Q3 | `Σ_{j≠i}` に 1/2 は不要では | **不要**（正しい）→ 除去済み | ✓ |
-| Q4 | Σ はパラメータか | 条件付き（Gaussian-X のみ）→ 修正済み | ✓ |
-
-**先生への返答ファイル：**
-- Q1/Q2/Q4：`docs/teacher/teacher_reply_draft.md`
-- Q3：**`docs/teacher/half_factor_teacher_reply.md`**（こちらが正しい回答）
-
----
-
-## ファイル構成（重要なもののみ）
+## 3. 実装系列（結果を絶対に混ぜない）
 
 ```
-conference_submission_final_draft.md   メイン原稿（完成）
-figures/fig1a_n_sweep_color.*          提出用図1
-figures/fig1b_misspecification_color.* 提出用図2
-
-expfam/src/model_dual_expfam.py        提案手法本体
-expfam/src/model_expfam.py             基底クラス
-reproduction/src/model.py             先行研究 Python 再現
-Mato Lab Program/calcEtaNewton.m      先行研究 MATLAB（calcAi: 1/2 なし の根拠）
-
-docs/teacher/teacher_reply_draft.md              Q1/Q2/Q4 返答案
-docs/teacher/half_factor_teacher_reply.md        Q3 返答案（正しい版）
-docs/math_notes/half_factor_math_explanation.md  1/2 不要の数学的証明
-docs/math_notes/half_factor_literature_code_check.md  MATLAB vs Python 照合表
-
-expfam/src/model_dual_expfam_fixed.py  0.5除去版（実データ実験フェーズはこちらを使用）
-expfam/results/real_data/              実データ実験（Wine/Cora/MovieLens）結果一式
-expfam/figures/real_data/              同・図一式
-reports/real_data_experiment_summary.md  実データ実験フェーズの総括（詳細は RESEARCH_MASTER.md §8b, EXPERIMENT_REGISTRY.md参照）
+reproduction/src/model.py                       LatentStructuralModel（先行研究 Python 再現）
+└ expfam/src/model_expfam.py                    0.5 あり
+  └ expfam/src/model_dual_expfam.py             0.5 あり ← 学会予稿の本文採用実験
+    └ expfam/src/model_dual_expfam_fixed.py     0.5 なし ← 実データ実験フェーズ
+      └ expfam/src/experimental/model_dual_expfam_masked.py
+        ├ _nb.py    └ _percolumn.py             prototype・本文採用不可
 ```
 
-**注：** 実データ実験フェーズ（Wine/Cora/MovieLens、2026-06-17〜2026-07-07、`main`にマージ済み）は
-学会予稿（`conference_submission_final_draft.md`）には含まれない修論フェーズ向けの追加検証。
-本ファイル（root CLAUDE.md）は主に人工データ実験フェーズ・原稿の確定事項を扱うため、
-実データ実験フェーズの詳細は `RESEARCH_MASTER.md`「8b. 実データ実験フェーズ」と
-`EXPERIMENT_REGISTRY.md`「実データ実験フェーズ」節を参照すること。
+- 数値を引用するときは**必ずどの系列か**を明記する（KI-002）。
+- 異なる系列の結果を同じ表・図に混在させない。
 
 ---
 
-## 残タスク
+## 4. source priority（どれを正とするか）
 
-- [ ] **先生への返答を送る**（`docs/teacher/teacher_reply_draft.md` + `docs/teacher/half_factor_teacher_reply.md` を参照）
-- [ ] **Word 文書に原稿内容を反映する**（.docx はリポジトリ外にある）
-- [ ] Python 実装の 1/2 修正（修論フェーズで対応、今は不要）
-- [x] 実データ実験フェーズ（Wine/Cora/MovieLens、fixed版使用）の実施・`main`へのマージ（2026-07-07完了）
-- [ ] 実データ実験フェーズの残課題：MovieLens pair mask対応（strict held-out）、Cora full-graphへの拡張、
-      Cora実データでのBICペナルティ過大問題への対処（詳細は`KNOWN_ISSUES.md` KI-011, KI-012）
-      （2026-07-19更新：pair maskはexperimental系列（`model_dual_expfam_masked.py`）で対応済み・
-      strict held-out実験も実施済み。fixed本体APIへの統合が残課題。BICの位置づけは
-      `reports/theory_audit/`の理論監査（現行基準はSchwarz BICではなくQベース完全データ型基準）を参照）
+1. 一次データ — 結果 CSV・runinfo・実行ログ・実コード・**先行研究の原論文 PDF**（`paper/A_study_on_latent_structural_models_for_binary_rel.pdf`）
+2. canonical docs — `RESEARCH_MASTER.md` / `KNOWN_ISSUES.md` / `EXPERIMENT_REGISTRY.md` / このファイル
+3. 日付入りで凍結された `reports/<phase>/`（当時の記録として読む）
+4. 参考のみ — `docs_for_notebooklm/*`、`GEMINI_REPORT_*`、`expfam/CLAUDE.md`、`expfam/handoff.md`
+
+**AI 生成レポート・派生資料を一次根拠にしない（KI-007）。** 数値主張は必ず 1 に遡る。
+歴史的文書（`reports/theory_audit/*`、`docs/math_notes/half_factor_literature_code_check.md` 等）は
+その時点の記録であり、現在の状態と異なることがある。書き換えずに現行 canonical docs を正とする。
+
+---
+
+## 5. 表現・主張の限定条件（断定しない）
+
+- **0.5 係数（KI-001）:** 採用式（1/2 なし）を正とする。本文採用実験は 0.5 あり実装で実行されている。
+  0.5 が掛かるのは Y 側項のみで Z 事前分布項・X 側項には掛かっていないため、
+  **「Newton 方向が全体として正しいとは断定できない」を必ず付記する。**
+- **Scen.C の「Y=Gaussian が支配」** は Exp4 ablation からの推測であり、理論的証明はない。
+- **誤指定倍率 23.6× / 41.45× / 38.97×** は系列も条件も異なる別々の値。並べるときは出所を明記する（KI-003）。
+- **モデル選択基準を「Schwarz BIC」と呼ばない。** 現行 `calc_bic_dual` は観測データの周辺尤度ではなく
+  `Q_strict`（EM の Q 関数の MC 近似）を使う。**Q-based complete-data criterion / ICL-type** として扱う
+  （`reports/theory_audit/theory_audit_report_20260718.md` §6-7、KI-010）。
+  関数名 `calc_bic_dual`・CSV 列名 `BIC`・過去結果の呼称は**変更しない**。
+- `KNOWN_ISSUES.md`「まだ主張してはいけないこと」に該当する内容を報告書・原稿案に書かない。
+
+---
+
+## 6. 作業時の安全ルール
+
+- **main を直接編集しない。** `git switch -c <type>/<issue#>-<slug>` でブランチを切る
+  （`experiment/` `audit/` `maintenance/` `docs/`）。
+- 結果 CSV・図はスクリプト経由でのみ生成する。**手で編集しない。**
+- **過去の CSV / runinfo を書き換えない**（事後に推測した情報の追記も禁止）。
+- `EXPERIMENT_REGISTRY.md` は追記して育てる。**既存行のパス文字列を書き換えない・削除しない。**
+- 実行環境は `.python-version`（3.13.14）と `requirements*.txt` を基準とする。
+  ただしこれは今後の baseline であり、**過去実験の環境を再現するものではない**（KI-014）。
+- コード修正・実験再実行・ファイル移動/削除の前に、目的とスコープをユーザーに確認する。
+
+---
+
+## 7. 参照先（必要になったときだけ読む）
+
+| 文書 | 内容 |
+|---|---|
+| `README.md` | 人間向け入口・環境構築・ディレクトリ規約 |
+| `RESEARCH_MASTER.md` | 研究内容の正本（目的・手法・数式の説明・フェーズ史・先生対応 Q1-Q4） |
+| `KNOWN_ISSUES.md` | 事故台帳・「まだ主張してはいけないこと」 |
+| `EXPERIMENT_REGISTRY.md` | 実験 → スクリプト → CSV → 図 → 主張の provenance |
+| `conference_submission_final_draft.md` | 学会予稿（完成・変更しない） |
+| `reports/environment/baseline_20260818.md` | 実行環境ベースライン |
+
+**今後やること（TODO）は GitHub Issue で管理する。このファイルにも他の canonical docs にも書かない。**
