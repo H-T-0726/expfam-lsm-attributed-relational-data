@@ -154,6 +154,7 @@ per-column は引き続き **prototype**。complementary blocks 実験は未着�
 | `reports/theory_audit/fix_and_experiment_plan_20260718.md` | 修正・実験計画 | `diagnostic_designs_20260719.md` の実験計画2 が参照 |
 | `docs/theory_audit/CLAUDE_FABLE_5_THEORY_AUDIT_MASTER_PROMPT.md` | 上記監査の実施に用いたマスタープロンプト（来歴記録）。2026-08-17 に root から移動 | 報告書冒頭 |
 | `reports/theory_audit/diagnostic_designs_20260719.md` | 上記監査の再検証と診断設計（すでに main 収録済み） | — |
+| `docs/math_notes/half_factor_primary_source_confirmation_20260818.md` | **primary-source confirmation evidence（2026-08-18）。** 先行研究 `paper/A_study_on_latent_structural_models_for_binary_rel.pdf` の印刷式に 1/2 が存在すること（Eq.19/20/22/23、Appendix A-1/A-3/A-5）を研究者本人が直接確認した記録。1/2 の所在を5系統に整理。2026-07-18 の理論監査で `[UNRESOLVED]` としていた点を後から解消したものであり、当時の監査記録の本文は historical record として不変のまま保持する | KI-001 |
 
 ---
 

@@ -1,3 +1,12 @@
+> ⚠ **HISTORICAL HANDOFF（2026-03-24 時点の記録）— current canonical source ではない。**
+> 本文の式・パス・作業ディレクトリ・タスクはすべて当時のものであり、更新していない。
+> 特に L.94 / L.104 の Y 側 Term3 は `w/2phi_Y`・`w^2/2phi_Y` と **1/2 を含む形**で書かれており、
+> これは当時参照していた実装（old 0.5 系列）の記述である。**本研究の採用式とは異なる。**
+> 現在の正本は `README.md`（入口・環境・規約）、`CLAUDE.md`（作業規約・確定式）、
+> `RESEARCH_MASTER.md`（研究内容・1/2 の5系統整理 §6.1）。
+> 1/2 の一次確認は `docs/math_notes/half_factor_primary_source_confirmation_20260818.md`。
+> **historical evidence として保持するため、本文は書き換えない。**
+
 # 引き継ぎドキュメント — Dual-ExpFam LSM
 
 **作成日:** 2026-03-24

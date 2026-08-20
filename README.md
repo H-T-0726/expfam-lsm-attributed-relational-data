@@ -1,151 +1,126 @@
-# Dual-ExpFam LSM 研究リポジトリ
+# Dual-ExpFam LSM — 属性情報付き関係データの潜在構造モデルの指数型分布族拡張
 
-属性データ X と関係データ Y の両方を指数型分布族へ一般化した
-潜在構造モデル **Dual-ExpFam LSM** の実装・実験・検証・原稿作成を管理する研究リポジトリ。
+属性データ **X** と関係データ **Y** の両方を指数型分布族へ一般化した潜在構造モデル
+**Dual-ExpFam LSM** の実装・実験・検証・原稿を管理する研究リポジトリ。
+先行研究が Bernoulli-Y + Gaussian-X に固定していた分布仮定を、
+Gaussian / Bernoulli / Poisson を X 側・Y 側で独立に選べる形へ一般化し、
+分布族の誤指定が潜在変数の推定精度に与える影響を人工データと実データで評価している。
 
 ベースライン: Mikawa et al., "A study on latent structural models for binary relational data
 with attribute information," NOLTA, IEICE, vol. 15, no. 2, 2024.
 
-**メインは NotebookLM 資料ではなく、`expfam/` にある提案手法の実験コードと実験結果。**
+---
+
+## 現在の位置づけ
+
+| フェーズ | 状態 |
+|---|---|
+| 人工データ実験フェーズ（シナリオ A/B/C、Exp1-4） | 完了。学会予稿 `conference_submission_final_draft.md` に収録済み |
+| 実データ実験フェーズ（Wine / Cora / MovieLens、fixed 系列） | 完了（2026-06-17〜2026-07-07）。**学会予稿には未収録**、修論フェーズ向けの追加検証 |
+| 理論監査フェーズ | 完了（2026-07-18〜19、read-only）。`reports/theory_audit/` |
+| 実行環境の固定 | 完了（**2026-08-20 実測**）。`reports/environment/baseline_20260818.md`（ファイル名の `20260818` は Issue #9 由来の識別子であり、実測日ではない） |
+
+現在進行中の作業は GitHub Issue で管理している。
 
 ---
 
-## 1. 最初に読むファイル
+## 環境構築
 
-| 目的 | 最初に読むファイル |
-|-----|----------------|
-| 実験を回したい | `expfam/README.md` → `expfam/src/exp_scenario_lib.py` |
-| 研究全体を理解したい | `CLAUDE.md` → `docs_for_notebooklm/NOTEBOOKLM_RESEARCH_BRIEF.md` |
-| 原稿内容を確認したい | `conference_submission_final_draft.md` |
-| 先生への返答を作りたい | `docs/teacher/teacher_reply_draft.md` / `docs/teacher/half_factor_teacher_reply.md` |
-| NotebookLM に投入したい | `docs_for_notebooklm/NOTEBOOKLM_RESEARCH_BRIEF.md` |
-| 実験数値を照合したい | `docs_for_notebooklm/02_experiment_result_verification.md` |
-
----
-
-## 2. ディレクトリ構成
-
-| フォルダ / ファイル | 内容 | 優先度 |
-|------------------|------|:------:|
-| **`expfam/`** | **提案手法の実装・実験・結果（メイン）** | ★★★ |
-| `reproduction/` | 先行研究 (NOLTA 2024) の Python 再現実装 | ★★ |
-| `Mato Lab Program/` | 先行研究の MATLAB 実装（数式・係数確認用） | ★★ |
-| `paper/` | 先行研究 PDF（NOLTA 2024） | ★★ |
-| `figures/` | 提出用図の最終版（2026-05-07） | ★★ |
-| `docs_for_notebooklm/` | NotebookLM 投入用資料・実験照合レポート | ★★ |
-| `docs/` | 補助資料（先生対応・数式メモ・原稿メモ） | ★ |
-| `archive/` | archive 済みファイル（研究と無関係・旧版） | — |
-| **`CLAUDE.md`** | **確定事項・過去の誤り・注意点（必読）** | ★★★ |
-| `conference_submission_final_draft.md` | 学会予稿完成版 | ★★★ |
-
----
-
-## 3. メイン実験フォルダ
-
-`expfam/` が本研究のメイン実験フォルダ。
-詳細は **`expfam/README.md`** を参照。
-
-```
-expfam/
-├── src/          実装・実験スクリプト（提案手法の核心）
-├── results/      実験結果（CSV・ログ・図）
-└── references/   先行研究との比較数値
-```
-
-クラス継承:
-
-```
-reproduction/src/model.py          ← 先行研究 Python 再現（ベースクラス）
-└── expfam/src/model_expfam.py     ← Y 側 ExpFam 拡張
-    └── expfam/src/model_dual_expfam.py  ← 提案手法本体（DualExpFamLSM）
-```
-
----
-
-## 4. 実験を回す場合
+Python **3.13.14** が baseline（`.python-version`）。
 
 ```bash
-# 作業ディレクトリ
-cd expfam/src
-
-# シナリオ A: 真の X=Poisson, Y=Bernoulli
-python exp_run_scenario_A.py
-
-# シナリオ B: 真の X=Gaussian, Y=Poisson
-python exp_run_scenario_B.py
-
-# シナリオ C: 真の X=Bernoulli, Y=Gaussian
-python exp_run_scenario_C.py
-
-# ユニットテスト（5つ全 PASS を確認してから実験）
-python test_dual_expfam.py
+python -m venv .venv
+# Windows: .venv\Scripts\activate    /  POSIX: source .venv/bin/activate
+pip install -r requirements.txt        # 実験の再現に必要な最小構成
+pip install -r requirements-dev.txt    # テストも動かす場合はこちら
 ```
 
-実験結果は `expfam/results/` に保存される。
+依存は `requirements.in` / `requirements-dev.in` を入力として `uv pip compile --generate-hashes` で
+機械生成している（直接依存は numpy / pandas / scipy / matplotlib / scikit-learn / psutil、dev に pytest）。
+
+> **注意:** これは**今後の再現基準**であり、**過去の実験結果 CSV を生成した環境を再現するものではない。**
+> 過去の実行環境は復元できない（`KNOWN_ISSUES.md` KI-014、`reports/environment/baseline_20260818.md`）。
+
+動作確認:
+
+```bash
+python expfam/src/test_dual_expfam.py
+python -m pytest expfam/src/experimental -q
+```
 
 ---
 
-## 5. 重要な注意事項
+## ディレクトリ規約
 
-### 必ず読むこと
+| パス | 内容 |
+|---|---|
+| `expfam/src/` | 人工データ・実データ実験の実装とスクリプト（研究の本体） |
+| `expfam/src/experimental/` | masked / NB / per-column の prototype（本文採用不可） |
+| `tools/` | 2026-07-08 以降のフェーズの実験スクリプト |
+| `expfam/results/` | 結果 artifact の root。人工データ Scenario A/B/C の旧・主要実験（Exp1-4）の CSV と生成図は**この直下**に出力される（`expfam/src/exp_scenario_lib.py` の `_RES = expfam/results`）。新しいフェーズには subdirectory を使うものもある（`fixed_official/`, `real_data/` 等）。**正確な対応は `EXPERIMENT_REGISTRY.md` を参照** |
+| `expfam/figures/` | fixed 系列・実データ等の図ディレクトリ（`fixed_official/`, `real_data/`, `distribution_mismatch_fixed/` 等） |
+| `figures/` | 学会予稿用の最終図（`fig1a_*`, `fig1b_*`）および後続フェーズの一部の図 |
+| `reports/<phase>/` | 各フェーズの設計・結論（日付入りで凍結） |
+| `reproduction/` | 先行研究の Python 再現実装 |
+| `Mato Lab Program/` | 先行研究の MATLAB 原実装 |
+| `paper/` | 先行研究 PDF |
+| `docs/` | 補助資料（`docs/README.md` 参照） |
+| `docs_for_notebooklm/` | 外部 AI ツール投入用の派生資料（**一次根拠にしない**・`docs_for_notebooklm/README.md` 参照） |
+| `archive/` | 研究本体外の歴史資料 |
 
-- **`CLAUDE.md`** — 確定事項・過去の誤り・精度行列の係数問題・先生対応状況
-- **`expfam/README.md`** — 実験の実行方法・主要ファイルの説明・注意事項
+> `figures/` が提出図とフェーズ図を兼ねているのは 2026-07-08 の規約変更の名残。
+> パスは実験 provenance の一部なので**移動しない**。
 
-### 実装上の注意（コード修正前に確認）
+クラス継承（詳細と混合禁止ルールは `CLAUDE.md` §3）:
 
-1. **Python path**: `reproduction/src/` を path に追加すること（`LatentStructuralModel` の継承元）
-2. **1/2 係数問題**: E-step の Y 側 Term3 に spurious な `0.5` が残存している
-   （`model_dual_expfam.py` L.159, L.200）。修論フェーズで修正予定。現時点では触らない。
-3. **原稿採用式と Python 実装は異なる**: 精度行列 Term3 は原稿で `(w^Y)^2 Σ_{j≠i}` だが
-   Python 実装は `0.5 * (w^Y)^2 Σ_{j≠i}`。詳細は `CLAUDE.md` 参照。
-
-### 数式確認
-
-- 精度行列の正しい式: `CLAUDE.md` の「精度行列（確定式）」節
-- 1/2 問題の証明: `docs/math_notes/half_factor_math_explanation.md`
-- MATLAB vs Python 照合: `docs/math_notes/half_factor_literature_code_check.md`
-
----
-
-## 6. 現在の研究状況（2026-05-18 時点）
-
-| 項目 | 状況 |
-|-----|------|
-| 提案手法の実装 | 完了（`expfam/src/`） |
-| 実験 A/B/C の実行 | 完了（`expfam/results/`） |
-| 学会予稿 | 完成（`conference_submission_final_draft.md`） |
-| 提出用図 | 完成（`figures/`） |
-| 先生への返答 | 案完成、未送付（`docs/teacher/teacher_reply_draft.md` 等） |
-| Word 文書反映 | 未実施（.docx はリポジトリ外） |
-| Python 実装の 1/2 修正 | 修論フェーズで対応予定 |
+```
+reproduction/src/model.py               先行研究 Python 再現（基底）
+└ expfam/src/model_expfam.py            Y 側 ExpFam 拡張
+  └ expfam/src/model_dual_expfam.py     提案手法本体（DualExpFamLSM）
+    └ expfam/src/model_dual_expfam_fixed.py
+```
 
 ---
 
-## 7. docs/ フォルダ構成（補助資料）
+## 実験の回し方
 
-補助資料は `docs/` に整理済み（root への散乱を解消）。
+venv を有効化し、**リポジトリルートから**実行する。
 
-| フォルダ | 内容 |
-|---------|------|
-| `docs/teacher/` | 先生対応メモ（返答案・実装確認） |
-| `docs/math_notes/` | 数式確認メモ（1/2 問題証明・MATLAB照合等） |
-| `docs/math_notes/legacy/` | 中間段階資料（現在の確定事項と矛盾する旧版） |
-| `docs/writing/` | 原稿作成メモ（改訂テキスト等） |
+```bash
+python expfam/src/exp_run_scenario_A.py   # 真の X=Poisson,  Y=Bernoulli
+python expfam/src/exp_run_scenario_B.py   # 真の X=Gaussian, Y=Poisson
+python expfam/src/exp_run_scenario_C.py   # 真の X=Bernoulli,Y=Gaussian
+python tools/...                          # 2026-07-08 以降のフェーズ
+```
 
-### docs/teacher/ 主要ファイル
+出力先はスクリプトごとに異なる（Scenario A/B/C は `expfam/results/` 直下、
+後続フェーズは subdirectory を使うものもある）。**どの実験がどこに出力するかは
+`EXPERIMENT_REGISTRY.md` を正とする。**
+**結果 CSV と図はスクリプト経由でのみ生成し、手で編集しない。**
+実験を追加したら `EXPERIMENT_REGISTRY.md` に行を追記する（既存行は書き換えない）。
 
-| ファイル | 内容 |
-|---------|------|
-| `teacher_reply_draft.md` | Q1/Q2/Q4 先生への返答案 |
-| `half_factor_teacher_reply.md` | Q3 返答案（1/2 問題、正しい版） |
-| `teacher_technical_questions_impl_check.md` | 実装確認メモ |
+---
 
-### docs/math_notes/ 主要ファイル
+## 目的別に次に読む文書
 
-| ファイル | 内容 |
-|---------|------|
-| `half_factor_math_explanation.md` | 1/2 不要の数学的証明 |
-| `half_factor_literature_code_check.md` | MATLAB vs Python 照合表 |
-| `half_factor_revision_for_manuscript.md` | 原稿の 1/2 記述修正案 |
-| `legacy/parameter_estimation_corrected_formulas.md` | ⚠ 中間段階の矛盾資料（原稿採用式の根拠としては使わない） |
+| 目的 | 文書 |
+|---|---|
+| 研究全体を理解したい | `RESEARCH_MASTER.md` |
+| 数値の根拠を辿りたい | `EXPERIMENT_REGISTRY.md` |
+| 何を主張してよいか知りたい | `KNOWN_ISSUES.md` |
+| 学会予稿を読みたい | `conference_submission_final_draft.md` |
+| 1/2 係数の経緯を知りたい | `docs/math_notes/half_factor_primary_source_confirmation_20260818.md` |
+| 実データ実験の総括を読みたい | `reports/real_data_experiment_summary.md` |
+| 実行環境を知りたい | `reports/environment/baseline_20260818.md` |
+| 補助資料の地図がほしい | `docs/README.md` |
+| **Claude Code で作業する** | **`CLAUDE.md`** |
+
+---
+
+## source of truth
+
+- 数値主張は必ず**一次データ**（結果 CSV・runinfo・実行ログ・実コード）に紐づける。
+- `docs_for_notebooklm/*` と `GEMINI_REPORT_*` は AI 生成・派生資料であり、
+  **一次根拠として単独で使わない**（`KNOWN_ISSUES.md` KI-007）。
+- `reports/<phase>/` は日付入りで凍結された当時の記録。現在の状態とは異なることがある。
+- 今後やること（TODO）は GitHub Issue で管理する。canonical docs には書かない。
