@@ -11,6 +11,8 @@ informed init、scale_Z）を、experimental モデル群
     family_y='nb' + nb_r : NB2-Y
     fix_x : F=0 固定（Y-only; X 信号遮断）
     fix_w : w=0 固定（X-only; Y 信号遮断）
+    numerics_mode='consistent' : forward-only objective-consistent numerics
+        （既定 'legacy' は従来挙動を保持。NB との併用は未対応）
 """
 
 import time
@@ -24,17 +26,35 @@ sys.path.insert(0, str(_HERE))
 from model_dual_expfam_masked import DualExpFamLSMMasked      # noqa: E402
 from model_dual_expfam_nb import DualExpFamLSMNB              # noqa: E402
 from model_dual_expfam_percolumn import DualExpFamLSMPerColumn  # noqa: E402
+from model_dual_expfam_consistent import (                    # noqa: E402
+    DualExpFamLSMConsistent,
+    DualExpFamLSMPerColumnConsistent,
+)
 from eval_utils import calc_Q_dual_strict_exp, calc_bic_exp   # noqa: E402
 from diagnostics import poisson_clip_diagnostics, validate_xy  # noqa: E402
 
 
 def build_model(n, d, k, L, family_x, family_y, nb_r=None,
-                sigma_y=1.0, train_mask=None, family_x_list=None):
+                sigma_y=1.0, train_mask=None, family_x_list=None,
+                numerics_mode="legacy"):
     """family_y / family_x_list に応じて experimental モデルを構築する。"""
+    if numerics_mode not in ("legacy", "consistent"):
+        raise ValueError(
+            "numerics_mode must be 'legacy' or 'consistent', "
+            f"got {numerics_mode!r}")
+    if numerics_mode == "consistent" and family_y == "nb":
+        raise NotImplementedError(
+            "numerics_mode='consistent' does not implement NB numerics; "
+            "use numerics_mode='legacy' for the unchanged NB lineage")
     if family_x_list is not None:
         if family_y == "nb":
             raise NotImplementedError(
                 "per-column X と NB-Y の併用は未実装（設計書参照）")
+        if numerics_mode == "consistent":
+            return DualExpFamLSMPerColumnConsistent(
+                n=n, d=d, k=k, L=L,
+                family_x_list=family_x_list, family_y=family_y,
+                sigma_y=sigma_y, train_mask=train_mask)
         return DualExpFamLSMPerColumn(n=n, d=d, k=k, L=L,
                                       family_x_list=family_x_list,
                                       family_y=family_y, sigma_y=sigma_y,
@@ -45,6 +65,11 @@ def build_model(n, d, k, L, family_x, family_y, nb_r=None,
         return DualExpFamLSMNB(n=n, d=d, k=k, L=L, family_x=family_x,
                                nb_r=nb_r, sigma_y=sigma_y,
                                train_mask=train_mask)
+    if numerics_mode == "consistent":
+        return DualExpFamLSMConsistent(
+            n=n, d=d, k=k, L=L, family_x=family_x,
+            family_y=family_y, sigma_y=sigma_y,
+            train_mask=train_mask)
     return DualExpFamLSMMasked(n=n, d=d, k=k, L=L, family_x=family_x,
                                family_y=family_y, sigma_y=sigma_y,
                                train_mask=train_mask)
@@ -69,6 +94,7 @@ def run_em_experimental(
     allow_support_mismatch: bool = False,
     mstep_q_diagnostic: bool = False,
     compute_clip_diagnostic: bool = False,
+    numerics_mode: str = "legacy",
 ) -> dict:
     """
     MCEM 実行（NaN ガード + 最大 2 回リトライ、リトライ毎に newton_alpha 半減）。
@@ -88,6 +114,11 @@ def run_em_experimental(
     compute_clip_diagnostic : True のときのみ、最終推定値に対する
         Poisson clip 発動率を post-hoc に計算する。EM 反復中の発動率ではない。
         False のとき診断関数・診断用行列積を実行しない。
+        consistent mode は hard clip を使わないため、clip 率を 0 と偽装せず
+        status='not_applicable' を返す。
+    numerics_mode : 'legacy'（既定）または 'consistent'。consistent は
+        新規の明示 opt-in で、Bernoulli/Poisson の objective・score・curvature
+        を canonical な同一目的関数に揃える。NB は明示的に reject する。
 
     Returns dict:
         Z_est, Z_samples, F, sigma, w0, w, var_z, sigma_y_est, model,
@@ -107,6 +138,11 @@ def run_em_experimental(
     max_retries = 2
     t0 = time.perf_counter()
 
+    if numerics_mode not in ("legacy", "consistent"):
+        raise ValueError(
+            "numerics_mode must be 'legacy' or 'consistent', "
+            f"got {numerics_mode!r}")
+
     if validate_support:
         # 'nb' の台は Poisson と同じ非負整数
         _fy_support = "poisson" if family_y == "nb" else family_y
@@ -122,7 +158,8 @@ def run_em_experimental(
         rng = np.random.default_rng(seed + retry * 1000)
         model = build_model(n, d, k, L, family_x, family_y,
                             nb_r=nb_r, train_mask=train_mask,
-                            family_x_list=family_x_list)
+                            family_x_list=family_x_list,
+                            numerics_mode=numerics_mode)
         model.initialize_params(true_params=None, seed=seed + retry * 1000)
 
         # ── Informed init: Y 側（観測ペアのみで統計をとる） ──────────
@@ -197,6 +234,10 @@ def run_em_experimental(
                 try:
                     _q_before = calc_Q_dual_strict_exp(
                         X, Y, Z_samples, F, sigma, var_z, w0, w, model)
+                except FloatingPointError:
+                    if numerics_mode == "consistent":
+                        raise
+                    _q_before = float("nan")
                 except Exception:
                     _q_before = float("nan")
 
@@ -219,6 +260,10 @@ def run_em_experimental(
                 try:
                     _q_after = calc_Q_dual_strict_exp(
                         X, Y, Z_samples, F, sigma, var_z, w0, w, model)
+                except FloatingPointError:
+                    if numerics_mode == "consistent":
+                        raise
+                    _q_after = float("nan")
                 except Exception:
                     _q_after = float("nan")
                 _diff = _q_after - _q_before
@@ -255,6 +300,9 @@ def run_em_experimental(
                                      model.family_x, label,
                                      n_gaussian_x_cols=n_gauss_cols)
         except Exception as exc:
+            if numerics_mode == "consistent" and isinstance(
+                    exc, FloatingPointError):
+                raise
             # 例外の握りつぶしをやめ、失敗を可視化する（処理は継続、
             # 従来どおり Q_strict / bic は NaN のまま返す）
             failure_reason = f"{type(exc).__name__}: {exc}"
@@ -267,13 +315,23 @@ def run_em_experimental(
     # ── opt-in post-hoc 診断: Poisson clip 発動率（純計算、乱数不使用） ──
     clip_diag = None
     if compute_clip_diagnostic:
-        try:
-            clip_diag = poisson_clip_diagnostics(
-                model, Z_samples[:, :, -1], F, w0, w)
-        except Exception as exc:
-            warnings.warn(
-                "run_em_experimental: clip diagnostics failed "
-                f"({type(exc).__name__}: {exc})", RuntimeWarning, stacklevel=2)
+        if numerics_mode == "consistent":
+            clip_diag = {
+                "status": "not_applicable",
+                "reason": ("consistent numerics use no hard Poisson clipping; "
+                           "non-finite/overflow-risk eta fail explicitly"),
+                "x_side": None,
+                "y_side": None,
+            }
+        else:
+            try:
+                clip_diag = poisson_clip_diagnostics(
+                    model, Z_samples[:, :, -1], F, w0, w)
+            except Exception as exc:
+                warnings.warn(
+                    "run_em_experimental: clip diagnostics failed "
+                    f"({type(exc).__name__}: {exc})", RuntimeWarning,
+                    stacklevel=2)
 
     return {
         "Z_est": Z_samples[:, :, -1].copy(),
@@ -290,6 +348,7 @@ def run_em_experimental(
         "q_bic_failed": q_bic_failed,
         "clip_diag": clip_diag,
         "mstep_q_history": mstep_q_history,
+        "numerics_mode": numerics_mode,
     }
 
 
@@ -298,4 +357,8 @@ def predict_mu_y(result: dict, clip_max: float = 1e5) -> np.ndarray:
     model = result["model"]
     Z_est = result["Z_est"]
     eta_y = result["w0"] + result["w"] * (Z_est @ Z_est.T)
-    return np.clip(model._mean_function(eta_y), 0.0, clip_max)
+    mu_y = model._mean_function(eta_y)
+    if (result.get("numerics_mode", "legacy") == "consistent"
+            and getattr(model, "family", None) == "poisson"):
+        return mu_y
+    return np.clip(mu_y, 0.0, clip_max)
