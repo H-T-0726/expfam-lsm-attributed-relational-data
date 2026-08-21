@@ -49,6 +49,14 @@ rather than patched:
 | 4 | The `1/sigma_hat^2 ~ 2.0e-4` figure was cited as `VERIFIED` in §11.2 although `sigma_hat` was never persisted | §11.2 | relabelled `DERIVED` / `PARTIALLY_SUPPORTED`, consistent with §9.2 |
 | 5 | Candidate A cannot isolate the baseline, because under Poisson `alpha` moves the mean, the variance and `A''` together | §16.2, §16.3, §17, §22, §23 | A rescored 30 -> 27 with an added dispersion factor; **the F3 branch is identified as structurally blocked** |
 
+A further consistency pass on 2026-08-21 applied three non-conclusion-changing fixes: the
+stale prior-hypothesis row in §7 was marked `WITHDRAWN / NOT ESTABLISHED`; the claim that
+all three §8.2 contrasts are monotone was corrected (**contrast C is not strictly
+monotone**: it rises 0.0010 -> 0.0518 -> 0.3677 and then falls to 0.3429 between rates 0.2
+and 0.1); and "Issue #27's primary endpoint is exactly contrast B" was corrected to
+"contrast B is one of its four pre-specified primary contrasts". None of these changed a
+conclusion; the third was checked against E's score and left it unchanged (§16.3).
+
 Where a conclusion changed, the earlier conclusion is stated and marked withdrawn rather
 than silently replaced.
 
@@ -247,7 +255,7 @@ under an invalid likelihood is not comparable across families.
 | id | phenomenon | primary evidence | trials/fits | effect | paired evidence | reproducibility | confounders | candidate mechanisms | already ruled out | unresolved | class | scientific importance | next discriminating experiment | modification justified now |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | **F1** | At dense Y, per-column / single / all-Gaussian differ very little | `single_vs_joint_summary.csv`; `y_sparsity_..._trials10.csv` at rate 1.0 | 3 trials; 10 trials | all_gaussian - per_column = **-0.0004** (3 trials) and **+0.0114** (10 trials, 10/10) | yes, trial-matched | reproduced in two independent experiments | generator makes every block individually informative; n=80 is small | Y already carries enough information; F rows are dense so blocks are not complementary | that it is a NaN/divergence artefact (0 NaN) | whether a complementary-block generator changes it | **III** (design) | HIGH - it bounds the whole per-column claim | E (redesigned, §16) | NO |
-| **F2** | As Y gets sparse, the per-column advantage grows | `y_sparsity_..._trials10.csv` | 10 paired trials per contrast per rate | contrast A (same 9 columns, `all_gaussian - per_column`): +0.011 / +0.065 / +0.412 / +0.426 across rates 1.0/0.5/0.2/0.1; contrast B (`single_gaussian - per_column`): +0.010 / +0.013 / +0.044 / +0.083. **A and B are separate contrasts, not orthogonal components (§8.2)** | yes | monotone in both contrasts; 10/10 wins at rates 0.2 and 0.1 | single generative configuration (n=80, d=9, k*=2); scalar-parameter error also grows | X compensates when Y information falls | seed dependence (10/10) | generalization to other n, d, k*, family mixes and to a complementary-block F | **II/III** | HIGH - the only positive result of the per-column line | E (Issue #27 as currently written, §16/§18) | NO |
+| **F2** | As Y gets sparse, the per-column advantage grows | `y_sparsity_..._trials10.csv` | 10 paired trials per contrast per rate | contrast A (same 9 columns, `all_gaussian - per_column`): +0.011 / +0.065 / +0.412 / +0.426 across rates 1.0/0.5/0.2/0.1; contrast B (`single_gaussian - per_column`): +0.010 / +0.013 / +0.044 / +0.083. **A and B are separate contrasts, not orthogonal components (§8.2)** | yes | contrasts A and B increase monotonically as Y is thinned; contrast C rises then dips slightly between rates 0.2 and 0.1 (0.3677 -> 0.3429); 10/10 wins at rates 0.2 and 0.1 | single generative configuration (n=80, d=9, k*=2); scalar-parameter error also grows | X compensates when Y information falls | seed dependence (10/10) | generalization to other n, d, k*, family mixes and to a complementary-block F | **II/III** | HIGH - the only positive result of the per-column line | E (Issue #27 as currently written, §16/§18) | NO |
 | **F3** | MovieLens: adding raw `ratings_count` as a Poisson column degrades held-out Y prediction | `movielens_attribute_diagnosis_..._trials4.csv`; `movielens_mixed_x_summary.csv` | 4 fits (2 splits) in each of two experiments | test_y_ll -0.374 vs genre_only, **0/4 better**, per-fit -0.314..-0.441; w0 3.417 -> 3.156, w 0.272 -> 0.330, hc_AUC 0.970 -> 0.949 | yes, fit-matched | reproduced in two separate experiments, 4/4 fits each | leakage (count and Y share `u.data`); only 2 splits; legacy numerics | no X intercept; raw count scale; Poisson fixed dispersion with A''=exp(eta); **X-side count overdispersion (var/mean 6.17)**; precision-block dominance; count informativeness | Poisson X clipping (§12); **Y-side** overdispersion (§9, J-Y; Y is identical across all conditions); NaN/divergence (0) | actual `A''/phi f f^T` share; whether an intercept fixes it; whether raw count under Gaussian **with genre still Bernoulli** also degrades; whether a dispersion-aware count family for X fixes it | **II** (with a CLASS III leakage caveat) | HIGH - the only real-data failure of the per-column line | C (measure), then B extended with an X-dispersion arm (§16) | NO |
 | **F4** | Transforming the count removes the degradation | same CSV | 4 fits | log-Gaussian **+0.0021**, z-score-Gaussian **+0.0016** vs genre_only; the two differ by +0.0005 (sd 0.0049) | yes | 2/4 fits better each, i.e. indistinguishable from genre_only | same as F3 | removal of the large baseline; switch to an estimated-dispersion family | that log specifically matters (z-score works identically) | which of centering / scaling / estimated dispersion is the operative part | **II** | HIGH - it is the causal-separation lever we already have | B (§16) | NO |
 | **F5** | Adding noise attributes does not help and sometimes hurts | `noise_check_summary.csv` | 3 trials x 5 noise conditions | mean deltas: gauss3 **+0.0098**, gauss6 **-0.0005**, gauss12 **+0.0120**, bern3 +0.0004, pois3 +0.0010 | yes, trial-matched | **not reproducible as a dose response** - §10 | 3 seeds; single configuration | Gaussian noise gets `1/sigma_hat^2` weight; local optima | a monotone dose response (0/3 trials monotone) | whether a systematic effect exists at larger trial counts | **III**, possibly II later | MEDIUM | D (§16) | NO |
@@ -278,8 +286,9 @@ MovieLens may not carry usable information about Y in the first place.**
 3. **The count column accounts for essentially the whole 22-column degradation**
    (`VERIFIED`). `mixed_percolumn_raw` - `genre_count_raw_poisson` = +0.0037 (sd 0.0073)
    and `mixed_percolumn_raw` - `rating_stats_only` = -0.0088 (sd 0.0060).
-4. **The sparse-Y interaction** (`SUPPORTED`). Monotone in rate, 10/10 wins at the two
-   sparsest rates, trial-matched, 0 NaN - but one generative configuration. The cleanest
+4. **The sparse-Y interaction** (`SUPPORTED`). Contrasts A and B increase monotonically as
+   Y is thinned (contrast C rises then dips slightly at the last step, §8.2); 10/10 wins at
+   the two sparsest rates, trial-matched, 0 NaN - but one generative configuration. The cleanest
    single number is contrast A in §8.2: on the **identical 9 columns**, per-column beats
    forced-Gaussian by 0.426 RMSE(Z) at `y_obs_rate = 0.1` (10/10) and by only 0.011 at
    dense Y (10/10). This is the per-column mechanism's own contrast and it is
@@ -298,7 +307,7 @@ recomputation.
 |---|---|
 | "no intercept alone" and "raw scale alone" are each insufficient to break the model | `PARTIALLY_SUPPORTED` but **CONFOUNDED**: `mixed_all_gaussian` keeps the raw count and has no intercept and loses only 0.021, but it also forces genre to Gaussian, so it isolates neither factor (§9) |
 | Poisson implied precision dominates | `PARTIALLY_SUPPORTED` on the data side (81.2x, §9.2); `UNRESOLVED` on the model side (F never saved) |
-| The sparse-Y result is mostly about family correctness, not about integrating more blocks | `SUPPORTED` and quantified (§8.2). This changed the thesis recommendation |
+| The sparse-Y result is mostly about family correctness, not about integrating more blocks | **WITHDRAWN / NOT ESTABLISHED.** This was accepted in an intermediate draft on the strength of a decomposition that was later shown to be invalid (revision-history item 1). Contrasts A, B and C in §8.2 are descriptive comparisons on different column sets and cannot be compared as orthogonal causal shares, so no statement about which factor supplies "most" of the sparse-Y benefit is supported. What survives is the regime dependence itself |
 | Cora's k problem is not only a penalty problem | `VERIFIED` - Q_strict peaks at k=2 (§13.6) |
 | NB / overdispersion is not needed | **Split.** `SUPPORTED` for the **Y side** (§9, candidate J-Y). **Withdrawn for the X side**: `ratings_count` is 6.17x over-dispersed and X-side count dispersion is `UNTESTED` (candidate J-X). The blanket phrasing was wrong |
 
@@ -359,8 +368,13 @@ decomposition of the sparse-Y benefit.
 
 What can be said, descriptively:
 
-- `SUPPORTED`: the sparse-Y interaction is real and monotone in every contrast. All three
-  grow as Y is thinned.
+- `SUPPORTED`: the sparse-Y interaction is real, and every contrast is far larger under
+  sparse Y than under dense Y. The shape differs by contrast and is stated exactly:
+  **contrast A increases monotonically** as Y is thinned (0.0114 -> 0.0647 -> 0.4117 ->
+  0.4261); **contrast B increases monotonically** (0.0104 -> 0.0129 -> 0.0439 -> 0.0832);
+  **contrast C is not strictly monotone** - it rises 0.0010 -> 0.0518 -> 0.3677 and then
+  falls slightly to 0.3429 between rates 0.2 and 0.1. Do not write "all three contrasts
+  are monotone".
 - `OBSERVED`: **contrast A is the cleanest single comparison available**, because both arms
   use the identical 9 columns and differ only in the family assigned to each. At
   `y_obs_rate = 0.1` per-column beats forced-Gaussian by **0.426 RMSE(Z), 10/10 trials**;
@@ -779,7 +793,7 @@ These must not be addressed by changing the model.
 | **F norm / actual precision contribution** | none measured | none | everything above | **NO - F was never saved** | C | (measurement first) |
 | **block imbalance (1 vs 19 columns)** | none | `rating_stats_only` uses 3 columns and degrades identically (-0.362) | column identity | **YES, and it argues against** | already isolated | block weighting (not motivated) |
 | **attribute informativeness** | count in an absorbable representation gives +0.002, i.e. nothing; genre gives +0.034 at k=3 but -0.039 at k=5 (F9) | at sparse Y in synthetic data X clearly helps (§8) | leakage, Y density, k | partially | matched-protocol MovieLens re-run | attribute selection (not motivated) |
-| **Y density** | §8, monotone across 4 rates, 10 paired trials | one generative configuration; scalar-parameter error also grows | generator design (dense F rows) | **YES for this generator** | E = Issue #27 as currently written, or another second configuration | none |
+| **Y density** | §8, contrasts A and B monotone across the 4 rates (C rises then dips slightly at the last step), 10 paired trials | one generative configuration; scalar-parameter error also grows | generator design (dense F rows) | **YES for this generator** | E = Issue #27 as currently written, or another second configuration | none |
 | **numerical clipping / floors** | PC-001 / PC-002 deterministic counterexamples | MovieLens etas are interior (`VERIFIED`); resolved forward in the consistent lineage | EM-transient activation never logged | **YES at convergence, NO during EM** | activation logging during EM | already fixed forward |
 | **optimization / local optima** | noise trial 1 bimodal; `all_bernoulli` collapse in 1/3; `poisson_strict` k=5 max test RMSE 48.19 against a mean of 14.58; Cora Q non-monotone in k | 0 NaN everywhere; most runs stable | MC sampling, `scale_Z`, Adam schedule | **NO** | multi-restart Q comparison at fixed data and fixed k | optimization / convergence change |
 | **`scale_Z`** | applied unconditionally (`em_runner.py` line 226); forces mean square 1 on all MC samples, which interacts with any block that wants a large `||z||` | no measured failure attributed to it | every scale mechanism above | **NO** | the non-destructive `apply_scale_z` ablation already designed in `reports/theory_audit/diagnostic_designs_20260719.md` §3 | make it switchable, default unchanged |
@@ -906,7 +920,10 @@ must be recorded. Primary endpoint is **pre-specified**: paired RMSE(Z) after Pr
 `y_obs_rate = 0.1`, with primary contrasts `per_column_all` versus each single family and
 versus `y_only`. Question: *when attribute blocks carry different pieces of the latent
 structure, is there a measurable reason to estimate them jointly under one shared Z?*
-Targets U9 and U6, and its pre-specified primary endpoint is exactly contrast B of §8.2.
+Targets U9 and U6. Its pre-specified primary **contrasts** include contrast B of §8.2
+(`single_gaussian` versus `per_column_all`), alongside the `single_bernoulli`,
+`single_poisson` and `y_only` comparisons; the primary **endpoint** itself is paired
+RMSE(Z) after Procrustes at `y_obs_rate = 0.1`.
 
 ### 16.3 Scores
 
@@ -939,9 +956,11 @@ Changes from the earlier scoring, with their causes:
 - **E: 22 -> 28.** Causes, all from reading the actual issue body: it fixes
   `numerics_mode="consistent"` and forbids generator clipping, so it becomes the first
   empirical use of the consistent lineage (U6) - IG 3 -> 4, UNC 3 -> 4. It carries a
-  **dense-Y negative control** and a **pre-specified primary endpoint** that is exactly
-  contrast B of §8.2, plus dimension-wise RMSE under one shared Procrustes rotation as a
-  mechanism diagnostic - DIR 3 -> 4, CSP 2 -> 3. It excludes the raw invalid-support arms,
+  **dense-Y negative control**, a **pre-specified primary endpoint** (paired RMSE(Z) after
+  Procrustes at `y_obs_rate = 0.1`) and pre-specified primary **contrasts** that include
+  contrast B of §8.2 together with the `single_bernoulli`, `single_poisson` and `y_only`
+  comparisons, plus dimension-wise RMSE under one shared Procrustes rotation as a mechanism
+  diagnostic - DIR 3 -> 4, CSP 2 -> 3. It excludes the raw invalid-support arms,
   forbids post-hoc tuning of `w0`, `w` and the dominant weight, forbids BIC-based ranking,
   and requires a null to be reported as a null - AMB 3 -> 4. It supplies the second
   generative configuration that PATH 4 needs - THE 3 -> 4.
@@ -954,7 +973,14 @@ Two honesty checks on the re-scoring:
    cut to A is traceable to review FINDING 5. The counterfactual is explicit: had Issue #27
    still contained only the July memo, E would have kept roughly its old score and A would
    still lead.
-2. **Is E still "designed to succeed"?** Partly, and that is why AMB is 4 and not 5. The
+2. **Does the corrected endpoint wording change E's score?** No. An intermediate draft said
+   E's "primary endpoint is exactly contrast B". Precisely, contrast B is **one of four
+   pre-specified primary contrasts**, and the endpoint is paired RMSE(Z) after Procrustes
+   at `y_obs_rate = 0.1`. The correction, if anything, slightly strengthens DIR rather than
+   weakening it: the other three contrasts include `single_bernoulli` and `single_poisson`
+   under reduced Y, for which **no evidence exists anywhere in this repository** (the
+   trials-10 run kept only four conditions). DIR stays 4 and no other criterion moves.
+3. **Is E still "designed to succeed"?** Partly, and that is why AMB is 4 and not 5. The
    generator is built so that the blocks are complementary. What lowers the risk is that
    the issue pre-registers the endpoint, requires the dense-Y control, and explicitly
    requires a null to be reported. The external-validity limitation remains and the issue
@@ -993,7 +1019,7 @@ At most five. Each is a recommendation only; nothing here was executed. This lis
   one attribute family at a time?
 - **Current evidence.** F1 (dense-Y differences of about 0.011); §8.2 contrast B (+0.010 at
   dense Y, +0.083 at `y_obs_rate = 0.1`, 10/10) - the smallest of the three sparse-Y
-  contrasts and the one E pre-registers as its primary endpoint; F2 (contrast A grows to
+  contrasts and one of the contrasts E pre-registers; F2 (contrast A grows to
   +0.426 at rate 0.1, 10/10) established on **one** generative configuration.
 - **Missing evidence.** U9 (a second generative configuration, here one deliberately built
   with complementary blocks) and U6 (**no experiment has ever used the consistent
@@ -1145,9 +1171,11 @@ condition attaining the smallest criterion value of all.
 
 - E is the **highest-scoring ungated candidate** (28; §16.3), and it reached that score
   through changes each traceable to a clause of the actual issue body.
-- Its **pre-specified primary endpoint is exactly contrast B of §8.2** - the smallest and
-  therefore least-established of the three sparse-Y contrasts, and the one on which the
-  per-column claim is weakest. It is testing our own weak point, not a strong point.
+- Its **pre-specified primary contrasts include contrast B of §8.2** - the smallest and
+  therefore least-established of the three sparse-Y contrasts - together with the
+  `single_bernoulli`, `single_poisson` and `y_only` comparisons, none of which exists under
+  reduced Y today. The primary endpoint itself is paired RMSE(Z) after Procrustes at
+  `y_obs_rate = 0.1`. It is testing our own weak point, not a strong point.
 - It supplies the **second generative configuration** that PATH 4 requires (U9), and it
   covers `single_bernoulli` and `single_poisson` under reduced Y, which no existing run does.
 - It would be the **first empirical use of the objective-consistent lineage** (U6). §12.2
@@ -1277,7 +1305,7 @@ Ordered by how much evidence would be needed to move them.
 | **1. X/Y exponential-family generalization** | **Strongest.** 180 + 180 + 180 + 550 rows of synthetic evidence with 10-30 trials, 10/10 k selection in three scenarios, misspecification ratios 4.34 / 9.04 / 40.37 reproduced exactly, Wine k=3, Cora 2.6-2.8x random | moderate - generalizing a fixed-family LSM | KI-001 hedge; criterion naming (KI-010); Cora Q non-monotonicity | none | none | **high** - every number reproduces from primary CSVs | low | already done |
 | **2. + per-column heterogeneous X** | **Regime-dependent, and stronger than the earlier draft allowed.** Contrast A (identical 9 columns, family assignment only): -0.0004 at dense Y in `single_vs_joint` (3 trials) and +0.0114 in the 10-trial run, but **+0.4261 at `y_obs_rate = 0.1`, 10/10** (§8.2). MovieLens is negative and F9 questions attribute value there at all | high | PC-001 in the legacy lineage (fixed forward, never validated in an experiment); prototype status; one generative configuration | consistent-lineage validation | E (Issue #27) | **moderate** - the hostile question "is it better than forcing Gaussian?" answers "no at dense Y, clearly yes at sparse Y in one generator" | medium-high | possible after E |
 | **3. + evidence-driven count/intercept refinement** | **Insufficient.** 4 fits / 2 splits on a single n=100 subset; mechanism `UNRESOLVED`; leakage caveat binding; and after review FINDING 5 the branch is structurally blocked (§16.4) | high if it works | U1-U4 and J-X all open | X intercept **and** an X-side dispersion capability | A6, C, then B | low today | high | not feasible this cycle |
-| **4. Conditions under which attribute integration is effective (sparse Y)** | **Moderate, and better founded than the earlier draft stated.** 10 trial-matched trials, monotone across 4 rates, 10/10 at the sparsest rates. The earlier draft discounted it by netting contrast A against contrast B; that decomposition is withdrawn (§8.2). Remaining limitation: **one generative configuration** | moderate | U9 - needs a second configuration | none | **E = Issue #27, as currently written** | moderate-to-high | medium | feasible with exactly one more experiment, which is already designed |
+| **4. Conditions under which attribute integration is effective (sparse Y)** | **Moderate, and better founded than the earlier draft stated.** 10 trial-matched trials, contrasts A and B monotone across the 4 rates (C rises then dips slightly at the last step), 10/10 at the sparsest rates. The earlier draft discounted it by netting contrast A against contrast B; that decomposition is withdrawn (§8.2). Remaining limitation: **one generative configuration** | moderate | U9 - needs a second configuration | none | **E = Issue #27, as currently written** | moderate-to-high | medium | feasible with exactly one more experiment, which is already designed |
 | **5. Family generalization plus explicit diagnostic limitations** | **Strong**, because it is built from what is already `VERIFIED`, including the negative results | low as novelty, high as scholarship | none - the limitations are the content | none | none | **high** - it pre-empts hostile questions by stating the limit first | low | already done |
 
 ### Recommended path
@@ -1320,9 +1348,11 @@ Why this one:
 1. It is the **highest-scoring ungated candidate** (28; §16.3), scored on the same rubric
    as every other candidate, against the **actual issue text** rather than the superseded
    July memo.
-2. Its pre-specified primary endpoint is **contrast B of §8.2** - the weakest and least
-   established of the three sparse-Y contrasts. It tests the per-column claim where that
-   claim is thinnest, not where it is strongest.
+2. Its pre-specified primary contrasts **include contrast B of §8.2** - the weakest and
+   least established of the three sparse-Y contrasts - alongside `single_bernoulli`,
+   `single_poisson` and `y_only`, with paired RMSE(Z) after Procrustes at
+   `y_obs_rate = 0.1` as the endpoint. It tests the per-column claim where that claim is
+   thinnest, not where it is strongest.
 3. It closes the two most consequential gaps that no other candidate touches: a **second
    generative configuration** for the only positive result the per-column line has (U9),
    and the **first empirical use of the objective-consistent lineage**, which currently
