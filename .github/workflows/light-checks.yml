@@ -1,0 +1,87 @@
+name: Light checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+      - name: Compile active Python surface
+        run: python -m compileall -q -x 'archive[\\/]' tools expfam/src reproduction/src
+
+  validator-self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+      - name: Run validator self-test with zero skips
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_file="$RUNNER_TEMP/validator-self-test.txt"
+          python tools/validate_registry_paths.py --self-test | tee "$output_file"
+          python - "$output_file" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          lines = Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()
+          summary_lines = [line for line in lines if line.startswith("self-test:")]
+          if len(summary_lines) != 1:
+              raise SystemExit(
+                  f"expected exactly one self-test summary, found {len(summary_lines)}"
+              )
+
+          match = re.fullmatch(
+              r"self-test: (\d+)/(\d+) PASS, (\d+) FAIL, (\d+) SKIP",
+              summary_lines[0],
+          )
+          if match is None:
+              raise SystemExit(f"unrecognized self-test summary: {summary_lines[0]!r}")
+
+          passed, total, failed, skipped = map(int, match.groups())
+          observed = {
+              status: sum(line.startswith(f"{status}  ") for line in lines)
+              for status in ("PASS", "FAIL", "SKIP")
+          }
+          expected = {"PASS": passed, "FAIL": failed, "SKIP": skipped}
+          if observed != expected:
+              raise SystemExit(
+                  f"self-test detail/summary mismatch: observed={observed}, expected={expected}"
+              )
+          if passed != total or failed != 0 or skipped != 0:
+              raise SystemExit(
+                  f"self-test requires all PASS with zero FAIL/SKIP: {summary_lines[0]}"
+              )
+
+          print(f"verified self-test counts: {passed} PASS, 0 FAIL, 0 SKIP")
+          PY
+
+  registry-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+      - name: Validate registry links
+        run: python tools/validate_registry_paths.py
