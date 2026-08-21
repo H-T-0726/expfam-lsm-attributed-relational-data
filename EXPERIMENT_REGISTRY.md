@@ -197,12 +197,46 @@ validator はその定数側の「訂正後の参照」を毎回ワーキング�
 waiver は（source document, 原文トークン）の完全一致でのみ効き、訂正後の参照が解決しなくなった時点で失効する。
 したがってこの節は原文を隠す免罪符ではなく、**原文の誤りを可視化したまま非ブロッキングにするための記録**である。
 
-なお `.gitignore` により Git 管理外とされている実験成果物（`expfam/data/movielens_pilot/*.npy` など）への参照は、
+なお `.gitignore` により Git 管理外とされている実験成果物への参照は、
 研究用ワークステーションには存在し fresh checkout には存在しない。
 これらは `LOCAL_ONLY_ARTIFACT` として非ブロッキングに分類され、
 **存在確認済み（`EXISTS_LITERAL`）とは別にカウントされる**。
 **分類自体**はワークステーションでも fresh checkout でも変わらない。
 一方で存在に由来するフィールド（`local_presence`・`matches`・`resolved_via`）とそこから計算される集計値は環境で変わる。
-なお、この分類は「無視対象の artifact のファイル名を打ち間違えた場合」を検出できない（ディレクトリ名の誤りは引き続き検出する）。
-artifact を実際に持つツリーでは `local_only_absent` が 0 になるはずなので、そこが 0 でなければ綴りを疑うこと。
+
+**重要**: この分類は拡張子からの推測では決まらない。
+`tools/validate_registry_paths.py` の `LOCAL_ONLY_ARTIFACT_REFERENCES` に
+（source document, 原文トークン, 想定される repository-relative path/pattern, 想定される .gitignore 規則）
+を明示登録した参照だけが対象であり、登録は KNOWN_NOTATION_DEFECT と同じ完全一致で効く。
+`.gitignore` は登録を**裏付ける証拠**であって、登録を**作り出す権限ではない**。
+したがって未登録の参照は、拡張子が無視対象であっても通常どおり判定される
+（例: expfam/results/ 配下に wine_typoooo.npy のような打ち間違いを書いても TRUE_BROKEN のままである。
+1文字違いも、別文書に現れた同一トークンも、登録を継承しない。
+なおこの例をバッククォートで囲むと validator が実際に TRUE_BROKEN として検出するため、意図的に平文で書いている）。
+登録が根拠とする .gitignore 規則が消えた場合、その登録は黙って残らず失効する。
+
+2026-08-21 時点の登録は次の3件。
+issue #19 Finding B が名指しした artifact は `expfam/data/movielens_pilot/*.npy` と
+`expfam/results/wine_F.npy` の2つだが、後者は registry 内で
+**bare basename 形式と明示パス形式の2通りで書かれている**。
+ただし正確には、bare basename 形式は historical row（Wine実験の行）に元からあるもので、
+**明示パス形式が現れるのは Phase 5a.1 で追加したこの節の中だけ**（すぐ上のこの段落と、下の登録表）であり、
+historical row には現れない。
+明示パス形式は issue #19 Finding B が用いている綴りでもあるため、
+平文に落とさず登録して validator の検査対象に残す判断をした。
+登録は raw token の完全一致で効き、ある綴りから別の綴りへ一般化しないため、
+2つの綴りはそれぞれ別エントリとして登録する（したがって artifact 2件・登録3件）。
+下表は self-test で機械的に検査している: 各行がちょうど1つの登録トークンを挙げること、
+登録の集合と行が挙げるトークンの集合が一致すること、行の重複がないこと、
+各行が対応する .gitignore 規則を明記していること。
+「想定 path/pattern」列は 同左／同上 という相対表記のため機械比較の対象外であり、人手レビューで担保する。
+
+| source document | 原文トークン | 想定 path/pattern | .gitignore 規則 |
+|---|---|---|---|
+| `EXPERIMENT_REGISTRY.md` | `expfam/data/movielens_pilot/*.npy` | 同左 | *.npy |
+| `EXPERIMENT_REGISTRY.md` | `expfam/results/wine_F.npy`（明示パス形式） | 同左 | *.npy |
+| `EXPERIMENT_REGISTRY.md` | 同 cell 先行の `expfam/results/wine_dual_results.csv` から rebase される `wine_F.npy`（bare basename 形式） | 同上 | *.npy |
+
+新しい local-only 参照を registry に書く場合は、上記に登録するまで TRUE_BROKEN として報告される。
+これは意図した失敗方向であり、**未登録の参照を黙って非ブロッキングにしない**ための設計である。
 詳細な意味と限界は `tools/validate_registry_paths.py` の docstring を参照。

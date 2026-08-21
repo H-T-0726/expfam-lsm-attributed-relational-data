@@ -26,16 +26,16 @@ not one of their own fixture roots (see ``_refuse_outside_fixture``).
 
 Two deliberate semantics are worth stating up front:
 
-* Existence is decided from the working tree, not from ``git ls-files``.  For a
-  reference that ``.gitignore`` provably excludes, the *classification* is
-  deliberately not taken from the working tree at all: it is
-  LOCAL_ONLY_ARTIFACT in either environment.  What the tree still decides for
-  such a reference is the presence-derived detail -- ``local_presence``,
-  ``matches``, ``match_count``, ``resolved_via`` and the presence clause of
-  ``reason`` -- so those fields, and the summary counters computed from them,
-  do differ between a workstation and CI.  Every other reference is decided
-  from the tree outright, so a fresh checkout may see fewer files than this run
-  does.
+* Existence is decided from the working tree, not from ``git ls-files``.  The
+  single exception is a reference listed in
+  :data:`LOCAL_ONLY_ARTIFACT_REFERENCES`, whose *classification* is deliberately
+  not taken from the tree at all: it is LOCAL_ONLY_ARTIFACT in either
+  environment.  What the tree still decides for such a reference is the
+  presence-derived detail -- ``local_presence``, ``matches``, ``match_count``,
+  ``resolved_via`` and the presence clause of ``reason`` -- so those fields, and
+  the summary counters computed from them, do differ between a workstation and
+  CI.  Every other reference is decided from the tree outright, so a fresh
+  checkout may see fewer files than this run does.
 * Matching is case sensitive on every platform, including Windows.  A reference
   whose case does not match the tree is reported, because it would fail on a
   case-sensitive filesystem.
@@ -48,14 +48,25 @@ from hard-coded file names.
 Two classifications exist so that a documented, non-blocking finding is never
 disguised as a verified one (issue #19, Phase 5a.1):
 
-* ``LOCAL_ONLY_ARTIFACT`` -- every concrete path the reference can denote is
-  excluded from Git by a ``.gitignore`` rule this module evaluates exactly, and
-  the directory the reference names does exist.  Such an artifact legitimately
-  lives on a research workstation and is legitimately absent from a fresh CI
-  checkout, so its *classification* is stable across both, while the
-  presence-derived fields listed above differ.  It is non-blocking, listed
-  individually and counted on its own line -- never folded into
-  EXISTS_LITERAL or PATTERN_RESOLVED.
+* ``LOCAL_ONLY_ARTIFACT`` -- the reference is one of the individually listed
+  entries in :data:`LOCAL_ONLY_ARTIFACT_REFERENCES`, matched on the exact pair
+  (source document, raw token), and the forms actually being resolved equal the
+  path or pattern that entry records.  Such an artifact legitimately lives on a
+  research workstation and is legitimately absent from a fresh CI checkout, so
+  its *classification* is stable across both, while the presence-derived fields
+  listed above differ.  It is non-blocking, listed individually and counted on
+  its own line -- never folded into EXISTS_LITERAL or PATTERN_RESOLVED.
+
+  Registration is the authorization, and it is deliberately the only one.
+  ``.gitignore`` is corroborating evidence: an entry names the rule expected to
+  exclude its path, that rule is re-read from the repository on every run, and
+  the entry lapses if the rule is gone, if the file gains a negation this
+  reader cannot evaluate, or if the rule would not in fact exclude the recorded
+  path.  What ``.gitignore`` can never do is create an entry.  An unregistered
+  reference is classified by the ordinary rules however its suffix reads, so a
+  missing ``expfam/results/wine_typoooo.npy`` is TRUE_BROKEN exactly like a
+  missing ``.csv`` would be, and neither a near miss of a registered reference
+  nor a registered token appearing in another document inherits the entry.
 
 * ``KNOWN_NOTATION_DEFECT`` -- the reference is one of the individually listed
   entries in :data:`KNOWN_NOTATION_DEFECTS`, matched on the exact pair
@@ -65,7 +76,7 @@ disguised as a verified one (issue #19, Phase 5a.1):
   the artifacts it points at.  The historical text stays as written; the defect
   stays visible and separately counted; it simply does not block CI.
 
-Three limitations are worth knowing before wiring this into CI:
+Six limitations are worth knowing before wiring this into CI:
 
 * A reference whose first segment names an existing top-level directory is
   treated as repository-relative, so it is reported broken rather than read as
@@ -83,25 +94,29 @@ Three limitations are worth knowing before wiring this into CI:
 * Inline mathematics that contains braces, and two-part names such as Git
   branches, land in UNRESOLVED.  ``--fail-on-unresolved`` is therefore only
   usable on documents free of both.
-* LOCAL_ONLY_ARTIFACT cannot distinguish an ignored artifact that is absent
-  because it was never committed from one whose *file name* was mistyped: both
-  are absent from the tree and neither is in Git.  A typo in any *directory*
-  segment is still blocking, because the rule requires the named directory to
-  exist.  The remaining case is not blocking under any flag, including
-  ``--fail-on-unresolved``, which is a real loss against Phase 5a for a
-  mistyped ignored basename written as a table-cell sibling.  What replaces it
-  is the ``local_only_absent`` summary counter: on a tree that does hold the
-  research artifacts it should be zero, so a non-zero value there is the signal
-  to look for a mistyped file name.  In CI, where every such artifact is
-  legitimately absent, the counter carries no information and the gap stands.
-* The class applies to every ``*.ext`` line of this repository's ``.gitignore``
-  -- currently nine of them, ``*.pyc``, ``*.pyo``, ``*.pyd``, ``*.log``,
-  ``*.tmp``, ``*.npy``, ``*.npz``, ``*.pkl``, ``*.pickle`` -- not only to the
-  array formats that motivated it.  A future registry reference to an
-  execution log therefore falls under the same rule and the same gap above.
-  The class also assumes such a file was not force-added to the index.  On
-  2026-08-21 ``git ls-files`` was run with all nine of those patterns as its
-  pathspec and returned nothing, so no file of any of them is tracked here.
+* LOCAL_ONLY_ARTIFACT is a maintained list, which is the point: an artifact
+  that stops being local-only, or a reference that is edited, has to be
+  reviewed rather than silently re-derived.  The cost is that a genuinely new
+  local-only reference is reported TRUE_BROKEN until someone adds it here.
+  That is the intended direction to fail in -- the reference stays visible and
+  blocking rather than being quietly excused.
+* A registration is scoped to its document, not to the row it was written
+  for.  Once ``expfam/results/wine_F.npy`` is registered for
+  ``EXPERIMENT_REGISTRY.md``, any future row of that document writing the same
+  token is non-blocking too -- including after the artifact is renamed or
+  deleted.  An entry whose ``expected`` differs from its ``raw`` is narrower
+  than that: it also requires the rebasing to land on the recorded path, so a
+  future row writing the bare ``wine_F.npy`` beside a different base is not
+  covered and stays UNRESOLVED.  Narrowing the key with a line number was considered and rejected:
+  the document is append-only, so line numbers move, and the same reasoning
+  that keeps :data:`KNOWN_NOTATION_DEFECTS` line-independent applies here.  The
+  breadth is therefore deliberate, and it is bounded by the document: a
+  registered token in another document inherits nothing.
+* An entry states that the artifact is not in Git; it cannot state that the
+  artifact was never force-added.  On 2026-08-21 ``git ls-files`` was run with
+  all nine of this repository's ``*.ext`` rules as its pathspec -- ``*.pyc``,
+  ``*.pyo``, ``*.pyd``, ``*.log``, ``*.tmp``, ``*.npy``, ``*.npz``, ``*.pkl``,
+  ``*.pickle`` -- and returned nothing, so nothing of those forms is tracked.
 
 Usage::
 
@@ -280,6 +295,105 @@ KNOWN_NOTATION_DEFECTS: dict[tuple[str, str], NotationDefect] = {
 }
 
 
+@dataclass(frozen=True)
+class LocalOnlyArtifactReference:
+    """An explicitly registered reference to a Git-excluded research artifact.
+
+    Registration is the authorization.  ``.gitignore`` is evidence that
+    supports an entry and can withdraw it, but it never creates one: an
+    unregistered reference is classified by the ordinary rules however its
+    suffix reads, so a mistyped artifact name cannot become non-blocking by
+    accident.  Matching is exact equality on the pair (``source``, ``raw``),
+    the same discipline as :data:`KNOWN_NOTATION_DEFECTS`.
+
+    ``expected`` is the repository-relative path or pattern the reference
+    denotes once any deterministic contextual rebasing has been applied.  The
+    reference is only honoured when the forms actually under consideration
+    equal it, so a registration for a bare basename cannot be inherited by a
+    near miss, and a registration cannot silently start covering some other
+    path if the document around it changes.
+
+    ``ignore_rule`` is the ``.gitignore`` line that is expected to exclude
+    every path ``expected`` can denote.  It is re-checked against the
+    repository on every run, and the entry lapses if that line is gone.
+    """
+
+    source: str
+    raw: str
+    expected: str
+    ignore_rule: str
+    reason: str
+
+    @property
+    def key(self) -> tuple[str, str]:
+        return (self.source, self.raw)
+
+
+#: Exact, individually justified local-only references.  Adding an entry is a
+#: reviewed decision to treat one named reference in one named document as an
+#: artifact Git deliberately does not carry.  Nothing is covered implicitly:
+#: neither another token with the same suffix, nor the same token in another
+#: document, nor a near miss of a registered one.
+LOCAL_ONLY_ARTIFACT_REFERENCES: dict[
+    tuple[str, str], LocalOnlyArtifactReference
+] = {
+    reference.key: reference
+    for reference in (
+        LocalOnlyArtifactReference(
+            source="EXPERIMENT_REGISTRY.md",
+            raw="expfam/data/movielens_pilot/*.npy",
+            expected="expfam/data/movielens_pilot/*.npy",
+            ignore_rule="*.npy",
+            reason=(
+                "Output of the MovieLens data-preparation step. The arrays are "
+                "regenerated by 'prepare_movielens_data.py' and are excluded "
+                "from Git by '*.npy', so they exist on a workstation that ran "
+                "the preparation and never in a fresh checkout. Registered for "
+                "issue #19 Finding B; the row that writes it is a real "
+                "provenance record, not a broken reference."
+            ),
+        ),
+        LocalOnlyArtifactReference(
+            source="EXPERIMENT_REGISTRY.md",
+            raw="expfam/results/wine_F.npy",
+            expected="expfam/results/wine_F.npy",
+            ignore_rule="*.npy",
+            reason=(
+                "The same artifact as the bare 'wine_F.npy' entry below, "
+                "written as an explicit repository-relative path. Issue #19 "
+                "Finding B names the artifact in exactly this form. Stated "
+                "plainly, though: every place this exact token is currently "
+                "written in EXPERIMENT_REGISTRY.md is inside the Phase 5a.1 "
+                "section itself -- both its prose and its registration table -- "
+                "and never a historical row, so this entry was needed because of "
+                "that section; a fresh-checkout run reported the token "
+                "TRUE_BROKEN without it. Registered rather than reworded so the "
+                "explicit spelling, which is the natural way to write the "
+                "reference and the one the issue uses, is covered for future "
+                "rows too. Separate from the bare-basename entry because a "
+                "registration is keyed on the exact raw token and never "
+                "generalises from one spelling of a path to another."
+            ),
+        ),
+        LocalOnlyArtifactReference(
+            source="EXPERIMENT_REGISTRY.md",
+            raw="wine_F.npy",
+            expected="expfam/results/wine_F.npy",
+            ignore_rule="*.npy",
+            reason=(
+                "Latent-position matrix of the old-0.5 Wine run (KI-006), "
+                "written in the registry as a sibling of "
+                "'expfam/results/wine_dual_results.csv' and therefore denoting "
+                "'expfam/results/wine_F.npy'. Excluded from Git by '*.npy'. "
+                "The expected path is recorded here rather than inferred, so "
+                "the registration cannot follow the token if the surrounding "
+                "cell changes. Registered for issue #19 Finding B."
+            ),
+        ),
+    )
+}
+
+
 class Classification(str, Enum):
     """Classification assigned by the validator to a single candidate."""
 
@@ -362,8 +476,9 @@ class Candidate:
     #: ``matches``, ``match_count``, ``resolved_via`` and the presence clause of
     #: ``reason`` move with it, as do the summary counters computed from them.
     local_presence: str = ""
-    #: For KNOWN_NOTATION_DEFECT only: the forward-corrected reference that
-    #: superseded the defective token and that this run resolved.
+    #: The reference that supersedes or explains the raw token: the
+    #: forward-corrected path for KNOWN_NOTATION_DEFECT, and the registered
+    #: expected path or pattern for LOCAL_ONLY_ARTIFACT.
     correction: str = ""
     variants: list[str] = field(default_factory=list)
     matches: list[str] = field(default_factory=list)
@@ -1023,8 +1138,22 @@ class Report:
 class Validator:
     """Classify the path references of a set of Markdown provenance documents."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(
+        self,
+        root: Path,
+        local_only_references: dict[
+            tuple[str, str], LocalOnlyArtifactReference
+        ] | None = None,
+    ) -> None:
         self.root = root
+        #: Injectable so the fixture suites can register their own references
+        #: instead of mutating module state.  Production always uses the
+        #: module-level mapping.
+        self.local_only_references = (
+            LOCAL_ONLY_ARTIFACT_REFERENCES
+            if local_only_references is None
+            else local_only_references
+        )
         (
             self.ignored_extension_patterns,
             ignored_directories,
@@ -1165,84 +1294,85 @@ class Validator:
 
     # -- local-only (gitignored) evidence -----------------------------------
 
-    def _rule_excluding(self, form: str) -> str | None:
-        """The ``*.ext`` rule that excludes **every** path ``form`` can denote.
+    def _form_excluded_by(self, form: str, rule: str) -> bool:
+        """True when ``rule`` excludes every path ``form`` can denote.
 
-        ``form`` is one brace-expanded variant and may still contain ``*``,
-        ``?`` or ``**``.  The test is structural, never a lookup of what happens
-        to be on this disk, so it answers the same on a workstation and in a
-        fresh checkout:
+        Used to validate a registered entry, never to discover one.  ``form``
+        is one brace-expanded variant and may still contain ``*``, ``?`` or
+        ``**``.  The test is structural, so it answers the same on a
+        workstation and in a fresh checkout:
 
-        * a directory reference (trailing ``/``) is refused -- a directory holds
-          whatever it holds, and nothing licenses a claim about its contents;
+        * a directory reference (trailing ``/``) is refused -- a directory
+          holds whatever it holds, and nothing licenses a claim about its
+          contents;
+        * the reference must name a location, not a bare basename, so that the
+          recorded path is reviewable;
         * the final segment must end in the rule's suffix *literally*, with no
           wildcard inside the suffix itself, so that every path the glob can
           match carries that suffix.  ``*.npy`` qualifies, ``*.np?`` does not;
         * ``**`` may cross separators, which changes only which directory a
           match lands in, never its suffix.
-
-        Returns the matching ``.gitignore`` line, or ``None``.
         """
-        if not self.local_only_supported or form.endswith("/"):
-            return None
+        if form.endswith("/") or segment_count(form) < 2:
+            return False
+        suffix = rule[1:]
         last = form.rsplit("/", 1)[-1]
-        if not last:
-            return None
-        for pattern in self.ignored_extension_patterns:
-            suffix = pattern[1:]
-            if len(last) < len(suffix) or not last.endswith(suffix):
-                continue
-            if any(char in GLOB_CHARACTERS for char in last[-len(suffix) :]):
-                continue
-            return pattern
-        return None
-
-    def _named_directory_exists(self, form: str) -> bool:
-        """True when the directory ``form`` places its file in is in the tree.
-
-        This is what keeps a mistyped directory blocking.  An ignored artifact
-        normally sits beside tracked files, so its parent survives a fresh
-        checkout; ``expfam/reslts/wine_F.npy`` names no such directory and is
-        therefore never excused as local-only.  The head's first segment must be
-        literal, because a head of ``**`` matches every directory and would
-        reduce this test to "some directory exists"; past that segment a
-        wildcarded parent has to match at least one real directory.  Either way
-        this is a check against the index, not a search for the file's own
-        basename anywhere in the tree.
-        """
-        head, separator, _ = form.rpartition("/")
-        if not separator or not head:
+        if len(last) < len(suffix) or not last.endswith(suffix):
             return False
-        # The first segment must be literal.  Without this, a head of "**"
-        # matches every directory in the tree and the guard would degenerate
-        # into "some directory exists", which is no guard at all.
-        if any(char in GLOB_CHARACTERS for char in head.split("/", 1)[0]):
-            return False
-        if any(char in GLOB_CHARACTERS for char in head):
-            return bool(self.index.match(head + "/"))
-        return self.index.exists(head, directory_only=True)
+        return not any(char in GLOB_CHARACTERS for char in last[-len(suffix) :])
 
-    def _local_only_rules(self, forms: Sequence[str]) -> list[str] | None:
-        """The ``.gitignore`` rules making *every* form in ``forms`` local-only.
+    def _expected_variants(
+        self, reference: LocalOnlyArtifactReference
+    ) -> list[str] | None:
+        """The registered expected forms, or ``None`` if the entry is not usable.
 
-        All of them must qualify.  A token mixing a tracked reference with an
-        ignored one keeps the ordinary rules, so a genuinely broken half is
-        still reported.  Returns ``None`` when the verdict does not apply.
+        This is where a registration is checked rather than trusted.  It fails
+        closed on every count: an unparsable expected form, a ``.gitignore``
+        that no longer carries the recorded rule, a rule this reader cannot
+        evaluate exactly, or an expected form that rule would not actually
+        exclude.  A registration that stops being supported by the repository
+        therefore stops applying, instead of going on silently excusing a
+        reference.
         """
-        if not forms:
+        if not self.local_only_supported:
             return None
-        rules: list[str] = []
-        for form in forms:
-            rule = self._rule_excluding(form)
-            if rule is None or not self._named_directory_exists(form):
-                return None
-            rules.append(rule)
-        return sorted(set(rules))
+        if reference.ignore_rule not in self.ignored_extension_patterns:
+            return None
+        try:
+            variants = sorted(set(expand_braces(normalize_token(reference.expected))))
+        except ExpansionError:
+            return None
+        if not variants:
+            return None
+        if not all(
+            self._form_excluded_by(variant, reference.ignore_rule)
+            for variant in variants
+        ):
+            return None
+        return variants
+
+    def _local_only_reference(
+        self, candidate: Candidate
+    ) -> tuple[LocalOnlyArtifactReference, list[str]] | None:
+        """The registered entry for this candidate, with its expected forms.
+
+        Returns ``None`` when the candidate is not registered or the entry is
+        no longer authorized.  Whether the *forms under consideration* equal
+        the expected ones is decided by the caller, because that depends on
+        which interpretation of the token is being tried.
+        """
+        reference = self.local_only_references.get((candidate.source, candidate.raw))
+        if reference is None:
+            return None
+        variants = self._expected_variants(reference)
+        if variants is None:
+            return None
+        return reference, variants
 
     def _mark_local_only(
         self,
         candidate: Candidate,
-        rules: Sequence[str],
+        reference: LocalOnlyArtifactReference,
         matches: Sequence[str],
         unmatched: Sequence[str],
         resolved_via: str,
@@ -1250,20 +1380,24 @@ class Validator:
         candidate.classification = Classification.LOCAL_ONLY_ARTIFACT
         candidate.local_presence = "present" if matches else "absent"
         candidate.resolved_via = resolved_via if matches else ""
-        base = (
-            "the reference resolves against the repository root"
+        candidate.correction = reference.expected
+        how = (
+            "as written"
             if resolved_via == "root"
-            else "the reference resolves against the base implied by the "
-            "preceding reference in the same table cell"
+            else "after rebasing onto the base implied by the preceding "
+            "reference in the same table cell"
         )
         candidate.reason = (
-            f"every path this reference can denote is excluded from Git by "
-            f"{', '.join(rules)}, and the directory it names exists, so the "
-            "artifact is a local-only research output: present on a workstation "
-            "that produced it and legitimately absent from a fresh checkout. "
-            f"In this working tree it is {candidate.local_presence}. Not a "
-            f"statement that the artifact exists; {base} only when present."
+            "explicitly registered as a local-only research artifact: the "
+            f"reference matches the registered entry {how}, and its recorded "
+            f"path {reference.expected!r} is excluded from Git by the "
+            f"{reference.ignore_rule} rule this run read from .gitignore. Such "
+            "an artifact is present on a workstation that produced it and "
+            "legitimately absent from a fresh checkout; in this working tree "
+            f"it is {candidate.local_presence}. Not a statement that the "
+            "artifact exists."
         )
+        candidate.evidence.append(f"registration reason: {reference.reason}")
         self._record_matches(candidate, matches, unmatched)
 
     def _correction_resolves(self, correction: str) -> bool:
@@ -1321,12 +1455,16 @@ class Validator:
 
         matches, unmatched = self._resolve_variants(candidate.variants)
 
-        # Decided before the tree is consulted for a verdict, so that a
-        # provably ignored reference gets the same classification whether or
-        # not this particular machine happens to hold the artifact.
-        rules = self._local_only_rules(candidate.variants)
-        if rules is not None:
-            self._mark_local_only(candidate, rules, matches, unmatched, "root")
+        # Looked up before the tree is consulted for a verdict, so that a
+        # registered reference gets the same classification whether or not
+        # this particular machine happens to hold the artifact.  Registration
+        # is the authorization; the expected forms must match what is actually
+        # being resolved, or the ordinary rules apply.
+        registered = self._local_only_reference(candidate)
+        if registered is not None and candidate.variants == registered[1]:
+            self._mark_local_only(
+                candidate, registered[0], matches, unmatched, "root"
+            )
             return
 
         if not unmatched:
@@ -1368,16 +1506,19 @@ class Validator:
             if base is not None:
                 rebased = [f"{base}/{variant}" for variant in candidate.variants]
                 rebased_matches, rebased_unmatched = self._resolve_variants(rebased)
-                # Same reasoning as at the repository root, applied to the one
-                # base the document itself supplies.  Without this a bare
-                # ignored basename would read as resolved here and as
-                # unresolved in CI.
-                rebased_rules = self._local_only_rules(rebased)
-                if rebased_rules is not None:
+                # A registration may record the rebased form, so that a bare
+                # basename the document writes as a sibling is stable across
+                # environments.  Condition: the rebasing must land exactly on
+                # the registered expected form -- the entry is never allowed
+                # to follow the token onto some other path.
+                if (
+                    registered is not None
+                    and sorted(set(rebased)) == registered[1]
+                ):
                     candidate.variants = rebased
                     self._mark_local_only(
                         candidate,
-                        rebased_rules,
+                        registered[0],
                         rebased_matches,
                         rebased_unmatched,
                         "inferred-context",
@@ -1561,14 +1702,14 @@ def render_text(report: Report, verbose: bool) -> str:
     local_only = report.by_classification(Classification.LOCAL_ONLY_ARTIFACT)
     present = sum(1 for c in local_only if c.local_presence == "present")
     lines.append(
-        f"{len(local_only)} LOCAL_ONLY_ARTIFACT candidate(s): provably excluded "
-        f"from Git, {present} present in this tree and {len(local_only) - present} "
-        "absent. The classification is the same in either case, so it does not "
-        "flip between a workstation and CI; the presence-derived fields "
-        "(local_presence, matches, resolved_via) do differ. It is never a claim "
-        "that the artifact exists. On a tree that holds the research artifacts, "
-        "an absent count above zero is the signal to check for a mistyped file "
-        "name; in CI the count carries no information."
+        f"{len(local_only)} LOCAL_ONLY_ARTIFACT candidate(s): explicitly "
+        f"registered references to Git-excluded artifacts, {present} present in "
+        f"this tree and {len(local_only) - present} absent. The classification "
+        "is the same in either case, so it does not flip between a workstation "
+        "and CI; the presence-derived fields (local_presence, matches, "
+        "resolved_via) do differ. It is never a claim that the artifact exists. "
+        "Only a registered reference can land here: an unregistered missing "
+        "path is TRUE_BROKEN whatever its extension."
     )
     defects = report.by_classification(Classification.KNOWN_NOTATION_DEFECT)
     lines.append(
@@ -1673,6 +1814,7 @@ class SelfTestCase:
 
 def _build_fixture_tree(root: Path) -> None:
     """Create the throwaway tree used by ``--self-test`` (outside the repository)."""
+    _refuse_outside_fixture(root)
     files = [
         "expfam/results/exp_scenario_A_exp1_k.csv",
         "expfam/results/exp_scenario_B_exp1_k.csv",
@@ -1701,6 +1843,13 @@ def _build_fixture_tree(root: Path) -> None:
         "expfam/results/story_diagnostics/y_sparsity_stress_20260713_agg.csv",
         "expfam/results/story_diagnostics/y_sparsity_stress_20260713_runinfo.csv",
         "reproduction/results/raw/raw_output.csv",
+        # Present, genuinely ignored, and deliberately unregistered: each is a
+        # control proving that an ignored suffix alone authorizes nothing.
+        "expfam/results/run_trace.log",
+        "expfam/results/scratch.tmp",
+        "expfam/results/state.pkl",
+        "expfam/results/state.pickle",
+        "expfam/results/bundle.npz",
         ".venv/lib/exp_scenario_A_exp1_k.csv",
     ]
     for relative in files:
@@ -1708,9 +1857,56 @@ def _build_fixture_tree(root: Path) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("fixture\n", encoding="utf-8")
     (root / ".gitignore").write_text(
-        "*.npy\n*.npz\n.venv/\n__pycache__/\nreproduction/results/raw/\n",
+        chr(10).join(
+            [
+                "*.npy", "*.npz", "*.pkl", "*.pickle", "*.log", "*.tmp",
+                ".venv/", "__pycache__/", "reproduction/results/raw/",
+            ]
+        )
+        + chr(10),
         encoding="utf-8",
     )
+
+
+#: Registrations used by the fixture suites.  They exist so the fixture can
+#: exercise the registered path without mutating module state; every token the
+#: fixture checks that is NOT listed here must fall back to ordinary semantics,
+#: which is what most of the local-only checks below are actually testing.
+FIXTURE_LOCAL_ONLY_REFERENCES: dict[
+    tuple[str, str], LocalOnlyArtifactReference
+] = {
+    reference.key: reference
+    for reference in (
+        LocalOnlyArtifactReference(
+            source="<self-test>",
+            raw="expfam/results/wine_F.npy",
+            expected="expfam/results/wine_F.npy",
+            ignore_rule="*.npy",
+            reason="fixture: explicit path form",
+        ),
+        LocalOnlyArtifactReference(
+            source="<self-test>",
+            raw="expfam/results/*.npy",
+            expected="expfam/results/*.npy",
+            ignore_rule="*.npy",
+            reason="fixture: wildcard form",
+        ),
+        LocalOnlyArtifactReference(
+            source="<self-test>",
+            raw="expfam/data/movielens_pilot/*.npy",
+            expected="expfam/data/movielens_pilot/*.npy",
+            ignore_rule="*.npy",
+            reason="fixture: wildcard form in a second directory",
+        ),
+        LocalOnlyArtifactReference(
+            source="<self-test>",
+            raw="wine_F.npy",
+            expected="expfam/results/wine_F.npy",
+            ignore_rule="*.npy",
+            reason="fixture: bare basename resolved through a sibling base",
+        ),
+    )
+}
 
 
 SELF_TEST_CASES: tuple[SelfTestCase, ...] = (
@@ -1863,10 +2059,49 @@ SELF_TEST_CASES: tuple[SelfTestCase, ...] = (
     ),
     # -- issue #19 Finding B: local-only artifacts ------------------------
     SelfTestCase(
-        "B2 ignored artifact absent from this tree",
+        # Unregistered.  An ignored suffix plus an existing parent directory
+        # is NOT authorization; this is the case that must never be excused.
+        "B6 unregistered ignored artifact, absent, is blocking",
         "expfam/results/absent_artifact.npy",
-        Classification.LOCAL_ONLY_ARTIFACT,
+        Classification.TRUE_BROKEN,
     ),
+    SelfTestCase(
+        "B6 unregistered ignored artifact, mistyped registered name",
+        "expfam/results/wine_typoooo.npy",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "B6 unregistered ignored artifact, plausible sibling name",
+        "expfam/results/wine_G.npy",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "B6 near miss of a registered wildcard is not covered",
+        "expfam/results/*.npz",
+        Classification.PATTERN_RESOLVED,
+    ),
+    # One control per remaining ignored suffix: present -> ordinary existence,
+    # absent -> ordinary blocking.  None of them may become local-only.
+    SelfTestCase("suffix control: .log present", "expfam/results/run_trace.log",
+                 Classification.EXISTS_LITERAL),
+    SelfTestCase("suffix control: .log absent", "expfam/results/absent.log",
+                 Classification.TRUE_BROKEN),
+    SelfTestCase("suffix control: .tmp present", "expfam/results/scratch.tmp",
+                 Classification.EXISTS_LITERAL),
+    SelfTestCase("suffix control: .tmp absent", "expfam/results/absent.tmp",
+                 Classification.TRUE_BROKEN),
+    SelfTestCase("suffix control: .pkl present", "expfam/results/state.pkl",
+                 Classification.EXISTS_LITERAL),
+    SelfTestCase("suffix control: .pkl absent", "expfam/results/absent.pkl",
+                 Classification.TRUE_BROKEN),
+    SelfTestCase("suffix control: .pickle present", "expfam/results/state.pickle",
+                 Classification.EXISTS_LITERAL),
+    SelfTestCase("suffix control: .pickle absent", "expfam/results/absent.pickle",
+                 Classification.TRUE_BROKEN),
+    SelfTestCase("suffix control: .npz present", "expfam/results/bundle.npz",
+                 Classification.EXISTS_LITERAL),
+    SelfTestCase("suffix control: .npz absent", "expfam/results/absent.npz",
+                 Classification.TRUE_BROKEN),
     SelfTestCase(
         "B3 missing non-ignored path is still blocking",
         "expfam/results/absent_artifact.csv",
@@ -1913,9 +2148,10 @@ SELF_TEST_CASES: tuple[SelfTestCase, ...] = (
         Classification.TRUE_BROKEN,
     ),
     SelfTestCase(
-        # A head of '**' matches every directory, so accepting it would turn
-        # "the named directory exists" into "some directory exists".  The head
-        # is refused, and both forms fall back to the ordinary verdict.
+        # Not registered, so the local-only lookup returns nothing before any
+        # suffix or head analysis happens, and the ordinary verdict stands.
+        # (Under the pre-review design this shape needed a dedicated guard;
+        # registration subsumes it.)
         "adversarial: fully globbed head is not local-only, resolves normally",
         "**/wine_F.npy",
         Classification.PATTERN_RESOLVED,
@@ -1926,16 +2162,16 @@ SELF_TEST_CASES: tuple[SelfTestCase, ...] = (
         Classification.TRUE_BROKEN,
     ),
     SelfTestCase(
-        # A *partially* globbed head keeps its literal first segment, so the
-        # guard still bites and the realistic form stays local-only.
-        "partially globbed head under a literal root is still local-only",
+        # Plausible-looking and genuinely ignored, but not registered, so it
+        # gets the ordinary verdict like anything else.
+        "unregistered recursive ignored wildcard is not local-only",
         "expfam/**/*.npy",
-        Classification.LOCAL_ONLY_ARTIFACT,
+        Classification.PATTERN_RESOLVED,
     ),
     SelfTestCase(
-        # '?' can match something other than 'y', so not every path this glob
-        # denotes ends in '.npy' and the local-only rule must decline.  What is
-        # left is the ordinary verdict: here the glob happens to match.
+        # Not registered, so it is never local-only.  The wildcarded suffix is
+        # also the shape _form_excluded_by refuses when it validates a
+        # registration's expected form, which is the only place that check runs.
         "adversarial: wildcarded suffix is not local-only, resolves normally",
         "expfam/results/wine_F.np?",
         Classification.PATTERN_RESOLVED,
@@ -2180,15 +2416,13 @@ def _structural_checks(validator: Validator) -> list[tuple[str, str, str, bool]]
     report = validator_report_from_text(
         validator, "| row | `expfam/results/wine_dual_results.csv`, `wine_G.npy` | n |\n"
     )
-    # Asserted more tightly than before issue #19: not merely "not resolved"
-    # but reported absent with no match at all.  This is also the documented
-    # gap -- a mistyped *file name* of an ignored artifact is non-blocking,
-    # because nothing in a fresh checkout can tell it from an artifact that was
-    # simply never committed.  A mistyped *directory* stays blocking; see the
-    # "typo in the directory of an ignored artifact" case.
+    # The Phase 5a assertion, restored unchanged: `wine_G.npy` is not
+    # registered, so no local-only entry covers it and it keeps the ordinary
+    # verdict.  Presence and match count are asserted too, which the baseline
+    # check did not do.
     record(
-        "broken ignored sibling is reported absent, never resolved",
-        "LOCAL_ONLY_ARTIFACT/absent/0",
+        "broken sibling is not silently resolved",
+        "UNRESOLVED//0",
         "{}/{}/{}".format(
             report.candidates[1].classification.value,
             report.candidates[1].local_presence,
@@ -2435,7 +2669,7 @@ def _fresh_checkout_checks(root: Path) -> list[tuple[str, str, str, bool]]:
     _refuse_outside_fixture(root)
     for artifact in sorted(root.rglob("*.npy")):
         artifact.unlink()
-    validator = Validator(root)
+    validator = Validator(root, FIXTURE_LOCAL_ONLY_REFERENCES)
 
     record(
         "fresh checkout: ignored artifact keeps its classification",
@@ -2443,7 +2677,8 @@ def _fresh_checkout_checks(root: Path) -> list[tuple[str, str, str, bool]]:
         _classify_one(validator, "expfam/results/wine_F.npy"),
     )
     probe = Candidate(
-        source="<fresh>", line=1, column=1, cell=None, raw="expfam/results/wine_F.npy"
+        source="<self-test>", line=1, column=1, cell=None,
+        raw="expfam/results/wine_F.npy",
     )
     validator.classify(probe, [])
     record("fresh checkout: presence flips to absent", "absent", probe.local_presence)
@@ -2488,7 +2723,7 @@ def _unsupported_gitignore_checks(root: Path) -> list[tuple[str, str, str, bool]
         "*.npy" + chr(10) + "!expfam/results/wine_F.npy" + chr(10) + ".venv/" + chr(10),
         encoding="utf-8",
     )
-    validator = Validator(root)
+    validator = Validator(root, FIXTURE_LOCAL_ONLY_REFERENCES)
     record("negated .gitignore: local-only policy is off", False,
            validator.local_only_supported)
     record(
@@ -2500,6 +2735,38 @@ def _unsupported_gitignore_checks(root: Path) -> list[tuple[str, str, str, bool]
         "negated .gitignore: absent artifact is blocking again",
         "TRUE_BROKEN",
         _classify_one(validator, "expfam/results/absent_artifact.npy"),
+    )
+
+    # The registered rule is simply gone.  The registration is still in the
+    # mapping, so this is the case where an entry must lapse rather than go on
+    # excusing a reference the repository no longer says anything about.
+    (root / ".gitignore").write_text(
+        chr(10).join(["*.npz", ".venv/", "__pycache__/"]) + chr(10),
+        encoding="utf-8",
+    )
+    lapsed = Validator(root, FIXTURE_LOCAL_ONLY_REFERENCES)
+    record(
+        "withdrawn .gitignore rule: local-only policy is still supported",
+        True,
+        lapsed.local_only_supported,
+    )
+    record(
+        "withdrawn .gitignore rule: the registration no longer authorizes",
+        None,
+        lapsed._local_only_reference(
+            Candidate(source="<self-test>", line=1, column=1, cell=None,
+                      raw="expfam/results/wine_F.npy")
+        ),
+    )
+    record(
+        "withdrawn .gitignore rule: present artifact falls back to the tree",
+        "EXISTS_LITERAL",
+        _classify_one(lapsed, "expfam/results/wine_F.npy"),
+    )
+    record(
+        "withdrawn .gitignore rule: absent artifact is blocking again",
+        "TRUE_BROKEN",
+        _classify_one(lapsed, "expfam/results/absent_artifact.npy"),
     )
     return results
 
@@ -2727,8 +2994,14 @@ def _real_tree_checks(root: Path) -> list[tuple[str, str, str, bool]]:
             None,
         )
         if document is None:
-            skip("real tree: waiver is anchored in its source document",
-                 f"{defect.source} is not in the default source set")
+            # Same reasoning as the local-only guard below: a skip counts as a
+            # pass, so a waiver registered against a document the default run
+            # never reads would silently retire its own anchoring check.
+            record(
+                f"real tree: {defect.source} is in the validated source set",
+                True,
+                False,
+            )
         else:
             tokens = {
                 c.raw for c in extract_candidates(defect.source,
@@ -2799,11 +3072,260 @@ def _real_tree_checks(root: Path) -> list[tuple[str, str, str, bool]]:
         ),
     )
 
+    # -- issue #19 Finding B: only registered references are local-only ----
+    for reference in list(LOCAL_ONLY_ARTIFACT_REFERENCES.values()):
+        # Asserted against the real document rather than a synthetic cell, so
+        # that the whole chain -- extraction, any contextual rebasing, and the
+        # registration -- is what is being checked.
+        occurrences = [
+            c
+            for c in report.candidates
+            if c.source == reference.source and c.raw == reference.raw
+        ]
+        record(
+            f"real tree: registered {reference.raw!r} occurs in its document",
+            True,
+            bool(occurrences),
+        )
+        record(
+            f"real tree: every occurrence of {reference.raw!r} is local-only",
+            True,
+            all(
+                c.classification is Classification.LOCAL_ONLY_ARTIFACT
+                and c.correction == reference.expected
+                for c in occurrences
+            ),
+        )
+        if normalize_token(reference.raw) != normalize_token(reference.expected):
+            # The entry records a rebased form, so the token on its own -- with
+            # no cell to rebase against -- must NOT be excused.  Registration
+            # is necessary but never sufficient.
+            record(
+                f"real tree: {reference.raw!r} without its cell context is not local-only",
+                True,
+                _classify_one(validator, reference.raw, source=reference.source)
+                != Classification.LOCAL_ONLY_ARTIFACT.value,
+            )
+        record(
+            f"real tree: registered {reference.raw!r} is not covered elsewhere",
+            True,
+            _classify_one(validator, reference.raw, source="KNOWN_ISSUES.md")
+            != Classification.LOCAL_ONLY_ARTIFACT.value,
+        )
+        # One-character near misses of the registered raw token.
+        body, dot, suffix = reference.raw.rpartition(".")
+        for near_miss in (body + "x" + dot + suffix, body[:-1] + dot + suffix,
+                          reference.raw.replace("/", "/x", 1)):
+            if near_miss == reference.raw:
+                continue
+            record(
+                f"real tree: near miss {near_miss!r} does not inherit the entry",
+                True,
+                _classify_one(validator, near_miss, source=reference.source)
+                != Classification.LOCAL_ONLY_ARTIFACT.value,
+            )
+        # The expected path must be the one the entry records, and the entry
+        # must not cover the token when it denotes something else.
+        record(
+            f"real tree: expected form of {reference.raw!r} is excluded by its rule",
+            True,
+            validator._expected_variants(reference) is not None,
+        )
+        # The two guards that police the CONTENT of a registration.  They are
+        # the reviewed-decision surface the whole design leans on, so each gets
+        # a negative case built from this very entry.
+        record(
+            "real tree: a registration whose rule does not exclude its path lapses",
+            None,
+            validator._expected_variants(
+                LocalOnlyArtifactReference(
+                    source=reference.source,
+                    raw=reference.raw,
+                    expected="expfam/results/wine_dual_results.csv",
+                    ignore_rule=reference.ignore_rule,
+                    reason="probe: expected form is not covered by the rule",
+                )
+            ),
+        )
+        record(
+            "real tree: a registration whose expected form is a bare name lapses",
+            None,
+            validator._expected_variants(
+                LocalOnlyArtifactReference(
+                    source=reference.source,
+                    raw=reference.raw,
+                    expected="wine_F.npy",
+                    ignore_rule=reference.ignore_rule,
+                    reason="probe: expected form names no location",
+                )
+            ),
+        )
+        record(
+            "real tree: a registration with an unexpandable expected form lapses",
+            None,
+            validator._expected_variants(
+                LocalOnlyArtifactReference(
+                    source=reference.source,
+                    raw=reference.raw,
+                    expected="expfam/results/" + "{a,b}" * 9 + ".npy",
+                    ignore_rule=reference.ignore_rule,
+                    reason="probe: expected form exceeds the expansion bound",
+                )
+            ),
+        )
+        record(
+            "real tree: a registration naming an absent .gitignore rule lapses",
+            None,
+            validator._expected_variants(
+                LocalOnlyArtifactReference(
+                    source=reference.source,
+                    raw=reference.raw,
+                    expected=reference.expected,
+                    ignore_rule="*.no_such_rule",
+                    reason="probe: rule is not in .gitignore",
+                )
+            ),
+        )
+
+        # A registration must correspond to a token that really is written in
+        # the document it names; otherwise it is a stale entry sitting in the
+        # mapping with nothing to justify it.
+        document = next(
+            (
+                src
+                for src in sources
+                if src.relative_to(root).as_posix() == reference.source
+            ),
+            None,
+        )
+        if document is None:
+            # Deliberately a failure, not a skip.  A skip counts as a pass, so
+            # registering against a document the default run never reads would
+            # silently retire every guard below for that entry.  Adding such a
+            # registration has to be a decision someone makes on purpose.
+            record(
+                f"real tree: {reference.source} is in the validated source set",
+                True,
+                False,
+            )
+        else:
+            tokens = {
+                c.raw
+                for c in extract_candidates(
+                    reference.source, document.read_text(encoding="utf-8")
+                )
+            }
+            record(
+                f"real tree: registered {reference.raw!r} is a token of its document",
+                True,
+                reference.raw in tokens,
+            )
+            # Drift in both directions, which is what actually went wrong
+            # once: the document's registration table must name exactly the
+            # registered tokens, one per row.  Counting rows alone would pass
+            # while a row's contents drifted, and asking only whether the token
+            # appears somewhere in the document would be satisfied by the
+            # historical row it was registered for.  So this is a bijection:
+            # every registration is named by a row, and every row names one.
+            row_prefix = "| `" + reference.source + "` |"
+            rows = [
+                line
+                for line in document.read_text(encoding="utf-8").splitlines()
+                if line.startswith(row_prefix)
+            ]
+            registered_here = {
+                other.raw
+                for other in LOCAL_ONLY_ARTIFACT_REFERENCES.values()
+                if other.source == reference.source
+            }
+            # A multiset, not a set: two rows naming the same registration
+            # would satisfy set equality while leaving the table wrong.
+            named: list[str] = []
+            rows_naming_exactly_one = 0
+            rule_stated = 0
+            for line in rows:
+                hits = registered_here & {
+                    c.raw for c in extract_candidates(reference.source, line)
+                }
+                if len(hits) != 1:
+                    continue
+                rows_naming_exactly_one += 1
+                token = next(iter(hits))
+                named.append(token)
+                # The rule column is plain text, so it is matched as a
+                # substring rather than as an inline-code token; writing it as
+                # code would make it a path candidate in its own right.  It is
+                # matched against the LAST cell, not the whole row: a wildcard
+                # registration such as 'dir/*.npy' contains the rule inside its
+                # own token, so a whole-row test would pass for that row even
+                # with the rule column deleted.
+                cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+                if cells and LOCAL_ONLY_ARTIFACT_REFERENCES[
+                    (reference.source, token)
+                ].ignore_rule == cells[-1]:
+                    rule_stated += 1
+            record(
+                f"real tree: every registration for {reference.source} is in its table",
+                sorted(registered_here),
+                sorted(named),
+            )
+            record(
+                f"real tree: no {reference.source} table row is duplicated",
+                len(registered_here),
+                len(named),
+            )
+            record(
+                f"real tree: every {reference.source} table row names one registration",
+                len(rows),
+                rows_naming_exactly_one,
+            )
+            record(
+                f"real tree: every {reference.source} row states its .gitignore rule",
+                len(rows),
+                rule_stated,
+            )
+
+    # -- issue #19 Finding B: unregistered ignored references stay ordinary --
+    for token in (
+        "expfam/results/wine_typoooo.npy",
+        "expfam/results/wine_G.npy",
+        "expfam/results/absent_artifact.npy",
+        "expfam/data/movielens_pilot/absent_thing.npy",
+        "expfam/results/absent.log",
+        "expfam/results/absent.tmp",
+        "expfam/results/absent.pkl",
+        "expfam/results/absent.pickle",
+        "expfam/results/absent.npz",
+    ):
+        record(
+            f"real tree: unregistered ignored reference {token!r} is blocking",
+            "TRUE_BROKEN",
+            _classify_one(validator, token, source="EXPERIMENT_REGISTRY.md"),
+        )
+
     # -- issue #19 Finding B: local-only artifacts in the real tree --------
     record(
         "real tree: a registry-referenced ignored artifact is local-only",
         "LOCAL_ONLY_ARTIFACT",
-        _classify_one(validator, "expfam/data/movielens_pilot/*.npy"),
+        _classify_one(
+            validator,
+            "expfam/data/movielens_pilot/*.npy",
+            source="EXPERIMENT_REGISTRY.md",
+        ),
+    )
+    # Assert the property, not a label: what this token classifies as in
+    # another document depends on whether the artifacts happen to be on this
+    # machine.  What must hold in both environments is that the registration
+    # does not reach across documents.
+    record(
+        "real tree: the same token is not covered in another document",
+        True,
+        _classify_one(
+            validator,
+            "expfam/data/movielens_pilot/*.npy",
+            source="KNOWN_ISSUES.md",
+        )
+        != Classification.LOCAL_ONLY_ARTIFACT.value,
     )
     record(
         "real tree: an ignored artifact under a mistyped directory is blocking",
@@ -2856,7 +3378,7 @@ def run_self_test(stream) -> int:
     with tempfile.TemporaryDirectory(prefix="registry_path_validator_") as temporary:
         root = Path(temporary).resolve()
         _build_fixture_tree(root)
-        validator = Validator(root)
+        validator = Validator(root, FIXTURE_LOCAL_ONLY_REFERENCES)
         results = _token_checks(validator) + _structural_checks(validator)
 
     # Each of the following needs a differently shaped fixture tree, so each
