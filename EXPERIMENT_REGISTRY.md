@@ -167,3 +167,42 @@ per-column は引き続き **prototype**。complementary blocks 実験は未着�
 | `tools/cleanup_audit.py` | ツリーを走査し cleanup 候補を CSV 出力する dry-run スクリプト | 削除・移動・編集は行わない（docstring に明記） |
 | `reports/cleanup_audit/cleanup_candidates_20260707.csv` | 753行。KEEP 597 / ARCHIVE_CANDIDATE 131 / DELETE_CANDIDATE 13 / REVIEW_REQUIRED 12 | 自動分類であり**実行判断ではない** |
 | `reports/cleanup_audit/cleanup_review_20260707.md` | 上記CSVの人間レビュー用サマリ | DELETE_CANDIDATE 13件は主に `__pycache__` 系 |
+
+---
+
+## パス表記の forward correction（2026-08-21、Phase 5a.1 / issue #19、append-only）
+
+上の各表の **historical row は一切書き換えていない**（rewrite 0 件・delete 0 件）。
+Phase 5a のパス参照検査（`tools/validate_registry_paths.py`）で検出された表記の誤り・不整合は、
+KI-009 および `docs/math_notes/half_factor_primary_source_confirmation_20260818.md` の行と同じ扱いとする。
+すなわち **原文はそのまま historical record として残し、この節に日付入りの forward correction を追記する**。
+当時の記録は当時のまま読み、**現行の正しい参照はこの節を正とする**。
+実験の数値・結論・状態・原稿採用列はいずれも変更していない（表記のみの訂正である）。
+
+| # | 対象の historical row | 原文（historical record。変更しない） | 現行の正しい参照 | 訂正理由 | validator 分類（原文 → 訂正後） |
+|---|---|---|---|---|---|
+| A | story diagnostics フェーズの「Y sparsity stress（smoke）」行（状態 `archive` / 原稿採用 ✗） | `expfam/results/story_diagnostics/y_sparsity_stress_20260713_{,agg,runinfo}.csv` | `expfam/results/story_diagnostics/y_sparsity_stress_20260713{,_agg,_runinfo}.csv` | brace 記法の誤り。アンダースコアが brace 群の外側に置かれているため、空 alternative が実在しない `y_sparsity_stress_20260713_.csv` に展開される。同フェーズの trials=10 行はすでに正しい記法で書かれている | KNOWN_NOTATION_DEFECT → PATTERN_RESOLVED |
+| C | 「Control比較」行（状態 `current_main` / 原稿採用 ✓） | 実装/スクリプト cell の bare basename `run_comparison_all.py`（同 cell の先行参照は `reproduction/src/experiment_compare_with_dual.py`） | `reproduction/scripts/run_comparison_all.py` | 同 cell の先行参照から reproduction/src/ 配下と読めてしまうが、実ファイルは reproduction/scripts/ 配下にある（同名ファイルはリポジトリ内に1件のみ、2026-08-21 確認）。historical row の bare basename は残し、validator も同名ファイルをリポジトリ全体から検索して推測することはしない（bare basename は UNRESOLVED のまま） | UNRESOLVED → EXISTS_LITERAL |
+
+**A が指す実 artifact は次の3件**（いずれも 2026-08-21 時点で実在）:
+
+- `expfam/results/story_diagnostics/y_sparsity_stress_20260713.csv`
+- `expfam/results/story_diagnostics/y_sparsity_stress_20260713_agg.csv`
+- `expfam/results/story_diagnostics/y_sparsity_stress_20260713_runinfo.csv`
+
+A の waiver 本体は `tools/validate_registry_paths.py` 内の定数として持たれており、
+validator はその定数側の「訂正後の参照」を毎回ワーキングツリーに対して解決する（この .md を読みに行くわけではない）。
+両者が食い違わないよう、**定数の原文トークンと訂正後参照がこの文書に実際に書かれていることを self-test で照合している**
+（照合対象は文書全体である。原文トークンは historical row にも現れるため、実質的にこの節を守っているのは訂正後参照のほうである）。
+waiver は（source document, 原文トークン）の完全一致でのみ効き、訂正後の参照が解決しなくなった時点で失効する。
+したがってこの節は原文を隠す免罪符ではなく、**原文の誤りを可視化したまま非ブロッキングにするための記録**である。
+
+なお `.gitignore` により Git 管理外とされている実験成果物（`expfam/data/movielens_pilot/*.npy` など）への参照は、
+研究用ワークステーションには存在し fresh checkout には存在しない。
+これらは `LOCAL_ONLY_ARTIFACT` として非ブロッキングに分類され、
+**存在確認済み（`EXISTS_LITERAL`）とは別にカウントされる**。
+**分類自体**はワークステーションでも fresh checkout でも変わらない。
+一方で存在に由来するフィールド（`local_presence`・`matches`・`resolved_via`）とそこから計算される集計値は環境で変わる。
+なお、この分類は「無視対象の artifact のファイル名を打ち間違えた場合」を検出できない（ディレクトリ名の誤りは引き続き検出する）。
+artifact を実際に持つツリーでは `local_only_absent` が 0 になるはずなので、そこが 0 でなければ綴りを疑うこと。
+詳細な意味と限界は `tools/validate_registry_paths.py` の docstring を参照。

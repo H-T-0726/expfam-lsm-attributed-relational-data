@@ -18,15 +18,24 @@ The validator itself performs no repository write:
 
 One byproduct is outside the module's control: importing or byte-compiling it
 makes CPython write ``tools/__pycache__/validate_registry_paths.*.pyc``, which
-``.gitignore`` excludes.  Likewise ``--self-test`` writes its fixtures into
-``tempfile.TemporaryDirectory()``, which lands outside the repository unless
-``TMPDIR``/``TEMP`` has been pointed inside it.
+``.gitignore`` excludes.  Likewise ``--self-test`` writes, and in two suites
+also deletes, its fixtures inside ``tempfile.TemporaryDirectory()``, which
+lands outside the repository unless ``TMPDIR``/``TEMP`` has been pointed inside
+it.  Those two suites additionally refuse to run against any directory that is
+not one of their own fixture roots (see ``_refuse_outside_fixture``).
 
 Two deliberate semantics are worth stating up front:
 
-* Existence is decided from the working tree, not from ``git ls-files``, so an
-  artifact that ``.gitignore`` excludes but that is present locally counts as
-  existing.  A fresh checkout may therefore see fewer files than this run does.
+* Existence is decided from the working tree, not from ``git ls-files``.  For a
+  reference that ``.gitignore`` provably excludes, the *classification* is
+  deliberately not taken from the working tree at all: it is
+  LOCAL_ONLY_ARTIFACT in either environment.  What the tree still decides for
+  such a reference is the presence-derived detail -- ``local_presence``,
+  ``matches``, ``match_count``, ``resolved_via`` and the presence clause of
+  ``reason`` -- so those fields, and the summary counters computed from them,
+  do differ between a workstation and CI.  Every other reference is decided
+  from the tree outright, so a fresh checkout may see fewer files than this run
+  does.
 * Matching is case sensitive on every platform, including Windows.  A reference
   whose case does not match the tree is reported, because it would fail on a
   case-sensitive filesystem.
@@ -35,6 +44,26 @@ Two deliberate semantics are worth stating up front:
 the note on ``TMPDIR`` above) and adversarial checks against the real working
 tree, whose anchors are derived from whatever currently resolves rather than
 from hard-coded file names.
+
+Two classifications exist so that a documented, non-blocking finding is never
+disguised as a verified one (issue #19, Phase 5a.1):
+
+* ``LOCAL_ONLY_ARTIFACT`` -- every concrete path the reference can denote is
+  excluded from Git by a ``.gitignore`` rule this module evaluates exactly, and
+  the directory the reference names does exist.  Such an artifact legitimately
+  lives on a research workstation and is legitimately absent from a fresh CI
+  checkout, so its *classification* is stable across both, while the
+  presence-derived fields listed above differ.  It is non-blocking, listed
+  individually and counted on its own line -- never folded into
+  EXISTS_LITERAL or PATTERN_RESOLVED.
+
+* ``KNOWN_NOTATION_DEFECT`` -- the reference is one of the individually listed
+  entries in :data:`KNOWN_NOTATION_DEFECTS`, matched on the exact pair
+  (source document, raw token) so that neither a near miss nor the same token
+  in another document is covered.  The waiver only applies while the recorded
+  forward correction still resolves against the tree, so it can never outlive
+  the artifacts it points at.  The historical text stays as written; the defect
+  stays visible and separately counted; it simply does not block CI.
 
 Three limitations are worth knowing before wiring this into CI:
 
@@ -54,6 +83,25 @@ Three limitations are worth knowing before wiring this into CI:
 * Inline mathematics that contains braces, and two-part names such as Git
   branches, land in UNRESOLVED.  ``--fail-on-unresolved`` is therefore only
   usable on documents free of both.
+* LOCAL_ONLY_ARTIFACT cannot distinguish an ignored artifact that is absent
+  because it was never committed from one whose *file name* was mistyped: both
+  are absent from the tree and neither is in Git.  A typo in any *directory*
+  segment is still blocking, because the rule requires the named directory to
+  exist.  The remaining case is not blocking under any flag, including
+  ``--fail-on-unresolved``, which is a real loss against Phase 5a for a
+  mistyped ignored basename written as a table-cell sibling.  What replaces it
+  is the ``local_only_absent`` summary counter: on a tree that does hold the
+  research artifacts it should be zero, so a non-zero value there is the signal
+  to look for a mistyped file name.  In CI, where every such artifact is
+  legitimately absent, the counter carries no information and the gap stands.
+* The class applies to every ``*.ext`` line of this repository's ``.gitignore``
+  -- currently nine of them, ``*.pyc``, ``*.pyo``, ``*.pyd``, ``*.log``,
+  ``*.tmp``, ``*.npy``, ``*.npz``, ``*.pkl``, ``*.pickle`` -- not only to the
+  array formats that motivated it.  A future registry reference to an
+  execution log therefore falls under the same rule and the same gap above.
+  The class also assumes such a file was not force-added to the index.  On
+  2026-08-21 ``git ls-files`` was run with all nine of those patterns as its
+  pathspec and returned nothing, so no file of any of them is tracked here.
 
 Usage::
 
@@ -88,7 +136,7 @@ from typing import Iterable, Sequence
 # constants
 # --------------------------------------------------------------------------
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 DEFAULT_SOURCES = ("EXPERIMENT_REGISTRY.md",)
 
@@ -164,6 +212,74 @@ INTENTIONAL_HISTORICAL_PATHS: dict[str, HistoricalException] = {
 }
 
 
+@dataclass(frozen=True)
+class NotationDefect:
+    """A known notation defect preserved verbatim in a historical record.
+
+    Matching is exact equality on the pair (``source``, ``raw``): the document
+    the token was written in and the token exactly as it was written there.  A
+    line number is deliberately not part of the key, so appending a forward
+    correction above or below the historical row cannot detach the waiver from
+    it -- and, equally deliberately, the same defective token quoted inside that
+    forward correction is covered by the same entry.
+
+    ``correction`` is the reference that supersedes the defective one.  It is
+    resolved against the working tree on every run, and the waiver only applies
+    while it resolves: the entry cannot outlive the artifacts it points at, and
+    it can never assert an existence the tree does not support.
+    """
+
+    source: str
+    raw: str
+    correction: str
+    reason: str
+    evidence: str
+
+    @property
+    def key(self) -> tuple[str, str]:
+        return (self.source, self.raw)
+
+
+#: Exact, individually justified notation defects.  Each entry names one token
+#: in one document; near misses (``runinfos`` for ``runinfo``), the same token
+#: in another document, and any other reference to the same artifacts are all
+#: outside the waiver and keep their ordinary classification.
+KNOWN_NOTATION_DEFECTS: dict[tuple[str, str], NotationDefect] = {
+    defect.key: defect
+    for defect in (
+        NotationDefect(
+            source="EXPERIMENT_REGISTRY.md",
+            raw=(
+                "expfam/results/story_diagnostics/"
+                "y_sparsity_stress_20260713_{,agg,runinfo}.csv"
+            ),
+            correction=(
+                "expfam/results/story_diagnostics/"
+                "y_sparsity_stress_20260713{,_agg,_runinfo}.csv"
+            ),
+            reason=(
+                "Known brace-notation defect in a historical registry row: the "
+                "underscore sits before the brace group instead of inside each "
+                "alternative, so the empty alternative expands to the "
+                "non-existent 'y_sparsity_stress_20260713_.csv'. The three "
+                "artifacts the row documents do exist and are named by the "
+                "recorded correction, which this run resolved. The historical "
+                "text is preserved as written and is not normalised."
+            ),
+            # ASCII only: this string is rendered to a console whose encoding
+            # varies, and to JSON written with ensure_ascii, so the Japanese
+            # section heading is described rather than quoted.
+            evidence=(
+                "EXPERIMENT_REGISTRY.md, appended forward-correction section "
+                "dated 2026-08-21 (Phase 5a.1 / issue #19, append-only); the "
+                "sibling row of the same phase already uses the correct "
+                "'..._trials10{,_agg,_runinfo}.csv' notation"
+            ),
+        ),
+    )
+}
+
+
 class Classification(str, Enum):
     """Classification assigned by the validator to a single candidate."""
 
@@ -171,6 +287,12 @@ class Classification(str, Enum):
     PATTERN_RESOLVED = "PATTERN_RESOLVED"
     TRUE_BROKEN = "TRUE_BROKEN"
     INTENTIONAL_HISTORICAL = "INTENTIONAL_HISTORICAL"
+    #: Provably excluded from Git; may legitimately be absent in a fresh
+    #: checkout.  Never an assertion that the artifact exists.
+    LOCAL_ONLY_ARTIFACT = "LOCAL_ONLY_ARTIFACT"
+    #: Listed in KNOWN_NOTATION_DEFECTS: a defect preserved on purpose, still
+    #: reported, superseded by a forward correction that does resolve.
+    KNOWN_NOTATION_DEFECT = "KNOWN_NOTATION_DEFECT"
     NON_PATH = "NON_PATH"
     UNRESOLVED = "UNRESOLVED"
 
@@ -179,6 +301,8 @@ class Classification(str, Enum):
 CLASSIFICATION_ORDER = (
     Classification.EXISTS_LITERAL,
     Classification.PATTERN_RESOLVED,
+    Classification.LOCAL_ONLY_ARTIFACT,
+    Classification.KNOWN_NOTATION_DEFECT,
     Classification.INTENTIONAL_HISTORICAL,
     Classification.NON_PATH,
     Classification.UNRESOLVED,
@@ -189,6 +313,17 @@ CLASSIFICATION_ORDER = (
 PROBLEM_CLASSIFICATIONS = (
     Classification.TRUE_BROKEN,
     Classification.UNRESOLVED,
+    Classification.KNOWN_NOTATION_DEFECT,
+    Classification.LOCAL_ONLY_ARTIFACT,
+    Classification.INTENTIONAL_HISTORICAL,
+)
+
+#: Non-blocking by construction: each names a documented, individually visible
+#: situation rather than an unverified reference.  The exit status acts on
+#: TRUE_BROKEN (and on UNRESOLVED under --fail-on-unresolved) only.
+NON_BLOCKING_BY_POLICY = (
+    Classification.KNOWN_NOTATION_DEFECT,
+    Classification.LOCAL_ONLY_ARTIFACT,
     Classification.INTENTIONAL_HISTORICAL,
 )
 
@@ -221,6 +356,15 @@ class Candidate:
     #: excludes, so a fresh checkout may classify this candidate differently.
     #: Structured rather than inferred from the evidence text.
     gitignore_sensitive: bool = False
+    #: For LOCAL_ONLY_ARTIFACT only: "present" or "absent" in the tree this run
+    #: walked.  The classification stays the same in both cases.  This field is
+    #: one of several that legitimately differ between a workstation and CI --
+    #: ``matches``, ``match_count``, ``resolved_via`` and the presence clause of
+    #: ``reason`` move with it, as do the summary counters computed from them.
+    local_presence: str = ""
+    #: For KNOWN_NOTATION_DEFECT only: the forward-corrected reference that
+    #: superseded the defective token and that this run resolved.
+    correction: str = ""
     variants: list[str] = field(default_factory=list)
     matches: list[str] = field(default_factory=list)
     match_count: int = 0
@@ -242,6 +386,8 @@ class Candidate:
             "classification": self.classification.value,
             "resolved_via": self.resolved_via,
             "gitignore_sensitive": self.gitignore_sensitive,
+            "local_presence": self.local_presence,
+            "correction": self.correction,
             "reason": self.reason,
             "variants": list(self.variants),
             "match_count": self.match_count,
@@ -713,37 +859,50 @@ def _glob_to_regex(pattern: str) -> str:
 # --------------------------------------------------------------------------
 
 
-def read_gitignore_rules(root: Path) -> tuple[list[str], frozenset[str]]:
+def read_gitignore_rules(root: Path) -> tuple[list[str], frozenset[str], bool]:
     """Read the two ``.gitignore`` forms this validator understands.
 
-    Returns ``(extension_patterns, bare_directory_names)``:
+    Returns ``(extension_patterns, bare_directory_names, has_negation)``:
 
-    * ``*.ext`` lines, used only to annotate results.  A file may exist in the
-      local working tree while being absent from a fresh checkout; the value
-      never influences a classification.
+    * ``*.ext`` lines.  They annotate results, and they are the only rule form
+      strong enough to support a LOCAL_ONLY_ARTIFACT verdict: Git applies such
+      a line to a file of that suffix at any depth, which this module can
+      decide for a given reference without consulting Git.
     * ``name/`` lines that carry no path separator of their own, such as
       ``.venv/`` or ``__pycache__/``.  Those directories are excluded from the
       working-tree index so that the index -- and therefore the verdict -- does
       not depend on machine-local scratch directories.
+    * whether the file contains any ``!`` negation.  A negation can re-include
+      a file that an earlier rule excluded, and this reader does not implement
+      Git's ordering and anchoring semantics for that.  When one is present the
+      whole LOCAL_ONLY_ARTIFACT determination is switched off rather than
+      guessed at: an unimplemented rule form must not soften a verdict.
 
-    Every other ``.gitignore`` form is deliberately ignored; this is a partial
-    reader, not a Git-compatible one.
+    Every other ``.gitignore`` form -- anchored directory prefixes such as
+    ``expfam/results/raw/``, bare file names, ``.env.*`` -- is deliberately not
+    interpreted here.  A reference those rules cover keeps whatever
+    classification the tree gives it; this is a partial reader, not a
+    Git-compatible one, and it only ever declines to act.
     """
     gitignore = root / ".gitignore"
     if not gitignore.is_file():
-        return [], frozenset()
+        return [], frozenset(), False
     extensions: list[str] = []
     directories: set[str] = set()
+    has_negation = False
     for line in gitignore.read_text(encoding="utf-8", errors="replace").splitlines():
         stripped = line.strip()
-        if not stripped or stripped.startswith("#") or stripped.startswith("!"):
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("!"):
+            has_negation = True
             continue
         if re.fullmatch(r"\*\.[A-Za-z0-9_]+", stripped):
             extensions.append(stripped)
             continue
         if re.fullmatch(r"[A-Za-z0-9_.-]+/", stripped):
             directories.add(stripped[:-1])
-    return sorted(set(extensions)), frozenset(directories)
+    return sorted(set(extensions)), frozenset(directories), has_negation
 
 
 # --------------------------------------------------------------------------
@@ -771,7 +930,7 @@ class Report:
 
     @property
     def inferred_context_count(self) -> int:
-        """PATTERN_RESOLVED entries that needed a base inferred from context.
+        """Entries located only against a base inferred from context.
 
         They are resolutions of an interpretation, not of the token as written,
         so they are reported separately instead of being folded into a single
@@ -793,7 +952,10 @@ class Report:
 
         Whatever the exit-status policy, these are the ones a human still has
         to look at: UNRESOLVED could not be located, NON_PATH was judged not to
-        be a path at all, and INTENTIONAL_HISTORICAL is a documented absence.
+        be a path at all, INTENTIONAL_HISTORICAL is a documented absence,
+        KNOWN_NOTATION_DEFECT is a documented defect superseded by a forward
+        correction, and LOCAL_ONLY_ARTIFACT is outside Git and therefore not
+        evidence of existence even when it is present here.
         """
         summary = self.summary
         return {
@@ -802,6 +964,8 @@ class Report:
                 Classification.UNRESOLVED,
                 Classification.NON_PATH,
                 Classification.INTENTIONAL_HISTORICAL,
+                Classification.KNOWN_NOTATION_DEFECT,
+                Classification.LOCAL_ONLY_ARTIFACT,
             )
         }
 
@@ -835,6 +999,17 @@ class Report:
             "summary": {
                 "candidates": len(self.candidates),
                 **self.summary,
+                "local_only_present": sum(
+                    1
+                    for c in self.candidates
+                    if c.local_presence == "present"
+                ),
+                "local_only_absent": sum(
+                    1 for c in self.candidates if c.local_presence == "absent"
+                ),
+                "non_blocking_by_policy": sum(
+                    self.summary[item.value] for item in NON_BLOCKING_BY_POLICY
+                ),
                 "resolved_via_inferred_context": self.inferred_context_count,
                 "not_covered_by_exit_status": self.unchecked_count,
                 "verdict_depends_on_gitignored_artifacts": len(
@@ -850,7 +1025,16 @@ class Validator:
 
     def __init__(self, root: Path) -> None:
         self.root = root
-        self.ignored_extension_patterns, ignored_directories = read_gitignore_rules(root)
+        (
+            self.ignored_extension_patterns,
+            ignored_directories,
+            gitignore_has_negation,
+        ) = read_gitignore_rules(root)
+        #: False disables every LOCAL_ONLY_ARTIFACT verdict.  See
+        #: read_gitignore_rules(): a negation makes this reader's view of
+        #: .gitignore incomplete, and an incomplete view may not excuse a
+        #: reference from the ordinary rules.
+        self.local_only_supported = not gitignore_has_negation
         self.skipped_directories: frozenset[str] = SKIPPED_TREE_DIRS | ignored_directories
         self.index = TreeIndex(root, self.skipped_directories)
 
@@ -979,6 +1163,122 @@ class Validator:
             "absent from a fresh checkout, so the verdict can differ in CI"
         ]
 
+    # -- local-only (gitignored) evidence -----------------------------------
+
+    def _rule_excluding(self, form: str) -> str | None:
+        """The ``*.ext`` rule that excludes **every** path ``form`` can denote.
+
+        ``form`` is one brace-expanded variant and may still contain ``*``,
+        ``?`` or ``**``.  The test is structural, never a lookup of what happens
+        to be on this disk, so it answers the same on a workstation and in a
+        fresh checkout:
+
+        * a directory reference (trailing ``/``) is refused -- a directory holds
+          whatever it holds, and nothing licenses a claim about its contents;
+        * the final segment must end in the rule's suffix *literally*, with no
+          wildcard inside the suffix itself, so that every path the glob can
+          match carries that suffix.  ``*.npy`` qualifies, ``*.np?`` does not;
+        * ``**`` may cross separators, which changes only which directory a
+          match lands in, never its suffix.
+
+        Returns the matching ``.gitignore`` line, or ``None``.
+        """
+        if not self.local_only_supported or form.endswith("/"):
+            return None
+        last = form.rsplit("/", 1)[-1]
+        if not last:
+            return None
+        for pattern in self.ignored_extension_patterns:
+            suffix = pattern[1:]
+            if len(last) < len(suffix) or not last.endswith(suffix):
+                continue
+            if any(char in GLOB_CHARACTERS for char in last[-len(suffix) :]):
+                continue
+            return pattern
+        return None
+
+    def _named_directory_exists(self, form: str) -> bool:
+        """True when the directory ``form`` places its file in is in the tree.
+
+        This is what keeps a mistyped directory blocking.  An ignored artifact
+        normally sits beside tracked files, so its parent survives a fresh
+        checkout; ``expfam/reslts/wine_F.npy`` names no such directory and is
+        therefore never excused as local-only.  The head's first segment must be
+        literal, because a head of ``**`` matches every directory and would
+        reduce this test to "some directory exists"; past that segment a
+        wildcarded parent has to match at least one real directory.  Either way
+        this is a check against the index, not a search for the file's own
+        basename anywhere in the tree.
+        """
+        head, separator, _ = form.rpartition("/")
+        if not separator or not head:
+            return False
+        # The first segment must be literal.  Without this, a head of "**"
+        # matches every directory in the tree and the guard would degenerate
+        # into "some directory exists", which is no guard at all.
+        if any(char in GLOB_CHARACTERS for char in head.split("/", 1)[0]):
+            return False
+        if any(char in GLOB_CHARACTERS for char in head):
+            return bool(self.index.match(head + "/"))
+        return self.index.exists(head, directory_only=True)
+
+    def _local_only_rules(self, forms: Sequence[str]) -> list[str] | None:
+        """The ``.gitignore`` rules making *every* form in ``forms`` local-only.
+
+        All of them must qualify.  A token mixing a tracked reference with an
+        ignored one keeps the ordinary rules, so a genuinely broken half is
+        still reported.  Returns ``None`` when the verdict does not apply.
+        """
+        if not forms:
+            return None
+        rules: list[str] = []
+        for form in forms:
+            rule = self._rule_excluding(form)
+            if rule is None or not self._named_directory_exists(form):
+                return None
+            rules.append(rule)
+        return sorted(set(rules))
+
+    def _mark_local_only(
+        self,
+        candidate: Candidate,
+        rules: Sequence[str],
+        matches: Sequence[str],
+        unmatched: Sequence[str],
+        resolved_via: str,
+    ) -> None:
+        candidate.classification = Classification.LOCAL_ONLY_ARTIFACT
+        candidate.local_presence = "present" if matches else "absent"
+        candidate.resolved_via = resolved_via if matches else ""
+        base = (
+            "the reference resolves against the repository root"
+            if resolved_via == "root"
+            else "the reference resolves against the base implied by the "
+            "preceding reference in the same table cell"
+        )
+        candidate.reason = (
+            f"every path this reference can denote is excluded from Git by "
+            f"{', '.join(rules)}, and the directory it names exists, so the "
+            "artifact is a local-only research output: present on a workstation "
+            "that produced it and legitimately absent from a fresh checkout. "
+            f"In this working tree it is {candidate.local_presence}. Not a "
+            f"statement that the artifact exists; {base} only when present."
+        )
+        self._record_matches(candidate, matches, unmatched)
+
+    def _correction_resolves(self, correction: str) -> bool:
+        """True when every variant of a recorded forward correction is present.
+
+        A waiver is only as good as the reference that replaces it, so this is
+        re-checked on every run instead of being trusted from the table.
+        """
+        try:
+            variants = expand_braces(normalize_token(correction))
+        except ExpansionError:
+            return False
+        _, unmatched = self._resolve_variants(variants)
+        return not unmatched
+
     # -- classification -----------------------------------------------------
 
     def classify(self, candidate: Candidate, earlier: Sequence[Candidate]) -> None:
@@ -1020,6 +1320,15 @@ class Validator:
         )
 
         matches, unmatched = self._resolve_variants(candidate.variants)
+
+        # Decided before the tree is consulted for a verdict, so that a
+        # provably ignored reference gets the same classification whether or
+        # not this particular machine happens to hold the artifact.
+        rules = self._local_only_rules(candidate.variants)
+        if rules is not None:
+            self._mark_local_only(candidate, rules, matches, unmatched, "root")
+            return
+
         if not unmatched:
             candidate.classification = (
                 Classification.PATTERN_RESOLVED
@@ -1036,6 +1345,20 @@ class Validator:
             self._record_matches(candidate, matches)
             return
 
+        defect = KNOWN_NOTATION_DEFECTS.get((candidate.source, candidate.raw))
+        if defect is not None and self._correction_resolves(defect.correction):
+            candidate.classification = Classification.KNOWN_NOTATION_DEFECT
+            candidate.correction = defect.correction
+            candidate.reason = defect.reason
+            candidate.evidence.append(defect.evidence)
+            candidate.evidence.append(
+                f"superseded by {defect.correction!r}, which this run resolved "
+                "against the working tree; the waiver lapses if it stops "
+                "resolving"
+            )
+            self._record_matches(candidate, matches, unmatched)
+            return
+
         locatable = names_a_location(base_forms[0])
         sibling_tried = False
 
@@ -1045,6 +1368,21 @@ class Validator:
             if base is not None:
                 rebased = [f"{base}/{variant}" for variant in candidate.variants]
                 rebased_matches, rebased_unmatched = self._resolve_variants(rebased)
+                # Same reasoning as at the repository root, applied to the one
+                # base the document itself supplies.  Without this a bare
+                # ignored basename would read as resolved here and as
+                # unresolved in CI.
+                rebased_rules = self._local_only_rules(rebased)
+                if rebased_rules is not None:
+                    candidate.variants = rebased
+                    self._mark_local_only(
+                        candidate,
+                        rebased_rules,
+                        rebased_matches,
+                        rebased_unmatched,
+                        "inferred-context",
+                    )
+                    return
                 if not rebased_unmatched:
                     # Always PATTERN_RESOLVED, even for a token that carries no
                     # wildcard: what resolved is an interpretation of the token,
@@ -1216,9 +1554,27 @@ def render_text(report: Report, verbose: bool) -> str:
         lines.append(f"  {item.value.ljust(width)} : {summary[item.value]}")
     lines.append("")
     lines.append(
-        f"of the {summary[Classification.PATTERN_RESOLVED.value]} PATTERN_RESOLVED, "
-        f"{report.inferred_context_count} needed a base directory inferred from the "
-        "surrounding table cell rather than resolving as written."
+        f"{report.inferred_context_count} candidate(s) were located only against a "
+        "base directory inferred from the surrounding table cell, rather than "
+        "resolving as written."
+    )
+    local_only = report.by_classification(Classification.LOCAL_ONLY_ARTIFACT)
+    present = sum(1 for c in local_only if c.local_presence == "present")
+    lines.append(
+        f"{len(local_only)} LOCAL_ONLY_ARTIFACT candidate(s): provably excluded "
+        f"from Git, {present} present in this tree and {len(local_only) - present} "
+        "absent. The classification is the same in either case, so it does not "
+        "flip between a workstation and CI; the presence-derived fields "
+        "(local_presence, matches, resolved_via) do differ. It is never a claim "
+        "that the artifact exists. On a tree that holds the research artifacts, "
+        "an absent count above zero is the signal to check for a mistyped file "
+        "name; in CI the count carries no information."
+    )
+    defects = report.by_classification(Classification.KNOWN_NOTATION_DEFECT)
+    lines.append(
+        f"{len(defects)} KNOWN_NOTATION_DEFECT candidate(s): historical notation "
+        "preserved as written, superseded by a forward correction that resolved "
+        "on this run."
     )
     unverified = report.unverified_counts
     breakdown = ", ".join(f"{name} {count}" for name, count in unverified.items())
@@ -1230,6 +1586,11 @@ def render_text(report: Report, verbose: bool) -> str:
         "TRUE_BROKEN and UNRESOLVED both fail this run (--fail-on-unresolved)"
         if report.unresolved_is_blocking
         else "TRUE_BROKEN alone fails this run"
+    )
+    lines.append(
+        "non-blocking by policy: "
+        + ", ".join(item.value for item in NON_BLOCKING_BY_POLICY)
+        + "; each is listed individually below and counted on its own line."
     )
     lines.append(
         f"policy: {policy}; {report.unchecked_count} of those candidate(s) are "
@@ -1259,7 +1620,7 @@ def render_text(report: Report, verbose: bool) -> str:
         lines.append("")
 
     inferred = report.inferred_context_candidates
-    lines.append(f"PATTERN_RESOLVED via inferred context ({len(inferred)})")
+    lines.append(f"located via inferred context ({len(inferred)})")
     if not inferred:
         lines.append("  (none)")
     for candidate in inferred:
@@ -1278,6 +1639,10 @@ def render_text(report: Report, verbose: bool) -> str:
 def _render_candidate(candidate: Candidate) -> list[str]:
     lines = [f"  {candidate.location}  `{candidate.raw}`"]
     lines.append(f"      classification : {candidate.classification.value}")
+    if candidate.local_presence:
+        lines.append(f"      local presence : {candidate.local_presence}")
+    if candidate.correction:
+        lines.append(f"      correction     : {candidate.correction}")
     lines.append(f"      normalized     : {candidate.normalized}")
     lines.append(f"      reason         : {candidate.reason}")
     if candidate.variants and candidate.variants != [candidate.normalized]:
@@ -1330,6 +1695,12 @@ def _build_fixture_tree(root: Path) -> None:
         "Mato Lab Program/calcEtaNewton.m",
         "Mato Lab Program/EffcalcEtaNewton (1).m",
         "reports/plan.md",
+        "expfam/data/movielens_pilot/movielens_movies_metadata.csv",
+        "expfam/data/movielens_pilot/movielens_X_genre.npy",
+        "expfam/results/story_diagnostics/y_sparsity_stress_20260713.csv",
+        "expfam/results/story_diagnostics/y_sparsity_stress_20260713_agg.csv",
+        "expfam/results/story_diagnostics/y_sparsity_stress_20260713_runinfo.csv",
+        "reproduction/results/raw/raw_output.csv",
         ".venv/lib/exp_scenario_A_exp1_k.csv",
     ]
     for relative in files:
@@ -1476,15 +1847,126 @@ SELF_TEST_CASES: tuple[SelfTestCase, ...] = (
         "archive/paper_writing_examples/*.pdf",
         Classification.TRUE_BROKEN,
     ),
+    # Both were EXISTS_LITERAL / PATTERN_RESOLVED before issue #19.  The
+    # reference is unchanged and still must not be reported broken; what
+    # changed is that presence in this tree is no longer reported as verified
+    # existence, because Git does not carry the artifact.
     SelfTestCase(
         "ignored but existing artifact",
         "expfam/results/wine_F.npy",
-        Classification.EXISTS_LITERAL,
+        Classification.LOCAL_ONLY_ARTIFACT,
     ),
     SelfTestCase(
         "ignored artifact wildcard",
         "expfam/results/*.npy",
+        Classification.LOCAL_ONLY_ARTIFACT,
+    ),
+    # -- issue #19 Finding B: local-only artifacts ------------------------
+    SelfTestCase(
+        "B2 ignored artifact absent from this tree",
+        "expfam/results/absent_artifact.npy",
+        Classification.LOCAL_ONLY_ARTIFACT,
+    ),
+    SelfTestCase(
+        "B3 missing non-ignored path is still blocking",
+        "expfam/results/absent_artifact.csv",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "B4 known extension that .gitignore does not cover",
+        "expfam/results/absent_artifact.mat",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "B5 anchored .gitignore rule is not a supported local-only form",
+        "reproduction/results/raw/absent.csv",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "B6 wildcard over an ignored suffix",
+        "expfam/data/movielens_pilot/*.npy",
+        Classification.LOCAL_ONLY_ARTIFACT,
+    ),
+    SelfTestCase(
+        "B6 wildcard over a non-ignored suffix in the same directory",
+        "expfam/data/movielens_pilot/*.csv",
         Classification.PATTERN_RESOLVED,
+    ),
+    SelfTestCase(
+        "B6 recursive wildcard is not local-only",
+        "expfam/data/movielens_pilot/**",
+        Classification.PATTERN_RESOLVED,
+    ),
+    SelfTestCase(
+        "B6 directory holding ignored files is not local-only",
+        "expfam/data/movielens_pilot/",
+        Classification.EXISTS_LITERAL,
+    ),
+    SelfTestCase(
+        "adversarial: typo in the directory of an ignored artifact",
+        "expfam/reslts/wine_F.npy",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "adversarial: ignored artifact in a directory that does not exist",
+        "expfam/nowhere/wine_F.npy",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        # A head of '**' matches every directory, so accepting it would turn
+        # "the named directory exists" into "some directory exists".  The head
+        # is refused, and both forms fall back to the ordinary verdict.
+        "adversarial: fully globbed head is not local-only, resolves normally",
+        "**/wine_F.npy",
+        Classification.PATTERN_RESOLVED,
+    ),
+    SelfTestCase(
+        "adversarial: fully globbed head is not local-only, blocking when missing",
+        "**/absent_thing.npy",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        # A *partially* globbed head keeps its literal first segment, so the
+        # guard still bites and the realistic form stays local-only.
+        "partially globbed head under a literal root is still local-only",
+        "expfam/**/*.npy",
+        Classification.LOCAL_ONLY_ARTIFACT,
+    ),
+    SelfTestCase(
+        # '?' can match something other than 'y', so not every path this glob
+        # denotes ends in '.npy' and the local-only rule must decline.  What is
+        # left is the ordinary verdict: here the glob happens to match.
+        "adversarial: wildcarded suffix is not local-only, resolves normally",
+        "expfam/results/wine_F.np?",
+        Classification.PATTERN_RESOLVED,
+    ),
+    SelfTestCase(
+        "adversarial: wildcarded suffix is not local-only, blocking when missing",
+        "expfam/results/absent_thing.np?",
+        Classification.TRUE_BROKEN,
+    ),
+    SelfTestCase(
+        "adversarial: ignored suffix in a non-final segment",
+        "expfam/results/wine_F.npy/nested.csv",
+        Classification.UNRESOLVED,
+    ),
+    SelfTestCase(
+        "adversarial: brace mixing an ignored and a missing tracked variant",
+        "expfam/results/{wine_F.npy,absent_thing.csv}",
+        Classification.TRUE_BROKEN,
+    ),
+    # -- issue #19 Finding A: the corrected notation must resolve ---------
+    SelfTestCase(
+        "A4 forward-corrected brace notation",
+        "expfam/results/story_diagnostics/"
+        "y_sparsity_stress_20260713{,_agg,_runinfo}.csv",
+        Classification.PATTERN_RESOLVED,
+    ),
+    SelfTestCase(
+        "A2 near miss of the corrected notation",
+        "expfam/results/story_diagnostics/"
+        "y_sparsity_stress_20260713{,_agg,_runinfos}.csv",
+        Classification.TRUE_BROKEN,
     ),
     SelfTestCase("bare basename without context", "run_wine_dual.py", Classification.UNRESOLVED),
     SelfTestCase("bare directory without context", "cora_clean/", Classification.UNRESOLVED),
@@ -1649,11 +2131,15 @@ def _structural_checks(validator: Validator) -> list[tuple[str, str, str, bool]]
     report = validator_report_from_text(
         validator, "| row | `expfam/results/wine_dual_results.csv`, `wine_F.npy` | n |\n"
     )
+    # The sibling base is still inferred and the artifact is still located --
+    # that is what this check protects.  Since issue #19 the label states that
+    # the artifact is outside Git rather than verified to exist.
     record(
-        "sibling continuation resolves",
-        "PATTERN_RESOLVED/expfam/results/wine_F.npy",
-        "{}/{}".format(
+        "sibling continuation locates the artifact",
+        "LOCAL_ONLY_ARTIFACT/inferred-context/expfam/results/wine_F.npy",
+        "{}/{}/{}".format(
             report.candidates[1].classification.value,
+            report.candidates[1].resolved_via,
             report.candidates[1].matches[0] if report.candidates[1].matches else "-",
         ),
     )
@@ -1694,10 +2180,20 @@ def _structural_checks(validator: Validator) -> list[tuple[str, str, str, bool]]
     report = validator_report_from_text(
         validator, "| row | `expfam/results/wine_dual_results.csv`, `wine_G.npy` | n |\n"
     )
+    # Asserted more tightly than before issue #19: not merely "not resolved"
+    # but reported absent with no match at all.  This is also the documented
+    # gap -- a mistyped *file name* of an ignored artifact is non-blocking,
+    # because nothing in a fresh checkout can tell it from an artifact that was
+    # simply never committed.  A mistyped *directory* stays blocking; see the
+    # "typo in the directory of an ignored artifact" case.
     record(
-        "broken sibling is not silently resolved",
-        "UNRESOLVED",
-        report.candidates[1].classification.value,
+        "broken ignored sibling is reported absent, never resolved",
+        "LOCAL_ONLY_ARTIFACT/absent/0",
+        "{}/{}/{}".format(
+            report.candidates[1].classification.value,
+            report.candidates[1].local_presence,
+            report.candidates[1].match_count,
+        ),
     )
 
     report = validator_report_from_text(
@@ -1738,9 +2234,12 @@ def _structural_checks(validator: Validator) -> list[tuple[str, str, str, bool]]
 
     report = validator_report_from_text(validator, "`expfam/results/wine_F.npy`\n")
     record(
-        "gitignored artifact still counts as existing",
-        "EXISTS_LITERAL",
-        report.candidates[0].classification.value,
+        "gitignored artifact is not reported as verified existence",
+        "LOCAL_ONLY_ARTIFACT/present",
+        "{}/{}".format(
+            report.candidates[0].classification.value,
+            report.candidates[0].local_presence,
+        ),
     )
     record(
         "gitignore annotation is attached as evidence",
@@ -1905,6 +2404,106 @@ def _structural_checks(validator: Validator) -> list[tuple[str, str, str, bool]]
     return results
 
 
+def _refuse_outside_fixture(root: Path) -> None:
+    """Abort unless ``root`` is a throwaway fixture tree.
+
+    The two suites below are the only code in this module that removes or
+    rewrites a file.  They are called with a ``tempfile.TemporaryDirectory()``
+    and nothing else, and this guard makes that a checked precondition rather
+    than a convention: a fixture root always carries the prefix this module
+    gave it, and a repository root -- which has a ``.git`` entry -- never does.
+    """
+    resolved = root.resolve()
+    if (resolved / ".git").exists():
+        raise RuntimeError(f"refusing to modify a repository checkout: {resolved}")
+    if not resolved.name.startswith("registry_path_validator_"):
+        raise RuntimeError(f"refusing to modify a non-fixture directory: {resolved}")
+
+
+def _fresh_checkout_checks(root: Path) -> list[tuple[str, str, str, bool]]:
+    """The fixture tree with every gitignored artifact removed.
+
+    This is the CI side of the local-only policy: the same references, on a
+    tree that never received the untracked research outputs.  What must not
+    change is the classification; what may change is the presence.
+    """
+    results: list[tuple[str, str, str, bool]] = []
+
+    def record(name: str, expected: object, actual: object) -> None:
+        results.append((name, str(expected), str(actual), expected == actual))
+
+    _refuse_outside_fixture(root)
+    for artifact in sorted(root.rglob("*.npy")):
+        artifact.unlink()
+    validator = Validator(root)
+
+    record(
+        "fresh checkout: ignored artifact keeps its classification",
+        "LOCAL_ONLY_ARTIFACT",
+        _classify_one(validator, "expfam/results/wine_F.npy"),
+    )
+    probe = Candidate(
+        source="<fresh>", line=1, column=1, cell=None, raw="expfam/results/wine_F.npy"
+    )
+    validator.classify(probe, [])
+    record("fresh checkout: presence flips to absent", "absent", probe.local_presence)
+    record("fresh checkout: nothing is claimed to match", 0, probe.match_count)
+    record(
+        "fresh checkout: ignored wildcard keeps its classification",
+        "LOCAL_ONLY_ARTIFACT",
+        _classify_one(validator, "expfam/data/movielens_pilot/*.npy"),
+    )
+    record(
+        "fresh checkout: non-ignored sibling of an ignored file still resolves",
+        "PATTERN_RESOLVED",
+        _classify_one(validator, "expfam/data/movielens_pilot/*.csv"),
+    )
+    record(
+        "fresh checkout: a missing non-ignored path is still blocking",
+        "TRUE_BROKEN",
+        _classify_one(validator, "expfam/results/absent_artifact.csv"),
+    )
+    record(
+        "fresh checkout: a mistyped directory is still blocking",
+        "TRUE_BROKEN",
+        _classify_one(validator, "expfam/reslts/wine_F.npy"),
+    )
+    return results
+
+
+def _unsupported_gitignore_checks(root: Path) -> list[tuple[str, str, str, bool]]:
+    """A ``.gitignore`` this reader cannot evaluate exactly disables the policy.
+
+    A ``!`` negation can re-include a file an earlier rule excluded.  Rather
+    than approximate Git's ordering rules, the local-only verdict is withdrawn
+    entirely and the references fall back to the ordinary ones.
+    """
+    results: list[tuple[str, str, str, bool]] = []
+
+    def record(name: str, expected: object, actual: object) -> None:
+        results.append((name, str(expected), str(actual), expected == actual))
+
+    _refuse_outside_fixture(root)
+    (root / ".gitignore").write_text(
+        "*.npy" + chr(10) + "!expfam/results/wine_F.npy" + chr(10) + ".venv/" + chr(10),
+        encoding="utf-8",
+    )
+    validator = Validator(root)
+    record("negated .gitignore: local-only policy is off", False,
+           validator.local_only_supported)
+    record(
+        "negated .gitignore: present artifact falls back to the tree verdict",
+        "EXISTS_LITERAL",
+        _classify_one(validator, "expfam/results/wine_F.npy"),
+    )
+    record(
+        "negated .gitignore: absent artifact is blocking again",
+        "TRUE_BROKEN",
+        _classify_one(validator, "expfam/results/absent_artifact.npy"),
+    )
+    return results
+
+
 def _mutate_segment(path: str, index: int) -> str:
     """Return ``path`` with one segment corrupted so that it cannot exist."""
     trailing = "/" if path.endswith("/") else ""
@@ -2035,6 +2634,194 @@ def _real_tree_checks(root: Path) -> list[tuple[str, str, str, bool]]:
         "TRUE_BROKEN",
         _classify_one(validator, exception + "/*.pdf"),
     )
+    # -- issue #19 Finding A: the notation-defect waiver -------------------
+    # Snapshot: the lapse check below temporarily replaces an entry, and
+    # mutating the mapping being iterated would otherwise depend on CPython
+    # rehashing details rather than on anything the language guarantees.
+    for defect in list(KNOWN_NOTATION_DEFECTS.values()):
+        record(
+            f"real tree: notation defect {defect.raw!r} is waived in its own document",
+            "KNOWN_NOTATION_DEFECT",
+            _classify_one(validator, defect.raw, source=defect.source),
+        )
+        record(
+            "real tree: the recorded forward correction resolves",
+            "PATTERN_RESOLVED",
+            _classify_one(validator, defect.correction, source=defect.source),
+        )
+        record(
+            "real tree: the waived token is not covered in another document",
+            "TRUE_BROKEN",
+            _classify_one(validator, defect.raw, source="KNOWN_ISSUES.md"),
+        )
+        record(
+            "real tree: an unwaived document name is not covered either",
+            "TRUE_BROKEN",
+            _classify_one(validator, defect.raw, source=defect.source + ".bak"),
+        )
+        for near_miss in (
+            defect.raw.replace("runinfo}", "runinfos}"),
+            defect.raw.replace("{,agg", "{,aggs"),
+            defect.raw.replace("20260713", "20260714"),
+            defect.raw.replace("story_diagnostics", "story_diagnostic"),
+            # Same artifacts, same normalised path, different raw text: the
+            # waiver is keyed on what the document actually says, and anything
+            # else keeps the ordinary verdict rather than being matched loosely.
+            "./" + defect.raw,
+        ):
+            if near_miss == defect.raw:
+                continue
+            record(
+                f"real tree: near miss {near_miss!r} is not waived",
+                "TRUE_BROKEN",
+                _classify_one(validator, near_miss, source=defect.source),
+            )
+        # End to end, not just the predicate: a waiver whose correction no
+        # longer resolves must give the defective token back to the ordinary
+        # rules, which report it broken.
+        lapsed = NotationDefect(
+            source=defect.source,
+            raw=defect.raw,
+            correction=_mutate_segment(defect.correction.split("{")[0] + "x.csv", -1),
+            reason=defect.reason,
+            evidence=defect.evidence,
+        )
+        record(
+            "real tree: a lapsed correction does not resolve",
+            False,
+            validator._correction_resolves(lapsed.correction),
+        )
+        original = dict(KNOWN_NOTATION_DEFECTS)
+        KNOWN_NOTATION_DEFECTS[lapsed.key] = lapsed
+        try:
+            record(
+                "real tree: a lapsed waiver hands the token back as broken",
+                "TRUE_BROKEN",
+                _classify_one(validator, defect.raw, source=defect.source),
+            )
+        finally:
+            KNOWN_NOTATION_DEFECTS.clear()
+            KNOWN_NOTATION_DEFECTS.update(original)
+        record(
+            "real tree: the waiver is restored after the lapse check",
+            "KNOWN_NOTATION_DEFECT",
+            _classify_one(validator, defect.raw, source=defect.source),
+        )
+
+        # F5: the waiver constant lives in this file, while the forward
+        # correction lives in the document.  Nothing would otherwise keep the
+        # two in step, so the agreement is asserted rather than assumed: both
+        # the defective token and its correction must appear in the source
+        # document as inline code.
+        # Compare on the repository-relative posix path, which is what
+        # Validator.run puts in Candidate.source and therefore what the waiver
+        # key is matched against.  Matching on the basename would silently
+        # skip -- and a skip counts as a pass -- for a waiver recorded in a
+        # document below the repository root.
+        document = next(
+            (
+                s
+                for s in sources
+                if s.relative_to(root).as_posix() == defect.source
+            ),
+            None,
+        )
+        if document is None:
+            skip("real tree: waiver is anchored in its source document",
+                 f"{defect.source} is not in the default source set")
+        else:
+            tokens = {
+                c.raw for c in extract_candidates(defect.source,
+                                                  document.read_text(encoding="utf-8"))
+            }
+            # Scope note: membership is tested over the whole document, not
+            # over the forward-correction section alone.  For ``raw`` that is
+            # weak on purpose -- the historical row contains it too, so this
+            # half only proves the waiver still has something to waive.  The
+            # ``correction`` half is the load-bearing one: that string occurs
+            # nowhere else in the document, so it fails if the section goes.
+            record(
+                "real tree: the waived token appears in its source document",
+                True,
+                defect.raw in tokens,
+            )
+            record(
+                "real tree: the recorded correction appears there too",
+                True,
+                defect.correction in tokens,
+            )
+
+    # -- issue #19 Finding C: run_comparison_all.py provenance -------------
+    record(
+        "real tree: the forward-corrected script path resolves",
+        "EXISTS_LITERAL",
+        _classify_one(validator, "reproduction/scripts/run_comparison_all.py"),
+    )
+    record(
+        "real tree: the historical bare basename is not guessed",
+        "UNRESOLVED",
+        _classify_one(validator, "run_comparison_all.py"),
+    )
+    record(
+        "real tree: the path the historical cell implies is still blocking",
+        "TRUE_BROKEN",
+        _classify_one(validator, "reproduction/src/run_comparison_all.py"),
+    )
+    record(
+        "real tree: an arbitrary unique basename is not guessed either",
+        "UNRESOLVED",
+        _classify_one(validator, "data_generator.py"),
+    )
+    # The isolated check above does not reach the sibling-rebase branch.  The
+    # real registry cell puts a resolved path before the bare basename, so the
+    # validator does try 'reproduction/src/run_comparison_all.py' -- and must
+    # still decline to reach for the file that exists under another parent.
+    in_context = validator_report_from_text(
+        validator,
+        "| Control | `reproduction/src/experiment_compare_with_dual.py`, "
+        "`run_comparison_all.py` | n |",
+    )
+    record(
+        "real tree: the bare basename stays unresolved in its real cell context",
+        "EXISTS_LITERAL/UNRESOLVED/0",
+        "{}/{}/{}".format(
+            in_context.candidates[0].classification.value,
+            in_context.candidates[1].classification.value,
+            in_context.candidates[1].match_count,
+        ),
+    )
+    record(
+        "real tree: the failed sibling base is reported as evidence",
+        True,
+        any(
+            "reproduction/src" in item
+            for item in in_context.candidates[1].evidence
+        ),
+    )
+
+    # -- issue #19 Finding B: local-only artifacts in the real tree --------
+    record(
+        "real tree: a registry-referenced ignored artifact is local-only",
+        "LOCAL_ONLY_ARTIFACT",
+        _classify_one(validator, "expfam/data/movielens_pilot/*.npy"),
+    )
+    record(
+        "real tree: an ignored artifact under a mistyped directory is blocking",
+        "TRUE_BROKEN",
+        _classify_one(validator, "expfam/data/movielens_pilo/*.npy"),
+    )
+    record(
+        "real tree: a non-ignored missing file beside it is blocking",
+        "TRUE_BROKEN",
+        _classify_one(validator, "expfam/data/movielens_pilot/absent_thing.csv"),
+    )
+    record(
+        "real tree: the non-blocking policy classes are none of the blocking ones",
+        True,
+        Classification.TRUE_BROKEN not in NON_BLOCKING_BY_POLICY
+        and Classification.UNRESOLVED not in NON_BLOCKING_BY_POLICY,
+    )
+
     record(
         "real tree: parent traversal never touches the filesystem",
         "UNRESOLVED",
@@ -2048,9 +2835,21 @@ def _real_tree_checks(root: Path) -> list[tuple[str, str, str, bool]]:
     return results
 
 
-def _classify_one(validator: Validator, token: str) -> str:
-    report = validator_report_from_text(validator, f"| x | `{token}` |\n")
-    return report.candidates[0].classification.value
+def _classify_one(
+    validator: Validator, token: str, source: str | None = None
+) -> str:
+    """Classification of ``token``, optionally as if written in ``source``.
+
+    ``source`` matters because a KNOWN_NOTATION_DEFECT waiver is keyed on the
+    document the token was written in, so the checks that probe the waiver have
+    to be able to name a real document -- and to name a different one.
+    """
+    if source is None:
+        report = validator_report_from_text(validator, f"| x | `{token}` |\n")
+        return report.candidates[0].classification.value
+    candidate = Candidate(source=source, line=1, column=1, cell=1, raw=token)
+    validator.classify(candidate, [])
+    return candidate.classification.value
 
 
 def run_self_test(stream) -> int:
@@ -2059,6 +2858,18 @@ def run_self_test(stream) -> int:
         _build_fixture_tree(root)
         validator = Validator(root)
         results = _token_checks(validator) + _structural_checks(validator)
+
+    # Each of the following needs a differently shaped fixture tree, so each
+    # gets its own throwaway directory rather than mutating a shared one.
+    with tempfile.TemporaryDirectory(prefix="registry_path_validator_fresh_") as temporary:
+        root = Path(temporary).resolve()
+        _build_fixture_tree(root)
+        results += _fresh_checkout_checks(root)
+
+    with tempfile.TemporaryDirectory(prefix="registry_path_validator_neg_") as temporary:
+        root = Path(temporary).resolve()
+        _build_fixture_tree(root)
+        results += _unsupported_gitignore_checks(root)
 
     results += _real_tree_checks(find_repository_root(Path(__file__).resolve().parent))
 
