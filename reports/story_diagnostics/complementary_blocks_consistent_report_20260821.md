@@ -81,9 +81,27 @@ Facts checked directly from code, hashes or the produced artifacts.
   (bern) / 0.975 (gauss) / 0.981 (pois), minimum 0.858; mean off-dimension norm 0.196 /
   0.198 / 0.180; mean dominant share of squared norm 0.948 / 0.951 / 0.963;
   `||f_l|| = 1.0000` for every column.
-- **No generator clipping was needed**: observed eta ranges were
-  `[-3.05, 3.07]` (bern), `[-3.31, 3.28]` (gauss), `[-3.02, 3.14]` (pois), far inside the
-  float64 representable domain (`log(finfo.max) = 709.78`).
+- **No generator clipping was needed, and representability is safe on every side.**
+  Observed natural-parameter ranges over all 10 trials:
+
+  | side | eta min | eta max | implied max mu |
+  |---|---:|---:|---:|
+  | Bernoulli X | −3.0473506436 | 3.0656024589 | — (sigmoid) |
+  | Gaussian X | −3.3096658148 | 3.2846492471 | — (identity) |
+  | Poisson X | −3.0209860242 | 3.1389539902 | 23.08 |
+  | **Poisson Y** | **−2.4211705648** | **4.3556716515** | **77.92** |
+
+  The float64 overflow boundary is `log(finfo.max) = 709.7827`, so the **headroom is 705.4
+  in eta units**. Canonical `exp` was therefore evaluated directly everywhere and no
+  generator clip was required on either the X or the Y side.
+
+  *Provenance (added after the run):* these ranges come from a **deterministic
+  generator-only recomputation** that imports the committed experiment script and calls its
+  `generate()` with the same pre-registered seeds. **No model fit was rerun** (0 new fits,
+  0 seed changes, 0 scientific-metric changes). The recomputed X-side values match the
+  committed `*_generator.csv` exactly (max abs diff `4.44e-16`); the Poisson-Y range is
+  reported here because `*_generator.csv` stores X columns only. All six values are also
+  recorded in `*_runinfo.csv` together with `eta_range_source`.
 
 ---
 
@@ -155,9 +173,11 @@ Dimension-wise RMSE uses the **same** whole-space Procrustes rotation `R`
 | `single_poisson` | +0.2770 | 8/10 | +0.9151 | 10/10 | **+0.0587** | **7/10** |
 | `all_gaussian` | +0.1391 | 8/10 | **+0.0010** | **5/10** | +0.1715 | 10/10 |
 
-`per_column_all` never has an advantage on the dimension a comparator already covers with
-the correct block (dim2 vs `single_gaussian`: 5/10; dim3 vs `single_poisson`: 7/10). Its
-advantage comes from the dimensions the comparator does not cover.
+The per-column advantage becomes much smaller on a dimension already covered by the
+comparator's correct block. For the Gaussian dimension it is essentially absent
+(**−0.0095, 5/10**), while a modest residual advantage remains on the Poisson dimension
+(**+0.0587, 7/10**). The large advantages are on the dimensions the comparator does not
+cover.
 
 ## 7. OBSERVED — precision-trace diagnostics
 
@@ -196,12 +216,20 @@ and when is the difference small?**
   +0.053 / +0.051 / +0.049 / **+0.009**. Against the best single block the advantage at
   dense Y is under 0.01 `RMSE_Z` with 9/10 wins — small enough that it should not be
   presented as a practical gain.
-- **The mechanism is dimension coverage, not uniform superiority.** The dimension-wise
-  diagnostic shows `per_column_all` has **no** advantage on the latent dimension a
-  comparator already covers correctly (dim2 vs `single_gaussian`, 5/10, −0.0095; dim3 vs
-  `single_poisson`, 7/10, +0.059). Its whole-space advantage is assembled from the
-  dimensions each single-family model cannot see. This is the mechanism the complementary
-  generator was built to expose, and it behaved as designed.
+- **The observed pattern is consistent with the designed dimension-coverage mechanism, and
+  the advantage is not uniform across dimensions.** The per-column advantage becomes much
+  smaller on a dimension already covered by the comparator's correct block: for the Gaussian
+  dimension it is essentially absent (dim2 vs `single_gaussian`, **−0.0095, 5/10**), while a
+  modest residual advantage remains on the Poisson dimension (dim3 vs `single_poisson`,
+  **+0.0587, 7/10**). The large advantages sit on the dimensions each single-family model
+  cannot see.
+  **This is consistency with the designed mechanism, not a causal proof of it.** At least
+  four alternative or additional contributions remain open: (i) Gaussian precision leakage
+  into other dimensions (§7, the Gaussian block contributes more precision to dim1 than the
+  Bernoulli block itself); (ii) `single_*` observes 3 X columns while the joint model
+  observes 9, so column count is confounded with family integration; (iii) finite-sample
+  latent correlation up to `|corr| = 0.293` (§7); and (iv) complementarity is only partial
+  for dim1. No claim is made that the mechanism has been isolated.
 - **The blocks are not equally informative, and that shapes the result.** The Gaussian block
   carries 0.858 of the true X-side precision trace and 53.9x the Bernoulli block. Consistent
   with that, `single_gaussian` is by far the strongest single-family model, and dim2 is the
@@ -286,9 +314,17 @@ Smoke (1 trial x 2 rates x 6 conditions = 12 fits) was run first to a location o
 repository and is deliberately **not** a tracked artifact. It passed every integrity
 criterion and no scientific claim is based on it.
 
+**Provenance note on `git_head`.** `*_runinfo.csv` records
+`git_head = 46fbc544b553f296e81de51635b0cda5161fbc15`, which is the **pre-commit execution
+base**: the experiment script and the generated artifacts were subsequently committed
+together in the PR experiment commit, so the final artifact commit SHA differs by
+construction. `git_head` is deliberately **not** rewritten to the final commit SHA.
+
 ## Research integrity
 
 - New model fits run: **YES — 120, all pre-registered**
+- Model fits rerun for the post-run provenance completion (§2 eta ranges): **0**
+- Seed changes: **0** · Scientific metric changes: **0**
 - Model / runner / existing tests changed: **NO**
 - Historical results overwritten: **NO**
 - Seeds changed, dropped or retried after a failure: **NO** (no failure occurred)
