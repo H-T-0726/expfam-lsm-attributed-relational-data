@@ -33,11 +33,24 @@ Inference is never written as `OBSERVED`.
 ### Conclusion discipline
 
 The audit was planned before the recomputation, and the plan recorded several prior
-hypotheses. Those hypotheses were held as hypotheses. The conclusion sections
-(§17-§22) are derived from the recomputation in §5-§16, and in at least one case the
-recomputation changed the answer: the decomposition in §8 moved the recommended thesis
-backbone away from the per-column story and toward the family-generalization story.
-Candidates A-E in §16 were scored on a uniform rubric that was fixed before scoring.
+hypotheses. Those hypotheses were held as hypotheses. The conclusion sections (§17-§22)
+are derived from the recomputation in §5-§16. Candidates A-E in §16 were scored on a
+uniform rubric fixed before scoring.
+
+**Revision history.** This document was revised on 2026-08-21 after an independent review
+of PR #29. Five corrections were applied and their downstream consequences were re-derived
+rather than patched:
+
+| # | correction | where | downstream effect |
+|---|---|---|---|
+| 1 | The §8.2 "misspecification cost vs integration value" reading was **not a causal decomposition**; the three conditions differ in more than one factor at a time | §8.2, §6 F2, §7, §11.3, §16, §18, §21, §22, §23 | the "8.4x / 4.1x" causal claim is withdrawn; the three comparisons are renamed as descriptive contrasts A/B/C; **PATH 4 and PATH 2 are stronger than the earlier draft concluded** |
+| 2 | Candidate E was scored against the superseded July memo instead of the **actual current body of GitHub Issue #27** | §16.2, §16.3, §18 | all four earlier criticisms of E are withdrawn as factually wrong; E rescored 22 -> 28; **the Issue #27 verdict changes from REDESIGN to RUN NEXT** |
+| 3 | X-side and Y-side overdispersion were conflated under one candidate and one verdict | §9.3, §14, §15, §19, §20, §23 | candidate J splits into J-Y (`NOT_SUPPORTED`) and J-X (`UNTESTED`, `CONFOUNDED`); the blanket "NB/dispersion NOT_JUSTIFIED" is withdrawn |
+| 4 | The `1/sigma_hat^2 ~ 2.0e-4` figure was cited as `VERIFIED` in §11.2 although `sigma_hat` was never persisted | §11.2 | relabelled `DERIVED` / `PARTIALLY_SUPPORTED`, consistent with §9.2 |
+| 5 | Candidate A cannot isolate the baseline, because under Poisson `alpha` moves the mean, the variance and `A''` together | §16.2, §16.3, §17, §22, §23 | A rescored 30 -> 27 with an added dispersion factor; **the F3 branch is identified as structurally blocked** |
+
+Where a conclusion changed, the earlier conclusion is stated and marked withdrawn rather
+than silently replaced.
 
 ---
 
@@ -234,14 +247,14 @@ under an invalid likelihood is not comparable across families.
 | id | phenomenon | primary evidence | trials/fits | effect | paired evidence | reproducibility | confounders | candidate mechanisms | already ruled out | unresolved | class | scientific importance | next discriminating experiment | modification justified now |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | **F1** | At dense Y, per-column / single / all-Gaussian differ very little | `single_vs_joint_summary.csv`; `y_sparsity_..._trials10.csv` at rate 1.0 | 3 trials; 10 trials | all_gaussian - per_column = **-0.0004** (3 trials) and **+0.0114** (10 trials, 10/10) | yes, trial-matched | reproduced in two independent experiments | generator makes every block individually informative; n=80 is small | Y already carries enough information; F rows are dense so blocks are not complementary | that it is a NaN/divergence artefact (0 NaN) | whether a complementary-block generator changes it | **III** (design) | HIGH - it bounds the whole per-column claim | E (redesigned, §16) | NO |
-| **F2** | As Y gets sparse, the per-column advantage grows | `y_sparsity_..._trials10.csv` | 10 paired trials per contrast per rate | all_gaussian - per_column: +0.011 / +0.065 / +0.412 / +0.426 across rates 1.0/0.5/0.2/0.1 | yes | monotone; 10/10 wins at rates 0.2 and 0.1 | single generative configuration; scalar-parameter error also grows | X compensates when Y information falls | seed dependence (10/10) | generalization to other n, d, k*, family mixes | **II/III** | HIGH - the only positive result of the per-column line | E (redesigned) or a second generative configuration | NO |
-| **F3** | MovieLens: adding raw `ratings_count` as a Poisson column degrades held-out Y prediction | `movielens_attribute_diagnosis_..._trials4.csv`; `movielens_mixed_x_summary.csv` | 4 fits (2 splits) in each of two experiments | test_y_ll -0.374 vs genre_only, **0/4 better**, per-fit -0.314..-0.441; w0 3.417 -> 3.156, w 0.272 -> 0.330, hc_AUC 0.970 -> 0.949 | yes, fit-matched | reproduced in two separate experiments, 4/4 fits each | leakage (count and Y share `u.data`); only 2 splits; legacy numerics | no X intercept; raw count scale; Poisson fixed dispersion with A''=exp(eta); precision-block dominance; count informativeness | Poisson X clipping (§12); Y overdispersion (§9); NaN/divergence (0) | actual `A''/phi f f^T` share; whether an intercept fixes it; whether raw count under Gaussian **with genre still Bernoulli** also degrades | **II** (with a CLASS III leakage caveat) | HIGH - the only real-data failure of the per-column line | A, then C, then B (§16) | NO |
+| **F2** | As Y gets sparse, the per-column advantage grows | `y_sparsity_..._trials10.csv` | 10 paired trials per contrast per rate | contrast A (same 9 columns, `all_gaussian - per_column`): +0.011 / +0.065 / +0.412 / +0.426 across rates 1.0/0.5/0.2/0.1; contrast B (`single_gaussian - per_column`): +0.010 / +0.013 / +0.044 / +0.083. **A and B are separate contrasts, not orthogonal components (§8.2)** | yes | monotone in both contrasts; 10/10 wins at rates 0.2 and 0.1 | single generative configuration (n=80, d=9, k*=2); scalar-parameter error also grows | X compensates when Y information falls | seed dependence (10/10) | generalization to other n, d, k*, family mixes and to a complementary-block F | **II/III** | HIGH - the only positive result of the per-column line | E (Issue #27 as currently written, §16/§18) | NO |
+| **F3** | MovieLens: adding raw `ratings_count` as a Poisson column degrades held-out Y prediction | `movielens_attribute_diagnosis_..._trials4.csv`; `movielens_mixed_x_summary.csv` | 4 fits (2 splits) in each of two experiments | test_y_ll -0.374 vs genre_only, **0/4 better**, per-fit -0.314..-0.441; w0 3.417 -> 3.156, w 0.272 -> 0.330, hc_AUC 0.970 -> 0.949 | yes, fit-matched | reproduced in two separate experiments, 4/4 fits each | leakage (count and Y share `u.data`); only 2 splits; legacy numerics | no X intercept; raw count scale; Poisson fixed dispersion with A''=exp(eta); **X-side count overdispersion (var/mean 6.17)**; precision-block dominance; count informativeness | Poisson X clipping (§12); **Y-side** overdispersion (§9, J-Y; Y is identical across all conditions); NaN/divergence (0) | actual `A''/phi f f^T` share; whether an intercept fixes it; whether raw count under Gaussian **with genre still Bernoulli** also degrades; whether a dispersion-aware count family for X fixes it | **II** (with a CLASS III leakage caveat) | HIGH - the only real-data failure of the per-column line | C (measure), then B extended with an X-dispersion arm (§16) | NO |
 | **F4** | Transforming the count removes the degradation | same CSV | 4 fits | log-Gaussian **+0.0021**, z-score-Gaussian **+0.0016** vs genre_only; the two differ by +0.0005 (sd 0.0049) | yes | 2/4 fits better each, i.e. indistinguishable from genre_only | same as F3 | removal of the large baseline; switch to an estimated-dispersion family | that log specifically matters (z-score works identically) | which of centering / scaling / estimated dispersion is the operative part | **II** | HIGH - it is the causal-separation lever we already have | B (§16) | NO |
 | **F5** | Adding noise attributes does not help and sometimes hurts | `noise_check_summary.csv` | 3 trials x 5 noise conditions | mean deltas: gauss3 **+0.0098**, gauss6 **-0.0005**, gauss12 **+0.0120**, bern3 +0.0004, pois3 +0.0010 | yes, trial-matched | **not reproducible as a dose response** - §10 | 3 seeds; single configuration | Gaussian noise gets `1/sigma_hat^2` weight; local optima | a monotone dose response (0/3 trials monotone) | whether a systematic effect exists at larger trial counts | **III**, possibly II later | MEDIUM | D (§16) | NO |
 | **F6** | all-Gaussian is unexpectedly strong for Z and Y | `single_vs_joint`; `movielens_attribute_diagnosis`; `poisson_misspecification` | 3 + 4 + 15 paired | §11 | yes in all three | three independent settings, consistent direction | different data, metrics and families | quasi-likelihood robustness; estimated dispersion auto-downweighting; Y dominance; metric divergence (Z vs density) | that it is a fluke of one experiment | which of the candidate mechanisms dominates | **II/III** | HIGH - the strongest counterargument to the per-column claim | A and C give partial answers | NO |
 | **F7** | Poisson / Bernoulli objective-score-curvature inconsistency in the legacy lineage | `per_column_math_code_audit_20260821.md` PC-001/PC-002 plus the code | deterministic counterexamples | at eta=11.5, x=3: implemented score -22023.47, precision 22026.47; the actual objective's finite-difference score and negative Hessian are both 0 | n/a | exactly reproducible | none - it is a code fact | hard clip `[-20,10]`; probability floor 1e-10; curvature floor 1e-8 | **resolved in the consistent lineage** (Issue #25 / PR #26) | whether it ever activated during historical EM runs | **I** | HIGH for future work, **LOW as an explanation of F3** (§12) | none for the defect itself; activation logging needed for the history | already fixed forward; not re-opened here |
 | **F8** | On Cora, the k criterion disagrees with AUC/AP/NMI | `cora_balanced_k_sweep_summary.csv` | 3 trials x 6 k | criterion argmin k=1; AP/AUC argmax k=6; NMI/ARI argmax k=3 | by seed | consistent across 3 trials | density 0.011; n=280 subset | penalty too large in sparse data; **Q_strict itself is non-monotone in k**; the criterion is Q-based, not Schwarz | that the parameter count is wrong (`p = kd - k(k-1)/2` reproduces exactly) | why Q degrades for k>=4 (optimization vs MC vs Laplace) | **III** plus optimization | MEDIUM-HIGH | a Q-vs-k optimization diagnostic (§17 A4) | NO |
-| **F9** (new) | On MovieLens, even genre-only X does not reliably help strict held-out Y | `movielens_shared_z_ablation_summary.csv` | 6 fits (3 splits x 2 seeds), k=5 | proposed_XY - y_only_fix_x = **-0.039** test ll, X helps **3/6** | yes, fit-matched | sign disagrees with the attribute-diagnosis experiment (+0.034, 4/4 at k=3) | different k, script, evaluation | X contributes little at this n and density; k differs | none | whether attribute integration helps MovieLens **at all** | **II/III** | HIGH - it weakens the premise of the whole MovieLens line | a matched-protocol re-run (§17 A5) | NO |
+| **F9** (new) | On MovieLens, even genre-only X does not reliably help strict held-out Y | `movielens_shared_z_ablation_summary.csv` | 6 fits (3 splits x 2 seeds), k=5 | proposed_XY - y_only_fix_x = **-0.039** test ll, X helps **3/6** | yes, fit-matched | sign disagrees with the attribute-diagnosis experiment (+0.034, 4/4 at k=3) | different k, script, evaluation | X contributes little at this n and density; k differs | none | whether attribute integration helps MovieLens **at all** | **II/III** | HIGH - it weakens the premise of the whole MovieLens line | a matched-protocol re-run (§17, below the top five) | NO |
 
 F9 is added by this audit. It was not in the Issue #28 list, and it changes how F3 should
 be read: **F3 is a failure of one attribute, but F9 says the attributes we have on
@@ -266,7 +279,11 @@ MovieLens may not carry usable information about Y in the first place.**
    (`VERIFIED`). `mixed_percolumn_raw` - `genre_count_raw_poisson` = +0.0037 (sd 0.0073)
    and `mixed_percolumn_raw` - `rating_stats_only` = -0.0088 (sd 0.0060).
 4. **The sparse-Y interaction** (`SUPPORTED`). Monotone in rate, 10/10 wins at the two
-   sparsest rates, trial-matched, 0 NaN - but one generative configuration.
+   sparsest rates, trial-matched, 0 NaN - but one generative configuration. The cleanest
+   single number is contrast A in §8.2: on the **identical 9 columns**, per-column beats
+   forced-Gaussian by 0.426 RMSE(Z) at `y_obs_rate = 0.1` (10/10) and by only 0.011 at
+   dense Y (10/10). This is the per-column mechanism's own contrast and it is
+   regime-dependent.
 5. **Poisson beats a correctly specified NB on Z recovery while losing on likelihood**
    (`VERIFIED`). 5/5 paired trials at every r_true in {2, 5, 20}, in both directions. This
    is the cleanest existing evidence that family choice acts on Z through weighting rather
@@ -283,7 +300,7 @@ recomputation.
 | Poisson implied precision dominates | `PARTIALLY_SUPPORTED` on the data side (81.2x, §9.2); `UNRESOLVED` on the model side (F never saved) |
 | The sparse-Y result is mostly about family correctness, not about integrating more blocks | `SUPPORTED` and quantified (§8.2). This changed the thesis recommendation |
 | Cora's k problem is not only a penalty problem | `VERIFIED` - Q_strict peaks at k=2 (§13.6) |
-| NB / overdispersion is not needed | `SUPPORTED` (§9, candidate J) |
+| NB / overdispersion is not needed | **Split.** `SUPPORTED` for the **Y side** (§9, candidate J-Y). **Withdrawn for the X side**: `ratings_count` is 6.17x over-dispersed and X-side count dispersion is `UNTESTED` (candidate J-X). The blanket phrasing was wrong |
 
 ---
 
@@ -312,28 +329,54 @@ Source: `expfam/results/story_diagnostics/y_sparsity_stress_20260713_trials10.cs
 Held-out Y log-likelihood gives the same ordering: `per_column_all` beats `all_gaussian`
 by +0.0063 (7/10) at rate 1.0 and by +0.1230 (10/10) at rate 0.1.
 
-### 8.2 Decomposition (this audit's main addition)
+### 8.2 Three named contrasts (descriptive, not a causal decomposition)
 
-`single_gaussian` uses only the 3 Gaussian columns and specifies them correctly.
-`all_gaussian` uses all 9 columns and specifies 6 of them wrongly.
-`per_column_all` uses all 9 and specifies all of them correctly. Therefore
+**Correction note (2026-08-21, PR #29 review).** An earlier version of this section read
+`all_gaussian - single_gaussian` as a "pure misspecification cost" and
+`single_gaussian - per_column_all` as an "integration value", and reported their ratio
+(8.4x, 4.1x) as a causal decomposition. **That reading is withdrawn.** The three
+conditions do not differ in one factor at a time:
 
-- `all_gaussian - single_gaussian` isolates the **cost of X-family misspecification**;
-- `single_gaussian - per_column_all` isolates the **value of adding 6 more correctly
-  specified columns**.
+| condition | columns used | family assignment |
+|---|---|---|
+| `single_gaussian` | 3 (the Gaussian block only) | correct for those 3 |
+| `all_gaussian` | all 9 | 3 correct, 6 wrong |
+| `per_column_all` | all 9 | all 9 correct |
 
-At `y_obs_rate = 0.2` these are **+0.3677** and **+0.0439**: the misspecification cost is
-**8.4x** the joint-integration value. At rate 0.1 they are 0.3429 and 0.0832, a factor of
-**4.1x**.
+`all_gaussian - single_gaussian` therefore mixes **"6 columns were added"** with
+**"those 6 were assigned the wrong family"**. It is not a pure misspecification cost.
 
-`SUPPORTED`: the sparse-Y interaction is real and monotone.
-`SUPPORTED`: most of it is "avoid specifying the wrong family", not "integrate more
-attribute blocks".
+The three comparisons are reported below as **named descriptive contrasts**. They satisfy
+the algebraic identity `A = B + C`, but that identity is bookkeeping, not orthogonality:
+B and C are not independent causal components and must not be presented as a variance
+decomposition of the sparse-Y benefit.
 
-This distinction is not made in
-`reports/story_diagnostics/story_diagnostics_summary_20260713.md`, which reports the
-per_column-vs-all_gaussian and per_column-vs-y_only gaps only. Nothing in that report is
-wrong; the decomposition simply was not performed.
+| contrast | definition | what varies | rate 1.0 | 0.5 | 0.2 | 0.1 |
+|---|---|---|---:|---:|---:|---:|
+| **A** same-column family-assignment contrast | `all_gaussian - per_column_all` | family assignment only, 9 columns in both arms | +0.0114 (10/10) | +0.0647 (9/10) | +0.4117 (10/10) | +0.4261 (10/10) |
+| **B** additional-block contrast under correct specification | `single_gaussian - per_column_all` | 3 correctly specified columns vs 9 correctly specified columns | +0.0104 (8/10) | +0.0129 (9/10) | +0.0439 (10/10) | +0.0832 (10/10) |
+| **C** misspecified-addition contrast | `all_gaussian - single_gaussian` | 6 columns added **and** assigned the wrong family | +0.0010 (3/10) | +0.0518 (7/10) | +0.3677 (10/10) | +0.3429 (10/10) |
+
+What can be said, descriptively:
+
+- `SUPPORTED`: the sparse-Y interaction is real and monotone in every contrast. All three
+  grow as Y is thinned.
+- `OBSERVED`: **contrast A is the cleanest single comparison available**, because both arms
+  use the identical 9 columns and differ only in the family assigned to each. At
+  `y_obs_rate = 0.1` per-column beats forced-Gaussian by **0.426 RMSE(Z), 10/10 trials**;
+  at dense Y the same contrast is only **0.011**. Contrast A is the direct empirical
+  statement of what the per-column mechanism does, and it is regime-dependent.
+- `OBSERVED`: contrast B, the empirical benefit of correctly integrating six further
+  blocks, is much smaller in absolute terms (+0.083 at rate 0.1, +0.010 at dense Y) though
+  still 10/10 at the two sparsest rates.
+- `NOT CLAIMED`: that the sparse-Y benefit "is mostly family correctness rather than
+  integration". A and B answer different questions on different column sets; their sizes
+  cannot be compared as competing causal shares.
+
+The earlier report `reports/story_diagnostics/story_diagnostics_summary_20260713.md`
+reports the per_column-vs-all_gaussian and per_column-vs-y_only gaps only, i.e. contrast A
+and the y_only comparison. Nothing in it is wrong. What this audit adds is contrast B, and
+the explicit warning that B and C are not orthogonal components.
 
 ### 8.3 Limits
 
@@ -433,7 +476,8 @@ Quantities computed from those - `DERIVED`, not measured:
 | G | metadata leakage / shared source | **CONFOUNDED, and it cuts the other way** | `mean_rating` and `ratings_count` are computed from the full `u.data` before the pair split, and Y comes from the same log (runinfo `leak_caveat`). Leakage would bias these conditions to look *better*, yet they look worse. Leakage therefore cannot explain the degradation, but it does invalidate the conditions as generalization evidence. |
 | H | optimizer instability | **NOT_SUPPORTED** | 0 NaN in 44/44 fits; sd within the raw-count conditions is 0.052-0.057, larger than elsewhere but an order of magnitude below the effect; the w0/w shift is systematic (4/4 in the same direction), not erratic. |
 | I | legacy numerical clipping | **NOT_SUPPORTED at convergence, UNRESOLVED during EM** | The clip is `[-20, 10]`, i.e. `mu` up to 22026. The count column needs `ln(154.4) = 5.04` on average and at most `ln(200) = 5.30`. The observed `x_rmse_count_raw = 27.47` is consistent with a fitted mean near the data mean, i.e. an interior eta. Activation during EM iterations was never recorded (neither script requests `compute_clip_diagnostic`), so it cannot be excluded outright. §12.3. |
-| J | Poisson distributional misspecification / overdispersion of Y | **NOT_SUPPORTED** | The marginal var/mean of Y is 9.89, but the plug-in posterior predictive check reproduces it (rep_mean 9.79, p = 0.15), and the conditional Pearson dispersion is 1.13 at k=3 and 0.76 at k=5. On strict held-out at k=3 NB improves test ll by only +0.020 (6/6). On synthetic NB-Y data NB is *worse* for Z at every r (§11). In any case Y is identical across all conditions in this experiment. |
+| J-Y | **Y-side** Poisson misspecification / overdispersion of the co-rating count | **NOT_SUPPORTED as an explanation of F3** | The marginal var/mean of Y is 9.89, but the plug-in posterior predictive check reproduces it (rep_mean 9.79, p = 0.15), and the conditional Pearson dispersion is 1.13 at k=3 and 0.76 at k=5. On strict held-out at k=3 NB improves test ll by only +0.020 (6/6). On synthetic NB-Y data NB is *worse* for Z at every r (§11). **Decisively: Y is byte-identical across all 11 conditions of this experiment, so no property of Y can produce a between-condition difference.** |
+| J-X | **X-side** overdispersion of `ratings_count` relative to the Poisson assumed for it | **UNTESTED, and CONFOUNDED with C** | `VERIFIED`: `ratings_count` has var/mean = **6.17** over the n=100 subset, so a Poisson likelihood assumes an sd of `sqrt(154.4) = 12.4` where the data show 30.9. `DERIVED`: since the X-side weight is `A''/phi`, a dispersion-matched count family would carry `mu/phi = 154.4/6.17 = 25.0` instead of 154.4 - i.e. **X-side overdispersion accounts for a factor of about 6.2 of the 81.2x weight ratio in §9.2, leaving about 13.2x** attributable to baseline/curvature. **No experiment in this repository has ever compared Poisson-X against a dispersion-aware count family for X.** Critically, every remedy that worked in F4 (log-Gaussian, z-score-Gaussian) *also* fixes the X dispersion mismatch, because Gaussian estimates `sigma^2` from the data. So F4 is equally consistent with a J-X explanation as with an intercept or a scale explanation. |
 
 ### 9.4 What must not be concluded
 
@@ -553,7 +597,7 @@ Poisson in 15 of 15 paired comparisons, while losing on held-out likelihood in 1
 | explanation | status | basis |
 |---|---|---|
 | Gaussian quasi-likelihood robustness | `PARTIALLY_SUPPORTED` | Consistent with 1 and 2, but does not explain 3, where the robust-looking model is Poisson, not Gaussian |
-| Estimated dispersion auto-downweights badly scaled or badly specified blocks | `PARTIALLY_SUPPORTED` | Directly supported by the MovieLens numbers: `1/sigma_hat^2 ~ 2.0e-4` for the raw count under Gaussian versus `A'' ~ 154` under Poisson (`VERIFIED`, §9.2). Also explains why Gaussian is safe for Z yet bad for X reconstruction |
+| Estimated dispersion auto-downweights badly scaled or badly specified blocks | `PARTIALLY_SUPPORTED` | The mechanism is `VERIFIED` from code (Gaussian X columns get `phi = sigma_hat_l^2` updated by MLE; Bernoulli and Poisson have `phi = 1` fixed). Its **magnitude** on MovieLens is only `DERIVED`: `sigma_hat` was never persisted, so the `1/sigma_hat^2 ~ 2.0e-4` figure in §9.2 rests on using `x_rmse_count_raw = 71.06` as a proxy. Treat it as an order-of-magnitude argument, not a measurement. Also consistent with Gaussian being safe for Z yet bad for X reconstruction (that part is `VERIFIED`: `x_rmse_bern` 0.679 vs 0.450, `x_rmse_pois` 2.555 vs 1.394) |
 | Y is strong enough that X hardly matters | `SUPPORTED at dense Y, CONTRADICTED at sparse Y` | At rate 1.0 all X variants lie within 0.011; at rate 0.1 the gap is 0.426 (§8). Regime-specific |
 | X reconstruction and Z recovery are different objectives | `SUPPORTED` | `single_vs_joint` shows Gaussian forcing costs 1.5-1.8x in per-block X RMSE while costing nothing in RMSE(Z); the NB result shows the same split in the opposite direction (better density, worse Z) |
 | Finite sample | `UNTESTED` | n=80 and n=100 in the relevant experiments; no n sweep exists for these comparisons |
@@ -578,10 +622,19 @@ promote this from hypothesis to finding is a **measurement of the actual per-blo
 precision contribution** - which is candidate C in §16 and is currently `UNRESOLVED`
 because F was never saved.
 
-**Consequence for the research claim:** the sentence "specifying the correct family per
-column improves Z estimation" is not supported at dense Y and is `CONTRADICTED in sign` by
-`single_vs_joint` (-0.0004). What is supported is the narrower, conditional statement in
-§8.
+**Consequence for the research claim, stated by regime.** The relevant comparison is
+contrast A of §8.2 - `all_gaussian` versus `per_column_all` on the identical 9 columns.
+
+- **Dense Y**: the claim "specifying the correct family per column improves Z estimation"
+  is **not supported**. It is `CONTRADICTED in sign` in `single_vs_joint` (-0.0004, 3
+  trials) and worth only +0.0114 in the 10-trial run.
+- **Sparse Y**: the same claim **is supported** in this generator: contrast A reaches
+  **+0.4261 RMSE(Z) at `y_obs_rate = 0.1`, 10/10 trials**.
+
+So all-Gaussian robustness is a **dense-Y phenomenon**, not a general one. Any statement
+about per-column family assignment must carry the Y-information regime with it, and any
+statement about all-Gaussian robustness must do the same. Both directions of this were
+partly obscured in the earlier draft of §8.2 and are corrected here.
 
 ---
 
@@ -726,12 +779,13 @@ These must not be addressed by changing the model.
 | **F norm / actual precision contribution** | none measured | none | everything above | **NO - F was never saved** | C | (measurement first) |
 | **block imbalance (1 vs 19 columns)** | none | `rating_stats_only` uses 3 columns and degrades identically (-0.362) | column identity | **YES, and it argues against** | already isolated | block weighting (not motivated) |
 | **attribute informativeness** | count in an absorbable representation gives +0.002, i.e. nothing; genre gives +0.034 at k=3 but -0.039 at k=5 (F9) | at sparse Y in synthetic data X clearly helps (§8) | leakage, Y density, k | partially | matched-protocol MovieLens re-run | attribute selection (not motivated) |
-| **Y density** | §8, monotone across 4 rates, 10 paired trials | one generative configuration; scalar-parameter error also grows | generator design (dense F rows) | **YES for this generator** | E (redesigned), or a second configuration | none |
+| **Y density** | §8, monotone across 4 rates, 10 paired trials | one generative configuration; scalar-parameter error also grows | generator design (dense F rows) | **YES for this generator** | E = Issue #27 as currently written, or another second configuration | none |
 | **numerical clipping / floors** | PC-001 / PC-002 deterministic counterexamples | MovieLens etas are interior (`VERIFIED`); resolved forward in the consistent lineage | EM-transient activation never logged | **YES at convergence, NO during EM** | activation logging during EM | already fixed forward |
 | **optimization / local optima** | noise trial 1 bimodal; `all_bernoulli` collapse in 1/3; `poisson_strict` k=5 max test RMSE 48.19 against a mean of 14.58; Cora Q non-monotone in k | 0 NaN everywhere; most runs stable | MC sampling, `scale_Z`, Adam schedule | **NO** | multi-restart Q comparison at fixed data and fixed k | optimization / convergence change |
 | **`scale_Z`** | applied unconditionally (`em_runner.py` line 226); forces mean square 1 on all MC samples, which interacts with any block that wants a large `||z||` | no measured failure attributed to it | every scale mechanism above | **NO** | the non-destructive `apply_scale_z` ablation already designed in `reports/theory_audit/diagnostic_designs_20260719.md` §3 | make it switchable, default unchanged |
 | **leakage** | runinfo `leak_caveat`; count and Y share `u.data` | would bias the affected conditions upward, yet they are worse | attribute informativeness | partially | train-only attribute construction | **none - this is CLASS III** |
-| **overdispersion** | marginal var/mean 9.89 | PPC p = 0.15 reproduces it; conditional dispersion 1.13 / 0.76; NB beats Poisson by only 0.020 at k=3; NB is worse for Z at every r | the k=5 Poisson divergence inflates NB's apparent gain | **YES** | already isolated | NB / dispersion (not motivated for Z) |
+| **Y-side overdispersion** | marginal var/mean 9.89 | PPC p = 0.15 reproduces it; conditional dispersion 1.13 / 0.76; NB beats Poisson by only 0.020 at k=3; NB is worse for Z at every r; and Y is identical across the F3 conditions | the k=5 Poisson divergence inflates NB's apparent gain | **YES** | already isolated | Y-side NB / dispersion (not motivated for Z recovery) |
+| **X-side count overdispersion** | `ratings_count` var/mean = **6.17** (`VERIFIED`); a Poisson X likelihood therefore over-weights that column by about 6.2x relative to a dispersion-matched count family (`DERIVED`) | none - it has never been tested | Poisson curvature, baseline/scale, intercept; **and every F4 remedy fixes it too** | **NO** | an X-side arm that keeps the column raw and Bernoulli genre intact but fits it with a dispersion-aware count family (quasi-Poisson / NB-X), against raw Poisson-X | X-side dispersion parameter or quasi-likelihood weight for count columns |
 | **k-selection criterion** | Cora argmin k=1 versus AP argmax k=6 | Wine and all three synthetic scenarios select correctly (10/10 x3) | Q non-monotonicity, sparsity, subset choice | partially | Q-vs-k optimization diagnostic | criterion change - **premature** |
 
 ---
@@ -752,7 +806,8 @@ by "the original paper had it".
 | 5 | **column weighting** | F5 | column imbalance | none | as above | as above | yes | **NOT_JUSTIFIED** |
 | 6 | **F regularization** | inferred `||F||` growth | F norm | `DERIVED` only; `||F||` was never recorded in any run | no measured failure attributable to it | `scale_Z` already constrains Z, not F | **NO** | **FUTURE_WORK** (record `||F||` first) |
 | 7 | **attribute selection** | F5 | informativeness | none | noise columns cause no systematic degradation | - | yes | **NOT_JUSTIFIED** |
-| 8 | **dispersion / NB** | MovieLens var/mean 9.89 | overdispersion | +0.020 test ll at k=3 (6/6) | PPC p = 0.15; conditional dispersion 1.13 / 0.76; NB worse for Z in 15/15 paired synthetic comparisons; the k=5 gain comes from a Poisson divergence | latent structure already absorbs the marginal overdispersion | yes | **NOT_JUSTIFIED for Z recovery**; **FUTURE_WORK** for density prediction only |
+| 8a | **Y-side dispersion / NB** | MovieLens Y var/mean 9.89 | Y-side overdispersion | +0.020 test ll at k=3 (6/6) | PPC p = 0.15; conditional dispersion 1.13 / 0.76; NB worse for Z in 15/15 paired synthetic comparisons; the k=5 gain comes from a Poisson divergence | latent structure already absorbs the marginal overdispersion | yes | **NOT_JUSTIFIED for Z recovery**; **FUTURE_WORK** for density prediction only |
+| 8b | **X-side count dispersion** (dispersion parameter or quasi-likelihood weight on count X columns) | F3 | X-side overdispersion / over-weighting of a count column | `ratings_count` var/mean = 6.17 (`VERIFIED`), implying about a 6.2x over-weighting relative to a dispersion-matched count family (`DERIVED`); it is a live competing explanation for F3 that no condition separates from intercept, scale or curvature | none, because it has never been tried; the 6.2x factor leaves about 13.2x of the §9.2 weight ratio unexplained, so it is unlikely to be the whole story | intercept, scale, Poisson curvature - all confounded with it | **NO** | **NEEDS_DIAGNOSTIC_FIRST** - and note this is a *different* modification from 8a, on a different side of the model; do not report them under one verdict |
 | 9 | **optimization / convergence change** | Cora Q non-monotone in k; `all_bernoulli` collapse 1/3; `poisson_strict` k=5 divergence | optimization | three independent `VERIFIED` signals | no diagnosis of which stage fails; a blind change risks breaking historical comparability | MC sampling, `scale_Z`, Adam schedule, Laplace approximation | **NO** | **NEEDS_DIAGNOSTIC_FIRST** - and this is the second-best-evidenced problem area in the repository after F3 |
 | 10 | **`scale_Z` made switchable** (default unchanged) | none directly | scale confounding | it is an unconditional transformation of the posterior samples that deviates from the MCEM target (`diagnostic_designs_20260719.md` §3) and confounds every scale mechanism in §14 | no measured failure | - | **NO** | **OPTIONAL_ENGINEERING** - a default-preserving flag is a no-op for existing results and unlocks an ablation; the ablation itself is NEEDS_DIAGNOSTIC_FIRST |
 | 11 | **k-selection criterion change** | F8 | criterion | criterion/metric disagreement on Cora | Q itself is non-monotone, so a criterion change alone would not fix it; the criterion selects correctly in 4 of the 5 settings tested | optimization failure at high k | **NO** | **NEEDS_DIAGNOSTIC_FIRST**, and it is CLASS III - do not fix an evaluation problem by changing the generative model |
@@ -793,139 +848,236 @@ Open items the candidates are scored against:
 
 ### 16.2 The candidates
 
-**A - Poisson baseline stress.** Synthetic. Hold the latent signal fixed and vary only the
-count baseline (e.g. `x_il ~ Poisson(alpha * exp(f_l^T z_i))` with `f` fixed across arms),
-correct Poisson family, current no-intercept model. Question: *does a large count baseline
-alone break a no-intercept model, and how does the damage scale with the baseline?*
-Targets U4, and U1 if instrumented. Needs no model change - only a generator arm. RMSE(Z)
-is measurable, unlike on MovieLens, and there is no leakage.
+**Source discipline (added 2026-08-21, PR #29 review).** Candidate E is scored against the
+**actual current body of GitHub Issue #27**, retrieved with `gh issue view 27`, not against
+the July 2026 design memo. An earlier version of this audit scored the memo by mistake;
+that scoring is withdrawn and replaced below. The relevant contents of the actual issue are
+summarized in §18.
 
-**B - Intercept x representation factorial.** Arms: raw Poisson without intercept (exists),
-raw Poisson with intercept (**requires the intercept**), transformed Gaussian without
-intercept (exists), optionally transformed Gaussian with intercept. Question: *is it the
-intercept, the representation/scale, or both?* Targets U2 and U3 directly.
+**A - Poisson baseline stress (revised).** Synthetic, two generation factors, fitted with
+the current no-intercept model and correct per-column families:
+
+- baseline `alpha` in `mu_il = alpha * exp(f_l^T z_i)`, with `F` and `Z` generation held
+  fixed across arms;
+- generative dispersion of the count column: equidispersed Poisson versus over-dispersed
+  (matching the observed `ratings_count` var/mean of 6.17), still **fitted** as Poisson.
+
+Question it can answer: *under the current no-intercept model, does raising the Poisson
+count baseline - and separately, does generative over-dispersion of that column - produce
+systematic degradation, and how does it scale?*
+
+**Question it cannot answer** (added after the PR #29 review): under a Poisson likelihood
+`alpha` moves the mean, the variance and `A''` **simultaneously**, because
+`A'' = mu = alpha * exp(f^T z)`. A therefore **cannot separate** "missing intercept" from
+"Poisson curvature" from "mean-variance coupling"; those three are one knob in a
+no-intercept Poisson model. The second factor does separate generative over-dispersion from
+the baseline, since dispersion can be varied at fixed mean. Targets U4 and part of J-X.
+
+**B - Intercept x representation x X-dispersion factorial (revised).** Arms: raw Poisson
+without intercept (exists); raw Poisson **with intercept** (requires the intercept);
+transformed Gaussian without intercept (exists); raw count with genre kept Bernoulli and
+the count fitted by a **dispersion-aware count family** (requires that family); optionally
+transformed Gaussian with intercept. Question: *is it the intercept, the
+representation/scale, or the X-side dispersion?* Targets U2, U3 and J-X, and it is the
+**only** candidate that can establish intercept causality.
 
 **C - Curvature / precision block diagnostic.** Instrumentation, not a new model: persist
 `F` and the converged `eta`, then compute per-block `A''(eta)/phi * f_l f_l^T` and its
-trace / norm share of the total X precision, on the existing MovieLens condition set and
-on synthetic mixed-X. Question: *does one count column actually dominate the Z update?*
-Targets U1, and U5 if clip activation is logged during EM at the same time.
+trace / norm share of the total X precision, on the existing MovieLens condition set and on
+synthetic mixed-X. Question: *does one count column actually dominate the Z update?*
+Targets U1, and U5 if clip activation is logged during EM at the same time. It yields
+**mediation / correlational** evidence: a large precision share constrains the mechanism
+but does not by itself establish that the share is what causes the degradation.
 
 **D - Noise dose-response.** Increase the number of noise columns with enough trials to
 detect a systematic degradation. Question: *is block weighting or regularization actually
 needed?* Targets the F5 null.
 
-**E - Complementary blocks (Issue #27).** Synthetic generator where each attribute block
-loads mainly on a different latent dimension; per-dimension RMSE reported. Question:
-*when blocks carry different information about Z, does joint integration matter?* Targets
-U9 and the weak component identified in §8.2.
+**E - Complementary blocks = Issue #27 as currently written.** Synthetic generator in which
+the Bernoulli, Gaussian and Poisson blocks load mainly on latent dimensions 1, 2 and 3
+respectively; `n=80`, `d=9`, `K_TRUE=3`, Poisson Y, `L=5`, `num_iter=8`, **10 trials**,
+fixed 20% test set shared across all conditions in a trial, and **two Y-information levels
+from the same trainable pool**: `y_obs_rate = 1.0` (dense negative control) and `0.1`
+(sparse primary). Conditions: `y_only`, `single_bernoulli`, `single_gaussian`,
+`single_poisson`, `per_column_all`, plus `all_gaussian` as a secondary misspecification
+control. Every fit must use `numerics_mode="consistent"` and the mode must be verified in
+the result. The generator is forbidden to clip Poisson `eta`, and observed min/max `eta`
+must be recorded. Primary endpoint is **pre-specified**: paired RMSE(Z) after Procrustes at
+`y_obs_rate = 0.1`, with primary contrasts `per_column_all` versus each single family and
+versus `y_only`. Question: *when attribute blocks carry different pieces of the latent
+structure, is there a measurable reason to estimate them jointly under one shared Z?*
+Targets U9 and U6, and its pre-specified primary endpoint is exactly contrast B of §8.2.
 
 ### 16.3 Scores
 
+Scores below are the **re-scoring** required by the PR #29 review. Every change is traced
+to a specific finding rather than to a desired ordering.
+
 | candidate | IG | DIR | CSP | UNC | IND | AMB | THE | total | gated? |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| **A** Poisson baseline stress | 4 | 5 | 4 | 4 | 5 | 4 | 4 | **30** | no |
-| **B** intercept x representation | 5 | 5 | 5 | 5 | **1** | 3 | 4 | **28** | **YES** - requires the X intercept |
+| **B** intercept x representation x X-dispersion | 5 | 5 | 5 | 5 | **1** | 3 | 4 | **28** | **YES** - requires the X intercept and a dispersion-aware X family |
+| **E** complementary blocks (Issue #27, current body) | 4 | 4 | 3 | 4 | 5 | 4 | 4 | **28** | no |
+| **A** Poisson baseline + dispersion stress | 4 | 5 | 3 | 3 | 5 | 3 | 4 | **27** | no |
 | **C** curvature / precision diagnostic | 3 | 5 | 3 | 4 | 5 | 4 | 3 | **27** | no |
-| **E** complementary blocks (#27) | 3 | 3 | 2 | 3 | 5 | 3 | 3 | **22** | no |
 | **D** noise dose-response | 2 | 2 | 2 | 3 | 5 | 2 | 3 | **19** | no |
 
-Score justifications, briefly:
+Changes from the earlier scoring, with their causes:
 
-- **A**: DIR 5 because the observed failure is literally a high-baseline count column under
-  Poisson. CSP 4 because it separates baseline magnitude from family choice, leakage and
-  informativeness, but cannot separate "no intercept" from "large baseline" - in a
-  no-intercept model those are the same knob, which is precisely why its answer is a
-  precondition for B. AMB 4 because a flat damage curve falsifies the baseline hypothesis
-  just as informatively as a rising curve confirms it.
-- **B**: the highest raw score, and gated. CSP 5 and UNC 5 are real; IND 1 is decisive
-  under the declared rule.
-- **C**: IG 3 and CSP 3 because measuring a dominance share does not by itself establish
-  causation - a large precision share could be a correlate of a badly posed column rather
-  than the operative cause. It is nonetheless the only way to close U1.
-- **E**: DIR 3, not 1. §8.2 shows the joint-integration component of the sparse-Y result is
-  small (+0.044 against a misspecification cost of +0.368), and F1 is an observed
-  phenomenon whose stated explanation is exactly the generator property E manipulates. But
-  CSP 2, because it separates none of the confounded mechanisms in §14, and AMB 3, because
-  a generator built so that integration must help produces a result that is hard to defend.
-- **D**: DIR 2 because F5 is currently a **null**, not a failure; AMB 2 because a larger
-  null is still a null, and a small positive would be hard to distinguish from the
-  local-optimum behaviour already visible in trial 1.
+- **A: CSP 4 -> 3, UNC 4 -> 3, AMB 4 -> 3 (total 30 -> 27).** Cause: the PR #29 review
+  point that `alpha` moves mean, variance and `A''` together under Poisson. A separates the
+  baseline/curvature bundle from leakage, informativeness and block count - all of which
+  were already excluded - but it does not separate anything *inside* the bundle. AMB falls
+  because a **rising** curve is now ambiguous between three mechanisms; only a **flat**
+  curve is unambiguous. CSP recovers from 2 to 3 because the added generative-dispersion
+  factor does separate X-side over-dispersion from the baseline at fixed mean. DIR stays 5:
+  it remains the closest synthetic analogue of the F3 configuration.
+- **B: unchanged at 28, still gated.** The review reinforces its role: it is now the only
+  candidate that can establish intercept causality, and it must additionally carry an
+  X-dispersion arm. IND stays 1.
+- **C: unchanged at 27.** The review's point that A2 is mediation evidence was already the
+  stated basis for CSP 3.
+- **E: 22 -> 28.** Causes, all from reading the actual issue body: it fixes
+  `numerics_mode="consistent"` and forbids generator clipping, so it becomes the first
+  empirical use of the consistent lineage (U6) - IG 3 -> 4, UNC 3 -> 4. It carries a
+  **dense-Y negative control** and a **pre-specified primary endpoint** that is exactly
+  contrast B of §8.2, plus dimension-wise RMSE under one shared Procrustes rotation as a
+  mechanism diagnostic - DIR 3 -> 4, CSP 2 -> 3. It excludes the raw invalid-support arms,
+  forbids post-hoc tuning of `w0`, `w` and the dominant weight, forbids BIC-based ranking,
+  and requires a null to be reported as a null - AMB 3 -> 4. It supplies the second
+  generative configuration that PATH 4 needs - THE 3 -> 4.
+- **D: unchanged at 19.**
+
+Two honesty checks on the re-scoring:
+
+1. **Is this score-fudging to flip the ordering?** Every raise for E is traceable to a
+   clause in the actual issue body that the earlier scoring simply had not read, and every
+   cut to A is traceable to review FINDING 5. The counterfactual is explicit: had Issue #27
+   still contained only the July memo, E would have kept roughly its old score and A would
+   still lead.
+2. **Is E still "designed to succeed"?** Partly, and that is why AMB is 4 and not 5. The
+   generator is built so that the blocks are complementary. What lowers the risk is that
+   the issue pre-registers the endpoint, requires the dense-Y control, and explicitly
+   requires a null to be reported. The external-validity limitation remains and the issue
+   itself lists it as a required LIMITATION.
 
 ### 16.4 Ranking
 
 ```
-1. A   (30)                          <- run this one if only one runs
-2. C   (27)                          <- pure instrumentation; closes U1
-3. B   (28 raw, gated by IND = 1)    <- becomes the right experiment once A has answered U4
-4. E   (22)                          <- see the Issue #27 decision in 18
-5. D   (19)
+1. E   (28)                          <- highest ungated; run this one if only one runs
+2. A   (27) / C (27)  - tie          <- both address the F3 branch, neither can close it
+4. D   (19)
+--  B  (28 raw, gated by IND = 1)    <- becomes the right experiment once C or A motivates it
 ```
 
-C is instrumentation rather than an experiment, so recording the per-block precision inside
-A's runs costs almost nothing. That is an implementation note, not a merged
-recommendation: the single primary recommendation remains A.
+**Tie-break, declared here:** A is listed before C because A produces new controlled data
+*and* can carry C's instrumentation inside its own runs, whereas C only instruments
+configurations that must be re-fitted anyway. This is a tie-break, not a score difference.
+
+**Consequence of the re-scoring for the F3 branch.** With A's CSP reduced and B gated, the
+F3 branch is now **structurally blocked**: no ungated candidate can separate intercept from
+curvature from X-dispersion, and the candidate that can (B) requires exactly the
+modifications whose justification is in question. This deadlock is itself a finding, and it
+is a substantive reason why the next experiment is not on the F3 branch.
 
 ---
 
 ## 17. Ranked next actions
 
-At most five. Each is a recommendation only; nothing here was executed.
+At most five. Each is a recommendation only; nothing here was executed. This list was
+**re-ordered** after the PR #29 review; see §16.3 for the score changes that drove it.
 
-### P0 - A1. Poisson baseline stress (DIAGNOSTIC EXPERIMENT)
+### P0 - A1. Run Issue #27 as currently written (DIAGNOSTIC EXPERIMENT)
 
-- **Question.** Does a large count baseline alone degrade a no-intercept
-  exponential-family X model, and does the degradation scale with the baseline?
-- **Current evidence.** F3 (-0.374 test ll, 0/4 fits, two experiments); the data-side
-  curvature ratio of 81.2x; the Gaussian arm with the same raw column loses 18x less.
-- **Missing evidence.** U4 entirely, U1 partially. No condition anywhere in this
-  repository varies the baseline while holding the latent signal fixed.
-- **Minimal design.** Synthetic mixed-X; hold the `F` and `Z` generation fixed; vary only a
-  multiplicative count baseline over roughly four levels spanning `mu` from about 1 to
-  about 200; correct per-column families; current model. Report RMSE(Z), held-out Y ll,
-  `w0`, `w`, per-block X RMSE, `||F||` and the per-block precision share. Use enough
-  trials that the trial-matched paired difference is readable (the sparse-Y experiment
-  needed 10). Run with `numerics_mode="consistent"` and log clip/floor activation during
-  EM.
-- **Decision enabled.** Whether the intercept / offset branch (B, then modifications 1 and
-  3) is worth opening at all.
-- **Risk.** If the damage curve is flat, the intercept branch is falsified - a useful
-  outcome, not a failed experiment.
-- **Known confound to design around.** `scale_Z` forces the MC samples to mean square 1
-  unconditionally (§4), so as the baseline rises the model can only respond by growing
-  `||F||`, not `||Z||`. A1's response is therefore *mediated* by `scale_Z`. Record `||F||`
-  per arm, and either run the `apply_scale_z` on/off ablation alongside or state
-  explicitly that the measured curve is conditional on `scale_Z` being on.
-- **Before #27:** YES.
+- **Question.** When attribute blocks carry different pieces of the latent structure, is
+  there a measurable reason to estimate them jointly under one shared Z rather than fitting
+  one attribute family at a time?
+- **Current evidence.** F1 (dense-Y differences of about 0.011); §8.2 contrast B (+0.010 at
+  dense Y, +0.083 at `y_obs_rate = 0.1`, 10/10) - the smallest of the three sparse-Y
+  contrasts and the one E pre-registers as its primary endpoint; F2 (contrast A grows to
+  +0.426 at rate 0.1, 10/10) established on **one** generative configuration.
+- **Missing evidence.** U9 (a second generative configuration, here one deliberately built
+  with complementary blocks) and U6 (**no experiment has ever used the consistent
+  lineage**). Also missing: any evidence at all on `single_bernoulli` and `single_poisson`
+  under reduced Y - the trials-10 run kept only four conditions.
+- **Minimal design.** The design is already written in the issue and needs no change:
+  10 trials x 2 Y-observation rates x 6 conditions = 120 fits, shared data and test split
+  within a trial, `numerics_mode="consistent"` verified per fit, no clipping in the
+  generator with min/max `eta` recorded, pre-specified paired RMSE(Z) endpoint at
+  `y_obs_rate = 0.1`, dense-Y negative control, dimension-wise RMSE under one shared
+  Procrustes rotation, and an explicit prohibition on ranking conditions by the criterion.
+- **Decision enabled.** Whether PATH 4 survives a second, adversarially-controlled
+  configuration; and whether the consistent lineage behaves at all in practice.
+- **Risk.** The generator is constructed so complementary integration *should* help, so a
+  positive result has limited external validity. The issue mitigates this with the dense-Y
+  control and by requiring nulls to be reported. One residual design note this audit adds:
+  E uses `K_TRUE = 3` while the existing sparse-Y evidence used `k* = 2`, so E differs from
+  it in **two** respects (F structure and k) and a difference in outcome cannot be
+  attributed to complementarity alone. Record this as a limitation; it does not warrant
+  changing the design.
+- **Before the F3 branch:** YES - the F3 branch is currently blocked (§16.4).
 
 ### P1 - A2. Per-block precision instrumentation (ALGORITHM VALIDATION)
 
 - **Question.** What share of the X precision `sum_l A''(eta_il)/phi_l f_l f_l^T` does each
   attribute block actually contribute at convergence?
-- **Current evidence.** The data-side ratio only (81.2x), with `||f_l||` unknown.
+- **Current evidence.** The data-side ratio only (81.2x, of which about 6.2x is now
+  attributed to X-side over-dispersion and about 13.2x to baseline/curvature - both
+  `DERIVED`), with `||f_l||` unknown.
 - **Missing evidence.** U1. `F` is not persisted by any of the relevant scripts, and
   `*.npy` is git-ignored.
 - **Minimal design.** A diagnostic function plus persistence of `F` and the converged
-  `eta`; no model change. Apply it to the existing MovieLens condition set and to A1's runs.
+  `eta`; no model change. Apply it to a re-fit of the existing MovieLens condition set, and
+  to A6's runs at no extra cost.
 - **Decision enabled.** Whether "precision-block dominance" graduates from
   `PARTIALLY_SUPPORTED` to a finding, or is falsified.
-- **Risk.** A dominance measurement is correlational; it constrains but does not prove the
-  mechanism. The report that uses it must say so.
-- **Before #27:** YES.
+- **Risk.** A dominance measurement is **mediation / correlational** evidence: it
+  constrains the mechanism but does not establish that the share is what causes the
+  degradation, and it cannot distinguish intercept from curvature from X-dispersion. The
+  report that uses it must say so. It also re-fits the same n=100 subset, so it adds fits
+  without adding samples.
+- **Before the F3 branch closes:** it is a prerequisite, not a conclusion.
 
 ### P1 - A3. Forward correction of the Exp2 registry annotation (CLAIM RESTRICTION)
 
 - **Question.** Which numbers may be quoted for the fixed-lineage n sweep?
 - **Current evidence.** Primary artifact: 49.3% / 41.2% / 58.6% (`VERIFIED`, two
   independent recomputations). Registry note and `reports/real_data_experiment_plan.md`
-  §2: 40% / 17% / 62%.
+  §2: 40% / 17% / 62%. The median reading was checked and rejected (-47.9 / -42.1 / -59.0%).
 - **Missing evidence.** None - this is settled.
 - **Minimal design.** An append-only, dated forward-correction row in
   `EXPERIMENT_REGISTRY.md`, in the same style as its 2026-08-21 Phase 5a.1 section.
   **Do not edit the historical row and do not edit the dated plan document.**
 - **Decision enabled.** Prevents an incorrect figure entering the thesis.
 - **Risk.** None, provided the historical text is left intact.
-- **Before #27:** YES - it costs nothing and is independent of everything else.
+- **Independent of everything else:** YES - it costs nothing and blocks nothing.
+
+### P2 - A6. Poisson baseline + X-dispersion stress (DIAGNOSTIC EXPERIMENT)
+
+- **Question.** Under the current no-intercept model, does raising the Poisson count
+  baseline - and separately, does generative over-dispersion of that column at fixed
+  mean - produce systematic degradation, and how does it scale?
+- **Current evidence.** F3; the 81.2x data-side weight ratio; the Gaussian arm with the
+  same raw column loses 18x less.
+- **Missing evidence.** U4, and the generative-dispersion half of J-X.
+- **Minimal design.** Synthetic mixed-X; hold `F` and `Z` generation fixed; cross a
+  multiplicative count baseline over about four levels spanning `mu` from about 1 to about
+  200 with two generative dispersion settings (equidispersed, and var/mean about 6.2);
+  fit with correct per-column families and the current model; `numerics_mode="consistent"`;
+  log clip/floor activation during EM. Report RMSE(Z), held-out Y ll, `w0`, `w`, per-block
+  X RMSE, `||F||` and the per-block precision share.
+- **Decision enabled.** A **flat** damage surface falsifies the whole baseline/curvature
+  bundle at once. A **rising** surface does not identify which of intercept, curvature or
+  mean-variance coupling is responsible - it only establishes that the bundle matters, and
+  it hands the question to B.
+- **Risk.** Precisely that asymmetry: only the negative outcome is unambiguous. Under
+  Poisson, `A'' = mu = alpha * exp(f^T z)`, so `alpha` moves the mean, the variance and the
+  curvature together.
+- **Known confound to design around.** `scale_Z` forces the MC samples to mean square 1
+  unconditionally (§4), so as the baseline rises the model can only respond by growing
+  `||F||`, not `||Z||`. The response is therefore *mediated* by `scale_Z`. Record `||F||`
+  per arm, and either run the `apply_scale_z` on/off ablation alongside or state explicitly
+  that the measured surface is conditional on `scale_Z` being on.
+- **Before #27:** NO - it now ranks below it.
 
 ### P2 - A4. Q-versus-k optimization diagnostic (ALGORITHM VALIDATION)
 
@@ -941,70 +1093,94 @@ At most five. Each is a recommendation only; nothing here was executed.
 - **Decision enabled.** Whether F8 is a criterion problem, an optimization problem, or
   both - and therefore whether a criterion change is even the right lever.
 - **Risk.** Scope creep into a full MCEM study. Keep it to n <= 280 and one fixed dataset.
-- **Before #27:** not required, but it outranks #27 on evidence.
 
-### P2 - A5. Matched-protocol MovieLens attribute check (DIAGNOSTIC EXPERIMENT)
+### Below the top five (recorded, not ranked)
 
-- **Question.** Does attribute integration help MovieLens **at all** (F9)?
-- **Current evidence.** Contradictory: +0.034 (4/4) at k=3 in one protocol, -0.039 (3/6) at
-  k=5 in another.
-- **Missing evidence.** U8. The two runs differ in k, script, evaluation and split count.
-- **Minimal design.** One script, one evaluation, both k values, genre-only X versus
-  y_only, train-only attribute construction if feasible (otherwise repeat the leakage
-  caveat verbatim).
-- **Decision enabled.** Whether MovieLens can carry any attribute-integration claim.
-- **Risk.** A null removes MovieLens as a positive dataset for the thesis - which would
-  itself be an honest and reportable result.
-- **Before #27:** not required.
+- **Matched-protocol MovieLens attribute check.** F9 shows +0.034 (4/4) at k=3 in one
+  protocol and -0.039 (3/6) at k=5 in another. One script, one evaluation, both k, genre-only
+  X versus `y_only`, train-only attributes if feasible. Needed before **any** MovieLens
+  attribute-integration claim, but it does not gate anything above.
+- **X-side count dispersion probe.** This is an **arm of B**, not a separate experiment:
+  raw count, genre kept Bernoulli, count fitted by a dispersion-aware family. It requires an
+  X-side dispersion capability that does not exist today, so it inherits B's gate.
 
 ---
 
 ## 18. Issue #27 decision
 
-**Decision: REDESIGN.**
+**Decision: RUN NEXT.**
 
-This decision was made after the §16.3 scoring. It is neither "defer because of
-positive-story risk" nor "run because the issue already exists"; both of those reasons
-were excluded in advance.
+**Correction note (2026-08-21, PR #29 review).** An earlier version of this section
+returned **REDESIGN**, based on the July 2026 design memo
+`reports/story_diagnostics/story_diagnostics_next_plan_20260713.md`. That was an error of
+sourcing: the memo is not the issue. The actual current body of GitHub Issue #27 was
+retrieved with `gh issue view 27` and is materially different. **The earlier REDESIGN
+verdict and all four of its stated defects are withdrawn.** What follows is decided from
+the actual issue text.
 
-**What E would answer, and how much that is worth.** §8.2 is the strongest reason to take
-E seriously: the joint-integration component of the sparse-Y result is only +0.044 RMSE(Z)
-against a misspecification cost of +0.368, and F1 shows the same near-null at dense Y. The
-stated explanation for both - that the current generator makes every block individually
-sufficient because `F` rows are dense random vectors - is exactly what E manipulates. E
-therefore tests a real, quantified weakness in our own positive claim, and it targets U9.
-That is why it scores DIR 3 rather than DIR 1.
+### 18.1 The four earlier criticisms, checked against the actual issue
 
-**Why it is not next.** It scores 22 against A's 30. It separates none of the confounded
-mechanisms in §14 (CSP 2), and it does not touch the only failure observed on real data.
+| # | earlier criticism | what the actual Issue #27 says | verdict |
+|---|---|---|---|
+| 1 | "No Y-density axis" | Two Y-information conditions from the same trainable pool, `y_obs_rate = 1.0` as an explicit **dense-Y negative control** and `0.1` as the **sparse-Y primary condition**, with the same fixed 20% test set in both | **WITHDRAWN - factually wrong** |
+| 2 | "No pre-registered decomposition" | A **pre-specified primary endpoint** (paired RMSE(Z) after Procrustes at `y_obs_rate = 0.1`), pre-specified primary contrasts (`per_column_all` versus each of `single_bernoulli`, `single_gaussian`, `single_poisson`, `y_only`), an explicit sign convention, `all_gaussian` retained as a secondary misspecification control, and dimension-wise RMSE under **one shared** Procrustes rotation. It also forbids redefining the endpoint after seeing results | **WITHDRAWN** - the two contrasts §8.2 needed (A and B) are both pre-registered |
+| 3 | "Raw forced-misspecification arms" | "Do **not** include raw `all_bernoulli` or raw `all_poisson` on the mixed continuous X as primary conditions... do not rerun them merely to make a dramatic comparison" | **WITHDRAWN - factually wrong** |
+| 4 | "Numerics and trial count unspecified" | `numerics_mode="consistent"` mandated and verified per fit; **no clipping permitted in the generator**, with min/max `eta` recorded for Bernoulli X, Poisson X and Poisson Y; **10 trials**; 120-fit integrity checks enumerated | **WITHDRAWN - factually wrong** |
 
-**Why the recorded design cannot be run as written.** The design in
-`reports/story_diagnostics/story_diagnostics_next_plan_20260713.md` (experiment 2)
-predates the evidence in this audit and has four concrete defects:
+Nothing of substance survives from the earlier list. One **new, minor** observation
+replaces it, and it is not a defect requiring redesign: Issue #27 uses `K_TRUE = 3` whereas
+the existing sparse-Y evidence used `k* = 2`, so E differs from the trials-10 configuration
+in **two** respects (complementary F structure *and* k). A difference in outcome therefore
+cannot be attributed to complementarity alone. This should be recorded as a limitation in
+E's own report.
 
-1. **No Y-density axis.** It leaves the Y observation rate at the dense setting. §8 and F1
-   show that at dense Y the entire achievable effect in this generator is about 0.011
-   RMSE(Z). Run as written, E would very likely produce a null that says nothing about
-   complementary blocks.
-2. **No pre-registered decomposition.** The quantity actually in question is
-   `(single-block correct) - (joint correct)`, the integration value, separated from
-   `(all-forced-Gaussian) - (single-block correct)`, the misspecification cost. The memo
-   reports overall and per-dimension RMSE only, which would leave exactly the ambiguity
-   §8.2 had to resolve after the fact.
-3. **Raw-value forced-misspecification arms.** The memo includes `all_bernoulli` and
-   `all_poisson` on raw values. `single_vs_joint` shows `all_bernoulli` collapsing in 1 of
-   3 trials (RMSE(Z) 1.747, test ll -106.5) and contaminating the mean. Either drop those
-   arms, pre-register a robust summary, or report them separately.
-4. **Numerics and trial count predate current knowledge.** The memo predates
-   `numerics_mode` (Issue #25 / PR #26) and fixes no trial count. E should run on the
-   consistent lineage with clip/floor activation logged, and needs a trial count in the
-   range that made §8 readable (10 trial-matched trials), not the 2-3 of the earlier
-   pilots.
+The actual issue additionally contains protections the earlier assessment gave it no credit
+for: post-hoc tuning of `w0`, `w` and the dominant weight is forbidden; a null or negative
+result is declared acceptable and must be reported as such; "per-column is always better"
+is forbidden; and the criterion is explicitly barred from being used to rank conditions -
+which is independently correct, since §5.4 of this audit shows a collapsed misspecified
+condition attaining the smallest criterion value of all.
 
-**Implied instruction.** Keep Issue #27 OPEN. Do not run it as specified. Revise the design
-along points 1-4, and schedule it after A1 - not because A1 is logically a prerequisite for
-E, but because A1 outranks it on the uniform rubric and because E's redesign should be able
-to use whatever A1 and A2 reveal about precision weighting.
+### 18.2 Why RUN NEXT, from the re-scoring
+
+- E is the **highest-scoring ungated candidate** (28; §16.3), and it reached that score
+  through changes each traceable to a clause of the actual issue body.
+- Its **pre-specified primary endpoint is exactly contrast B of §8.2** - the smallest and
+  therefore least-established of the three sparse-Y contrasts, and the one on which the
+  per-column claim is weakest. It is testing our own weak point, not a strong point.
+- It supplies the **second generative configuration** that PATH 4 requires (U9), and it
+  covers `single_bernoulli` and `single_poisson` under reduced Y, which no existing run does.
+- It would be the **first empirical use of the objective-consistent lineage** (U6). §12.2
+  records that the lineage exists, is tested at the unit level, and has never been used in
+  an experiment. That gap does not close by itself.
+- The competing branch is blocked. After review FINDING 5, no ungated candidate can
+  separate intercept from curvature from X-dispersion on the F3 branch (§16.4), and the
+  candidate that can (B) needs exactly the capabilities whose justification is in question.
+  Waiting for the F3 branch would mean running an experiment whose positive outcome is
+  known in advance to be ambiguous.
+
+### 18.3 Why not DEFER, REDESIGN or REPLACE
+
+- **DEFER** would require something above it that is un-blocked. There is not: A6 and C
+  both sit on the blocked F3 branch, and A3 is a documentation action that blocks nothing.
+- **REDESIGN** was the earlier verdict and is withdrawn; none of its four grounds survives
+  contact with the actual issue text. The one residual observation (K_TRUE = 3 vs k* = 2)
+  is a limitation to record, not a design fault to fix.
+- **REPLACE** would require a better experiment answering the same question. None of A, B,
+  C or D answers E's question at all; they address the F3 branch.
+
+### 18.4 Guard against the two forbidden reasons
+
+Neither forbidden reason was used. **Not** "run it because the issue already exists": E was
+re-scored on the same seven criteria as everything else, and it was the actual issue text -
+not its existence - that changed the score. **Not** "defer it because of positive-story
+risk": that concern is real, it is priced into AMB = 4 rather than 5, and it is handled by
+the issue's own dense-Y control and null-reporting requirement rather than by refusing to
+run the experiment.
+
+**Instruction implied.** Keep Issue #27 OPEN and run it as written, under its own stated
+absolute-stop conditions. Add the `K_TRUE = 3` versus `k* = 2` note to its report's
+LIMITATION section. Do not weaken the pre-specified endpoint after seeing results.
 
 ---
 
@@ -1016,12 +1192,13 @@ Applying the five conditions honestly:
 
 | modification | (1) repeated concrete failure | (2) mechanism supported or alternatives excluded | (3) clear mathematical role | (4) before/after validation designable | (5) not "the paper had it" | verdict |
 |---|---|---|---|---|---|---|
-| X intercept | partly - 4 fits / 2 splits | **NO** - U2, U3, U4 all open | yes | yes | must be argued explicitly, since the X bias was previously removed as an error | fails (1), (2) |
+| X intercept | partly - 4 fits / 2 splits, one n=100 subset | **NO** - U2, U3, U4 and J-X all open, and after review FINDING 5 no ungated experiment can separate them | yes | yes | must be argued explicitly, since the X bias was previously removed as an error | fails (1), (2) |
 | Poisson offset | as above | **NO** | yes | yes | yes | fails (1), (2) |
 | block / column weighting | **NO** - §10 is a null | **NO** | weak - no likelihood justification | yes | yes | fails (1), (2), (3) |
 | F regularization | **NO** | **NO** - `||F||` never recorded | yes | yes | yes | fails (1), (2) |
 | attribute selection | **NO** | **NO** | yes | yes | yes | fails (1), (2) |
-| NB / dispersion | **NO** - §9 candidate J | **CONTRADICTED** | yes | yes | yes | fails (1), (2) |
+| Y-side NB / dispersion | **NO** - §9 candidate J-Y | **CONTRADICTED** | yes | yes | yes | fails (1), (2) |
+| X-side count dispersion | partly - F3, 4 fits / 2 splits | **NO** - `UNTESTED`, and confounded with intercept, scale and curvature | yes | yes | yes | fails (1), (2) |
 | optimization change | yes - three independent signals | **NO** - no diagnosis of which stage | not yet specified | yes | yes | fails (2), (3) |
 | criterion change | yes - F8 | **NO** - Q itself is non-monotone | yes | yes | yes | fails (2) |
 | `scale_Z` switch | no failure attributed | n/a | yes | yes | yes | not a fix; see below |
@@ -1041,34 +1218,55 @@ Making `scale_Z` switchable with the current behaviour as the default is
 that several mechanisms in §14 are confounded by. It is not a fix and must not be presented
 as one.
 
+**A structural note added after the PR #29 review.** The F3 branch cannot reach
+JUSTIFIED_NOW by accumulating more un-gated evidence, because no un-gated experiment
+separates the intercept from the Poisson curvature from the X-side dispersion (§16.4,
+§23). Closing it requires accepting a *provisional* implementation of the X intercept and
+of a dispersion-aware X count family purely in order to run B. That is a human scientific
+decision about how much provisional implementation is acceptable, not a gap this audit can
+close with more analysis. It is recorded here rather than disguised as a NEEDS_DIAGNOSTIC
+that some future read-only step could satisfy.
+
 ---
 
 ## 20. NOT_JUSTIFIED_YET
 
 Ordered by how much evidence would be needed to move them.
 
-1. **X intercept / Poisson offset** - `NEEDS_DIAGNOSTIC_FIRST`. Needs A1, then B. Note for
+1. **X intercept / Poisson offset** - `NEEDS_DIAGNOSTIC_FIRST`, with the structural caveat
+   in §19: no un-gated experiment can separate it from the Poisson curvature or from the
+   X-side dispersion, so A6 and C can motivate B but cannot substitute for it. Note for
    the write-up: a per-column bias in X was **removed** as an error (RESEARCH_MASTER §4,
    eq(2): `N(w_0l + z_i^T w_l, sigma_l^2)` -> `N(f_l^T z_i, sigma_l^2)`). Re-introducing it
    must rest on the diagnostic evidence, and the report must say so, or it will read as
    reverting to the prior work's formulation.
 2. **Block weighting / column weighting** - `NOT_JUSTIFIED`. The motivating observation
-   (F5) is a null in every individual trial, and the real-data failure (F3) is explained
-   without it. Introducing weights would also further damage the likelihood interpretation
+   (F5) is a null in every individual trial, and F3 does not require it: `rating_stats_only`
+   uses 3 columns and degrades as much as the 22-column condition, so column-count
+   imbalance is not the operative variable. Introducing weights would also further damage the likelihood interpretation
    of the criterion, which §5.4 shows is already fragile across families.
 3. **F regularization** - `FUTURE_WORK`. Record `||F||` first; nothing currently measures
    it.
 4. **Attribute selection** - `NOT_JUSTIFIED`. No systematic degradation from uninformative
    columns has been demonstrated.
-5. **NB / dispersion** - `NOT_JUSTIFIED for Z recovery`; `FUTURE_WORK` for density
-   prediction only, where the honest statement is +0.020 test ll at k=3.
+5. **Y-side NB / dispersion** - `NOT_JUSTIFIED for Z recovery`; `FUTURE_WORK` for density
+   prediction only, where the honest statement is +0.020 test ll at k=3. This verdict
+   rests entirely on Y-side evidence and **says nothing about the X side**.
+5b. **X-side count dispersion** - `NEEDS_DIAGNOSTIC_FIRST`. `ratings_count` is 6.17x
+   over-dispersed relative to the Poisson assumed for it, no experiment has ever fitted a
+   dispersion-aware count family to an X column, and every remedy that worked in F4 also
+   removes the dispersion mismatch. It is a live competing explanation for F3 on the same
+   footing as the intercept, and it must be an arm of whatever experiment settles F3.
 6. **Optimization / convergence change** - `NEEDS_DIAGNOSTIC_FIRST` (A4). The evidence
    that *something* is wrong is good; the evidence about *what* is absent.
 7. **k-selection criterion change** - `NEEDS_DIAGNOSTIC_FIRST`, and CLASS III. Do not
    attempt to fix an evaluation problem by changing the generative model.
-8. **Promotion of the per-column prototype to the thesis method** - `NOT_JUSTIFIED`.
-   §5.2, §8.2 and §11 together mean the strongest defensible statement is conditional, not
-   general.
+8. **Promotion of the per-column prototype to the thesis method** - `NOT_JUSTIFIED`
+   **today**, and explicitly re-openable after E. §5.2, §8.2 contrast A and §11.3 together
+   mean the strongest defensible statement is conditional on the Y-information regime and
+   rests on one generative configuration. Issue #27 supplies the second configuration; a
+   positive result there would make a *conditional* method claim arguable, and the issue
+   itself states that even then the prototype is not automatically promoted.
 
 ---
 
@@ -1077,139 +1275,159 @@ Ordered by how much evidence would be needed to move them.
 | path | evidence strength | novelty | unresolved issues | implementation required | experiment required | oral-defense strength | risk | feasibility |
 |---|---|---|---|---|---|---|---|---|
 | **1. X/Y exponential-family generalization** | **Strongest.** 180 + 180 + 180 + 550 rows of synthetic evidence with 10-30 trials, 10/10 k selection in three scenarios, misspecification ratios 4.34 / 9.04 / 40.37 reproduced exactly, Wine k=3, Cora 2.6-2.8x random | moderate - generalizing a fixed-family LSM | KI-001 hedge; criterion naming (KI-010); Cora Q non-monotonicity | none | none | **high** - every number reproduces from primary CSVs | low | already done |
-| **2. + per-column heterogeneous X** | **Weak.** per_column - all_gaussian = -0.0004 at dense Y (3 trials); MovieLens negative; F9 questions attribute value on MovieLens at all | high | PC-001 in the legacy lineage (fixed forward, unvalidated); prototype status | consistent-lineage validation | several | **low** - the obvious question "is it better than forcing Gaussian?" currently answers "no, at dense Y" | high | possible, not defensible today |
-| **3. + evidence-driven count/intercept refinement** | **Insufficient.** 4 fits / 2 splits; mechanism `UNRESOLVED`; leakage caveat binding | high if it works | U1-U4 all open | X intercept | A1, B, plus validation | low today | high | not feasible this cycle |
-| **4. Conditions under which attribute integration is effective (sparse Y)** | **Moderate.** 10 trial-matched trials, monotone across 4 rates, 10/10 at the sparsest rates - but **one generative configuration**, and §8.2 shows the effect is mostly misspecification avoidance rather than integration | moderate | U9; needs a second configuration | none | E (redesigned) or another configuration | moderate | medium | feasible with one more experiment |
+| **2. + per-column heterogeneous X** | **Regime-dependent, and stronger than the earlier draft allowed.** Contrast A (identical 9 columns, family assignment only): -0.0004 at dense Y in `single_vs_joint` (3 trials) and +0.0114 in the 10-trial run, but **+0.4261 at `y_obs_rate = 0.1`, 10/10** (§8.2). MovieLens is negative and F9 questions attribute value there at all | high | PC-001 in the legacy lineage (fixed forward, never validated in an experiment); prototype status; one generative configuration | consistent-lineage validation | E (Issue #27) | **moderate** - the hostile question "is it better than forcing Gaussian?" answers "no at dense Y, clearly yes at sparse Y in one generator" | medium-high | possible after E |
+| **3. + evidence-driven count/intercept refinement** | **Insufficient.** 4 fits / 2 splits on a single n=100 subset; mechanism `UNRESOLVED`; leakage caveat binding; and after review FINDING 5 the branch is structurally blocked (§16.4) | high if it works | U1-U4 and J-X all open | X intercept **and** an X-side dispersion capability | A6, C, then B | low today | high | not feasible this cycle |
+| **4. Conditions under which attribute integration is effective (sparse Y)** | **Moderate, and better founded than the earlier draft stated.** 10 trial-matched trials, monotone across 4 rates, 10/10 at the sparsest rates. The earlier draft discounted it by netting contrast A against contrast B; that decomposition is withdrawn (§8.2). Remaining limitation: **one generative configuration** | moderate | U9 - needs a second configuration | none | **E = Issue #27, as currently written** | moderate-to-high | medium | feasible with exactly one more experiment, which is already designed |
 | **5. Family generalization plus explicit diagnostic limitations** | **Strong**, because it is built from what is already `VERIFIED`, including the negative results | low as novelty, high as scholarship | none - the limitations are the content | none | none | **high** - it pre-empts hostile questions by stating the limit first | low | already done |
 
 ### Recommended path
 
-**Path 1 as the backbone, framed with Path 5, and Path 4 as a conditional extension.**
+**Path 1 as the backbone, framed with Path 5, with Path 4 as the primary extension and
+Path 2 conditional on it.**
 
 - Path 1 supplies the claims that survive recomputation without qualification.
-- Path 5 supplies the honest boundary: forcing every column to Gaussian is nearly as good
-  for Z and Y and worse only for X reconstruction (§11); the criterion is Q-based and not
-  comparable across families (§5.4, §13); on Cora the fitted Q is non-monotone in k (§13.6);
-  MovieLens attributes did not help (§9, F9).
-- Path 4 is added **only if** a second generative configuration reproduces the sparse-Y
-  interaction, and it must be stated with the §8.2 decomposition attached, i.e. "when Y is
-  sparse, specifying the right family per column matters much more than adding blocks".
+- Path 5 supplies the honest boundary: at **dense** Y, forcing every column to Gaussian is
+  as good for Z and Y and worse only for X reconstruction (§11); the criterion is Q-based
+  and not comparable across families (§5.4, §13); on Cora the fitted Q is non-monotone in k
+  (§13.6); MovieLens attributes did not help (§9, F9); and the F3 mechanism is
+  `UNRESOLVED`.
+- Path 4 is the extension the evidence actually points at, **conditional on E reproducing
+  the sparse-Y interaction in a second generative configuration**. Its statement must carry
+  the regime and the contrast: "on identical columns, per-column family assignment is worth
+  about 0.43 RMSE(Z) when only 10% of training pairs are observed and about 0.01 when all
+  are (one generator, 10 paired trials)".
 
-**This differs from the hypothesis carried into the audit**, which put Path 4 first. The
-§8.2 decomposition demoted it: the component unique to per-column joint integration is
-+0.044 RMSE(Z) against a +0.368 misspecification cost, and at dense Y it is negative. The
-recomputation, not the plan, produced this ordering.
+**Correction relative to the earlier draft.** That draft demoted Path 4 on the strength of
+an §8.2 "decomposition" that has since been withdrawn as non-causal (PR #29 review,
+FINDING 1). With contrast A read as what it is - the per-column mechanism's own
+same-column comparison - Path 4 and Path 2 are **stronger** than the earlier draft
+concluded, though still regime-restricted and still resting on one generative
+configuration. The correction, not a preference, produced this change.
 
 Confidence: **moderate-to-high** for Path 1 plus Path 5 (every supporting number reproduced
-from primary artifacts); **low** for Path 2 or Path 3 as a thesis backbone today.
+from primary artifacts); **moderate** for Path 4 pending E; **low** for Path 3 today.
 
 ---
 
 ## 22. Final evidence-based recommendation
 
-**Run exactly one experiment next: A1, the Poisson baseline stress test (§17), with the A2
-per-block precision instrumentation recorded inside the same runs.**
+**Run exactly one experiment next: Issue #27 as currently written (candidate E, action A1
+in §17), unchanged in design, with the `K_TRUE = 3` versus `k* = 2` note added to its
+report's limitations.**
 
 Why this one:
 
-1. It is the only top-ranked candidate that attacks the **only failure observed on real
-   data** (F3) while requiring **no model modification**, which is what the operating
-   principle of this phase demands.
-2. It removes the confound that currently makes F3 uninterpretable. Every remedy that works
-   (log, z-score) changes baseline, scale and family dispersion simultaneously, and the one
-   condition that comes closest to isolating "no intercept with raw scale"
-   (`mixed_all_gaussian`) also changes the genre family. A1 varies exactly one thing.
-3. Both outcomes are decisive. A rising damage curve opens the intercept / offset branch
-   and makes B the right follow-up. A flat curve falsifies the baseline hypothesis and
-   moves attention to the dispersion asymmetry in §11.3, which is currently the
-   best-supported unifying hypothesis in this audit.
-4. It is synthetic, so RMSE(Z) is measurable and the MovieLens leakage caveat does not
-   apply.
-5. F3 rests on a single n=100 MovieLens subset (§9.4). Chasing the mechanism on that same
-   subset - which is what B would do - adds fits without adding samples. A1 moves the
-   question to a setting where the sample can be replicated at will and the truth is known.
+1. It is the **highest-scoring ungated candidate** (28; §16.3), scored on the same rubric
+   as every other candidate, against the **actual issue text** rather than the superseded
+   July memo.
+2. Its pre-specified primary endpoint is **contrast B of §8.2** - the weakest and least
+   established of the three sparse-Y contrasts. It tests the per-column claim where that
+   claim is thinnest, not where it is strongest.
+3. It closes the two most consequential gaps that no other candidate touches: a **second
+   generative configuration** for the only positive result the per-column line has (U9),
+   and the **first empirical use of the objective-consistent lineage**, which currently
+   exists, passes unit tests, and has never been run in an experiment (U6, §12.2).
+4. The competing branch is blocked. After review FINDING 5, `alpha` in A6 moves the mean,
+   the variance and `A''` together, so a positive A6 result cannot separate intercept from
+   curvature from mean-variance coupling; C yields mediation evidence only; and B, the one
+   candidate that can separate them, requires the very intercept and X-dispersion
+   capabilities whose justification is in question. Running an F3-branch experiment now
+   means running one whose positive outcome is known in advance to be ambiguous.
+5. It requires **no model modification** and no new dataset.
 
-Do **not** implement the X intercept, block weighting, column weighting, F regularization,
-attribute selection, NB, or a criterion change before A1 reports. None of them reaches
-JUSTIFIED_NOW (§19).
+Do **not** implement the X intercept, a Poisson offset, an X-side dispersion parameter,
+block weighting, column weighting, F regularization, attribute selection, Y-side NB, or a
+criterion change. None of them reaches JUSTIFIED_NOW (§19), and the F3 branch cannot be
+closed by any experiment that avoids them.
 
 Alongside it, two zero-risk items: the A3 registry forward correction, and the policy that
 every new per-column run selects `numerics_mode="consistent"` and logs clip/floor
-activation.
+activation - a policy Issue #27 already enforces for itself.
 
 ---
 
 ## 23. Decision tree
 
-```
-MovieLens raw-count failure (F3)   [VERIFIED: -0.374 test ll, 0/4 fits, 2 experiments]
-|
-+-- Is it the legacy numerical defect (PC-001)?
-|     eta needed = ln(154) = 5.04, clip boundary = 10 (mu = 22026);
-|     x_rmse is consistent with an interior fit.
-|     -> NO at convergence                      [NOT_SUPPORTED]
-|     -> during-EM activation was never logged  [UNRESOLVED]
-|        => log clip/floor activation in every future run (costless),
-|           but do not expect it to explain F3.
-|
-+-- Is it Y-side overdispersion?
-|     PPC p = 0.15 reproduces var/mean 9.89; conditional dispersion 1.13 / 0.76;
-|     NB gains +0.020 at k=3; NB is worse for Z in 15/15 synthetic paired comparisons.
-|     -> NO   [NOT_SUPPORTED]   => NB / dispersion stays NOT_JUSTIFIED.
-|
-+-- Is it block-count imbalance (1 count column vs 19 genre columns)?
-|     rating_stats_only uses 3 columns and degrades by the same -0.362.
-|     -> NO   [it is the column's identity, not the count]
-|        => block weighting stays NOT_JUSTIFIED.
-|
-+-- Is it leakage?
-|     Leakage would flatter these conditions; they are worse.
-|     -> cannot explain the degradation   [CONFOUNDED, and it cuts the other way]
-|        => but it does void these runs as generalization evidence   [CLASS III].
-|
-+-- Has the actual precision dominance A''/phi f f^T been measured?
-|     F was never saved (*.npy is git-ignored).
-|     -> NO   [UNRESOLVED]
-|        => A2 instrumentation. The data-side ratio is 81.2x, but ||f_l|| is unknown
-|           and is NOT imputed.
-|
-+-- Is it the baseline magnitude, the representation/scale, or the family's fixed
-    dispersion?
-      Known: log and z-score are interchangeable (+0.0005 apart), so variance
-             stabilization is not the operative part.
-      Known: the same raw column under Gaussian (estimated sigma^2) costs 18x less,
-             but that arm also changes the genre family, so it isolates nothing.
-      Unknown: U2, U3, U4.
-      |
-      +-- STEP 1: A1 baseline stress    [no model change]
-      |     |
-      |     +-- damage rises with the baseline
-      |     |     => the baseline / intercept branch is live
-      |     |        => STEP 2: B, intercept x representation factorial
-      |     |             (this is the point at which implementing the X intercept
-      |     |              becomes justified, and not before)
-      |     |             |
-      |     |             +-- intercept fixes raw Poisson -> X intercept / Poisson offset
-      |     |             |                                  becomes JUSTIFIED
-      |     |             +-- it does not                 -> representation convention,
-      |     |                                                or the dispersion branch below
-      |     |
-      |     +-- damage is flat in the baseline
-      |           => the intercept hypothesis is FALSIFIED
-      |              => dispersion branch: the operative variable is that Bernoulli and
-      |                 Poisson have phi fixed at 1 while Gaussian estimates it (11.3)
-      |                 => the question becomes how a per-block dispersion or weighting
-      |                    should be *derived*, not bolted on - a modelling question,
-      |                    not an engineering one.
-      |
-      +-- (parallel, independent of the above)
-            Cora k selection (F8): Q_strict peaks at k=2 and falls
-              -> even a zero penalty would not select k=6
-              -> this is NOT primarily a penalty problem   [VERIFIED]
-              -> A4 optimization diagnostic before any criterion change   [CLASS III]
+Two branches. They are independent, and only one of them is currently traversable.
 
-            MovieLens attribute value (F9): +0.034 (4/4, k=3) vs -0.039 (3/6, k=5)
-              -> A5 matched-protocol re-run before any MovieLens attribute claim
+```
+BRANCH 1 - the per-column claim itself   [traversable now]
+|
++-- What does the sparse-Y evidence actually say?   [3 named contrasts, 8.2]
+|     A  same-column family assignment  : +0.011 (dense)  -> +0.426 (rate 0.1), 10/10
+|     B  add 6 correctly specified cols : +0.010 (dense)  -> +0.083 (rate 0.1), 10/10
+|     C  add 6 cols as the wrong family : +0.001 (dense)  -> +0.343 (rate 0.1), 10/10
+|     A = B + C algebraically, but B and C are NOT orthogonal causal components.
+|     Do not report "the benefit is mostly family correctness".
+|
++-- Does it hold outside this one generator?
+      -> UNKNOWN  [U9]   n=80, d=9, k*=2, dense random F rows, one family mix
+      |
+      +-- Run Issue #27 as written (candidate E, 28, highest ungated)
+            pre-specified endpoint = contrast B at y_obs_rate = 0.1
+            dense-Y arm = negative control
+            numerics_mode = "consistent"   -> also closes U6
+            |
+            +-- E reproduces the interaction
+            |     -> PATH 4 becomes claimable, regime-restricted, two configurations
+            |     -> PATH 2 becomes arguable as a conditional method claim
+            |
+            +-- E does not reproduce it
+                  -> the sparse-Y result is specific to the dense-random-F generator
+                  -> PATH 4 is withdrawn; PATH 1 + PATH 5 stand alone
+                  -> this is an acceptable, reportable outcome
+
+
+BRANCH 2 - the MovieLens raw-count failure F3   [currently BLOCKED]
+|
++-- Ruled out already
+|     legacy Poisson clip     : eta = ln(154) = 5.04 vs boundary 10   [NOT_SUPPORTED at
+|                               convergence; during-EM activation UNRESOLVED, never logged]
+|     Y-side overdispersion   : PPC p = 0.15; conditional dispersion 1.13 / 0.76;
+|                               and Y is identical across all 11 conditions   [NOT_SUPPORTED]
+|     block-count imbalance   : rating_stats_only uses 3 columns, degrades by the same
+|                               -0.362   [it is the column's identity, not the count]
+|     leakage                 : would flatter these conditions; they are worse
+|                               [cannot explain it, but voids them as generalization evidence]
+|     optimizer instability   : 0 NaN in 44/44, systematic 4/4 w0/w shift   [NOT_SUPPORTED]
+|
++-- Still confounded with one another, and NOT separated by any existing condition
+|     missing X intercept
+|     raw baseline / scale
+|     Poisson curvature A'' = exp(eta)
+|     X-side count overdispersion (var/mean 6.17; about 6.2x of the 81.2x weight ratio)
+|     actual precision share A''/phi f f^T   [UNRESOLVED - F was never saved]
+|
+|     Note: every remedy that worked in F4 (log-Gaussian, z-score-Gaussian) removes the
+|     baseline, the scale AND the dispersion mismatch at once. F4 discriminates nothing.
+|
++-- Which experiment separates them?
+      |
+      +-- A6 baseline + dispersion stress   [no model change]
+      |     under Poisson, alpha moves mean, variance and A'' together
+      |     -> FLAT surface  : falsifies the whole bundle at once   [decisive]
+      |     -> RISING surface: bundle matters, but intercept vs curvature vs
+      |                        mean-variance coupling remain unseparated   [ambiguous]
+      |
+      +-- C precision instrumentation   [no model change]
+      |     -> measures the share, closes U1
+      |     -> mediation / correlational only; does not separate the three either
+      |
+      +-- B intercept x representation x X-dispersion factorial   [GATED]
+            the ONLY design that separates them
+            requires: X column intercept AND a dispersion-aware X count family
+            i.e. it requires the modifications whose justification is in question
+            |
+            +-- => BRANCH 2 cannot be closed without first accepting a provisional
+                   implementation. That is a human scientific decision, not an
+                   evidence gap this audit can fill.
+
+(parallel, independent of both branches)
+  Cora k selection F8 : Q_strict peaks at k=2 and falls; even a zero penalty would not
+                        select k=6   [VERIFIED]  -> A4 optimization diagnostic BEFORE any
+                        criterion change   [CLASS III; scalar family_x, not per-column]
+  MovieLens F9        : +0.034 (4/4, k=3) vs -0.039 (3/6, k=5)  -> matched-protocol re-run
+                        before ANY MovieLens attribute claim
 ```
 
 ---
