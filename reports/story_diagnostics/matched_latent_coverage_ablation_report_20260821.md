@@ -247,24 +247,29 @@ decomposition and a contradiction in the secondary arms.**
   coverage.** The result is *consistent with* a latent-coverage / block-rank geometry effect
   in this controlled synthetic setting.
 
-- **The secondary arms do not support a simple coverage story.** The `single_bernoulli`
-  interaction is **negative in 10/10 trials** and the `single_poisson` interaction is
-  **approximately null**. A pure "coverage explains the joint advantage" account would
-  predict the same sign for all three comparators. It does not hold here: what changed
-  between regimes was not only each comparator's coverage but also the joint model's own
-  precision geometry, which improved by the same `+0.201` against every comparator. Whether
-  a comparator's interaction comes out positive, null or negative is therefore governed by
-  how much *that* comparator itself gained from full coverage — `+0.315` (Gaussian),
-  `+0.197` (Poisson), `-0.003` (Bernoulli).
+- **The secondary interactions do not show a comparator-independent version of the primary
+  coverage interaction.** The positive Gaussian interaction does not generalize uniformly
+  across the Bernoulli and Poisson comparators: `single_bernoulli` is **negative in 10/10
+  trials** and `single_poisson` is **approximately null**. Therefore the experiment supports a
+  **comparator-specific association** between the latent-coverage / block-rank manipulation
+  and the Gaussian-vs-joint contrast, but it does **not** establish a universal interaction
+  pattern across all single-family comparators.
+
+  Descriptively, the joint model's own shift is common to all three contrasts
+  (`D_J = +0.201`) while the comparator shifts differ: `+0.315` (Gaussian), `+0.197`
+  (Poisson), `-0.003` (Bernoulli). Since `I = D_G - D_J` is an exact identity, the sign of
+  each comparator's interaction follows arithmetically from how much *that* comparator itself
+  moved between regimes relative to the common joint shift.
 
 - **The dense-Y negative control behaves correctly**: all interactions collapse to within
   about 0.02 RMSE_Z with near-even sign counts, and the joint model even loses slightly to
   `single_gaussian` on held-out likelihood under full coverage.
 
-- **The manipulation was clean at the generator level.** Row norms and absolute component
-  multisets were preserved exactly; the Gaussian block's total true precision trace was held
-  fixed to `2.13e-14`; only the orientation changed (coverage_index 0.0034 -> 0.2233,
-  effective rank 1.09 -> 2.70).
+- **The manipulation was clean at the generator level.** Absolute component multisets were
+  preserved **exactly**, and row norms were preserved within the pre-registered absolute
+  tolerance of `1e-15`. The Gaussian block's total true precision trace was **33.3333 in both
+  regimes, with a maximum absolute regime difference of `2.13e-14`**; only the orientation
+  changed (coverage_index 0.0034 -> 0.2233, effective rank 1.09 -> 2.70).
 
 **This is not a causal proof.** The words "fully isolated", "isolated alone" and "dimension
 assignment alone caused the effect" are not applicable, and no universal per-column
@@ -282,9 +287,10 @@ superiority is claimed.
    identity and `D_J = +0.201` is large. `I` must never be reported alone.
 3. **The manipulation also changes the comparator's block rank**, not only its "coverage":
    generator effective rank goes 1.09 -> 2.70 per block. That is a construction fact.
-4. **The secondary interactions contradict a single-mechanism reading** (`single_bernoulli`
-   negative 10/10, `single_poisson` null). This is reported as-is and is not reinterpreted
-   as success.
+4. **The interaction is comparator-specific and is not uniformly reproduced across
+   comparators** (`single_bernoulli` negative 10/10, `single_poisson` approximately null).
+   The experiment does not establish a universal interaction pattern across all
+   single-family comparators. This is reported as-is and is not reinterpreted as success.
 5. **Deliberately constructed geometry.** Both regimes are synthetic constructions; external
    validity is limited and no real-data claim follows.
 6. **One synthetic configuration**, `n = 80`, `K_TRUE = 3`, **10 trials only**. Effect sizes
@@ -301,11 +307,11 @@ superiority is claimed.
 
 ## 9. Decision gate
 
-The primary interaction is positive (9/10) but the mandatory decomposition and the two
-secondary arms show that latent coverage is **not** a single sufficient explanation of the
-Issue #27 result. Under the pre-registered gate this is not a clean "coverage interaction
-clear" outcome, and it is certainly not a null that would justify withdrawing the story
-outright.
+The primary interaction is positive (9/10), but the mandatory decomposition shows a large
+common joint shift (`D_J = +0.201`) and the two secondary arms show that the positive
+Gaussian interaction is **not uniformly reproduced across comparators**. Under the
+pre-registered gate this is therefore not a clean "coverage interaction clear" outcome, and
+it is not a null that would justify withdrawing the story outright either.
 
 The pre-registered instruction in both cases points the same way: **do not redesign F to
 force success and do not run further synthetic mechanism tuning.** The residual information
@@ -336,6 +342,25 @@ Smoke (18 fits) was run first to a location outside the repository and is delibe
 based on it.
 
 ## Research integrity
+
+### Generator-gate execution provenance
+
+Before the smoke fits, the complete **10-trial** generator-only gate was executed separately.
+The `--smoke` CLI itself gates only the smoke trial (`TRIALS_SMOKE = 1`, and
+`main()` calls `generator_prefit_gate(trials)` with `trials = TRIALS_SMOKE if smoke else
+TRIALS_FULL`); the later full run also reran the complete 10-trial gate before all 180 full
+fits.
+
+This is confirmed from the session execution record, not asserted. The standalone gate was
+run read-only with a scratchpad-only driver that imported the committed script and called
+
+```python
+gen, drift = m.generator_prefit_gate(m.TRIALS_FULL, verbose=True)   # no model fit
+```
+
+and recorded `trials checked = 10  rows = 60` with all criteria PASS. The full-run log then
+shows the `PHASE 4 generator-only pre-fit gate` block completing before the first fit line.
+The committed experiment script was **not** modified to make this appear so.
 
 - New model fits run: **180, all pre-registered**
 - Seeds changed, dropped, retried or rescued: **NO** (no failure occurred)
