@@ -611,7 +611,7 @@ finding" is **wrong**.
 | lineage | PC-001 / PC-002 status |
 |---|---|
 | `DualExpFamLSMPerColumn` (legacy per-column) | **Confirmed present.** The clip `[-20,10]` and the floors are still in the file at `e132bed` |
-| `DualExpFamLSMConsistent` / `DualExpFamLSMPerColumnConsistent` (`objective_consistent_numerics.py`, `model_dual_expfam_consistent.py`) | **Resolved.** Clip removed, canonical objective/score/curvature, dtype-derived overflow guard, 9/9 new tests PASS, finite-difference score error 1.75e-06 at eta=11.5 (Issue #25 / PR #26) |
+| `DualExpFamLSMConsistent` / `DualExpFamLSMPerColumnConsistent` (`objective_consistent_numerics.py`, `model_dual_expfam_consistent.py`) | **Resolved for Bernoulli and Poisson.** Both files were read in this audit: there is no `clip`, no probability floor and no independent curvature floor on those two paths; the sigmoid is sign-partitioned, `poisson_mean` guards on `log(np.finfo(dtype).max)`, and mean / curvature / log-likelihood are all built from the same helpers. `VERIFIED` here. The accompanying test results (9/9 PASS, finite-difference score error 1.75e-06 at eta=11.5) are quoted from `reports/per_column_family/objective_consistency_fix_20260821.md` and **were not re-run in this audit** |
 | Every experiment listed in §3 | **Ran on legacy numerics.** `numerics_mode` did not exist yet |
 | The consistent lineage | **Never used in a claim-bearing or diagnostic experiment.** Deterministic smokes only |
 
