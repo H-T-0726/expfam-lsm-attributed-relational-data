@@ -240,3 +240,18 @@ historical row には現れない。
 新しい local-only 参照を registry に書く場合は、上記に登録するまで TRUE_BROKEN として報告される。
 これは意図した失敗方向であり、**未登録の参照を黙って非ブロッキングにしない**ための設計である。
 詳細な意味と限界は `tools/validate_registry_paths.py` の docstring を参照。
+
+---
+
+## complementary blocks 検証フェーズ（2026-08-21、issue #27、branch: experiment/27-complementary-blocks-consistent、objective-consistent numerics 使用）
+
+Issue #28 / PR #29 の evidence-driven audit（`reports/model_refinement/evidence_driven_model_refinement_audit_20260821.md`）が
+Issue #27 を RUN NEXT と判定したことを受けて実施した、事前登録済みの人工データ検証実験。
+**objective-consistent lineage（Issue #25 / PR #26）を実験で使用した最初の実行**である。
+per-column は引き続き **prototype** であり、本実験は修論の正式提案手法への昇格を意味しない。
+実データに関する主張も行わない。総括は
+`reports/story_diagnostics/complementary_blocks_consistent_report_20260821.md` を参照。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| complementary blocks（consistent, trials=10） | 属性 block ごとに異なる潜在次元を主に担う complementary-F 人工データ（n=80, d=9, K_TRUE=3, bern→z1 / gauss→z2 / pois→z3）で、`y_obs_rate ∈ {1.0 (dense negative control), 0.1 (sparse primary)}` × 6条件（`y_only` / `single_bernoulli` / `single_gaussian` / `single_poisson` / `per_column_all` / `all_gaussian`）を strict held-out で比較。全 fit `numerics_mode="consistent"`、generator clipping なし、120 fits | `tools/research_audit/run_complementary_blocks_consistent.py`, `expfam/src/experimental/model_dual_expfam_consistent.py` | `expfam/results/story_diagnostics/complementary_blocks_consistent_20260821_{summary,agg,paired,runinfo,generator,blockdiag}.csv` | `figures/story_diagnostics/complementary_blocks_consistent_20260821_{rmse_z,dimwise_rmse,test_y_ll}.png` | current_support | ✗ | **事前登録**: primary domain `y_obs_rate=0.1`、primary endpoint whole-space Procrustes RMSE_Z、primary contrasts は `per_column_all` vs `single_bernoulli`/`single_gaussian`/`single_poisson`/`y_only`、delta = comparator − per_column。**結果**: sparse-Y で4本とも per_column 優位（+0.512 / +0.422 / +0.389 / +0.203、10/10・10/10・10/10・9/10）、dense-Y では同方向だが約1桁縮小（+0.051 / +0.053 / +0.049 / **+0.009**）。**integrity**: 120/120 consistent、internal retry 0、NaN 0、q_bic_failed 0、warning 0、hash 整合 OK。**限定**: ①K_TRUE=3 で既存 sparse-Y 証拠（k\*=2）とは complementary 構造と潜在次元の2点が異なる ②block 間の local-curvature imbalance（gauss/bern 53.9×）は family だけの効果ではなく `sigma_G=0.3` を含む本 generator 設計との組合せ ③`all_gaussian` vs `per_column_all` は same-column misspecification contrast で M-step optimizer 経路が交絡 ④`single_*` vs joint は観測 X 列数も異なる ⑤Poisson X の marginal var > mean は latent heterogeneity であり overdispersion ではない ⑥prototype・実データ主張なし |
