@@ -134,18 +134,29 @@ pair over all 4950 pairs of `Y_test`.
 
 Identity `Delta = A + B` held to `0.000e+00` across all 30 splits.
 
-`A` and `B` are of the same order (+0.0020 and +0.0022) and split the primary roughly in half.
-Condition 4 existed to test whether any advantage of `mixed_train_log` was attributable to the
-exposure/degree column alone; **it is not** — the exposure column accounts for about half of
-Delta, and the remaining half comes from the other two Gaussian columns. Both halves have
-across-split spread 4–5× their own mean.
+`A` and `B` are an **exact telescoping decomposition of conditional model contrasts**, not a
+partition of Delta into isolated attribute effects:
+
+```
+A = LL_test(mixed_train_log)      - LL_test(genre_logcount_train)
+B = LL_test(genre_logcount_train) - LL_test(genre_only)
+Delta = A + B
+```
+
+The mean primary contrast decomposes into two conditional contrasts of similar average
+magnitude: A = +0.002009 and B = +0.002239. Thus the observed mean Delta is not numerically
+concentrated in B alone under this ordering of model comparisons. **This decomposition does not
+isolate causal or unique attribute contributions, and interactions among attributes / model
+parameters remain possible.** Each component has across-split spread 4–5× its own mean
+(`std/|mean|` = 5.04 for A, 4.17 for B).
 
 ### Positive control
 
-`P` is positive in 25/30 splits with mean +0.012437 — about **2.9×** the primary Delta — and it
-is the only contrast whose spread is close to its mean (ratio 1.07). The pipeline can therefore
-express a real attribute effect on this data. This is a descriptive sanity check; no
-significance test was performed on it.
+The descriptive positive control is directionally positive in 25/30 splits (mean +0.012437),
+showing that this pipeline can produce an attribute-associated predictive contrast under this
+protocol. It is about **2.9×** the primary Delta and is the only contrast whose spread is close
+to its mean (ratio 1.07). This is a descriptive sanity check only; no significance test was
+performed on it, and it is not evidence of a causal or "real" effect.
 
 ### Secondary (pre-registered, never promoted)
 
@@ -259,12 +270,16 @@ validated ledger row. `Y_test`'s hash never appears as a fit input.
 
 The primary contrast is **positive in direction but small relative to its own across-split
 spread**: mean +0.004248 with std 0.012276, i.e. `std/|mean| = 2.89`, positive in 23/30 splits,
-and an empirical 10th–90th percentile range that spans zero. The mandatory decomposition
-attributes roughly half to the exposure column (`B`) and half to the remaining Gaussian columns
-(`A`), neither of which is large relative to its own spread.
+and an empirical 10th–90th percentile range that spans zero. The mandatory decomposition gives
+two conditional contrasts of similar average magnitude (A = +0.002009, B = +0.002239), so the
+observed mean Delta is not numerically concentrated in B alone under this ordering of model
+comparisons; neither component is large relative to its own spread. This decomposition does not
+isolate causal or unique attribute contributions, and interactions among attributes / model
+parameters remain possible.
 
-The positive control behaves as required (25/30, mean +0.0124, spread ratio 1.07), so a
-small primary is not attributable to a pipeline that cannot express attribute effects at all.
+The descriptive positive control is directionally positive in 25/30 splits (mean +0.012437,
+spread ratio 1.07), showing that this pipeline can produce an attribute-associated predictive
+contrast under this protocol. No significance test was performed on it.
 
 No significance test, confidence interval, or power analysis was performed; the 30 splits reuse
 the same 943 users and are not independent replicates. The numbers above are a repeated
