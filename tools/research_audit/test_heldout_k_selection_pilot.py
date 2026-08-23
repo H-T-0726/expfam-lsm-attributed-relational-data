@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import csv
 import inspect
 import functools
+import json
 import sys
 from dataclasses import dataclass
 from dataclasses import replace
@@ -1615,18 +1617,29 @@ def test_smoke_cli_requires_allow_em_and_static_stub_runs_once(
     assert calls == 1
 
 
-def test_full_remains_fail_closed_without_fit(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_full_is_fail_closed_without_every_authorization_gate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Phase 7e triple gate: --full alone and --full --allow-em perform 0 fits."""
+
     calls = 0
 
-    def exploding() -> None:
+    def exploding(*args: object, **kwargs: object) -> None:
         nonlocal calls
         calls += 1
         raise AssertionError("fit path must not run")
 
     monkeypatch.setattr(harness, "run_canary_cli", exploding)
     monkeypatch.setattr(harness, "run_smoke_cli", exploding)
-    with pytest.raises(harness.HarnessStop, match="full pilot"):
+    monkeypatch.setattr(harness, "run_full_pilot_cli", exploding)
+    with pytest.raises(harness.HarnessStop, match="--allow-em"):
+        harness.main(["--full"])
+    assert calls == 0
+    with pytest.raises(harness.HarnessStop, match="--confirm-full-pilot"):
         harness.main(["--full", "--allow-em"])
+    assert calls == 0
+    with pytest.raises(harness.HarnessStop, match="--allow-em"):
+        harness.main(["--full", "--confirm-full-pilot"])
     assert calls == 0
 
 
@@ -1643,3 +1656,791 @@ def test_default_cli_does_not_fit(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit):
         harness.main([])
     assert calls == 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 7e full held-out K-selection pilot (Issue #43)
+# ---------------------------------------------------------------------------
+
+
+def full_replicate_inputs(
+    *,
+    replicates=harness.FULL_REPLICATES,
+    zero_targets: bool = False,
+) -> list[harness.FullReplicateInputs]:
+    """Three tiny fake replicates that satisfy every frozen provenance gate."""
+
+    manifest = harness.build_full_manifest()
+    inputs: list[harness.FullReplicateInputs] = []
+    for replicate in replicates:
+        train, test = valid_masks()
+        diagnostics = harness.validate_pair_masks(train, test, 3)
+        plan = harness.SplitPlan(
+            replicate, harness.SPLIT_SEED_BASE + replicate, 3, train, test, diagnostics
+        )
+        preflight = harness.authorize_canary_preflight(plan)
+        # Distinct per-replicate data so cross-replicate provenance differs.
+        Y = np.zeros((6, 6), dtype=float)
+        if not zero_targets:
+            upper_rows, upper_cols = np.where(np.triu(test, 1))
+            for index, (row_index, col_index) in enumerate(
+                zip(upper_rows.tolist(), upper_cols.tolist(), strict=True)
+            ):
+                value = float((index + replicate) % 3 == 0)
+                Y[row_index, col_index] = value
+                Y[col_index, row_index] = value
+        X = np.full((6, 2), float(replicate), dtype=np.float64)
+        prepared = harness.prepare_training_data(
+            X, Y, preflight=preflight, train_mask=train, test_mask=test
+        )
+        subset = tuple(row for row in manifest if row.replicate == replicate)
+        comparability = tuple(harness.build_full_comparability(prepared, subset))
+        inputs.append(
+            harness.FullReplicateInputs(
+                replicate=replicate,
+                preflight=preflight,
+                prepared=prepared,
+                score_Y=Y,
+                manifest=subset,
+                comparability=comparability,
+            )
+        )
+    return inputs
+
+
+def run_static_full_pilot(
+    callback,
+    inputs: list[harness.FullReplicateInputs] | None = None,
+) -> harness.FullPilotReport:
+    selected = full_replicate_inputs() if inputs is None else inputs
+    adapter = harness._make_test_fit_adapter(callback, score_targets=())
+    return harness._run_full_pilot_test_only(
+        replicate_inputs=selected, adapter=adapter
+    )
+
+
+def full_fake_fit_factory(calls: list[tuple[int, int]]):
+    """Deterministic fake fit whose score peaks at a K that is not K_TRUE."""
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        k = int(kwargs["k"])
+        seed = int(kwargs["seed"])
+        calls.append((k, seed))
+        return fake_canary_result(w0=-float(k), w=0.0, Z=np.zeros((6, k)))
+
+    return fake_fit
+
+
+# --- 1-4: frozen manifest completeness -------------------------------------
+
+
+def test_full_manifest_is_exactly_42_rows_in_frozen_order() -> None:
+    manifest = harness.build_full_manifest()
+    assert len(manifest) == 42
+    assert harness.EXPECTED_FULL_FITS == 42
+    expected = [
+        (replicate, k, start)
+        for replicate in (1, 2, 3)
+        for k in (1, 2, 3, 4, 5, 6, 7)
+        for start in (1, 2)
+    ]
+    assert [(row.replicate, row.k, row.start) for row in manifest] == expected
+    harness.validate_full_manifest(manifest)
+
+
+def test_full_manifest_replicate_set_is_exactly_one_two_three() -> None:
+    manifest = harness.build_full_manifest()
+    assert sorted({row.replicate for row in manifest}) == [1, 2, 3]
+    assert harness.FULL_REPLICATES == (1, 2, 3)
+    truncated = [row for row in manifest if row.replicate != 3]
+    with pytest.raises(harness.HarnessStop):
+        harness.validate_full_manifest(truncated)
+    extended = [
+        *manifest,
+        *harness.build_manifest((4,), harness.FULL_K_CANDIDATES, harness.START_LABELS),
+    ]
+    with pytest.raises(harness.HarnessStop):
+        harness.validate_full_manifest(extended)
+
+
+def test_full_manifest_k_set_is_exactly_one_to_seven() -> None:
+    manifest = harness.build_full_manifest()
+    assert sorted({row.k for row in manifest}) == [1, 2, 3, 4, 5, 6, 7]
+    assert harness.FULL_K_CANDIDATES == (1, 2, 3, 4, 5, 6, 7)
+    without_k1 = [row for row in manifest if row.k != 1]
+    with pytest.raises(harness.HarnessStop):
+        harness.validate_full_manifest(without_k1)
+
+
+def test_full_manifest_starts_are_exactly_one_and_two() -> None:
+    manifest = harness.build_full_manifest()
+    assert sorted({row.start for row in manifest}) == [1, 2]
+    assert harness.START_LABELS == (1, 2)
+    for row in manifest:
+        assert row.model_seed == 43000 + row.replicate * 1000 + row.k * 10 + row.start
+    assert manifest[0].model_seed == 44011
+    assert manifest[1].model_seed == 44012
+    assert manifest[13].model_seed == 44072
+    assert manifest[14].model_seed == 45011
+    assert manifest[-1].model_seed == 46072
+
+
+def test_full_manifest_seed_convention_is_independent_of_harness_code() -> None:
+    """Recompute every seed from the written convention, not from the harness."""
+
+    manifest = harness.build_full_manifest()
+    expected: list[tuple[int, int, int, int, int, int]] = []
+    for replicate in (1, 2, 3):
+        for k in (1, 2, 3, 4, 5, 6, 7):
+            for start in (1, 2):
+                expected.append(
+                    (
+                        replicate,
+                        k,
+                        start,
+                        41000 + replicate,
+                        42000 + replicate,
+                        43000 + replicate * 1000 + k * 10 + start,
+                    )
+                )
+    assert [
+        (row.replicate, row.k, row.start, row.data_seed, row.split_seed, row.model_seed)
+        for row in manifest
+    ] == expected
+
+
+# --- 5: all three splits preflighted before the first fit ------------------
+
+
+def test_all_three_splits_are_validated_before_the_first_fake_fit() -> None:
+    calls: list[tuple[int, int]] = []
+    report = run_static_full_pilot(full_fake_fit_factory(calls))
+    events = list(report.events)
+    assert events[:3] == [
+        ("preflight_validated", 1),
+        ("preflight_validated", 2),
+        ("preflight_validated", 3),
+    ]
+    assert events[3][0] == "fit"
+    assert all(event[0] != "fit" for event in events[:3])
+
+
+def test_full_pilot_requires_all_three_replicates_before_any_fit() -> None:
+    calls: list[tuple[int, int]] = []
+    partial = full_replicate_inputs(replicates=(1, 2))
+    with pytest.raises(harness.HarnessStop, match="exactly three dataset replicates"):
+        run_static_full_pilot(full_fake_fit_factory(calls), partial)
+    assert calls == []
+
+
+def test_full_pilot_rejects_out_of_order_replicates_before_any_fit() -> None:
+    calls: list[tuple[int, int]] = []
+    reordered = list(reversed(full_replicate_inputs()))
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), reordered)
+    assert calls == []
+
+
+# --- 6-9: corrupted manifest rows / seeds stop before any fit --------------
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    ["missing_row", "duplicate_row", "extra_row", "reordered_rows"],
+)
+def test_full_pilot_rejects_wrong_missing_or_duplicate_row(corruption: str) -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    rows = list(inputs[1].manifest)
+    if corruption == "missing_row":
+        rows = rows[:-1]
+    elif corruption == "duplicate_row":
+        rows[-1] = rows[0]
+    elif corruption == "extra_row":
+        rows = [*rows, rows[0]]
+    else:
+        rows = [rows[1], rows[0], *rows[2:]]
+    inputs[1] = replace(inputs[1], manifest=tuple(rows))
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    ("field_name", "bad_value"),
+    [
+        ("data_seed", 41999),
+        ("split_seed", 42999),
+        ("model_seed", 99999),
+    ],
+)
+def test_full_pilot_rejects_wrong_seed_before_any_fit(
+    field_name: str, bad_value: int
+) -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    rows = list(inputs[0].manifest)
+    rows[5] = replace(rows[5], **{field_name: bad_value})
+    inputs[0] = replace(inputs[0], manifest=tuple(rows))
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+def test_full_pilot_rejects_uniformly_wrong_model_seed_before_any_fit() -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    rows = [
+        replace(row, model_seed=row.model_seed + 100000) for row in inputs[2].manifest
+    ]
+    inputs[2] = replace(inputs[2], manifest=tuple(rows))
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+# --- 10-12: provenance / preprocessing hash corruption ---------------------
+
+
+def test_full_pilot_rejects_uniform_wrong_fit_provenance_before_any_fit() -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    corrupted = tuple(
+        replace(row, fit_provenance_hash="0" * 64) for row in inputs[0].comparability
+    )
+    inputs[0] = replace(inputs[0], comparability=corrupted)
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+def test_full_pilot_rejects_single_preprocessing_hash_corruption() -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    rows = list(inputs[1].comparability)
+    rows[7] = replace(rows[7], preprocessing_hash="f" * 64)
+    inputs[1] = replace(inputs[1], comparability=tuple(rows))
+    with pytest.raises(harness.HarnessStop, match="preprocessing_hash"):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+def test_full_pilot_rejects_uniform_preprocessing_hash_corruption() -> None:
+    """Phase 7d LOW-02: uniqueness checks alone would miss this corruption."""
+
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    corrupted = tuple(
+        replace(row, preprocessing_hash="f" * 64) for row in inputs[1].comparability
+    )
+    assert len({row.preprocessing_hash for row in corrupted}) == 1
+    inputs[1] = replace(inputs[1], comparability=corrupted)
+    with pytest.raises(harness.HarnessStop, match="preprocessing_hash"):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "x_hash",
+        "training_y_hash",
+        "train_mask_hash",
+        "test_mask_hash",
+        "target_topology_hash",
+        "score_config_hash",
+    ],
+)
+def test_full_pilot_rejects_uniform_hash_corruption_for_every_field(
+    field_name: str,
+) -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    corrupted = tuple(
+        replace(row, **{field_name: "a" * 64}) for row in inputs[2].comparability
+    )
+    inputs[2] = replace(inputs[2], comparability=corrupted)
+    with pytest.raises(harness.HarnessStop):
+        run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    assert calls == []
+
+
+# --- 13: held-out counterfactual -------------------------------------------
+
+
+def test_full_pilot_y_test_counterfactual_changes_only_score_side() -> None:
+    calls_a: list[tuple[int, int]] = []
+    inputs_a = full_replicate_inputs()
+    report_a = run_static_full_pilot(full_fake_fit_factory(calls_a), inputs_a)
+
+    calls_b: list[tuple[int, int]] = []
+    inputs_b = full_replicate_inputs()
+    for item in inputs_b:
+        # Mutate held-out outcomes only; fit-side state was frozen already.
+        mask = item.prepared.test_mask
+        item.score_Y[mask] = 1.0 - item.score_Y[mask]
+    report_b = run_static_full_pilot(full_fake_fit_factory(calls_b), inputs_b)
+
+    assert calls_a == calls_b
+    for row_a, row_b in zip(report_a.rows, report_b.rows, strict=True):
+        assert row_a.x_hash == row_b.x_hash
+        assert row_a.training_y_hash == row_b.training_y_hash
+        assert row_a.train_mask_hash == row_b.train_mask_hash
+        assert row_a.test_mask_hash == row_b.test_mask_hash
+        assert row_a.fit_provenance_hash == row_b.fit_provenance_hash
+        assert row_a.preprocessing_hash == row_b.preprocessing_hash
+        assert row_a.target_topology_hash == row_b.target_topology_hash
+        assert row_a.score_config_hash == row_b.score_config_hash
+        assert row_a.fit_config_hash == row_b.fit_config_hash
+        assert row_a.score_target_hash != row_b.score_target_hash
+        assert row_a.heldout_mean_log_score != row_b.heldout_mean_log_score
+
+
+def test_full_pilot_every_boundary_receives_training_only_y() -> None:
+    inputs = full_replicate_inputs()
+    for item in inputs:
+        item.score_Y[item.prepared.test_mask] = 1.0
+    test_masks = {item.replicate: item.prepared.test_mask for item in inputs}
+    assert all(np.any(item.score_Y[item.prepared.test_mask] == 1.0) for item in inputs)
+    raw_targets = [item.score_Y for item in inputs]
+    seen = 0
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal seen
+        seen += 1
+        fit_Y = np.asarray(kwargs["Y"])
+        for raw in raw_targets:
+            assert fit_Y is not raw
+            assert not np.shares_memory(fit_Y, raw)
+        assert any(
+            np.all(fit_Y[mask] == 0.0) for mask in test_masks.values()
+        )
+        return fake_canary_result(Z=np.zeros((6, int(kwargs["k"]))))
+
+    run_static_full_pilot(fake_fit, inputs)
+    assert seen == 42
+
+
+# --- 14-16: failure timing and target creation timing ----------------------
+
+
+@pytest.mark.parametrize(
+    ("failure_call", "expected_targets"),
+    [(1, 0), (14, 0), (15, 1), (28, 1), (29, 2), (42, 2)],
+)
+def test_full_pilot_global_stop_never_targets_an_incomplete_replicate(
+    failure_call: int, expected_targets: int
+) -> None:
+    calls = 0
+    targets: list[object] = []
+    original = harness.make_score_only_target
+
+    def counting_target(*args: object, **kwargs: object) -> object:
+        result = original(*args, **kwargs)
+        targets.append(result)
+        return result
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        changes: dict[str, object] = {"Z": np.zeros((6, int(kwargs["k"])))}
+        if calls == failure_call:
+            changes["q_failure"] = True
+        return fake_canary_result(**changes)
+
+    saved = harness.make_score_only_target
+    harness.make_score_only_target = counting_target  # type: ignore[assignment]
+    try:
+        with pytest.raises(harness.HarnessStop, match="Q failure"):
+            run_static_full_pilot(fake_fit)
+    finally:
+        harness.make_score_only_target = saved  # type: ignore[assignment]
+    assert calls == failure_call
+    assert len(targets) == expected_targets
+
+
+def test_full_pilot_creates_one_target_per_replicate_after_its_fourteen_fits() -> None:
+    calls: list[tuple[int, int]] = []
+    report = run_static_full_pilot(full_fake_fit_factory(calls))
+    events = list(report.events)
+    fit_events = [event for event in events if event[0] == "fit"]
+    target_events = [event for event in events if event[0] == "target_create"]
+    score_events = [event for event in events if event[0] == "score"]
+    assert len(fit_events) == 42
+    assert len(target_events) == 3
+    assert len(score_events) == 42
+    assert report.targets_created == 3
+    for index, replicate in enumerate(harness.FULL_REPLICATES):
+        offset = 3 + index * 29
+        assert [event[1] for event in events[offset : offset + 14]] == [replicate] * 14
+        assert all(event[0] == "fit" for event in events[offset : offset + 14])
+        assert events[offset + 14] == ("target_create", replicate)
+        assert all(
+            event[0] == "score" for event in events[offset + 15 : offset + 29]
+        )
+
+
+def test_full_pilot_produces_exactly_three_targets_and_42_score_rows() -> None:
+    calls: list[tuple[int, int]] = []
+    report = run_static_full_pilot(full_fake_fit_factory(calls))
+    assert report.em_fits_executed == 42
+    assert report.targets_created == 3
+    assert report.score_rows == 42
+    assert len(report.rows) == 42
+    assert len(calls) == 42
+    assert calls == [
+        (row.k, row.model_seed) for row in harness.build_full_manifest()
+    ]
+    assert len({row.score_target_hash for row in report.rows}) == 3
+    for replicate in harness.FULL_REPLICATES:
+        replicate_rows = [row for row in report.rows if row.replicate == replicate]
+        assert len(replicate_rows) == 14
+        assert len({row.x_hash for row in replicate_rows}) == 1
+        assert len({row.training_y_hash for row in replicate_rows}) == 1
+        assert len({row.train_mask_hash for row in replicate_rows}) == 1
+        assert len({row.test_mask_hash for row in replicate_rows}) == 1
+        assert len({row.fit_provenance_hash for row in replicate_rows}) == 1
+        assert len({row.preprocessing_hash for row in replicate_rows}) == 1
+        assert len({row.target_topology_hash for row in replicate_rows}) == 1
+        assert len({row.score_target_hash for row in replicate_rows}) == 1
+        assert len({row.score_config_hash for row in replicate_rows}) == 1
+        assert len({row.fit_config_hash for row in replicate_rows}) == 14
+
+
+# --- 17-19: aggregation and selector ---------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("failure_call", "changes", "message"),
+    [
+        (1, {"internal_retry": 1}, "internal_retry"),
+        (14, {"warnings": ("warning",)}, "emitted warnings"),
+        (15, {"nan_occurred": True}, "NaN/nonfinite"),
+        (28, {"Q_strict": float("nan")}, "Q_strict is nonfinite"),
+        (29, {"w": float("nan")}, "nonfinite"),
+        (42, {"q_failure": True}, "Q failure"),
+    ],
+)
+def test_full_pilot_never_aggregates_only_successful_fits(
+    failure_call: int, changes: dict[str, object], message: str
+) -> None:
+    calls = 0
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        values: dict[str, object] = {"Z": np.zeros((6, int(kwargs["k"])))}
+        if calls == failure_call:
+            values.update(changes)
+        return fake_canary_result(**values)
+
+    with pytest.raises(harness.HarnessStop, match=message):
+        run_static_full_pilot(fake_fit)
+    assert calls == failure_call
+
+
+def test_full_pilot_selector_runs_independently_inside_every_replicate() -> None:
+    # score decreases with K inside replicate 1, peaks at K=4 in replicate 2,
+    # and peaks at K=7 in replicate 3.
+    peaks = {1: 1, 2: 4, 3: 7}
+    order = harness.build_full_manifest()
+    index = 0
+
+    # All held-out targets are 0, so the Bernoulli log score is strictly
+    # decreasing in eta; a larger penalty therefore yields a worse score.
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal index
+        row = order[index]
+        index += 1
+        assert int(kwargs["k"]) == row.k
+        assert int(kwargs["seed"]) == row.model_seed
+        penalty = abs(row.k - peaks[row.replicate])
+        return fake_canary_result(
+            w0=-5.0 + 0.1 * penalty, w=0.0, Z=np.zeros((6, row.k))
+        )
+
+    report = run_static_full_pilot(
+        fake_fit, full_replicate_inputs(zero_targets=True)
+    )
+    assert [item.selected_k for item in report.replicate_selections] == [1, 4, 7]
+    assert report.true_k == 3
+    assert report.true_k_selected_count == 0
+    assert report.descriptive_recovery_rate == 0.0
+    assert report.selected_k_counts == ((1, 1), (4, 1), (7, 1))
+    for selection in report.replicate_selections:
+        assert len(selection.summaries) == 7
+        for summary in selection.summaries:
+            assert summary.mean_score == pytest.approx(
+                (summary.start_1_score + summary.start_2_score) / 2, abs=0.0, rel=0.0
+            )
+        assert selection.best_mean_score >= selection.second_best_mean_score
+        assert selection.margin == pytest.approx(
+            selection.best_mean_score - selection.second_best_mean_score
+        )
+    assert len(report.k_aggregates) == 7
+    for aggregate in report.k_aggregates:
+        values = [
+            summary.mean_score
+            for selection in report.replicate_selections
+            for summary in selection.summaries
+            if summary.k == aggregate.k
+        ]
+        assert len(values) == 3
+        assert aggregate.mean_across_replicates == pytest.approx(float(np.mean(values)))
+        assert aggregate.std_across_replicates == pytest.approx(
+            float(np.std(values, ddof=1))
+        )
+        assert aggregate.min_across_replicates == pytest.approx(min(values))
+        assert aggregate.max_across_replicates == pytest.approx(max(values))
+
+
+def test_full_pilot_recovery_rate_is_descriptive_over_three_replicates() -> None:
+    order = harness.build_full_manifest()
+    index = 0
+    peaks = {1: 3, 2: 3, 3: 6}
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal index
+        row = order[index]
+        index += 1
+        penalty = abs(row.k - peaks[row.replicate])
+        return fake_canary_result(
+            w0=-5.0 + 0.1 * penalty, w=0.0, Z=np.zeros((6, row.k))
+        )
+
+    report = run_static_full_pilot(
+        fake_fit, full_replicate_inputs(zero_targets=True)
+    )
+    assert [item.selected_k for item in report.replicate_selections] == [3, 3, 6]
+    assert report.n_replicates == 3
+    assert report.true_k_selected_count == 2
+    assert report.descriptive_recovery_rate == pytest.approx(2 / 3)
+
+
+# --- 20: CLI surface --------------------------------------------------------
+
+
+def test_full_pilot_cli_exposes_no_k_start_seed_or_tolerance_option() -> None:
+    parser = harness._build_parser()
+    option_strings = {
+        option for action in parser._actions for option in action.option_strings
+    }
+    assert option_strings == {
+        "-h",
+        "--help",
+        "--validate-only",
+        "--canary",
+        "--smoke",
+        "--full",
+        "--allow-em",
+        "--confirm-full-pilot",
+    }
+    for bad in (
+        ["--full", "--allow-em", "--confirm-full-pilot", "--k", "5"],
+        ["--full", "--allow-em", "--confirm-full-pilot", "--seed", "1"],
+        ["--full", "--allow-em", "--confirm-full-pilot", "--replicates", "5"],
+        ["--full", "--allow-em", "--confirm-full-pilot", "--tie-tolerance", "1e-3"],
+    ):
+        with pytest.raises(SystemExit):
+            harness._build_parser().parse_args(bad)
+
+
+def test_full_pilot_cli_requires_three_gates_and_calls_runner_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+
+    def static_stub(command: str) -> dict[str, object]:
+        calls.append(command)
+        return {"mode": "full", "em_fits_executed": 42}
+
+    monkeypatch.setattr(harness, "run_full_pilot_cli", static_stub)
+    with pytest.raises(harness.HarnessStop, match="--allow-em"):
+        harness.main(["--full"])
+    with pytest.raises(harness.HarnessStop, match="--confirm-full-pilot"):
+        harness.main(["--full", "--allow-em"])
+    assert calls == []
+    assert harness.main(["--full", "--allow-em", "--confirm-full-pilot"]) == 0
+    assert len(calls) == 1
+    assert "--full --allow-em --confirm-full-pilot" in calls[0]
+
+
+def test_validate_only_covers_the_frozen_42_row_manifest_without_fitting(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def exploding(*args: object, **kwargs: object) -> None:
+        raise AssertionError("fit path must not run")
+
+    monkeypatch.setattr(harness.AuthorizedEMFitAdapter, "fit", exploding)
+    monkeypatch.setattr(harness, "run_full_pilot_cli", exploding)
+    result = harness.run_validate_only()
+    assert result["em_fits_executed"] == 0
+    assert result["full_pilot_manifest_keys"] == 42
+    assert result["full_pilot_expected_fits"] == 42
+    assert result["full_pilot_replicates"] == [1, 2, 3]
+    assert result["full_pilot_k_candidates"] == [1, 2, 3, 4, 5, 6, 7]
+    assert result["full_pilot_starts"] == [1, 2]
+    assert result["full_pilot_split_preflight_pass"] == 3
+
+
+def test_full_pilot_production_entry_rejects_the_test_adapter() -> None:
+    inputs = full_replicate_inputs()
+    adapter = harness._make_test_fit_adapter(
+        lambda **kwargs: fake_canary_result(), score_targets=()
+    )
+    with pytest.raises(harness.HarnessStop, match="production full pilot requires"):
+        harness.run_full_pilot(replicate_inputs=inputs, adapter=adapter)  # type: ignore[arg-type]
+
+
+def test_full_pilot_output_artifacts_are_frozen_and_never_overwritten(
+    tmp_path: Path,
+) -> None:
+    assert harness.FULL_PILOT_OUTPUT_DIR.name == "heldout_full_pilot_20260824"
+    assert set(harness.FULL_PILOT_ARTIFACT_NAMES) == {
+        "manifest.csv",
+        "fit_results.csv",
+        "replicate_selection.csv",
+        "aggregate_summary.csv",
+        "score_by_k.csv",
+        "runinfo.json",
+        "runinfo.md",
+    }
+    harness._require_no_existing_full_artifacts(tmp_path)
+    (tmp_path / "fit_results.csv").write_text("x", encoding="utf-8")
+    with pytest.raises(harness.HarnessStop, match="refusing to overwrite"):
+        harness._require_no_existing_full_artifacts(tmp_path)
+
+
+def test_full_pilot_rejects_unexpected_generated_artifact(tmp_path: Path) -> None:
+    (tmp_path / "runinfo.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "stdout.log").write_text("", encoding="utf-8")
+    assert harness._require_only_expected_artifacts(tmp_path) == [
+        "runinfo.json",
+        "stdout.log",
+    ]
+    (tmp_path / "sneaky.csv").write_text("", encoding="utf-8")
+    with pytest.raises(harness.HarnessStop, match="unexpected generated artifact"):
+        harness._require_only_expected_artifacts(tmp_path)
+
+
+def test_full_pilot_runinfo_contains_every_required_provenance_field() -> None:
+    calls: list[tuple[int, int]] = []
+    inputs = full_replicate_inputs()
+    report = run_static_full_pilot(full_fake_fit_factory(calls), inputs)
+    manifest = harness.build_full_manifest()
+    runinfo = harness.build_full_pilot_runinfo(
+        command="python tools/research_audit/run_heldout_k_selection_pilot.py --full",
+        branch="experiment/full-heldout-k-selection-pilot",
+        run_code_sha="0" * 40,
+        base_main_sha="1" * 40,
+        started_utc="2026-08-24T00:00:00+00:00",
+        started_local="2026-08-24T09:00:00+09:00",
+        finished_utc="2026-08-24T01:00:00+00:00",
+        manifest=manifest,
+        replicate_inputs=inputs,
+        report=report,
+        git_status_before="",
+        git_status_after="",
+        failure_state="none",
+        artifacts=["manifest.csv"],
+    )
+    required = {
+        "issue",
+        "branch",
+        "run_code_sha",
+        "base_main_sha",
+        "timestamp_utc_start",
+        "timestamp_local_start",
+        "command",
+        "python_version",
+        "numpy_version",
+        "platform",
+        "config",
+        "candidate_k",
+        "starts",
+        "replicates",
+        "manifest",
+        "data_seeds",
+        "split_seeds",
+        "model_seeds",
+        "per_replicate_provenance",
+        "git_status_before",
+        "git_status_after_scientific_execution",
+        "stdout_log",
+        "expected_fit_count",
+        "actual_fit_count",
+        "failure_state",
+        "generated_artifacts",
+    }
+    assert required <= set(runinfo)
+    assert runinfo["issue"] == 43
+    assert len(runinfo["manifest"]) == 42
+    assert len(runinfo["model_seeds"]) == 42
+    assert runinfo["data_seeds"] == [41001, 41002, 41003]
+    assert runinfo["split_seeds"] == [42001, 42002, 42003]
+    assert runinfo["expected_fit_count"] == 42
+    assert runinfo["actual_fit_count"] == 42
+    assert len(runinfo["per_replicate_provenance"]) == 3
+    for entry in runinfo["per_replicate_provenance"]:
+        for key in (
+            "x_hash",
+            "training_y_hash",
+            "train_mask_hash",
+            "test_mask_hash",
+            "fit_provenance_hash",
+            "target_topology_hash",
+            "preprocessing_hash",
+            "score_config_hash",
+            "score_target_hash",
+        ):
+            assert entry[key]
+    # JSON must be serialisable without NaN for the immutable record.
+    json.dumps(runinfo, allow_nan=False)
+    assert harness._render_runinfo_markdown(runinfo).startswith("# Phase 7e")
+
+
+def test_full_pilot_result_csvs_are_generated_from_machine_readable_results(
+    tmp_path: Path,
+) -> None:
+    calls: list[tuple[int, int]] = []
+    report = run_static_full_pilot(full_fake_fit_factory(calls))
+    harness.write_full_pilot_manifest_csv(tmp_path, harness.build_full_manifest())
+    harness.write_full_pilot_result_csvs(tmp_path, report)
+    manifest_rows = list(
+        csv.DictReader((tmp_path / "manifest.csv").read_text(encoding="utf-8").splitlines())
+    )
+    assert len(manifest_rows) == 42
+    fit_rows = list(
+        csv.DictReader((tmp_path / "fit_results.csv").read_text(encoding="utf-8").splitlines())
+    )
+    assert len(fit_rows) == 42
+    assert all(row["fit_status"] == "clean" for row in fit_rows)
+    assert all(row["retry"] == "0" for row in fit_rows)
+    selection_rows = list(
+        csv.DictReader(
+            (tmp_path / "replicate_selection.csv").read_text(encoding="utf-8").splitlines()
+        )
+    )
+    assert len(selection_rows) == 21
+    aggregate_rows = list(
+        csv.DictReader(
+            (tmp_path / "aggregate_summary.csv").read_text(encoding="utf-8").splitlines()
+        )
+    )
+    assert sum(1 for row in aggregate_rows if row["section"] == "k_wise") == 7
+    assert {
+        row["key"] for row in aggregate_rows if row["section"] == "pilot"
+    } == {
+        "n_replicates",
+        "true_k",
+        "selected_k_counts",
+        "true_k_selected_count",
+        "descriptive_recovery_rate",
+    }
+    score_rows = list(
+        csv.DictReader((tmp_path / "score_by_k.csv").read_text(encoding="utf-8").splitlines())
+    )
+    assert len(score_rows) == 7
+    # every stored float must round-trip exactly
+    for row, source in zip(fit_rows, report.rows, strict=True):
+        assert float(row["heldout_mean_log_score"]) == source.heldout_mean_log_score

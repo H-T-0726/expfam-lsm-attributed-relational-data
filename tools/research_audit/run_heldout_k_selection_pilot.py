@@ -8,12 +8,16 @@ from __future__ import annotations
 
 import argparse
 import copy
+import csv
 import functools
 import hashlib
 import json
+import platform
+import subprocess
 import sys
 import warnings
 from dataclasses import asdict, dataclass, field, fields, is_dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
@@ -49,6 +53,26 @@ CANARY_RTOL = np.float64(1e-10)
 DATA_SEED_BASE = 41000
 SPLIT_SEED_BASE = 42000
 MODEL_SEED_BASE = 43000
+
+# --- Phase 7e full pilot frozen constants (Issue #43) -----------------------
+FULL_PILOT_ISSUE = 43
+FULL_REPLICATES = (1, 2, 3)
+FULL_K_CANDIDATES = K_CANDIDATES
+EXPECTED_FULL_FITS = len(FULL_REPLICATES) * len(FULL_K_CANDIDATES) * len(START_LABELS)
+FITS_PER_REPLICATE = len(FULL_K_CANDIDATES) * len(START_LABELS)
+FULL_PILOT_OUTPUT_DIR = (
+    ROOT / "expfam" / "results" / "k_selection" / "heldout_full_pilot_20260824"
+)
+FULL_PILOT_STDOUT_NAME = "stdout.log"
+FULL_PILOT_ARTIFACT_NAMES = (
+    "manifest.csv",
+    "fit_results.csv",
+    "replicate_selection.csv",
+    "aggregate_summary.csv",
+    "score_by_k.csv",
+    "runinfo.json",
+    "runinfo.md",
+)
 
 
 class HarnessStop(RuntimeError):
@@ -1624,6 +1648,16 @@ def _store_smoke_fit(
     )
 
 
+def _identity_preprocessing_hash() -> str:
+    """Frozen provenance of the (identity) preprocessing stage.
+
+    The value is deliberately identical to the Phase 7d inline literal so that
+    smoke and full-pilot provenance remain comparable.
+    """
+
+    return stable_config_hash({"preprocessing": "identity", "uses_y_test": False})
+
+
 def _smoke_target_topology_hash(prepared: PreparedTrainingData) -> str:
     """Outcome-blind score-scope provenance; not a target outcome hash."""
 
@@ -1646,9 +1680,7 @@ def build_expected_smoke_comparability(
     common = {
         "x_hash": prepared.x_hash,
         "training_y_hash": prepared.training_y_hash,
-        "preprocessing_hash": stable_config_hash(
-            {"preprocessing": "identity", "uses_y_test": False}
-        ),
+        "preprocessing_hash": _identity_preprocessing_hash(),
         "train_mask_hash": prepared.train_mask_hash,
         "test_mask_hash": prepared.test_mask_hash,
         "fit_provenance_hash": prepared.fit_provenance_hash,
@@ -1969,6 +2001,17 @@ def run_validate_only() -> dict[str, Any]:
     validate_manifest(full_manifest, replicates, K_CANDIDATES)
     validate_manifest(smoke_manifest, replicates, SMOKE_K_CANDIDATES)
 
+    # Phase 7e: statically verify the frozen production 42-row manifest and
+    # every planned dataset-replicate split without performing any fit.
+    full_pilot_manifest = build_full_manifest()
+    validate_full_manifest(full_pilot_manifest)
+    _require(len(full_pilot_manifest) == 42, "full pilot manifest must have 42 rows")
+    full_split_plans = preflight_all_splits(FULL_REPLICATES)
+    _require(
+        len(full_split_plans) == len(FULL_REPLICATES),
+        "full pilot split preflight did not cover every replicate",
+    )
+
     split_plans = preflight_all_splits(replicates)
     split_plan = split_plans[0]
     expected_test_pairs = split_plan.expected_test_pairs
@@ -1993,7 +2036,7 @@ def run_validate_only() -> dict[str, Any]:
     _require(np.array_equal(canary_a.Y_fit[train_mask], canary_b.Y_fit[train_mask]), "canary train values differ")
     _require(np.any(canary_a.Y_fit[test_mask] != canary_b.Y_fit[test_mask]), "canary test payloads do not differ")
 
-    preprocessing_hash = stable_config_hash({"preprocessing": "identity", "uses_y_test": False})
+    preprocessing_hash = _identity_preprocessing_hash()
     frozen_score_hash = score_config_hash(frozen_score_config())
     common = {
         "x_hash": prepared.x_hash,
@@ -2015,6 +2058,12 @@ def run_validate_only() -> dict[str, Any]:
         "config_hash": stable_config_hash(config),
         "full_manifest_keys": len(full_manifest),
         "smoke_manifest_keys": len(smoke_manifest),
+        "full_pilot_manifest_keys": len(full_pilot_manifest),
+        "full_pilot_replicates": list(FULL_REPLICATES),
+        "full_pilot_k_candidates": list(FULL_K_CANDIDATES),
+        "full_pilot_starts": list(START_LABELS),
+        "full_pilot_split_preflight_pass": len(full_split_plans),
+        "full_pilot_expected_fits": EXPECTED_FULL_FITS,
         "expected_test_pairs": expected_test_pairs,
         "split": split,
         "fit_payload_a_hash": canary_a.payload_hash,
@@ -2122,17 +2171,1230 @@ def run_smoke_cli() -> SmokeSelectionReport:
     )
 
 
+# ---------------------------------------------------------------------------
+# Phase 7e full held-out K-selection pilot (Issue #43)
+#
+# The frozen production manifest is exactly
+#   replicate in {1,2,3} x K in {1,...,7} x start in {1,2} = 42 fits.
+# There is no CLI surface for K, replicate, start, seed, or tolerance.
+# ---------------------------------------------------------------------------
+
+
+def _full_target_topology_hash(prepared: PreparedTrainingData) -> str:
+    """Outcome-blind score-scope provenance for the full pilot."""
+
+    return stable_config_hash(
+        {
+            "test_mask_hash": prepared.test_mask_hash,
+            "pair_selection": "upper_test_pairs",
+            "target_materialization": "after_all_fourteen_fits_of_replicate",
+        }
+    )
+
+
+def build_full_manifest() -> list[ManifestRow]:
+    """Build the frozen 42-row manifest in replicate/K/start ascending order."""
+
+    return build_manifest(FULL_REPLICATES, FULL_K_CANDIDATES, START_LABELS)
+
+
+def validate_full_manifest(rows: Sequence[ManifestRow]) -> None:
+    """Require exact 42-row completeness, order, sets, and seed conventions."""
+
+    expected = build_manifest(FULL_REPLICATES, FULL_K_CANDIDATES, START_LABELS)
+    _require(
+        len(rows) == EXPECTED_FULL_FITS,
+        "full manifest must contain exactly 42 rows",
+    )
+    validate_manifest(rows, FULL_REPLICATES, FULL_K_CANDIDATES, START_LABELS)
+    _require(tuple(rows) == tuple(expected), "full manifest order/content changed")
+    _require(
+        {row.replicate for row in rows} == set(FULL_REPLICATES),
+        "full replicate set must be exactly {1,2,3}",
+    )
+    _require(
+        {row.k for row in rows} == set(FULL_K_CANDIDATES),
+        "full K candidate set must be exactly {1,...,7}",
+    )
+    _require(
+        {row.start for row in rows} == set(START_LABELS),
+        "full start set must be exactly {1,2}",
+    )
+
+
+def build_expected_full_comparability(
+    prepared: PreparedTrainingData,
+    manifest_subset: Sequence[ManifestRow],
+) -> list[ComparabilityRow]:
+    """Build exact expected fit/score-topology metadata for one replicate."""
+
+    _require(type(prepared) is PreparedTrainingData, "full pilot requires PreparedTrainingData")
+    common = {
+        "x_hash": prepared.x_hash,
+        "training_y_hash": prepared.training_y_hash,
+        "preprocessing_hash": _identity_preprocessing_hash(),
+        "train_mask_hash": prepared.train_mask_hash,
+        "test_mask_hash": prepared.test_mask_hash,
+        "fit_provenance_hash": prepared.fit_provenance_hash,
+        "target_topology_hash": _full_target_topology_hash(prepared),
+        "score_config_hash": score_config_hash(frozen_score_config()),
+    }
+    return [ComparabilityRow(manifest=row, **common) for row in manifest_subset]
+
+
+def build_full_comparability(
+    prepared: PreparedTrainingData,
+    manifest_subset: Sequence[ManifestRow],
+) -> list[ComparabilityRow]:
+    """Compatibility wrapper for the expected frozen full-pilot metadata."""
+
+    return build_expected_full_comparability(prepared, manifest_subset)
+
+
+def validate_full_comparability(
+    rows: Sequence[ComparabilityRow],
+    prepared: PreparedTrainingData,
+    expected_manifest_subset: Sequence[ManifestRow],
+) -> None:
+    """Bind every full-pilot row to actual prepared state and frozen config.
+
+    Because the expected rows are rebuilt from ``prepared``, both a single
+    corrupted hash and a uniformly corrupted hash are rejected.
+    """
+
+    expected_rows = build_expected_full_comparability(prepared, expected_manifest_subset)
+    validate_cross_k_comparability(rows, expected_rows)
+
+
+def _full_fit_config(row: ManifestRow) -> FrozenFitConfig:
+    _require(row.replicate in FULL_REPLICATES, "full replicate is unexpected")
+    _require(row.k in FULL_K_CANDIDATES, "full K is unexpected")
+    _require(row.start in START_LABELS, "full start is unexpected")
+    _require(row.data_seed == DATA_SEED_BASE + row.replicate, "full data seed changed")
+    _require(row.split_seed == SPLIT_SEED_BASE + row.replicate, "full split seed changed")
+    _require(
+        row.model_seed == expected_model_seed(row.replicate, row.k, row.start),
+        "full model seed changed",
+    )
+    return FrozenFitConfig(
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        k_est=row.k,
+        L=L_SAMPLES,
+        num_iter=NUM_ITER,
+        seed=row.model_seed,
+        numerics_mode=NUMERICS_MODE,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class StoredFullFit:
+    """Readonly fit-only snapshot retained until the deferred score phase."""
+
+    replicate: int
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    Z: np.ndarray
+    w0: float
+    w: float
+    Q_strict: float
+    train_objective_diagnostics: Any
+    internal_retry: int
+    warnings: tuple[str, ...]
+    q_failure: bool
+    nan_occurred: bool
+    x_hash: str
+    training_y_hash: str
+    train_mask_hash: str
+    test_mask_hash: str
+    fit_provenance_hash: str
+    target_topology_hash: str
+    preprocessing_hash: str
+    score_config_hash: str
+    fit_config_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class FullFitResult:
+    replicate: int
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    fit_status: str
+    heldout_mean_log_score: float
+    Q_strict: float
+    internal_retry: int
+    warnings: tuple[str, ...]
+    warning_count: int
+    q_failure: bool
+    nan_occurred: bool
+    finite_state: bool
+    x_hash: str
+    training_y_hash: str
+    train_mask_hash: str
+    test_mask_hash: str
+    fit_provenance_hash: str
+    target_topology_hash: str
+    score_target_hash: str
+    preprocessing_hash: str
+    score_config_hash: str
+    fit_config_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class ReplicateKSummary:
+    replicate: int
+    k: int
+    start_1_score: float
+    start_2_score: float
+    mean_score: float
+
+
+@dataclass(frozen=True, slots=True)
+class ReplicateSelection:
+    replicate: int
+    selected_k: int
+    best_mean_score: float
+    second_best_mean_score: float
+    margin: float
+    tie_candidates: tuple[int, ...]
+    summaries: tuple[ReplicateKSummary, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class KAggregate:
+    k: int
+    mean_across_replicates: float
+    std_across_replicates: float
+    min_across_replicates: float
+    max_across_replicates: float
+
+
+@dataclass(frozen=True, slots=True)
+class FullPilotReport:
+    rows: tuple[FullFitResult, ...]
+    replicate_selections: tuple[ReplicateSelection, ...]
+    k_aggregates: tuple[KAggregate, ...]
+    selected_k_counts: tuple[tuple[int, int], ...]
+    n_replicates: int
+    true_k: int
+    true_k_selected_count: int
+    descriptive_recovery_rate: float
+    em_fits_executed: int
+    targets_created: int
+    score_rows: int
+    events: tuple[tuple[Any, ...], ...]
+    score_config_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class FullReplicateInputs:
+    """Everything one dataset replicate contributes to the frozen pilot."""
+
+    replicate: int
+    preflight: CanaryPreflight
+    prepared: PreparedTrainingData
+    score_Y: np.ndarray
+    manifest: tuple[ManifestRow, ...]
+    comparability: tuple[ComparabilityRow, ...]
+
+
+def _store_full_fit(
+    manifest_row: ManifestRow,
+    result: CanaryFitResult,
+    config: FrozenFitConfig,
+    prepared: PreparedTrainingData,
+    frozen_score_hash: str,
+) -> StoredFullFit:
+    """Detach the exact relation-side scoring state from a completed fit."""
+
+    return StoredFullFit(
+        replicate=manifest_row.replicate,
+        k=manifest_row.k,
+        start=manifest_row.start,
+        data_seed=manifest_row.data_seed,
+        split_seed=manifest_row.split_seed,
+        model_seed=manifest_row.model_seed,
+        Z=_readonly_copy(result.Z, np.float64),
+        w0=float(result.w0),
+        w=float(result.w),
+        Q_strict=float(result.Q_strict),
+        train_objective_diagnostics=_freeze_smoke_audit_value(
+            result.train_objective_diagnostics
+        ),
+        internal_retry=result.internal_retry,
+        warnings=tuple(result.warnings),
+        q_failure=result.q_failure,
+        nan_occurred=result.nan_occurred,
+        x_hash=prepared.x_hash,
+        training_y_hash=prepared.training_y_hash,
+        train_mask_hash=prepared.train_mask_hash,
+        test_mask_hash=prepared.test_mask_hash,
+        fit_provenance_hash=prepared.fit_provenance_hash,
+        target_topology_hash=_full_target_topology_hash(prepared),
+        preprocessing_hash=_identity_preprocessing_hash(),
+        score_config_hash=frozen_score_hash,
+        fit_config_hash=stable_config_hash(asdict(config)),
+    )
+
+
+def _validate_full_replicate_inputs(
+    replicate_inputs: Sequence[FullReplicateInputs],
+    expected_manifest: Sequence[ManifestRow],
+) -> list[tuple[Any, ...]]:
+    """Validate EVERY replicate before the first fit is allowed to start.
+
+    Structural guarantee for the all-split preflight rule: this function is
+    called once, over all three replicates, before the fit loop is entered.
+    """
+
+    events: list[tuple[Any, ...]] = []
+    _require(
+        len(replicate_inputs) == len(FULL_REPLICATES),
+        "full pilot requires exactly three dataset replicates",
+    )
+    _require(
+        tuple(item.replicate for item in replicate_inputs) == FULL_REPLICATES,
+        "full pilot replicate order/set changed",
+    )
+    for item in replicate_inputs:
+        _require(type(item) is FullReplicateInputs, "full replicate input type is invalid")
+        prepared = item.prepared
+        _require(type(prepared) is PreparedTrainingData, "full replicate prepared type is invalid")
+        _require(type(item.preflight) is CanaryPreflight, "full replicate preflight type is invalid")
+        _require(
+            item.preflight.replicate == item.replicate,
+            "full replicate preflight binding mismatch",
+        )
+        _validate_canary_preflight(item.preflight, prepared.train_mask, prepared.test_mask)
+        subset = [row for row in expected_manifest if row.replicate == item.replicate]
+        _require(
+            len(subset) == FITS_PER_REPLICATE,
+            "frozen manifest does not contain fourteen rows for this replicate",
+        )
+        _require(
+            tuple(item.manifest) == tuple(subset),
+            "replicate manifest subset order/content changed",
+        )
+        validate_full_comparability(item.comparability, prepared, subset)
+        _require(
+            tuple(row.manifest for row in item.comparability) == tuple(subset),
+            "replicate comparability manifest order changed",
+        )
+        events.append(("preflight_validated", item.replicate))
+    return events
+
+
+def _run_full_pilot(
+    *,
+    replicate_inputs: Sequence[FullReplicateInputs],
+    adapter: AuthorizedEMFitAdapter | _TestAuthorizedFitAdapter,
+    test_only: bool,
+) -> FullPilotReport:
+    """Execute exactly the frozen 42-row pilot or stop on the first failure."""
+
+    expected_manifest = build_full_manifest()
+    validate_full_manifest(expected_manifest)
+    _require(
+        len(replicate_inputs) == len(FULL_REPLICATES),
+        "full pilot requires exactly three dataset replicates",
+    )
+    _require(
+        tuple(item.replicate for item in replicate_inputs) == FULL_REPLICATES,
+        "full pilot replicate order/set changed",
+    )
+    actual_manifest = [row for item in replicate_inputs for row in item.manifest]
+    _require(
+        len(actual_manifest) == EXPECTED_FULL_FITS,
+        "full pilot manifest must contain exactly 42 rows",
+    )
+    validate_full_manifest(actual_manifest)
+
+    events = _validate_full_replicate_inputs(replicate_inputs, expected_manifest)
+
+    frozen_score_hash = score_config_hash(frozen_score_config())
+    rows: list[FullFitResult] = []
+    fit_count = 0
+    targets_created = 0
+    score_count = 0
+
+    for item in replicate_inputs:
+        prepared = item.prepared
+        stored: list[StoredFullFit] = []
+        for manifest_row in item.manifest:
+            config = _full_fit_config(manifest_row)
+            if test_only:
+                _require(
+                    type(adapter) is _TestAuthorizedFitAdapter,
+                    "test full pilot requires test adapter",
+                )
+                boundary = FitCallBoundary._from_preflight_test_only(
+                    prepared, item.preflight, config, adapter
+                )
+            else:
+                _require(
+                    type(adapter) is AuthorizedEMFitAdapter,
+                    "production full pilot requires production adapter",
+                )
+                boundary = FitCallBoundary.from_preflight(
+                    prepared, item.preflight, config, adapter
+                )
+            fit_count += 1
+            events.append(
+                ("fit", manifest_row.replicate, manifest_row.k, manifest_row.start)
+            )
+            result = boundary.call(0)
+            label = (
+                f"full r={manifest_row.replicate} K={manifest_row.k} "
+                f"start={manifest_row.start}"
+            )
+            _require_clean_smoke_fit(result, label)
+            stored.append(
+                _store_full_fit(manifest_row, result, config, prepared, frozen_score_hash)
+            )
+
+        expected_order = tuple(
+            (row.k, row.start, row.model_seed) for row in item.manifest
+        )
+        stored_order = tuple((row.k, row.start, row.model_seed) for row in stored)
+        _require(
+            len(stored) == FITS_PER_REPLICATE,
+            "replicate did not store exactly fourteen clean fits",
+        )
+        _require(stored_order == expected_order, "stored full fit order changed")
+
+        # Score phase: the outcome-bearing target is created exactly once,
+        # after all fourteen clean fits of THIS replicate have passed the hard
+        # count/order gates.  An incomplete replicate never reaches this line.
+        target = make_score_only_target(item.score_Y, prepared.test_mask)
+        targets_created += 1
+        events.append(("target_create", item.replicate))
+        _require(
+            target.test_mask_hash == prepared.test_mask_hash,
+            "score target mask hash mismatch",
+        )
+        score_target_hash = stable_array_hash(target.rows, target.cols, target.values)
+
+        for entry in stored:
+            eta_pairs = heldout_raw_eta_pairs(
+                entry.Z, entry.w0, entry.w, prepared.test_mask
+            )
+            score = score_heldout_bernoulli(target, eta_pairs)
+            _require(np.isfinite(score), "full held-out score is nonfinite")
+            score_count += 1
+            events.append(("score", entry.replicate, entry.k, entry.start))
+            rows.append(
+                FullFitResult(
+                    replicate=entry.replicate,
+                    k=entry.k,
+                    start=entry.start,
+                    data_seed=entry.data_seed,
+                    split_seed=entry.split_seed,
+                    model_seed=entry.model_seed,
+                    fit_status="clean",
+                    heldout_mean_log_score=float(score),
+                    Q_strict=entry.Q_strict,
+                    internal_retry=entry.internal_retry,
+                    warnings=entry.warnings,
+                    warning_count=len(entry.warnings),
+                    q_failure=entry.q_failure,
+                    nan_occurred=entry.nan_occurred,
+                    finite_state=True,
+                    x_hash=entry.x_hash,
+                    training_y_hash=entry.training_y_hash,
+                    train_mask_hash=entry.train_mask_hash,
+                    test_mask_hash=entry.test_mask_hash,
+                    fit_provenance_hash=entry.fit_provenance_hash,
+                    target_topology_hash=entry.target_topology_hash,
+                    score_target_hash=score_target_hash,
+                    preprocessing_hash=entry.preprocessing_hash,
+                    score_config_hash=entry.score_config_hash,
+                    fit_config_hash=entry.fit_config_hash,
+                )
+            )
+
+    _require(fit_count == EXPECTED_FULL_FITS, "full pilot did not execute exactly 42 fits")
+    _require(
+        targets_created == len(FULL_REPLICATES),
+        "full pilot did not create exactly three score targets",
+    )
+    _require(score_count == EXPECTED_FULL_FITS, "full pilot did not score exactly 42 fits")
+    _require(len(rows) == EXPECTED_FULL_FITS, "full pilot did not record exactly 42 rows")
+
+    replicate_selections = _select_per_replicate(rows)
+    k_aggregates = _aggregate_across_replicates(replicate_selections)
+
+    counts: dict[int, int] = {}
+    for selection in replicate_selections:
+        counts[selection.selected_k] = counts.get(selection.selected_k, 0) + 1
+    _require(
+        sum(counts.values()) == len(FULL_REPLICATES),
+        "selected-K counts do not cover every replicate",
+    )
+    true_k_selected = counts.get(K_TRUE, 0)
+
+    return FullPilotReport(
+        rows=tuple(rows),
+        replicate_selections=tuple(replicate_selections),
+        k_aggregates=tuple(k_aggregates),
+        selected_k_counts=tuple(sorted(counts.items())),
+        n_replicates=len(FULL_REPLICATES),
+        true_k=K_TRUE,
+        true_k_selected_count=true_k_selected,
+        descriptive_recovery_rate=true_k_selected / len(FULL_REPLICATES),
+        em_fits_executed=fit_count,
+        targets_created=targets_created,
+        score_rows=score_count,
+        events=tuple(events),
+        score_config_hash=frozen_score_hash,
+    )
+
+
+def _select_per_replicate(
+    rows: Sequence[FullFitResult],
+) -> list[ReplicateSelection]:
+    """Apply the frozen two-start-mean selector inside every replicate."""
+
+    selections: list[ReplicateSelection] = []
+    for replicate in FULL_REPLICATES:
+        replicate_rows = [row for row in rows if row.replicate == replicate]
+        _require(
+            len(replicate_rows) == FITS_PER_REPLICATE,
+            "replicate selection requires exactly fourteen scored fits",
+        )
+        start_scores = [
+            StartScore(row.k, row.start, np.float64(row.heldout_mean_log_score))
+            for row in replicate_rows
+        ]
+        selection = select_k_from_two_starts(
+            start_scores, FULL_K_CANDIDATES, START_LABELS
+        )
+        summaries: list[ReplicateKSummary] = []
+        for k in FULL_K_CANDIDATES:
+            by_start = {
+                row.start: row.heldout_mean_log_score
+                for row in replicate_rows
+                if row.k == k
+            }
+            _require(
+                set(by_start) == set(START_LABELS),
+                "replicate aggregation start set changed",
+            )
+            expected_mean = np.mean(
+                np.asarray([by_start[1], by_start[2]], dtype=np.float64),
+                dtype=np.float64,
+            )
+            _require(
+                np.float64(selection.mean_scores[k]) == expected_mean,
+                "full aggregation is not the unweighted two-start mean",
+            )
+            summaries.append(
+                ReplicateKSummary(
+                    replicate, k, by_start[1], by_start[2], float(expected_mean)
+                )
+            )
+        ordered = sorted(
+            (float(selection.mean_scores[k]) for k in FULL_K_CANDIDATES), reverse=True
+        )
+        _require(len(ordered) == len(FULL_K_CANDIDATES), "replicate K coverage changed")
+        best = ordered[0]
+        second_best = ordered[1]
+        selections.append(
+            ReplicateSelection(
+                replicate=replicate,
+                selected_k=selection.selected_k,
+                best_mean_score=best,
+                second_best_mean_score=second_best,
+                margin=best - second_best,
+                tie_candidates=selection.tie_candidates,
+                summaries=tuple(summaries),
+            )
+        )
+    _require(
+        len(selections) == len(FULL_REPLICATES),
+        "per-replicate selection is incomplete",
+    )
+    return selections
+
+
+def _aggregate_across_replicates(
+    selections: Sequence[ReplicateSelection],
+) -> list[KAggregate]:
+    """Descriptive per-K summary over all replicates; never successful-only."""
+
+    aggregates: list[KAggregate] = []
+    for k in FULL_K_CANDIDATES:
+        values = np.asarray(
+            [
+                summary.mean_score
+                for selection in selections
+                for summary in selection.summaries
+                if summary.k == k
+            ],
+            dtype=np.float64,
+        )
+        _require(
+            values.size == len(FULL_REPLICATES),
+            "K aggregate must use every dataset replicate",
+        )
+        _require(bool(np.all(np.isfinite(values))), "K aggregate input is nonfinite")
+        aggregates.append(
+            KAggregate(
+                k=k,
+                mean_across_replicates=float(np.mean(values, dtype=np.float64)),
+                std_across_replicates=float(np.std(values, ddof=1, dtype=np.float64)),
+                min_across_replicates=float(values.min()),
+                max_across_replicates=float(values.max()),
+            )
+        )
+    return aggregates
+
+
+def run_full_pilot(
+    *,
+    replicate_inputs: Sequence[FullReplicateInputs],
+    adapter: AuthorizedEMFitAdapter,
+) -> FullPilotReport:
+    """Production full-pilot entry point; only the sealed EM adapter passes."""
+
+    _require(
+        type(adapter) is AuthorizedEMFitAdapter,
+        "production full pilot requires production adapter",
+    )
+    return _run_full_pilot(
+        replicate_inputs=replicate_inputs, adapter=adapter, test_only=False
+    )
+
+
+def _run_full_pilot_test_only(
+    *,
+    replicate_inputs: Sequence[FullReplicateInputs],
+    adapter: _TestAuthorizedFitAdapter,
+) -> FullPilotReport:
+    """Pure fake-fit entry point; the production CLI cannot select it."""
+
+    return _run_full_pilot(
+        replicate_inputs=replicate_inputs, adapter=adapter, test_only=True
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 7e immutable run artifacts
+# ---------------------------------------------------------------------------
+
+
+def _git_output(arguments: Sequence[str]) -> str:
+    """Read-only git query used for provenance recording."""
+
+    try:
+        completed = subprocess.run(
+            ["git", *arguments],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:  # pragma: no cover - environment dependent
+        return f"<git unavailable: {error}>"
+    if completed.returncode != 0:
+        return f"<git error {completed.returncode}: {completed.stderr.strip()}>"
+    return completed.stdout.rstrip("\n")
+
+
+def _git_status_porcelain() -> str:
+    return _git_output(["status", "--porcelain"])
+
+
+def _require_no_existing_full_artifacts(out_dir: Path) -> None:
+    """Never overwrite an existing result artifact."""
+
+    for name in FULL_PILOT_ARTIFACT_NAMES:
+        _require(
+            not (out_dir / name).exists(),
+            f"refusing to overwrite existing artifact: {name}",
+        )
+
+
+def _write_csv(path: Path, header: Sequence[str], rows: Iterable[Sequence[Any]]) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(list(header))
+        for row in rows:
+            writer.writerow(list(row))
+
+
+def write_full_pilot_manifest_csv(out_dir: Path, manifest: Sequence[ManifestRow]) -> Path:
+    path = out_dir / "manifest.csv"
+    _write_csv(
+        path,
+        ("fit_index", "replicate", "K", "start", "data_seed", "split_seed", "model_seed"),
+        (
+            (index, row.replicate, row.k, row.start, row.data_seed, row.split_seed, row.model_seed)
+            for index, row in enumerate(manifest, start=1)
+        ),
+    )
+    return path
+
+
+def write_full_pilot_result_csvs(out_dir: Path, report: FullPilotReport) -> list[Path]:
+    written: list[Path] = []
+
+    fit_path = out_dir / "fit_results.csv"
+    _write_csv(
+        fit_path,
+        (
+            "replicate",
+            "K",
+            "start",
+            "data_seed",
+            "split_seed",
+            "model_seed",
+            "heldout_mean_log_score",
+            "Q_strict",
+            "retry",
+            "warnings",
+            "warning_count",
+            "q_failure",
+            "nan_occurred",
+            "finite_state",
+            "fit_status",
+            "x_hash",
+            "training_y_hash",
+            "train_mask_hash",
+            "test_mask_hash",
+            "fit_provenance_hash",
+            "target_topology_hash",
+            "score_target_hash",
+            "preprocessing_hash",
+            "score_config_hash",
+            "fit_config_hash",
+        ),
+        (
+            (
+                row.replicate,
+                row.k,
+                row.start,
+                row.data_seed,
+                row.split_seed,
+                row.model_seed,
+                repr(row.heldout_mean_log_score),
+                repr(row.Q_strict),
+                row.internal_retry,
+                "|".join(row.warnings),
+                row.warning_count,
+                row.q_failure,
+                row.nan_occurred,
+                row.finite_state,
+                row.fit_status,
+                row.x_hash,
+                row.training_y_hash,
+                row.train_mask_hash,
+                row.test_mask_hash,
+                row.fit_provenance_hash,
+                row.target_topology_hash,
+                row.score_target_hash,
+                row.preprocessing_hash,
+                row.score_config_hash,
+                row.fit_config_hash,
+            )
+            for row in report.rows
+        ),
+    )
+    written.append(fit_path)
+
+    selection_path = out_dir / "replicate_selection.csv"
+    _write_csv(
+        selection_path,
+        (
+            "replicate",
+            "K",
+            "start1_score",
+            "start2_score",
+            "mean_score",
+            "selected_k",
+            "best_mean_score",
+            "second_best_mean_score",
+            "margin",
+            "tie_candidates",
+        ),
+        (
+            (
+                summary.replicate,
+                summary.k,
+                repr(summary.start_1_score),
+                repr(summary.start_2_score),
+                repr(summary.mean_score),
+                selection.selected_k,
+                repr(selection.best_mean_score),
+                repr(selection.second_best_mean_score),
+                repr(selection.margin),
+                "|".join(str(k) for k in selection.tie_candidates),
+            )
+            for selection in report.replicate_selections
+            for summary in selection.summaries
+        ),
+    )
+    written.append(selection_path)
+
+    aggregate_path = out_dir / "aggregate_summary.csv"
+    aggregate_rows: list[Sequence[Any]] = [
+        (
+            "k_wise",
+            "",
+            aggregate.k,
+            repr(aggregate.mean_across_replicates),
+            repr(aggregate.std_across_replicates),
+            repr(aggregate.min_across_replicates),
+            repr(aggregate.max_across_replicates),
+            "",
+        )
+        for aggregate in report.k_aggregates
+    ]
+    aggregate_rows.extend(
+        [
+            ("pilot", "n_replicates", "", "", "", "", "", report.n_replicates),
+            ("pilot", "true_k", "", "", "", "", "", report.true_k),
+            (
+                "pilot",
+                "selected_k_counts",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "|".join(f"{k}:{count}" for k, count in report.selected_k_counts),
+            ),
+            (
+                "pilot",
+                "true_k_selected_count",
+                "",
+                "",
+                "",
+                "",
+                "",
+                report.true_k_selected_count,
+            ),
+            (
+                "pilot",
+                "descriptive_recovery_rate",
+                "",
+                "",
+                "",
+                "",
+                "",
+                repr(report.descriptive_recovery_rate),
+            ),
+        ]
+    )
+    _write_csv(
+        aggregate_path,
+        (
+            "section",
+            "key",
+            "K",
+            "mean_across_replicates",
+            "std_across_replicates",
+            "min_across_replicates",
+            "max_across_replicates",
+            "value",
+        ),
+        aggregate_rows,
+    )
+    written.append(aggregate_path)
+
+    score_by_k_path = out_dir / "score_by_k.csv"
+    mean_lookup = {
+        (summary.replicate, summary.k): summary.mean_score
+        for selection in report.replicate_selections
+        for summary in selection.summaries
+    }
+    aggregate_lookup = {aggregate.k: aggregate for aggregate in report.k_aggregates}
+    _write_csv(
+        score_by_k_path,
+        (
+            "K",
+            *(f"replicate_{replicate}_mean" for replicate in FULL_REPLICATES),
+            "mean_across_replicates",
+            "std_across_replicates",
+            "min_across_replicates",
+            "max_across_replicates",
+        ),
+        (
+            (
+                k,
+                *(repr(mean_lookup[(replicate, k)]) for replicate in FULL_REPLICATES),
+                repr(aggregate_lookup[k].mean_across_replicates),
+                repr(aggregate_lookup[k].std_across_replicates),
+                repr(aggregate_lookup[k].min_across_replicates),
+                repr(aggregate_lookup[k].max_across_replicates),
+            )
+            for k in FULL_K_CANDIDATES
+        ),
+    )
+    written.append(score_by_k_path)
+    return written
+
+
+def build_full_pilot_runinfo(
+    *,
+    command: str,
+    branch: str,
+    run_code_sha: str,
+    base_main_sha: str,
+    started_utc: str,
+    started_local: str,
+    finished_utc: str,
+    manifest: Sequence[ManifestRow],
+    replicate_inputs: Sequence[FullReplicateInputs],
+    report: FullPilotReport | None,
+    git_status_before: str,
+    git_status_after: str,
+    failure_state: str,
+    artifacts: Sequence[str],
+) -> dict[str, Any]:
+    """Assemble the complete immutable run record."""
+
+    per_replicate = []
+    for item in replicate_inputs:
+        prepared = item.prepared
+        score_target_hashes = sorted(
+            {
+                row.score_target_hash
+                for row in (report.rows if report is not None else ())
+                if row.replicate == item.replicate
+            }
+        )
+        per_replicate.append(
+            {
+                "replicate": item.replicate,
+                "data_seed": DATA_SEED_BASE + item.replicate,
+                "split_seed": SPLIT_SEED_BASE + item.replicate,
+                "x_hash": prepared.x_hash,
+                "training_y_hash": prepared.training_y_hash,
+                "train_mask_hash": prepared.train_mask_hash,
+                "test_mask_hash": prepared.test_mask_hash,
+                "fit_provenance_hash": prepared.fit_provenance_hash,
+                "target_topology_hash": _full_target_topology_hash(prepared),
+                "preprocessing_hash": _identity_preprocessing_hash(),
+                "score_config_hash": score_config_hash(frozen_score_config()),
+                "score_target_hash": score_target_hashes,
+            }
+        )
+
+    return {
+        "issue": FULL_PILOT_ISSUE,
+        "phase": "7e",
+        "branch": branch,
+        "run_code_sha": run_code_sha,
+        "base_main_sha": base_main_sha,
+        "timestamp_utc_start": started_utc,
+        "timestamp_local_start": started_local,
+        "timestamp_utc_finish": finished_utc,
+        "command": command,
+        "python_version": sys.version,
+        "numpy_version": np.__version__,
+        "platform": platform.platform(),
+        "config": frozen_config(),
+        "candidate_k": list(FULL_K_CANDIDATES),
+        "starts": list(START_LABELS),
+        "replicates": list(FULL_REPLICATES),
+        "seed_convention": {
+            "data_seed": "DATA_SEED_BASE + replicate",
+            "split_seed": "SPLIT_SEED_BASE + replicate",
+            "model_seed": "MODEL_SEED_BASE + replicate*1000 + K*10 + start",
+            "DATA_SEED_BASE": DATA_SEED_BASE,
+            "SPLIT_SEED_BASE": SPLIT_SEED_BASE,
+            "MODEL_SEED_BASE": MODEL_SEED_BASE,
+        },
+        "manifest": [
+            {
+                "fit_index": index,
+                "replicate": row.replicate,
+                "K": row.k,
+                "start": row.start,
+                "data_seed": row.data_seed,
+                "split_seed": row.split_seed,
+                "model_seed": row.model_seed,
+            }
+            for index, row in enumerate(manifest, start=1)
+        ],
+        "data_seeds": sorted({row.data_seed for row in manifest}),
+        "split_seeds": sorted({row.split_seed for row in manifest}),
+        "model_seeds": [row.model_seed for row in manifest],
+        "per_replicate_provenance": per_replicate,
+        "git_status_before": git_status_before,
+        "git_status_after_scientific_execution": git_status_after,
+        "stdout_log": str(
+            (FULL_PILOT_OUTPUT_DIR / FULL_PILOT_STDOUT_NAME).relative_to(ROOT)
+        ).replace("\\", "/"),
+        "expected_fit_count": EXPECTED_FULL_FITS,
+        "actual_fit_count": 0 if report is None else report.em_fits_executed,
+        "targets_created": 0 if report is None else report.targets_created,
+        "score_rows": 0 if report is None else report.score_rows,
+        "failure_state": failure_state,
+        "generated_artifacts": list(artifacts),
+        "tie_tolerance": float(TIE_TOLERANCE),
+        "tie_rule": "smallest K among candidates within 1e-12 of the best mean score",
+        "interpretation_boundary": (
+            "Descriptive pilot over three dataset replicates. Not a consistency "
+            "result, not a general true-K recovery claim, and not a comparison "
+            "verdict against BIC or C1/C2/C3."
+        ),
+    }
+
+
+def _render_runinfo_markdown(runinfo: Mapping[str, Any]) -> str:
+    lines = [
+        "# Phase 7e full held-out K-selection pilot — runinfo",
+        "",
+        f"- issue: #{runinfo['issue']}",
+        f"- branch: `{runinfo['branch']}`",
+        f"- RUN_CODE_SHA: `{runinfo['run_code_sha']}`",
+        f"- base main SHA: `{runinfo['base_main_sha']}`",
+        f"- start (UTC): {runinfo['timestamp_utc_start']}",
+        f"- start (local): {runinfo['timestamp_local_start']}",
+        f"- finish (UTC): {runinfo['timestamp_utc_finish']}",
+        f"- command: `{runinfo['command']}`",
+        f"- Python: {runinfo['python_version'].splitlines()[0]}",
+        f"- NumPy: {runinfo['numpy_version']}",
+        f"- platform: {runinfo['platform']}",
+        f"- candidate K: {runinfo['candidate_k']}",
+        f"- starts: {runinfo['starts']}",
+        f"- replicates: {runinfo['replicates']}",
+        f"- expected fit count: {runinfo['expected_fit_count']}",
+        f"- actual fit count: {runinfo['actual_fit_count']}",
+        f"- targets created: {runinfo['targets_created']}",
+        f"- score rows: {runinfo['score_rows']}",
+        f"- failure state: {runinfo['failure_state']}",
+        f"- stdout log: `{runinfo['stdout_log']}`",
+        "",
+        "## git status before",
+        "",
+        "```",
+        runinfo["git_status_before"] or "(clean)",
+        "```",
+        "",
+        "## git status after scientific execution",
+        "",
+        "```",
+        runinfo["git_status_after_scientific_execution"] or "(clean)",
+        "```",
+        "",
+        "## generated artifacts",
+        "",
+    ]
+    lines.extend(f"- `{name}`" for name in runinfo["generated_artifacts"])
+    lines.extend(["", "## per-replicate provenance", ""])
+    for entry in runinfo["per_replicate_provenance"]:
+        lines.append(f"### replicate {entry['replicate']}")
+        lines.append("")
+        for key, value in entry.items():
+            if key == "replicate":
+                continue
+            lines.append(f"- {key}: `{value}`")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def _write_full_pilot_runinfo(out_dir: Path, runinfo: Mapping[str, Any]) -> list[Path]:
+    json_path = out_dir / "runinfo.json"
+    json_path.write_text(
+        json.dumps(runinfo, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False)
+        + "\n",
+        encoding="utf-8",
+    )
+    md_path = out_dir / "runinfo.md"
+    md_path.write_text(_render_runinfo_markdown(runinfo), encoding="utf-8")
+    return [json_path, md_path]
+
+
+def _require_only_expected_artifacts(out_dir: Path) -> list[str]:
+    allowed = set(FULL_PILOT_ARTIFACT_NAMES) | {FULL_PILOT_STDOUT_NAME}
+    present = sorted(path.name for path in out_dir.iterdir() if path.is_file())
+    unexpected = sorted(set(present) - allowed)
+    _require(not unexpected, f"unexpected generated artifact: {unexpected}")
+    return present
+
+
+def run_full_pilot_cli(command: str) -> dict[str, Any]:
+    """Execute the frozen 42-fit pilot exactly once and record everything."""
+
+    out_dir = FULL_PILOT_OUTPUT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    _require_no_existing_full_artifacts(out_dir)
+
+    git_status_before = _git_status_porcelain()
+    started_utc = datetime.now(timezone.utc).isoformat()
+    started_local = datetime.now().astimezone().isoformat()
+    branch = _git_output(["rev-parse", "--abbrev-ref", "HEAD"])
+    run_code_sha = _git_output(["rev-parse", "HEAD"])
+    base_main_sha = _git_output(["merge-base", "HEAD", "origin/main"])
+
+    manifest = build_full_manifest()
+    validate_full_manifest(manifest)
+    write_full_pilot_manifest_csv(out_dir, manifest)
+
+    # Every planned split is generated and topology-guarded here, before any
+    # EM-capable module is imported.  One failure stops the pilot globally.
+    split_plans = preflight_all_splits(FULL_REPLICATES)
+    _require(
+        len(split_plans) == len(FULL_REPLICATES),
+        "split preflight did not cover every replicate",
+    )
+    _require(
+        tuple(plan.replicate for plan in split_plans) == FULL_REPLICATES,
+        "split preflight replicate order changed",
+    )
+    preflights = [authorize_canary_preflight(plan) for plan in split_plans]
+    print(
+        json.dumps(
+            {
+                "stage": "split_preflight",
+                "replicates": list(FULL_REPLICATES),
+                "expected_test_pairs": [plan.expected_test_pairs for plan in split_plans],
+                "diagnostics": [asdict(plan.diagnostics) for plan in split_plans],
+                "em_fits_executed": 0,
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+    if str(EXPFAM_SRC) not in sys.path:
+        sys.path.insert(0, str(EXPFAM_SRC))
+    from data_generator_expfam import generate_dual_data  # noqa: PLC0415
+
+    replicate_inputs: list[FullReplicateInputs] = []
+    for plan, preflight in zip(split_plans, preflights, strict=True):
+        replicate = plan.replicate
+        data = generate_dual_data(
+            n=N_NODES,
+            d=N_FEATURES,
+            k=K_TRUE,
+            seed=DATA_SEED_BASE + replicate,
+            family_x=FAMILY_X,
+            family_y=FAMILY_Y,
+        )
+        X = _readonly_copy(data["X"], np.float64)
+        score_Y = _readonly_copy(data["Y"], np.float64)
+        prepared = prepare_training_data(
+            X,
+            score_Y,
+            preflight=preflight,
+            train_mask=plan.train_mask,
+            test_mask=plan.test_mask,
+        )
+        subset = tuple(row for row in manifest if row.replicate == replicate)
+        comparability = tuple(build_full_comparability(prepared, subset))
+        validate_full_comparability(comparability, prepared, subset)
+        replicate_inputs.append(
+            FullReplicateInputs(
+                replicate=replicate,
+                preflight=preflight,
+                prepared=prepared,
+                score_Y=score_Y,
+                manifest=subset,
+                comparability=comparability,
+            )
+        )
+
+    report: FullPilotReport | None = None
+    failure_state = "none"
+    try:
+        report = run_full_pilot(
+            replicate_inputs=replicate_inputs, adapter=AuthorizedEMFitAdapter()
+        )
+    except HarnessStop as error:
+        failure_state = f"PILOT GLOBAL STOP: {error}"
+    except Exception as error:  # noqa: BLE001 - record then re-raise
+        failure_state = f"UNEXPECTED FAILURE: {type(error).__name__}: {error}"
+
+    written: list[Path] = [out_dir / "manifest.csv"]
+    if report is not None:
+        written.extend(write_full_pilot_result_csvs(out_dir, report))
+
+    git_status_after = _git_status_porcelain()
+    finished_utc = datetime.now(timezone.utc).isoformat()
+    artifact_names = sorted(path.name for path in written)
+    runinfo = build_full_pilot_runinfo(
+        command=command,
+        branch=branch,
+        run_code_sha=run_code_sha,
+        base_main_sha=base_main_sha,
+        started_utc=started_utc,
+        started_local=started_local,
+        finished_utc=finished_utc,
+        manifest=manifest,
+        replicate_inputs=replicate_inputs,
+        report=report,
+        git_status_before=git_status_before,
+        git_status_after=git_status_after,
+        failure_state=failure_state,
+        artifacts=[*artifact_names, "runinfo.json", "runinfo.md", FULL_PILOT_STDOUT_NAME],
+    )
+    _write_full_pilot_runinfo(out_dir, runinfo)
+    present = _require_only_expected_artifacts(out_dir)
+
+    _require(failure_state == "none" and report is not None, failure_state)
+    assert report is not None
+    return {
+        "mode": "full",
+        "em_fits_executed": report.em_fits_executed,
+        "expected_fit_count": EXPECTED_FULL_FITS,
+        "targets_created": report.targets_created,
+        "score_rows": report.score_rows,
+        "run_code_sha": run_code_sha,
+        "branch": branch,
+        "output_dir": str(out_dir.relative_to(ROOT)).replace("\\", "/"),
+        "artifacts": present,
+        "selected_k_by_replicate": {
+            str(selection.replicate): selection.selected_k
+            for selection in report.replicate_selections
+        },
+        "selected_k_counts": {str(k): count for k, count in report.selected_k_counts},
+        "true_k": report.true_k,
+        "true_k_selected_count": report.true_k_selected_count,
+        "descriptive_recovery_rate": report.descriptive_recovery_rate,
+        "replicate_mean_scores": {
+            str(selection.replicate): {
+                str(summary.k): summary.mean_score for summary in selection.summaries
+            }
+            for selection in report.replicate_selections
+        },
+        "k_aggregates": [asdict(aggregate) for aggregate in report.k_aggregates],
+        "score_config_hash": report.score_config_hash,
+        "total_retries": sum(row.internal_retry for row in report.rows),
+        "total_warnings": sum(row.warning_count for row in report.rows),
+        "total_q_failures": sum(1 for row in report.rows if row.q_failure),
+        "total_nan": sum(1 for row in report.rows if row.nan_occurred),
+    }
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--validate-only", action="store_true", help="pure/static validation; performs zero fits")
     modes.add_argument("--canary", action="store_true", help="run gated two-payload canary")
     modes.add_argument("--smoke", action="store_true", help="run gated K={2,3,4}, two-start smoke")
-    modes.add_argument("--full", action="store_true", help="out of scope for Issue #41")
+    modes.add_argument(
+        "--full",
+        action="store_true",
+        help="run the frozen 42-fit Phase 7e pilot (triple gated)",
+    )
     parser.add_argument(
         "--allow-em",
         action="store_true",
-        help="second explicit authorization required with --canary or --smoke",
+        help="second explicit authorization required with --canary, --smoke, or --full",
+    )
+    parser.add_argument(
+        "--confirm-full-pilot",
+        action="store_true",
+        help="third explicit authorization required with --full",
     )
     return parser
 
@@ -2154,7 +3416,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = run_smoke_cli()
         print(json.dumps(asdict(report), sort_keys=True, allow_nan=False))
         return 0
-    raise HarnessStop("full pilot is not implemented or authorized")
+    if args.full:
+        _require(args.allow_em, "--full requires the additional --allow-em authorization")
+        _require(
+            args.confirm_full_pilot,
+            "--full requires the additional --confirm-full-pilot authorization",
+        )
+        command = " ".join(
+            [
+                "python",
+                "tools/research_audit/run_heldout_k_selection_pilot.py",
+                *(argv if argv is not None else sys.argv[1:]),
+            ]
+        )
+        result = run_full_pilot_cli(command)
+        print(json.dumps(result, sort_keys=True, allow_nan=False))
+        return 0
+    raise HarnessStop("no authorized mode was selected")
 
 
 if __name__ == "__main__":
