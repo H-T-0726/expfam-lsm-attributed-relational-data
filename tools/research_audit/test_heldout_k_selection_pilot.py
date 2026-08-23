@@ -251,6 +251,152 @@ def boundary_parts() -> tuple[object, ...]:
     return train, test, Y, preflight, prepared, target, config
 
 
+def test_prepared_training_data_contains_training_pairs_but_no_full_source_y() -> None:
+    train, test, Y, _, prepared, _, _ = boundary_parts()
+    assert not hasattr(prepared, "source_Y")
+    assert "_source_Y" not in prepared.__slots__
+    assert "source_y_hash" not in prepared.__slots__
+    training = prepared.training_values
+    expected_rows, expected_cols = np.where(np.triu(train, 1))
+    assert np.array_equal(training.rows, expected_rows)
+    assert np.array_equal(training.cols, expected_cols)
+    assert np.array_equal(training.values, Y[expected_rows, expected_cols])
+    assert not np.shares_memory(training.values, Y)
+    assert training.values.size == np.count_nonzero(np.triu(train, 1))
+    assert training.values.size + np.count_nonzero(np.triu(test, 1)) == 15
+
+
+def test_y_test_counterfactual_changes_only_score_side_provenance() -> None:
+    train, test = valid_masks()
+    diagnostics = harness.validate_pair_masks(train, test, 3)
+    plan = harness.SplitPlan(1, harness.SPLIT_SEED_BASE + 1, 3, train, test, diagnostics)
+    preflight = harness.authorize_canary_preflight(plan)
+    X = np.arange(12, dtype=np.float64).reshape(6, 2)
+    Y_a = np.zeros((6, 6), dtype=np.float64)
+    Y_b = Y_a.copy()
+    Y_b[test] = 1.0
+
+    prepared_a = harness.prepare_training_data(
+        X, Y_a, preflight=preflight, train_mask=train, test_mask=test
+    )
+    prepared_b = harness.prepare_training_data(
+        X, Y_b, preflight=preflight, train_mask=train, test_mask=test
+    )
+    assert np.array_equal(prepared_a.X, prepared_b.X)
+    assert np.array_equal(prepared_a.training_values.rows, prepared_b.training_values.rows)
+    assert np.array_equal(prepared_a.training_values.cols, prepared_b.training_values.cols)
+    assert np.array_equal(prepared_a.training_values.values, prepared_b.training_values.values)
+    assert prepared_a.training_y_hash == prepared_b.training_y_hash
+    assert prepared_a.fit_provenance_hash == prepared_b.fit_provenance_hash
+    assert prepared_a.train_mask_hash == prepared_b.train_mask_hash
+    assert prepared_a.test_mask_hash == prepared_b.test_mask_hash
+    manifest = harness.build_manifest(
+        (1,), harness.SMOKE_K_CANDIDATES, harness.START_LABELS
+    )
+    comparability_a = harness.build_smoke_comparability(prepared_a, manifest)
+    comparability_b = harness.build_smoke_comparability(prepared_b, manifest)
+    assert comparability_a == comparability_b
+    assert {
+        row.target_topology_hash for row in comparability_a
+    } == {row.target_topology_hash for row in comparability_b}
+
+    calls_a: list[dict[str, object]] = []
+    calls_b: list[dict[str, object]] = []
+    config = harness.FrozenFitConfig("poisson", "bernoulli", 3, 5, 8, 43031, "consistent")
+    boundary_a = harness.FitCallBoundary._from_preflight_test_only(
+        prepared_a,
+        preflight,
+        config,
+        harness._make_test_fit_adapter(
+            lambda **kwargs: calls_a.append(kwargs) or "ok", score_targets=()
+        ),
+    )
+    boundary_b = harness.FitCallBoundary._from_preflight_test_only(
+        prepared_b,
+        preflight,
+        config,
+        harness._make_test_fit_adapter(
+            lambda **kwargs: calls_b.append(kwargs) or "ok", score_targets=()
+        ),
+    )
+    assert boundary_a.call(0) == boundary_b.call(0) == "ok"
+    for field in ("X", "Y", "train_mask"):
+        assert np.array_equal(calls_a[0][field], calls_b[0][field])
+
+    target_a = harness.make_score_only_target(Y_a, test)
+    target_b = harness.make_score_only_target(Y_b, test)
+    score_target_hash_a = harness.stable_array_hash(
+        target_a.rows, target_a.cols, target_a.values
+    )
+    score_target_hash_b = harness.stable_array_hash(
+        target_b.rows, target_b.cols, target_b.values
+    )
+    assert score_target_hash_a != score_target_hash_b
+
+
+def test_boundary_graph_and_inputs_have_no_raw_y_reference_or_heldout_outcomes() -> None:
+    train, test = valid_masks()
+    diagnostics = harness.validate_pair_masks(train, test, 3)
+    plan = harness.SplitPlan(1, harness.SPLIT_SEED_BASE + 1, 3, train, test, diagnostics)
+    preflight = harness.authorize_canary_preflight(plan)
+    X = np.zeros((6, 2), dtype=np.float64)
+    raw_Y = np.zeros((6, 6), dtype=np.float64)
+    raw_Y[test] = 1.0
+    prepared = harness.prepare_training_data(
+        X, raw_Y, preflight=preflight, train_mask=train, test_mask=test
+    )
+    calls: list[dict[str, object]] = []
+    adapter = harness._make_test_fit_adapter(
+        lambda **kwargs: calls.append(kwargs) or "ok", score_targets=()
+    )
+    config = harness.FrozenFitConfig("poisson", "bernoulli", 3, 5, 8, 43031, "consistent")
+    boundary = harness.FitCallBoundary._from_preflight_test_only(
+        prepared, preflight, config, adapter
+    )
+
+    for name in boundary.__slots__:
+        value = getattr(boundary, name)
+        if isinstance(value, np.ndarray):
+            assert value is not raw_Y
+            assert not np.shares_memory(value, raw_Y)
+    training = boundary._training_values
+    assert training.values is not raw_Y
+    assert not np.shares_memory(training.values, raw_Y)
+    assert boundary.call(0) == "ok"
+    assert calls[0]["Y"] is not raw_Y
+    assert not np.shares_memory(calls[0]["Y"], raw_Y)
+    assert np.all(np.asarray(calls[0]["Y"])[test] == 0.0)
+
+
+def test_raw_y_test_mutation_after_preparation_cannot_change_boundary_input() -> None:
+    train, test = valid_masks()
+    diagnostics = harness.validate_pair_masks(train, test, 3)
+    plan = harness.SplitPlan(1, harness.SPLIT_SEED_BASE + 1, 3, train, test, diagnostics)
+    preflight = harness.authorize_canary_preflight(plan)
+    X = np.zeros((6, 2), dtype=np.float64)
+    raw_Y = np.zeros((6, 6), dtype=np.float64)
+    prepared = harness.prepare_training_data(
+        X, raw_Y, preflight=preflight, train_mask=train, test_mask=test
+    )
+    before_hash = prepared.fit_provenance_hash
+    before_values = prepared.training_values.values.copy()
+    raw_Y[test] = 1.0
+
+    calls: list[np.ndarray] = []
+    adapter = harness._make_test_fit_adapter(
+        lambda **kwargs: calls.append(np.array(kwargs["Y"], copy=True)) or "ok",
+        score_targets=(),
+    )
+    config = harness.FrozenFitConfig("poisson", "bernoulli", 3, 5, 8, 43031, "consistent")
+    boundary = harness.FitCallBoundary._from_preflight_test_only(
+        prepared, preflight, config, adapter
+    )
+    assert boundary.call(0) == "ok"
+    assert prepared.fit_provenance_hash == before_hash
+    assert np.array_equal(prepared.training_values.values, before_values)
+    assert np.all(calls[0][test] == 0.0)
+
+
 def test_fit_boundary_test_adapter_receives_only_authorized_payloads() -> None:
     train, _, Y, preflight, prepared, target, config = boundary_parts()
     calls: list[dict[str, object]] = []
@@ -533,26 +679,37 @@ def test_manifest_rejects_k_specific_seed_and_model_seed_rescue() -> None:
 def comparability_rows() -> list[harness.ComparabilityRow]:
     manifest = harness.build_manifest((1,), (1, 2))
     return [
-        harness.ComparabilityRow(row, "x", "prep", "train", "test", "target", "score")
+        harness.ComparabilityRow(
+            manifest=row,
+            x_hash="x",
+            training_y_hash="training-y",
+            preprocessing_hash="prep",
+            train_mask_hash="train",
+            test_mask_hash="test",
+            fit_provenance_hash="fit",
+            target_topology_hash="topology",
+            score_config_hash="score",
+        )
         for row in manifest
     ]
 
 
 def test_cross_k_comparability_accepts_identical_provenance() -> None:
     rows = comparability_rows()
-    harness.validate_cross_k_comparability(rows, [row.manifest for row in rows])
+    harness.validate_cross_k_comparability(rows, list(rows))
 
 
 def test_cross_k_comparability_rejects_hash_mismatch() -> None:
     rows = comparability_rows()
-    rows[2] = replace(rows[2], target_hash="different")
-    with pytest.raises(harness.HarnessStop, match="target_hash"):
-        harness.validate_cross_k_comparability(rows, [row.manifest for row in rows])
+    expected = list(rows)
+    rows[2] = replace(rows[2], target_topology_hash="different")
+    with pytest.raises(harness.HarnessStop, match="target_topology_hash"):
+        harness.validate_cross_k_comparability(rows, expected)
 
 
 def test_cross_k_comparability_rejects_incomplete_duplicate_and_unexpected_keys() -> None:
     complete = comparability_rows()
-    expected = [row.manifest for row in complete]
+    expected = list(complete)
     harness.validate_cross_k_comparability(complete, expected)
     with pytest.raises(harness.HarnessStop, match="key set"):
         harness.validate_cross_k_comparability(complete[:-1], expected)
@@ -576,7 +733,7 @@ def test_cross_k_comparability_rejects_incomplete_duplicate_and_unexpected_keys(
 )
 def test_cross_k_comparability_rejects_wrong_actual_seed(seed_field: str, message: str) -> None:
     rows = comparability_rows()
-    expected = [row.manifest for row in rows]
+    expected = list(rows)
     rows[0] = replace(rows[0], manifest=replace(rows[0].manifest, **{seed_field: 999}))
     with pytest.raises(harness.HarnessStop, match=message):
         harness.validate_cross_k_comparability(rows, expected)
@@ -680,6 +837,7 @@ def canary_inputs() -> dict[str, object]:
     return {
         "preflight": preflight,
         "prepared": prepared,
+        "score_Y": Y,
         "config": harness.FrozenFitConfig(
             "poisson", "bernoulli", 3, 5, 8, 43031, "consistent"
         ),
@@ -721,6 +879,394 @@ def fake_canary_result(**changes: object) -> harness.CanaryFitResult:
     return harness.CanaryFitResult(**values)  # type: ignore[arg-type]
 
 
+def run_static_smoke(
+    callback,
+    *,
+    inputs: dict[str, object] | None = None,
+    manifest: list[harness.ManifestRow] | None = None,
+    comparability: list[harness.ComparabilityRow] | None = None,
+) -> harness.SmokeSelectionReport:
+    selected_inputs = canary_inputs() if inputs is None else inputs
+    prepared = selected_inputs["prepared"]
+    score_Y = selected_inputs["score_Y"]
+    assert isinstance(prepared, harness.PreparedTrainingData)
+    assert isinstance(score_Y, np.ndarray)
+    selected_manifest = (
+        harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, harness.START_LABELS)
+        if manifest is None
+        else manifest
+    )
+    selected_comparability = (
+        harness.build_smoke_comparability(prepared, selected_manifest)
+        if comparability is None
+        else comparability
+    )
+    adapter = harness._make_test_fit_adapter(callback, score_targets=())
+    return harness._run_smoke_selection_test_only(
+        preflight=selected_inputs["preflight"],
+        prepared=prepared,
+        score_Y=score_Y,
+        manifest=selected_manifest,
+        comparability=selected_comparability,
+        adapter=adapter,
+    )
+
+
+def test_static_smoke_runs_exact_frozen_six_rows_and_selects() -> None:
+    calls: list[tuple[int, int]] = []
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        seed = int(kwargs["seed"])
+        k = int(kwargs["k"])
+        calls.append((k, seed))
+        return fake_canary_result(w0=-float(k), w=0.0)
+
+    report = run_static_smoke(fake_fit)
+    assert calls == [
+        (2, 44021),
+        (2, 44022),
+        (3, 44031),
+        (3, 44032),
+        (4, 44041),
+        (4, 44042),
+    ]
+    assert report.em_fits_executed == 6
+    assert [(row.k, row.start, row.model_seed) for row in report.rows] == [
+        (2, 1, 44021),
+        (2, 2, 44022),
+        (3, 1, 44031),
+        (3, 2, 44032),
+        (4, 1, 44041),
+        (4, 2, 44042),
+    ]
+    assert len(report.rows) == 6
+    assert len(report.summaries) == 3
+    assert all(
+        row.fit_status == "clean"
+        and row.data_seed == 41001
+        and row.split_seed == 42001
+        and row.internal_retry == 0
+        and row.warning_count == 0
+        for row in report.rows
+    )
+    assert len({row.x_hash for row in report.rows}) == 1
+    assert len({row.training_y_hash for row in report.rows}) == 1
+    assert len({row.train_mask_hash for row in report.rows}) == 1
+    assert len({row.test_mask_hash for row in report.rows}) == 1
+    assert len({row.target_topology_hash for row in report.rows}) == 1
+    assert len({row.score_target_hash for row in report.rows}) == 1
+    assert len({row.fit_provenance_hash for row in report.rows}) == 1
+    assert len({row.score_config_hash for row in report.rows}) == 1
+    assert report.selected_k == 4
+
+
+def test_all_six_smoke_boundaries_receive_training_only_y() -> None:
+    inputs = canary_inputs()
+    prepared = inputs["prepared"]
+    score_Y = inputs["score_Y"]
+    assert isinstance(prepared, harness.PreparedTrainingData)
+    assert isinstance(score_Y, np.ndarray)
+    # This is the same caller-owned raw Y used during preparation.  Mutating
+    # only held-out outcomes afterward must affect scoring, never fit inputs.
+    score_Y[prepared.test_mask] = 1.0
+    seen = 0
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        nonlocal seen
+        seen += 1
+        fit_Y = np.asarray(kwargs["Y"])
+        assert fit_Y is not score_Y
+        assert not np.shares_memory(fit_Y, score_Y)
+        assert np.all(fit_Y[prepared.test_mask] == 0.0)
+        return fake_canary_result()
+
+    run_static_smoke(fake_fit, inputs=inputs)
+    assert seen == 6
+
+
+@pytest.mark.parametrize(
+    ("failure_call", "changes", "message"),
+    [
+        (1, {"q_failure": True}, "Q failure"),
+        (3, {"q_failure": True}, "Q failure"),
+        (6, {"q_failure": True}, "Q failure"),
+        (2, {"warnings": ("warning",)}, "emitted warnings"),
+        (2, {"internal_retry": 1}, "internal_retry"),
+        (2, {"nan_occurred": True}, "NaN/nonfinite"),
+        (2, {"w": float("nan")}, "nonfinite"),
+        (2, {"Q_strict": float("nan")}, "Q_strict is nonfinite"),
+        (
+            2,
+            {"train_objective_diagnostics": ({"q": float("nan")},)},
+            "diagnostics.*nonfinite",
+        ),
+    ],
+)
+def test_static_smoke_stops_on_first_unclean_fit(
+    failure_call: int,
+    changes: dict[str, object],
+    message: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    target_creations = 0
+    score_calls = 0
+    original_target = harness.make_score_only_target
+    original_score = harness.score_heldout_bernoulli
+
+    def target_spy(*args: object, **kwargs: object) -> harness.ScoreOnlyTarget:
+        nonlocal target_creations
+        target_creations += 1
+        return original_target(*args, **kwargs)
+
+    def score_spy(
+        target: harness.ScoreOnlyTarget, eta_pairs: harness.EtaPairs
+    ) -> float:
+        nonlocal score_calls
+        score_calls += 1
+        return original_score(target, eta_pairs)
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        return fake_canary_result(**(changes if calls == failure_call else {}))
+
+    monkeypatch.setattr(harness, "make_score_only_target", target_spy)
+    monkeypatch.setattr(harness, "score_heldout_bernoulli", score_spy)
+    with pytest.raises(harness.HarnessStop, match=message):
+        run_static_smoke(fake_fit)
+    assert calls == failure_call
+    assert target_creations == 0
+    assert score_calls == 0
+
+
+def test_static_smoke_rejects_nonfinite_score_without_extra_fit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    selector_calls = 0
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        return fake_canary_result()
+
+    def selector_spy(*_: object, **__: object) -> object:
+        nonlocal selector_calls
+        selector_calls += 1
+        raise AssertionError("selector must not see partial scored rows")
+
+    monkeypatch.setattr(harness, "score_heldout_bernoulli", lambda *_: float("inf"))
+    monkeypatch.setattr(harness, "select_k_from_two_starts", selector_spy)
+    with pytest.raises(harness.HarnessStop, match="score is nonfinite"):
+        run_static_smoke(fake_fit)
+    assert calls == 6
+    assert selector_calls == 0
+
+
+def test_static_smoke_pair_mismatch_stops(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    original = harness.heldout_raw_eta_pairs
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        return fake_canary_result()
+
+    def mismatched(*args: object, **kwargs: object) -> harness.EtaPairs:
+        pairs = original(*args, **kwargs)
+        return replace(
+            pairs,
+            rows=pairs.rows[::-1],
+            cols=pairs.cols[::-1],
+            eta=pairs.eta[::-1],
+        )
+
+    monkeypatch.setattr(harness, "heldout_raw_eta_pairs", mismatched)
+    with pytest.raises(harness.HarnessStop, match="rows mismatch"):
+        run_static_smoke(fake_fit)
+    assert calls == 6
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "missing",
+        "duplicate",
+        "one-start",
+        "third-start",
+        "extra-k-1",
+        "extra-k-5",
+        "start-0",
+        "start-3",
+        "wrong-model-seed",
+        "wrong-data-seed",
+        "wrong-split-seed",
+    ],
+)
+def test_static_smoke_invalid_manifest_stops_before_fit(case: str) -> None:
+    calls = 0
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        return fake_canary_result()
+
+    complete = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, harness.START_LABELS)
+    if case == "missing":
+        manifest = complete[:-1]
+    elif case == "duplicate":
+        manifest = complete + [complete[0]]
+    elif case == "one-start":
+        manifest = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, (1,))
+    elif case == "third-start":
+        manifest = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, (1, 2, 3))
+    elif case == "extra-k-1":
+        manifest = harness.build_manifest((1,), (1, 2, 3, 4), harness.START_LABELS)
+    elif case == "extra-k-5":
+        manifest = harness.build_manifest((1,), (2, 3, 4, 5), harness.START_LABELS)
+    elif case == "start-0":
+        manifest = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, (0, 1, 2))
+    elif case == "start-3":
+        manifest = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, (1, 2, 3))
+    elif case == "wrong-model-seed":
+        manifest = [replace(complete[0], model_seed=999), *complete[1:]]
+    elif case == "wrong-data-seed":
+        manifest = [replace(complete[0], data_seed=999), *complete[1:]]
+    else:
+        manifest = [replace(complete[0], split_seed=999), *complete[1:]]
+    with pytest.raises(harness.HarnessStop):
+        run_static_smoke(fake_fit, manifest=manifest)
+    assert calls == 0
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "x_hash",
+        "training_y_hash",
+        "train_mask_hash",
+        "test_mask_hash",
+        "fit_provenance_hash",
+        "score_config_hash",
+        "target_topology_hash",
+    ],
+)
+@pytest.mark.parametrize("corruption", ["single", "uniform"])
+def test_static_smoke_wrong_comparability_hash_stops_before_fit(
+    field_name: str, corruption: str
+) -> None:
+    calls = 0
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        calls += 1
+        return fake_canary_result()
+
+    inputs = canary_inputs()
+    prepared = inputs["prepared"]
+    assert isinstance(prepared, harness.PreparedTrainingData)
+    manifest = harness.build_manifest((1,), harness.SMOKE_K_CANDIDATES, harness.START_LABELS)
+    comparability = harness.build_smoke_comparability(prepared, manifest)
+    if corruption == "single":
+        comparability[2] = replace(comparability[2], **{field_name: "wrong"})
+    else:
+        comparability = [
+            replace(row, **{field_name: "uniform-wrong"}) for row in comparability
+        ]
+    with pytest.raises(harness.HarnessStop, match=field_name):
+        run_static_smoke(fake_fit, manifest=manifest, comparability=comparability)
+    assert calls == 0
+
+
+def test_static_smoke_target_created_once_after_all_fits_and_reused_only_for_scoring(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[str] = []
+    target_ids: list[int] = []
+    original_target = harness.make_score_only_target
+    original_score = harness.score_heldout_bernoulli
+
+    def target_spy(*args: object, **kwargs: object) -> harness.ScoreOnlyTarget:
+        events.append("target")
+        return original_target(*args, **kwargs)
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        assert "target" not in events
+        events.append("fit")
+        return fake_canary_result()
+
+    def score_spy(
+        target: harness.ScoreOnlyTarget, eta_pairs: harness.EtaPairs
+    ) -> float:
+        events.append("score")
+        target_ids.append(id(target))
+        return original_score(target, eta_pairs)
+
+    monkeypatch.setattr(harness, "make_score_only_target", target_spy)
+    monkeypatch.setattr(harness, "score_heldout_bernoulli", score_spy)
+    run_static_smoke(fake_fit)
+    assert events == [
+        "fit",
+        "fit",
+        "fit",
+        "fit",
+        "fit",
+        "fit",
+        "target",
+        "score",
+        "score",
+        "score",
+        "score",
+        "score",
+        "score",
+    ]
+    assert len(target_ids) == 6
+    assert len(set(target_ids)) == 1
+
+
+def test_static_smoke_stored_state_is_detached_from_reused_fit_array_and_target_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    backing = np.zeros((6, 3), dtype=np.float64)
+    intended = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+    observed: list[float] = []
+    calls = 0
+    original_target = harness.make_score_only_target
+    original_eta = harness.heldout_raw_eta_pairs
+
+    def fake_fit(**_: object) -> harness.CanaryFitResult:
+        nonlocal calls
+        backing.fill(intended[calls])
+        calls += 1
+        return fake_canary_result(Z=backing, w0=0.0, w=0.1)
+
+    def target_spy(*args: object, **kwargs: object) -> harness.ScoreOnlyTarget:
+        target = original_target(*args, **kwargs)
+        target.values.flags.writeable = True
+        target.values[:] = 1.0 - target.values
+        target.values.flags.writeable = False
+        # Target materialization occurs only after all fits.  Mutating the fake
+        # adapter's reusable buffer now cannot alter any stored fit snapshot.
+        backing.fill(999.0)
+        return target
+
+    def eta_spy(
+        Z: np.ndarray, w0: float, w: float, test_mask: np.ndarray
+    ) -> harness.EtaPairs:
+        assert not Z.flags.writeable
+        observed.append(float(Z[0, 0]))
+        return original_eta(Z, w0, w, test_mask)
+
+    monkeypatch.setattr(harness, "make_score_only_target", target_spy)
+    monkeypatch.setattr(harness, "heldout_raw_eta_pairs", eta_spy)
+    run_static_smoke(fake_fit)
+    assert calls == 6
+    assert observed == intended
+
+
 def test_static_canary_identical_complete_outputs_pass() -> None:
     calls = 0
 
@@ -732,6 +1278,30 @@ def test_static_canary_identical_complete_outputs_pass() -> None:
     report = run_static_canary(fake_fit)
     assert calls == 2
     assert report.initialization_equal and report.final_outputs_equal
+
+
+def test_static_canary_fit_provenance_and_training_inputs_are_identical() -> None:
+    inputs = canary_inputs()
+    prepared = inputs["prepared"]
+    assert isinstance(prepared, harness.PreparedTrainingData)
+    fit_hash_before = prepared.fit_provenance_hash
+    calls: list[dict[str, object]] = []
+
+    def fake_fit(**kwargs: object) -> harness.CanaryFitResult:
+        calls.append(kwargs)
+        return fake_canary_result()
+
+    run_static_canary(fake_fit, inputs)
+    assert len(calls) == 2
+    assert prepared.fit_provenance_hash == fit_hash_before
+    assert np.array_equal(calls[0]["X"], calls[1]["X"])
+    assert np.array_equal(calls[0]["train_mask"], calls[1]["train_mask"])
+    train_mask = np.asarray(calls[0]["train_mask"])
+    Y_a = np.asarray(calls[0]["Y"])
+    Y_b = np.asarray(calls[1]["Y"])
+    assert np.array_equal(Y_a[train_mask], Y_b[train_mask])
+    assert set(np.unique(Y_a[~train_mask & ~np.eye(6, dtype=bool)])) == {0.0}
+    assert set(np.unique(Y_b[~train_mask & ~np.eye(6, dtype=bool)])) == {1.0}
 
 
 def test_static_canary_seals_boundary_and_finishes_fits_before_target_creation(
@@ -853,9 +1423,11 @@ def test_static_canary_blocks_every_nonempty_warning_state(
 
 def test_static_canary_rejects_target_bearing_fit_callable() -> None:
     inputs = canary_inputs()
+    score_Y = inputs["score_Y"]
     prepared = inputs["prepared"]
+    assert isinstance(score_Y, np.ndarray)
     assert isinstance(prepared, harness.PreparedTrainingData)
-    target = harness.make_score_only_target(prepared.source_Y, prepared.test_mask)
+    target = harness.make_score_only_target(score_Y, prepared.test_mask)
 
     class TargetBearingFit:
         def __init__(self, target: object) -> None:
@@ -955,7 +1527,7 @@ def test_initialization_capture_spy_observes_informed_init_once_without_extra_rn
     assert result.internal_retry == 0
 
 
-def test_validate_only_never_calls_production_adapter_or_canary(
+def test_validate_only_never_calls_production_adapter_canary_or_smoke(
     capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     calls = 0
@@ -971,6 +1543,7 @@ def test_validate_only_never_calls_production_adapter_or_canary(
         raise AssertionError("production adapter must not be instantiated")
 
     monkeypatch.setattr(harness, "run_canary_cli", exploding_canary)
+    monkeypatch.setattr(harness, "run_smoke_cli", exploding_canary)
     monkeypatch.setattr(harness, "AuthorizedEMFitAdapter", exploding_adapter)
     assert harness.main(["--validate-only"]) == 0
     assert calls == 0
@@ -986,7 +1559,25 @@ def test_production_cli_has_no_test_adapter_or_callable_injection_api() -> None:
     assert "authorize_x_payload" not in source
     assert "make_score_only_target" not in source
     assert source.index("prepare_training_data") < source.index("run_two_canary_falsification")
+    smoke_source = inspect.getsource(harness.run_smoke_cli)
+    assert "_TestAuthorizedFitAdapter" not in smoke_source
+    assert "_run_smoke_selection_test_only" not in smoke_source
+    assert "make_score_only_target" not in smoke_source
+    assert smoke_source.index("prepare_training_data") < smoke_source.index("run_smoke_selection")
     assert list(inspect.signature(harness.main).parameters) == ["argv"]
+
+
+def test_fit_phase_apis_cannot_receive_raw_y_or_score_target() -> None:
+    for fit_phase in (
+        harness._run_two_canary_fit_phase,
+        harness._run_smoke_fit_phase,
+    ):
+        parameters = inspect.signature(fit_phase).parameters
+        assert "score_Y" not in parameters
+        assert "raw_Y" not in parameters
+        assert "target" not in parameters
+        source = inspect.getsource(fit_phase)
+        assert "make_score_only_target" not in source
 
 
 def test_canary_cli_requires_two_explicit_gates(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1004,7 +1595,51 @@ def test_canary_cli_requires_two_explicit_gates(monkeypatch: pytest.MonkeyPatch)
     assert calls == 1
 
 
-@pytest.mark.parametrize("mode", ["--smoke", "--full"])
-def test_other_fit_modes_fail_closed(mode: str) -> None:
-    with pytest.raises(harness.HarnessStop, match="not implemented or authorized"):
-        harness.main([mode])
+def test_smoke_cli_requires_allow_em_and_static_stub_runs_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+
+    def static_stub() -> harness.SmokeSelectionReport:
+        nonlocal calls
+        calls += 1
+        return harness.SmokeSelectionReport(
+            (), (), 2, (2,), 6, "score", "topology", "score-target"
+        )
+
+    monkeypatch.setattr(harness, "run_smoke_cli", static_stub)
+    with pytest.raises(harness.HarnessStop, match="--allow-em"):
+        harness.main(["--smoke"])
+    assert calls == 0
+    assert harness.main(["--smoke", "--allow-em"]) == 0
+    assert calls == 1
+
+
+def test_full_remains_fail_closed_without_fit(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+
+    def exploding() -> None:
+        nonlocal calls
+        calls += 1
+        raise AssertionError("fit path must not run")
+
+    monkeypatch.setattr(harness, "run_canary_cli", exploding)
+    monkeypatch.setattr(harness, "run_smoke_cli", exploding)
+    with pytest.raises(harness.HarnessStop, match="full pilot"):
+        harness.main(["--full", "--allow-em"])
+    assert calls == 0
+
+
+def test_default_cli_does_not_fit(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+
+    def exploding() -> None:
+        nonlocal calls
+        calls += 1
+        raise AssertionError("fit path must not run")
+
+    monkeypatch.setattr(harness, "run_canary_cli", exploding)
+    monkeypatch.setattr(harness, "run_smoke_cli", exploding)
+    with pytest.raises(SystemExit):
+        harness.main([])
+    assert calls == 0

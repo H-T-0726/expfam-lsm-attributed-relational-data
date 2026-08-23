@@ -7,6 +7,7 @@ running ``--validate-only`` cannot import or call the EM runner.
 from __future__ import annotations
 
 import argparse
+import copy
 import functools
 import hashlib
 import json
@@ -599,7 +600,16 @@ class FitCallBoundary:
     ) -> None:
         _require(authority is _BOUNDARY_CONSTRUCTION_AUTHORITY, "boundary construction is unauthorized")
         self._X = _readonly_copy(prepared.X, np.float64)
-        self._training_values = make_training_y_values(prepared.source_Y, prepared.train_mask)
+        training = prepared.training_values
+        self._training_values = TrainingYValues(
+            training.n_nodes,
+            _readonly_copy(training.rows, np.int64),
+            _readonly_copy(training.cols, np.int64),
+            _readonly_copy(training.values, np.float64),
+            training.train_mask_hash,
+            training.provenance_version,
+            _TRAINING_Y_AUTHORITY,
+        )
         self._train_mask = _readonly_copy(prepared.train_mask, np.bool_)
         self._test_mask = _readonly_copy(prepared.test_mask, np.bool_)
         self._config = config
@@ -664,9 +674,29 @@ class FitCallBoundary:
         _validate_canary_preflight(preflight, prepared.train_mask, prepared.test_mask)
         _require(type(config) is FrozenFitConfig, "fit config type is invalid")
         _require(stable_array_hash(prepared.X) == prepared.x_hash, "prepared X hash changed")
-        _require(stable_array_hash(prepared.source_Y) == prepared.source_y_hash, "prepared source Y hash changed")
+        training = prepared.training_values
+        _require(type(training) is TrainingYValues, "prepared training Y type changed")
+        _require(training._authority is _TRAINING_Y_AUTHORITY, "prepared training Y authority changed")
+        _require(
+            stable_array_hash(training.rows, training.cols, training.values)
+            == prepared.training_y_hash,
+            "prepared training Y hash changed",
+        )
         _require(stable_array_hash(prepared.train_mask) == prepared.train_mask_hash, "prepared train mask changed")
         _require(stable_array_hash(prepared.test_mask) == prepared.test_mask_hash, "prepared test mask changed")
+        expected_fit_provenance = stable_config_hash(
+            {
+                "provenance_version": prepared.provenance_version,
+                "x_hash": prepared.x_hash,
+                "training_y_hash": prepared.training_y_hash,
+                "train_mask_hash": prepared.train_mask_hash,
+                "test_mask_hash": prepared.test_mask_hash,
+            }
+        )
+        _require(
+            expected_fit_provenance == prepared.fit_provenance_hash,
+            "prepared fit provenance hash changed",
+        )
 
     def call(self, canary_value: int) -> Any:
         """Build boundary-owned Y and run; there is deliberately no X/Y argument."""
@@ -825,21 +855,20 @@ class CanaryPreflight:
 
 
 _PREPARED_DATA_AUTHORITY = object()
-PREPARED_DATA_PROVENANCE = "heldout-training-data-v1"
+PREPARED_DATA_PROVENANCE = "heldout-training-only-data-v2"
 
 
 class PreparedTrainingData:
-    """Immutable pre-target snapshot of all frozen dataset-side fit inputs."""
+    """Immutable fit-only data; held-out outcome values are structurally absent."""
 
     __slots__ = (
         "_X",
-        "_source_Y",
         "_training_values",
         "_train_mask",
         "_test_mask",
         "x_hash",
-        "source_y_hash",
         "training_y_hash",
+        "fit_provenance_hash",
         "train_mask_hash",
         "test_mask_hash",
         "x_shape",
@@ -852,7 +881,6 @@ class PreparedTrainingData:
         self,
         *,
         X: np.ndarray,
-        source_Y: np.ndarray,
         training_values: TrainingYValues,
         train_mask: np.ndarray,
         test_mask: np.ndarray,
@@ -860,19 +888,46 @@ class PreparedTrainingData:
     ) -> None:
         _require(authority is _PREPARED_DATA_AUTHORITY, "prepared data construction is unauthorized")
         object.__setattr__(self, "_X", _readonly_copy(X, np.float64))
-        object.__setattr__(self, "_source_Y", _readonly_copy(source_Y, np.float64))
-        object.__setattr__(self, "_training_values", training_values)
+        object.__setattr__(
+            self,
+            "_training_values",
+            TrainingYValues(
+                training_values.n_nodes,
+                _readonly_copy(training_values.rows, np.int64),
+                _readonly_copy(training_values.cols, np.int64),
+                _readonly_copy(training_values.values, np.float64),
+                training_values.train_mask_hash,
+                training_values.provenance_version,
+                _TRAINING_Y_AUTHORITY,
+            ),
+        )
         object.__setattr__(self, "_train_mask", _readonly_copy(train_mask, np.bool_))
         object.__setattr__(self, "_test_mask", _readonly_copy(test_mask, np.bool_))
         object.__setattr__(self, "x_hash", stable_array_hash(self._X))
-        object.__setattr__(self, "source_y_hash", stable_array_hash(self._source_Y))
         object.__setattr__(
             self,
             "training_y_hash",
-            stable_array_hash(training_values.rows, training_values.cols, training_values.values),
+            stable_array_hash(
+                self._training_values.rows,
+                self._training_values.cols,
+                self._training_values.values,
+            ),
         )
         object.__setattr__(self, "train_mask_hash", stable_array_hash(self._train_mask))
         object.__setattr__(self, "test_mask_hash", stable_array_hash(self._test_mask))
+        object.__setattr__(
+            self,
+            "fit_provenance_hash",
+            stable_config_hash(
+                {
+                    "provenance_version": PREPARED_DATA_PROVENANCE,
+                    "x_hash": self.x_hash,
+                    "training_y_hash": self.training_y_hash,
+                    "train_mask_hash": self.train_mask_hash,
+                    "test_mask_hash": self.test_mask_hash,
+                }
+            ),
+        )
         object.__setattr__(self, "x_shape", self._X.shape)
         object.__setattr__(self, "x_dtype", self._X.dtype.str)
         object.__setattr__(self, "provenance_version", PREPARED_DATA_PROVENANCE)
@@ -885,10 +940,6 @@ class PreparedTrainingData:
     @property
     def X(self) -> np.ndarray:
         return self._X
-
-    @property
-    def source_Y(self) -> np.ndarray:
-        return self._source_Y
 
     @property
     def training_values(self) -> TrainingYValues:
@@ -921,7 +972,6 @@ def prepare_training_data(
     training = make_training_y_values(Y, train_mask)
     return PreparedTrainingData(
         X=X,
-        source_Y=Y,
         training_values=training,
         train_mask=train_mask,
         test_mask=test_mask,
@@ -1043,18 +1093,20 @@ def preflight_all_splits(
 class ComparabilityRow:
     manifest: ManifestRow
     x_hash: str
+    training_y_hash: str
     preprocessing_hash: str
     train_mask_hash: str
     test_mask_hash: str
-    target_hash: str
+    fit_provenance_hash: str
+    target_topology_hash: str
     score_config_hash: str
 
 
-def validate_cross_k_comparability(
+def _validate_cross_k_internal_consistency(
     rows: Sequence[ComparabilityRow],
     expected_manifest: Sequence[ManifestRow],
 ) -> None:
-    """Require manifest completeness, seed rules, then cross-K provenance."""
+    """Require manifest completeness, seed rules, and row-wise consistency."""
 
     _require(bool(rows), "comparability manifest is empty")
     actual_keys = [
@@ -1090,10 +1142,12 @@ def validate_cross_k_comparability(
 
     invariant_fields = (
         "x_hash",
+        "training_y_hash",
         "preprocessing_hash",
         "train_mask_hash",
         "test_mask_hash",
-        "target_hash",
+        "fit_provenance_hash",
+        "target_topology_hash",
         "score_config_hash",
     )
     by_replicate: dict[int, list[ComparabilityRow]] = {}
@@ -1113,6 +1167,27 @@ def validate_cross_k_comparability(
             len({row.manifest.split_seed for row in replicate_rows}) == 1,
             "cross-K comparability mismatch: split seed",
         )
+
+
+def validate_cross_k_comparability(
+    rows: Sequence[ComparabilityRow],
+    expected_rows: Sequence[ComparabilityRow],
+) -> None:
+    """Bind complete actual metadata to complete frozen expected metadata."""
+
+    _require(bool(expected_rows), "expected comparability manifest is empty")
+    expected_manifest = [row.manifest for row in expected_rows]
+    _validate_cross_k_internal_consistency(rows, expected_manifest)
+    _validate_cross_k_internal_consistency(expected_rows, expected_manifest)
+    _require(len(rows) == len(expected_rows), "comparability row count changed")
+    for index, (actual, expected) in enumerate(
+        zip(rows, expected_rows, strict=True)
+    ):
+        for field_name in (field.name for field in fields(ComparabilityRow)):
+            _require(
+                getattr(actual, field_name) == getattr(expected, field_name),
+                f"comparability row {index} differs from frozen expected: {field_name}",
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -1259,21 +1334,23 @@ def _validate_canary_preflight(
     _require(preflight.test_mask_hash == stable_array_hash(test_mask), "canary test mask bypasses preflight")
 
 
-def _run_two_canary_falsification(
+@dataclass(frozen=True, slots=True)
+class _CanaryFitPhaseResult:
+    result_a: CanaryFitResult
+    result_b: CanaryFitResult
+    payload_a_hash: str
+    payload_b_hash: str
+
+
+def _run_two_canary_fit_phase(
     *,
     preflight: CanaryPreflight,
     prepared: PreparedTrainingData,
     config: FrozenFitConfig,
     adapter: AuthorizedEMFitAdapter | _TestAuthorizedFitAdapter,
     test_only: bool,
-) -> CanaryInvarianceReport:
-    """Run A=0/B=1 complete-fit falsification after all preflight gates.
-
-    Numeric tolerances are frozen module constants before any results exist:
-    arrays/scalars use ``CANARY_ATOL``/``CANARY_RTOL``; hashes, config, seeds,
-    retry/failure/warning states use exact equality.  Tolerances must never be
-    relaxed after inspecting canary output.
-    """
+) -> _CanaryFitPhaseResult:
+    """Run A/B from training-only state; raw Y is not part of this API graph."""
 
     _validate_canary_preflight(preflight, prepared.train_mask, prepared.test_mask)
     _require(config.family_y == FAMILY_Y, "canary family_y freeze changed")
@@ -1293,10 +1370,39 @@ def _run_two_canary_falsification(
     result_b = boundary.call(1)
     payload_b_hash = boundary.last_evidence.fit_y_hash if boundary.last_evidence else ""
     _require(type(result_a) is CanaryFitResult and type(result_b) is CanaryFitResult, "fit callable returned invalid canary result")
+    return _CanaryFitPhaseResult(
+        result_a, result_b, payload_a_hash, payload_b_hash
+    )
 
-    # ScoreOnlyTarget does not exist until boundary sealing and both fits finish.
-    target = make_score_only_target(prepared.source_Y, prepared.test_mask)
-    _require(target.test_mask_hash == prepared.test_mask_hash, "score target mask hash mismatch")
+
+def _run_two_canary_falsification(
+    *,
+    preflight: CanaryPreflight,
+    prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
+    config: FrozenFitConfig,
+    adapter: AuthorizedEMFitAdapter | _TestAuthorizedFitAdapter,
+    test_only: bool,
+) -> CanaryInvarianceReport:
+    """Run A=0/B=1 complete-fit falsification after all preflight gates.
+
+    Numeric tolerances are frozen module constants before any results exist:
+    arrays/scalars use ``CANARY_ATOL``/``CANARY_RTOL``; hashes, config, seeds,
+    retry/failure/warning states use exact equality.  Tolerances must never be
+    relaxed after inspecting canary output.
+    """
+
+    fit_phase = _run_two_canary_fit_phase(
+        preflight=preflight,
+        prepared=prepared,
+        config=config,
+        adapter=adapter,
+        test_only=test_only,
+    )
+    result_a = fit_phase.result_a
+    result_b = fit_phase.result_b
+    payload_a_hash = fit_phase.payload_a_hash
+    payload_b_hash = fit_phase.payload_b_hash
 
     for label, result in (("A", result_a), ("B", result_b)):
         _require(result.internal_retry == 0, f"canary {label} internal_retry > 0")
@@ -1336,6 +1442,10 @@ def _run_two_canary_falsification(
     _require(result_a.q_failure == result_b.q_failure, "BLOCKING LEAKAGE FAILURE: Q failure state differs")
     _require(result_a.warnings == result_b.warnings, "BLOCKING LEAKAGE FAILURE: warning state differs")
     _require(result_a.nan_occurred == result_b.nan_occurred, "BLOCKING LEAKAGE FAILURE: NaN state differs")
+    # Raw score Y is outside the fit phase API.  Materialize the score-only
+    # target only after both fits and every clean/invariance gate pass.
+    target = make_score_only_target(score_Y, prepared.test_mask)
+    _require(target.test_mask_hash == prepared.test_mask_hash, "score target mask hash mismatch")
     return CanaryInvarianceReport(
         config_hash=stable_config_hash(asdict(config)),
         fit_payload_a_hash=payload_a_hash,
@@ -1350,6 +1460,7 @@ def run_two_canary_falsification(
     *,
     preflight: CanaryPreflight,
     prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
     config: FrozenFitConfig,
     adapter: AuthorizedEMFitAdapter,
 ) -> CanaryInvarianceReport:
@@ -1359,6 +1470,7 @@ def run_two_canary_falsification(
     return _run_two_canary_falsification(
         preflight=preflight,
         prepared=prepared,
+        score_Y=score_Y,
         config=config,
         adapter=adapter,
         test_only=False,
@@ -1369,6 +1481,7 @@ def _run_two_canary_falsification_test_only(
     *,
     preflight: CanaryPreflight,
     prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
     config: FrozenFitConfig,
     adapter: _TestAuthorizedFitAdapter,
 ) -> CanaryInvarianceReport:
@@ -1377,7 +1490,445 @@ def _run_two_canary_falsification_test_only(
     return _run_two_canary_falsification(
         preflight=preflight,
         prepared=prepared,
+        score_Y=score_Y,
         config=config,
+        adapter=adapter,
+        test_only=True,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class SmokeFitResult:
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    fit_status: str
+    heldout_mean_log_score: float
+    Q_strict: float
+    internal_retry: int
+    warnings: tuple[str, ...]
+    warning_count: int
+    q_failure: bool
+    nan_occurred: bool
+    finite_state: bool
+    x_hash: str
+    training_y_hash: str
+    train_mask_hash: str
+    test_mask_hash: str
+    fit_provenance_hash: str
+    target_topology_hash: str
+    score_target_hash: str
+    score_config_hash: str
+    fit_config_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class SmokeKSummary:
+    k: int
+    start_1_score: float
+    start_2_score: float
+    mean_score: float
+
+
+@dataclass(frozen=True, slots=True)
+class SmokeSelectionReport:
+    rows: tuple[SmokeFitResult, ...]
+    summaries: tuple[SmokeKSummary, ...]
+    selected_k: int
+    tie_candidates: tuple[int, ...]
+    em_fits_executed: int
+    score_config_hash: str
+    target_topology_hash: str
+    score_target_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class StoredSmokeFit:
+    """Readonly fit-only snapshot retained until the deferred score phase."""
+
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    Z: np.ndarray
+    w0: float
+    w: float
+    Q_strict: float
+    train_objective_diagnostics: Any
+    internal_retry: int
+    warnings: tuple[str, ...]
+    q_failure: bool
+    nan_occurred: bool
+    x_hash: str
+    training_y_hash: str
+    train_mask_hash: str
+    test_mask_hash: str
+    fit_provenance_hash: str
+    target_topology_hash: str
+    score_config_hash: str
+    fit_config_hash: str
+
+
+def _freeze_smoke_audit_value(value: Any) -> Any:
+    """Deep-copy a diagnostic tree into readonly/immutable containers."""
+
+    if isinstance(value, np.ndarray):
+        return _readonly_copy(value)
+    if isinstance(value, Mapping):
+        return tuple(
+            (copy.deepcopy(key), _freeze_smoke_audit_value(item))
+            for key, item in value.items()
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_smoke_audit_value(item) for item in value)
+    return copy.deepcopy(value)
+
+
+def _store_smoke_fit(
+    manifest_row: ManifestRow,
+    result: CanaryFitResult,
+    config: FrozenFitConfig,
+    prepared: PreparedTrainingData,
+    frozen_score_hash: str,
+) -> StoredSmokeFit:
+    """Detach the exact relation-side scoring state from a completed fit."""
+
+    return StoredSmokeFit(
+        k=manifest_row.k,
+        start=manifest_row.start,
+        data_seed=manifest_row.data_seed,
+        split_seed=manifest_row.split_seed,
+        model_seed=manifest_row.model_seed,
+        Z=_readonly_copy(result.Z, np.float64),
+        w0=float(result.w0),
+        w=float(result.w),
+        Q_strict=float(result.Q_strict),
+        train_objective_diagnostics=_freeze_smoke_audit_value(
+            result.train_objective_diagnostics
+        ),
+        internal_retry=result.internal_retry,
+        warnings=tuple(result.warnings),
+        q_failure=result.q_failure,
+        nan_occurred=result.nan_occurred,
+        x_hash=prepared.x_hash,
+        training_y_hash=prepared.training_y_hash,
+        train_mask_hash=prepared.train_mask_hash,
+        test_mask_hash=prepared.test_mask_hash,
+        fit_provenance_hash=prepared.fit_provenance_hash,
+        target_topology_hash=_smoke_target_topology_hash(prepared),
+        score_config_hash=frozen_score_hash,
+        fit_config_hash=stable_config_hash(asdict(config)),
+    )
+
+
+def _smoke_target_topology_hash(prepared: PreparedTrainingData) -> str:
+    """Outcome-blind score-scope provenance; not a target outcome hash."""
+
+    return stable_config_hash(
+        {
+            "test_mask_hash": prepared.test_mask_hash,
+            "pair_selection": "upper_test_pairs",
+            "target_materialization": "after_all_six_fits",
+        }
+    )
+
+
+def build_expected_smoke_comparability(
+    prepared: PreparedTrainingData,
+    manifest: Sequence[ManifestRow],
+) -> list[ComparabilityRow]:
+    """Build exact expected fit/score-topology metadata from frozen state."""
+
+    _require(type(prepared) is PreparedTrainingData, "smoke requires PreparedTrainingData")
+    common = {
+        "x_hash": prepared.x_hash,
+        "training_y_hash": prepared.training_y_hash,
+        "preprocessing_hash": stable_config_hash(
+            {"preprocessing": "identity", "uses_y_test": False}
+        ),
+        "train_mask_hash": prepared.train_mask_hash,
+        "test_mask_hash": prepared.test_mask_hash,
+        "fit_provenance_hash": prepared.fit_provenance_hash,
+        "target_topology_hash": _smoke_target_topology_hash(prepared),
+        "score_config_hash": score_config_hash(frozen_score_config()),
+    }
+    return [ComparabilityRow(manifest=row, **common) for row in manifest]
+
+
+def build_smoke_comparability(
+    prepared: PreparedTrainingData,
+    manifest: Sequence[ManifestRow],
+) -> list[ComparabilityRow]:
+    """Compatibility wrapper for the expected frozen smoke metadata builder."""
+
+    return build_expected_smoke_comparability(prepared, manifest)
+
+
+def validate_smoke_comparability(
+    rows: Sequence[ComparabilityRow],
+    prepared: PreparedTrainingData,
+    expected_manifest: Sequence[ManifestRow],
+) -> None:
+    """Bind every smoke row to actual prepared state and frozen configuration."""
+
+    expected_rows = build_expected_smoke_comparability(prepared, expected_manifest)
+    validate_cross_k_comparability(rows, expected_rows)
+
+
+def _smoke_fit_config(row: ManifestRow) -> FrozenFitConfig:
+    _require(row.replicate == 1, "smoke replicate changed")
+    _require(row.k in SMOKE_K_CANDIDATES, "smoke K is unexpected")
+    _require(row.start in START_LABELS, "smoke start is unexpected")
+    _require(row.data_seed == DATA_SEED_BASE + 1, "smoke data seed changed")
+    _require(row.split_seed == SPLIT_SEED_BASE + 1, "smoke split seed changed")
+    _require(
+        row.model_seed == expected_model_seed(row.replicate, row.k, row.start),
+        "smoke model seed changed",
+    )
+    return FrozenFitConfig(
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        k_est=row.k,
+        L=L_SAMPLES,
+        num_iter=NUM_ITER,
+        seed=row.model_seed,
+        numerics_mode=NUMERICS_MODE,
+    )
+
+
+def _require_clean_smoke_fit(result: CanaryFitResult, label: str) -> None:
+    _require(type(result) is CanaryFitResult, f"{label} returned invalid fit result")
+    _require(result.internal_retry == 0, f"{label} internal_retry > 0")
+    _require(not result.warnings, f"{label} emitted warnings")
+    _require(not result.q_failure, f"{label} Q failure")
+    _require(not result.nan_occurred, f"{label} NaN/nonfinite state")
+    _require_finite_tree(result.initialization.Z, f"{label} init Z")
+    _require_finite_tree(result.initialization.F, f"{label} init F")
+    _require_finite_tree(result.initialization.w0, f"{label} init w0")
+    _require_finite_tree(result.initialization.w, f"{label} init w")
+    _require_finite_tree(result.initialization.sigma_y, f"{label} init sigma_y")
+    _require_finite_tree(result.Z, f"{label} final Z")
+    _require_finite_tree(result.F, f"{label} final F")
+    _require_finite_tree(result.w0, f"{label} final w0")
+    _require_finite_tree(result.w, f"{label} final w")
+    _require_finite_tree(result.sigma_y, f"{label} final sigma_y")
+    _require_finite_tree(result.Q_strict, f"{label} Q_strict")
+    _require_finite_tree(result.train_objective_diagnostics, f"{label} diagnostics")
+
+
+@dataclass(frozen=True, slots=True)
+class _SmokeFitPhaseResult:
+    stored_fits: tuple[StoredSmokeFit, ...]
+    fit_count: int
+    score_config_hash: str
+
+
+def _run_smoke_fit_phase(
+    *,
+    preflight: CanaryPreflight,
+    prepared: PreparedTrainingData,
+    manifest: Sequence[ManifestRow],
+    comparability: Sequence[ComparabilityRow],
+    adapter: AuthorizedEMFitAdapter | _TestAuthorizedFitAdapter,
+    test_only: bool,
+) -> _SmokeFitPhaseResult:
+    """Fit the frozen six rows without accepting raw Y or score targets."""
+
+    expected_manifest = build_manifest((1,), SMOKE_K_CANDIDATES, START_LABELS)
+    validate_manifest(manifest, (1,), SMOKE_K_CANDIDATES, START_LABELS)
+    _require(tuple(manifest) == tuple(expected_manifest), "smoke manifest order/content changed")
+    validate_smoke_comparability(comparability, prepared, expected_manifest)
+    _require(
+        tuple(row.manifest for row in comparability) == tuple(expected_manifest),
+        "smoke comparability manifest order changed",
+    )
+    _validate_canary_preflight(preflight, prepared.train_mask, prepared.test_mask)
+    _require(len(expected_manifest) == 6, "smoke manifest must contain exactly six rows")
+
+    stored_fits: list[StoredSmokeFit] = []
+    frozen_score_hash = score_config_hash(frozen_score_config())
+    fit_count = 0
+    for manifest_row in expected_manifest:
+        config = _smoke_fit_config(manifest_row)
+        if test_only:
+            _require(type(adapter) is _TestAuthorizedFitAdapter, "test smoke requires test adapter")
+            boundary = FitCallBoundary._from_preflight_test_only(
+                prepared, preflight, config, adapter
+            )
+        else:
+            _require(type(adapter) is AuthorizedEMFitAdapter, "production smoke requires production adapter")
+            boundary = FitCallBoundary.from_preflight(
+                prepared, preflight, config, adapter
+            )
+        fit_count += 1
+        result = boundary.call(0)
+        label = f"smoke K={manifest_row.k} start={manifest_row.start}"
+        _require_clean_smoke_fit(result, label)
+        stored_fits.append(
+            _store_smoke_fit(
+                manifest_row, result, config, prepared, frozen_score_hash
+            )
+        )
+
+    expected_order = tuple(
+        (row.k, row.start, row.model_seed) for row in expected_manifest
+    )
+    stored_order = tuple((row.k, row.start, row.model_seed) for row in stored_fits)
+    _require(fit_count == 6, "smoke did not execute exactly six fits")
+    _require(len(stored_fits) == 6, "smoke did not store exactly six clean fits")
+    _require(stored_order == expected_order, "stored smoke fit order changed")
+    return _SmokeFitPhaseResult(tuple(stored_fits), fit_count, frozen_score_hash)
+
+
+def _run_smoke_selection(
+    *,
+    preflight: CanaryPreflight,
+    prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
+    manifest: Sequence[ManifestRow],
+    comparability: Sequence[ComparabilityRow],
+    adapter: AuthorizedEMFitAdapter | _TestAuthorizedFitAdapter,
+    test_only: bool,
+) -> SmokeSelectionReport:
+    """Execute exactly the frozen six-row smoke or stop on the first failure."""
+
+    fit_phase = _run_smoke_fit_phase(
+        preflight=preflight,
+        prepared=prepared,
+        manifest=manifest,
+        comparability=comparability,
+        adapter=adapter,
+        test_only=test_only,
+    )
+    stored_fits = fit_phase.stored_fits
+    fit_count = fit_phase.fit_count
+    frozen_score_hash = fit_phase.score_config_hash
+
+    # Phase B: score only.  The outcome-bearing target is created exactly once,
+    # after all six clean fits and the hard fit-count/order gates have passed.
+    target = make_score_only_target(score_Y, prepared.test_mask)
+    score_target_hash = stable_array_hash(target.rows, target.cols, target.values)
+    rows: list[SmokeFitResult] = []
+    for stored in stored_fits:
+        eta_pairs = heldout_raw_eta_pairs(
+            stored.Z,
+            stored.w0,
+            stored.w,
+            prepared.test_mask,
+        )
+        score = score_heldout_bernoulli(target, eta_pairs)
+        _require(np.isfinite(score), "smoke held-out score is nonfinite")
+        rows.append(
+            SmokeFitResult(
+                k=stored.k,
+                start=stored.start,
+                data_seed=stored.data_seed,
+                split_seed=stored.split_seed,
+                model_seed=stored.model_seed,
+                fit_status="clean",
+                heldout_mean_log_score=float(score),
+                Q_strict=stored.Q_strict,
+                internal_retry=stored.internal_retry,
+                warnings=stored.warnings,
+                warning_count=len(stored.warnings),
+                q_failure=stored.q_failure,
+                nan_occurred=stored.nan_occurred,
+                finite_state=True,
+                x_hash=stored.x_hash,
+                training_y_hash=stored.training_y_hash,
+                train_mask_hash=stored.train_mask_hash,
+                test_mask_hash=stored.test_mask_hash,
+                fit_provenance_hash=stored.fit_provenance_hash,
+                target_topology_hash=stored.target_topology_hash,
+                score_target_hash=score_target_hash,
+                score_config_hash=stored.score_config_hash,
+                fit_config_hash=stored.fit_config_hash,
+            )
+        )
+
+    _require(len(rows) == 6, "smoke did not score exactly six stored fits")
+    _require(bool(score_target_hash), "smoke score target was not created")
+
+    start_scores = [
+        StartScore(row.k, row.start, np.float64(row.heldout_mean_log_score))
+        for row in rows
+    ]
+    selection = select_k_from_two_starts(
+        start_scores, SMOKE_K_CANDIDATES, START_LABELS
+    )
+    summaries: list[SmokeKSummary] = []
+    for k in SMOKE_K_CANDIDATES:
+        by_start = {
+            row.start: row.heldout_mean_log_score for row in rows if row.k == k
+        }
+        _require(set(by_start) == set(START_LABELS), "smoke aggregation start set changed")
+        expected_mean = np.mean(
+            np.asarray([by_start[1], by_start[2]], dtype=np.float64),
+            dtype=np.float64,
+        )
+        _require(
+            np.float64(selection.mean_scores[k]) == expected_mean,
+            "smoke aggregation is not the unweighted two-start mean",
+        )
+        summaries.append(
+            SmokeKSummary(k, by_start[1], by_start[2], float(expected_mean))
+        )
+
+    return SmokeSelectionReport(
+        rows=tuple(rows),
+        summaries=tuple(summaries),
+        selected_k=selection.selected_k,
+        tie_candidates=selection.tie_candidates,
+        em_fits_executed=fit_count,
+        score_config_hash=frozen_score_hash,
+        target_topology_hash=_smoke_target_topology_hash(prepared),
+        score_target_hash=score_target_hash,
+    )
+
+
+def run_smoke_selection(
+    *,
+    preflight: CanaryPreflight,
+    prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
+    manifest: Sequence[ManifestRow],
+    comparability: Sequence[ComparabilityRow],
+    adapter: AuthorizedEMFitAdapter,
+) -> SmokeSelectionReport:
+    """Production smoke entry point; only the sealed EM adapter is accepted."""
+
+    _require(type(adapter) is AuthorizedEMFitAdapter, "production smoke requires production adapter")
+    return _run_smoke_selection(
+        preflight=preflight,
+        prepared=prepared,
+        score_Y=score_Y,
+        manifest=manifest,
+        comparability=comparability,
+        adapter=adapter,
+        test_only=False,
+    )
+
+
+def _run_smoke_selection_test_only(
+    *,
+    preflight: CanaryPreflight,
+    prepared: PreparedTrainingData,
+    score_Y: np.ndarray,
+    manifest: Sequence[ManifestRow],
+    comparability: Sequence[ComparabilityRow],
+    adapter: _TestAuthorizedFitAdapter,
+) -> SmokeSelectionReport:
+    """Pure fake-fit smoke entry point; production CLI cannot select it."""
+
+    return _run_smoke_selection(
+        preflight=preflight,
+        prepared=prepared,
+        score_Y=score_Y,
+        manifest=manifest,
+        comparability=comparability,
         adapter=adapter,
         test_only=True,
     )
@@ -1438,7 +1989,6 @@ def run_validate_only() -> dict[str, Any]:
         test_mask=test_mask,
     )
     training = prepared.training_values
-    target = make_score_only_target(Y_sentinel, test_mask)
     canary_a, canary_b = build_two_canary_payloads(training, train_mask)
     _require(np.array_equal(canary_a.Y_fit[train_mask], canary_b.Y_fit[train_mask]), "canary train values differ")
     _require(np.any(canary_a.Y_fit[test_mask] != canary_b.Y_fit[test_mask]), "canary test payloads do not differ")
@@ -1447,14 +1997,16 @@ def run_validate_only() -> dict[str, Any]:
     frozen_score_hash = score_config_hash(frozen_score_config())
     common = {
         "x_hash": prepared.x_hash,
+        "training_y_hash": prepared.training_y_hash,
         "preprocessing_hash": preprocessing_hash,
         "train_mask_hash": stable_array_hash(train_mask),
         "test_mask_hash": stable_array_hash(test_mask),
-        "target_hash": stable_array_hash(target.rows, target.cols, target.values),
+        "fit_provenance_hash": prepared.fit_provenance_hash,
+        "target_topology_hash": _smoke_target_topology_hash(prepared),
         "score_config_hash": frozen_score_hash,
     }
     comparability = [ComparabilityRow(manifest=row, **common) for row in smoke_manifest]
-    validate_cross_k_comparability(comparability, smoke_manifest)
+    validate_smoke_comparability(comparability, prepared, smoke_manifest)
 
     require_no_blocking_failures({})
     return {
@@ -1519,7 +2071,53 @@ def run_canary_cli() -> CanaryInvarianceReport:
     return run_two_canary_falsification(
         preflight=preflight,
         prepared=prepared,
+        score_Y=Y,
         config=config,
+        adapter=AuthorizedEMFitAdapter(),
+    )
+
+
+def run_smoke_cli() -> SmokeSelectionReport:
+    """Run the explicitly gated K={2,3,4}, starts={1,2} smoke."""
+
+    replicate = 1
+    manifest = build_manifest((replicate,), SMOKE_K_CANDIDATES, START_LABELS)
+    validate_manifest(manifest, (replicate,), SMOKE_K_CANDIDATES, START_LABELS)
+
+    # Complete every manifest/split/provenance guard before importing EM code.
+    split_plans = preflight_all_splits((replicate,))
+    split_plan = split_plans[0]
+    preflight = authorize_canary_preflight(split_plan)
+
+    if str(EXPFAM_SRC) not in sys.path:
+        sys.path.insert(0, str(EXPFAM_SRC))
+    from data_generator_expfam import generate_dual_data  # noqa: PLC0415
+
+    data = generate_dual_data(
+        n=N_NODES,
+        d=N_FEATURES,
+        k=K_TRUE,
+        seed=DATA_SEED_BASE + replicate,
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+    )
+    X = _readonly_copy(data["X"], np.float64)
+    score_Y = _readonly_copy(data["Y"], np.float64)
+    prepared = prepare_training_data(
+        X,
+        score_Y,
+        preflight=preflight,
+        train_mask=split_plan.train_mask,
+        test_mask=split_plan.test_mask,
+    )
+    comparability = build_smoke_comparability(prepared, manifest)
+    validate_smoke_comparability(comparability, prepared, manifest)
+    return run_smoke_selection(
+        preflight=preflight,
+        prepared=prepared,
+        score_Y=score_Y,
+        manifest=manifest,
+        comparability=comparability,
         adapter=AuthorizedEMFitAdapter(),
     )
 
@@ -1529,12 +2127,12 @@ def _build_parser() -> argparse.ArgumentParser:
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--validate-only", action="store_true", help="pure/static validation; performs zero fits")
     modes.add_argument("--canary", action="store_true", help="run gated two-payload canary")
-    modes.add_argument("--smoke", action="store_true", help="reserved; blocked in Phase 1/2")
+    modes.add_argument("--smoke", action="store_true", help="run gated K={2,3,4}, two-start smoke")
     modes.add_argument("--full", action="store_true", help="out of scope for Issue #41")
     parser.add_argument(
         "--allow-em",
         action="store_true",
-        help="second explicit authorization required with --canary",
+        help="second explicit authorization required with --canary or --smoke",
     )
     return parser
 
@@ -1551,7 +2149,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = run_canary_cli()
         print(json.dumps(asdict(report), sort_keys=True, allow_nan=False))
         return 0
-    raise HarnessStop("requested smoke/full fit mode is not implemented or authorized")
+    if args.smoke:
+        _require(args.allow_em, "--smoke requires the additional --allow-em authorization")
+        report = run_smoke_cli()
+        print(json.dumps(asdict(report), sort_keys=True, allow_nan=False))
+        return 0
+    raise HarnessStop("full pilot is not implemented or authorized")
 
 
 if __name__ == "__main__":
