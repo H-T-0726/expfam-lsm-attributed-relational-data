@@ -1,0 +1,4 @@
+n,trial,score,argmin_k,k_range_lo,k_range_hi,at_range_boundary,interior_minimum,matches_K_TRUE,monotone_decreasing,monotone_increasing
+75,1,bic_impl,3,2,4,False,True,True,False,False
+75,1,scf,4,2,4,True,False,False,True,False
+75,1,s_laplace_post,3,2,4,False,True,True,False,False
