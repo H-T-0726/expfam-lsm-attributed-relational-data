@@ -19,18 +19,74 @@
 本レポートで繰り返し使う次の量に、**専用の名前を与え、他の名前で呼ばない**。
 
 ```
-lnpZ_det      := −(n·k/2)·(1 + ln 2π)
-                 scale_Z 適用後の Z サンプルで評価した Z 事前分布項の値（§5.3）
+lnpZ_det       := −(n·k/2)·(1 + ln 2π)
+                  scale_Z 適用後の Z サンプルで評価した Z 事前分布項の値（§5.3）
 
-counterfactual diagnostic score
-   S_cf(k)   := −2·( Q_strict − lnpZ_det ) + p̂·ln n
-                 Q_strict から lnpZ_det だけを取り除いた診断量
+S_cf(k)        := −2·( Q_strict − lnpZ_det ) + p̂·ln n
+                  counterfactual diagnostic score
+                  Q_strict から lnpZ_det だけを取り除いた診断量
+
+S_laplace_post := S_cf + Σ_i ln det A_i^{post}
+                  post-hoc Laplace-curvature diagnostic score
+                  最終サンプルで再評価した曲率 A_i^{post} から作る診断量（§6.5）
 ```
 
 > **`S_cf` を「corrected BIC」「modified BIC」「true BIC」「Schwarz BIC」と呼んではならない。**
-> `S_cf` は**この項が選択結果にどれだけ効いたかを測るためだけの診断スコア**であり、
-> 何らかの意味で「正しい」基準ではない。周辺尤度にも ELBO にも対応しない
-> （ELBO との正確な関係は §6.5）。
+> `S_cf` は**この項が選択結果にどれだけ効いたかを測るための診断スコア**であり、
+> 何らかの意味で「正しい」基準ではない。周辺尤度には対応しない。
+>
+> **`S_laplace_post` を「ELBO」「ELBO 補正 BIC」「variational BIC」と呼んではならない。**
+> これは **指定した Gaussian entropy surrogate を代入したときに成り立つ代数的恒等式**として
+> 定義される診断量であり、**実アルゴリズムが実際に用いている `q` の ELBO ではない**（§6.5.1）。
+> 本レポートは旧版で `BIC_ELBO` / `K̂_ELBO` という名称を用いていたが、**撤回して改名した**。
+>
+> **`S_cf` を「原論文 BIC の再現」と呼んではならない。**
+> `S_cf` の当てはまり項は原論文 Eq.(16) の `ln L` と**構成要素レベルで整合する**が（§7.5.3）、
+> 評価手続き（どの `Z` を代入するか等）が原論文では特定できない。
+> 使ってよい限定表現は **paper-Eq16-aligned diagnostic** までである。
+
+### 0.1 3 つの「尤度」を絶対に混同しない（最重要）
+
+`Z` の扱いが異なる 3 つの量に、それぞれ別の名前を与える。
+
+```
+(Q1) conditional / plug-in likelihood
+     ln p(X, Y | Z, θ)
+     = 原論文 Eq.(16) の ln L
+     Z を積分せず、与えられた Z のもとで評価する量
+
+(Q2) complete joint log density
+     ln p(Z, X, Y | θ) = ln p(Z|θ) + ln p(X|Z,θ) + ln p(Y|Z,θ)
+     = 原論文 Eq.(17)/(18) の Q が事後期待値を取る対象
+     = 現行 Python の Q_strict が MC 近似している対象
+
+(Q3) observed-data marginal likelihood
+     ln p(X, Y | θ) = ln ∫ p(Z, X, Y | θ) dZ
+     Schwarz BIC が本来対象とする量
+```
+
+三者の関係:
+
+| | 当てはまり項が対象とする量 |
+|---|---|
+| **印刷された原論文 Eq.(26)** | **(Q1)** — Eq.(16) の `ln L` |
+| **現行 Python `calc_bic_dual`** | **(Q2) の近似事後期待値** — `Q_strict` |
+| **正しい意味の Schwarz BIC** | **(Q3)** |
+| `S_cf`（本レポートの診断量） | **(Q1) に構成要素レベルで整合**。(Q3) ではない |
+
+> **決定的な帰結**: 原論文 Eq.(26) の当てはまり項が `p(Z)` を含まないこと（§7.5.1）は
+> 一次確認された事実だが、**そこから「原論文 Eq.(26) は standard Schwarz BIC である」は従わない。**
+> Eq.(16) は `z_i` に条件づけた (Q1) であって、`Z` を積分した (Q3) ではないからである。
+> 実際、原論文は Eq.(16) を "the likelihood function `L` for `θ`" と呼び、
+> `θ` の要素に `σ_z²` を含めているが、右辺は `z_i` を与えたまま積分していない
+> [SUPPORTED_BY_PRIMARY_SOURCE]。
+>
+> **原論文の著者が Eq.(16) をどの `Z` で評価したか（最終 `Z` の plug-in か、`L` サンプル平均か、他か）は
+> 本文から特定できない。** したがって Eq.(26) が
+> plug-in likelihood BIC / conditional BIC / complete-data-like criterion の
+> **どれとして理論的に意図されたかは [UNRESOLVED] とし、本文以上に推測しない**（§17-U6）。
+>
+> **`S_cf` を「観測データ周辺尤度に基づく基準」と呼んではならない。** `S_cf` も (Q3) ではない。
 
 ---
 
@@ -76,21 +132,51 @@ counterfactual diagnostic score
    （**旧 0.5 系列**）では `Q_strict` の Gaussian-X 部分が **1 M-step 古い Σ** で評価されている。
    fixed 系列の実験スクリプトと `em_runner.py` は明示同期しているため該当しない。
    **数値への影響量は未測定** [UNRESOLVED]。
-7. **新発見: 先行研究の MATLAB で `BIC` という名前を持つ唯一の量は、joint モデルの `Q` ではない**
+7. **最重要の新発見: 現行 Python は、原論文 Eq.(26) の当てはまり項に存在しない `E[ln p(Z)]` を
+   潜在次元選択のスコアに含めている** [SUPPORTED_BY_PRIMARY_SOURCE + CONFIRMED_IN_REPOSITORY]。
+   2026-08-23 に環境既存の `pdftotext` で原論文を直接読み、次を確認した:
+   - **Eq.(16) の尤度 `L` に `p(Z|σ_z²)` は入っていない**（X の項と Y の項だけ）。
+   - **Eq.(18) の `Q` には `ln p(Z^(l)|θ)` が入っている**。
+   - **Eq.(26) の当てはまり項は `ln L`（Eq.16）であり `Q`（Eq.18）ではない。**
+     本文が "the true dimension k\* affects the likelihood function of L from Eq. (16)" と明示している。
+
+   一方 `calc_bic_dual` は `−2·Q_strict + p̂ ln n` を使い、`Q_strict` は `E[ln p(Z)]` を含む。
+   **すなわち原論文自身が `L` と `Q` を使い分けているのに対し、現行 Python は BIC に `Q` を入れている。**
+   さらに `scale_Z` + `var_z = 1` によりその余分な項は決定論化する（上記 1）。
+   これは「現行基準は Schwarz BIC ではない」（KI-010）より**具体的な量レベルの不一致**である（§7.5.1）。
+   また **原論文 Algorithm 2 / Eq.(14) は `σ_z²` を推定する**のに対し、
+   MATLAB と Python は推定せず `scale_Z` で尺度を固定する（§5.5）。
+
+   > **ただし、ここから「原論文の側が正しい Schwarz BIC である」とは従わない**（§0.1、E25）。
+   > Eq.(16) の `ln L` は `z_i` に**条件づけた**量であり、`Z` を積分した観測データ周辺尤度
+   > `ln p(X,Y|θ) = ln ∫ p(Z,X,Y|θ) dZ` ではない。
+   > 原論文は Eq.(16) を "the likelihood function `L` for `θ`" と呼び `θ` に `σ_z²` を含めているが、
+   > 右辺は `z_i` を与えたままである [SUPPORTED_BY_PRIMARY_SOURCE]。
+   > すなわち **3 つの別の量**が関与している:
+   > (Q1) `ln p(X,Y|Z,θ)`（＝原論文 Eq.(26)）／
+   > (Q2) `ln p(Z,X,Y|θ)` の近似事後期待値（＝現行 Python）／
+   > (Q3) `ln p(X,Y|θ)`（＝本来の Schwarz BIC）。
+   > **どちらも (Q3) ではない。** Eq.(26) がどの型の規準として意図されたかは [UNRESOLVED]（U6-c）。
+8. **先行研究の MATLAB で `BIC` という名前を持つ唯一の量は、joint モデルの `Q` ではない**
    [CONFIRMED_IN_REPOSITORY]。`Mato Lab Program/DecideNumFactor.m` L.13-14 は
    `factoran`（**X のみの古典的探索的因子分析**）の周辺対数尤度に
    `t = (i+1)*d − 0.5*i*(i−1)` を掛けた罰則を付す。
-   これは現行 Python の `−2·Q_strict + p̂ ln n` とは**量のレベルで別物**である（§7.5）。
-8. **「異種 family だから BIC が使えない」は誤りである** [DERIVED]。
+   ただし同関数はどの `.m` からも呼ばれておらず、原論文 Experiment 2 との接続は **UNRESOLVED**（§7.5）。
+9. **「異種 family だから BIC が使えない」は誤りである** [DERIVED]。
    同一 family 割当のもとでの k 比較には支障がない。致命的なのは
    **異なる支配測度をまたぐ family 間の尤度値比較**であり、一次 CSV で直接観測できる
    （`per_column_demo_summary.csv`: 台違反の `all_bernoulli` が最小 BIC 9672.73 かつ最悪の rmse_Z 0.5919）
    [EMPIRICALLY_OBSERVED]。
-9. **K_TRUE を振った選択率は、旧 0.5 系列に既に存在する** [CONFIRMED_IN_REPOSITORY]。
+10. **K_TRUE を振った選択率は、旧 0.5 系列に既に存在する** [CONFIRMED_IN_REPOSITORY]。
    `exp2_bic_{A,B,C}.csv`（n=150, d=15, K_TRUE ∈ {1,3,5,7,9}, k_est=1..10, 5 試行）で
-   15 セル中 13 セルが `P(K̂=K_TRUE)=1.00`。低下するのは**シナリオ B のみ**。
-10. **n を振った K 選択は一度も行われていない** [CONFIRMED_IN_REPOSITORY]（§13.5）。
-11. **決定ゲート: `D: INVESTIGATE_ALTERNATIVE_CRITERION_BEFORE_K_SWEEP`**（次点 `A`）。§20。
+   15 セル中 **12 セル**が `P(K̂=K_TRUE)=1.00`。低下するのは**シナリオ B のみ**。
+11. **n を振った K 選択は一度も行われていない** [CONFIRMED_IN_REPOSITORY]（§13.5）。
+12. **決定ゲート: `D: INVESTIGATE_ALTERNATIVE_CRITERION_BEFORE_K_SWEEP`**（次点 `A`）。§20。
+    根拠は「`Σ_i ln det A_i` 1 量を測ればよい」ではない（撤回済み）。
+    **原論文 Eq.(16)/(26)・現行 Q ベース基準・観測データ周辺尤度の 3 者が
+    互いに別の量であることが一次確認されたため、
+    大規模 K sweep の前に「何を dimension-selection target として比較するか」を
+    整理する必要がある**ことである。
 
 ---
 
@@ -115,12 +201,27 @@ counterfactual diagnostic score
 - per-column prototype の本文採用可否の判断
 - 一致性定理の完全証明 [OUT_OF_SCOPE]
 
-### 本監査が読めなかった一次資料
-- `paper/A_study_on_latent_structural_models_for_binary_rel.pdf` は本環境で**機械読み取り不可**
-  （PDF 抽出ライブラリ未導入。環境変更は本 Issue のスコープ外）。
-  原論文に関する記述はすべて **研究者本人による一次確認の伝聞**であり、
-  `[UNVERIFIED_IN_REPOSITORY]` として明示する。
-  この扱いは `docs/math_notes/half_factor_primary_source_confirmation_20260818.md` §3 の先例に従う。
+### 一次資料の読み取り状況（2026-08-23 更新）
+
+**`paper/A_study_on_latent_structural_models_for_binary_rel.pdf` は読めた。**
+環境に既存の `pdftotext`（`/mingw64/bin/pdftotext`、poppler 由来）で
+`pdftotext -layout` によりテキスト抽出に成功した（1129 行）。
+**新規パッケージのインストールは行っていない。** 環境は変更していない。
+
+したがって、旧版で `[UNVERIFIED_IN_REPOSITORY]` としていた原論文に関する記述は
+**本監査で直接確認した `[SUPPORTED_BY_PRIMARY_SOURCE]` に更新した**（§5.5・§7.5）。
+
+**限定**: `pdftotext` の出力は数式のレイアウトを完全には保持しない（添字・上付きが平坦化される）。
+本レポートが引用する Eq.(14)/(16)/(17)/(18)/(26) と Algorithm 2 は、
+**構造（どの項が含まれ、どの項が含まれないか）**については明瞭に読み取れたが、
+**逐字の記号レベルの一致は保証しない**。式番号・項の有無・本文の主張はすべて確認済みである。
+
+**Table I の行対応は信用しない** [CONFIRMED]。`pdftotext -layout` は Table I の
+結合セルを縦方向にずらして出力しており、Experiment 1 / 2 / 3 の行が正しく対応していない。
+Experiment 2 の設定（`k* ∈ {1,3,5,7,9}`、`k̂ = 1..10`）は**本文 §4.3 の記述**
+（"the true dimension k\* of the latent vector is set to be 1, 3, 5, 7, 9, and we calculate
+the BIC when k ranges from 1 to 10 for each k\*"）から取っている。
+Table I からは取っていない。
 
 ---
 
@@ -272,6 +373,7 @@ M-step で更新されない [CONFIRMED_IN_REPOSITORY: 全ソースを網羅 gre
 | `run_fixed_official_exp1_bic_full.py` L.156 | あり | 影響なし |
 | `run_fixed_real_wine_pilot.py` L.218 | あり | 影響なし |
 | `run_fixed_real_cora_balanced_k_sweep.py` L.261 | あり | 影響なし |
+| `run_fixed_official_exp1_bic_k9_extension.py` L.162 | あり | 影響なし |
 | `experimental/em_runner.py` L.285 | あり | 影響なし |
 
 **数値への影響量は未測定** [UNRESOLVED]。関連する経験的観測は §13.3b。
@@ -312,11 +414,12 @@ BIC 換算では潜在次元 1 あたり **`+2.8378770664 n`** の固定加算�
   2. `NaN`: `np.mean` が NaN を返し `NaN > 0` は偽なので未変更で返る。
      **ただし全ランナーで NaN/Inf ガードが `scale_Z` の前に発火し**
      （`utils_expfam.py` L.507-512 → L.514、`run_fixed_official_exp1_bic_full.py` L.134-137 → L.139、
+     `run_fixed_official_exp1_bic_k9_extension.py` L.142-145 → L.147、
      `em_runner.py` L.219-224 → L.226）、置換値 `Z_prev` は常に有限なので**この経路は閉じている**。
 - **制約は配列全体に効く**（スライスごとではない）。したがって
   `lnpZ(Z^{(l)})` は `l` ごとには一定でない。**`L` 平均だけが一定**であり、
   それは `_lnpZ` が `Σ Z²` についてアフィンだからである。
-- **実行順序**（6 ランナーすべてで確認）: `scale_Z` は E-step の最後・M-step の前に走り、
+- **実行順序**（`scale_Z` を呼ぶ 7 ランナーすべてで確認）: `scale_Z` は E-step の最後・M-step の前に走り、
   `Q_strict` は**同じ scaled `Z_samples`** に対して計算される。
 
 | ランナー | `scale_Z` | M-step | `Q_strict` |
@@ -324,6 +427,7 @@ BIC 換算では潜在次元 1 あたり **`+2.8378770664 n`** の固定加算�
 | `utils_expfam.run_em` | L.209 | L.214-220 | ループ後、同一 `Z_samples` |
 | `utils_expfam.run_em_dual` | L.514 | L.519-527 | L.581 |
 | `run_fixed_official_exp1_bic_full.py` | L.139 | L.144-149 | L.159（同期 L.156 の後） |
+| `run_fixed_official_exp1_bic_k9_extension.py` | L.147 | L.151-156 | L.163（同期 L.162 の後） |
 | `run_fixed_real_wine_pilot.py` | L.200 | — | L.219（同期 L.218 の後） |
 | `run_fixed_real_cora_balanced_k_sweep.py` | L.250 | — | L.262（同期 L.261 の後） |
 | `experimental/em_runner.py` | L.226 | L.245-252 | L.294（同期 L.285 の後） |
@@ -355,10 +459,22 @@ BIC 換算では潜在次元 1 あたり **`+2.8378770664 n`** の固定加算�
 
 ### 5.5 [CONFIRMED_IN_REPOSITORY] 3 系列の分離 — `σ_z²` の扱い
 
-**LINEAGE 1: 印刷された原論文** [UNVERIFIED_IN_REPOSITORY]
-研究者本人の一次確認によれば、Eq.(14) は
-`σ_z² = 1/(L k n) Σ ||z_i^(l)||²` として `σ_z²` を**更新する**と記載されている。
-本監査は PDF を読めないため、この記述を検証していない。
+**LINEAGE 1: 印刷された原論文** [SUPPORTED_BY_PRIMARY_SOURCE — 2026-08-23 に `pdftotext` で直接確認]
+
+Eq.(14) は `σ_z² = (1/(L k n)) Σ_l Σ_i ||z_i^(l)||²` として **`σ_z²` を M-step で更新する**。
+Algorithm 2 の第 11 行は
+
+> "Using Z(1), Z(2), …, Z(L), compute parameters F, μ_x, Σ and σ_z² based on Eqs. (10)–(12)
+> and (14), and compute gradients of w0 and w based on Eqs. (24) and (25)."
+
+と書かれており、**`σ_z²` は推定対象パラメータである**。
+**印刷されたアルゴリズムに `scaleZ` に相当する操作は存在しない。**
+
+また人工データ生成手順 Step 1 は
+「Set `σ_z² = 1` and generate `Z` so that `z_i ~ N(0, σ_z² I)`」であり、
+**Z の列ごとの z-score 化は行っていない**。
+Step 3 は `x_i ~ N(F z_i + μ_x, Σ)`、`F` の各成分 `~ N(0, 10)`、`Σ = diag(0.1,…)`、`μ_x = 0` であり、
+**`F` の行正規化も X の z-score 化も行っていない**（本研究の生成器はいずれも行う。§4.1）。
 
 **LINEAGE 2: MATLAB**（`Mato Lab Program/calcdescmetric_ver4.m`）[CONFIRMED_IN_REPOSITORY]
 
@@ -367,7 +483,7 @@ L.29   Z_new2 = scaleZ(Z_new);
 L.30   % Z_new2 = Z_new;
 L.35   % varZ = calcVarZ(Z_new2, params.L);        ← コメントアウト
 L.40-42  Q = Q + calcp_X(...) + calcp_Y(...) + calcp_Z(Z_new2(:,:,l), 1);   ← σ_z を 1 に直書き
-L.65-77  function Z_new2 = scaleZ(Z)
+L.65-79  function Z_new2 = scaleZ(Z)   % 代入は L.78
            a = Σ_{l,i,k} Z²;  a = a / (L·n);       ← すなわち a = k · mean(Z²)
            Z_new2 = Z .* sqrt(size(Z,2) / a);      ← = Z / sqrt(mean(Z²))
 L.98-100 function varZ = calcVarZ(Z, L)            ← 定義はあるが呼ばれていない
@@ -381,12 +497,16 @@ L.98-100 function varZ = calcVarZ(Z, L)            ← 定義はあるが呼ば�
 **LINEAGE 3: 現行 Python** — `var_z = 1.0` 固定 ＋ `scale_Z`。**MATLAB と同じ構造**である。
 
 **評価** [DERIVED + UNRESOLVED]:
+- **印刷された論文は `σ_z²` を推定する。MATLAB と Python は推定せず `scale_Z` で尺度を固定する。**
+  すなわち **LINEAGE 1 と LINEAGE 2/3 の間に実装上の差が確認された** [SUPPORTED_BY_PRIMARY_SOURCE +
+  CONFIRMED_IN_REPOSITORY]。
 - 目的は 3 系列とも**尺度の識別性制約**とみてよい（`model.py` L.98 の注釈と整合）。
-- **代数的な接点**: `scale_Z` の下では `calcVarZ` は厳密に 1 を返す。すなわち両者はこの点で互いの不動点である。
-- しかし **EM の軌道が同一になるか、`Q` / BIC の評価が同一になるかは別問題であり、証明していない** [UNRESOLVED]。
+- **代数的な接点**: `scale_Z` の下では `calcVarZ`（= Eq.(14) と同形）は厳密に 1 を返す。
+  すなわち両者はこの点で互いの不動点である。
+- しかし **EM の軌道が同一になるか、目的関数上で等価かは別問題であり、証明していない** [UNRESOLVED]。
   **`Q` / BIC への影響は明確に異なる**: `scale_Z` ＋ `var_z = 1` では `lnpZ` 寄与が定数に退化するが、
   `σ_z²` を真に再推定する方式ではデータ依存の量として残る。
-- **どちらが「正しい」とは判断しない。**
+- **どちらが「正しい」とは判断しない。等価性を証明できないので UNRESOLVED のままとする。**
 
 ---
 
@@ -440,7 +560,7 @@ ln p(D|θ) = E_q[ ln p(D|θ) ]
 ### 6.3 [DERIVED] 本実装で KL が消えない 3 つの理由
 
 1. **Laplace 近似**: `q` は各ノードごとの `N(η_i, A_i^{-1})` の積であり、厳密事後ではない
-   （`calc_eta_newton` L.443-458）。ノード間の事後相関も無視されている。
+   （`calc_eta_newton` L.446-460）。ノード間の事後相関も無視されている。
 2. **θ のずれ**: `q` は M-step 前の θ で作られ、`Q_strict` は M-step 後の θ で評価される。
    有限 `num_iter = 8` で停止するため EM 停留点でもない。
 3. **`scale_Z` の押し出し**: 実際に使われるのは Laplace 密度ではなく、その大域スカラー倍による押し出し。
@@ -471,31 +591,72 @@ A_i = (1/var_z)·I  +  F^T diag(非負) F  +  c·w²·Z^T diag(非負) Z ,   c �
 > したがって `Q + H(q) ≤ Q − lnpZ_det`。[DERIVED、ただし §6.3 の (3) により
 > **実際に使われている `q`（`scale_Z` 押し出し後、かつ逐次依存連鎖の経験分布）に対しては成立を保証しない**]
 
-### 6.5 [DERIVED] ELBO 補正基準と診断スコアの正確な関係（新規）
+### 6.5 [DERIVED] Gaussian entropy surrogate を代入したときの代数的恒等式
 
-`BIC_ELBO := −2(Q_strict + Ĥ) + p̂ ln n`、`Ĥ := (nk/2)ln(2πe) − (1/2)Σ_i ln det A_i` と置くと
+任意の曲率行列の族 `{A_i}` に対し、**Gaussian entropy surrogate**
+
+```
+Ĥ({A_i}) := Σ_i [ (k/2)·ln(2πe) − (1/2)·ln det A_i ]
+          = (nk/2)(1 + ln 2π) − (1/2)·Σ_i ln det A_i
+```
+
+を定義し、`S({A_i}) := −2(Q_strict + Ĥ({A_i})) + p̂ ln n` と置くと
 
 ```
 −2Ĥ = −n k (1 + ln 2π) + Σ_i ln det A_i
-BIC_ELBO = BIC_impl − n k (1 + ln 2π) + Σ_i ln det A_i
+S    = BIC_impl − n k (1 + ln 2π) + Σ_i ln det A_i
 ```
 
 一方 `S_cf = BIC_impl − n k (1 + ln 2π)`（§0）なので
 
-> **`BIC_ELBO = S_cf + Σ_i ln det A_i`（厳密）** [DERIVED]
+> **`S({A_i}) = S_cf + Σ_i ln det A_i`（代数的恒等式）** [DERIVED]
 
-すなわち **診断スコア `S_cf` と ELBO 補正基準の差は、`Σ_i ln det A_i` ちょうど 1 項である。**
-`A_i ⪰ I` より `Σ_i ln det A_i ≥ 0` なので `BIC_ELBO ≥ S_cf` であり、上界はない。
+`A_i ⪰ I` より `Σ_i ln det A_i ≥ 0` なので `S ≥ S_cf` であり、上界はない。
 
-`S_cf` は fixed 系列 4/5 ケースで k について単調減少する（§13.2a）。したがって:
+本監査は、`A_i` として **最終サンプルで再評価した `A_i^{post}`**（§6.5.2 で定義）を代入した場合を
+`S_laplace_post := S_cf + Σ_i ln det A_i^{post}` と呼ぶ。
 
-> **「ELBO 補正基準が内点最小を持つかどうか」は、
-> 「`Σ_i ln det A_i` が k について `S_cf` の減少を打ち消すほど急に増えるか」と完全に同値である。**
+### 6.5.1 [重要] これは ELBO ではない
+
+> **`S_laplace_post` を「ELBO 補正基準」と呼んではならない。** [DERIVED]
+
+`ln p(D|θ) ≥ Q(θ;q) + H(q)` という ELBO 不等式が意味を持つのは、
+`Q` と `H` が**同一の分布 `q`** について評価されているときだけである（§6.1）。
+本実装ではそれが成り立たない [CONFIRMED_IN_REPOSITORY]:
+
+1. `calc_eta_newton` は `Z` をノードごとに in-place 更新する **Gauss–Seidel** であり、
+   `A_i` はそのノードのその時点の位置で評価される。
+   **サンプリング手続き全体は `Z_samples` 上の well-defined な確率法則を定める**が、
+   それは**各ノードの Laplace 密度の積ではなく**、掃引順序に依存する陰的な法則であり、
+   閉形式も密度評価も持たない（intractable）。
+   `Ĥ({A_i})` はその法則のエントロピーではない。
+2. `L` 個のサンプルは**逐次依存の連鎖**であり、共通の `q` からの iid 標本ではない（§6.3）。
+3. サンプリング後に `scale_Z` が `Z_samples` 全体に作用し、`Q_strict` は
+   **スケール後**のサンプルで評価される。`q` は Laplace 密度ではなくその押し出しである。
+4. `A_i^{post}` は**サンプリング時に使われた `A_i` ではない**（§6.5.2）。
+5. したがって `Ĥ({A_i^{post}})` は**実際の `q` のエントロピーではない**。
+
+すなわち `S({A_i}) = S_cf + Σ_i ln det A_i` は
+**「指定した Gaussian entropy surrogate を代入したときに成り立つ代数的恒等式」**であって、
+**`ln p(D|θ)` の下界であることは保証されない**。
+旧版の「未解決問題は `Σ_i ln det A_i` ただ 1 量に縮約された」という表現は
+**この点で誤りであり、撤回する**。縮約されるのは*この代数式の残り 1 項*であって、
+「どの量を選択の対象にするか」という問い自体は残る（§7.5・§20）。
+
+### 6.5.2 `A_i^{post}` の定義と限定
+
+```
+A_i^{post,(l)} := _calc_precision_matrix(Z_samples[:,:,l], F, sigma, var_z, w0, w, i)
+```
+（最終 E-step 後、`scale_Z` 適用済みの `Z_samples` で再評価した曲率。乱数を使わない純関数評価。）
+
+`Z` は `scale_Z` で大域スケール変更を受けており、`A_i` は `Z` に非線形に依存するため、
+`A_i^{post}` は E-step 内部の `A_i` と一致しない。
+`scale_Z` のスケール係数 `c` は、ランナーがスケール前の `Z` を返さないため**復元できない**。
 
 **`Σ_i ln det A_i` はどの実験でも記録されていない** [CONFIRMED_IN_REPOSITORY:
 `expfam/results` 配下の全 CSV を `log_det|logdet|eigen|det_A|posterior_var` で grep して 0 件]。
-したがって ELBO 補正後の argmin は**現時点では計算できない** [UNRESOLVED]。
-これが §20 の決定ゲートと次実験計画の中心にある。
+したがって `S_laplace_post` は**現時点では計算できない** [UNRESOLVED]。
 
 ---
 
@@ -550,12 +711,32 @@ BIC_ELBO = BIC_impl − n k (1 + ln 2π) + Σ_i ln det A_i
 
 3 系列を混同しない。
 
-**LINEAGE 1: 印刷された原論文** [UNVERIFIED_IN_REPOSITORY]
-研究者本人の一次確認によれば、Eq.(26) は
-`BIC = −2 ln L + ((k+1)d − k(k−1)/2) ln n` であり、本文は
-「the true dimension k\* affects the likelihood function L from Eq. (16)」と述べている。
-すなわち印刷された定義は **`Q` ではなく尤度 `L`** を用いているように読める。
-**本監査は PDF を読めないため、この記述を検証していない。**
+**LINEAGE 1: 印刷された原論文** [SUPPORTED_BY_PRIMARY_SOURCE — 2026-08-23 に `pdftotext` で直接確認]
+
+抽出テキストから確認した 3 点:
+
+```
+Eq.(16)   L = ∏_{i=1}^{n} p(x_i | F, z_i, μ_x, Σ) · { ∏_{i≠j} p(y_ij | z_i, z_j, w0, w) }^{1/2}
+Eq.(17)   Q(θ, θ_old) = ∫ p(Z | X, Y, θ_old) · ln p(Z, X, Y | θ) dZ
+Eq.(18)   Q ≈ (1/L) Σ_l ln p(Z^(l), X, Y | θ)
+             = (1/L) Σ_l { ln p(Z^(l) | θ) + ln p(X | Z^(l), θ) + ln p(Y | Z^(l), θ) }
+Eq.(26)   BIC = −2 ln L + ( (k+1)d − k(k−1)/2 ) ln n
+本文       "Note that the true dimension k* affects the likelihood function of L from Eq. (16)."
+```
+
+**決定的な事実** [SUPPORTED_BY_PRIMARY_SOURCE]:
+
+1. **Eq.(16) の `L` に `p(Z | σ_z²)` は入っていない。** 尤度は X の項と Y の項だけからなる。
+2. **Eq.(18) の `Q` には `ln p(Z^(l) | θ)` が入っている。**
+3. **Eq.(26) の当てはまり項は `ln L`（Eq.16）であって `Q`（Eq.18）ではない。**
+   本文がそれを明示している（"the likelihood function of L from Eq. (16)"）。
+
+すなわち **原論文自身が `L` と `Q` を別の量として使い分けており、
+BIC には `p(Z)` を含まない `L` を使っている。**
+
+なお Eq.(16) の Y 側には `{ · }^{1/2}` の指数が付いている（`(1/2)Σ_{i≠j} = Σ_{i<j}`）。
+これは KI-001 の「印刷式に 1/2 がある」という既存の記録と整合する。本監査はこれを再確認しただけであり、
+KI-001 の判断を変更しない。
 
 **LINEAGE 2: MATLAB** `Mato Lab Program/DecideNumFactor.m` [CONFIRMED_IN_REPOSITORY]
 
@@ -584,12 +765,137 @@ L.14     BIC_X(1, i) = -2 * n * loglikely(1, i) + t * log(n);
    オフラインで公式ドキュメントを確認できないため [UNRESOLVED] とする。研究者の確認事項。
 
 **LINEAGE 3: 現行 Python** — `calc_bic_dual` L.403 は `−2·Q_strict + p̂·ln n` を明示的に使う。
+`Q_strict` は §5.1 の通り `E[ln p(Z)] + E[ln p(X|Z)] + E[ln p(Y|Z)]` を含む。
 
-**帰結** [DERIVED]:
-研究者報告の Eq.(26) が `ln L`（尤度）であるとすれば、現行 Python は
-**`Q_strict`（完全データ対数尤度の近似事後期待値）を同じ位置に置いており、量のレベルで別物である。**
-これは既存の「現行基準は Schwarz BIC ではない」（KI-010）より**具体的な、量レベルの不一致の指摘**である。
-ただし LINEAGE 1 は本監査では未検証であり、**この帰結は研究者の一次確認に条件付きである。**
+### 7.5.1 [SUPPORTED_BY_PRIMARY_SOURCE + CONFIRMED_IN_REPOSITORY] 量レベルの不一致
+
+| | BIC の当てはまり項 | `p(Z)` を含むか |
+|---|---|:---:|
+| **印刷された原論文 Eq.(26)** | `ln L` = Eq.(16) = `Σ_i ln p(x_i\|·) + Σ_{i<j} ln p(y_ij\|·)` | **含まない** |
+| **現行 Python `calc_bic_dual`** | `Q_strict` = `(1/L)Σ_l [ ln p(Z^(l)) + ln p(X\|Z^(l)) + ln p(Y\|Z^(l)) ]` | **含む** |
+
+> **したがって現行 Python は、印刷された Eq.(26) の `L` に存在しない `E[ln p(Z)]` を
+> 潜在次元選択のスコアに含めている。**
+> さらに `scale_Z` ＋ `var_z = 1` により、その項は `−(nk/2)(1 + ln 2π)` に決定論化する（§5.3）。
+
+これは既存の「現行基準は Schwarz BIC ではない」（KI-010）より**具体的な、
+paper-vs-current の量レベルの不一致**であり、本監査で一次資料により確認された。
+
+**ただしここで止まってはならない**（§0.1）。原論文 Eq.(16) の `ln L` も
+`z_i` に条件づけた量であり、`Z` を積分していない [SUPPORTED_BY_PRIMARY_SOURCE]。
+原論文本文は Eq.(16) の直前で
+「`θ` を `F, μ_x, Σ, σ_z², w0, w` を要素とするパラメータベクトルとし、Fig.1 から
+ `θ` の尤度関数 `L` は次で与えられる」と書いているが、その右辺は `z_i` を与えたままである。
+したがって:
+
+| | 対象とする量（§0.1 の記号） | `p(Z)` を含むか | `Z` を積分するか |
+|---|---|:---:|:---:|
+| **印刷された原論文 Eq.(26)** | **(Q1)** `ln p(X,Y\|Z,θ)` | **含まない** | **しない** |
+| **現行 Python `calc_bic_dual`** | **(Q2)** の近似事後期待値 `Q_strict` | **含む** | しない（MC 事後平均） |
+| **正しい意味の Schwarz BIC** | **(Q3)** `ln p(X,Y\|θ)` | — | **する** |
+
+> **したがって「原論文 Eq.(26) は standard Schwarz BIC である」とは言えない。**
+> 三者はいずれも別の量である。現行 Python が原論文と食い違っているのは事実だが、
+> **原論文の側が (Q3) に一致している保証もない。**
+> 原論文が Eq.(26) をどの型の規準として意図したかは [UNRESOLVED]（§17-U6）。
+
+### 7.5.2 parameter count
+
+Eq.(26) の `(k+1)d − k(k−1)/2` は
+`utils_expfam.calc_bic` L.104 および `DecideNumFactor.m` L.13 と**厳密に一致する**。
+`calc_bic_dual` とは **Gaussian-X かつ非 Gaussian-Y の場合のみ**一致する（§7.4）。
+
+記録のみ [UNRESOLVED]: `(k+1)d − k(k−1)/2 = kd − k(k−1)/2 + d` は `F`（`O(k)` 商）に加えて
+`d` 個を **1 組だけ**数えている。一方、印刷モデルの `θ` は Eq.(16) 直前の定義により
+`F, μ_x, Σ, σ_z², w0, w` である [SUPPORTED_BY_PRIMARY_SOURCE]。すなわち Eq.(26) の
+parameter count に**現れていない**推定対象は、少なくとも次の 4 種ある:
+
+- `μ_x`（`d` 個、Eq.(11) で推定）と `Σ` の対角（`d` 個、Eq.(12) で推定）の**一方**
+  （`+d` は片方しか吸収できない）
+- `σ_z²`（1 個、Eq.(14)・Algorithm 2 L.11 で推定）
+- `w0`（1 個）
+- `w`（1 個）
+
+どれを意図的に除いたのかは本文からは判別できない。
+
+なお `(k+1)d − k(k−1)/2` は**古典的探索的因子分析（EFA）の自由パラメータ数
+`kd + d − k(k−1)/2`（負荷 + 一意分散 − 回転の自由度）と一致する形**であり、
+リポジトリ内でも `DecideNumFactor.m` L.13 が **`factoran`（EFA）** の尤度に対して
+この `t` を使っている [CONFIRMED_IN_REPOSITORY]。
+すなわちこの count は EFA の慣行をそのまま持ち込んだ形であり、
+関係データ側のパラメータ（`w0, w`）と `σ_z²` を含まない。
+**ただしこれは形の一致であって、原論文著者の意図の証拠ではない** [UNRESOLVED]。
+
+**なお本研究の Python モデルは `μ_x` を持たない**（`calc_F` の注記「μ_x is assumed to be 0」、
+root `CLAUDE.md` §1 の「バイアスなし」）。原論文の生成手順も Step 3) で `μ_x = 0` と置いている
+が、推定側（Eq.(11)）では `μ_x` を推定する [SUPPORTED_BY_PRIMARY_SOURCE]。
+
+### 7.5.3 `S_cf` と Eq.(16) の関係、および呼んではいけない名前
+
+`Q_strict − E[ln p(Z)] = E[ln p(X|Z)] + E[ln p(Y|Z)]` であり、
+これは **Eq.(16) の `ln L` と構成要素レベルで整合する** [DERIVED]。
+Y 側についても、`calc_log_likelihood_Y` は全非対角和に `0.5` を掛けるので
+`Σ_{i<j}` となり、Eq.(16) の `{∏_{i≠j}}^{1/2}` と一致する。
+
+**しかし `S_cf` を「原論文 BIC の再現」と呼んではならない** [UNRESOLVED]。
+原論文 Experiment 2 が Eq.(16) の `L` をどう評価したかは、本文からは特定できない:
+
+- 最終的な `Z` を plug-in したのか、`L` 個のサンプル平均を取ったのか、別の推定量を使ったのか
+- `DecideNumFactor.m`（X のみの `factoran` 尤度、§7.5 LINEAGE 2）を使ったのか
+- `μ_x` を推定した状態で評価したのか
+
+さらに Experiment 2 の設定は本研究と少なくとも **7 点**で異なる:
+
+| # | 原論文 Experiment 2 | 本研究 |
+|---:|---|---|
+| 1 | `σ_z²` を Eq.(14) で推定 | `var_z = 1` 固定 ＋ `scale_Z` |
+| 2 | `L = 10` | `L = 5` |
+| 3 | 反復 `10` | 反復 `8` |
+| 4 | 生成器は Z の z-score 化・F の行正規化・X の z-score 化を**行わない** | いずれも**行う**（E18） |
+| 5 | `μ_x` を Eq.(11) で推定 | `μ_x` を持たない（バイアスなし） |
+| 6 | Eq.(16) の評価手続きが不明 | `Q_strict`（MC 事後平均） |
+| 7 | **family は Gaussian-X / Bernoulli-Y のみ**（生成手順 Step 2/3） | 合成 3 シナリオはいずれも**この組合せではない**（A: pois/bern, B: gauss/pois, C: bern/gauss） |
+
+**原論文 Experiment 2 は再現していない。**
+
+**`paper-Eq16-aligned diagnostic` という限定表現もなお過大になりうる** [DERIVED]。
+`S_cf` が Eq.(16) の `ln L` と整合するのは**当てはまり項の構成要素**についてのみであり、
+次の 3 点では一致しない:
+
+1. **罰則項が Eq.(26) のものではない。** `S_cf` は `p̂ = kd − k(k−1)/2 + d·1{GX} + 1·1{GY}` を使う。
+   これが Eq.(26) の `(k+1)d − k(k−1)/2` と一致するのは Gaussian-X かつ非 Gaussian-Y のときだけで、
+   本研究の Poisson-X / Bernoulli-X の条件では**一致しない**（§7.4）。
+2. **Gaussian-Y の正規化定数が欠落している。** utils 系列は `−0.5·ln 2π` を落としており（E17）、
+   シナリオ C（n=150）では当てはまり項が `0.5·ln(2π)·11175 = 10269.14` だけ不足している（§5.4）。
+   **ただしこれは k に依存しない定数であり、argmin を動かさない。**
+3. **`μ_x` を持たない。** Eq.(16) の `p(x_i | F, z_i, μ_x, Σ)` に対応する項が本研究では `μ_x = 0` である。
+
+> **使ってよい限定表現は `paper-Eq16-aligned diagnostic` までであり、
+> かつそれは「当てはまり項の構成要素が Eq.(16) と整合する」という意味に限る。**
+> 罰則・正規化定数・`μ_x` の 3 点で Eq.(26) とは異なる。
+> **`S_cf` は §0.1 の (Q3)（観測データ周辺尤度）でもない。**
+
+### 7.5.4 [UNRESOLVED] 原論文 Fig.3 との関係
+
+原論文 Experiment 2（n=150, d=15, L=10, 反復 10, 10 試行, `k* ∈ {1,3,5,7,9}`, `k̂ = 1..10`）は
+「BIC is smallest when k = k\* for each k\*」と報告している [SUPPORTED_BY_PRIMARY_SOURCE]。
+
+一方、本研究の fixed 系列では `S_cf`（`p(Z)` を除いた診断量）は
+**5 ケース中 4 ケースで** k について単調減少し内点最小を持たない（§13.2a）。
+**Wine（k=5）のみが内点最小を持つ。**
+
+ここで注意すべき点がある [DERIVED]:
+**Wine は fixed 系列 5 ケースのうち唯一の Gaussian-X / Bernoulli-Y のケースであり、
+すなわち原論文の生成手順（Step 2: Bernoulli-Y、Step 3: Gaussian-X）と family 組合せが一致する唯一のケースである。
+そしてそれが唯一の内点最小ケースでもある。**
+合成 A/B/C はいずれも別の family 組合せである（§13.2a）。
+**ただしこれは 1 ケースの観察であり、family 組合せが原因であることは示していない**
+[PLAUSIBLE]。Wine は実データであり、n・d・関係データの構成（クラスラベル由来）も同時に異なる。
+
+**「原論文の結果と矛盾する」と読んではならない** [UNRESOLVED]。
+上記 7 点の設定差があり、かつ本研究は原論文 Experiment 2 を再現していない。
+両者の関係は**未解決**であり、これを解くには原論文設定の再現が必要である。
+本監査はそれを行っていない。
 
 ---
 
@@ -941,7 +1247,12 @@ family_x/family_y、エッジ密度、**試行数（10→3）**、そして**当
 なお `reports/theory_audit/theory_audit_report_20260718.md` L.282-293 は
 同じ Cora の説明を既に提示し、`PLAUSIBLE（因果断定は不可）` と限定している。
 本監査はその限定を維持する（新しい測定を行っていないため、強度を上げる根拠がない）。
-未測定の鍵は `Σ_i ln det A_i` である（§6.5、§17-U1）。
+
+**未測定なのは 1 量ではない。** `Σ_i ln det A_i^{post}`（U1）は未測定だが、
+それを測っても得られるのは `S_laplace_post` という**もう 1 つの診断量**であって、
+機構同定でも周辺尤度でもない（§6.5.1）。
+機構を分離するには少なくとも n・d・family・密度・試行数の交絡を切る実験設計が必要であり、
+本監査はそれを行っていない（§17-U1, U2, U11）。
 
 ### 13.3b [PLAUSIBLE] stale-Σ とシナリオ B の関係
 
@@ -965,7 +1276,8 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 
 （`K̂` は**多重集合**として示す。trial 順ではない。）
 
-- 誤りはすべて **+1〜+2 側への過大選択**であり、過小選択は 1 件もない [CONFIRMED_IN_REPOSITORY]。
+- 誤りはすべて **ちょうど +1 の過大選択**であり（観測された `K̂ − K_TRUE` の値は 1 のみ）、
+  過小選択は 1 件もない [CONFIRMED_IN_REPOSITORY]。
 - trial 平均 `rmse_Z` の argmin は 15 セル中 15 セルで `K_TRUE` に一致。
   trial 平均 `BIC_impl` の argmin は B の `K_TRUE = 9` のみ 10 になる。
 - **registry 上の位置づけは `current_support / △`**（`EXPERIMENT_REGISTRY.md` L.33「KI-010 の検証対象」）であり、
@@ -982,7 +1294,7 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 ### 13.6 [CONFIRMED_IN_REPOSITORY] `Σ_i ln det A_i` はどこにも記録されていない
 
 `expfam/results` 配下の全 CSV を `log_det|logdet|eigen|det_A|posterior_var` で grep して 0 件。
-したがって §6.5 の `BIC_ELBO` は**既存データからは計算できない**。
+したがって §6.5 の `S_laplace_post` は**既存データからは計算できない**。
 
 ---
 
@@ -1009,7 +1321,8 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 |---|---|---|---|---|---|---|
 | Schwarz BIC（正しい意味の） | 観測データ周辺尤度 + 正則 Laplace 展開 | 正則性・内点真値・iid 指数型族 | 周辺尤度の最大値 | **不可** | 周辺尤度の近似法 | ✗ |
 | 現行 `BIC_impl` | 完全データ対数尤度の近似事後期待値（ICL 型） | — | **実装済み・追加コスト 0** | 可（§5.3 の性質を明示すること） | — | ○（記述的ベースライン） |
-| ELBO 補正（`−2(Q̂ + Ĥ) + p̂ ln n`） | 周辺尤度の**下界** | per-node Laplace `q` の妥当性 | **`Σ_i ln det A_i` の記録のみ追加** | 可 | 下界の緩みの k 依存性 | ○（低コスト） |
+| post-hoc 曲率診断 `S_laplace_post`（`= S_cf + Σ_i ln det A_i^{post}`） | **代数的診断量**。実アルゴリズムの `q` の ELBO ではない（§6.5.1） | 特になし（surrogate を代入するだけ） | **`Σ_i ln det A_i^{post}` の記録のみ追加** | 可 | **周辺尤度の下界である保証がない**。実 `q` との乖離が k 依存 | △（記述的な診断としてのみ） |
+| （参考）真の ELBO 補正 | 周辺尤度の下界 | `Q` と `H` を**同一の `q`** で評価すること | 現行アルゴリズムの `q` は well-defined だが **intractable** で、per-node Laplace の積ではない（Gauss-Seidel・逐次依存・`scale_Z` 押し出し）。エントロピーを評価できない | **不可** | 扱える共通の `q` を定義し直す設計変更 | ✗（将来課題） |
 | held-out 予測（pair split / CV） | 予測リスク | 分割の独立性・MCAR | 分割数 × フィット | 可（masked lineage 実装済み） | X 側 held-out は未実装 | ○ |
 | WBIC | Bayes free energy | 逆温度 `1/ln n` の事後サンプリング | MCMC 必須 | **不可** | 事後サンプラ設計 | ✗（将来課題） |
 | sBIC | 特異 BIC | 学習係数（RLCT）の知識 | 方程式系の求解 | **不可** | **本モデルの RLCT は未発見** | ✗（将来課題） |
@@ -1027,9 +1340,9 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 | E4 | `scale_Z` により `(1/L)Σ_l ln p(Z^{(l)}) = −(nk/2)(1+ln 2π)`（実数演算で厳密、float64 で `1 ± O(10⁻¹⁶)`） | `[DERIVED]` | `model.py` L.468-504 + `_lnpZ` L.315-321 |
 | E5 | 公開 BIC 値は `−2 Q_strict + p̂ ln n` から**最大絶対差 `7.276e-12`** で再構成できる（8 ブロック） | `[DERIVED]` | 合成 fixed(k1-9) / 合成旧 0.5 / Wine / Cora |
 | E6 | 診断スコア `S_cf` は fixed 系列 5 ケース中 4 ケースで検討範囲内に内点最小を持たない（k について単調減少）。Wine のみ内点 k=5。**旧 0.5 系列では A・C が内点 k=3 を保つ** | `[DERIVED]` | §13.2a・§13.2b |
-| E7 | 正確な恒等式は `ln p(D|θ) = Q + H(q) + KL`。KL は本実装で消えない | `[DERIVED]` | §6.1・§6.3 |
+| E7 | 正確な恒等式は `ln p(D\|θ) = Q + H(q) + KL`。KL は本実装で消えない | `[DERIVED]` | §6.1・§6.3 |
 | E8 | **per-node Laplace の `q` に対して**、`A_i ⪰ I` ゆえ `H(q) ≤ −lnpZ_det`、したがって `Q + H ≤ Q − lnpZ_det`。**実際に使われている押し出し後の `q` に対しては保証しない** | `[DERIVED・条件付き]` | §6.4 |
-| E9 | `BIC_ELBO = S_cf + Σ_i ln det A_i`（厳密） | `[DERIVED]` | §6.5 |
+| E9 | 任意の `{A_i}` に対し `S({A_i}) = S_cf + Σ_i ln det A_i` は**代数的恒等式**。**ELBO であることは保証されない**（`Q` と `Ĥ` が同一の `q` について評価されていない） | `[DERIVED]` | §6.5・§6.5.1 |
 | E10 | 観測分布を不変にする群は `O(k)`（一般の位置で）。尺度と `w` の符号は識別される | `[DERIVED]` | §9.1-9.3 |
 | E11 | 潜在変数モデルは Schwarz の正則条件を満たさない | `[SUPPORTED_BY_PRIMARY_SOURCE]` | Drton & Plummer (2017) abstract |
 | E12 | 異種 family 混在それ自体は k 選択の障害ではない。障害は family **間**比較（支配測度の違い） | `[DERIVED]`+`[EMPIRICALLY_OBSERVED]` | §11・§11.1 |
@@ -1038,10 +1351,15 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 | E15 | MovieLens #33 の K=3 は固定設計定数であり、BIC 選択の結果ではない | `[CONFIRMED_IN_REPOSITORY]` | `movielens_userdisjoint_20260822_summary.csv`（360 行すべて `k=3`、BIC 列なし） |
 | E16 | `calc_Q_dual` は引数 `sigma` を使っていない。旧 0.5 系列の `Q_strict` は Gaussian-X で 1 M-step 古い Σ を使う | `[CONFIRMED_IN_REPOSITORY]` | `utils_expfam.py` L.329・L.498・L.521・L.581 |
 | E17 | Gaussian-Y の `−0.5 ln 2π` は utils 系列で欠落し、experimental 系列では `calc_Q_dual_strict_exp` L.228 が補う（**モデル側のオーバーライドは consistent 系列でも落としたまま**） | `[CONFIRMED_IN_REPOSITORY]` | `model_expfam.py` L.263-264 / `model_dual_expfam_consistent.py` L.61-63 / `eval_utils.py` L.228 |
-| E18 | 生成器は Z を列ごとに z-score 化（`ddof=0`）し、Gaussian-X の X も z-score 化する。`K_TRUE` は階数として保存される | `[CONFIRMED_IN_REPOSITORY]`+`[DERIVED]` | `data_generator_expfam.py` L.282-298 |
-| E19 | 旧 0.5 系列で `K_TRUE ∈ {1,3,5,7,9}` の掃引が存在し、15 セル中 13 セルで `P(K̂=K_TRUE)=1.00`。低下は B のみ | `[CONFIRMED_IN_REPOSITORY]` | `exp2_bic_{A,B,C}.csv` |
+| E18 | 生成器は Z を列ごとに z-score 化（`ddof=0`）し、Gaussian-X の X も z-score 化する。`K_TRUE` は階数として保存される | `[CONFIRMED_IN_REPOSITORY]`+`[DERIVED]` | `data_generator_expfam.py` L.283（Z の z-score）/ L.287-290（F 行の再スケール）/ L.298（X の z-score） |
+| E19 | 旧 0.5 系列で `K_TRUE ∈ {1,3,5,7,9}` の掃引が存在し、15 セル中 **12 セル**で `P(K̂=K_TRUE)=1.00`。低下は B のみ | `[CONFIRMED_IN_REPOSITORY]` | `exp2_bic_{A,B,C}.csv` |
 | E20 | MATLAB `DecideNumFactor.m` L.13-14 は `factoran` の **X のみ**の周辺対数尤度に `(i+1)d − 0.5i(i−1)` の罰則を付す。`calcdescmetric_ver4.m` の joint `Q` ではない | `[CONFIRMED_IN_REPOSITORY]` | `Mato Lab Program/DecideNumFactor.m`, `calcdescmetric_ver4.m` L.40-42 |
-| E21 | MATLAB でも `varZ` 更新はコメントアウトされ、`calcp_Z` に `σ_z = 1` が直書きされ、`scaleZ` が Python の `scale_Z` と代数的に同一である | `[CONFIRMED_IN_REPOSITORY]` | `calcdescmetric_ver4.m` L.29/35/42/65-77/98-100 |
+| E21 | MATLAB でも `varZ` 更新はコメントアウトされ、`calcp_Z` に `σ_z = 1` が直書きされ、`scaleZ` が Python の `scale_Z` と代数的に同一である | `[CONFIRMED_IN_REPOSITORY]` | `calcdescmetric_ver4.m` L.29/35/42/65-79（代入 L.78）/98-100 |
+| E22 | **原論文 Eq.(16) の尤度 `L` に `p(Z)` は含まれない。Eq.(18) の `Q` には含まれる。Eq.(26) の当てはまり項は `ln L`（Eq.16）である** | `[SUPPORTED_BY_PRIMARY_SOURCE]` | `pdftotext` 抽出（2026-08-23）。本文 "the likelihood function of L from Eq. (16)" |
+| E23 | **原論文 Algorithm 2 / Eq.(14) は `σ_z²` を推定する。印刷アルゴリズムに `scaleZ` 相当の操作はない。生成手順も Z の z-score 化・F の行正規化・X の z-score 化を行わない** | `[SUPPORTED_BY_PRIMARY_SOURCE]` | 同上。Algorithm 2 L.11、Step 1-3 |
+| E24 | `Q_strict − E[ln p(Z)]` は Eq.(16) の `ln L` と**当てはまり項の構成要素レベルでのみ整合する**。罰則（非 Gaussian-X で `p̂ ≠ (k+1)d − k(k−1)/2`）・Gaussian-Y の欠落定数（C で 10269.14、k 非依存）・`μ_x` の不在の 3 点で Eq.(26) とは異なる | `[DERIVED]` | §7.5.3・§7.4・§5.4 |
+| E25 | **原論文 Eq.(16) の `ln L` は `z_i` に条件づけた量であり、`Z` を積分した観測データ周辺尤度ではない。** `θ` の定義（`F, μ_x, Σ, σ_z², w0, w`）は Eq.(16) 直前にあるが、右辺は `z_i` を与えたままである。したがって「Eq.(26) は standard Schwarz BIC である」は**従わない** | `[SUPPORTED_BY_PRIMARY_SOURCE]`+`[DERIVED]` | `pdftotext` 抽出（2026-08-23）Eq.(16) と直前文・§0.1・§7.5.1 |
+| E26 | 原論文 Experiment 2 の family 組合せは **Gaussian-X / Bernoulli-Y のみ**（生成手順 Step 2/3）。本研究の合成 3 シナリオはいずれもこの組合せではない。fixed 系列で唯一この組合せを持つのは Wine（実データ）である | `[SUPPORTED_BY_PRIMARY_SOURCE]`+`[CONFIRMED_IN_REPOSITORY]` | 原論文 §4.1 Step 1-3・§13.2a |
 
 ---
 
@@ -1052,12 +1370,13 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 | PL1 | Cora の k=1 選択は「疎 → 事後拡散 → H(q) が大 → 完全データ型基準の過大ペナルティ」で説明できる | 機構は整合的だが `Σ_i ln det A_i` を実測していない。2026-07-18 の記録も `PLAUSIBLE` と限定している |
 | PL2 | Cora と合成データが同一の機構である | n 以外に d・family・密度・試行数・当てはまり曲線が同時に異なる（§13.3） |
 | PL3 | シナリオ B の過大選択（K_TRUE≥5）は stale-Σ（E16）に起因する | 相関のみ。B は Poisson-Y でもあり交絡 |
-| PL4 | ELBO 補正を入れると Cora でより大きい k が選ばれる | `BIC_ELBO = S_cf + Σ_i ln det A_i`（E9）の第 2 項が未測定 |
+| PL4 | 曲率項を足すと Cora でより大きい k が選ばれる | `S_laplace_post = S_cf + Σ_i ln det A_i^{post}`（E9）の第 2 項が未測定。かつこれは ELBO ではない（§6.5.1） |
 | PL5 | `n → ∞` で決定論項（`O(nk)`）が当てはまり項に負けて過大選択に転じる | §8.4 のオーダー比較は当てはまり項の実オーダーを確定していない |
 | PL6 | `{M_K}` が K について非入れ子である | §9.4。示したのは 1 つの埋め込みの失敗のみ。全パラメータにわたる非包含は未証明 |
 | PL7 | 非入れ子性による KL ギャップが K 選択を有利にする | ギャップの大きさを計算していない。推定量が KL 射影に到達する保証もない |
 | PL8 | Wine の `BIC_impl` argmin k=3 がクラス数 3 と一致したのは潜在次元の回復を意味する | Y がラベル由来で k=2 で既に `auc_y = 1.0`。`S_cf` では k=5 |
-| PL9 | 現行 Python の `Q_strict` が原論文 Eq.(26) の `ln L` に対応する | §7.5。原論文は未検証、MATLAB の `DecideNumFactor` は呼ばれておらず、Experiment 2 との接続は確認できない |
+| PL9 | **撤回**（旧: 「現行 Python の `Q_strict` が原論文 Eq.(26) の `ln L` に対応する」）。この命題は 2026-08-23 の一次確認により**否定された**（E22）。`Q_strict` は `E[ln p(Z)]` を含み、Eq.(16) の `ln L` は含まない。したがって「もっともらしい」ではなく `[CONTRADICTED]` である | §7.5.1。**この行は「plausible only」ではなく反証済みとして残す**（旧版が PL9 として掲げていた記録のため削除しない） |
+| PL10 | Wine が唯一の内点最小ケースであることは、Wine が fixed 系列で唯一 Gaussian-X / Bernoulli-Y（＝原論文の family 組合せ）だからである | 1 ケースの観察。Wine は実データであり n・d・関係データの構成も同時に異なる（§7.5.4、E26） |
 
 ---
 
@@ -1065,20 +1384,22 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 
 | # | 未解決事項 | 解消に必要なもの |
 |---:|---|---|
-| U1 | `Σ_i ln det A_i` の値、したがって `BIC_ELBO` の argmin | 新規フィットでの記録。既存データからは計算不可（§13.6） |
+| U1 | `Σ_i ln det A_i^{post}` の値、したがって `S_laplace_post` の argmin | 新規フィットでの記録。既存データからは計算不可（§6.5.2） |
 | U2 | K 選択の n 依存性 | n を振った K 掃引。一度も行われていない（§13.5） |
 | U3 | E16（stale-Σ）の数値的影響量 | 同期版・非同期版の対比フィット |
 | U4 | `O(k)` 商の上での Fisher 情報の非退化 | 解析または数値評価 |
 | U5 | 本モデルクラスの実対数閾値（RLCT）／学習係数 | 文献調査で発見できず。sBIC 適用の前提 |
-| U6 | 原論文 Eq.(26) の「量」が joint `Q` か X のみの `ln L` か、および Experiment 2 が `DecideNumFactor` を用いたか | **研究者本人による原論文の該当節の確認**。parameter count `(k+1)d − k(k−1)/2` 自体は MATLAB `DecideNumFactor.m` L.13 で確認済み（§7.5） |
+| U6 | **一部解消**: Eq.(26) の当てはまり項は Eq.(16) の `ln L` であり `p(Z)` を含まない（§7.5.1）。**残る未解決**は 3 点: (a) Experiment 2 が Eq.(16) の `L` をどう評価したか（最終 `Z` の plug-in / `L` サンプル平均 / `DecideNumFactor` の使用の有無）、(b) `(k+1)d` の `+d` が `μ_x` と `Σ` のどちらを数え、`σ_z², w0, w` をなぜ数えないのか（§7.5.2）、(c) **Eq.(26) が plug-in likelihood BIC / conditional BIC / complete-data-like criterion のどれとして理論的に意図されたか**（§0.1、E25） | 原論文からは特定できない。著者への確認以外に手段がない。**本文以上に推測しない** |
 | U7 | MATLAB `BIC_X = -2 * n * loglikely + t*log(n)` の `n` 倍の意味 | `factoran` の `stats.loglike` の定義確認（本監査は MATLAB を実行できない） |
-| U8 | `σ_z²` 更新方式と `scale_Z` + `var_z=1` の等価性 | 証明または反例（§5.5）。**等価性を証明できないため UNRESOLVED** |
+| U8 | `σ_z²` 更新方式（原論文 Eq.14・Algorithm 2、一次確認済み）と `scale_Z` + `var_z=1`（MATLAB・Python）の等価性 | 証明または反例（§5.5）。**等価性を証明できないため UNRESOLVED**。実装差の存在自体は確認済み |
 | U9 | 本モデルの実効標本数 `n_eff` | Krivitsky-Kolaczyk 型の解析の潜在変数モデルへの拡張 |
 | U10 | per-node 分解後の Laplace 近似誤差の n 依存性 | Shun-McCullagh 型の解析 |
 | U11 | 実データで `p0 ∈ M_K` が成り立つか（realizability） | 適合度検定 |
 | U12 | `{M_K}` の非入れ子性の完全証明、および KL ギャップの大きさ | §9.4 のギャップを埋める |
 | U13 | `rank F` が実行時に欠損しているか | `F` は `.npy` が gitignore されており保存されていない |
 | U14 | Nguyen & Hirose (2026) の仮定が本モデルの X 側に当てはまるか | 定理の逐条検証 |
+| U15 | 原論文 Fig.3（`k*` ごとに BIC 最小が `k = k*`）と、本研究で `S_cf` が内点最小を持たないことの関係 | 原論文設定（`σ_z²` 推定・L=10・反復 10・正規化なしの生成器・`μ_x` 推定）の再現。**本監査は再現していない。矛盾とは読まない**（§7.5.4） |
+| U16 | K 選択の selection target をどの量にするか（`Q_strict` / paper-Eq16-aligned / post-hoc 曲率 / held-out 予測） | 定義と解釈の確定。§20 の主決定の対象 |
 
 ---
 
@@ -1088,6 +1409,15 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 > 本研究で潜在次元の選択に用いる指標は、観測データの周辺尤度に基づく Schwarz の BIC ではなく、
 > MC-EM の Q 関数（完全データ対数尤度の近似事後期待値）に `−2·Q + p̂ ln n` の形の罰則を加えた
 > **完全データ型（ICL 型）の指標**である。関数名・CSV 列名は provenance のため `BIC` のまま維持する。
+>
+> より正確には、`Z` の扱いが異なる次の 3 つの量を区別する必要がある:
+> (i) `ln p(X,Y | Z, θ)`（潜在変数に条件づけた尤度）、
+> (ii) `ln p(Z,X,Y | θ)`（完全データ対数密度）、
+> (iii) `ln p(X,Y | θ) = ln ∫ p(Z,X,Y|θ) dZ`（観測データの周辺尤度）。
+> 本研究の指標は (ii) の近似事後期待値を当てはまり項とする。
+> 先行研究の印刷された定義は (i) を用いている。
+> Schwarz の BIC が本来対象とするのは (iii) である。
+> **すなわち本研究の指標も先行研究の印刷された指標も、(iii) には対応しない。**
 
 **(2) 基準の実効的な次元罰則（新しい記述）**
 > この指標では、EM の各反復で潜在変数サンプルを平均二乗が 1 になるよう大域的に正規化しているため、
@@ -1095,17 +1425,32 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 > `−(nk/2)(1 + ln 2π)` に退化する。その結果、**潜在次元 1 あたり `n(1 + ln 2π) ≈ 2.84n` の
 > 固定的な次元罰則が実効的に働いている**。同じ構造は先行研究の MATLAB 実装にも存在する。
 > 本研究の設定（n = 150〜280）では、この項はパラメータ数罰則 `p̂ ln n` の k 依存部分より大きい。
-> 実際、この項だけを取り除いた診断スコアは、検討した 5 ケース中 4 ケースで
-> 候補範囲内に内点最小を持たなくなる。
+> 実際、この項だけを取り除いた診断スコアは、**実データ実験フェーズの実装系列（`model_dual_expfam_fixed.py`、
+> 1/2 係数なし）で検討した 5 ケース中 4 ケース**で候補範囲内に内点最小を持たなくなる。
 > **ただしこの診断スコアは補正された基準ではなく、当該項の寄与を測るための量である。**
+> **また学会予稿が依拠する実装系列（`model_dual_expfam.py`、1/2 係数あり）では
+> 3 シナリオ中 2 つでこの診断スコアも内点 `k = 3` を保つ。実装系列によって結論が異なる。**
+
+**(10) 先行研究の定義との関係（新しい記述）**
+> 先行研究の印刷された定義では、情報量規準の当てはまり項は尤度
+> `L = ∏_i p(x_i|·) · {∏_{i≠j} p(y_ij|·)}^{1/2}` であり、潜在変数の事前分布 `p(Z)` を含まない。
+> 一方、本研究の実装は EM の Q 関数（`ln p(Z) + ln p(X|Z) + ln p(Y|Z)` の近似事後期待値）を
+> 当てはまり項として用いている。すなわち両者は**量のレベルで異なる**。
+> また先行研究の印刷されたアルゴリズムは潜在変数の分散 `σ_z²` を M ステップで推定するのに対し、
+> 本研究の実装（および受け継いだ MATLAB 実装）はこれを 1 に固定し、
+> 潜在変数サンプルの大域正規化によって尺度を定めている。
+> **本研究は先行研究の当該実験を再現していないため、どちらが正しいとは述べない。**
+> 今後の課題として記載する。
 
 **(3) 合成データの結果**
-> `K_TRUE = 3` の合成データ 3 シナリオ（n=150, d=15、10 試行）において、
+> **実データ実験フェーズの実装系列（`model_dual_expfam_fixed.py`）において**、
+> `K_TRUE = 3` の合成データ 3 シナリオ（n=150, d=15、10 試行）で
 > `k = 1,…,9` の候補から本指標が `k = 3` を選ぶことを 30 試行すべてで確認した。
 > ただしこれは n = 150 の 1 点における有限標本の観測であり、
 > **大標本での選択一致性を示すものではない。**
 
 **(4) 実データの結果**
+> **以下はいずれも実データ実験フェーズの実装系列（`model_dual_expfam_fixed.py`）の結果である。**
 > Wine（n=178、5 試行）では本指標の最小が `k = 3` であり、クラス数 3 と一致した。
 > ただし Wine の関係データはクラスラベルから構成されており、`k = 2` の時点で
 > 関係データの再現 AUC が 1.0 に達している。したがってこの一致は観測であり、
@@ -1131,6 +1476,11 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 > 同一の分布族割当のもとでの潜在次元比較を妨げない。
 > 一方、支配測度の異なる分布族どうしで対数尤度の値を直接比較することはできない。
 > 実際、非二値の属性に Bernoulli 尤度を当てた条件が最小の指標値を示しつつ潜在変数の推定誤差は最悪であった。
+> **ただしこの観測は per-column prototype 実装（`experimental/model_dual_expfam_percolumn.py`）による
+> 予備的実験の出力であり、`EXPERIMENT_REGISTRY.md` 上の原稿採用は ✗、
+> root `CLAUDE.md` §3 により prototype・本文採用不可である。**
+> 修論本文では、この数値を主張の根拠としてではなく、
+> 支配測度をまたぐ尤度比較が破綻することの**例示**としてのみ用いる。
 > **本研究では分布族の選択に本指標を用いない。**
 
 **(8) 大標本での主張の限定**
@@ -1151,6 +1501,16 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 |---|---|
 | 「Schwarz BIC で潜在次元を選択した」 | `Q_strict` は周辺尤度ではない（§5・§6）。KI-010 |
 | 診断スコア `S_cf` を「corrected BIC」「modified BIC」「true BIC」「Schwarz BIC」と呼ぶ | §0。`S_cf` は補正版ではない |
+| `S_laplace_post` を「ELBO」「ELBO 補正 BIC」「variational BIC」と呼ぶ | §6.5.1。`Q` と `Ĥ` が同一の `q` について評価されていないので下界の保証がない |
+| 「未解決問題は `Σ_i ln det A_i` ただ 1 量に縮約された」 | §6.5.1 で撤回。縮約されるのは代数式の残り 1 項であって、「何を selection target にするか」という問いは残る |
+| `S_cf` を「原論文 BIC の再現」と呼ぶ | §7.5.3。Eq.(16) の評価手続きが特定できず、設定も 6 点異なる。限定表現は `paper-Eq16-aligned diagnostic` まで |
+| 「本研究の結果は原論文 Fig.3 と矛盾する」 | §7.5.4。原論文 Experiment 2 を再現していない |
+| 「原論文の BIC は joint モデルの `Q` を使っている」 | **一次確認により否定された**。Eq.(26) の当てはまり項は Eq.(16) の `ln L` であり `p(Z)` を含まない（§7.5.1） |
+| 「原論文 Eq.(26) は standard Schwarz BIC である」 | §0.1・E25。Eq.(16) の `ln L` は `z_i` に条件づけた量であり、`Z` を積分した観測データ周辺尤度ではない。Eq.(26) がどの型の規準として意図されたかは [UNRESOLVED]（U6-c） |
+| `S_cf` を「観測データ周辺尤度に基づく基準」と呼ぶ | §0.1。`S_cf` も `Z` を積分していない |
+| 「`S_cf` は原論文 Eq.(26) と当てはまり項も罰則も一致する」 | §7.5.3。罰則は非 Gaussian-X で一致せず、Gaussian-Y の定数が欠落し、`μ_x` を持たない（E24） |
+| 「Wine が内点最小を持つのは family 組合せが原論文と一致するからである」 | §7.5.4・PL10。1 ケースの観察であり、n・d・関係データの構成も同時に異なる |
+| 「未測定なのは `Σ_i ln det A_i^{post}` の 1 量だけである」 | §13.3。それを測っても得られるのはもう 1 つの診断量であり、機構同定でも周辺尤度でもない |
 | 「BIC により真の潜在次元が選ばれることを確認した」（無条件） | n=150 の 1 点。`K_TRUE` を振った掃引は旧 0.5 系列の 5 試行のみ |
 | 「Schwarz 型の罰則が過大次元を防いでいる」 | fixed 系列 4/5 で `S_cf` に内点最小がない（§13.2a） |
 | 「既存の k\*=3 は Schwarz 型ペナルティの結果ではない」（無条件） | **旧 0.5 系列の A・C では罰則単独で k=3 が残る**（§13.2b）。系列とシナリオを特定すること |
@@ -1164,7 +1524,6 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 | 「`{M_K}` は入れ子でないことを証明した」 | §9.4 はスケッチであり、全パラメータにわたる非包含は未証明（PL6） |
 | 「Wine で潜在次元がクラス数と一致したので手法が妥当である」 | Y がラベル由来。k=2 で AUC 1.0 |
 | 「MovieLens 実験で K=3 が選ばれた」 | K=3 は固定設計定数。BIC 列すら存在しない（E15） |
-| 「原論文の BIC は joint モデルの Q を使っている」 | 未検証。MATLAB で `BIC` と名の付く唯一の量は X のみの `factoran` 尤度（§7.5、PL9） |
 | 「per-column heterogeneous-X を提案手法として採用した」 | prototype。root `CLAUDE.md` §3、Issue #26 の「Prototype promoted: NO」 |
 | 「`Q` と周辺尤度の差はエントロピーである」 | KL 項が残る（§6.2） |
 | 旧 0.5 系列と fixed 系列と consistent 系列の数値を同じ表・図に並べる | root `CLAUDE.md` §3、KI-002。§13 では表を系列ごとに分割している |
@@ -1179,13 +1538,13 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 |---|---|
 | standard BIC が実は K 選択に一致的である可能性は残っていないか | **残っている**。Nguyen & Hirose (2026, preprint) は因子分析で BIC の一致性を示す（§10.3） |
 | 「特異だから BIC は必ず inconsistent」という誤解をしていないか | していない。§10.3 で明示的に区別した |
-| 現行 Q-based criterion が意図せず良い selector になる条件はないか | **ある**。決定論項 `2.838 n·k` は n 比例の次元罰則として働き、n=150 では `K_TRUE=3` を 30/30 で当てている（E13）。旧 0.5 系列では `K_TRUE ∈ {1,3,5,7,9}` の 15 セル中 13 セルで的中（§13.4）。**「artefact だから悪い selector だ」とは言えない** |
+| 現行 Q-based criterion が意図せず良い selector になる条件はないか | **ある**。決定論項 `2.838 n·k` は n 比例の次元罰則として働き、n=150 では `K_TRUE=3` を 30/30 で当てている（E13）。旧 0.5 系列では `K_TRUE ∈ {1,3,5,7,9}` の 15 セル中 **12 セル**で的中（§13.4）。**「artefact だから悪い selector だ」とは言えない** |
 | Cora の失敗は criterion ではなく optimization / finite sample / sparsity 由来ではないか | **切り分けられていない**。`rank F`・`Σ_i ln det A_i`・収束状態のいずれも記録がなく、**試行数は 3** である（U1・U13）。断定しない |
 | heterogeneous family 問題と misspecification を混同していないか | §11 で A–H に分解した |
 | `K_TRUE` は生成器の設定と本当に一致しているか | **厳密には一致しない**（§4.1）。`K_TRUE` は「階数」としてのみ well-defined |
 | `O(k)` 非識別性と K 非識別性を混同していないか | §4.4 で分離した |
 | sample-size 定義を根拠なく選んでいないか | §8 で `O(n)`〜`O(n²)` の幅を明示し、決めていない |
-| 診断スコア `S_cf` を作る反実仮想は正当か | **限定つきで正当**。`S_cf` は ELBO とは `Σ_i ln det A_i` だけ違う（E9）。**`S_cf` の argmin が ELBO 補正基準の argmin を意味することはない** |
+| 診断スコア `S_cf` を作る反実仮想は正当か | **限定つきで正当**。`S_cf` の当てはまり項は原論文 Eq.(16) の `ln L` と構成要素レベルで整合する（§7.5.3）。ただし原論文 BIC の再現ではなく、`S_laplace_post` との差 `Σ_i ln det A_i^{post}` は ELBO 差ではない（§6.5.1） |
 | `S_cf` の argmin として報告した値は本当に最小点か | **いいえ**。4/5 は範囲の上端であり内点最小ではない（§13.2a）。旧版の「6」は k=1..6 の CSV を使った副産物であった。撤回済み |
 | 旧 0.5 系列でも同じ結論か | **いいえ**。A と C は `S_cf` でも内点 k=3 を保つ（§13.2b）。系列依存であり一律には言えない |
 | 先行監査（2026-07-18）の貢献を自分のものにしていないか | §6.2 で帰属を明記した。`2.84n` の数値は既に同文書にある |
@@ -1196,50 +1555,69 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 
 **次点（SECONDARY）: `A: RUN_K_SELECTION_SIMULATION_NEXT`**
 
-#### D を主決定とする根拠
+#### D を主決定とする根拠（2026-08-23 改訂）
 
-1. **§6.5 の恒等式 `BIC_ELBO = S_cf + Σ_i ln det A_i` により、
-   未解決の問いが `Σ_i ln det A_i` ただ 1 つに縮約された。**
-   `S_cf` は fixed 系列 4/5 で k について単調減少するので（§13.2a）、
-   「ELBO 補正基準が内点最小を持つか」は「`Σ_i ln det A_i` が k について十分急に増えるか」と完全に同値である。
-2. その測定量は E-step で既に計算されている `A_i` から得られ、**追加コストはほぼゼロ**である。
-   しかも**どの実験にも記録されていない**（§13.6）。
-3. 現状で `P(K̂ = K_TRUE)` だけを測る K 掃引を先に行っても、
-   得られる数値は「決定論項がその n で偶然うまく効くか」に帰着する。
-   **同一のフィットの上で 2 つの基準を比較できなければ、K 掃引の解釈が定まらない。**
-4. `K_TRUE` を振った選択率は旧 0.5 系列に既に存在し（§13.4）、n=150 では 15 セル中 13 セルで 1.00 である。
-   **単純な K 掃引の追加情報量は小さい。** 真に未測定なのは **n 依存性**（U2）であり、D の実験に同居させられる。
+> **根拠を「`Σ_i ln det A_i` 1 量を測ればよい」にはしない。それは §6.5.1 で撤回した。**
+
+1. **`Z` の扱いが異なる 3 つの量が関与しており、そのいずれを選択対象にするかが未確定である**
+   （§0.1、§7.5.1、E25）。
+   - **(Q1)** 印刷された原論文 Eq.(26) の当てはまり項 `ln L`（Eq.16）は `p(Z)` を含まないが、
+     `z_i` に条件づけた量であり `Z` を積分していない。
+   - **(Q2)** 現行実装は `p(Z)` を含む `Q_strict` を使い、`scale_Z` によりその項は決定論化する（§5.3）。
+   - **(Q3)** Schwarz BIC が本来対象とする観測データ周辺尤度は、**どちらでもない**。
+
+   ここで根拠として使うのは「原論文の側が正しいからそちらに合わせるべきだ」ではない。
+   そうは言えない（Eq.(26) がどの型の規準として意図されたかは U6-c で未解決）。
+   **言えるのは、「ベースライン論文が用いている量に合わせる」という選択肢が
+   一次確認によって初めて具体的に定義可能になった、ということである。**
+   これは以前は `UNVERIFIED` だったため検討対象にすらならなかった。
+   選択肢が増えた以上、どれを比較するかを先に決めないと、後続の測定の解釈が定まらない。
+2. 候補となる量は少なくとも 4 つあり、いずれも定義と解釈が固まっていない:
+   `Q_strict` ベース（現行）／paper-Eq16-aligned diagnostic（`S_cf`）／
+   post-hoc 曲率診断（`S_laplace_post`）／held-out 予測。
+   **`S_laplace_post` は ELBO ではない**ので（§6.5.1）、
+   **これを primary alternative criterion として事前確定してはならない。**
+3. この状態で大規模な `n × K_TRUE` の K sweep を先に走らせても、
+   得られる選択率が**どの量についての性質なのかが定まらない**。
+   同一フィット上で複数の量を比較できる形にしてからでなければ、解釈が確定しない。
+4. `K_TRUE ∈ {1,3,5,7,9}` の掃引データは旧 0.5 系列に既に存在する（§13.4、15 セル中 12 セルが 1.00、
+   誤りはすべてシナリオ B のちょうど +1）。
+   **単純な K 掃引の追加情報量は小さい。** 真に未測定なのは n 依存性（U2）である。
 5. Issue #35 の non-goals（新 criterion の実装）に抵触しない。
-   ELBO 補正は**新しいモデルではなく、既存量の記録と事後計算**である。
+   本決定が求めるのは**量の定義と解釈の確定**であって、新しい基準の提案ではない。
 
 #### D を反証しうる証拠
 
-- `Σ_i ln det A_i` を記録した結果、ELBO 補正基準が `BIC_impl` と**同じ k** を選ぶ場合
-  → 決定論項の議論は「絶対値の解釈」の問題に縮小し、A（K 掃引）を先にすべきだった、となる。
-- 現行基準が n を変えても安定して `K_TRUE` を当てる場合
-  → 「artefact だが良い selector」として記述的に採用すればよく、代替基準の検討は不要（→ C に近づく）。
+- 4 つの候補量が同一フィット上で**同じ k** を選ぶことが小規模に確認された場合
+  → 量の選択は実質的に無害であり、A（K sweep）へ直進してよかった、となる。
+- 原論文 Experiment 2 の設定を再現したときに現行実装がそのまま Fig.3 を再現する場合
+  → 不一致は評価手続きの差に吸収され、C（記述的ベースライン）で足りる。
 
 #### A（次点）を主決定にすべき条件
 
-- `Σ_i ln det A_i` の測定が技術的に不可能であることが判明した場合。
+- 上記の量の比較が小規模 pilot で決着し、selection target が確定した場合。
 - あるいは修論の残り時間が、選択率の記述的報告以上を許さない場合。
 
 #### C・B・E を主決定にしなかった理由
 
 - **C（現行基準を descriptive baseline としてのみ使う）** は root `CLAUDE.md` §5 と KI-010 により
-  **既に発効している運用ルール**である。次の研究決定として選ぶことは実質的に E と同じであり、新しい情報を生まない。
-  ただし本監査の §18(2) と §7.5 は C の記述内容を**大幅に具体化する**ものであり、
-  D の結果がどうであれ修論本文には反映されるべきである。
-- **B（さらに理論が必要）** は採用しない。本監査で導出可能な理論
-  （正確な恒等式・`BIC_ELBO = S_cf + Σ ln det A_i`・parameter count・sample size・識別性・`A_i ⪰ I` の上界）は
-  完了した。残る理論ギャップ（§9.4 の非入れ子性の完全証明、U5 の RLCT）は
-  **修論の中心主張に影響せず、今後の課題として書ける**。次に必要なのは**測定**である。
-- **E（変更不要）** は E6・E16・E20 が未報告のまま残ることを意味するため採用しない。
+  **既に発効している運用ルール**である。ただし §7.5.1 の量レベル不一致は
+  C の記述内容を**大幅に具体化する**ものであり、D の結果がどうであれ修論本文に反映されるべきである。
+- **B（さらに理論が必要）** は採用しない。原論文の一次確認により、
+  本監査で導出可能な理論は完了した。残るギャップ（§9.4 の非入れ子性、U5 の RLCT）は
+  修論の中心主張に影響せず今後の課題として書ける。
+- **E（変更不要）** は §7.5.1・E6・E16 が未報告のまま残ることを意味するため採用しない。
 
 #### 次 Issue の提案
 
-`k_selection_next_experiment_plan_20260822.md` に pre-registration draft を置いた。
-**本 Issue では実行しない。**
+`k_selection_next_experiment_plan_20260822.md` に **Phase 7b: K 選択スコアの系列整理と診断 pilot** の案を置いた。
+目的は測定量そのものではなく、**候補スコア 4 種（現行 Q ベース / paper-Eq16-aligned / post-hoc 曲率 / held-out 予測）の
+定義と解釈を確定すること**である。pilot は 42 fits（10 分未満）で、`Σ_i ln det A_i^{post}` の初測定を含む。
+**Phase 7b は仮説検定を行わず、primary estimand を置かない。**
+`n × K_TRUE` の full sweep（630 fits）と原論文 Experiment 2 の再現は **Phase 7c の候補案**であり、
+**`RUN NEXT` とはしない**（同ファイル §11）。
+
+**本 Issue では実行しない。新しい Issue も作成しない。**
 
 ---
 
@@ -1275,6 +1653,85 @@ trial ごとに `argmin_k BIC_impl` を取り、`K_TRUE` と一致した割合:
 
 **独立監査は Web にアクセスできないため、§14 の外部文献はすべて `UNVERIFIED_EXTERNAL` のままである。**
 本監査本体の Web 確認をもって auditor の確認とは扱わない。
+
+---
+
+## 21.2 PR #36 の独立レビュー（2026-08-23、第 2 巡）
+
+PR #36 に対する独立レビューで、さらに 6 件の指摘を受けた。すべて反映した。
+
+| # | 重要度 | 内容 | 判定 | 反映箇所 |
+|---:|---|---|---|---|
+| R1 | **BLOCKER** | `BIC_ELBO = S_cf + Σ ln det A_i` を「厳密な ELBO 補正」と読める表現が残っていた。実アルゴリズムは Gauss-Seidel・逐次依存 `L` サンプル・`scale_Z` 押し出し・`A_i^{post} ≠` サンプリング時 `A_i` であり、`Q` と `Ĥ` は同一の `q` について評価されていない | **ACCEPT** | **§6.5 を全面改稿**。`§6.5.1「これは ELBO ではない」` を新設。「未解決問題は 1 量に縮約」を明示的に撤回 |
+| R2 | HIGH | `BIC_ELBO` / `K̂_ELBO` という名称を避け、post-hoc Laplace-curvature diagnostic であることが分かる名前にする | **ACCEPT** | `S_laplace_post` へ改名（§0）。代数式自体は保持し、「指定した Gaussian entropy surrogate を代入したときの代数的恒等式」と位置づけ直した |
+| R3 | HIGH | 原論文 Section 3 / 4.3 を既存手段で再確認せよ（新規インストール禁止） | **ACCEPT・成功** | 環境既存の `pdftotext`（`/mingw64/bin`）で抽出成功。**環境変更なし**。§2 の読み取り状況を更新 |
+| R4 | **BLOCKER 級の新事実** | Eq.(16) に `p(Z)` が入っていない／Eq.(18) の `Q` には入っている／Eq.(26) は `ln L`（Eq.16）を使う、を直接確認せよ | **ACCEPT・確認済み** | **§7.5.1 を新設**。§1 項目 7 に昇格。E22 追加 |
+| R5 | HIGH | `S_cf` は Eq.(16) と構成要素レベルで整合するが「原論文 BIC の再現」と呼ばない。限定表現は `paper-Eq16-aligned diagnostic` | **ACCEPT** | §7.5.3 新設、§0 と §19 に禁止表現を追加。§7.5.4 で Fig.3 との関係を UNRESOLVED として明記 |
+| R6 | HIGH | Eq.(14) / Algorithm 2 も一次確認し、lineage 差を UNVERIFIED から更新。ただし等価性は主張しない | **ACCEPT** | §5.5 を更新（`σ_z²` は推定対象、`scaleZ` 相当の操作なし、生成手順も正規化なし）。E23 追加。等価性は U8 で UNRESOLVED のまま |
+| R7 | HIGH | Decision gate の根拠を「1 量を測ればよい」にしない | **ACCEPT** | **§20.2 の根拠を全面改稿**。量レベル不一致に基づく再定式化。`S_laplace_post` を primary alternative として事前確定しないことを明記 |
+| R8 | MEDIUM | 次 Issue を 630 fits の即実行ではなく Phase 7b の軽量 pilot にする | **ACCEPT** | 実験計画を全面改稿（§0-§4 を Phase 7b 化、630 fits は Phase 7c の候補案に降格） |
+
+**REJECT した指摘はない。**
+
+### 本巡で新たに一次確認できたこと
+
+環境に既存の `pdftotext -layout` により `paper/A_study_on_latent_structural_models_for_binary_rel.pdf`
+を抽出（1129 行、**新規インストールなし**）。確認できたのは Eq.(14)/(16)/(17)/(18)/(26)、
+Algorithm 2、Table I（Experiment 2 の設定）、および §4.1 のデータ生成手順 Step 1-3 である。
+これにより §5.5・§7.5 の記述が `[UNVERIFIED_IN_REPOSITORY]` から
+`[SUPPORTED_BY_PRIMARY_SOURCE]` に更新された。
+
+---
+
+## 21.3 独立監査（research-auditor）第 3 巡と PR #36 追加レビュー（2026-08-23）
+
+第 2 巡の改稿後に `research-auditor` を READ-ONLY で再実行し、18 件の finding を得た。
+また PR #36 に対する追加レビューで、**「Eq.(16) は観測データ周辺尤度ではない」**という
+理論的指摘を受けた。
+
+**auditor の 2 つの総合判定**:
+
+- **PRIORITY 1（ELBO 表現の撤回が完了しているか）**: `ACCEPT`。残存表現なし、代数の再導出は正しく、
+  §6.5.1 の 5 理由のうち 4 つは厳密に正しい（1 つは F9 で修正）。
+- **PRIORITY 2（原論文に関する主張 (a)–(i)）**: **すべて `CONFIRMED`**（`paper.txt` に対して照合）。
+
+| # | 重要度 | 内容 | 判定 | 反映箇所 |
+|---:|---|---|---|---|
+| **T0** | **理論（PR レビュー）** | Eq.(16) の `ln L` は `Z` に条件づけた量であり、観測データ周辺尤度ではない。`p(Z)` の有無だけを見て「原論文は正しい BIC」と読んではならない。(Q1)/(Q2)/(Q3) を分離せよ | **ACCEPT** | **§0.1 新設**、§7.5.1 拡張、E25、U6-c、§18(1)、§19（2 行追加）、§1 項目 7、§20.2 根拠 1 |
+| F1 | HIGH | 「15 セル中 13 セルが 1.00」は誤り。§13.4 の表自身が 12 セルを示す | **ACCEPT**（`exp2_bic_{A,B,C}.csv` から再計算し 12 を確認） | §1(10), E19, §20.1, §20.2(4) |
+| F2 | HIGH | §7.5.4 が「4/5」の限定を落としている（Wine は内点最小 k=5 を持つ） | **ACCEPT** | §7.5.4 |
+| F3 | HIGH | 設定差リストに **family 組合せ**が抜けている。原論文は Gaussian-X / Bernoulli-Y のみ。合成 3 シナリオはいずれも不一致で、唯一一致する Wine が唯一の内点最小ケース | **ACCEPT**（原論文 §4.1 Step 2/3 を再確認） | §7.5.3（7 点の表）、§7.5.4、E26、PL10 |
+| F4 | HIGH | §18(2)(3)(4) が系列ラベルなしで fixed 系列の数値を述べている（root `CLAUDE.md` §3 / KI-002） | **ACCEPT** | §18(2)(3)(4) |
+| F5 | HIGH | PL9 は stale（「原論文は未検証」）で、命題自体が E22 により反証済み。「plausible only」に置くのは誤り | **ACCEPT** | §16 PL9 を `[CONTRADICTED]` として書き換え |
+| F6 | MEDIUM | §18(7) が per-column prototype の出力を provenance 開示なしに使っている（registry 原稿採用 ✗） | **ACCEPT** | §18(7) |
+| F7 | MEDIUM | `paper-Eq16-aligned diagnostic` が過大。罰則が Eq.(26) と一致せず、Gaussian-Y 定数が欠落し、`μ_x` がない | **ACCEPT** | §7.5.3（3 点の非一致）、E24 に caveat |
+| F8 | MEDIUM | fixed 系列 k=7..9 行の実際の生成元 `run_fixed_official_exp1_bic_k9_extension.py` が §5.2/§5.3 の網羅表に欠けている | **ACCEPT**（L.162 で同期 → L.163 で `Q_strict`。結論は不変） | §5.2 表、§5.3 表、「7 ランナー」に修正 |
+| F9 | MEDIUM | §6.5.1(1) と §14.1 の「`q` は定義されていない」は言い過ぎ。法則は well-defined だが intractable で、per-node Laplace の積ではない | **ACCEPT** | §6.5.1(1)、§14.1 |
+| F10 | MEDIUM | §13.3 に「1 量」の枠組みが残存 | **ACCEPT** | §13.3 |
+| F11 | MEDIUM | §20.2 根拠 1 が書かれたままでは non sequitur | **ACCEPT** | §20.2 根拠 1 を全面改稿（「ベースライン論文の量に合わせる選択肢が定義可能になった」に限定） |
+| F12 | MEDIUM | 実験計画 §4 の「既存証拠との直接比較が可能」が同表の KI-002 行および §12 と矛盾 | **ACCEPT** | 実験計画 §4 |
+| F13 | LOW | 実験計画 §6 の `mstep_q_history` は `mstep_q_diagnostic=True` を渡さないと空（`em_runner.py` L.95 の既定は `False`） | **ACCEPT** | 実験計画 §6 |
+| F14 | LOW | §13.4「+1〜+2 側への過大選択」— 観測された誤りはすべてちょうど +1 | **ACCEPT**（一次 CSV で再計算） | §13.4 |
+| F15 | LOW | 原論文の `ln L` 自体も plug-in / 条件付き量であることを明記すべき | **ACCEPT**（T0 と同一） | §0.1、§7.5.1、E25 |
+| F16 | LOW | §7.5.2 の未計上パラメータの数え落とし。かつ既に引用している `factoran`（EFA）の証拠を使っていない | **ACCEPT** | §7.5.2 |
+| F17 | LOW | 行番号 3 件の不正確（`calc_eta_newton` per-node ブロック / MATLAB `scaleZ` / 生成器の F 行再スケール） | **ACCEPT**（3 件とも実ファイルで再確認） | §6.3、§5.5、E18、E21 |
+| F18 | LOW | 実験計画 §4 が objective-consistent 系列を指定しながら prototype 制約を書いていない | **ACCEPT** | 実験計画 §4 |
+
+**REJECT した指摘はない。UNRESOLVED として残した指摘もない。**
+
+auditor が確認できなかった項目（git 履歴・`7.276e-12`・外部文献）は
+本セッションで別途検証済みである（§21 末尾と同じ根拠）。
+
+**本巡で新たに一次確認できたこと**:
+
+- 原論文 §4.1 の生成手順 Step 2/3 が **Bernoulli-Y / Gaussian-X** であること。
+- Eq.(16) 直前の `θ` の定義が `F, μ_x, Σ, σ_z², w0, w` であり、
+  にもかかわらず Eq.(16) の右辺が `z_i` を積分していないこと（T0 の根拠）。
+- Algorithm 2 L.11 が更新するのは `F, μ_x, Σ, σ_z²`（Eqs.(10)–(12) と (14)）であり、
+  `σ_y²` を含まないこと（Algorithm 1 とは異なる）。
+- 原論文 §4.3 が BIC を採用する理由として "BIC possesses consistency in this regard" と
+  **述べているだけで、本モデルに対する一致性の証明は与えていない**こと [SUPPORTED_BY_PRIMARY_SOURCE]。
+  **本研究はこの一致性を証明しない**（§18(8)、U6）。
 
 ---
 
