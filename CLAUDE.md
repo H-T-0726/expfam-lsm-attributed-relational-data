@@ -1,8 +1,9 @@
-# CLAUDE.md — Dual-ExpFam LSM（Claude Code 向け作業規約）
+# CLAUDE.md — Dual-ExpFam LSM（Claude Code / Codex 共通作業規約）
 
 人間向けの入口・環境構築・ディレクトリ規約は `README.md` を参照。
-このファイルには **Claude Code が毎セッション守る制約だけ** を書く。
-実験数値・ファイル一覧・先生対応履歴・TODO はここに置かない（正本は §6）。
+このファイルは **Claude Code と Codex が毎セッション共有する研究指示の正本**であり、
+両者が常に守る研究上の制約だけを書く。ツール固有の workflow は各ツールの設定・拡張に分離する。
+実験数値・ファイル一覧・先生対応履歴・TODO はここに置かない（正本は §8）。
 
 ---
 
@@ -104,7 +105,41 @@ reproduction/src/model.py                       LatentStructuralModel（先行�
 
 ---
 
-## 6. 作業時の安全ルール
+## 6. Human Gate / Approved Task（正式な権限モデル）
+
+ユーザーが目的と scope を明示して依頼した時点で、その依頼を Approved Task の人間承認とする。
+Approved Task 内の個々のコマンド・編集・validation・commit・normal push・Draft PR について、
+個別の再確認は不要。Human Gate に該当する判断が新たに必要になった場合だけ停止して確認する。
+
+### Human Gate（人間だけが決定・実行を承認する）
+
+- 研究目的・モデル・数式の変更
+- family / K / 評価指標 / 実験条件の変更
+- 結果に基づく次の実験の決定
+- frozen spec の変更
+- prototype の正式手法・manuscript evidence への昇格
+- Issue close
+- PR merge
+- force push / published history rewrite
+- main への直接変更
+
+### Approved Task（承認済み scope 内では Claude / Codex が自動実行してよい）
+
+- repo 調査と承認済み scope 内の実装
+- test / debug / validation
+- 承認済み pilot / full experiment
+- 承認済み script と新しい出力先による artifact 生成
+- provenance 記録
+- working branch での commit / normal push
+- Draft PR の作成・更新
+- CI 確認と承認済み scope 内の修正
+
+実装中に別の研究課題や改善を発見しても scope を拡張しない。
+承認済み作業が終わったら人間へ結果を返し、次の phase や次の実験を自動開始しない。
+
+---
+
+## 7. 作業時の安全ルール
 
 - **main を直接編集しない。** `git switch -c <type>/<issue#>-<slug>` でブランチを切る
   （`experiment/` `audit/` `maintenance/` `docs/`）。
@@ -113,11 +148,13 @@ reproduction/src/model.py                       LatentStructuralModel（先行�
 - `EXPERIMENT_REGISTRY.md` は追記して育てる。**既存行のパス文字列を書き換えない・削除しない。**
 - 実行環境は `.python-version`（3.13.14）と `requirements*.txt` を基準とする。
   ただしこれは今後の baseline であり、**過去実験の環境を再現するものではない**（KI-014）。
-- コード修正・実験再実行・ファイル移動/削除の前に、目的とスコープをユーザーに確認する。
+- 既存成果物を手編集・上書きしない。artifact は承認済み script と新しい出力先から生成する。
+- 依頼に目的と scope が明示されていないコード修正・実験再実行・ファイル移動/削除は、
+  実行前にユーザーへ確認する。
 
 ---
 
-## 7. 参照先（必要になったときだけ読む）
+## 8. 参照先（必要になったときだけ読む）
 
 | 文書 | 内容 |
 |---|---|
