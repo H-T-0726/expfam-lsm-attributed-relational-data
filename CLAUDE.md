@@ -111,7 +111,7 @@ reproduction/src/model.py                       LatentStructuralModel（先行�
 Approved Task 内の個々のコマンド・編集・validation・commit・normal push・Draft PR について、
 個別の再確認は不要。Human Gate に該当する判断が新たに必要になった場合だけ停止して確認する。
 
-### Human Gate（人間だけが決定・実行を承認する）
+### Human Gate（人間の判断または人間自身による操作が必要）
 
 - 研究目的・モデル・数式の変更
 - family / K / 評価指標 / 実験条件の変更
@@ -123,12 +123,16 @@ Approved Task 内の個々のコマンド・編集・validation・commit・norma
 - force push / published history rewrite
 - main への直接変更
 
+研究上の変更は人間が判断し、必要なら別の明示的 scope として承認する。
+**Issue close / PR merge / force push / published history rewrite は、通常の agent workflow では
+agent に委任せず、人間自身が実行する。**
+
 ### Approved Task（承認済み scope 内では Claude / Codex が自動実行してよい）
 
 - repo 調査と承認済み scope 内の実装
 - test / debug / validation
 - 承認済み pilot / full experiment
-- 承認済み script と新しい出力先による artifact 生成
+- 承認済み script による artifact 生成（既存成果物の再生成・上書きは scope 明示時のみ）
 - provenance 記録
 - working branch での commit / normal push
 - Draft PR の作成・更新
@@ -148,7 +152,8 @@ Approved Task 内の個々のコマンド・編集・validation・commit・norma
 - `EXPERIMENT_REGISTRY.md` は追記して育てる。**既存行のパス文字列を書き換えない・削除しない。**
 - 実行環境は `.python-version`（3.13.14）と `requirements*.txt` を基準とする。
   ただしこれは今後の baseline であり、**過去実験の環境を再現するものではない**（KI-014）。
-- 既存成果物を手編集・上書きしない。artifact は承認済み script と新しい出力先から生成する。
+- 既存の記録済み成果物を手編集・無断で上書きしない。artifact は承認済み script から生成する。
+  既存成果物の再生成・上書きが本当に必要な場合は、Approved Task の scope に明示されていること。
 - 依頼に目的と scope が明示されていないコード修正・実験再実行・ファイル移動/削除は、
   実行前にユーザーへ確認する。
 
