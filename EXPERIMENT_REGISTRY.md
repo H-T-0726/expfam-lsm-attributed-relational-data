@@ -311,3 +311,30 @@ Phase 7c (#39) で設計し Phase 7d (#41) で実装・two-canary falsification 
 | 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
 |------|----|----------|-------|---|----|------|----|
 | Phase 7e full held-out K-selection pilot | transductive dyad holdout（`test_ratio=0.20`）で held-out Bernoulli plug-in mean log score（raw `eta = w0 + w z_i^T z_j`、`y*eta - logaddexp(0,eta)`）による K 選択。family_x=poisson、family_y=bernoulli、K_TRUE=3、n=75、d=15、L=5、num_iter=8、`numerics_mode="consistent"`、candidate K=1..7、2 starts/K、3 dataset replicates、**42 fits** | `tools/research_audit/run_heldout_k_selection_pilot.py`（`--full --allow-em --confirm-full-pilot`）, `tools/research_audit/audit_heldout_full_pilot.py`, `tools/research_audit/build_heldout_full_pilot_report.py`, `expfam/src/experimental/model_dual_expfam_consistent.py` | `expfam/results/k_selection/heldout_full_pilot_20260824/{manifest,fit_results,replicate_selection,aggregate_summary,score_by_k}.csv`, `expfam/results/k_selection/heldout_full_pilot_20260824/runinfo.json` | （なし） | current_support | ✗ | objective-consistent prototype; Issue #43; decision A。RUN_CODE_SHA `b9311e64a7b36c0a8a9704fff0ee7b38efe36a8a`、base main `a11406ca5e93c216bd4faa875fdbe0ca73c406c6`。**結果**: selected K = replicate1:3、replicate2:3、replicate3:5（tie candidates はいずれも単一）、selected-K counts {3:2, 5:1}、K_TRUE selected count 2、**descriptive pilot recovery rate 2/3 = 0.6667**。**integrity**: 42/42 clean、internal retry 0、warning 0、q_failure 0、NaN 0、非有限 0、duplicate/missing key 0、score target ちょうど 3、score rows 42。independent self-audit verdict PASS（BLOCKER 0 / HIGH 0 / MEDIUM 0 / LOW 0）、2-start mean score の runtime との差分 **0.0**、K 別集約の差分 1.73e-18（frozen tolerance 1e-12 未満、丸め順序差、選択結果に影響なし）。**限定**: ①replication unit は独立生成 dataset replicate で **わずか 3 個**、recovery rate は記述値であり信頼区間を伴う推定量ではない ②held-out dyad は node を共有し独立ではない。held-out pair 数（555）は独立標本サイズではない ③score は plug-in であり parameter・Z の不確実性を積分していない（posterior predictive / marginal likelihood / ELBO ではない）④候補 K のモデルは回転不定性を持ち操作上入れ子とは限らない ⑤MCEM 近似（L=5）と有限反復（num_iter=8）が予測ランキングに影響しうる ⑥transductive dyad holdout であり inductive / new-node 一般化（Design B）は現行 API 未サポート ⑦replicate3 の best-second margin は 0.000744 と小さいが、**margin は選択規則に一切使っていない。統計的有意差ではない** ⑧prototype・本文採用不可。**p 値・信頼区間・検出力・bootstrap は一切計算していない** |
+
+---
+
+## 監査・設計・実装フェーズ（2026-08-21〜2026-08-31、append-only 追記）
+
+この節は 2026-08-31 の canonical integration で追加した。**既存行は一切書き換えていない。**
+ここに載るのは **EM fit を伴わない監査・設計・実装成果物**であり、
+上の各表の「実験」行とは役割が異なる（`理論監査フェーズ` 節と同じ扱い）。
+Phase 6 の実験（issue #27 / #31 / #33）と Phase 7b / 7e の実験は既に上の節に登録済みであり、
+**重複行を追加していない。**
+
+| 成果物 | issue / PR | 内容 | EM fit | 参照 |
+|---|---|---|---|---|
+| `reports/per_column_family/per_column_math_code_audit_20260821.md` | #23 / PR #24 | per-column prototype（`DualExpFamLSMPerColumn`）の数理・コード監査。内点は独立導出・有限差分と一致（勾配 2.26e-10 / 曲率 7.51e-09）。**PC-001 HIGH**（Poisson clip 外で目的関数と実装導関数が不整合）・**PC-002 MEDIUM**（Bernoulli floored tail）。検証補助は `tools/research_audit/audit_per_column_math.py` | なし（read-only 監査＋決定論的 fixture） | KI-015 |
+| `reports/per_column_family/objective_consistency_fix_20260821.md`＋`expfam/src/experimental/model_dual_expfam_consistent.py` | #25 / PR #26 | PC-001/PC-002 の **forward 修正**として objective-consistent lineage（`DualExpFamLSMConsistent` / `DualExpFamLSMPerColumnConsistent`）を新設。**過去結果は再計算していない。`numerics_mode` の既定は `legacy` のまま** | なし（実装＋単体テスト） | KI-015 |
+| `reports/model_refinement/evidence_driven_model_refinement_audit_20260821.md` | #28 / PR #29 | 一次 CSV から全数値を再計算した read-only 監査。failure map F1〜F9（**F9 は本監査が新規に発見**）。model modification は 1 つも JUSTIFIED_NOW に到達しないと判定し、issue #27 を RUN NEXT とした | なし（read-only、再計算のみ） | — |
+| `reports/k_selection_theory/k_selection_theory_audit_20260822.md`＋`k_selection_next_experiment_plan_20260822.md` | #35 / PR #36 | Phase 7a。潜在次元 K 選択・識別可能性・Q-based criterion の理論監査。E1–E26 を確立。**原論文 Eq.(26) の当てはまり項 Eq.(16) `ln L` が `p(Z)` を含まず `Z` も積分していないことを原論文 PDF で一次確認**。決定は `D: INVESTIGATE_ALTERNATIVE_CRITERION_BEFORE_K_SWEEP` | なし（read-only） | KI-010 |
+| `reports/k_selection_theory/heldout_k_selection_design_20260823.md`／`heldout_k_selection_leakage_matrix_20260823.md`／`heldout_k_selection_implementation_plan_20260823.md` | #39 / PR #40 | Phase 7c。leakage-safe held-out K-selection の設計・leakage ledger・実装計画。primary design は transductive dyad holdout。two-canary gate と test-Y flow prohibition を凍結 | なし（設計のみ） | — |
+| `tools/research_audit/run_heldout_k_selection_pilot.py`＋`tools/research_audit/test_heldout_k_selection_pilot.py` | #41 / PR #42 | Phase 7d。上記 protocol の harness 実装、two-canary falsification、K={2,3,4} smoke。**full pilot は本フェーズでは未実行**（`--full` は blocked）。決定は `A: RUN_FULL_HELDOUT_K_SELECTION_PILOT_NEXT` | smoke のみ（full pilot なし） | — |
+| `tools/research_audit/audit_heldout_full_pilot.py`（強化）＋`test_heldout_k_selection_pilot.py`（negative test 25 件追加） | #43 / PR #44（commit `18176e545c7732aeb91c68032b18f3a3e8a6db0f`） | Phase 7e の **post-run audit hardening**。independent Codex review の MEDIUM finding B（artifact completeness の fail-open）に対応し、required artifact 存在・21 行/7 行/12 行の構造・pilot key 集合・`descriptive_recovery_rate` の NaN fail-open・runinfo required field を fail-closed 化。**scientific execution に使われた code（RUN_CODE_SHA `b9311e64...`）とは別 commit であり、42 fits は再実行していない** | **なし（artifact-only）** | KI-017 |
+| `reports/k_selection_theory/heldout_k_selection_full_pilot_provenance_addendum_20260831.md` | #43 / PR #44 | Phase 7e の **provenance addendum（append-only）**。independent Codex review の MEDIUM finding A に対応。`stdout.log` を生成した outer capture command は **`NOT RECOVERABLE FROM REPOSITORY EVIDENCE`**。保存 artifact から言えるのは「frozen RUN_CODE_SHA 後に 42 clean fits からなる 1 successful recorded execution が存在する」ことまでで、**「削除された先行実行の不存在まで含めて externally proven exactly once」とは書かない**。2026-08-24 の report・runinfo・result CSV は一切変更していない | なし | KI-017 |
+
+**この節の運用:** ここに載る成果物は `状態` / `原稿採用` 列を持たない。
+いずれも **EM fit を伴わない**ため実験 provenance の対象外であり、
+数値主張の根拠として引用する場合は上の実験表の該当行（および一次 CSV）へ遡ること。
+per-column（lineage F）と objective-consistent（lineage E）はいずれも **prototype・本文採用不可**である
+（root `CLAUDE.md` §3、`RESEARCH_MASTER.md` §12.1）。

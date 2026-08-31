@@ -7,7 +7,11 @@
 既知の問題点を一覧化したものである。
 
 事実（コード・CSV・実行ログで確認できること）と解釈（推測・評価）を分けて記載する。
-本ドキュメントは新規作成のみであり、既存ファイルの内容は変更していない。
+
+本ドキュメントは **継続的に forward update される canonical safety document** である。
+historical な issue 行は記録として保持しつつ、**current status は日付入りの forward update 節を正とする**
+（最新は「2026-08-31 forward update」）。
+current guidance と historical 記述が食い違う場合は forward update 節を優先する。
 
 ---
 
@@ -52,9 +56,17 @@
 
 ## 今すぐ主張してよいこと
 
-- Dual-ExpFam LSMは、Gaussian / Bernoulli / Poissonの3分布族について、X側・Y側を任意に指定できる実装が存在する（`model_dual_expfam.py`のコード上で確認可能）。
+**完全な分類は `RESEARCH_MASTER.md` §14「2026-08-31 Current Claim Ledger」を正本とする。**
+本リストはその要約であり、食い違う場合は §14 を優先する。
+
+- Dual-ExpFam LSMは、Gaussian / Bernoulli / Poissonの3分布族について、X側・Y側を任意に指定できる実装が存在する（`model_dual_expfam.py`のコード上で確認可能）。**実装レベルの一般化であり性能主張ではない。Categorical は未実装。**
 - 3シナリオ（A: Poisson-X/Bernoulli-Y, B: Gaussian-X/Poisson-Y, C: Bernoulli-X/Gaussian-Y）でExp1-4が実行され、結果CSVが存在する。
-- 各シナリオでBICによりk*=3が選択される（`exp_scenario_*_exp1_k.csv`で確認可能、`reports/claims_and_evidence.md`にも記載）。
+- **潜在次元の選択（限定付き・QUALIFIED ONLY）:** 明示した人工設定において、
+  **歴史的に `BIC` と呼ばれてきた Q ベース基準**が `K = 3` を選択した
+  （fixed 系列では候補 `K = 1,…,9` から 30/30 trial、
+  `expfam/results/fixed_official/exp1_k9/fixed_exp1_bic_k1to9_bestk_by_trial.csv`）。
+  **これは Schwarz BIC の妥当性・一般的な true-K recovery・model-selection consistency のいずれも意味しない**（KI-010 forward update）。
+  **「BIC で正しい K を選べる」と読める表現を使わない。**
 - nの増加に伴いRMSE(Z)が改善する傾向が3シナリオで確認できる（`exp_scenario_*_exp2_n.csv`）。
 - fixed版（0.5除去）でシナリオA/B/CのExp1-4が正式に再実行され、結果CSVが存在する（`expfam/results/fixed_official/`）。
 - fixed版はWine・Cora・MovieLensの3つの実データセットに適用でき、いずれもNaNなく全fitが成功した（`reports/real_data_experiment_summary.md` §8）。
@@ -68,14 +80,27 @@
 - 「Categorical分布にも対応している」という主張（未実装）。
 - 「41.5倍・23.6倍・38.97倍が同一条件・同一モデルの結果である」という主張（KI-003参照、異なる実験の値）。
 - AI生成レポート（GEMINI_REPORT_*等）の結論を一次根拠として引用すること。
-- 「MovieLensで未知ペアの共評価数を予測できた」という主張（strict held-outは未実装、in-sample再構成のみ、KI-012）。
+- 「MovieLensで未知ペアの共評価数を予測できた」という主張。
+  （**この禁止は 2026-08-31 現在も有効**。ただし括弧内の理由づけは更新されている:
+  strict held-out は **experimental 系列（`model_dual_expfam_masked.py`）で実装済み**であり、
+  Issue #33 の user-disjoint validation も実施済みである。
+  それでもなおこの主張が禁止なのは、Issue #33 report §9 の禁止句リストに含まれること、
+  Y が overdispersed で Poisson log-likelihood は score にすぎないこと、
+  および lineage が experimental prototype であることによる。詳細は下記 C。
+  **「strict held-out は未実装」を current statement として引用しない。**）
 - 「Cora（n=280 balanced subset）の結果がfull Cora（n=2708）に一般化する」という主張（未検証）。
 - 「実データでBICが常に適切なkを選ぶ」という主張（Coraでは疎密度によりk=1を選択、KI-011）。
 - 「実データ実験フェーズの結果が学会予稿の主張に含まれる」という主張（`conference_submission_final_draft.md`には未収録、修論フェーズ向けの追加検証）。
 - **「先行研究（Mikawa et al. 2024）の印刷された式にも 1/2 がない」という記述**（原論文 Eq.19/20/22/23・Appendix A-1/A-3/A-5 には 1/2 がある。2026-08-18 に一次確認済み、KI-001）。
 - **「過去の実験結果が特定の実行環境で生成された」という主張**（過去の runinfo に環境情報がなく、記録だけから完全・一意には復元できない。`reports/environment/baseline_20260818.md` は今後の baseline であり historical environment の証明ではない、KI-014）。
 
-## 修論フェーズで優先的に検証すること
+## 修論フェーズで優先的に検証すること（historical、2026-05〜2026-06 時点の一覧）
+
+> **【2026-08-31】** 以下は当時の一覧であり、**current な TODO ではない**。
+> 研究上の TODO は GitHub Issue で管理し、canonical docs には置かない（root `CLAUDE.md` §8）。
+> 各項目の 2026-08-31 時点の状態は下の「2026-08-31 forward update」§I を参照。
+> 科学的に未解決である事実は `RESEARCH_MASTER.md` §14 の `UNRESOLVED` に記載している。
+
 
 1. KI-001：0.5係数を除去した実装（`model_dual_expfam_fixed.py`相当）でExp1-4を再実行し、本文の数値が変化するか確認する。
    → fixed_official/half_factor_checkで人工データについては実行済み。原稿数値との対応整理が次のステップ。
@@ -87,3 +112,197 @@
 6. KI-012：MovieLens Poisson実験のpair mask対応（strict held-out評価の実装）、および負の二項分布によるoverdispersion対応を検討する。
 7. Cora実験をfull Cora（n=2708）または他の引用ネットワーク（Citeseer等）に拡張する。
 8. MovieLensのuser-node投影・二部グラフ拡張など、他のprojection方式との比較を検討する（`reports/movielens_pilot_design.md` 案B/C）。
+
+---
+
+## 2026-08-31 forward update（Phase 6〜7e の統合）
+
+**本節自体は append-only である。** ただし本文書全体は current canonical safety document であり、
+2026-08-31 の統合では次の 2 種類の変更を行っている。
+
+- **保持したもの:** 「Issue一覧」表の **historical row 本体**（KI-001〜KI-014 の各行と 2026-07-19 更新注記）。
+  これらは当時の記録として書き換えていない。
+- **forward update したもの:** 文書上部の **current guidance と summary list**。
+  具体的には ①冒頭「目的」節の文書自体に関する説明、②「今すぐ主張してよいこと」の
+  潜在次元選択に関する記述（無限定の BIC 表現を限定付き表現へ変更）、
+  ③「まだ主張してはいけないこと」の MovieLens 行（禁止は維持し、理由を
+  strict held-out の現状に合わせて更新）、④「修論フェーズで優先的に検証すること」の
+  見出しと説明（historical であることの明示）。
+
+historical state を残す必要がある箇所は `Historical` / `historical state` として明示的に隔離している。
+**現在形の主張の正本は `RESEARCH_MASTER.md` §14「2026-08-31 Current Claim Ledger」である。**
+本節と上のリストが食い違う場合は、本節と §14 を現在の状態とする。
+
+### A. 既存 KI の現在の状態（historical record は削除しない）
+
+| KI | 2026-08-31 時点の状態 | 根拠 |
+|---|---|---|
+| KI-001（0.5 係数・5 系統） | **変更なし**。採用式（1/2 なし）を正とし、原論文の印刷式には 1/2 が**ある**。「Newton 方向が全体として正しいとは断定できない」の付記は引き続き必須 | `RESEARCH_MASTER.md` §6.1 |
+| KI-002（旧版と fixed の混在） | **範囲が拡大**。現在は **6 lineage**（A 原論文印刷式 / B 旧 0.5 / C fixed / D experimental / **E objective-consistent** / **F per-column prototype**）を区別する必要がある。E・F は Phase 6 以降で新設・多用された | `RESEARCH_MASTER.md` §12.1 |
+| KI-003（23.6× / 41.45× / 38.97×） | **変更なし**。加えて fixed 系列の誤指定最悪比は **A 4.3414× / B 9.0405× / C 40.3706×**（ablation 行を除く）であることを一次 CSV で再確認した。`fixed_exp4_scen_c_ratios.csv` の 46.8637× は `fix_w=True` の ablation（`X_only`）であり**誤指定倍率として引用しない** | `RESEARCH_MASTER.md` §15、`expfam/results/fixed_official/exp4/fixed_exp4_scen_{a,b,c}_ratios.csv` |
+| KI-005（Categorical 未実装） | **変更なし**。「指数型分布族すべてに対応」とは書かない | — |
+| KI-006（Wine） | **変更なし**（部分解消のまま）。Wine の Y はラベル由来 | — |
+| KI-010（BIC の呼称・パラメータ数） | **大幅に具体化。詳細は下記 D。** | `RESEARCH_MASTER.md` §12.6 |
+| KI-011（Cora で BIC が機能不全） | **変更なし・原因は UNRESOLVED**。`Σ_i ln det A_i` は未測定、試行は 3 のみ。「KI-011 を完全に説明した」とは書かない | Issue #35 PL1 |
+| KI-012（MovieLens overdispersion と strict held-out 未対応） | **PARTIALLY RESOLVED。詳細は下記 C。** | `RESEARCH_MASTER.md` §12.5 |
+| KI-014（過去実験環境の非復元性） | **変更なし**。加えて Phase 7e について新種の provenance limitation が判明（下記 F） | — |
+
+### B. 新規 KI-015 — per-column prototype の objective inconsistency（tail）と objective-consistent lineage
+
+**事実（Issue #23、一次確認済み）:** `experimental/model_dual_expfam_percolumn.py` は、
+Poisson の clip 区間 `[-20,10]` の**外側**と Bernoulli の floor された tail において、
+報告している目的関数の勾配・負 Hessian が 0 であるのに、実装の score・precision は非零を返す。
+決定論的反例: `eta=11.5, x=3` で実装 score `-22023.465794806718` / precision `22026.465794806718`、
+実際の目的関数の有限差分はいずれも `0.0`。**内点（interior）では独立導出・有限差分と一致している**
+（勾配 2.26e-10 / 曲率 7.51e-09）。
+
+**対応（Issue #25）:** `experimental/model_dual_expfam_consistent.py`（lineage E）を
+**forward 修正**として新設した。**過去の結果は再計算していない。**
+`numerics_mode` の既定は `legacy` のままであり、Phase 6 より前の全実験は legacy numerics で実行されている。
+
+**影響:** legacy numerics で実行された per-column 系の過去結果について、
+**EM 反復中に clip が発動したかは記録されておらず UNRESOLVED** である。
+新しい per-column 実験は `numerics_mode="consistent"` を明示的に選ぶ運用とする。
+
+**まだ主張してはいけないこと:** 「legacy 系列の per-column 結果は clip の影響を受けていない」。
+
+### C. KI-012 の forward update — historical state と current state を分ける
+
+**historical state（2026-06 時点、上の KI-012 行の記述）:**
+「現在のモデル API は pair mask に対応しておらず strict held-out 評価ができない」。
+**この記述は 2026-06 時点として正しく、削除しない。**
+
+**current state（2026-08-31）:**
+
+1. **pair mask（strict held-out）は experimental 系列で実装済み**（`model_dual_expfam_masked.py`、2026-07-10 以降）。
+   ただし **fixed 本体 API（`model_dual_expfam_fixed.py`）には未統合**。
+2. **Issue #33 で user-disjoint protocol による実データ検証を実施済み**
+   （30 splits、train users のみからの movie selection、train-only 由来属性、360 fits）。
+   旧 pilot にあった selection leakage（100 映画 subset が full-data popularity で選ばれていた）を除く設計。
+3. **Y の overdispersion は解消していない**（split 半分で var/mean 5.0–5.6、full data で 9.9）。
+   Poisson の per-pair log-likelihood は **score として**用いており、正しく指定された尤度ではない。
+
+**それでも「MovieLens で未知ペアの共評価数を予測できた」とは書かない。**
+Issue #33 の report §9 が禁止句として明示している
+（"we predicted unseen co-rating counts on MovieLens" は FORBIDDEN_CLAIM_PHRASES に含まれる）。
+また #28 の **F9**（MovieLens では genre-only X ですら strict held-out Y を確実には改善しない）は未解消である。
+
+### D. KI-010 の forward update — 基準の呼称制限（一次確認により具体化）
+
+**現行基準を「Schwarz BIC」と呼ばない。** 関数名 `calc_bic_dual`・CSV 列名 `BIC`・過去結果の呼称は
+provenance のため**変更しない**（この方針は変更なし）。
+
+Issue #35 の理論監査で新たに一次確認されたこと:
+
+1. 現行基準は `BIC_impl = −2·Q_strict + p̂·ln n`。当てはまり項は **EM の Q 関数**であり観測データ周辺尤度ではない。
+2. `scale_Z` により潜在変数の事前分布項が定数 `−(nk/2)(1+ln2π)` に退化し、
+   **潜在次元 1 あたり `n(1+ln2π) ≈ 2.84n` の固定的な次元罰則**が実効的に働いている。
+3. **先行研究の印刷された Eq.(26) の当てはまり項 `ln L`（Eq.16）も `Z` を積分していない**
+   （`z_i` に条件づけた量。2026-08-23 に原論文 PDF を一次確認）。
+   → **本研究の基準も先行研究の印刷された基準も、Schwarz BIC が対象とする観測データ周辺尤度には対応しない。**
+
+**新たに書いてはいけないこと（KI-010 に追加）:**
+
+- 「先行研究の Eq.(26) は standard Schwarz BIC である」
+- 「先行研究の BIC は joint モデルの `Q` を使っている」（一次確認により否定された）
+- 診断スコア `S_cf` を「corrected BIC」「modified BIC」「true BIC」と呼ぶこと
+- `S_laplace_post` を「ELBO」「variational BIC」と呼ぶこと
+
+**K 選択は現在も UNRESOLVED である。** selection target が未確定（#35 U16）、
+K 選択の n 依存性は一度も測定されていない（U2）、本モデルの RLCT は未知（U5）。
+Issue #37 は**同一の 42 fits 上で score 定義により選ばれる K が異なる**ことを示した
+（C1 `bic_impl` と C3 `S_laplace_post` は k=3 を 6/6、C2 `S_cf` は範囲上端 k=7 を 6/6）。
+
+### E. 新規 KI-016 — sparse/dense Y boundary と latent-coverage の解釈境界
+
+**sparse/dense Y boundary（Issue #27、lineage E+F、人工データ）:**
+`y_obs_rate=0.1` では 4 つの primary contrast すべてで複数属性同時利用が優位
+（`y_only` +0.5122 10/10、`single_bernoulli` +0.4218 10/10、`single_poisson` +0.3889 10/10、
+`single_gaussian` +0.2030 9/10）。`y_obs_rate=1.0` では最良単一 block 比 **+0.0087** まで縮小。
+
+**書いてはいけない:** 「一般に per-column が優れる」「実データでも優れる」
+**「dense-Y では無意味／実務的に無意味」**（縮小したという記述までにとどめる）
+「正式提案手法として確立した」。
+
+**latent-coverage の解釈境界（Issue #31、lineage E+F、人工データ）:**
+primary（Gaussian comparator）は `I = +0.1139`（std 0.0915、9/10）だが、
+必須分解の `D_J = +0.2012`（10/10）が大きく、**`I` を単独で解釈してはいけない**。
+secondary は追随しない: `single_bernoulli` の `I = −0.2041`（**0/10**）、`single_poisson` は `−0.0046`（6/10）。
+
+**書いてはいけない:** 「latent coverage が改善原因である」「機構を分離した」「alone / fully isolated」。
+
+### F. 新規 KI-017 — Phase 7e の結果境界と stdout provenance limitation
+
+**Phase 7e は実行済みである**（Issue #43 close 済み、PR #44 merge 済み、main `ec6e646c...`）。
+「未実行」「planned next experiment」と書かない。
+
+**結果（lineage E、objective-consistent experimental prototype、本文採用不可）:**
+selected K = replicate1:**3** / replicate2:**3** / replicate3:**5**、counts `{3:2, 5:1}`、
+**descriptive recovery rate 2/3**。42/42 clean。
+
+**書いてはいけない:** 「true K recovery 66.7% という一般性能」「consistency」「BIC より優れる」
+「C1/C2/C3 より優れる」「manuscript-level conclusion」「実データ妥当性」「漸近的結果」。
+これは **1 synthetic setting × 3 dataset replicate だけの descriptive pilot** である。
+
+**stdout provenance limitation:**
+`stdout.log` を生成した outer capture command は
+**`NOT RECOVERABLE FROM REPOSITORY EVIDENCE`** である（runner 自身に write 処理がなく、
+`runinfo.json` の `command` は inner Python command のみを記録している）。
+repository evidence から言えるのは、frozen RUN_CODE_SHA の後に
+**42 clean fits からなる 1 successful recorded execution が保存 artifact として存在する**ことまで。
+
+**書いてはいけない:** 「削除された先行実行が存在しないことまで含めて externally proven exactly once」。
+この限定は 42 saved fit rows・selected K・arithmetic・seed・hash・leakage isolation を無効化しない。
+詳細は `reports/k_selection_theory/heldout_k_selection_full_pilot_provenance_addendum_20260831.md`。
+
+### G. 新規 KI-018 — raw-count Poisson diagnostic の原因は未解明
+
+**事実（Issue #33、lineage E+F、実データ）:** secondary contrast
+`mixed_train_raw_poisson − mixed_train_log` は mean **−0.100274**、**29/30 splits で悪化**。
+leakage を除いた user-disjoint protocol 上でも、旧 leaky pair-split diagnostic と同じ方向を示した。
+
+**書いてよい:** 「今回の MovieLens 設定・モデル・raw-count 表現では、
+raw count を Poisson-X として扱った条件が log-count 表現より一貫して悪化した」。
+
+**書いてはいけない:** 「Poisson は悪い」「Poisson は実データに不適」「Poisson-X は一般に有害」
+**「intercept 欠如が原因」「curvature が原因」**。
+
+**原因は UNRESOLVED。** Issue #28 §9.3 の通り、intercept 欠如 / raw scale / Poisson 曲率 /
+X 側過分散（`ratings_count` の var/mean = 6.17）の 4 要因が交絡しており、
+これらを分離できる設計は #28 の候補 B のみである。B は X 列 intercept と
+dispersion-aware count family を伴う設計を要する。**現時点でそのような条件は存在せず、原因は未解明のままである。**
+
+### H. 追加された「まだ主張してはいけないこと」（上のリストへの append）
+
+上の「まだ主張してはいけないこと」に、2026-08-31 時点で次を追加する（既存行は削除しない）。
+
+- 「per-column heterogeneous-X が一般に優れる」「実データでも優れる」「正式提案手法として採用した」（B/E/F、prototype）
+- 「MovieLens で提案手法の有効性を確認した」「statistically significant」「robust superiority」
+  「30 independent experiments」「causal contribution」（Issue #33 report §9 の禁止句リスト）
+- 「Poisson は実データに不適」「Poisson-X は一般に有害」「raw-count 悪化の原因は intercept 欠如／curvature である」（KI-018）
+- 「先行研究の Eq.(26) は standard Schwarz BIC である」（KI-010 forward update）
+- 「K-selection の consistency を確認した」「BIC で正しい K を選べる」「true K を一般に回復する」（KI-010 forward update）
+- 「Phase 7e の 2/3 は true K recovery 66.7% という一般性能である」（KI-017）
+- 「Phase 7e は externally proven exactly once である（削除された先行実行の不存在を含めて）」（KI-017）
+- 「latent coverage が per-column の改善原因である」（KI-016）
+- 「legacy numerics で実行された per-column の過去結果は clip の影響を受けていない」（KI-015）
+- 旧 0.5 系列（B）・fixed 系列（C）・consistent 系列（E）の数値を同じ表・図に並べること（KI-002 の拡張）
+
+### I. 修論フェーズで優先的に検証すること（上のリストへの forward note）
+
+上のリスト（項目 1〜8）は 2026-05〜2026-06 時点のものであり、**削除しない**。
+2026-08-31 時点の状態は次のとおり。
+
+| 旧項目 | 現在の状態 |
+|---|---|
+| 1. KI-001 fixed 版での再実行 | **実行済み**（`fixed_official/`）。残るのは条件対応表の作成（§15、RESEARCH_MASTER） |
+| 2. KI-003 fixed 版での倍率計算 | **実行済み**（A 4.3414× / B 9.0405× / C 40.3706×）。**条件対応表は未作成**（human decision） |
+| 3. KI-006 Wine | **完了** |
+| 4. KI-010 パラメータ数の手計算 | **完了**（#35 E1、18 セルで `num_params` 一致を確認）。ただし基準の位置づけ問題は別途 UNRESOLVED |
+| 5. KI-011 疎データでのペナルティ | **未解決**。`Σ_i ln det A_i` 未測定 |
+| 6. KI-012 pair mask / NB | **部分解消**（上記 C）。fixed 本体 API への統合は未実施 |
+| 7. Cora full への拡張 | **未実施** |
+| 8. MovieLens 他 projection | **未実施**。ただし #33 で user-disjoint protocol は確立した |
+
+本表は各項目の **現在の状態** を記録したものであり、実施計画ではない
+（研究上の TODO は GitHub Issue で管理する。root `CLAUDE.md` §8）。
