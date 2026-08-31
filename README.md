@@ -19,8 +19,16 @@ with attribute information," NOLTA, IEICE, vol. 15, no. 2, 2024.
 | 実データ実験フェーズ（Wine / Cora / MovieLens、fixed 系列） | 完了（2026-06-17〜2026-07-07）。**学会予稿には未収録**、修論フェーズ向けの追加検証 |
 | 理論監査フェーズ | 完了（2026-07-18〜19、read-only）。`reports/theory_audit/` |
 | 実行環境の固定 | 完了（**2026-08-20 実測**）。`reports/environment/baseline_20260818.md`（ファイル名の `20260818` は Issue #9 由来の識別子であり、実測日ではない） |
+| Phase 6（per-column 監査 / objective-consistent numerics / 人工データ検証 / MovieLens user-disjoint 検証） | 完了（2026-08-21〜08-22、issue #23・#25・#27・#28・#31・#33）。experimental prototype 系列であり**本文採用不可** |
+| Phase 7（K 選択の理論監査 → score pilot → held-out 設計・実装 → full pilot） | 完了（2026-08-22〜08-24、issue #35・#37・#39・#41・#43）。`reports/k_selection_theory/` |
+| canonical docs の統合 | 2026-08-31。**現在形の主張の正本は `RESEARCH_MASTER.md` §14「2026-08-31 Current Claim Ledger」** |
 
 現在進行中の作業は GitHub Issue で管理している。
+
+**数値・主張を引用する前に必ず読むもの:** `RESEARCH_MASTER.md` §12（Phase 6〜7e のフェーズ史と lineage）
+と §14（Current Claim Ledger）、および `KNOWN_ISSUES.md` の 2026-08-31 forward update。
+実装 lineage（旧 0.5 / fixed / experimental / objective-consistent / per-column prototype）を
+混ぜて引用しないこと（KI-002）。
 
 ---
 
