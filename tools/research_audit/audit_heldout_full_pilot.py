@@ -40,6 +40,78 @@ WITHIN_REPLICATE_INVARIANT_COLUMNS = (
     "score_config_hash",
 )
 
+# The frozen final artifact set.  Completeness is checked fail-closed: a
+# missing artifact is a BLOCKER and an empty or truncated table can never
+# pass by making a comparison loop iterate zero times.
+REQUIRED_ARTIFACT_NAMES = (
+    "manifest.csv",
+    "fit_results.csv",
+    "replicate_selection.csv",
+    "aggregate_summary.csv",
+    "score_by_k.csv",
+    "runinfo.json",
+    "runinfo.md",
+    "stdout.log",
+)
+
+EXPECTED_SELECTION_KEYS = frozenset(
+    (replicate, k) for replicate in REPLICATES for k in K_CANDIDATES
+)
+EXPECTED_SELECTION_ROWS = len(EXPECTED_SELECTION_KEYS)
+EXPECTED_SCORE_BY_K_ROWS = len(K_CANDIDATES)
+EXPECTED_PILOT_KEYS = (
+    "n_replicates",
+    "true_k",
+    "selected_k_counts",
+    "true_k_selected_count",
+    "descriptive_recovery_rate",
+)
+EXPECTED_AGGREGATE_ROWS = len(K_CANDIDATES) + len(EXPECTED_PILOT_KEYS)
+
+# Columns of replicate_selection.csv that describe the replicate as a whole and
+# must therefore be identical across that replicate's seven candidate-K rows.
+REPLICATE_CONSTANT_SELECTION_COLUMNS = (
+    "selected_k",
+    "best_mean_score",
+    "second_best_mean_score",
+    "margin",
+    "tie_candidates",
+)
+
+REQUIRED_RUNINFO_FIELDS = (
+    "issue",
+    "branch",
+    "run_code_sha",
+    "base_main_sha",
+    "timestamp_utc_start",
+    "timestamp_local_start",
+    "timestamp_utc_finish",
+    "command",
+    "python_version",
+    "numpy_version",
+    "platform",
+    "config",
+    "candidate_k",
+    "starts",
+    "replicates",
+    "manifest",
+    "data_seeds",
+    "split_seeds",
+    "model_seeds",
+    "per_replicate_provenance",
+    "git_status_before",
+    "git_status_after_scientific_execution",
+    "stdout_log",
+    "expected_fit_count",
+    "actual_fit_count",
+    "targets_created",
+    "score_rows",
+    "failure_state",
+    "generated_artifacts",
+    "tie_tolerance",
+    "tie_rule",
+)
+
 
 def _relative_to_root(path: Path) -> str:
     try:
@@ -87,11 +159,84 @@ def _sample_std(values: Sequence[float]) -> float:
     return math.sqrt(sum((value - mean) ** 2 for value in values) / (n - 1))
 
 
+def _verdict_for(findings: Sequence[dict[str, str]]) -> str:
+    severities = {finding["severity"] for finding in findings}
+    if "BLOCKER" in severities or "HIGH" in severities:
+        return "FAIL"
+    if "MEDIUM" in severities:
+        return "PASS_WITH_NOTES"
+    return "PASS"
+
+
+def _incomplete_result(
+    run_dir: Path,
+    findings: list[dict[str, str]],
+    present_files: Sequence[str],
+    missing_required: Sequence[str],
+) -> dict[str, Any]:
+    """Result shape used when the artifact set is too incomplete to recompute.
+
+    Returning early here is what makes the audit fail *closed*: without it a
+    missing table would raise, or an empty table would let every comparison
+    loop iterate zero times and report PASS.
+    """
+
+    return {
+        "run_dir": _relative_to_root(run_dir),
+        "verdict": _verdict_for(findings),
+        "artifacts_present": list(present_files),
+        "missing_required_artifacts": list(missing_required),
+        "unexpected_artifacts": sorted(
+            set(present_files) - set(REQUIRED_ARTIFACT_NAMES)
+        ),
+        "fit_rows": 0,
+        "manifest_rows": 0,
+        "duplicate_keys": 0,
+        "missing_keys": [],
+        "total_retries": 0,
+        "total_warnings": 0,
+        "total_q_failures": 0,
+        "total_nan": 0,
+        "independent_means": {},
+        "independent_selected_k": {},
+        "independent_tie_candidates": {},
+        "independent_margin": {},
+        "independent_selected_k_counts": {},
+        "independent_true_k_selected_count": 0,
+        "independent_descriptive_recovery_rate": 0.0,
+        "independent_k_stats": {},
+        "max_mean_score_difference": 0.0,
+        "max_aggregate_difference": 0.0,
+        "blocker": sum(1 for f in findings if f["severity"] == "BLOCKER"),
+        "high": sum(1 for f in findings if f["severity"] == "HIGH"),
+        "medium": sum(1 for f in findings if f["severity"] == "MEDIUM"),
+        "low": sum(1 for f in findings if f["severity"] == "LOW"),
+        "findings": findings,
+    }
+
+
 def audit(run_dir: Path) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
 
     def record(severity: str, check: str, detail: str) -> None:
         findings.append({"severity": severity, "check": check, "detail": detail})
+
+    # --- required artifact completeness (fail-closed, before any read) ----
+    if run_dir.is_dir():
+        present_files = sorted(path.name for path in run_dir.iterdir() if path.is_file())
+    else:
+        present_files = []
+        record("BLOCKER", "run_dir_missing", _relative_to_root(run_dir))
+    missing_required = [
+        name for name in REQUIRED_ARTIFACT_NAMES if name not in present_files
+    ]
+    for name in missing_required:
+        record("BLOCKER", "required_artifact_missing", name)
+    unexpected_artifacts = sorted(set(present_files) - set(REQUIRED_ARTIFACT_NAMES))
+    if unexpected_artifacts:
+        record("HIGH", "unexpected_artifact", f"{unexpected_artifacts}")
+    if missing_required:
+        return _incomplete_result(run_dir, findings, present_files, missing_required)
 
     manifest_rows = _read_csv(run_dir / "manifest.csv")
     fit_rows = _read_csv(run_dir / "fit_results.csv")
@@ -219,6 +364,55 @@ def audit(run_dir: Path) -> dict[str, Any]:
             "margin": ordered[0] - ordered[1],
         }
 
+    # --- replicate_selection structure (fail-closed) ----------------------
+    # Without these checks a header-only or truncated file would make the
+    # comparison loop below iterate zero times and silently PASS.
+    if len(selection_rows) != EXPECTED_SELECTION_ROWS:
+        record(
+            "BLOCKER",
+            "selection_row_count",
+            f"{len(selection_rows)} != {EXPECTED_SELECTION_ROWS}",
+        )
+    selection_keys = [
+        (int(row["replicate"]), int(row["K"])) for row in selection_rows
+    ]
+    duplicate_selection_keys = sorted(
+        {key for key in selection_keys if selection_keys.count(key) > 1}
+    )
+    if duplicate_selection_keys:
+        record(
+            "BLOCKER",
+            "selection_duplicate_key",
+            f"duplicate (replicate,K): {duplicate_selection_keys}",
+        )
+    if set(selection_keys) != EXPECTED_SELECTION_KEYS:
+        missing_selection = sorted(EXPECTED_SELECTION_KEYS - set(selection_keys))
+        extra_selection = sorted(set(selection_keys) - EXPECTED_SELECTION_KEYS)
+        record(
+            "BLOCKER",
+            "selection_key_set",
+            f"missing={missing_selection} extra={extra_selection}",
+        )
+    for replicate in REPLICATES:
+        replicate_selection_rows = [
+            row for row in selection_rows if int(row["replicate"]) == replicate
+        ]
+        if len(replicate_selection_rows) != len(K_CANDIDATES):
+            record(
+                "BLOCKER",
+                "selection_rows_per_replicate",
+                f"r{replicate}: {len(replicate_selection_rows)} != {len(K_CANDIDATES)}",
+            )
+            continue
+        for column in REPLICATE_CONSTANT_SELECTION_COLUMNS:
+            distinct = {row[column] for row in replicate_selection_rows}
+            if len(distinct) != 1:
+                record(
+                    "BLOCKER",
+                    "selection_replicate_consistency",
+                    f"r{replicate}.{column}: {sorted(distinct)}",
+                )
+
     # --- compare against replicate_selection.csv --------------------------
     max_mean_diff = 0.0
     for row in selection_rows:
@@ -297,6 +491,49 @@ def audit(run_dir: Path) -> dict[str, Any]:
             "max": max(values),
         }
 
+    # --- aggregate_summary structure (fail-closed) ------------------------
+    if len(aggregate_rows) != EXPECTED_AGGREGATE_ROWS:
+        record(
+            "BLOCKER",
+            "aggregate_row_count",
+            f"{len(aggregate_rows)} != {EXPECTED_AGGREGATE_ROWS}",
+        )
+    k_wise_keys = [
+        int(row["K"]) for row in aggregate_rows if row["section"] == "k_wise"
+    ]
+    if len(k_wise_keys) != len(K_CANDIDATES):
+        record(
+            "BLOCKER",
+            "aggregate_k_wise_row_count",
+            f"{len(k_wise_keys)} != {len(K_CANDIDATES)}",
+        )
+    duplicate_k_wise = sorted({k for k in k_wise_keys if k_wise_keys.count(k) > 1})
+    if duplicate_k_wise:
+        record("BLOCKER", "aggregate_duplicate_k", f"{duplicate_k_wise}")
+    if set(k_wise_keys) != set(K_CANDIDATES):
+        record(
+            "BLOCKER",
+            "aggregate_k_wise_key_set",
+            f"missing={sorted(set(K_CANDIDATES) - set(k_wise_keys))} "
+            f"extra={sorted(set(k_wise_keys) - set(K_CANDIDATES))}",
+        )
+    pilot_keys = [row["key"] for row in aggregate_rows if row["section"] == "pilot"]
+    duplicate_pilot = sorted({key for key in pilot_keys if pilot_keys.count(key) > 1})
+    if duplicate_pilot:
+        record("BLOCKER", "aggregate_duplicate_pilot_key", f"{duplicate_pilot}")
+    if set(pilot_keys) != set(EXPECTED_PILOT_KEYS):
+        record(
+            "BLOCKER",
+            "aggregate_pilot_key_set",
+            f"missing={sorted(set(EXPECTED_PILOT_KEYS) - set(pilot_keys))} "
+            f"extra={sorted(set(pilot_keys) - set(EXPECTED_PILOT_KEYS))}",
+        )
+    unexpected_sections = sorted(
+        {row["section"] for row in aggregate_rows} - {"k_wise", "pilot"}
+    )
+    if unexpected_sections:
+        record("BLOCKER", "aggregate_unexpected_section", f"{unexpected_sections}")
+
     max_aggregate_diff = 0.0
     for row in aggregate_rows:
         if row["section"] != "k_wise":
@@ -338,11 +575,46 @@ def audit(run_dir: Path) -> dict[str, Any]:
             "true_k_selected_count",
             f"{pilot.get('true_k_selected_count')} vs {independent_true_k_count}",
         )
-    if abs(float(pilot.get("descriptive_recovery_rate", "nan")) - independent_recovery) > 0.0:
+    # NOTE: a missing key previously produced float("nan"), and every NaN
+    # comparison is False, so the check passed silently.  Presence and
+    # finiteness are now asserted before the value is compared.
+    reported_recovery_text = pilot.get("descriptive_recovery_rate")
+    if reported_recovery_text is None:
+        record("BLOCKER", "descriptive_recovery_rate", "<missing>")
+    else:
+        reported_recovery = float(reported_recovery_text)
+        if not math.isfinite(reported_recovery):
+            record(
+                "BLOCKER",
+                "descriptive_recovery_rate_finite",
+                f"{reported_recovery_text!r}",
+            )
+        elif abs(reported_recovery - independent_recovery) > 0.0:
+            record(
+                "BLOCKER",
+                "descriptive_recovery_rate",
+                f"{reported_recovery_text} vs {independent_recovery}",
+            )
+
+    # --- score_by_k structure (fail-closed) -------------------------------
+    if len(score_by_k_rows) != EXPECTED_SCORE_BY_K_ROWS:
         record(
             "BLOCKER",
-            "descriptive_recovery_rate",
-            f"{pilot.get('descriptive_recovery_rate')} vs {independent_recovery}",
+            "score_by_k_row_count",
+            f"{len(score_by_k_rows)} != {EXPECTED_SCORE_BY_K_ROWS}",
+        )
+    score_by_k_keys = [int(row["K"]) for row in score_by_k_rows]
+    duplicate_score_k = sorted(
+        {k for k in score_by_k_keys if score_by_k_keys.count(k) > 1}
+    )
+    if duplicate_score_k:
+        record("BLOCKER", "score_by_k_duplicate_k", f"{duplicate_score_k}")
+    if set(score_by_k_keys) != set(K_CANDIDATES):
+        record(
+            "BLOCKER",
+            "score_by_k_key_set",
+            f"missing={sorted(set(K_CANDIDATES) - set(score_by_k_keys))} "
+            f"extra={sorted(set(score_by_k_keys) - set(K_CANDIDATES))}",
         )
 
     for row in score_by_k_rows:
@@ -354,6 +626,37 @@ def audit(run_dir: Path) -> dict[str, Any]:
                 record("HIGH", "score_by_k", f"K={k} r{replicate}: {reported!r} vs {expected!r}")
 
     # --- runinfo ----------------------------------------------------------
+    for field in REQUIRED_RUNINFO_FIELDS:
+        if field not in runinfo:
+            record("BLOCKER", "runinfo_missing_field", field)
+    # The saved runinfo declares which artifacts the run produced.  That
+    # declaration must agree with the files actually present.  The *method*
+    # that captured stdout.log is a separate, unresolved provenance question
+    # and is deliberately not inferred here.
+    declared_artifacts = runinfo.get("generated_artifacts")
+    if not isinstance(declared_artifacts, list):
+        record("BLOCKER", "runinfo_generated_artifacts", f"{declared_artifacts!r}")
+    else:
+        declared_missing = sorted(set(declared_artifacts) - set(present_files))
+        undeclared_present = sorted(set(present_files) - set(declared_artifacts))
+        if declared_missing:
+            record(
+                "BLOCKER",
+                "runinfo_declared_artifact_absent",
+                f"{declared_missing}",
+            )
+        if undeclared_present:
+            record(
+                "HIGH",
+                "runinfo_undeclared_artifact_present",
+                f"{undeclared_present}",
+            )
+    if len(independent_means) != len(REPLICATES):
+        record(
+            "BLOCKER",
+            "independent_recomputation_coverage",
+            f"{sorted(independent_means)} != {list(REPLICATES)}",
+        )
     if runinfo.get("expected_fit_count") != EXPECTED_FITS:
         record("BLOCKER", "runinfo_expected_fits", str(runinfo.get("expected_fit_count")))
     if runinfo.get("actual_fit_count") != EXPECTED_FITS:
@@ -380,19 +683,12 @@ def audit(run_dir: Path) -> dict[str, Any]:
     if runinfo_manifest != expected_manifest:
         record("BLOCKER", "runinfo_manifest_exact", "runinfo manifest differs from convention")
 
-    severities = {finding["severity"] for finding in findings}
-    if "BLOCKER" in severities:
-        verdict = "FAIL"
-    elif "HIGH" in severities:
-        verdict = "FAIL"
-    elif "MEDIUM" in severities:
-        verdict = "PASS_WITH_NOTES"
-    else:
-        verdict = "PASS"
-
     return {
         "run_dir": _relative_to_root(run_dir),
-        "verdict": verdict,
+        "verdict": _verdict_for(findings),
+        "artifacts_present": list(present_files),
+        "missing_required_artifacts": list(missing_required),
+        "unexpected_artifacts": list(unexpected_artifacts),
         "fit_rows": len(fit_rows),
         "manifest_rows": len(manifest_rows),
         "duplicate_keys": len(fit_keys) - len(set(fit_keys)),

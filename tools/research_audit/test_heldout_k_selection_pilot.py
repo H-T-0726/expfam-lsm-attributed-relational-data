@@ -2444,3 +2444,261 @@ def test_full_pilot_result_csvs_are_generated_from_machine_readable_results(
     # every stored float must round-trip exactly
     for row, source in zip(fit_rows, report.rows, strict=True):
         assert float(row["heldout_mean_log_score"]) == source.heldout_mean_log_score
+
+
+# ---------------------------------------------------------------------------
+# Artifact-completeness negative tests for the independent self-audit layer.
+#
+# These are pure artifact tests: they copy the frozen run directory into a
+# temporary directory, corrupt one thing, and assert that the audit fails
+# closed.  No EM fit, no model import, no scientific rerun.
+# ---------------------------------------------------------------------------
+
+import shutil
+
+import audit_heldout_full_pilot as pilot_audit
+
+
+FROZEN_RUN_DIR = pilot_audit.DEFAULT_RUN_DIR
+
+requires_frozen_run = pytest.mark.skipif(
+    not FROZEN_RUN_DIR.is_dir(),
+    reason="frozen Phase 7e run directory is not present in this checkout",
+)
+
+
+def _copy_frozen_run(tmp_path: Path) -> Path:
+    run_dir = tmp_path / "run"
+    shutil.copytree(FROZEN_RUN_DIR, run_dir)
+    return run_dir
+
+
+def _read_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = list(reader.fieldnames or [])
+        return fieldnames, list(reader)
+
+
+def _write_rows(path: Path, fieldnames, rows) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(fieldnames), lineterminator="\n")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+def _write_header_only(path: Path) -> None:
+    fieldnames, _ = _read_rows(path)
+    _write_rows(path, fieldnames, [])
+
+
+def _checks(result: dict) -> set[str]:
+    return {finding["check"] for finding in result["findings"]}
+
+
+@requires_frozen_run
+def test_audit_passes_on_the_actual_frozen_artifact_directory() -> None:
+    """(10) The real saved artifacts must still audit clean."""
+
+    result = pilot_audit.audit(FROZEN_RUN_DIR)
+    assert result["verdict"] == "PASS"
+    assert result["blocker"] == 0
+    assert result["high"] == 0
+    assert result["missing_required_artifacts"] == []
+    assert result["unexpected_artifacts"] == []
+    # The scientific result is unchanged by this hardening.
+    assert result["independent_selected_k"] == {"1": 3, "2": 3, "3": 5}
+    assert result["independent_selected_k_counts"] == {"3": 2, "5": 1}
+    assert result["independent_true_k_selected_count"] == 2
+    assert result["independent_descriptive_recovery_rate"] == pytest.approx(2 / 3)
+
+
+@requires_frozen_run
+@pytest.mark.parametrize("artifact", pilot_audit.REQUIRED_ARTIFACT_NAMES)
+def test_audit_fails_when_a_required_artifact_is_missing(
+    tmp_path: Path, artifact: str
+) -> None:
+    """(1) Every required artifact is load-bearing, incl. runinfo.md/stdout.log."""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    (run_dir / artifact).unlink()
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert result["blocker"] >= 1
+    assert artifact in result["missing_required_artifacts"]
+    assert "required_artifact_missing" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_unexpected_extra_artifact(tmp_path: Path) -> None:
+    run_dir = _copy_frozen_run(tmp_path)
+    (run_dir / "sneaky_extra.csv").write_text("x\n", encoding="utf-8")
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "unexpected_artifact" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_header_only_replicate_selection(tmp_path: Path) -> None:
+    """(2) A zero-row table must not pass by making the compare loop empty."""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    _write_header_only(run_dir / "replicate_selection.csv")
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "selection_row_count" in _checks(result)
+    assert "selection_key_set" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_missing_replicate_selection_row(tmp_path: Path) -> None:
+    """(3)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "replicate_selection.csv"
+    fieldnames, rows = _read_rows(path)
+    dropped = [row for row in rows if not (row["replicate"] == "2" and row["K"] == "5")]
+    assert len(dropped) == len(rows) - 1
+    _write_rows(path, fieldnames, dropped)
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "selection_row_count" in _checks(result)
+    assert "selection_key_set" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_duplicate_replicate_selection_row(tmp_path: Path) -> None:
+    """(4)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "replicate_selection.csv"
+    fieldnames, rows = _read_rows(path)
+    _write_rows(path, fieldnames, [*rows, dict(rows[0])])
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "selection_row_count" in _checks(result)
+    assert "selection_duplicate_key" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_header_only_score_by_k(tmp_path: Path) -> None:
+    """(5)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    _write_header_only(run_dir / "score_by_k.csv")
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "score_by_k_row_count" in _checks(result)
+    assert "score_by_k_key_set" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_missing_score_by_k_row(tmp_path: Path) -> None:
+    """(6)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "score_by_k.csv"
+    fieldnames, rows = _read_rows(path)
+    _write_rows(path, fieldnames, [row for row in rows if row["K"] != "4"])
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "score_by_k_row_count" in _checks(result)
+    assert "score_by_k_key_set" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_duplicate_score_by_k_row(tmp_path: Path) -> None:
+    """(7)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "score_by_k.csv"
+    fieldnames, rows = _read_rows(path)
+    _write_rows(path, fieldnames, [*rows, dict(rows[2])])
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "score_by_k_duplicate_k" in _checks(result)
+
+
+@requires_frozen_run
+@pytest.mark.parametrize("pilot_key", pilot_audit.EXPECTED_PILOT_KEYS)
+def test_audit_fails_on_missing_aggregate_pilot_key(
+    tmp_path: Path, pilot_key: str
+) -> None:
+    """(8) Includes descriptive_recovery_rate, whose absence used to pass.
+
+    A missing value previously became float("nan"); every NaN comparison is
+    False, so the mismatch check silently succeeded.
+    """
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "aggregate_summary.csv"
+    fieldnames, rows = _read_rows(path)
+    kept = [
+        row for row in rows if not (row["section"] == "pilot" and row["key"] == pilot_key)
+    ]
+    assert len(kept) == len(rows) - 1
+    _write_rows(path, fieldnames, kept)
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert result["blocker"] >= 1
+    assert "aggregate_pilot_key_set" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_on_duplicate_aggregate_k_row(tmp_path: Path) -> None:
+    """(9)"""
+
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "aggregate_summary.csv"
+    fieldnames, rows = _read_rows(path)
+    k_wise = [row for row in rows if row["section"] == "k_wise"]
+    _write_rows(path, fieldnames, [*rows, dict(k_wise[0])])
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "aggregate_duplicate_k" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_when_runinfo_declares_an_absent_artifact(tmp_path: Path) -> None:
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "runinfo.json"
+    runinfo = json.loads(path.read_text(encoding="utf-8"))
+    runinfo["generated_artifacts"] = [*runinfo["generated_artifacts"], "ghost.csv"]
+    path.write_text(json.dumps(runinfo), encoding="utf-8")
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "runinfo_declared_artifact_absent" in _checks(result)
+
+
+@requires_frozen_run
+def test_audit_fails_when_a_required_runinfo_field_is_absent(tmp_path: Path) -> None:
+    run_dir = _copy_frozen_run(tmp_path)
+    path = run_dir / "runinfo.json"
+    runinfo = json.loads(path.read_text(encoding="utf-8"))
+    del runinfo["run_code_sha"]
+    path.write_text(json.dumps(runinfo), encoding="utf-8")
+    result = pilot_audit.audit(run_dir)
+    assert result["verdict"] == "FAIL"
+    assert "runinfo_missing_field" in _checks(result)
+
+
+def test_audit_module_never_imports_an_em_capable_module() -> None:
+    """The audit layer must stay artifact-only.
+
+    Checked on the import graph via the AST, not by substring: runinfo field
+    names such as "numpy_version" legitimately appear as string literals.
+    """
+
+    import ast
+
+    tree = ast.parse(Path(pilot_audit.__file__).read_text(encoding="utf-8"))
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            imported.add(node.module.split(".")[0])
+    assert imported <= {"__future__", "argparse", "csv", "json", "math", "pathlib", "typing"}
+    for forbidden in ("numpy", "model_dual_expfam", "em_runner", "run_heldout_k_selection_pilot"):
+        assert forbidden not in imported
