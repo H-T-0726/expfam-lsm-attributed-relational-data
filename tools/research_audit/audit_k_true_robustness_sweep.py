@@ -164,10 +164,63 @@ AUDIT_MODES = {
                   "diagnostics.csv", "fit_results.csv", "k_true_selection_matrix.csv"),
 }
 
-# S2_REQUIRED_FOLLOW_UP: direct Phase8b leakage boundary tests before smoke.
-# The fit path is hard-stopped in S1, so A01-A03 leakage falsification is still
-# carried by the reused Phase 7e boundary; it must be re-established directly in
-# Phase 8b before the smoke gate is opened.
+# S2 (Issue #51) implemented the direct Phase 8b leakage falsification that S1
+# left as a follow-up: A01 raw held-out Y injection, A02 ScoreOnlyTarget
+# rejection and A03 post-fit mask substitution are now tested against the
+# Phase 8b boundary with an injectable counting adapter.  The real EM path is
+# still closed; smoke remains gated on a human approval.
+
+LEAKAGE_BOUNDARY_VERSION = "phase8b-leakage-boundary-v1"
+
+# Future smoke/full artifacts carry the leakage-gate evidence.  Audited when the
+# artifact is present; S2 itself produces no scientific result artifact.
+LEAKAGE_GATE_COLUMNS = (
+    "estimand", "role", "K_TRUE", "replicate", "K", "start",
+    "pre_fit_test_mask_hash", "pre_fit_train_mask_hash",
+    "post_fit_test_mask_hash", "post_fit_train_mask_hash",
+    "anchor_mask_hash", "anchor_train_mask_hash",
+    "pre_fit_passed", "post_fit_passed", "fit_boundary_status", "boundary_version",
+)
+
+
+def audit_leakage_gate(rows: Sequence[dict[str, str]], estimand: str,
+                       anchors: dict[int, tuple[str, str]], auditor: Auditor) -> None:
+    """Fail-closed audit of the leakage-gate provenance rows.
+
+    Every fit must show: pre-fit and post-fit hashes equal to each other AND to
+    the frozen Phase 7e anchor, on BOTH the test and the train side.
+    """
+
+    header = list(rows[0])
+    auditor.require(tuple(header) == LEAKAGE_GATE_COLUMNS, "leakage_columns",
+                    f"header differs from the frozen schema: {header}")
+    auditor.require(len(rows) == FITS_PER_ESTIMAND, "leakage_row_count",
+                    f"{len(rows)} != {FITS_PER_ESTIMAND}")
+    keys = [(int(r["K_TRUE"]), int(r["replicate"]), int(r["K"]), int(r["start"])) for r in rows]
+    auditor.require(len(keys) == len(set(keys)), "leakage_duplicate_key", "duplicate fit key")
+
+    for row in rows:
+        replicate = int(row["replicate"])
+        anchor = anchors.get(replicate)
+        if anchor is None:
+            auditor.blocker("leakage_anchor_missing", f"replicate {replicate}")
+            continue
+        anchor_test, anchor_train = anchor
+        auditor.require(row["estimand"] == estimand, "leakage_estimand", row["estimand"])
+        auditor.require(row["role"] == ROLE_BY_ESTIMAND[estimand], "leakage_role", row["role"])
+        auditor.require(row["boundary_version"] == LEAKAGE_BOUNDARY_VERSION,
+                        "leakage_boundary_version", row["boundary_version"])
+        for side, anchor_hash in (("test", anchor_test), ("train", anchor_train)):
+            pre = row[f"pre_fit_{side}_mask_hash"]
+            post = row[f"post_fit_{side}_mask_hash"]
+            auditor.require(pre == post, f"leakage_{side}_mask_changed",
+                            f"r{replicate}: {side} mask hash changed across the fit")
+            auditor.require(pre == anchor_hash, f"leakage_{side}_anchor_mismatch",
+                            f"r{replicate}: {side} mask hash differs from the Phase 7e anchor")
+        auditor.require(_is_true(row["pre_fit_passed"]), "leakage_pre_fit_failed", str(row))
+        auditor.require(_is_true(row["post_fit_passed"]), "leakage_post_fit_failed", str(row))
+        auditor.require(row["fit_boundary_status"] == "clean", "leakage_boundary_status",
+                        row["fit_boundary_status"])
 
 
 @dataclass(frozen=True, slots=True)
