@@ -819,11 +819,17 @@ manifest には最低限、次の意味を持つ列を設ける（exact field na
 | 意味 | 内容 |
 |---|---|
 | split seed | 実際に使用した seed 値 |
-| split mask hash | 生成された mask の hash |
+| split mask hash | `stable_array_hash(test_mask)`（canonical。§10.4） |
+| train mask hash | `stable_array_hash(train_mask)` |
 | mask design | `S-a` / `S-b` / `S-c` のいずれか |
 | mask group id | 同一 mask を共有する cell 群の識別子 |
-| anchor mask hash | Phase 7e K3 anchor の mask hash（S-c では一致を要求、S-a/S-b では参照値として記録） |
+| anchor mask hash | Phase 7e stored `test_mask_hash`（S-c では一致を要求、S-a/S-b では参照値として記録） |
+| anchor train mask hash | Phase 7e stored `train_mask_hash`（S-c では一致を要求、S-a/S-b では参照値として記録） |
 | intentional seed reuse | split seed の共有が意図的であることの明示フラグ |
+
+この 7 列（split seed を除く）は
+**implementation plan §3.4.0 の canonical contract・§3.4 の M1・§4.1 の manifest schema・
+静的テスト T12e と同一の required provenance field 集合である。**
 
 ### 10.6 設計判断の記録
 

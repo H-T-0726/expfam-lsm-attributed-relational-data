@@ -592,7 +592,7 @@ K_TRUE=3 の 3 行は Phase 7e の `replicate_selection.csv` から**読み取�
 | T12b | `S_B` で**新規 `K_TRUE` {1,2,4,5} の間だけ** mask が一致し、**K3 anchor とは一致しない**ことを検査 | MB1 / MB2（partial alignment。「全 K_TRUE 共通」ではない） |
 | T12c | `S_C` で `K_TRUE ∈ {1,2,4,5}` の mask hash が Phase 7e K3 anchor の保存値と一致 | MC1（**anchor は読み取りのみ・再実行しない**） |
 | T12d | mask 不一致時に `HarnessStop`（seed 差し替え・Phase 7e 再実行の経路が存在しない） | §3.4 fail-closed |
-| T12e | manifest に `split_mask_hash` / `mask_design` / `mask_group_id` / `anchor_mask_hash` / `intentional_seed_reuse` が存在 | M1 / M2 |
+| T12e | manifest に **M1 / canonical provenance schema の 7 列がすべて存在**: `split_mask_hash` / `train_mask_hash` / `mask_design` / `mask_group_id` / `anchor_mask_hash` / `anchor_train_mask_hash` / `intentional_seed_reuse` | M1 / M2 / M3（§3.4.0・§4.1・design §10.5 と同一集合） |
 | T12f | **`expected_split_seed` が `estimand` を引数に取らず、`RANDOM_DESIGN` を参照しない** | **H2/H4 責任分離（F-01）** |
 | T12g | `RANDOM_DESIGN` を `CRN` / `INDEPENDENT` に振っても `expected_split_seed` の戻り値が不変 | 同上 |
 | T12h | `RANDOM_DESIGN == "INDEPENDENT"` かつ `SPLIT_VARIANT == "S_C"` で MC1 が成立し、config validator が reject しない | **MC4・合法な組み合わせの保証** |
