@@ -671,6 +671,692 @@ def audit_selection_matrix(rows: Sequence[dict[str, str]], estimand: str,
 # ===========================================================================
 
 
+# ===========================================================================
+# Phase 8b S2c smoke artifact audit (Issue #55) -- artifact-only, fail closed
+# ===========================================================================
+#
+# Every expectation below is an INDEPENDENT restatement of the frozen protocol.
+# Nothing is imported from the harness: not the selector, not the summary
+# builder, not the artifact builder.  The two-start means and the selected K
+# are recomputed from the six CSV scores alone, so a self-consistent tampering
+# of smoke_summary.json cannot pass.
+
+APPROVED_SCIENTIFIC_MAIN_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+# The frozen scientific protocol hash, restated here as an INDEPENDENT
+# constant.  It is deliberately not imported from the harness: an audit that
+# asks the audited code what the right answer is proves nothing, and a
+# self-consistent artifact set that agrees with itself on a fabricated hash
+# must still fail.
+EXPECTED_SMOKE_PROTOCOL_HASH = \
+    "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+
+SMOKE_PROTOCOL_ISSUE_NUMBER = 53
+SMOKE_EXECUTION_ISSUE_NUMBER = 55
+SMOKE_ARTIFACT_VERSION = "phase8b-smoke-artifact-v1"
+
+SMOKE_ESTIMAND = "A"
+SMOKE_ROLE = "primary"
+SMOKE_K_TRUE = 1
+SMOKE_REPLICATE = 1
+SMOKE_K_CANDIDATES = (2, 3, 4)
+SMOKE_STARTS = (1, 2)
+EXPECTED_SMOKE_FITS = 6
+EXPECTED_CANARY_FITS = 2
+EXPECTED_REAL_EM_BUDGET = 8
+
+SMOKE_DATA_SEED_BASE = 61000
+SMOKE_MODEL_SEED_BASE = 630000
+SMOKE_SPLIT_SEED = 42001
+CANARY_K_EST = 1
+CANARY_START = 1
+CANARY_MODEL_SEED = 641011
+CANARY_STATUS_PASS = "PASS"
+
+# audit_report.json is this module's OUTPUT, so it is never a required input.
+SMOKE_AUDIT_INPUT_FILES = (
+    "authorization.json",
+    "canary.json",
+    "runinfo.json",
+    "smoke_fit_results.csv",
+    "smoke_summary.json",
+)
+
+SMOKE_FIT_RESULTS_COLUMNS = (
+    "run_code_sha",
+    "approved_scientific_main_sha",
+    "protocol_hash",
+    "estimand",
+    "role",
+    "K_TRUE",
+    "replicate",
+    "K",
+    "start",
+    "data_seed",
+    "split_seed",
+    "model_seed",
+    "pre_fit_test_hash",
+    "pre_fit_train_hash",
+    "post_fit_test_hash",
+    "post_fit_train_hash",
+    "anchor_test_hash",
+    "anchor_train_hash",
+    "boundary_version",
+    "fit_status",
+    "internal_retry",
+    "warning_count",
+    "q_failure",
+    "nan_occurred",
+    "finite_state",
+    "heldout_mean_log_score",
+    "score_config_hash",
+    "canary_provenance",
+    "real_canary_fits_executed",
+    "real_smoke_fits_executed",
+)
+
+
+def expected_smoke_data_seed(k_true: int = SMOKE_K_TRUE,
+                             replicate: int = SMOKE_REPLICATE) -> int:
+    return SMOKE_DATA_SEED_BASE + 100 * int(k_true) + int(replicate)
+
+
+def expected_smoke_model_seed(k: int, start: int, k_true: int = SMOKE_K_TRUE,
+                              replicate: int = SMOKE_REPLICATE) -> int:
+    return (SMOKE_MODEL_SEED_BASE + 10000 * int(k_true) + 1000 * int(replicate)
+            + 10 * int(k) + int(start))
+
+
+def expected_smoke_manifest_keys() -> tuple[tuple[int, int], ...]:
+    return tuple((k, start) for k in SMOKE_K_CANDIDATES for start in SMOKE_STARTS)
+
+
+ACCEPTED_TRUE_TOKENS = ("True", "true")
+ACCEPTED_FALSE_TOKENS = ("False", "false")
+
+
+def _parse_int_field(row: Mapping[str, str], column: str, auditor: Auditor,
+                     check: str, label: str) -> int | None:
+    """Strict integer field.  Never raises; a bad value is a BLOCKER.
+
+    ``"2.0"``, ``""``, ``"nan"``, ``"inf"``, ``True`` and any non-numeric text
+    are all rejected: the schema stores plain decimal integers.
+    """
+
+    if column not in row:
+        auditor.blocker(check, f"{label}: column {column} is missing")
+        return None
+    raw = row[column]
+    if not isinstance(raw, str) or raw.strip() == "":
+        auditor.blocker(check, f"{label}: {column} is blank")
+        return None
+    text = raw.strip()
+    body = text[1:] if text[:1] in "+-" else text
+    if not body.isdigit():
+        auditor.blocker(check, f"{label}: {column} is not a plain integer: {raw!r}")
+        return None
+    try:
+        return int(text)
+    except ValueError:  # pragma: no cover - isdigit already guarantees this
+        auditor.blocker(check, f"{label}: {column} is not an integer: {raw!r}")
+        return None
+
+
+def _parse_finite_float_field(row: Mapping[str, str], column: str, auditor: Auditor,
+                              check: str, label: str) -> float | None:
+    """Strict finite float field.  NaN, +/-Inf, blank and text are BLOCKERs."""
+
+    if column not in row:
+        auditor.blocker(check, f"{label}: column {column} is missing")
+        return None
+    raw = row[column]
+    if not isinstance(raw, str) or raw.strip() == "":
+        auditor.blocker(check, f"{label}: {column} is blank")
+        return None
+    try:
+        number = float(raw)
+    except (TypeError, ValueError):
+        auditor.blocker(check, f"{label}: {column} is not a number: {raw!r}")
+        return None
+    if not math.isfinite(number):
+        auditor.blocker(check, f"{label}: {column} is nonfinite: {raw!r}")
+        return None
+    return number
+
+
+def _parse_bool_field(row: Mapping[str, str], column: str, auditor: Auditor,
+                      check: str, label: str) -> bool | None:
+    """Strict boolean field.  Only the canonical tokens are accepted.
+
+    ``"False"`` is a truthy Python string, so a bare truth test would silently
+    invert every negative flag; the accepted token set is fixed instead.
+    """
+
+    if column not in row:
+        auditor.blocker(check, f"{label}: column {column} is missing")
+        return None
+    raw = row[column]
+    if raw in ACCEPTED_TRUE_TOKENS:
+        return True
+    if raw in ACCEPTED_FALSE_TOKENS:
+        return False
+    auditor.blocker(check, f"{label}: {column} is not a canonical boolean: {raw!r}")
+    return None
+
+
+def _read_json(path: Path, auditor: Auditor) -> dict[str, Any] | None:
+    if not path.is_file():
+        auditor.blocker("smoke_artifact_missing", str(path.name))
+        return None
+    text = path.read_text(encoding="utf-8")
+    if text.strip() == "":
+        auditor.blocker("smoke_artifact_empty", str(path.name))
+        return None
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as error:
+        auditor.blocker("smoke_artifact_malformed", f"{path.name}: {error}")
+        return None
+    if not isinstance(payload, dict):
+        auditor.blocker("smoke_artifact_not_object", str(path.name))
+        return None
+    return payload
+
+
+def _as_float(value: str, auditor: Auditor, check: str) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        auditor.blocker(check, f"not a number: {value!r}")
+        return None
+    if not math.isfinite(number):
+        auditor.blocker(check, f"nonfinite: {value!r}")
+        return None
+    return number
+
+
+def _is_false(value: str) -> bool:
+    return value in ("False", "false")
+
+
+def _require_frozen_protocol_hash(payload: Mapping[str, Any], auditor: Auditor,
+                                  label: str) -> None:
+    """Every artifact must carry the frozen hash, not merely agree with the others."""
+
+    auditor.require(payload.get("protocol_hash") == EXPECTED_SMOKE_PROTOCOL_HASH,
+                    "smoke_protocol_hash_frozen",
+                    f"{label}: expected {EXPECTED_SMOKE_PROTOCOL_HASH}, "
+                    f"got {payload.get('protocol_hash')!r}")
+
+
+def audit_smoke_authorization(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    _require_frozen_protocol_hash(payload, auditor, "authorization.json")
+    auditor.require(payload.get("artifact_version") == SMOKE_ARTIFACT_VERSION,
+                    "smoke_auth_version", str(payload.get("artifact_version")))
+    auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
+                    "smoke_auth_baseline_sha",
+                    f"expected {APPROVED_SCIENTIFIC_MAIN_SHA}, "
+                    f"got {payload.get('approved_scientific_main_sha')!r}")
+    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
+                    "smoke_auth_execution_issue", str(payload.get("execution_issue_number")))
+    auditor.require(payload.get("protocol_origin_issue_number") == SMOKE_PROTOCOL_ISSUE_NUMBER,
+                    "smoke_auth_protocol_issue",
+                    str(payload.get("protocol_origin_issue_number")))
+    auditor.require(payload.get("independent_review_pass") is True,
+                    "smoke_auth_independent_review", "INDEPENDENT_REVIEW_PASS is not True")
+    auditor.require(payload.get("human_smoke_approval") is True,
+                    "smoke_auth_human_approval", "HUMAN_SMOKE_APPROVAL is not True")
+    auditor.require(payload.get("expected_canary_fits") == EXPECTED_CANARY_FITS,
+                    "smoke_auth_canary_count", str(payload.get("expected_canary_fits")))
+    auditor.require(payload.get("expected_smoke_fits") == EXPECTED_SMOKE_FITS,
+                    "smoke_auth_smoke_count", str(payload.get("expected_smoke_fits")))
+    auditor.require(payload.get("estimand") == SMOKE_ESTIMAND
+                    and payload.get("role") == SMOKE_ROLE,
+                    "smoke_auth_estimand", str(payload.get("estimand")))
+    auditor.require(payload.get("k_true") == SMOKE_K_TRUE
+                    and payload.get("replicate") == SMOKE_REPLICATE,
+                    "smoke_auth_cell", str(payload.get("k_true")))
+    auditor.require(payload.get("split_seed") == SMOKE_SPLIT_SEED,
+                    "smoke_auth_split_seed", str(payload.get("split_seed")))
+    auditor.require(payload.get("data_seed") == expected_smoke_data_seed(),
+                    "smoke_auth_data_seed", str(payload.get("data_seed")))
+    auditor.require(payload.get("canary_model_seed") == CANARY_MODEL_SEED,
+                    "smoke_auth_canary_seed", str(payload.get("canary_model_seed")))
+    expected_models = [expected_smoke_model_seed(k, start)
+                       for k, start in expected_smoke_manifest_keys()]
+    auditor.require(list(payload.get("smoke_model_seeds") or []) == expected_models,
+                    "smoke_auth_model_seeds", str(payload.get("smoke_model_seeds")))
+
+
+def audit_smoke_canary(payload: Mapping[str, Any], anchors: Mapping[int, tuple[str, str]],
+                       auditor: Auditor) -> None:
+    _require_frozen_protocol_hash(payload, auditor, "canary.json")
+    auditor.require(payload.get("status") == CANARY_STATUS_PASS,
+                    "smoke_canary_status", str(payload.get("status")))
+    auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
+                    "smoke_canary_baseline_sha",
+                    str(payload.get("approved_scientific_main_sha")))
+    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
+                    "smoke_canary_execution_issue", str(payload.get("execution_issue_number")))
+    auditor.require(payload.get("execution_mode") == "real", "smoke_canary_execution_mode",
+                    f"{payload.get('execution_mode')!r} is not a real execution")
+    auditor.require(payload.get("expected_fit_count") == EXPECTED_CANARY_FITS
+                    and payload.get("actual_fit_count") == EXPECTED_CANARY_FITS,
+                    "smoke_canary_fit_count",
+                    f"{payload.get('actual_fit_count')} != {EXPECTED_CANARY_FITS}")
+    auditor.require(payload.get("real_canary_fits_executed") == EXPECTED_CANARY_FITS,
+                    "smoke_canary_real_fit_count",
+                    f"{payload.get('real_canary_fits_executed')} != {EXPECTED_CANARY_FITS}")
+    auditor.require(payload.get("k_est") == CANARY_K_EST
+                    and payload.get("start") == CANARY_START,
+                    "smoke_canary_cell", str(payload.get("k_est")))
+    auditor.require(payload.get("model_seed") == CANARY_MODEL_SEED,
+                    "smoke_canary_model_seed", str(payload.get("model_seed")))
+    auditor.require(payload.get("data_seed") == expected_smoke_data_seed(),
+                    "smoke_canary_data_seed", str(payload.get("data_seed")))
+    auditor.require(payload.get("split_seed") == SMOKE_SPLIT_SEED,
+                    "smoke_canary_split_seed", str(payload.get("split_seed")))
+    auditor.require(payload.get("initialization_equal") is True
+                    and payload.get("final_outputs_equal") is True,
+                    "smoke_canary_invariance", "canary A/B outputs are not invariant")
+    auditor.require(payload.get("internal_retry") == 0, "smoke_canary_retry",
+                    str(payload.get("internal_retry")))
+    auditor.require(payload.get("warning_count") == 0, "smoke_canary_warnings",
+                    str(payload.get("warning_count")))
+    auditor.require(payload.get("q_failure") is False, "smoke_canary_q_failure", "q_failure")
+    auditor.require(payload.get("nan_occurred") is False, "smoke_canary_nan", "nan_occurred")
+    auditor.require(payload.get("finite_state") is True, "smoke_canary_finite", "finite_state")
+    auditor.require(payload.get("fit_payload_a_hash") != payload.get("fit_payload_b_hash"),
+                    "smoke_canary_payload_variation",
+                    "canary A/B fit payloads are identical")
+    anchor = anchors.get(SMOKE_REPLICATE)
+    if anchor is not None:
+        auditor.require(payload.get("anchor_test_hash") == anchor[0],
+                        "smoke_canary_anchor_test", str(payload.get("anchor_test_hash")))
+        auditor.require(payload.get("anchor_train_hash") == anchor[1],
+                        "smoke_canary_anchor_train", str(payload.get("anchor_train_hash")))
+
+
+def audit_smoke_fit_rows(rows: Sequence[dict[str, str]],
+                         anchors: Mapping[int, tuple[str, str]],
+                         auditor: Auditor) -> dict[int, dict[int, float]]:
+    """Independently validate the six rows and return the scores by (K, start)."""
+
+    scores: dict[int, dict[int, float]] = {}
+    header = tuple(rows[0]) if rows else ()
+    if not auditor.require(header == SMOKE_FIT_RESULTS_COLUMNS, "smoke_fit_columns",
+                           f"header differs from the frozen schema: {list(header)}"):
+        return scores
+    if not auditor.require(len(rows) == EXPECTED_SMOKE_FITS, "smoke_fit_row_count",
+                           f"{len(rows)} != {EXPECTED_SMOKE_FITS}"):
+        return scores
+
+    keys: list[tuple[int, int]] = []
+    for index, row in enumerate(rows, start=1):
+        k = _parse_int_field(row, "K", auditor, "smoke_fit_key_parse", f"row {index}")
+        start = _parse_int_field(row, "start", auditor, "smoke_fit_key_parse", f"row {index}")
+        if k is None or start is None:
+            continue
+        keys.append((k, start))
+    auditor.require(len(set(keys)) == len(keys), "smoke_fit_duplicate_key", str(keys))
+    auditor.require(tuple(keys) == expected_smoke_manifest_keys(), "smoke_fit_key_order",
+                    f"{keys} != {list(expected_smoke_manifest_keys())}")
+
+    anchor = anchors.get(SMOKE_REPLICATE)
+    for index, row in enumerate(rows, start=1):
+        label = f"row {index}"
+        k = _parse_int_field(row, "K", auditor, "smoke_fit_key_parse", label)
+        start = _parse_int_field(row, "start", auditor, "smoke_fit_key_parse", label)
+        if k is None or start is None:
+            continue
+        label = f"K={k} start={start}"
+        auditor.require(row.get("protocol_hash") == EXPECTED_SMOKE_PROTOCOL_HASH,
+                        "smoke_protocol_hash_frozen",
+                        f"smoke_fit_results.csv {label}: {row.get('protocol_hash')!r}")
+        auditor.require(row["approved_scientific_main_sha"] == APPROVED_SCIENTIFIC_MAIN_SHA,
+                        "smoke_fit_baseline_sha", f"{label}: {row['approved_scientific_main_sha']}")
+        auditor.require(bool(row["run_code_sha"]), "smoke_fit_run_code_sha", label)
+        auditor.require(row["estimand"] == SMOKE_ESTIMAND and row["role"] == SMOKE_ROLE,
+                        "smoke_fit_estimand", label)
+        k_true = _parse_int_field(row, "K_TRUE", auditor, "smoke_fit_cell", label)
+        replicate = _parse_int_field(row, "replicate", auditor, "smoke_fit_cell", label)
+        auditor.require(k_true == SMOKE_K_TRUE and replicate == SMOKE_REPLICATE,
+                        "smoke_fit_cell", label)
+        data_seed = _parse_int_field(row, "data_seed", auditor, "smoke_fit_data_seed", label)
+        auditor.require(data_seed == expected_smoke_data_seed(),
+                        "smoke_fit_data_seed", f"{label}: {row.get('data_seed')}")
+        split_seed = _parse_int_field(row, "split_seed", auditor, "smoke_fit_split_seed", label)
+        auditor.require(split_seed == SMOKE_SPLIT_SEED,
+                        "smoke_fit_split_seed", f"{label}: {row.get('split_seed')}")
+        model_seed = _parse_int_field(row, "model_seed", auditor, "smoke_fit_model_seed", label)
+        auditor.require(model_seed == expected_smoke_model_seed(k, start),
+                        "smoke_fit_model_seed", f"{label}: {row.get('model_seed')}")
+        if anchor is not None:
+            for column, expected in (("pre_fit_test_hash", anchor[0]),
+                                     ("post_fit_test_hash", anchor[0]),
+                                     ("anchor_test_hash", anchor[0]),
+                                     ("pre_fit_train_hash", anchor[1]),
+                                     ("post_fit_train_hash", anchor[1]),
+                                     ("anchor_train_hash", anchor[1])):
+                auditor.require(row[column] == expected, "smoke_fit_mask",
+                                f"{label}: {column} differs from the Phase 7e anchor")
+        auditor.require(row["fit_status"] == "clean", "smoke_fit_status",
+                        f"{label}: {row['fit_status']}")
+        auditor.require(
+            _parse_int_field(row, "internal_retry", auditor, "smoke_fit_retry", label) == 0,
+            "smoke_fit_retry", label)
+        auditor.require(
+            _parse_int_field(row, "warning_count", auditor, "smoke_fit_warnings", label) == 0,
+            "smoke_fit_warnings", label)
+        auditor.require(
+            _parse_bool_field(row, "q_failure", auditor, "smoke_fit_q_failure", label) is False,
+            "smoke_fit_q_failure", label)
+        auditor.require(
+            _parse_bool_field(row, "nan_occurred", auditor, "smoke_fit_nan", label) is False,
+            "smoke_fit_nan", label)
+        auditor.require(
+            _parse_bool_field(row, "finite_state", auditor, "smoke_fit_finite", label) is True,
+            "smoke_fit_finite", label)
+        auditor.require(row["boundary_version"] == LEAKAGE_BOUNDARY_VERSION,
+                        "smoke_fit_boundary_version", label)
+        auditor.require(
+            _parse_int_field(row, "real_canary_fits_executed", auditor,
+                             "smoke_fit_canary_count", label) == EXPECTED_CANARY_FITS,
+            "smoke_fit_canary_count", f"{label}: {row.get('real_canary_fits_executed')}")
+        auditor.require(
+            _parse_int_field(row, "real_smoke_fits_executed", auditor,
+                             "smoke_fit_smoke_count", label) == EXPECTED_SMOKE_FITS,
+            "smoke_fit_smoke_count", f"{label}: {row.get('real_smoke_fits_executed')}")
+        score = _parse_finite_float_field(row, "heldout_mean_log_score", auditor,
+                                          "smoke_fit_score", label)
+        if score is not None:
+            scores.setdefault(k, {})[start] = score
+    return scores
+
+
+def audit_smoke_summary(payload: Mapping[str, Any],
+                        scores: Mapping[int, Mapping[int, float]],
+                        auditor: Auditor) -> None:
+    """Recompute the two-start means and the selector from the CSV scores alone."""
+
+    _require_frozen_protocol_hash(payload, auditor, "smoke_summary.json")
+    auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
+                    "smoke_summary_baseline_sha",
+                    str(payload.get("approved_scientific_main_sha")))
+    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
+                    "smoke_summary_execution_issue", str(payload.get("execution_issue_number")))
+    auditor.require(payload.get("expected_smoke_fits") == EXPECTED_SMOKE_FITS
+                    and payload.get("actual_smoke_fits") == EXPECTED_SMOKE_FITS,
+                    "smoke_summary_fit_count", str(payload.get("actual_smoke_fits")))
+    # selected_k is recomputed below, but K recovery is never evaluated: K_TRUE=1
+    # is not in the candidate set {2,3,4}, so agreement is impossible by design.
+    auditor.require(payload.get("k_recovery_evaluated") is False,
+                    "smoke_summary_k_recovery_flag",
+                    "k_recovery_evaluated must be False")
+    auditor.require(payload.get("selected_k_interpretation") == "record_only",
+                    "smoke_summary_selected_k_interpretation",
+                    str(payload.get("selected_k_interpretation")))
+    auditor.require(list(payload.get("candidate_k") or []) == list(SMOKE_K_CANDIDATES),
+                    "smoke_summary_candidates", str(payload.get("candidate_k")))
+
+    per_k = payload.get("per_k")
+    if not auditor.require(isinstance(per_k, Mapping), "smoke_summary_per_k",
+                           "per_k is missing or not an object"):
+        return
+    if not auditor.require(set(scores) == set(SMOKE_K_CANDIDATES), "smoke_summary_score_set",
+                           f"scores cover {sorted(scores)}"):
+        return
+
+    recomputed: dict[int, float] = {}
+    for k in SMOKE_K_CANDIDATES:
+        by_start = scores.get(k, {})
+        if not auditor.require(set(by_start) == set(SMOKE_STARTS), "smoke_summary_starts",
+                               f"K={k} covers starts {sorted(by_start)}"):
+            return
+        mean = (by_start[1] + by_start[2]) / 2.0
+        recomputed[k] = mean
+        entry = per_k.get(str(k))
+        if not auditor.require(isinstance(entry, Mapping), "smoke_summary_per_k_entry",
+                               f"K={k} missing"):
+            continue
+        for name, expected in (("start_1", by_start[1]), ("start_2", by_start[2]),
+                               ("mean", mean)):
+            reported = entry.get(name)
+            ok = isinstance(reported, (int, float)) and math.isfinite(float(reported)) \
+                and abs(float(reported) - expected) <= 1e-12
+            auditor.require(ok, "smoke_summary_arithmetic",
+                            f"K={k} {name}: reported {reported!r}, recomputed {expected!r}")
+
+    best = max(recomputed.values())
+    tied = sorted(k for k, mean in recomputed.items() if best - mean <= TIE_TOLERANCE)
+    selected = tied[0]
+    auditor.require(payload.get("selected_k") == selected, "smoke_summary_selected_k",
+                    f"reported {payload.get('selected_k')!r}, recomputed {selected}")
+    reported_ties = sorted(int(k) for k in (payload.get("tie_candidates") or []))
+    auditor.require(reported_ties == tied, "smoke_summary_tie_candidates",
+                    f"reported {reported_ties}, recomputed {tied}")
+
+
+def audit_smoke_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    _require_frozen_protocol_hash(payload, auditor, "runinfo.json")
+    auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
+                    "smoke_runinfo_baseline_sha",
+                    str(payload.get("approved_scientific_main_sha")))
+    auditor.require(bool(payload.get("run_code_sha")), "smoke_runinfo_run_code_sha", "missing")
+    auditor.require(payload.get("run_code_sha") != APPROVED_SCIENTIFIC_MAIN_SHA
+                    or payload.get("approved_baseline_is_ancestor") is True,
+                    "smoke_runinfo_lineage", "run code SHA lineage is inconsistent")
+    auditor.require(payload.get("execution_issue") == SMOKE_EXECUTION_ISSUE_NUMBER,
+                    "smoke_runinfo_execution_issue", str(payload.get("execution_issue")))
+    auditor.require(payload.get("protocol_origin_issue") == SMOKE_PROTOCOL_ISSUE_NUMBER,
+                    "smoke_runinfo_protocol_issue", str(payload.get("protocol_origin_issue")))
+    auditor.require(payload.get("expected_real_em_budget") == EXPECTED_REAL_EM_BUDGET,
+                    "smoke_runinfo_budget", str(payload.get("expected_real_em_budget")))
+    auditor.require(payload.get("actual_canary_fits") == EXPECTED_CANARY_FITS,
+                    "smoke_runinfo_canary_count", str(payload.get("actual_canary_fits")))
+    auditor.require(payload.get("actual_smoke_fits") == EXPECTED_SMOKE_FITS,
+                    "smoke_runinfo_smoke_count", str(payload.get("actual_smoke_fits")))
+    auditor.require(payload.get("full_fits_executed") == 0, "smoke_runinfo_full_fits",
+                    str(payload.get("full_fits_executed")))
+    auditor.require(payload.get("phase7e_rerun_count") == 0, "smoke_runinfo_phase7e_rerun",
+                    str(payload.get("phase7e_rerun_count")))
+    auditor.require(payload.get("working_tree_clean") is True,
+                    "smoke_runinfo_working_tree", "the working tree was dirty")
+    auditor.require(bool(payload.get("invocation_mode")) and bool(payload.get("requested_command")),
+                    "smoke_runinfo_invocation", "invocation provenance is missing")
+
+
+def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Auditor:
+    """Independent, fail-closed audit of one smoke execution directory."""
+
+    auditor = Auditor()
+    run_dir = Path(run_dir)
+    if not run_dir.is_dir():
+        auditor.blocker("smoke_run_dir_missing", str(run_dir))
+        return auditor
+
+    for name in SMOKE_AUDIT_INPUT_FILES:
+        if not (run_dir / name).is_file():
+            auditor.blocker("required_artifact_missing", f"smoke mode requires {name}")
+
+    anchors = read_phase7e_anchor(auditor, phase7e_dir)
+
+    authorization = _read_json(run_dir / "authorization.json", auditor)
+    if authorization is not None:
+        audit_smoke_authorization(authorization, auditor)
+
+    canary = _read_json(run_dir / "canary.json", auditor)
+    if canary is not None:
+        audit_smoke_canary(canary, anchors, auditor)
+
+    runinfo = _read_json(run_dir / "runinfo.json", auditor)
+    if runinfo is not None:
+        audit_smoke_runinfo(runinfo, auditor)
+
+    rows = _read_csv(run_dir / "smoke_fit_results.csv", auditor)
+    scores = audit_smoke_fit_rows(rows, anchors, auditor) if rows else {}
+
+    summary = _read_json(run_dir / "smoke_summary.json", auditor)
+    if summary is not None:
+        audit_smoke_summary(summary, scores, auditor)
+
+    # Cross-file lineage: exactly one protocol hash and one run-code SHA.
+    payloads = {name: payload for name, payload in
+                (("authorization.json", authorization), ("canary.json", canary),
+                 ("runinfo.json", runinfo), ("smoke_summary.json", summary))
+                if payload is not None}
+    protocol_hashes = {p.get("protocol_hash") for p in payloads.values()}
+    auditor.require(protocol_hashes == {EXPECTED_SMOKE_PROTOCOL_HASH},
+                    "smoke_protocol_hash_lineage",
+                    f"protocol hashes are not the single frozen value: {protocol_hashes}")
+    if rows:
+        csv_hashes = {row.get("protocol_hash") for row in rows}
+        auditor.require(csv_hashes == {EXPECTED_SMOKE_PROTOCOL_HASH},
+                        "smoke_protocol_hash_lineage",
+                        f"CSV protocol hashes are not the frozen value: {csv_hashes}")
+
+    audit_smoke_run_code_lineage(payloads, rows, auditor)
+
+    unexpected = sorted(
+        p.name for p in run_dir.iterdir()
+        if p.name not in SMOKE_AUDIT_INPUT_FILES and p.name != "audit_report.json")
+    auditor.require(not unexpected, "smoke_unexpected_artifact", str(unexpected))
+    return auditor
+
+
+def audit_smoke_run_code_lineage(payloads: Mapping[str, Mapping[str, Any]],
+                                 rows: Sequence[Mapping[str, str]] | None,
+                                 auditor: Auditor) -> None:
+    """Every artifact must name exactly ONE run-code SHA.
+
+    The canary and the smoke must have been produced by the same code: a canary
+    from a different commit is not evidence about this execution, and a single
+    drifted CSV row means the six fits did not come from one run.
+    """
+
+    observed: dict[str, str] = {}
+    for name, payload in payloads.items():
+        sha = payload.get("run_code_sha")
+        if not _is_full_commit_sha(sha):
+            auditor.blocker("smoke_run_code_sha_format", f"{name}: {sha!r}")
+            continue
+        observed[name] = sha
+    if rows:
+        for index, row in enumerate(rows, start=1):
+            sha = row.get("run_code_sha")
+            if not _is_full_commit_sha(sha):
+                auditor.blocker("smoke_run_code_sha_format",
+                                f"smoke_fit_results.csv row {index}: {sha!r}")
+                continue
+            observed[f"smoke_fit_results.csv row {index}"] = sha
+    distinct = sorted(set(observed.values()))
+    auditor.require(len(distinct) <= 1, "smoke_run_code_sha_lineage",
+                    f"artifacts name different run-code SHAs: "
+                    f"{ {name: sha for name, sha in observed.items()} }")
+    # The run-code SHA is provenance, never approval: it must not be silently
+    # substituted for the approved baseline.
+    for name, payload in payloads.items():
+        auditor.require(payload.get("approved_scientific_main_sha")
+                        == APPROVED_SCIENTIFIC_MAIN_SHA,
+                        "smoke_baseline_sha_lineage",
+                        f"{name}: {payload.get('approved_scientific_main_sha')!r}")
+
+
+def _is_full_commit_sha(value: Any) -> bool:
+    return (isinstance(value, str) and len(value) == 40
+            and all(character in "0123456789abcdef" for character in value))
+
+
+# ---------------------------------------------------------------------------
+# durable audit evidence
+# ---------------------------------------------------------------------------
+
+
+AUDIT_REPORT_VERSION = "phase8b-smoke-audit-v1"
+AUDIT_REPORT_FILENAME = "audit_report.json"
+
+
+def _atomic_write_json(path: Path, payload: Mapping[str, Any]) -> Path:
+    """Temp file -> flush -> fsync -> atomic replace.  No partial file survives."""
+
+    import os
+    import tempfile
+
+    if path.exists():
+        raise FileExistsError(f"refusing to overwrite an existing audit report: {path}")
+    text = json.dumps(payload, sort_keys=True, indent=2, allow_nan=False, ensure_ascii=False)
+    handle, temporary = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp-", suffix=".part")
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write((text + "\n").encode("utf-8"))
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        Path(temporary).unlink(missing_ok=True)
+        raise
+    return path
+
+
+def build_smoke_audit_report(auditor: Auditor, run_dir: Path) -> dict[str, Any]:
+    """Structured audit evidence.  Safe to build even for a malformed artifact set."""
+
+    def field(name: str, key: str, default: Any = None) -> Any:
+        path = Path(run_dir) / name
+        if not path.is_file():
+            return default
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            return default
+        return payload.get(key, default) if isinstance(payload, dict) else default
+
+    blockers = len(auditor.blockers)
+    highs = len(auditor.highs)
+    mediums = len([f for f in auditor.findings if f.severity == "MEDIUM"])
+    audited = sorted(name for name in SMOKE_AUDIT_INPUT_FILES
+                     if (Path(run_dir) / name).is_file())
+    return {
+        "audit_version": AUDIT_REPORT_VERSION,
+        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "run_code_sha": field("runinfo.json", "run_code_sha"),
+        "protocol_hash": EXPECTED_SMOKE_PROTOCOL_HASH,
+        "protocol_origin_issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "execution_issue": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "status": "PASS" if blockers == 0 and highs == 0 else "FAIL",
+        "blocker_count": blockers,
+        "high_count": highs,
+        "medium_count": mediums,
+        "findings": [{"severity": f.severity, "check": f.check, "detail": f.detail}
+                     for f in auditor.findings],
+        "expected_canary_fits": EXPECTED_CANARY_FITS,
+        "actual_canary_fits": field("runinfo.json", "actual_canary_fits"),
+        "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+        "actual_smoke_fits": field("runinfo.json", "actual_smoke_fits"),
+        "selected_k": field("smoke_summary.json", "selected_k"),
+        "selected_k_interpretation": field("smoke_summary.json",
+                                           "selected_k_interpretation"),
+        # The audit recomputes selected_k but never compares it to K_TRUE.
+        "k_recovery_evaluated": False,
+        "audited_files": audited,
+        "run_dir": str(run_dir),
+    }
+
+
+def write_smoke_audit_report(run_dir: Path, auditor: Auditor) -> Path:
+    """Publish durable audit evidence exactly once.  An existing report is a stop."""
+
+    directory = Path(run_dir)
+    if not directory.is_dir():
+        raise FileNotFoundError(f"audit run directory does not exist: {directory}")
+    path = directory / AUDIT_REPORT_FILENAME
+    if path.exists():
+        raise FileExistsError(
+            f"{AUDIT_REPORT_FILENAME} already exists; a previous audit verdict is "
+            f"never overwritten: {path}")
+    return _atomic_write_json(path, build_smoke_audit_report(auditor, directory))
+
+
 def audit_run_dir(run_dir: Path, estimand: str, mode: str = "config",
                   phase7e_dir: Path | None = None) -> Auditor:
     auditor = Auditor()
@@ -734,12 +1420,23 @@ def _render(auditor: Auditor, run_dir: Path, estimand: str, mode: str) -> dict[s
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Artifact-only audit of a Phase 8b run directory")
     parser.add_argument("--run-dir", type=Path, required=True)
-    parser.add_argument("--estimand", choices=ESTIMANDS, required=True)
-    parser.add_argument("--mode", choices=sorted(AUDIT_MODES), default="config")
+    parser.add_argument("--estimand", choices=ESTIMANDS, default=None,
+                        help="required for config/selection mode; unused by smoke mode")
+    parser.add_argument("--mode", choices=[*sorted(AUDIT_MODES), "smoke"], default="config")
     parser.add_argument("--phase7e-dir", type=Path, default=None)
+    parser.add_argument("--write-report", action="store_true",
+                        help="smoke mode: publish audit_report.json (never overwritten)")
     args = parser.parse_args(argv)
-    auditor = audit_run_dir(args.run_dir, args.estimand, args.mode, args.phase7e_dir)
-    report = _render(auditor, args.run_dir, args.estimand, args.mode)
+    if args.mode == "smoke":
+        auditor = audit_smoke_run_dir(args.run_dir, args.phase7e_dir)
+        report = _render(auditor, args.run_dir, SMOKE_ESTIMAND, "smoke")
+        if args.write_report:
+            report["audit_report"] = str(write_smoke_audit_report(args.run_dir, auditor))
+    else:
+        if args.estimand is None:
+            parser.error(f"--estimand is required for {args.mode} mode")
+        auditor = audit_run_dir(args.run_dir, args.estimand, args.mode, args.phase7e_dir)
+        report = _render(auditor, args.run_dir, args.estimand, args.mode)
     print(json.dumps(report, sort_keys=True, ensure_ascii=False))
     return 0 if report["verdict"] == "PASS" else 1
 

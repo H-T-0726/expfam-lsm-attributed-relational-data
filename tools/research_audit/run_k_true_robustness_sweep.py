@@ -45,6 +45,8 @@ for _path in (str(RESEARCH_AUDIT), str(EXPERIMENTAL), str(EXPFAM_SRC)):
 
 # Phase 7e reuse.  Importing this module does not import em_runner.
 from run_heldout_k_selection_pilot import (  # noqa: E402
+    CANARY_ATOL,
+    CANARY_RTOL,
     AuthorizedEMFitAdapter,
     CanaryFitResult,
     CanaryInvarianceReport,
@@ -2065,9 +2067,23 @@ def run_leakage_self_check() -> dict[str, Any]:
 # scorer are the same code the anchor ran under.
 
 
-SMOKE_ISSUE_NUMBER = 53
+# Two DIFFERENT issues, deliberately kept apart (Issue #55 §8):
+#   * the protocol was frozen and implemented under Issue #53, and that number
+#     is part of the scientific protocol hash;
+#   * the real-execution authorization lineage is Issue #55, and that number is
+#     execution metadata that must NOT perturb the protocol hash.
+SMOKE_PROTOCOL_ISSUE_NUMBER = 53
+SMOKE_EXECUTION_ISSUE_NUMBER = 55
 SMOKE_PROTOCOL_VERSION = "phase8b-smoke-protocol-v1"
 SMOKE_AUTHORIZATION_VERSION = "phase8b-smoke-authorization-v1"
+
+# --- APPROVED SCIENTIFIC BASELINE (frozen, Issue #55 §6) -------------------
+# PR #54 merge commit: the reviewed S2b scientific/operational implementation.
+# This is a committed literal.  It is never read from the CLI, the environment,
+# a config file, the current branch, ``git rev-parse HEAD`` or the
+# authorization record itself -- any of those would let the running code
+# declare itself approved.
+APPROVED_SCIENTIFIC_MAIN_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
 
 # --- FROZEN SMOKE PROTOCOL (Issue #53, merged plan §7) ---------------------
 # Operational pipeline smoke on the PRIMARY estimand only.  Running A+B would
@@ -2098,7 +2114,7 @@ EXPECTED_REAL_EM_BUDGET = EXPECTED_CANARY_FITS + EXPECTED_SMOKE_FITS  # 8
 # --- FUTURE SMOKE ARTIFACT SCHEMA (definition only; nothing is written) ----
 SMOKE_ARTIFACT_COLUMNS = (
     "run_code_sha",
-    "approved_main_sha",
+    "approved_scientific_main_sha",
     "protocol_hash",
     "estimand",
     "role",
@@ -2235,7 +2251,10 @@ def smoke_protocol_config() -> dict[str, Any]:
 
     return {
         "phase": PHASE,
-        "issue": SMOKE_ISSUE_NUMBER,
+        # The protocol-origin issue, not the execution issue: binding the
+        # execution lineage in here would change the scientific protocol hash
+        # for a purely administrative reason.
+        "issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
         "protocol_version": SMOKE_PROTOCOL_VERSION,
         "estimand": SMOKE_ESTIMAND,
         "role": SMOKE_ROLE,
@@ -2399,19 +2418,22 @@ class SmokeExecutionAuthorization:
 
 
 def current_expected_smoke_main_sha() -> str | None:
-    """The single trusted source of the reviewed main SHA.  None in this branch.
+    """The single trusted source of the reviewed scientific baseline SHA.
 
-    None is NOT a placeholder: it is the fail-closed state "no human has yet
-    authorized a reviewed main SHA for real smoke execution".  The value is a
-    literal on purpose -- deriving it from the environment, the CLI, a config
-    file, ``git rev-parse HEAD`` or the authorization record itself would let
-    the running code declare itself approved.
+    Bound (Issue #55) to ``APPROVED_SCIENTIFIC_MAIN_SHA``: the PR #54 merge
+    commit that carries the independently reviewed S2b implementation.
 
-    A later execution Issue changes this to the S2b merge commit SHA, and that
-    change is itself the reviewed, human-approved artifact.
+    The value is a committed literal.  It is deliberately NOT derived from the
+    CLI, the environment, a config file, the current branch, ``git rev-parse
+    HEAD`` or the authorization record -- each of those would let the running
+    code declare itself approved.  ``run_code_sha`` is recorded separately as
+    provenance and is never an approval source.
+
+    Binding this SHA does NOT authorize execution: the execution authorization
+    record is still absent (see ``current_smoke_execution_authorization``).
     """
 
-    return None
+    return APPROVED_SCIENTIFIC_MAIN_SHA
 
 
 # Test-only trusted SHA.  It is never the value production compares against:
@@ -2423,6 +2445,17 @@ def _require_full_commit_sha(value: Any, label: str) -> None:
     _require(type(value) is str and len(value) == SMOKE_SHA_LENGTH
              and all(character in "0123456789abcdef" for character in value),
              f"{label} is not a full lowercase commit SHA")
+
+
+def trusted_main_sha_for(test_only: bool) -> str | None:
+    """The trusted SHA for one execution mode.
+
+    Production always reads ``current_expected_smoke_main_sha()``; the test-only
+    constant is reachable only when the caller has already declared the
+    test-only mode, and no production entry point ever does.
+    """
+
+    return _TEST_EXPECTED_MAIN_SHA if test_only else current_expected_smoke_main_sha()
 
 
 def _validate_smoke_execution_authorization(authorization: Any, *,
@@ -2449,7 +2482,7 @@ def _validate_smoke_execution_authorization(authorization: Any, *,
              "approved main SHA does not match the reviewed execution SHA")
 
     checks = (
-        ("issue_number", authorization.issue_number, SMOKE_ISSUE_NUMBER),
+        ("issue_number", authorization.issue_number, SMOKE_EXECUTION_ISSUE_NUMBER),
         ("protocol_hash", authorization.protocol_hash, smoke_protocol_hash()),
         ("estimand", authorization.estimand, SMOKE_ESTIMAND),
         ("k_true", authorization.k_true, SMOKE_K_TRUE),
@@ -2480,17 +2513,10 @@ def validate_smoke_execution_authorization(authorization: Any, *, test_only: boo
     it is going to be checked against.
     """
 
-    if test_only:
-        _validate_smoke_execution_authorization(
-            authorization,
-            expected_main_sha=_TEST_EXPECTED_MAIN_SHA,
-            authority=_SMOKE_TEST_AUTHORITY,
-        )
-        return
     _validate_smoke_execution_authorization(
         authorization,
-        expected_main_sha=current_expected_smoke_main_sha(),
-        authority=_SMOKE_EXECUTION_AUTHORITY,
+        expected_main_sha=trusted_main_sha_for(test_only),
+        authority=_SMOKE_TEST_AUTHORITY if test_only else _SMOKE_EXECUTION_AUTHORITY,
     )
 
 
@@ -2515,7 +2541,7 @@ def _make_test_smoke_authorization(
     """Static-test-only factory.  No CLI or production path references it."""
 
     fields: dict[str, Any] = {
-        "issue_number": SMOKE_ISSUE_NUMBER,
+        "issue_number": SMOKE_EXECUTION_ISSUE_NUMBER,
         "approved_main_sha": approved_main_sha,
         "protocol_hash": smoke_protocol_hash(),
         "estimand": SMOKE_ESTIMAND,
@@ -2694,10 +2720,16 @@ class Phase8bCanaryReport:
     test_only: bool
 
 
-def _run_real_canary(authorization: Any, *, adapter: Any, test_only: bool) -> Phase8bCanaryReport:
-    """Reuse the Phase 7e two-canary falsification on the smoke cell."""
+def _run_real_canary(authorization: Any, *, adapter: Any, test_only: bool,
+                     cell: "SmokePreparedCell | None" = None) -> Phase8bCanaryReport:
+    """Reuse the Phase 7e two-canary falsification on the smoke cell.
 
-    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    ``cell`` lets the caller complete every no-fit preflight *before* any
+    directory is reserved or any adapter is constructed; when it is omitted the
+    identical preparation runs here.
+    """
+
+    cell = prepare_smoke_cell(authorization, test_only=test_only) if cell is None else cell
     config = smoke_canary_config()
     invariance = _run_two_canary_falsification(
         preflight=cell.preflight,
@@ -2723,12 +2755,16 @@ def _run_real_canary(authorization: Any, *, adapter: Any, test_only: bool) -> Ph
     )
 
 
-def run_real_canary(authorization: Any) -> Phase8bCanaryReport:
-    """Production canary entry point: only the sealed Phase 7e adapter is used."""
+def run_real_canary(authorization: Any) -> dict[str, Any]:
+    """Production canary entry point.
 
-    validate_smoke_execution_authorization(authorization, test_only=False)
-    adapter = AuthorizedEMFitAdapter()
-    return _run_real_canary(authorization, adapter=adapter, test_only=False)
+    A thin wrapper over the single production workflow: it never validates,
+    constructs an adapter or fits on its own.  Calling it directly is exactly
+    as gated as ``--canary``.  Defined near the CLI so it can delegate to
+    ``_run_production_execution``.
+    """
+
+    return _run_production_execution(authorization, "canary")
 
 
 def _run_real_canary_test_only(authorization: Any, *, adapter: Any) -> Phase8bCanaryReport:
@@ -2844,10 +2880,11 @@ def _run_smoke_fit_phase_8b(cell: SmokePreparedCell, *, adapter: Any,
     return tuple(stored)
 
 
-def _run_real_smoke(authorization: Any, *, adapter: Any, test_only: bool) -> Phase8bSmokeReport:
+def _run_real_smoke(authorization: Any, *, adapter: Any, test_only: bool,
+                    cell: "SmokePreparedCell | None" = None) -> Phase8bSmokeReport:
     """Six clean fits, then -- and only then -- the deferred score phase."""
 
-    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    cell = prepare_smoke_cell(authorization, test_only=test_only) if cell is None else cell
     stored_fits = _run_smoke_fit_phase_8b(cell, adapter=adapter, test_only=test_only)
 
     # Phase B: the outcome-bearing target is materialized exactly once, after
@@ -2912,12 +2949,17 @@ def _run_real_smoke(authorization: Any, *, adapter: Any, test_only: bool) -> Pha
     )
 
 
-def run_real_smoke(authorization: Any) -> Phase8bSmokeReport:
-    """Production smoke entry point: only the sealed Phase 7e adapter is used."""
+def run_real_smoke(authorization: Any) -> dict[str, Any]:
+    """Production smoke entry point.
 
-    validate_smoke_execution_authorization(authorization, test_only=False)
-    adapter = AuthorizedEMFitAdapter()
-    return _run_real_smoke(authorization, adapter=adapter, test_only=False)
+    A thin wrapper over the single production workflow.  There is deliberately
+    no ``canary_report``, ``canary_pass``, ``skip_canary_check``, ``out_dir``
+    or ``run_code_sha`` parameter: the canary evidence is read from the frozen
+    artifact directory and the run-code SHA comes from the internal provenance
+    source, so a caller cannot supply either side of a lineage check.
+    """
+
+    return _run_production_execution(authorization, "smoke")
 
 
 def _run_real_smoke_test_only(authorization: Any, *, adapter: Any) -> Phase8bSmokeReport:
@@ -2963,6 +3005,689 @@ def build_smoke_artifact_rows(canary: Phase8bCanaryReport,
     return rows
 
 
+# ===========================================================================
+# Phase 8b S2c-A — execution artifacts, canary lineage, CLI wiring (Issue #55)
+# ===========================================================================
+#
+# Everything below is the machinery a future authorized run would use.  None of
+# it can run here: ``current_smoke_execution_authorization()`` is still None, so
+# the CLI stops before any adapter is constructed.  Binding the reviewed
+# baseline SHA is NOT an execution approval.
+
+
+SMOKE_ARTIFACT_VERSION = "phase8b-smoke-artifact-v1"
+SMOKE_ARTIFACT_DIRNAME = "k_true_robustness_smoke_20260901"
+SMOKE_ARTIFACT_ROOT = ROOT / "expfam" / "results" / "k_selection"
+SMOKE_ARTIFACT_DIR = SMOKE_ARTIFACT_ROOT / SMOKE_ARTIFACT_DIRNAME
+
+# Fixed before any result exists.  ``audit_report.json`` is the audit's OUTPUT,
+# so it is not required as an audit input.
+SMOKE_ARTIFACT_FILES = (
+    "authorization.json",
+    "canary.json",
+    "runinfo.json",
+    "smoke_fit_results.csv",
+    "smoke_summary.json",
+    "audit_report.json",
+)
+SMOKE_AUDIT_INPUT_FILES = tuple(
+    name for name in SMOKE_ARTIFACT_FILES if name != "audit_report.json")
+
+CANARY_STATUS_PASS = "PASS"
+CANARY_STATUS_FAIL = "FAIL"
+
+# Selected-K interpretation, frozen before any smoke result exists.
+SELECTED_K_INTERPRETATION = "record_only"
+
+
+# ---------------------------------------------------------------------------
+# git provenance -- NOT an approval source
+# ---------------------------------------------------------------------------
+
+
+def _git_output(arguments: Sequence[str]) -> str:
+    import subprocess  # noqa: PLC0415
+
+    completed = subprocess.run(
+        ["git", *arguments], capture_output=True, text=True, cwd=str(ROOT), check=False)
+    _require(completed.returncode == 0,
+             f"git {' '.join(arguments)} failed: {completed.stderr.strip()}")
+    return completed.stdout.strip()
+
+
+def current_run_code_sha() -> str:
+    """PROVENANCE ONLY: which commit executed.
+
+    This is deliberately NOT the approval source.  ``current_expected_smoke_
+    main_sha()`` alone decides whether a reviewed scientific baseline has been
+    approved; recording which commit ran is a separate, purely descriptive
+    fact.  Confusing the two would let any commit approve itself.
+    """
+
+    sha = _git_output(["rev-parse", "HEAD"])
+    _require_full_commit_sha(sha, "run code SHA")
+    return sha
+
+
+def working_tree_is_clean() -> bool:
+    return _git_output(["status", "--porcelain"]) == ""
+
+
+def approved_baseline_is_ancestor(run_code_sha: str | None = None) -> bool:
+    """Extra provenance guard: the reviewed baseline is in this commit's history.
+
+    This is a *guard*, never an approval: a commit being a descendant of the
+    approved baseline does not make that commit approved.
+    """
+
+    import subprocess  # noqa: PLC0415
+
+    head = current_run_code_sha() if run_code_sha is None else run_code_sha
+    completed = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", APPROVED_SCIENTIFIC_MAIN_SHA, head],
+        capture_output=True, text=True, cwd=str(ROOT), check=False)
+    return completed.returncode == 0
+
+
+# ---------------------------------------------------------------------------
+# fail-safe artifact I/O
+# ---------------------------------------------------------------------------
+
+
+def _atomic_write_bytes(path: Path, payload: bytes) -> Path:
+    """Write via a temporary file + atomic replace.
+
+    A crashed or truncated write can never be read back as evidence: readers
+    only ever see the complete file or no file at all.
+    """
+
+    import os  # noqa: PLC0415
+    import tempfile  # noqa: PLC0415
+
+    directory = path.parent
+    _require(directory.is_dir(), f"artifact directory does not exist: {directory}")
+    handle, temporary = tempfile.mkstemp(dir=str(directory), prefix=".tmp-", suffix=".part")
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        Path(temporary).unlink(missing_ok=True)
+        raise
+    return path
+
+
+def _require_absent_artifact(path: Path) -> None:
+    _require(not path.exists(), f"refusing to overwrite an existing artifact: {path}")
+
+
+def write_json_artifact(path: Path, payload: Mapping[str, Any]) -> Path:
+    _require_absent_artifact(path)
+    text = json.dumps(payload, sort_keys=True, indent=2, allow_nan=False, ensure_ascii=False)
+    return _atomic_write_bytes(path, (text + "\n").encode("utf-8"))
+
+
+def write_csv_artifact(path: Path, header: Sequence[str],
+                       rows: Sequence[Sequence[Any]]) -> Path:
+    _require_absent_artifact(path)
+    import io  # noqa: PLC0415
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, lineterminator="\n")
+    writer.writerow(header)
+    for row in rows:
+        _require(len(row) == len(header), "artifact row width does not match the header")
+        writer.writerow(row)
+    return _atomic_write_bytes(path, buffer.getvalue().encode("utf-8"))
+
+
+def read_json_artifact(path: Path) -> dict[str, Any]:
+    """Strict read: a missing, empty, truncated or non-object file is a stop."""
+
+    path = Path(path)
+    _require(path.is_file(), f"required artifact is missing: {path}")
+    text = path.read_text(encoding="utf-8")
+    _require(text.strip() != "", f"artifact is empty: {path}")
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as error:
+        raise HarnessStop(f"artifact is not valid JSON: {path} ({error})") from error
+    _require(isinstance(payload, dict), f"artifact is not a JSON object: {path}")
+    return payload
+
+
+def require_new_smoke_artifact_dir(out_dir: Path | None = None) -> Path:
+    """The execution directory must not exist yet.  Nothing is ever overwritten."""
+
+    directory = SMOKE_ARTIFACT_DIR if out_dir is None else Path(out_dir)
+    require_not_phase7e_path(directory)
+    _require(not directory.exists(),
+             f"smoke artifact directory already exists; refusing to overwrite: {directory}")
+    directory.mkdir(parents=True, exist_ok=False)
+    return directory
+
+
+def require_existing_smoke_artifact_dir(out_dir: Path | None = None) -> Path:
+    directory = SMOKE_ARTIFACT_DIR if out_dir is None else Path(out_dir)
+    require_not_phase7e_path(directory)
+    _require(directory.is_dir(), f"smoke artifact directory does not exist: {directory}")
+    return directory
+
+
+# ---------------------------------------------------------------------------
+# artifact payloads (schema frozen before any result exists)
+# ---------------------------------------------------------------------------
+
+
+def build_authorization_payload(authorization: Any, run_code_sha: str) -> dict[str, Any]:
+    _require(type(authorization) is SmokeExecutionAuthorization,
+             "authorization payload requires a SmokeExecutionAuthorization")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    return {
+        "artifact_version": SMOKE_ARTIFACT_VERSION,
+        "execution_issue_number": authorization.issue_number,
+        "protocol_origin_issue_number": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "approved_scientific_main_sha": authorization.approved_main_sha,
+        "run_code_sha": run_code_sha,
+        "protocol_hash": authorization.protocol_hash,
+        "authorization_version": authorization.authorization_version,
+        "independent_review_pass": authorization.independent_review_pass,
+        "human_smoke_approval": authorization.human_smoke_approval,
+        "expected_canary_fits": authorization.canary_fit_count,
+        "expected_smoke_fits": authorization.smoke_fit_count,
+        "expected_real_em_budget": EXPECTED_REAL_EM_BUDGET,
+        "estimand": authorization.estimand,
+        "role": SMOKE_ROLE,
+        "k_true": authorization.k_true,
+        "replicate": authorization.replicate,
+        "data_seed_base": authorization.data_seed_base,
+        "model_seed_base": authorization.model_seed_base,
+        "split_seed": authorization.split_seed,
+        "data_seed": smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+        "canary_model_seed": CANARY_MODEL_SEED,
+        "smoke_model_seeds": [smoke_model_seed(SMOKE_K_TRUE, SMOKE_REPLICATE, k, start)
+                              for k in SMOKE_K_CANDIDATES for start in SMOKE_STARTS],
+    }
+
+
+def build_canary_payload(report: Phase8bCanaryReport, run_code_sha: str) -> dict[str, Any]:
+    """PASS evidence.  Only a report from a fully clean canary reaches this."""
+
+    _require(type(report) is Phase8bCanaryReport, "canary payload requires a Phase8bCanaryReport")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    _require(report.real_canary_fits_executed
+             == (0 if report.test_only else EXPECTED_CANARY_FITS),
+             "canary evidence real-fit count is inconsistent with the execution mode")
+    invariance = report.invariance
+    return {
+        "artifact_version": SMOKE_ARTIFACT_VERSION,
+        "status": CANARY_STATUS_PASS,
+        # A test-only canary can never satisfy a production smoke, and a real
+        # canary can never satisfy a test-only smoke: the modes are disjoint.
+        "execution_mode": "test_only" if report.test_only else "real",
+        "execution_issue_number": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue_number": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "approved_scientific_main_sha": report.approved_main_sha,
+        "run_code_sha": run_code_sha,
+        "protocol_hash": report.protocol_hash,
+        "estimand": SMOKE_ESTIMAND,
+        "role": SMOKE_ROLE,
+        "k_true": SMOKE_K_TRUE,
+        "replicate": SMOKE_REPLICATE,
+        "k_est": report.k_est,
+        "start": report.start,
+        "data_seed": report.data_seed,
+        "split_seed": report.split_seed,
+        "model_seed": report.model_seed,
+        "expected_fit_count": EXPECTED_CANARY_FITS,
+        # The orchestration structurally performs exactly two boundary calls in
+        # both modes; only the REAL count distinguishes them.
+        "actual_fit_count": EXPECTED_CANARY_FITS,
+        "real_canary_fits_executed": report.real_canary_fits_executed,
+        "anchor_test_hash": report.anchor_test_hash,
+        "anchor_train_hash": report.anchor_train_hash,
+        "fit_config_hash": invariance.config_hash,
+        "fit_payload_a_hash": invariance.fit_payload_a_hash,
+        "fit_payload_b_hash": invariance.fit_payload_b_hash,
+        "initialization_equal": bool(invariance.initialization_equal),
+        "final_outputs_equal": bool(invariance.final_outputs_equal),
+        "internal_retry": int(invariance.internal_retry),
+        "warning_count": 0,
+        "q_failure": False,
+        "nan_occurred": False,
+        "finite_state": True,
+        "canary_atol": float(CANARY_ATOL),
+        "canary_rtol": float(CANARY_RTOL),
+        "boundary_version": LEAKAGE_BOUNDARY_VERSION,
+    }
+
+
+def build_smoke_fit_rows(smoke: Phase8bSmokeReport, canary: Phase8bCanaryReport,
+                         run_code_sha: str) -> list[tuple[Any, ...]]:
+    return build_smoke_artifact_rows(canary, smoke, run_code_sha)
+
+
+def build_smoke_summary_payload(smoke: Phase8bSmokeReport,
+                                run_code_sha: str) -> dict[str, Any]:
+    _require(type(smoke) is Phase8bSmokeReport, "summary requires a Phase8bSmokeReport")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    by_key = {(row.k, row.start): row.heldout_mean_log_score for row in smoke.rows}
+    means = dict(smoke.mean_scores)
+    per_k: dict[str, Any] = {}
+    for k in SMOKE_K_CANDIDATES:
+        per_k[str(k)] = {
+            "start_1": by_key[(k, 1)],
+            "start_2": by_key[(k, 2)],
+            "mean": means[k],
+        }
+    return {
+        "artifact_version": SMOKE_ARTIFACT_VERSION,
+        "execution_issue_number": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue_number": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "approved_scientific_main_sha": smoke.approved_main_sha,
+        "run_code_sha": run_code_sha,
+        "protocol_hash": smoke.protocol_hash,
+        "score_config_hash": smoke.score_config_hash,
+        "per_k": per_k,
+        "selected_k": smoke.selected_k,
+        "tie_candidates": list(smoke.tie_candidates),
+        # K_TRUE=1 is not in the candidate set {2,3,4}: agreement with K_TRUE is
+        # structurally impossible, so selected_k is operational evidence only.
+        "selected_k_interpretation": SELECTED_K_INTERPRETATION,
+        "k_recovery_evaluated": False,
+        "k_true": SMOKE_K_TRUE,
+        "candidate_k": list(SMOKE_K_CANDIDATES),
+        "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+        "actual_smoke_fits": smoke.real_smoke_fits_executed,
+    }
+
+
+def build_smoke_runinfo_payload(*, run_code_sha: str, out_dir: Path,
+                                requested_command: str, invocation_mode: str,
+                                started_at: str, completed_at: str,
+                                working_tree_clean: bool,
+                                actual_canary_fits: int,
+                                actual_smoke_fits: int) -> dict[str, Any]:
+    return {
+        "artifact_version": SMOKE_ARTIFACT_VERSION,
+        "phase": PHASE,
+        "execution_issue": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        # run_code_sha is provenance; approved_scientific_main_sha is approval.
+        "run_code_sha": run_code_sha,
+        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "approved_baseline_is_ancestor": approved_baseline_is_ancestor(run_code_sha),
+        "protocol_hash": smoke_protocol_hash(),
+        "score_config_hash": score_config_hash(frozen_score_config()),
+        "frozen_config_hash": frozen_config_hash(),
+        "working_tree_clean": bool(working_tree_clean),
+        "invocation_mode": invocation_mode,
+        "requested_command": requested_command,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "expected_real_em_budget": EXPECTED_REAL_EM_BUDGET,
+        "expected_canary_fits": EXPECTED_CANARY_FITS,
+        "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+        "actual_canary_fits": int(actual_canary_fits),
+        "actual_smoke_fits": int(actual_smoke_fits),
+        "full_fits_executed": 0,
+        "phase7e_rerun_count": 0,
+        "artifact_directory": str(out_dir),
+        "artifact_files": list(SMOKE_ARTIFACT_FILES),
+    }
+
+
+# ---------------------------------------------------------------------------
+# canary-before-smoke lineage gate
+# ---------------------------------------------------------------------------
+
+
+CANARY_EVIDENCE_REQUIRED_KEYS = (
+    "artifact_version", "status", "execution_issue_number",
+    "protocol_origin_issue_number", "approved_scientific_main_sha", "run_code_sha",
+    "protocol_hash", "estimand", "role", "k_true", "replicate", "k_est", "start",
+    "data_seed", "split_seed", "model_seed", "expected_fit_count",
+    "actual_fit_count", "anchor_test_hash", "anchor_train_hash",
+    "fit_config_hash", "fit_payload_a_hash", "fit_payload_b_hash",
+    "initialization_equal", "final_outputs_equal", "internal_retry",
+    "warning_count", "q_failure", "nan_occurred", "finite_state",
+    "canary_atol", "canary_rtol", "boundary_version",
+    "execution_mode", "real_canary_fits_executed",
+)
+
+
+def require_canary_pass_evidence(out_dir: Path, authorization: Any,
+                                 anchors: Mapping[int, AnchorMask] | None = None,
+                                 *, current_run_code_sha: str,
+                                 test_only: bool = False) -> dict[str, Any]:
+    """Smoke may not begin without a PASS canary from THIS execution lineage.
+
+    "A canary.json exists" is not enough: the evidence must carry the same
+    approved baseline, protocol hash, execution issue, seed block AND the same
+    run-code SHA as the smoke run that is about to start.  A format-valid but
+    different SHA means the canary was produced by different code, so it is not
+    evidence about this execution at all.
+    """
+
+    directory = require_existing_smoke_artifact_dir(out_dir)
+    payload = read_json_artifact(directory / "canary.json")
+
+    missing = [key for key in CANARY_EVIDENCE_REQUIRED_KEYS if key not in payload]
+    _require(not missing, f"canary evidence is incomplete; missing {missing}")
+
+    _require(payload["artifact_version"] == SMOKE_ARTIFACT_VERSION,
+             "canary evidence artifact version changed")
+    _require(payload["status"] == CANARY_STATUS_PASS,
+             f"canary evidence status is not PASS: {payload['status']!r}")
+    _require(payload["execution_issue_number"] == SMOKE_EXECUTION_ISSUE_NUMBER,
+             "canary evidence belongs to a different execution issue")
+    _require(payload["protocol_origin_issue_number"] == SMOKE_PROTOCOL_ISSUE_NUMBER,
+             "canary evidence protocol origin issue changed")
+    _require(payload["approved_scientific_main_sha"] == authorization.approved_main_sha
+             == trusted_main_sha_for(test_only),
+             "canary evidence was produced under a different approved baseline")
+    # Run-code identity: same code produced the canary and is starting the smoke.
+    _require_full_commit_sha(payload["run_code_sha"], "canary evidence run code SHA")
+    _require_full_commit_sha(current_run_code_sha, "current smoke run code SHA")
+    _require(payload["run_code_sha"] == current_run_code_sha,
+             "canary evidence run code SHA does not match the current smoke execution: "
+             f"{payload['run_code_sha']} != {current_run_code_sha}")
+    _require(payload["protocol_hash"] == authorization.protocol_hash == smoke_protocol_hash(),
+             "canary evidence protocol hash does not match this execution")
+
+    _require(payload["estimand"] == SMOKE_ESTIMAND and payload["role"] == SMOKE_ROLE,
+             "canary evidence estimand/role changed")
+    _require(payload["k_true"] == SMOKE_K_TRUE and payload["replicate"] == SMOKE_REPLICATE,
+             "canary evidence cell changed")
+    _require(payload["k_est"] == CANARY_K_EST and payload["start"] == CANARY_START,
+             "canary evidence K_est/start changed")
+    _require(payload["data_seed"] == smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+             "canary evidence data seed changed")
+    _require(payload["split_seed"] == SMOKE_SPLIT_SEED, "canary evidence split seed changed")
+    _require(payload["model_seed"] == CANARY_MODEL_SEED, "canary evidence model seed changed")
+
+    expected_mode = "test_only" if test_only else "real"
+    _require(payload["execution_mode"] == expected_mode,
+             f"canary evidence execution mode is {payload['execution_mode']!r}, "
+             f"expected {expected_mode!r}")
+    _require(payload["expected_fit_count"] == EXPECTED_CANARY_FITS,
+             "canary evidence expected fit count changed")
+    _require(payload["actual_fit_count"] == EXPECTED_CANARY_FITS,
+             "canary evidence did not record exactly two canary fits")
+    _require(payload["real_canary_fits_executed"] == (0 if test_only else EXPECTED_CANARY_FITS),
+             "canary evidence real-fit count does not match the execution mode")
+
+    anchor = (read_phase7e_anchor_masks() if anchors is None else anchors)[SMOKE_REPLICATE]
+    _require(payload["anchor_test_hash"] == anchor.test_mask_hash,
+             "canary evidence test anchor hash differs from Phase 7e")
+    _require(payload["anchor_train_hash"] == anchor.train_mask_hash,
+             "canary evidence train anchor hash differs from Phase 7e")
+
+    _require(payload["initialization_equal"] is True, "canary initialization was not invariant")
+    _require(payload["final_outputs_equal"] is True, "canary final outputs were not invariant")
+    _require(payload["internal_retry"] == 0, "canary evidence records an internal retry")
+    _require(payload["warning_count"] == 0, "canary evidence records warnings")
+    _require(payload["q_failure"] is False, "canary evidence records a Q failure")
+    _require(payload["nan_occurred"] is False, "canary evidence records a NaN state")
+    _require(payload["finite_state"] is True, "canary evidence records a nonfinite state")
+    _require(payload["fit_payload_a_hash"] != payload["fit_payload_b_hash"],
+             "canary A/B payloads are identical; the canary representation did not vary")
+
+    # Frozen Phase 7e tolerances, never relaxed after seeing output.
+    _require(payload["canary_atol"] == float(CANARY_ATOL), "canary atol was changed")
+    _require(payload["canary_rtol"] == float(CANARY_RTOL), "canary rtol was changed")
+    _require(payload["boundary_version"] == LEAKAGE_BOUNDARY_VERSION,
+             "canary evidence boundary version changed")
+    return payload
+
+
+# ---------------------------------------------------------------------------
+# production execution wiring (unreachable while the authorization is absent)
+# ---------------------------------------------------------------------------
+
+
+def _utc_now() -> str:
+    from datetime import datetime, timezone  # noqa: PLC0415
+
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _require_execution_preconditions(run_code_sha: str) -> None:
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    _require(working_tree_is_clean(),
+             "the working tree is dirty; refusing to start a real execution")
+    _require(approved_baseline_is_ancestor(run_code_sha),
+             "the approved scientific baseline is not an ancestor of this commit")
+
+
+def _resolve_fit_adapter(test_adapter: Any, test_only: bool) -> Any:
+    """Construct the fit adapter -- the LAST step before the first fit.
+
+    This is the ONLY place in the module that constructs
+    ``AuthorizedEMFitAdapter``.  Every production route therefore has to pass
+    through ``_execute_real_canary`` / ``_execute_real_smoke``, which means it
+    has already cleared the full preflight and, for smoke, the canary lineage.
+    A static test enumerates the construction sites to keep it that way.
+    """
+
+    if test_only:
+        _require(type(test_adapter) is _TestAuthorizedFitAdapter,
+                 "a test-only execution requires the Phase 7e test adapter")
+        return test_adapter
+    _require(test_adapter is None,
+             "a production execution must not be handed a pre-built adapter")
+    return AuthorizedEMFitAdapter()
+
+
+def _execute_real_canary(authorization: Any, out_dir: Path | None, *,
+                         test_adapter: Any, test_only: bool,
+                         run_code_sha: str) -> dict[str, Any]:
+    """Full no-fit preflight -> reserve dir -> evidence -> adapter -> 2 fits.
+
+    Nothing observable happens until every gate that does not need a fit has
+    passed: no directory is created, no evidence is written and no adapter is
+    constructed while a preflight failure is still possible.
+    """
+
+    started_at = _utc_now()
+    # --- phase 1: no side effects at all ---------------------------------
+    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    # --- phase 2: reserve the directory and record the authorization -----
+    directory = require_new_smoke_artifact_dir(out_dir)
+    write_json_artifact(directory / "authorization.json",
+                        build_authorization_payload(authorization, run_code_sha))
+    # --- phase 3: only now may a fit-capable adapter exist ---------------
+    adapter = _resolve_fit_adapter(test_adapter, test_only)
+    report = _run_real_canary(authorization, adapter=adapter, test_only=test_only, cell=cell)
+    payload = build_canary_payload(report, run_code_sha)
+    write_json_artifact(directory / "canary.json", payload)
+    return {
+        "mode": "canary",
+        "artifact_directory": str(directory),
+        "started_at": started_at,
+        "completed_at": _utc_now(),
+        "canary_status": payload["status"],
+        "real_canary_fits_executed": report.real_canary_fits_executed,
+        "real_smoke_fits_executed": 0,
+        "em_fits_executed": report.real_canary_fits_executed,
+    }
+
+
+def _execute_real_smoke(authorization: Any, out_dir: Path | None, *,
+                        test_adapter: Any, test_only: bool,
+                        run_code_sha: str) -> dict[str, Any]:
+    """Full no-fit preflight -> canary lineage -> adapter -> 6 fits -> artifacts.
+
+    Smoke reuses the canary's directory; it never creates a new one.
+    """
+
+    started_at = _utc_now()
+    # --- phase 1: no side effects at all ---------------------------------
+    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    directory = require_existing_smoke_artifact_dir(out_dir)
+    canary_payload = require_canary_pass_evidence(
+        directory, authorization, current_run_code_sha=run_code_sha, test_only=test_only)
+    # --- phase 2: only now may a fit-capable adapter exist ---------------
+    adapter = _resolve_fit_adapter(test_adapter, test_only)
+    report = _run_real_smoke(authorization, adapter=adapter, test_only=test_only, cell=cell)
+
+    rows = build_smoke_artifact_rows_from_evidence(report, canary_payload, run_code_sha)
+    write_csv_artifact(directory / "smoke_fit_results.csv", SMOKE_ARTIFACT_COLUMNS, rows)
+    write_json_artifact(directory / "smoke_summary.json",
+                        build_smoke_summary_payload(report, run_code_sha))
+    completed_at = _utc_now()
+    write_json_artifact(directory / "runinfo.json", build_smoke_runinfo_payload(
+        run_code_sha=run_code_sha,
+        out_dir=directory,
+        requested_command="--smoke",
+        invocation_mode="cli",
+        started_at=started_at,
+        completed_at=completed_at,
+        working_tree_clean=working_tree_is_clean(),
+        actual_canary_fits=canary_payload["real_canary_fits_executed"],
+        actual_smoke_fits=report.real_smoke_fits_executed,
+    ))
+    return {
+        "mode": "smoke",
+        "artifact_directory": str(directory),
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "selected_k": report.selected_k,
+        "selected_k_interpretation": SELECTED_K_INTERPRETATION,
+        "k_recovery_evaluated": False,
+        "real_canary_fits_executed": canary_payload["real_canary_fits_executed"],
+        "real_smoke_fits_executed": report.real_smoke_fits_executed,
+        "em_fits_executed": report.real_smoke_fits_executed,
+    }
+
+
+def build_smoke_artifact_rows_from_evidence(smoke: Phase8bSmokeReport,
+                                            canary_payload: Mapping[str, Any],
+                                            run_code_sha: str) -> list[tuple[Any, ...]]:
+    """Six CSV rows, with the canary provenance taken from the PASS evidence."""
+
+    _require(type(smoke) is Phase8bSmokeReport, "artifact rows require a Phase8bSmokeReport")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    canary_provenance = stable_config_hash({
+        "k_est": canary_payload["k_est"],
+        "start": canary_payload["start"],
+        "model_seed": canary_payload["model_seed"],
+        "config_hash": canary_payload["fit_config_hash"],
+        "payload_a_hash": canary_payload["fit_payload_a_hash"],
+        "payload_b_hash": canary_payload["fit_payload_b_hash"],
+    })
+    rows: list[tuple[Any, ...]] = []
+    for row in smoke.rows:
+        rows.append((
+            run_code_sha, smoke.approved_main_sha, smoke.protocol_hash,
+            SMOKE_ESTIMAND, SMOKE_ROLE, SMOKE_K_TRUE, SMOKE_REPLICATE,
+            row.k, row.start, row.data_seed, row.split_seed, row.model_seed,
+            row.pre_fit_test_hash, row.pre_fit_train_hash,
+            row.post_fit_test_hash, row.post_fit_train_hash,
+            smoke.anchor_test_hash, smoke.anchor_train_hash,
+            LEAKAGE_BOUNDARY_VERSION, row.fit_status,
+            row.internal_retry, row.warning_count, row.q_failure, row.nan_occurred,
+            row.finite_state, row.heldout_mean_log_score, row.score_config_hash,
+            canary_provenance,
+            canary_payload["real_canary_fits_executed"], smoke.real_smoke_fits_executed,
+        ))
+    _require(len(rows) == EXPECTED_SMOKE_FITS, "smoke artifact must have exactly six rows")
+    _require(all(len(row) == len(SMOKE_ARTIFACT_COLUMNS) for row in rows),
+             "smoke artifact row width does not match the schema")
+    return rows
+
+
+def _run_production_execution(authorization: Any, command: str) -> dict[str, Any]:
+    """THE production workflow for a real canary or smoke.
+
+    Both the CLI and the public ``run_real_*`` wrappers delegate here, so there
+    is exactly one preflight implementation and no second path that could drift
+    away from it.  Nothing here is caller-controlled: the output directory is
+    the frozen ``SMOKE_ARTIFACT_DIR`` and the run-code SHA comes from the
+    internal provenance source.
+    """
+
+    _require(command in ("canary", "smoke"), f"unknown production command {command!r}")
+    validate_smoke_execution_authorization(authorization, test_only=False)
+    run_code_sha = current_run_code_sha()
+    _require_execution_preconditions(run_code_sha)
+    if command == "canary":
+        return _execute_real_canary(authorization, SMOKE_ARTIFACT_DIR,
+                                    test_adapter=None, test_only=False,
+                                    run_code_sha=run_code_sha)
+    return _execute_real_smoke(authorization, SMOKE_ARTIFACT_DIR,
+                               test_adapter=None, test_only=False,
+                               run_code_sha=run_code_sha)
+
+
+def run_real_canary_cli(args: argparse.Namespace) -> dict[str, Any]:
+    """Production canary CLI path.  Unreachable while the authorization is absent."""
+
+    authorization = _require_em_authorization(args, "canary")
+    return _run_production_execution(authorization, "canary")
+
+
+def run_real_smoke_cli(args: argparse.Namespace) -> dict[str, Any]:
+    """Production smoke CLI path.  Unreachable while the authorization is absent."""
+
+    authorization = _require_em_authorization(args, "smoke")
+    return _run_production_execution(authorization, "smoke")
+
+
+def _execute_real_canary_test_only(authorization: Any, out_dir: Path, *,
+                                   adapter: Any, run_code_sha: str) -> dict[str, Any]:
+    """Static-test-only path.  It is the ONLY way to redirect the output dir."""
+
+    _require(type(adapter) is _TestAuthorizedFitAdapter, "test canary requires the test adapter")
+    _require(out_dir is not None, "the test-only path requires an explicit temp directory")
+    return _execute_real_canary(authorization, out_dir, test_adapter=adapter, test_only=True,
+                                run_code_sha=run_code_sha)
+
+
+def _execute_real_smoke_test_only(authorization: Any, out_dir: Path, *,
+                                  adapter: Any, run_code_sha: str) -> dict[str, Any]:
+    """Static-test-only path.  It is the ONLY way to redirect the output dir."""
+
+    _require(type(adapter) is _TestAuthorizedFitAdapter, "test smoke requires the test adapter")
+    _require(out_dir is not None, "the test-only path requires an explicit temp directory")
+    return _execute_real_smoke(authorization, out_dir, test_adapter=adapter, test_only=True,
+                               run_code_sha=run_code_sha)
+
+
+def run_smoke_contract() -> dict[str, Any]:
+    """Zero-EM: report the frozen execution contract without touching the disk."""
+
+    return {
+        "mode": "smoke-contract",
+        "em_fits_executed": 0,
+        "artifact_version": SMOKE_ARTIFACT_VERSION,
+        "artifact_directory": str(SMOKE_ARTIFACT_DIR),
+        "artifact_directory_exists": SMOKE_ARTIFACT_DIR.exists(),
+        "artifact_files": list(SMOKE_ARTIFACT_FILES),
+        "audit_input_files": list(SMOKE_AUDIT_INPUT_FILES),
+        "smoke_fit_results_columns": list(SMOKE_ARTIFACT_COLUMNS),
+        "canary_evidence_keys": list(CANARY_EVIDENCE_REQUIRED_KEYS),
+        "protocol_hash": smoke_protocol_hash(),
+        "protocol_origin_issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "execution_issue": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "trusted_main_sha_present": current_expected_smoke_main_sha() is not None,
+        "execution_authorization_present":
+            current_smoke_execution_authorization() is not None,
+        "expected_canary_fits": EXPECTED_CANARY_FITS,
+        "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+        "expected_real_em_budget": EXPECTED_REAL_EM_BUDGET,
+        "selected_k_interpretation": SELECTED_K_INTERPRETATION,
+        "k_recovery_evaluated": False,
+        "real_canary_fits_executed": 0,
+        "real_smoke_fits_executed": 0,
+    }
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Phase 8b K_TRUE robustness harness (Issue #49)")
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -2973,18 +3698,27 @@ def _build_parser() -> argparse.ArgumentParser:
                       help="exercise the leakage boundary with a fake adapter; EM fits = 0")
     mode.add_argument("--smoke-authorization", action="store_true",
                       help="report the smoke authorization gates; EM fits = 0")
+    mode.add_argument("--smoke-contract", action="store_true",
+                      help="report the frozen execution/artifact contract; EM fits = 0")
     mode.add_argument("--canary", action="store_true", help="leakage falsification (requires EM gates)")
     mode.add_argument("--smoke", action="store_true", help="smoke selection (requires EM gates)")
     mode.add_argument("--full", action="store_true", help="full sweep (requires EM gates)")
     parser.add_argument("--allow-em", action="store_true")
     parser.add_argument("--confirm-k-true-sweep", action="store_true")
     parser.add_argument("--estimand", choices=("A", "B"))
-    parser.add_argument("--out-dir", type=Path, default=None)
+    # --out-dir applies to --record-diagnostics only; a real canary/smoke
+    # refuses it (the production artifact directory is frozen).
+    parser.add_argument("--out-dir", type=Path, default=None,
+                        help="diagnostics output directory; rejected by --canary/--smoke")
     return parser
 
 
-def _require_em_authorization(args: argparse.Namespace, command: str) -> None:
+def _require_em_authorization(args: argparse.Namespace,
+                              command: str) -> SmokeExecutionAuthorization:
     """Every EM-bearing command needs a committed execution authorization.
+
+    Returns the validated authorization so the caller can proceed; it raises
+    for every command that is not authorized, which is all of them here.
 
     ``--allow-em`` is a speed bump, not proof of anything.  The real gate is
     ``current_smoke_execution_authorization()``, which returns None in this
@@ -3010,23 +3744,28 @@ def _require_em_authorization(args: argparse.Namespace, command: str) -> None:
         )
 
     _require(command in ("canary", "smoke"), f"unknown EM command {command!r}")
+    # HIGH-03: a real execution writes to exactly one frozen directory.  A
+    # caller-supplied path could redirect evidence away from the audited
+    # location or point at an existing tree, so it is refused outright.
+    _require(getattr(args, "out_dir", None) is None,
+             f"--out-dir is not accepted for a real {command}: the production "
+             f"artifact directory is frozen at {SMOKE_ARTIFACT_DIR}")
     authorization = current_smoke_execution_authorization()
     if authorization is None:
         raise HarnessStop(
-            f"{command} is not authorized in Phase 8b S2b: the production canary "
-            "and 6-fit smoke path is implemented but no committed "
-            "SmokeExecutionAuthorization exists (Issue #53). Recording "
-            "INDEPENDENT_REVIEW_PASS and HUMAN_SMOKE_APPROVAL against a reviewed "
-            "main SHA is a separate human gate."
+            f"{command} is not authorized in Phase 8b S2c: the production canary "
+            "and 6-fit smoke path is implemented and the reviewed scientific "
+            f"baseline {APPROVED_SCIENTIFIC_MAIN_SHA} is bound, but no committed "
+            "SmokeExecutionAuthorization exists (Issue #55). Recording "
+            "INDEPENDENT_REVIEW_PASS and HUMAN_SMOKE_APPROVAL against that "
+            "reviewed baseline is a separate human gate."
         )
     validate_smoke_execution_authorization(authorization, test_only=False)
     # Authorization first (Issue #53 §26), then the zero-EM gates.  Both are
     # repeated inside ``prepare_smoke_cell``, so a run can never skip them.
     run_validate_only()
     run_config_gate()
-    raise HarnessStop(  # pragma: no cover - unreachable while the record is None
-        f"{command} authorization exists but real execution is out of scope here"
-    )
+    return authorization
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -3063,18 +3802,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "hard-stopped until a human records INDEPENDENT_REVIEW_PASS and "
                     "HUMAN_SMOKE_APPROVAL against a reviewed main SHA",
         }
+    elif args.smoke_contract:
+        result = run_smoke_contract()
     elif args.canary:
-        _require_em_authorization(args, "canary")
-        raise AssertionError("unreachable")
+        # Reachable only with a committed authorization, which does not exist.
+        result = run_real_canary_cli(args)
     elif args.smoke:
-        _require_em_authorization(args, "smoke")
-        raise AssertionError("unreachable")
+        result = run_real_smoke_cli(args)
     elif args.full:
         _require_em_authorization(args, "full")
         raise AssertionError("unreachable")
     else:  # pragma: no cover - argparse enforces one mode
         raise HarnessStop("no mode selected")
-    _require(result["em_fits_executed"] == 0, "no-EM path reported a nonzero fit count")
+    if not (args.canary or args.smoke):
+        _require(result["em_fits_executed"] == 0, "no-EM path reported a nonzero fit count")
     print(json.dumps(result, sort_keys=True, allow_nan=False, ensure_ascii=False))
     return 0
 
