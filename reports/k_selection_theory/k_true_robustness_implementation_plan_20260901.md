@@ -316,45 +316,80 @@ diagnostics の値を見て seed / tolerance / K range / replicate を変更し�
 `--config-gate` の一部として、**full fit より前に**（EM fits = 0 の段階で）
 mask の整合を検査する。design §10.4 の 3 案それぞれで要求が異なる。
 
+#### 3.4.0 canonical hash contract（**FROZEN — 実装任せにしない**）
+
+Phase 7e の一次証拠（`heldout_full_pilot_20260824/fit_results.csv`）が保持している mask hash 列は
+**`train_mask_hash` と `test_mask_hash` の 2 つであり、`split_mask_hash` という列は存在しない。**
+したがって新設する単一 hash が「何を hash した値か」を、blocking gate に使う前に一意に固定する。
+
+```
+split_mask_hash   := stable_array_hash(test_mask)
+anchor_mask_hash  := Phase 7e の保存済み test_mask_hash
+train_mask_hash   := stable_array_hash(train_mask)          （artifact に併せて保持）
+anchor_train_mask_hash := Phase 7e の保存済み train_mask_hash
+```
+
+**理由:** H4 で揃えたい科学的対象は **held-out pair-index mask**、すなわち `test_mask` である。
+よって canonical object を `test_mask` に固定する。
+
+**blocking verification は test / train の両方で行う。**
+canonical provenance field は `split_mask_hash`（= `test_mask_hash`）1 本に固定しつつ、
+gate では `test_mask` と `train_mask` の両方が anchor と一致することを要求する。
+加えて `validate_pair_masks` により train/test の complement semantics も確認する。
+
+```
+canonical provenance field : split_mask_hash = test_mask_hash
+blocking verification      : test AND train both match anchor
+```
+
 ```
 M0  (全案共通) 生成した mask が validate_pair_masks を満たす
                 （対称・対角 False・train ⊻ test = 全非対角・expected_test_pairs = 555）
-M1  (全案共通) manifest に split_seed / split_mask_hash / mask_design /
-                mask_group_id / anchor_mask_hash / intentional_seed_reuse が保存される
-M2  (全案共通) mask_design == SPLIT_VARIANT
+M1  (全案共通) manifest に split_seed / split_mask_hash / train_mask_hash / mask_design /
+                mask_group_id / anchor_mask_hash / anchor_train_mask_hash /
+                intentional_seed_reuse が保存される
+M2  (全案共通) mask_design == MASK_DESIGN
+M3  (全案共通) split_mask_hash == stable_array_hash(test_mask) であること
+                （canonical contract 3.4.0 の遵守）
 ```
 
 **S_A:**
 
 ```
-MA1  split_mask_hash が (K_TRUE, replicate) ごとに相異なる
+MA1  split_mask_hash (= test_mask_hash) が (K_TRUE, replicate) ごとに相異なる
 MA2  intentional_seed_reuse == False
 ```
 
 **S_B:**
 
 ```
-MB1  同一 replicate の新規 K_TRUE {1,2,4,5} で split_mask_hash が一致
-MB2  その値が Phase 7e K3 anchor の mask hash と一致「しない」ことを記録する
+MB1  同一 replicate の新規 K_TRUE {1,2,4,5} で split_mask_hash (= test_mask_hash) が一致
+MB2  その値が Phase 7e K3 anchor の test_mask_hash と一致「しない」ことを記録する
        （不一致は失敗ではない。S_B の定義どおりであることの確認）
 MB3  intentional_seed_reuse == True（新規 K_TRUE 間のみ）
 ```
 
-**S_C:**
+**S_C（← current config）:**
 
 ```
 for each replicate r in {1,2,3}:
-    reference = Phase 7e K3 の保存済み split_mask_hash(r)
-                （expfam/results/k_selection/heldout_full_pilot_20260824/fit_results.csv
-                  の train_mask_hash / test_mask_hash を読むだけ。再実行しない）
+    # Phase 7e artifact を read-only で読むだけ。再実行しない。
+    # 出典: expfam/results/k_selection/heldout_full_pilot_20260824/fit_results.csv
+    anchor_test_hash  = Phase 7e stored test_mask_hash(r)
+    anchor_train_hash = Phase 7e stored train_mask_hash(r)
+
     for K_TRUE in {1,2,4,5}:
-        for estimand in (実行する estimand すべて):     # A / B / A+B のいずれでも
-            assert split_mask_hash(estimand, K_TRUE, r) == reference
-MC1  上記 assert がすべて成立
+        for estimand in {A, B}:                        # current config は ESTIMANDS="AB"
+            assert stable_array_hash(test_mask)  == anchor_test_hash
+            assert stable_array_hash(train_mask) == anchor_train_hash
+
+MC1  上記 assert が test / train ともにすべて成立
 MC2  intentional_seed_reuse == True
-MC3  anchor_mask_hash 列に reference が保存される
+MC3  anchor_mask_hash       列に anchor_test_hash  が保存される
+     anchor_train_mask_hash 列に anchor_train_hash が保存される
 MC4  RANDOM_DESIGN == "INDEPENDENT" であっても MC1 が成立する
        （estimand offset は split_seed に適用されないため。§2.3）
+MC5  各 new row の anchor_match == True
 ```
 
 **`RANDOM_DESIGN`（H2）の値は MC1 の要求を緩めない。**
@@ -414,34 +449,97 @@ mask_design   = S_A | S_B | S_C        # H4: split_seed / pair-index mask を支
 config validator はこの組み合わせを reject してはならない。**
 （reject すると design §10.7.3 で human に提示した選択肢が実行不能になる。）
 
-### 4.2 出力 artifact
+### 4.2 出力 artifact（行数は **current frozen config へ確定**）
 
-| file | 行数 | Phase 7e からの差分 |
+current config は `NEW_K_TRUE = {1,2,4,5}`・`REPLICATES = {1,2,3}` なので、
+**estimand あたりの new dataset cell 数は `4 × 3 = 12` である。**
+以下の行数はこの前提で一意に固定する（範囲表記を残さない）。
+
+| file | 行数（estimand あたり） | Phase 7e からの差分 |
 |---|---:|---|
-| `manifest.csv` | 168 | `estimand`, `role`, `K_TRUE`, `w0_true`, `w_true` 列追加 |
+| `manifest.csv` | 168 | `estimand`, `role`, `K_TRUE`, `w0_true`, `w_true` および mask provenance 列を追加 |
 | `fit_results.csv` | 168 | 同上。他列は Phase 7e と同一 |
 | `replicate_selection.csv` | 4×3×7 = 84 | `estimand`, `role`, `K_TRUE` 列追加 |
-| `cell_selection.csv` | **12**（新規） | `estimand, role, K_TRUE, replicate, selected_k, tie_candidates, best_score, second_best_score, margin, signed_error, abs_error, label` |
+| `cell_selection.csv` | **12** | `estimand, role, K_TRUE, replicate, selected_k, tie_candidates, best_score, second_best_score, margin, signed_error, abs_error, label` |
 | `aggregate_summary.csv` | K_TRUE 別 k_wise 28 行 + pilot 行 | `estimand`, `role`, `K_TRUE` 列追加 |
-| `config_gate.csv` | 4–5 + mask 行 | §3.1 の G1–G5 と §3.4 の M0–M2 / MA / MB / MC の判定結果 |
-| `mask_provenance.csv` | 12–15 | replicate × K_TRUE ごとの `split_seed` / `split_mask_hash` / `mask_design` / `mask_group_id` / `anchor_mask_hash` / `intentional_seed_reuse` / anchor 一致判定 |
-| `diagnostics.csv` | 5 | §3.2 の RECORD ONLY 値（**pass/fail 列を持たない**） |
+| `config_gate.csv` | G1–G5 + M0–M3 + MA/MB/MC 各判定 1 行 | §3.1 と §3.4 の判定結果 |
+| `mask_provenance.csv` | **12** | §4.2.1 |
+| `diagnostics.csv` | **12** | §4.2.2 |
 | `runinfo.json` / `runinfo.md` | — | `estimand` / `role` / `hierarchy` / `w_true_rule` / **`random_design`（H2）/ `mask_design`（H4）を別 field で** / `anchor_reference` / `config_gate` / `diagnostics` を追加 |
 | `stdout.log` | — | §9 |
+
+#### 4.2.1 `mask_provenance.csv` — **exactly 12 rows / estimand**
+
+key: `(estimand, K_TRUE, replicate)`、`K_TRUE ∈ {1,2,4,5}` × `replicate ∈ {1,2,3}`。
+artifact directory が estimand 別であっても `estimand` 列は保持してよい。
+
+各 new row が保持する provenance:
+
+```
+estimand, role, K_TRUE, replicate,
+split_seed, split_mask_hash (= test_mask_hash), train_mask_hash,
+mask_design, mask_group_id,
+anchor_mask_hash (= Phase 7e stored test_mask_hash),
+anchor_train_mask_hash (= Phase 7e stored train_mask_hash),
+intentional_seed_reuse, anchor_match
+```
+
+**Phase 7e anchor の 3 行そのものを `mask_provenance.csv` へコピーしない。**
+anchor evidence は各 new row の `anchor_mask_hash` / `anchor_train_mask_hash` から参照する。
+これにより §4.3 の
+「`k_true_selection_matrix.csv` が anchor と new result を同居させる唯一の統合成果物」
+という規約と整合する。
+
+#### 4.2.2 `diagnostics.csv` — **exactly 12 rows / estimand**
+
+RECORD ONLY diagnostics は dataset realization ごとに異なるため、
+key は `(K_TRUE, replicate)`、`K_TRUE ∈ {1,2,4,5}` × `replicate ∈ {1,2,3}` の 12 行。
+
+各 row が保持する項目:
+
+```
+K_TRUE, replicate, estimand, role,
+sample sd(eta_Y), Y density, conditional entropy, oracle mean log score,
+higher-moment diagnostics, latent / F invariants
+  （Sigma_i||z_i||^2/n, ||F||_F^2, tr(F^T F)/K）
+```
+
+**`K_TRUE=3` anchor について新しい diagnostic row を生成しない。**
+Phase 7e は frozen read-only anchor であり、
+Phase 8a の new diagnostics lineage へ新しい K3 measurement を混ぜない。
+report では **`K3 diagnostics were not newly generated`** と明記する。
+
+**これらの値はいかなる場合も full run を停止させない**（RECORD ONLY、§3.2）。
 
 ### 4.3 anchor 統合成果物（**別ファイル・provenance 列必須**）
 
 `k_true_selection_matrix.csv`（estimand あたり 15 行）
 — **唯一 anchor と新規を同居させるファイル**:
 
+列は 11 個（`estimand, role, K_TRUE, replicate, selected_k, signed_error, abs_error,
+label, lineage, run_code_sha, artifact_dir`）。**全行が header と同じ列数でなければならない。**
+
+Option B（`role = sensitivity`、H3-a）の matrix 例:
+
 ```csv
 estimand,role,K_TRUE,replicate,selected_k,signed_error,abs_error,label,lineage,run_code_sha,artifact_dir
-B,3,1,3,0,0,exact,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
-B,3,2,3,0,0,exact,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
-B,3,3,5,2,2,over,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
-B,1,1,...,...,...,...,phase8a_new,<sha>,expfam/results/k_selection/k_true_robustness_B_<date>
-...
+B,sensitivity,3,1,3,0,0,exact,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
+B,sensitivity,3,2,3,0,0,exact,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
+B,sensitivity,3,3,5,2,2,over,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
+B,sensitivity,1,1,<k>,<signed>,<abs>,<label>,phase8a_new,<sha>,expfam/results/k_selection/k_true_robustness_B_<date>
+B,sensitivity,1,2,<k>,<signed>,<abs>,<label>,phase8a_new,<sha>,expfam/results/k_selection/k_true_robustness_B_<date>
 ```
+
+Option A（`role = primary`、H3-a）の matrix では `estimand,role` が `A,primary` になる:
+
+```csv
+estimand,role,K_TRUE,replicate,selected_k,signed_error,abs_error,label,lineage,run_code_sha,artifact_dir
+A,primary,3,1,3,0,0,exact,phase7e_anchor,b9311e64...,expfam/results/k_selection/heldout_full_pilot_20260824
+A,primary,1,1,<k>,<signed>,<abs>,<label>,phase8a_new,<sha>,expfam/results/k_selection/k_true_robustness_A_<date>
+```
+
+`K_TRUE=3` の 3 行は A・B いずれの matrix でも同一の anchor 値になる
+（`w_3 = 1.5` が共通のため。design §11.1）。**anchor fits は再実行しない。**
 
 **`lineage` / `run_code_sha` / `artifact_dir` 列は必須**（KI-002、design §14 C7）。
 K_TRUE=3 の 3 行は Phase 7e の `replicate_selection.csv` から**読み取るだけ**で、
@@ -482,6 +580,13 @@ K_TRUE=3 の 3 行は Phase 7e の `replicate_selection.csv` から**読み取�
 | T12h | `RANDOM_DESIGN == "INDEPENDENT"` かつ `SPLIT_VARIANT == "S_C"` で MC1 が成立し、config validator が reject しない | **MC4・合法な組み合わせの保証** |
 | T12i | `RANDOM_DESIGN == "INDEPENDENT"` で `expected_data_seed` / `expected_model_seed` は estimand ごとに異なる値を返す | H2 の offset が data / model にのみ効く |
 | T12j | `runinfo` / manifest に `random_design` と `mask_design` が**別 field** として保存される | provenance 上の責任分離 |
+| T12k | **`split_mask_hash == stable_array_hash(test_mask)`**（canonical contract §3.4.0） | **HIGH-01: hash 定義の一意性** |
+| T12l | `anchor_mask_hash` が Phase 7e stored `test_mask_hash`、`anchor_train_mask_hash` が stored `train_mask_hash` と一致 | 同上 |
+| T12m | `S_C` gate が **test と train の両方**を検査する（片方だけ一致では PASS しない） | MC1 |
+| T12n | `mask_provenance.csv` が **exactly 12 rows / estimand**、key `(estimand, K_TRUE, replicate)` が重複なし | **MEDIUM-03** |
+| T12o | `diagnostics.csv` が **exactly 12 rows / estimand**、key `(K_TRUE, replicate)` が重複なし、`K_TRUE=3` の行を含まない | **MEDIUM-03** |
+| T12p | `mask_provenance.csv` に Phase 7e anchor 行そのものが含まれない（anchor は hash 参照のみ） | §4.2.1 |
+| T12q | `k_true_selection_matrix.csv` の全行が header と同じ列数（11 列） | **MEDIUM-02: 列ずれ防止** |
 | T13 | `make_pair_split` が `K_TRUE` に依存しない | split の K 不変性 |
 | T14 | `score_config_hash` が Phase 7e の値と一致 | **score protocol の同一性** |
 | T15 | `select_k_from_two_starts` を Phase 7e から import している | selector 同一性 |
@@ -531,6 +636,10 @@ K_TRUE=3 の 3 行は Phase 7e の `replicate_selection.csv` から**読み取�
 | A19 | A/B を同一 estimand の replication として集計（両者を平均する等） | `estimand` 列の集約禁止検査で BLOCKER（**別 generator family である**） |
 | A20 | **`RANDOM_DESIGN == "INDEPENDENT"` を理由に `split_seed` へ estimand offset を加える実装を混入** | T12f / T12g で検出。S_C では MC1 / MC4 でも BLOCKER（**F-01 の回帰防止**） |
 | A21 | config validator が `INDEPENDENT` × `S_C` を reject する実装を混入 | T12h で検出（合法な組み合わせを塞がない） |
+| A22 | `split_mask_hash` を `train_mask` や `(train,test)` 連結から計算する実装を混入 | T12k で検出（**canonical contract 違反**） |
+| A23 | `S_C` gate で test mask のみ一致・train mask 不一致の状態を PASS させる | T12m / MC1 で BLOCKER |
+| A24 | `diagnostics.csv` に `K_TRUE=3` の新規 measurement 行を追加 | T12o で BLOCKER（**anchor lineage の混入防止**） |
+| A25 | A/B の結果差を「Y variance の isolated causal contribution」として report に記述 | report template の解釈境界検査で BLOCKER（design §13） |
 
 **audit script は harness の selector を import せず、artifact のみから
 seed 規約・selector 算術・行数・key 集合・hash 一貫性を再計算する**

@@ -539,7 +539,7 @@ decision `C`（anchor 使用不可）は発生しない。**
 |---|---|---|---|---|
 | **1. A only** | *alternative considered — NOT SELECTED* | fixed `w` のみ実行 | 実装最小・anchor 無条件互換・新規 168 fits | 次元効果と Y 応答不確実性が分離されない。ゼミ指摘への回答としては限定的 |
 | **2. B only** | *alternative considered — NOT SELECTED* | variance-matched のみ実行 | Y 分散の K 依存を除去。ゼミ指摘に近い | Phase 7e が採用した generator family そのものの挙動は測れない。高次モーメント残差は残る |
-| **3. A + B（separate estimands）** | **SELECTED（Human Gate 2026-09-01, H1）** | 両方を別 estimand として事前登録。**A/B の hierarchy は H3-a（A primary + B pre-registered sensitivity）に確定済み（§16 H3）** | **A と B の差そのものが「Y 分散の K 依存」の寄与を示す**。どちらの estimand も結果前に freeze される | fit 数が倍（§11）。集計・report が 2 系統になる |
+| **3. A + B（separate estimands）** | **SELECTED（Human Gate 2026-09-01, H1）** | 両方を別 estimand として事前登録。**A/B の hierarchy は H3-a（A primary + B pre-registered sensitivity）に確定済み（§16 H3）** | **A/B contrast により、Y natural-parameter variance を `K=3` 基準へ match するための w-scaling rule に対して selected-K pattern がどの程度 sensitive かを記述できる**（§13 の解釈境界を参照）。どちらの estimand も結果前に freeze される | fit 数が倍（§11）。集計・report が 2 系統になる。**A/B 差は Y variance だけの isolated causal contribution を意味しない** |
 | **4. generator redesign** | *alternative considered — NOT SELECTED* | 新しい生成規約を設計（例: `d` を `K` とともに増やす等） | 原理的にはより清潔な比較が可能 | 本 Issue の scope 外。Phase 7e anchor を捨てることになる。設計・検証コストが大きい |
 
 > **INDEPENDENT REVIEW RECOMMENDATION（Codex）: R3 = `PRE_REGISTER_A_AND_B_AS_SEPARATE_ESTIMANDS`（Strategy 3）**
@@ -1010,6 +1010,14 @@ Option A では variance 一定の条件を課さない（分散が動くこと�
 - `margin` は統計的有意差ではない（Phase 7e と同じ）。
 - 3 replicates の百分率を一般性能として扱わない。
 - 異なる `K_TRUE` は異なる推定問題であり、水準間の「性能の優劣」を述べない。
+- **A/B contrast の解釈を限定する。** A/B 差から言えるのは
+  「Y natural-parameter variance を `K=3` 基準へ match するための **w-scaling rule** に対して
+  selected-K pattern がどの程度 sensitive か」までである。
+  **A/B の結果差を「Y variance だけの isolated causal contribution」と解釈しない。**
+  `w_K` を変えると `η^Y` の分布は分散だけでなく全体が変化し（§8.4）、
+  Option B は variance matching only だからである。
+  なお「A と B の generator 呼び出しで異なる scientific manipulation は `w` rule のみである」
+  という **mechanical statement** は正しく、これは書いてよい。
 - **A+B を実行する場合、`H3` で freeze した A/B の役割（H3-a の primary / sensitivity、
   または H3-b の co-equal）を結果に応じて入れ替えない。**
   favorable な option だけを本文採用することを result を見て決めない（§16 H3 Reporting freeze）。
