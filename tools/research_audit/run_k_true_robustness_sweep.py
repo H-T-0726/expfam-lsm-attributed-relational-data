@@ -28,7 +28,7 @@ import csv
 import json
 import math
 import sys
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -45,23 +45,40 @@ for _path in (str(RESEARCH_AUDIT), str(EXPERIMENTAL), str(EXPFAM_SRC)):
 
 # Phase 7e reuse.  Importing this module does not import em_runner.
 from run_heldout_k_selection_pilot import (  # noqa: E402
+    AuthorizedEMFitAdapter,
+    CanaryFitResult,
+    CanaryInvarianceReport,
+    CanaryPreflight,
+    FitCallBoundary,
     FitPayload,
     FrozenFitConfig,
     FrozenScoreConfig,
     HarnessStop,
+    PreparedTrainingData,
     ScoreOnlyTarget,
     SplitDiagnostics,
+    SplitPlan,
+    StartScore,
     TrainingYValues,
     _expected_test_pairs,
+    _make_test_fit_adapter,
     _readonly_copy,
     _reject_forbidden_fit_objects,
     _require,
+    _require_clean_smoke_fit,
+    _run_two_canary_falsification,
+    _store_smoke_fit,
+    _TestAuthorizedFitAdapter,
+    authorize_canary_preflight,
     build_fit_payload,
     frozen_score_config,
+    heldout_raw_eta_pairs,
     make_pair_split,
     make_score_only_target,
     make_training_y_values,
+    prepare_training_data,
     score_config_hash,
+    score_heldout_bernoulli,
     select_k_from_two_starts,
     stable_array_hash,
     stable_config_hash,
@@ -2031,6 +2048,921 @@ def run_leakage_self_check() -> dict[str, Any]:
     }
 
 
+# ===========================================================================
+# Phase 8b S2b — human-gated real canary + frozen 6-fit smoke (Issue #53)
+# ===========================================================================
+#
+# The production canary/smoke orchestration lives here, but it CANNOT run:
+# every real-EM entry point demands a committed ``SmokeExecutionAuthorization``
+# and no code path in this repository issues one.  ``current_smoke_execution_``
+# ``authorization()`` returns None by construction because the two human gates
+# are literals.  The zero-EM command paths never touch this section, so
+# ``em_runner`` stays unimported (it is imported only inside the Phase 7e
+# ``AuthorizedEMFitAdapter.fit``, which only an authorized run can reach).
+#
+# Phase 7e is reused, never modified: its sealed adapter, fit-call boundary,
+# training-only data preparation, two-canary falsification, clean-fit gate and
+# scorer are the same code the anchor ran under.
+
+
+SMOKE_ISSUE_NUMBER = 53
+SMOKE_PROTOCOL_VERSION = "phase8b-smoke-protocol-v1"
+SMOKE_AUTHORIZATION_VERSION = "phase8b-smoke-authorization-v1"
+
+# --- FROZEN SMOKE PROTOCOL (Issue #53, merged plan §7) ---------------------
+# Operational pipeline smoke on the PRIMARY estimand only.  Running A+B would
+# silently change the pre-registered budget from 6 fits to 12.  B is NOT
+# dropped: it remains the pre-registered sensitivity estimand for the S3 full
+# run (all 168 B rows).
+SMOKE_ESTIMAND = "A"
+SMOKE_ROLE = "primary"
+SMOKE_K_TRUE = 1
+SMOKE_REPLICATE = 1
+SMOKE_K_CANDIDATES = (2, 3, 4)
+SMOKE_STARTS = (1, 2)
+EXPECTED_SMOKE_FITS = 6
+
+# Dedicated smoke seed block: disjoint from Phase 7e and from the Phase 8 full
+# seed space, so the 8 authorized executions consume no full-run cell.
+SMOKE_DATA_SEED_BASE = 61000
+SMOKE_MODEL_SEED_BASE = 630000
+
+# --- FROZEN REAL CANARY ----------------------------------------------------
+CANARY_K_EST = 1
+CANARY_START = 1
+EXPECTED_CANARY_FITS = 2
+
+# Future human-authorized real-EM budget.  This branch executes 0.
+EXPECTED_REAL_EM_BUDGET = EXPECTED_CANARY_FITS + EXPECTED_SMOKE_FITS  # 8
+
+# --- FUTURE SMOKE ARTIFACT SCHEMA (definition only; nothing is written) ----
+SMOKE_ARTIFACT_COLUMNS = (
+    "run_code_sha",
+    "approved_main_sha",
+    "protocol_hash",
+    "estimand",
+    "role",
+    "K_TRUE",
+    "replicate",
+    "K",
+    "start",
+    "data_seed",
+    "split_seed",
+    "model_seed",
+    "pre_fit_test_hash",
+    "pre_fit_train_hash",
+    "post_fit_test_hash",
+    "post_fit_train_hash",
+    "anchor_test_hash",
+    "anchor_train_hash",
+    "boundary_version",
+    "fit_status",
+    "internal_retry",
+    "warning_count",
+    "q_failure",
+    "nan_occurred",
+    "finite_state",
+    "heldout_mean_log_score",
+    "score_config_hash",
+    "canary_provenance",
+    "real_canary_fits_executed",
+    "real_smoke_fits_executed",
+)
+
+
+def smoke_data_seed(k_true: int, replicate: int) -> int:
+    """Dedicated smoke data seed.  Never reuses the full-run data seed block."""
+
+    return SMOKE_DATA_SEED_BASE + 100 * int(k_true) + int(replicate)
+
+
+def smoke_model_seed(k_true: int, replicate: int, k: int, start: int) -> int:
+    """Dedicated smoke model seed.  Never reuses the full-run model seed block."""
+
+    return (
+        SMOKE_MODEL_SEED_BASE
+        + 10000 * int(k_true)
+        + 1000 * int(replicate)
+        + 10 * int(k)
+        + int(start)
+    )
+
+
+def smoke_split_seed(k_true: int, replicate: int) -> int:
+    """H4-governed ONLY: the smoke split seed is the ordinary S_C split seed.
+
+    No smoke / estimand / data / model offset is applied here.  Applying one
+    would break the S_C anchor alignment, which is the whole point of the mask
+    design, so this delegates to the single frozen split-seed rule.
+    """
+
+    return expected_split_seed(k_true, replicate)
+
+
+SMOKE_SPLIT_SEED = 42001  # == smoke_split_seed(1, 1); asserted by a static test
+CANARY_MODEL_SEED = 641011  # == smoke_model_seed(1, 1, 1, 1)
+
+
+def phase7e_seed_space() -> dict[str, frozenset[int]]:
+    """The Phase 7e data/model seed space, rebuilt from its frozen rules."""
+
+    data = {PHASE7E_DATA_SEED_BASE + replicate for replicate in REPLICATES}
+    model = {
+        PHASE7E_MODEL_SEED_BASE + 1000 * replicate + 10 * k + start
+        for replicate in REPLICATES
+        for k in K_CANDIDATES
+        for start in START_LABELS
+    }
+    return {"data": frozenset(data), "model": frozenset(model)}
+
+
+def phase8_full_seed_space() -> dict[str, frozenset[int]]:
+    """The Phase 8b full-run data/model seed space over both estimands."""
+
+    data: set[int] = set()
+    model: set[int] = set()
+    for estimand in ("A", "B"):
+        for k_true in NEW_K_TRUE:
+            for replicate in REPLICATES:
+                data.add(expected_data_seed(k_true, replicate, estimand))
+                for k in K_CANDIDATES:
+                    for start in START_LABELS:
+                        model.add(expected_model_seed(k_true, replicate, k, start, estimand))
+    return {"data": frozenset(data), "model": frozenset(model)}
+
+
+def smoke_seed_space() -> dict[str, frozenset[int]]:
+    """Every data/model seed the 2 canary + 6 smoke executions would consume."""
+
+    data = {smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE)}
+    model = {
+        smoke_model_seed(SMOKE_K_TRUE, SMOKE_REPLICATE, k, start)
+        for k in SMOKE_K_CANDIDATES
+        for start in SMOKE_STARTS
+    }
+    model.add(CANARY_MODEL_SEED)
+    return {"data": frozenset(data), "model": frozenset(model)}
+
+
+def check_smoke_seed_collisions() -> dict[str, Any]:
+    """The smoke block must not intersect Phase 7e or Phase 8 full seeds.
+
+    The split seed is deliberately excluded: under H4=S_C the smoke split seed
+    IS the Phase 7e replicate-1 split seed, and that reuse is the design.
+    """
+
+    smoke = smoke_seed_space()
+    report: dict[str, Any] = {"split_seed_excluded": True}
+    for name, other in (("phase7e", phase7e_seed_space()),
+                        ("phase8_full", phase8_full_seed_space())):
+        for kind in ("data", "model"):
+            overlap = sorted(smoke[kind] & other[kind])
+            report[f"{name}_{kind}_overlap"] = overlap
+            _require(not overlap,
+                     f"smoke {kind} seeds collide with {name}: {overlap}")
+    report["smoke_data_seeds"] = sorted(smoke["data"])
+    report["smoke_model_seeds"] = sorted(smoke["model"])
+    return report
+
+
+# ---------------------------------------------------------------------------
+# Frozen smoke protocol hash
+# ---------------------------------------------------------------------------
+
+
+def smoke_protocol_config() -> dict[str, Any]:
+    """Everything the authorization is bound to.  Any change changes the hash."""
+
+    return {
+        "phase": PHASE,
+        "issue": SMOKE_ISSUE_NUMBER,
+        "protocol_version": SMOKE_PROTOCOL_VERSION,
+        "estimand": SMOKE_ESTIMAND,
+        "role": SMOKE_ROLE,
+        "k_true": SMOKE_K_TRUE,
+        "replicate": SMOKE_REPLICATE,
+        "k_candidates": list(SMOKE_K_CANDIDATES),
+        "starts": list(SMOKE_STARTS),
+        "data_seed_base": SMOKE_DATA_SEED_BASE,
+        "model_seed_base": SMOKE_MODEL_SEED_BASE,
+        "split_seed": SMOKE_SPLIT_SEED,
+        "canary_k_est": CANARY_K_EST,
+        "canary_start": CANARY_START,
+        "canary_model_seed": CANARY_MODEL_SEED,
+        "expected_canary_fits": EXPECTED_CANARY_FITS,
+        "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+        "family_x": FAMILY_X,
+        "family_y": FAMILY_Y,
+        "n_nodes": N_NODES,
+        "n_features": N_FEATURES,
+        "L": L_SAMPLES,
+        "num_iter": NUM_ITER,
+        "test_ratio": TEST_RATIO,
+        "numerics_mode": NUMERICS_MODE,
+        "var_f": VAR_F,
+        "uniq": UNIQ,
+        "w0_true": W0_TRUE,
+        "w_true": resolve_w_true(SMOKE_ESTIMAND, SMOKE_K_TRUE),
+        "mask_design": MASK_DESIGN,
+        "hierarchy": HIERARCHY,
+        "random_design": RANDOM_DESIGN,
+        "score_config_hash": score_config_hash(frozen_score_config()),
+        "frozen_config_hash": frozen_config_hash(),
+        "boundary_version": LEAKAGE_BOUNDARY_VERSION,
+    }
+
+
+def smoke_protocol_hash() -> str:
+    return stable_config_hash(smoke_protocol_config())
+
+
+# ---------------------------------------------------------------------------
+# Smoke manifest: exactly six deterministic rows
+# ---------------------------------------------------------------------------
+
+
+def build_smoke_manifest(anchors: Mapping[int, AnchorMask] | None = None,
+                         split: "SplitRecord | None" = None) -> list[ManifestRow]:
+    """Build the frozen six smoke rows from the smoke seed rules directly.
+
+    This is a smoke-specific builder on purpose: it never takes a full-run
+    manifest and patches seeds afterwards, because that pattern makes a
+    seed-block mistake invisible.
+    """
+
+    anchors = read_phase7e_anchor_masks() if anchors is None else anchors
+    split = build_split_record(SMOKE_K_TRUE, SMOKE_REPLICATE) if split is None else split
+    anchor = anchors[SMOKE_REPLICATE]
+    _require(split.split_seed == SMOKE_SPLIT_SEED, "smoke split seed changed")
+
+    rows: list[ManifestRow] = []
+    for k in SMOKE_K_CANDIDATES:
+        for start in SMOKE_STARTS:
+            rows.append(ManifestRow(
+                fit_index=len(rows) + 1,
+                estimand=SMOKE_ESTIMAND,
+                role=SMOKE_ROLE,
+                k_true=SMOKE_K_TRUE,
+                replicate=SMOKE_REPLICATE,
+                k=int(k),
+                start=int(start),
+                data_seed=smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+                split_seed=smoke_split_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+                split_mask_hash=split.split_mask_hash,
+                train_mask_hash=split.train_mask_hash,
+                mask_design=MASK_DESIGN,
+                mask_group_id=mask_group_id(SMOKE_K_TRUE, SMOKE_REPLICATE),
+                anchor_mask_hash=anchor.test_mask_hash,
+                anchor_train_mask_hash=anchor.train_mask_hash,
+                intentional_seed_reuse=intentional_seed_reuse(),
+                model_seed=smoke_model_seed(SMOKE_K_TRUE, SMOKE_REPLICATE, k, start),
+                w0_true=W0_TRUE,
+                w_true=resolve_w_true(SMOKE_ESTIMAND, SMOKE_K_TRUE),
+            ))
+    validate_smoke_manifest(rows)
+    return rows
+
+
+def validate_smoke_manifest(rows: Sequence[ManifestRow]) -> None:
+    """Exactly six rows in K -> start order, all on the frozen smoke cell."""
+
+    _require(len(rows) == EXPECTED_SMOKE_FITS,
+             f"smoke manifest must contain exactly {EXPECTED_SMOKE_FITS} rows")
+    expected_keys = tuple((k, start) for k in SMOKE_K_CANDIDATES for start in SMOKE_STARTS)
+    _require(tuple((row.k, row.start) for row in rows) == expected_keys,
+             "smoke manifest key order changed")
+    for index, row in enumerate(rows, start=1):
+        _require(row.fit_index == index, "smoke manifest fit_index order changed")
+        _require(row.estimand == SMOKE_ESTIMAND, "smoke estimand is not the frozen primary estimand")
+        _require(row.role == SMOKE_ROLE, "smoke role changed")
+        _require(row.role == resolve_role(row.estimand), "smoke role is not the H3-a role")
+        _require(row.k_true == SMOKE_K_TRUE, "smoke K_TRUE changed")
+        _require(row.replicate == SMOKE_REPLICATE, "smoke replicate changed")
+        _require(row.data_seed == smoke_data_seed(row.k_true, row.replicate),
+                 "smoke data seed is not the dedicated smoke seed")
+        _require(row.split_seed == SMOKE_SPLIT_SEED, "smoke split seed changed")
+        _require(row.model_seed == smoke_model_seed(row.k_true, row.replicate, row.k, row.start),
+                 "smoke model seed is not the dedicated smoke seed")
+        _require(row.w0_true == W0_TRUE, "smoke w0_true changed")
+        _require(row.w_true == resolve_w_true(row.estimand, row.k_true), "smoke w_true changed")
+        _require(row.mask_design == MASK_DESIGN, "smoke mask design changed")
+        _require(row.intentional_seed_reuse is intentional_seed_reuse(),
+                 "smoke intentional seed reuse flag changed")
+        # S_C: the smoke masks must be the Phase 7e replicate-1 anchor masks.
+        _require(row.split_mask_hash == row.anchor_mask_hash,
+                 "smoke test mask does not match the Phase 7e anchor")
+        _require(row.train_mask_hash == row.anchor_train_mask_hash,
+                 "smoke train mask does not match the Phase 7e anchor")
+
+
+# ---------------------------------------------------------------------------
+# Execution authorization contract
+# ---------------------------------------------------------------------------
+#
+# Two distinct authorities.  The production one is never handed out by any
+# function in this repository; the test one is issued by a private factory that
+# no CLI or production entry point references.
+
+_SMOKE_EXECUTION_AUTHORITY = object()
+_SMOKE_TEST_AUTHORITY = object()
+
+SMOKE_SHA_LENGTH = 40
+
+
+@dataclass(frozen=True, slots=True)
+class SmokeExecutionAuthorization:
+    """A committed record binding one reviewed main SHA to one frozen protocol.
+
+    There is deliberately no public constructor path: ``_authority`` must be a
+    module-private sentinel, so a CLI flag, an environment variable or a config
+    file cannot fabricate one.
+    """
+
+    issue_number: int
+    approved_main_sha: str
+    protocol_hash: str
+    estimand: str
+    k_true: int
+    replicate: int
+    smoke_fit_count: int
+    canary_fit_count: int
+    data_seed_base: int
+    model_seed_base: int
+    split_seed: int
+    independent_review_pass: bool
+    human_smoke_approval: bool
+    authorization_version: str
+    _authority: Any = field(repr=False, compare=False, default=None)
+
+    def is_test_only(self) -> bool:
+        return self._authority is _SMOKE_TEST_AUTHORITY
+
+
+def current_expected_smoke_main_sha() -> str | None:
+    """The single trusted source of the reviewed main SHA.  None in this branch.
+
+    None is NOT a placeholder: it is the fail-closed state "no human has yet
+    authorized a reviewed main SHA for real smoke execution".  The value is a
+    literal on purpose -- deriving it from the environment, the CLI, a config
+    file, ``git rev-parse HEAD`` or the authorization record itself would let
+    the running code declare itself approved.
+
+    A later execution Issue changes this to the S2b merge commit SHA, and that
+    change is itself the reviewed, human-approved artifact.
+    """
+
+    return None
+
+
+# Test-only trusted SHA.  It is never the value production compares against:
+# production reads ``current_expected_smoke_main_sha()`` and nothing else.
+_TEST_EXPECTED_MAIN_SHA = "a" * SMOKE_SHA_LENGTH
+
+
+def _require_full_commit_sha(value: Any, label: str) -> None:
+    _require(type(value) is str and len(value) == SMOKE_SHA_LENGTH
+             and all(character in "0123456789abcdef" for character in value),
+             f"{label} is not a full lowercase commit SHA")
+
+
+def _validate_smoke_execution_authorization(authorization: Any, *,
+                                            expected_main_sha: Any,
+                                            authority: Any) -> None:
+    """Internal validator.  ``expected_main_sha`` comes from a trusted source.
+
+    The SHA identity gate runs before every protocol/count/human check so an
+    unrelated field error can never mask a wrong-SHA authorization.
+    """
+
+    _require(type(authorization) is SmokeExecutionAuthorization,
+             "real execution requires a SmokeExecutionAuthorization")
+    _require(authorization._authority is authority,
+             "smoke execution authorization provenance is unauthorized")
+
+    # --- trusted reviewed-main SHA identity binding (Issue #53 HIGH-01) ----
+    _require(expected_main_sha is not None,
+             "no reviewed main SHA has been authorized for real smoke execution")
+    _require_full_commit_sha(expected_main_sha, "trusted reviewed main SHA")
+    _require_full_commit_sha(authorization.approved_main_sha,
+                             "smoke authorization approved_main_sha")
+    _require(authorization.approved_main_sha == expected_main_sha,
+             "approved main SHA does not match the reviewed execution SHA")
+
+    checks = (
+        ("issue_number", authorization.issue_number, SMOKE_ISSUE_NUMBER),
+        ("protocol_hash", authorization.protocol_hash, smoke_protocol_hash()),
+        ("estimand", authorization.estimand, SMOKE_ESTIMAND),
+        ("k_true", authorization.k_true, SMOKE_K_TRUE),
+        ("replicate", authorization.replicate, SMOKE_REPLICATE),
+        ("smoke_fit_count", authorization.smoke_fit_count, EXPECTED_SMOKE_FITS),
+        ("canary_fit_count", authorization.canary_fit_count, EXPECTED_CANARY_FITS),
+        ("data_seed_base", authorization.data_seed_base, SMOKE_DATA_SEED_BASE),
+        ("model_seed_base", authorization.model_seed_base, SMOKE_MODEL_SEED_BASE),
+        ("split_seed", authorization.split_seed, SMOKE_SPLIT_SEED),
+        ("authorization_version", authorization.authorization_version,
+         SMOKE_AUTHORIZATION_VERSION),
+    )
+    for name, actual, expected in checks:
+        _require(actual == expected,
+                 f"smoke authorization {name} does not match the frozen protocol: "
+                 f"{actual!r} != {expected!r}")
+    _require(authorization.independent_review_pass is True,
+             "smoke authorization is missing INDEPENDENT_REVIEW_PASS")
+    _require(authorization.human_smoke_approval is True,
+             "smoke authorization is missing HUMAN_SMOKE_APPROVAL")
+
+
+def validate_smoke_execution_authorization(authorization: Any, *, test_only: bool) -> None:
+    """Bind an authorization to the trusted reviewed-main SHA and the protocol.
+
+    The expected SHA is never a parameter of any public entry point: it is
+    fetched here from the trusted source, so a caller cannot supply the value
+    it is going to be checked against.
+    """
+
+    if test_only:
+        _validate_smoke_execution_authorization(
+            authorization,
+            expected_main_sha=_TEST_EXPECTED_MAIN_SHA,
+            authority=_SMOKE_TEST_AUTHORITY,
+        )
+        return
+    _validate_smoke_execution_authorization(
+        authorization,
+        expected_main_sha=current_expected_smoke_main_sha(),
+        authority=_SMOKE_EXECUTION_AUTHORITY,
+    )
+
+
+def current_smoke_execution_authorization() -> SmokeExecutionAuthorization | None:
+    """Always None in this branch.
+
+    S2b implements the schema and the validator, not the record.  The approved
+    main SHA cannot even exist yet: it is the SHA of main AFTER this branch is
+    reviewed and merged, so hard-coding this branch's own SHA here would be a
+    self-signed approval.  A later execution Issue commits the record together
+    with the two human gates.
+    """
+
+    return None
+
+
+def _make_test_smoke_authorization(
+    *,
+    approved_main_sha: str = _TEST_EXPECTED_MAIN_SHA,
+    **overrides: Any,
+) -> SmokeExecutionAuthorization:
+    """Static-test-only factory.  No CLI or production path references it."""
+
+    fields: dict[str, Any] = {
+        "issue_number": SMOKE_ISSUE_NUMBER,
+        "approved_main_sha": approved_main_sha,
+        "protocol_hash": smoke_protocol_hash(),
+        "estimand": SMOKE_ESTIMAND,
+        "k_true": SMOKE_K_TRUE,
+        "replicate": SMOKE_REPLICATE,
+        "smoke_fit_count": EXPECTED_SMOKE_FITS,
+        "canary_fit_count": EXPECTED_CANARY_FITS,
+        "data_seed_base": SMOKE_DATA_SEED_BASE,
+        "model_seed_base": SMOKE_MODEL_SEED_BASE,
+        "split_seed": SMOKE_SPLIT_SEED,
+        "independent_review_pass": True,
+        "human_smoke_approval": True,
+        "authorization_version": SMOKE_AUTHORIZATION_VERSION,
+    }
+    fields.update(overrides)
+    return SmokeExecutionAuthorization(_authority=_SMOKE_TEST_AUTHORITY, **fields)
+
+
+# ---------------------------------------------------------------------------
+# Shared preflight for every real execution
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class SmokePreparedCell:
+    """The frozen smoke cell, prepared train-only, before any fit."""
+
+    split: SplitRecord
+    anchor: AnchorMask
+    preflight: CanaryPreflight
+    prepared: PreparedTrainingData
+    score_Y: np.ndarray
+    manifest: tuple[ManifestRow, ...]
+    protocol_hash: str
+
+
+def _require_smoke_anchor_masks(split: SplitRecord, anchor: AnchorMask) -> None:
+    """S_C: BOTH the test and the train mask must equal the Phase 7e anchor."""
+
+    _require(split.split_mask_hash == anchor.test_mask_hash,
+             "smoke test mask hash differs from the Phase 7e anchor")
+    _require(split.train_mask_hash == anchor.train_mask_hash,
+             "smoke train mask hash differs from the Phase 7e anchor")
+
+
+def _run_zero_em_preflight_gates() -> dict[str, Any]:
+    """Every zero-EM gate must pass before a single real fit is prepared."""
+
+    validation = run_validate_only()
+    _require(validation["em_fits_executed"] == 0, "validate-only reported a nonzero fit count")
+    config = run_config_gate()
+    _require(bool(config["all_passed"]), "config gate did not pass")
+    anchors = read_phase7e_anchor_masks()
+    mask_gates = run_mask_gate(anchors=anchors)
+    _require(all(gate.passed for gate in mask_gates), "anchor mask gate did not pass")
+    leakage = run_leakage_self_check()
+    _require(bool(leakage["all_passed"]), "leakage self-check did not pass")
+    _require(leakage["real_em_fits_executed"] == 0, "leakage self-check executed a real fit")
+    return {
+        "config_gate_count": config["gate_count"],
+        "leakage_cases": len(leakage["cases"]),
+        "anchor_mask_gates": len(mask_gates),
+    }
+
+
+def prepare_smoke_cell(authorization: Any, *, test_only: bool) -> SmokePreparedCell:
+    """Authorization -> zero-EM gates -> anchor masks -> train-only data.
+
+    The raw ``Y`` is returned for the deferred score phase only; it never
+    enters the fit API, which is owned by the Phase 7e ``FitCallBoundary``.
+    """
+
+    validate_smoke_execution_authorization(authorization, test_only=test_only)
+    _require(smoke_protocol_hash() == authorization.protocol_hash,
+             "smoke protocol hash changed after authorization")
+    check_smoke_seed_collisions()
+    _run_zero_em_preflight_gates()
+
+    anchors = read_phase7e_anchor_masks()
+    anchor = anchors[SMOKE_REPLICATE]
+    split = build_split_record(SMOKE_K_TRUE, SMOKE_REPLICATE)
+    _require_smoke_anchor_masks(split, anchor)
+
+    manifest = build_smoke_manifest(anchors=anchors, split=split)
+    data_seed = smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE)
+    data = _generate_smoke_cell(data_seed)
+    X = _readonly_copy(data["X"], np.float64)
+    Y = _readonly_copy(data["Y"], np.float64)
+
+    split_plan = SplitPlan(
+        replicate=SMOKE_REPLICATE,
+        split_seed=split.split_seed,
+        expected_test_pairs=_expected_test_pairs(N_NODES, TEST_RATIO),
+        train_mask=split.train_mask,
+        test_mask=split.test_mask,
+        diagnostics=split.diagnostics,
+    )
+    preflight = authorize_canary_preflight(split_plan)
+    prepared = prepare_training_data(
+        X, Y,
+        preflight=preflight,
+        train_mask=split.train_mask,
+        test_mask=split.test_mask,
+    )
+    _require(prepared.test_mask_hash == anchor.test_mask_hash,
+             "prepared test mask hash differs from the Phase 7e anchor")
+    _require(prepared.train_mask_hash == anchor.train_mask_hash,
+             "prepared train mask hash differs from the Phase 7e anchor")
+    return SmokePreparedCell(
+        split=split,
+        anchor=anchor,
+        preflight=preflight,
+        prepared=prepared,
+        score_Y=Y,
+        manifest=tuple(manifest),
+        protocol_hash=smoke_protocol_hash(),
+    )
+
+
+def _generate_smoke_cell(data_seed: int) -> dict[str, Any]:
+    """Generator only.  This never touches EM."""
+
+    from data_generator_expfam import generate_dual_data  # noqa: PLC0415
+
+    _require(data_seed == smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+             "smoke data seed is not the dedicated smoke seed")
+    return generate_dual_data(
+        n=N_NODES,
+        d=N_FEATURES,
+        k=SMOKE_K_TRUE,
+        seed=int(data_seed),
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        var_f=VAR_F,
+        uniq=UNIQ,
+        w0_true=W0_TRUE,
+        w_true=resolve_w_true(SMOKE_ESTIMAND, SMOKE_K_TRUE),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Real canary: exactly two fits
+# ---------------------------------------------------------------------------
+
+
+def smoke_canary_config() -> FrozenFitConfig:
+    """K_est=1, start=1, model seed 641011.  Both canary fits start identically."""
+
+    _require(CANARY_MODEL_SEED == smoke_model_seed(SMOKE_K_TRUE, SMOKE_REPLICATE,
+                                                   CANARY_K_EST, CANARY_START),
+             "canary model seed is not the dedicated smoke seed")
+    return FrozenFitConfig(
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        k_est=CANARY_K_EST,
+        L=L_SAMPLES,
+        num_iter=NUM_ITER,
+        seed=CANARY_MODEL_SEED,
+        numerics_mode=NUMERICS_MODE,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bCanaryReport:
+    protocol_hash: str
+    approved_main_sha: str
+    k_est: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    anchor_test_hash: str
+    anchor_train_hash: str
+    invariance: CanaryInvarianceReport
+    real_canary_fits_executed: int
+    test_only: bool
+
+
+def _run_real_canary(authorization: Any, *, adapter: Any, test_only: bool) -> Phase8bCanaryReport:
+    """Reuse the Phase 7e two-canary falsification on the smoke cell."""
+
+    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    config = smoke_canary_config()
+    invariance = _run_two_canary_falsification(
+        preflight=cell.preflight,
+        prepared=cell.prepared,
+        score_Y=cell.score_Y,
+        config=config,
+        adapter=adapter,
+        test_only=test_only,
+    )
+    return Phase8bCanaryReport(
+        protocol_hash=cell.protocol_hash,
+        approved_main_sha=authorization.approved_main_sha,
+        k_est=CANARY_K_EST,
+        start=CANARY_START,
+        data_seed=smoke_data_seed(SMOKE_K_TRUE, SMOKE_REPLICATE),
+        split_seed=SMOKE_SPLIT_SEED,
+        model_seed=CANARY_MODEL_SEED,
+        anchor_test_hash=cell.anchor.test_mask_hash,
+        anchor_train_hash=cell.anchor.train_mask_hash,
+        invariance=invariance,
+        real_canary_fits_executed=0 if test_only else EXPECTED_CANARY_FITS,
+        test_only=test_only,
+    )
+
+
+def run_real_canary(authorization: Any) -> Phase8bCanaryReport:
+    """Production canary entry point: only the sealed Phase 7e adapter is used."""
+
+    validate_smoke_execution_authorization(authorization, test_only=False)
+    adapter = AuthorizedEMFitAdapter()
+    return _run_real_canary(authorization, adapter=adapter, test_only=False)
+
+
+def _run_real_canary_test_only(authorization: Any, *, adapter: Any) -> Phase8bCanaryReport:
+    """Static-test-only entry point; the production CLI cannot select it."""
+
+    _require(type(adapter) is _TestAuthorizedFitAdapter, "test canary requires the test adapter")
+    return _run_real_canary(authorization, adapter=adapter, test_only=True)
+
+
+# ---------------------------------------------------------------------------
+# Real smoke: exactly six fits, then a deferred score phase
+# ---------------------------------------------------------------------------
+
+
+def smoke_fit_config(row: ManifestRow) -> FrozenFitConfig:
+    """Bind one frozen smoke manifest row to its fit configuration."""
+
+    _require(type(row) is ManifestRow, "smoke fit config requires a ManifestRow")
+    _require(row.estimand == SMOKE_ESTIMAND and row.role == SMOKE_ROLE, "smoke estimand/role changed")
+    _require(row.k_true == SMOKE_K_TRUE and row.replicate == SMOKE_REPLICATE, "smoke cell changed")
+    _require(row.k in SMOKE_K_CANDIDATES, "smoke candidate K is unexpected")
+    _require(row.start in SMOKE_STARTS, "smoke start is unexpected")
+    _require(row.data_seed == smoke_data_seed(row.k_true, row.replicate), "smoke data seed changed")
+    _require(row.split_seed == SMOKE_SPLIT_SEED, "smoke split seed changed")
+    _require(row.model_seed == smoke_model_seed(row.k_true, row.replicate, row.k, row.start),
+             "smoke model seed changed")
+    return FrozenFitConfig(
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        k_est=row.k,
+        L=L_SAMPLES,
+        num_iter=NUM_ITER,
+        seed=row.model_seed,
+        numerics_mode=NUMERICS_MODE,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bSmokeRow:
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    fit_status: str
+    heldout_mean_log_score: float
+    internal_retry: int
+    warning_count: int
+    q_failure: bool
+    nan_occurred: bool
+    finite_state: bool
+    pre_fit_test_hash: str
+    pre_fit_train_hash: str
+    post_fit_test_hash: str
+    post_fit_train_hash: str
+    score_config_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bSmokeReport:
+    protocol_hash: str
+    approved_main_sha: str
+    rows: tuple[Phase8bSmokeRow, ...]
+    mean_scores: tuple[tuple[int, float], ...]
+    # RECORDED ONLY.  K_TRUE=1 is not in the candidate set {2,3,4}, so
+    # ``selected_k == K_TRUE`` is structurally impossible and this value is
+    # never a pass/fail condition, a gate, or scientific evidence.
+    selected_k: int
+    tie_candidates: tuple[int, ...]
+    anchor_test_hash: str
+    anchor_train_hash: str
+    score_config_hash: str
+    real_smoke_fits_executed: int
+    test_only: bool
+
+
+def _run_smoke_fit_phase_8b(cell: SmokePreparedCell, *, adapter: Any,
+                            test_only: bool) -> tuple[Any, ...]:
+    """Phase A: all six fits complete before any ScoreOnlyTarget exists."""
+
+    manifest = list(cell.manifest)
+    validate_smoke_manifest(manifest)
+    frozen_score_hash = score_config_hash(frozen_score_config())
+    stored: list[Any] = []
+    fit_count = 0
+    for row in manifest:
+        config = smoke_fit_config(row)
+        if test_only:
+            _require(type(adapter) is _TestAuthorizedFitAdapter, "test smoke requires the test adapter")
+            boundary = FitCallBoundary._from_preflight_test_only(
+                cell.prepared, cell.preflight, config, adapter)
+        else:
+            _require(type(adapter) is AuthorizedEMFitAdapter,
+                     "production smoke requires the sealed Phase 7e EM adapter")
+            boundary = FitCallBoundary.from_preflight(
+                cell.prepared, cell.preflight, config, adapter)
+        fit_count += 1
+        result = boundary.call(0)
+        label = f"phase8b smoke K={row.k} start={row.start}"
+        _require_clean_smoke_fit(result, label)
+        # Post-fit: the masks the boundary owns must still be the anchor masks.
+        _require(boundary.test_mask_hash == cell.anchor.test_mask_hash,
+                 f"{label}: post-fit test mask hash differs from the Phase 7e anchor")
+        _require(boundary.train_mask_hash == cell.anchor.train_mask_hash,
+                 f"{label}: post-fit train mask hash differs from the Phase 7e anchor")
+        stored.append(_store_smoke_fit(row, result, config, cell.prepared, frozen_score_hash))
+    _require(fit_count == EXPECTED_SMOKE_FITS,
+             f"smoke did not execute exactly {EXPECTED_SMOKE_FITS} fits")
+    _require(len(stored) == EXPECTED_SMOKE_FITS, "smoke did not store exactly six clean fits")
+    _require(tuple((row.k, row.start, row.model_seed) for row in stored)
+             == tuple((row.k, row.start, row.model_seed) for row in manifest),
+             "stored smoke fit order changed")
+    return tuple(stored)
+
+
+def _run_real_smoke(authorization: Any, *, adapter: Any, test_only: bool) -> Phase8bSmokeReport:
+    """Six clean fits, then -- and only then -- the deferred score phase."""
+
+    cell = prepare_smoke_cell(authorization, test_only=test_only)
+    stored_fits = _run_smoke_fit_phase_8b(cell, adapter=adapter, test_only=test_only)
+
+    # Phase B: the outcome-bearing target is materialized exactly once, after
+    # every fit and every blocking gate has passed.
+    target = make_score_only_target(cell.score_Y, cell.prepared.test_mask)
+    _require(target.test_mask_hash == cell.prepared.test_mask_hash,
+             "score target mask hash mismatch")
+    frozen_score_hash = score_config_hash(frozen_score_config())
+
+    rows: list[Phase8bSmokeRow] = []
+    for stored in stored_fits:
+        eta_pairs = heldout_raw_eta_pairs(stored.Z, stored.w0, stored.w, cell.prepared.test_mask)
+        score = score_heldout_bernoulli(target, eta_pairs)
+        _require(bool(np.isfinite(score)), "smoke held-out score is nonfinite")
+        rows.append(Phase8bSmokeRow(
+            k=stored.k,
+            start=stored.start,
+            data_seed=stored.data_seed,
+            split_seed=stored.split_seed,
+            model_seed=stored.model_seed,
+            fit_status="clean",
+            heldout_mean_log_score=float(score),
+            internal_retry=stored.internal_retry,
+            warning_count=len(stored.warnings),
+            q_failure=stored.q_failure,
+            nan_occurred=stored.nan_occurred,
+            finite_state=True,
+            pre_fit_test_hash=cell.split.split_mask_hash,
+            pre_fit_train_hash=cell.split.train_mask_hash,
+            post_fit_test_hash=stored.test_mask_hash,
+            post_fit_train_hash=stored.train_mask_hash,
+            score_config_hash=stored.score_config_hash,
+        ))
+    _require(len(rows) == EXPECTED_SMOKE_FITS, "smoke did not score exactly six stored fits")
+
+    start_scores = [StartScore(row.k, row.start, np.float64(row.heldout_mean_log_score))
+                    for row in rows]
+    selection = select_k_from_two_starts(start_scores, SMOKE_K_CANDIDATES, SMOKE_STARTS)
+    means: list[tuple[int, float]] = []
+    for k in SMOKE_K_CANDIDATES:
+        by_start = {row.start: row.heldout_mean_log_score for row in rows if row.k == k}
+        _require(set(by_start) == set(SMOKE_STARTS), "smoke aggregation start set changed")
+        expected_mean = np.mean(np.asarray([by_start[1], by_start[2]], dtype=np.float64),
+                                dtype=np.float64)
+        _require(np.float64(selection.mean_scores[k]) == expected_mean,
+                 "smoke aggregation is not the unweighted two-start mean")
+        means.append((int(k), float(expected_mean)))
+
+    # selected_k is recorded, never gated on.  K_TRUE=1 is not a candidate.
+    return Phase8bSmokeReport(
+        protocol_hash=cell.protocol_hash,
+        approved_main_sha=authorization.approved_main_sha,
+        rows=tuple(rows),
+        mean_scores=tuple(means),
+        selected_k=int(selection.selected_k),
+        tie_candidates=tuple(int(k) for k in selection.tie_candidates),
+        anchor_test_hash=cell.anchor.test_mask_hash,
+        anchor_train_hash=cell.anchor.train_mask_hash,
+        score_config_hash=frozen_score_hash,
+        real_smoke_fits_executed=0 if test_only else EXPECTED_SMOKE_FITS,
+        test_only=test_only,
+    )
+
+
+def run_real_smoke(authorization: Any) -> Phase8bSmokeReport:
+    """Production smoke entry point: only the sealed Phase 7e adapter is used."""
+
+    validate_smoke_execution_authorization(authorization, test_only=False)
+    adapter = AuthorizedEMFitAdapter()
+    return _run_real_smoke(authorization, adapter=adapter, test_only=False)
+
+
+def _run_real_smoke_test_only(authorization: Any, *, adapter: Any) -> Phase8bSmokeReport:
+    """Static-test-only entry point; the production CLI cannot select it."""
+
+    _require(type(adapter) is _TestAuthorizedFitAdapter, "test smoke requires the test adapter")
+    return _run_real_smoke(authorization, adapter=adapter, test_only=True)
+
+
+def build_smoke_artifact_rows(canary: Phase8bCanaryReport,
+                              smoke: Phase8bSmokeReport,
+                              run_code_sha: str) -> list[tuple[Any, ...]]:
+    """Future artifact rows.  S2b writes nothing; this only fixes the schema."""
+
+    _require(type(canary) is Phase8bCanaryReport, "artifact rows require a canary report")
+    _require(type(smoke) is Phase8bSmokeReport, "artifact rows require a smoke report")
+    _require(canary.protocol_hash == smoke.protocol_hash, "canary/smoke protocol hash differs")
+    canary_provenance = stable_config_hash({
+        "k_est": canary.k_est,
+        "start": canary.start,
+        "model_seed": canary.model_seed,
+        "config_hash": canary.invariance.config_hash,
+        "payload_a_hash": canary.invariance.fit_payload_a_hash,
+        "payload_b_hash": canary.invariance.fit_payload_b_hash,
+    })
+    rows: list[tuple[Any, ...]] = []
+    for row in smoke.rows:
+        rows.append((
+            run_code_sha, smoke.approved_main_sha, smoke.protocol_hash,
+            SMOKE_ESTIMAND, SMOKE_ROLE, SMOKE_K_TRUE, SMOKE_REPLICATE,
+            row.k, row.start, row.data_seed, row.split_seed, row.model_seed,
+            row.pre_fit_test_hash, row.pre_fit_train_hash,
+            row.post_fit_test_hash, row.post_fit_train_hash,
+            smoke.anchor_test_hash, smoke.anchor_train_hash,
+            LEAKAGE_BOUNDARY_VERSION, row.fit_status,
+            row.internal_retry, row.warning_count, row.q_failure, row.nan_occurred,
+            row.finite_state, row.heldout_mean_log_score, row.score_config_hash,
+            canary_provenance,
+            canary.real_canary_fits_executed, smoke.real_smoke_fits_executed,
+        ))
+    _require(all(len(row) == len(SMOKE_ARTIFACT_COLUMNS) for row in rows),
+             "smoke artifact row width does not match the schema")
+    return rows
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Phase 8b K_TRUE robustness harness (Issue #49)")
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -2052,7 +2984,18 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _require_em_authorization(args: argparse.Namespace, command: str) -> None:
-    """Every EM-bearing command needs an explicit multi-gate authorization."""
+    """Every EM-bearing command needs a committed execution authorization.
+
+    ``--allow-em`` is a speed bump, not proof of anything.  The real gate is
+    ``current_smoke_execution_authorization()``, which returns None in this
+    branch by construction: no CLI flag, environment variable or config file
+    can produce a ``SmokeExecutionAuthorization``, because its provenance
+    sentinel is module-private and nothing hands it out.
+
+    ``--full`` has NO authorization schema at all.  A smoke authorization can
+    never be widened into a full-run authorization: the two are separate human
+    gates and full is refused before anything else is even considered.
+    """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")
     if command == "full":
@@ -2060,13 +3003,29 @@ def _require_em_authorization(args: argparse.Namespace, command: str) -> None:
         _require(args.estimand is not None, "--full requires --estimand")
         _require(args.estimand in active_estimands(),
                  "--estimand is inconsistent with the frozen ESTIMANDS")
-        # Zero-EM gates must have passed before any fit is authorized.
-        run_validate_only()
-        run_config_gate()
-    raise HarnessStop(
-        f"{command} is not authorized in Phase 8b S1: implementation and zero-EM "
-        "validation only (Issue #49). Full/smoke/canary execution requires a "
-        "separate human approval gate."
+        raise HarnessStop(
+            "full is not authorized in Phase 8b: the 336-fit sweep is a separate "
+            "S3 human gate and has no execution authorization schema. A smoke "
+            "authorization must never be reused for --full."
+        )
+
+    _require(command in ("canary", "smoke"), f"unknown EM command {command!r}")
+    authorization = current_smoke_execution_authorization()
+    if authorization is None:
+        raise HarnessStop(
+            f"{command} is not authorized in Phase 8b S2b: the production canary "
+            "and 6-fit smoke path is implemented but no committed "
+            "SmokeExecutionAuthorization exists (Issue #53). Recording "
+            "INDEPENDENT_REVIEW_PASS and HUMAN_SMOKE_APPROVAL against a reviewed "
+            "main SHA is a separate human gate."
+        )
+    validate_smoke_execution_authorization(authorization, test_only=False)
+    # Authorization first (Issue #53 §26), then the zero-EM gates.  Both are
+    # repeated inside ``prepare_smoke_cell``, so a run can never skip them.
+    run_validate_only()
+    run_config_gate()
+    raise HarnessStop(  # pragma: no cover - unreachable while the record is None
+        f"{command} authorization exists but real execution is out of scope here"
     )
 
 
@@ -2090,8 +3049,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             "missing": authorization.missing(),
             "authorized": authorization.authorized(),
             "human_only_gates": list(HUMAN_ONLY_SMOKE_GATES),
-            "note": "S2 adds the gate; smoke remains hard-stopped until a human grants "
-                    "INDEPENDENT_REVIEW_PASS and HUMAN_SMOKE_APPROVAL",
+            "execution_authorization_present":
+                current_smoke_execution_authorization() is not None,
+            "trusted_main_sha_present":
+                current_expected_smoke_main_sha() is not None,
+            "smoke_protocol_hash": smoke_protocol_hash(),
+            "expected_canary_fits": EXPECTED_CANARY_FITS,
+            "expected_smoke_fits": EXPECTED_SMOKE_FITS,
+            "expected_real_em_budget": EXPECTED_REAL_EM_BUDGET,
+            "real_canary_fits_executed": 0,
+            "real_smoke_fits_executed": 0,
+            "note": "S2b implements the production canary/smoke path; smoke remains "
+                    "hard-stopped until a human records INDEPENDENT_REVIEW_PASS and "
+                    "HUMAN_SMOKE_APPROVAL against a reviewed main SHA",
         }
     elif args.canary:
         _require_em_authorization(args, "canary")

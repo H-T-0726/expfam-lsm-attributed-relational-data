@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import dataclasses
 import importlib
+import json
 import math
 import subprocess
 import sys
@@ -2130,3 +2131,894 @@ def test_S2_audit_leakage_gate_row_count_and_duplicates(anchors):
     auditor2 = A.Auditor()
     A.audit_leakage_gate(rows[:-1] + [dict(rows[0])], "B", anchor_map, auditor2)
     assert any(f.check == "leakage_duplicate_key" for f in auditor2.blockers)
+
+
+# ===========================================================================
+# Phase 8b S2b — human-gated real canary + frozen 6-fit smoke (Issue #53)
+# ===========================================================================
+#
+# Every test here drives the PRODUCTION orchestration with a Phase 7e
+# test-only fit adapter.  Real EM executions remain 0 and ``em_runner`` is
+# never imported.
+
+
+from run_heldout_k_selection_pilot import (  # noqa: E402
+    CanaryFitResult,
+    InitializationSnapshot,
+    _TestAuthorizedFitAdapter,
+)
+
+
+class _FakeFitRecorder:
+    """Counts fits and records the exact arguments the boundary supplied."""
+
+    def __init__(self, forced_scores=None):
+        self.calls = 0
+        self.seeds = []
+        self.k_values = []
+        self.saw_score_target = False
+        self._forced = forced_scores or {}
+
+    def __call__(self, **kwargs):
+        self.calls += 1
+        self.seeds.append(kwargs["seed"])
+        self.k_values.append(kwargs["k"])
+        assert set(kwargs) >= {"X", "Y", "train_mask", "k", "seed"}
+        assert "score_target" not in kwargs and "test_mask" not in kwargs
+        k = kwargs["k"]
+        n = kwargs["Y"].shape[0]
+        rng = _np.random.default_rng(kwargs["seed"])
+        Z = rng.normal(size=(n, k))
+        F = rng.normal(size=(kwargs["X"].shape[1], k))
+        # A forced Z scale lets a test steer which K wins without touching gates.
+        scale = self._forced.get(k)
+        if scale is not None:
+            Z = Z * 0.0 + scale
+        init = InitializationSnapshot(Z=Z.copy(), F=F.copy(), w0=-1.0, w=1.5, sigma_y=None)
+        return CanaryFitResult(
+            initialization=init, Z=Z, F=F, w0=-1.0, w=1.5, sigma_y=None,
+            Q_strict=-123.0, train_objective_diagnostics={"ok": 1.0},
+            internal_retry=0, q_failure=False, warnings=(), nan_occurred=False,
+        )
+
+
+def _test_authorization(**overrides):
+    return H._make_test_smoke_authorization(**overrides)
+
+
+def _test_adapter(recorder):
+    return H._make_test_fit_adapter(recorder, score_targets=())
+
+
+# --- frozen smoke protocol -------------------------------------------------
+
+
+def test_S2b_smoke_manifest_is_exactly_six_rows():
+    manifest = H.build_smoke_manifest()
+    assert len(manifest) == H.EXPECTED_SMOKE_FITS == 6
+    assert [(row.k, row.start) for row in manifest] == [
+        (2, 1), (2, 2), (3, 1), (3, 2), (4, 1), (4, 2)]
+    assert [row.fit_index for row in manifest] == [1, 2, 3, 4, 5, 6]
+
+
+def test_S2b_smoke_estimand_is_primary_A_only():
+    manifest = H.build_smoke_manifest()
+    assert H.SMOKE_ESTIMAND == "A" and H.SMOKE_ROLE == "primary"
+    assert H.SMOKE_ROLE == H.resolve_role(H.SMOKE_ESTIMAND)
+    assert {row.estimand for row in manifest} == {"A"}
+    assert {row.role for row in manifest} == {"primary"}
+
+
+def test_S2b_B_sensitivity_is_not_dropped_from_the_full_run():
+    """Smoke is A-only for budget reasons; B stays a full-run estimand."""
+
+    assert H.active_estimands() == ("A", "B")
+    assert len(H.build_manifest("B")) == H.FITS_PER_ESTIMAND == 168
+    assert H.resolve_role("B") == "sensitivity"
+    assert H.EXPECTED_NEW_FITS == 336
+
+
+def test_S2b_smoke_cell_is_k_true_one_replicate_one():
+    manifest = H.build_smoke_manifest()
+    assert H.SMOKE_K_TRUE == 1 and H.SMOKE_REPLICATE == 1
+    assert {row.k_true for row in manifest} == {1}
+    assert {row.replicate for row in manifest} == {1}
+
+
+def test_S2b_frozen_smoke_seeds_are_exact():
+    assert H.SMOKE_DATA_SEED_BASE == 61000
+    assert H.SMOKE_MODEL_SEED_BASE == 630000
+    assert H.smoke_data_seed(1, 1) == 61101
+    assert H.smoke_model_seed(1, 1, 2, 1) == 641021
+    assert H.smoke_model_seed(1, 1, 2, 2) == 641022
+    assert H.smoke_model_seed(1, 1, 3, 1) == 641031
+    assert H.smoke_model_seed(1, 1, 3, 2) == 641032
+    assert H.smoke_model_seed(1, 1, 4, 1) == 641041
+    assert H.smoke_model_seed(1, 1, 4, 2) == 641042
+    assert H.CANARY_MODEL_SEED == H.smoke_model_seed(1, 1, 1, 1) == 641011
+
+    manifest = H.build_smoke_manifest()
+    assert {row.data_seed for row in manifest} == {61101}
+    assert [row.model_seed for row in manifest] == [
+        641021, 641022, 641031, 641032, 641041, 641042]
+
+
+def test_S2b_smoke_seeds_are_disjoint_from_phase7e_and_full():
+    report = H.check_smoke_seed_collisions()
+    for key in ("phase7e_data_overlap", "phase7e_model_overlap",
+                "phase8_full_data_overlap", "phase8_full_model_overlap"):
+        assert report[key] == [], (key, report[key])
+    smoke = H.smoke_seed_space()
+    assert smoke["data"] == frozenset({61101})
+    assert len(smoke["model"]) == 7          # 6 smoke + 1 canary
+    assert report["split_seed_excluded"] is True
+
+
+def test_S2b_split_seed_is_S_C_and_carries_no_smoke_offset():
+    assert H.SMOKE_SPLIT_SEED == 42001
+    assert H.smoke_split_seed(1, 1) == H.expected_split_seed(1, 1) == 42001
+    assert {row.split_seed for row in H.build_smoke_manifest()} == {42001}
+
+    executable = _executable_body(H.smoke_split_seed)
+    for forbidden in ("SMOKE_DATA_SEED_BASE", "SMOKE_MODEL_SEED_BASE",
+                      "estimand", "ESTIMAND_SEED_OFFSET", "61000", "630000"):
+        assert forbidden not in executable, forbidden
+    assert "expected_split_seed" in executable
+
+
+def test_S2b_smoke_masks_equal_the_phase7e_replicate_one_anchor(anchors):
+    split = H.build_split_record(H.SMOKE_K_TRUE, H.SMOKE_REPLICATE)
+    anchor = anchors[1]
+    assert split.split_mask_hash == anchor.test_mask_hash
+    assert split.train_mask_hash == anchor.train_mask_hash
+    for row in H.build_smoke_manifest():
+        assert row.split_mask_hash == row.anchor_mask_hash == anchor.test_mask_hash
+        assert row.train_mask_hash == row.anchor_train_mask_hash == anchor.train_mask_hash
+
+
+def test_S2b_smoke_mask_gate_requires_both_sides(anchors):
+    split = H.build_split_record(H.SMOKE_K_TRUE, H.SMOKE_REPLICATE)
+    other = H.build_split_record(H.NEW_K_TRUE[0], 2)
+    good = anchors[1]
+
+    H._require_smoke_anchor_masks(split, good)          # positive control
+
+    test_only_match = H.AnchorMask(replicate=1, test_mask_hash=good.test_mask_hash,
+                                   train_mask_hash=other.train_mask_hash,
+                                   source=good.source)
+    with pytest.raises(HarnessStop) as excinfo:
+        H._require_smoke_anchor_masks(split, test_only_match)
+    assert "train mask" in str(excinfo.value)
+
+    train_only_match = H.AnchorMask(replicate=1, test_mask_hash=other.split_mask_hash,
+                                    train_mask_hash=good.train_mask_hash,
+                                    source=good.source)
+    with pytest.raises(HarnessStop) as excinfo2:
+        H._require_smoke_anchor_masks(split, train_only_match)
+    assert "test mask" in str(excinfo2.value)
+
+
+def test_S2b_canary_protocol_is_exact():
+    config = H.smoke_canary_config()
+    assert H.CANARY_K_EST == 1 and H.CANARY_START == 1
+    assert config.k_est == 1
+    assert config.seed == 641011
+    assert config.family_x == H.FAMILY_X and config.family_y == H.FAMILY_Y
+    assert config.L == H.L_SAMPLES and config.num_iter == H.NUM_ITER
+    assert config.numerics_mode == H.NUMERICS_MODE
+
+
+def test_S2b_future_real_execution_budget_is_two_plus_six():
+    assert H.EXPECTED_CANARY_FITS == 2
+    assert H.EXPECTED_SMOKE_FITS == 6
+    assert H.EXPECTED_REAL_EM_BUDGET == 8
+
+
+def test_S2b_protocol_hash_is_stable_and_binds_the_protocol(monkeypatch):
+    baseline = H.smoke_protocol_hash()
+    assert baseline == H.smoke_protocol_hash()
+    config = H.smoke_protocol_config()
+    for key in ("estimand", "k_true", "replicate", "k_candidates", "starts",
+                "data_seed_base", "model_seed_base", "split_seed",
+                "expected_smoke_fits", "expected_canary_fits", "canary_model_seed"):
+        assert key in config, key
+    monkeypatch.setattr(H, "SMOKE_K_CANDIDATES", (2, 3, 5))
+    assert H.smoke_protocol_hash() != baseline
+
+
+# --- authorization contract ------------------------------------------------
+
+
+def test_S2b_production_authorization_is_unavailable():
+    assert H.current_smoke_execution_authorization() is None
+
+
+def test_S2b_no_cli_or_env_can_assert_human_approval(monkeypatch):
+    options = {action.option_strings[0] for action in H._build_parser()._actions
+               if action.option_strings}
+    for forbidden in ("--human-approved", "--reviewed", "--independent-review-pass",
+                      "--human-smoke-approval", "--approve"):
+        assert forbidden not in options, forbidden
+
+    for name in ("PHASE8B_HUMAN_SMOKE_APPROVAL", "HUMAN_SMOKE_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_SMOKE_AUTHORIZED"):
+        monkeypatch.setenv(name, "1")
+    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_authorization().authorized() is False
+
+    executable = _executable_body(H.current_smoke_execution_authorization)
+    assert "return None" in executable
+    for forbidden in ("environ", "getenv", "argv", "args", "SmokeExecutionAuthorization"):
+        assert forbidden not in executable, forbidden
+
+
+def test_S2b_authorization_requires_the_production_authority():
+    test_auth = _test_authorization()
+    # a test record is fine for the test path ...
+    H.validate_smoke_execution_authorization(test_auth, test_only=True)
+    # ... but must never satisfy the production path
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(test_auth, test_only=False)
+    assert "provenance is unauthorized" in str(excinfo.value)
+
+    forged = dataclasses.replace(test_auth, _authority=object())
+    for test_only in (True, False):
+        with pytest.raises(HarnessStop):
+            H.validate_smoke_execution_authorization(forged, test_only=test_only)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("issue_number", 999),
+    ("protocol_hash", "tampered"),
+    ("estimand", "B"),
+    ("k_true", 3),
+    ("replicate", 2),
+    ("smoke_fit_count", 12),
+    ("canary_fit_count", 1),
+    ("data_seed_base", 51000),
+    ("model_seed_base", 530000),
+    ("split_seed", 42002),
+    ("authorization_version", "v0"),
+    ("independent_review_pass", False),
+    ("human_smoke_approval", False),
+    ("approved_main_sha", "not-a-sha"),
+    ("approved_main_sha", "A" * 40),
+])
+def test_S2b_authorization_field_mismatch_fails_closed(field, value):
+    authorization = _test_authorization(**{field: value})
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(authorization, test_only=True)
+
+
+def test_S2b_authorization_rejects_non_records():
+    for bad in (None, object(), {"human_smoke_approval": True}):
+        with pytest.raises(HarnessStop):
+            H.validate_smoke_execution_authorization(bad, test_only=True)
+
+
+def test_S2b_test_authority_is_unreachable_from_production():
+    """The CLI and the production entry points never name the test factories."""
+
+    production = (H.main, H._require_em_authorization, H._build_parser,
+                  H.run_real_canary, H.run_real_smoke,
+                  H.current_smoke_execution_authorization)
+    forbidden = ("_make_test_smoke_authorization", "_make_test_fit_adapter",
+                 "_run_real_canary_test_only", "_run_real_smoke_test_only",
+                 "_SMOKE_TEST_AUTHORITY", "_TestAuthorizedFitAdapter")
+    for function in production:
+        source = _inspect.getsource(function)
+        for name in forbidden:
+            assert name not in source, (function.__name__, name)
+
+
+# --- production entry points are implemented but disabled ------------------
+
+
+def test_S2b_production_entrypoints_refuse_a_missing_authorization():
+    for entrypoint in (H.run_real_canary, H.run_real_smoke):
+        with pytest.raises(HarnessStop):
+            entrypoint(H.current_smoke_execution_authorization())
+        with pytest.raises(HarnessStop):
+            entrypoint(_test_authorization())
+
+
+def test_S2b_cli_canary_and_smoke_remain_hard_stopped():
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"]):
+        with pytest.raises(HarnessStop) as excinfo:
+            H.main(command)
+        message = str(excinfo.value)
+        assert "not authorized" in message
+        assert "SmokeExecutionAuthorization" in message
+
+
+def test_S2b_full_remains_blocked_and_has_no_authorization_schema():
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    message = str(excinfo.value)
+    assert "not authorized" in message
+    assert "never be reused for --full" in message
+    for name in dir(H):
+        assert "FullExecutionAuthorization" not in name
+    executable = _executable_body(H._require_em_authorization)
+    full_branch = executable.split('if command == \'full\':')[1].split('_require(command in')[0]
+    assert "current_smoke_execution_authorization" not in full_branch
+
+
+def test_S2b_real_adapter_is_never_reached_without_authorization(monkeypatch):
+    class Tripwire:
+        def fit(self, invocation):          # pragma: no cover - must never run
+            raise AssertionError("the real EM adapter was reached without authorization")
+
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", Tripwire)
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+        with pytest.raises(HarnessStop):
+            H.main(command)
+    for entrypoint in (H.run_real_canary, H.run_real_smoke):
+        with pytest.raises(HarnessStop):
+            entrypoint(_test_authorization())
+    assert "em_runner" not in sys.modules
+
+
+# --- fake orchestration: canary --------------------------------------------
+
+
+def test_S2b_canary_runs_exactly_two_fake_fits_from_one_state():
+    recorder = _FakeFitRecorder()
+    report = H._run_real_canary_test_only(_test_authorization(),
+                                          adapter=_test_adapter(recorder))
+    assert recorder.calls == 2
+    assert recorder.seeds == [641011, 641011], "both canary fits must share the model seed"
+    assert recorder.k_values == [1, 1]
+    assert report.invariance.initialization_equal is True
+    assert report.invariance.final_outputs_equal is True
+    assert report.invariance.internal_retry == 0
+    assert report.invariance.fit_payload_a_hash != report.invariance.fit_payload_b_hash
+    assert report.model_seed == 641011 and report.data_seed == 61101
+    assert report.split_seed == 42001 and report.k_est == 1 and report.start == 1
+    assert report.real_canary_fits_executed == 0 and report.test_only is True
+    assert "em_runner" not in sys.modules
+
+
+def test_S2b_canary_refuses_a_non_test_adapter():
+    _row, _split, _Y, _target, _request, state = _leakage_fixture()
+    for adapter in (H.SealedFakeFitAdapter(state), object()):
+        with pytest.raises(HarnessStop):
+            H._run_real_canary_test_only(_test_authorization(), adapter=adapter)
+
+
+# --- fake orchestration: smoke ---------------------------------------------
+
+
+def test_S2b_smoke_runs_exactly_six_fake_fits_in_order():
+    recorder = _FakeFitRecorder()
+    report = H._run_real_smoke_test_only(_test_authorization(),
+                                         adapter=_test_adapter(recorder))
+    assert recorder.calls == 6
+    assert recorder.seeds == [641021, 641022, 641031, 641032, 641041, 641042]
+    assert recorder.k_values == [2, 2, 3, 3, 4, 4]
+    assert len(report.rows) == 6
+    assert [(row.k, row.start) for row in report.rows] == [
+        (2, 1), (2, 2), (3, 1), (3, 2), (4, 1), (4, 2)]
+    assert all(_np.isfinite(row.heldout_mean_log_score) for row in report.rows)
+    assert all(row.fit_status == "clean" and row.internal_retry == 0
+               and row.warning_count == 0 and row.q_failure is False
+               and row.nan_occurred is False and row.finite_state is True
+               for row in report.rows)
+    assert [k for k, _ in report.mean_scores] == [2, 3, 4]
+    assert report.real_smoke_fits_executed == 0 and report.test_only is True
+    assert "em_runner" not in sys.modules
+
+
+def test_S2b_smoke_two_start_means_are_unweighted():
+    recorder = _FakeFitRecorder()
+    report = H._run_real_smoke_test_only(_test_authorization(),
+                                         adapter=_test_adapter(recorder))
+    by_key = {(row.k, row.start): row.heldout_mean_log_score for row in report.rows}
+    for k, mean in report.mean_scores:
+        assert mean == pytest.approx((by_key[(k, 1)] + by_key[(k, 2)]) / 2.0, rel=0, abs=1e-15)
+
+
+def test_S2b_score_target_is_created_only_after_all_six_fits(monkeypatch):
+    """Phase A must complete before the outcome-bearing target exists."""
+
+    events = []
+    real_target = H.make_score_only_target
+
+    def watched(Y, test_mask):
+        events.append(("target", len(events)))
+        return real_target(Y, test_mask)
+
+    recorder = _FakeFitRecorder()
+
+    class CountingRecorder(_FakeFitRecorder):
+        def __call__(self, **kwargs):
+            events.append(("fit", len(events)))
+            return _FakeFitRecorder.__call__(self, **kwargs)
+
+    counting = CountingRecorder()
+    monkeypatch.setattr(H, "make_score_only_target", watched)
+    H._run_real_smoke_test_only(_test_authorization(), adapter=_test_adapter(counting))
+
+    kinds = [kind for kind, _ in events]
+    assert kinds.count("fit") == 6
+    assert kinds.count("target") == 1
+    assert kinds.index("target") == 6, kinds
+    del recorder
+
+
+def test_S2b_smoke_refuses_a_non_test_adapter():
+    _row, _split, _Y, _target, _request, state = _leakage_fixture()
+    for adapter in (H.SealedFakeFitAdapter(state), object()):
+        with pytest.raises(HarnessStop):
+            H._run_real_smoke_test_only(_test_authorization(), adapter=adapter)
+
+
+# --- selected_k is never a gate --------------------------------------------
+
+
+@pytest.mark.parametrize("winner", [2, 3, 4])
+def test_S2b_selected_k_outcome_does_not_change_smoke_success(winner):
+    """Whichever K wins, the smoke completes identically.  K_TRUE=1 is not a candidate."""
+
+    forced = {k: (0.9 if k == winner else 0.1) for k in H.SMOKE_K_CANDIDATES}
+    recorder = _FakeFitRecorder(forced_scores=forced)
+    report = H._run_real_smoke_test_only(_test_authorization(),
+                                         adapter=_test_adapter(recorder))
+    assert recorder.calls == 6
+    assert len(report.rows) == 6
+    assert report.selected_k in H.SMOKE_K_CANDIDATES
+    assert H.SMOKE_K_TRUE not in H.SMOKE_K_CANDIDATES, \
+        "selected_k == K_TRUE is structurally impossible in smoke"
+
+
+def test_S2b_selected_k_is_not_referenced_by_any_gate():
+    """Static check: no blocking condition reads selected_k."""
+
+    for function in (H._run_smoke_fit_phase_8b, H.prepare_smoke_cell,
+                     H.validate_smoke_execution_authorization,
+                     H.validate_smoke_manifest, H._require_em_authorization,
+                     H.current_smoke_authorization):
+        assert "selected_k" not in _inspect.getsource(function), function.__name__
+    scoring = _inspect.getsource(H._run_real_smoke)
+    gating = [line for line in scoring.splitlines()
+              if "selected_k" in line and ("_require(" in line or "assert " in line)]
+    assert gating == [], gating
+
+
+# --- failure tests: fail closed --------------------------------------------
+
+
+@pytest.mark.parametrize("field,value", [
+    ("estimand", "B"),
+    ("role", "sensitivity"),
+    ("k_true", 2),
+    ("replicate", 2),
+    ("k", 5),
+    ("start", 3),
+    ("data_seed", 51101),
+    ("model_seed", 541021),
+    ("split_seed", 52001),
+    ("w_true", 9.9),
+    ("w0_true", 0.5),
+    ("mask_design", "S_A"),
+])
+def test_S2b_tampered_smoke_manifest_row_is_rejected(field, value):
+    manifest = H.build_smoke_manifest()
+    manifest[0] = dataclasses.replace(manifest[0], **{field: value})
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_manifest(manifest)
+
+
+def test_S2b_wrong_smoke_manifest_length_is_rejected():
+    manifest = H.build_smoke_manifest()
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_manifest(manifest[:-1])
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_manifest(manifest + [manifest[-1]])
+
+
+def test_S2b_reordered_smoke_manifest_is_rejected():
+    manifest = H.build_smoke_manifest()
+    swapped = [manifest[1], manifest[0]] + manifest[2:]
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_manifest(swapped)
+
+
+def test_S2b_anchor_mask_mismatch_stops_before_any_fit(monkeypatch):
+    other = H.build_split_record(H.NEW_K_TRUE[0], 2)
+    monkeypatch.setattr(H, "build_split_record", lambda k_true, replicate: other)
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._run_real_smoke_test_only(_test_authorization(), adapter=_test_adapter(recorder))
+    assert "Phase 7e anchor" in str(excinfo.value)
+    assert recorder.calls == 0
+
+
+def test_S2b_protocol_hash_drift_stops_before_any_fit(monkeypatch):
+    authorization = _test_authorization()
+    monkeypatch.setattr(H, "SMOKE_K_CANDIDATES", (2, 3, 5))
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._run_real_smoke_test_only(authorization, adapter=_test_adapter(recorder))
+    assert "protocol_hash" in str(excinfo.value) or "protocol hash" in str(excinfo.value)
+    assert recorder.calls == 0
+
+
+def test_S2b_seed_collision_stops_before_any_fit(monkeypatch):
+    monkeypatch.setattr(H, "SMOKE_DATA_SEED_BASE", H.DATA_SEED_BASE)
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop):
+        H._run_real_smoke_test_only(_test_authorization(), adapter=_test_adapter(recorder))
+    assert recorder.calls == 0
+
+
+def test_S2b_failing_zero_em_gate_stops_before_any_fit(monkeypatch):
+    monkeypatch.setattr(H, "run_leakage_self_check",
+                        lambda: {"all_passed": False, "cases": {},
+                                 "em_fits_executed": 0, "real_em_fits_executed": 0})
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._run_real_smoke_test_only(_test_authorization(), adapter=_test_adapter(recorder))
+    assert "leakage self-check" in str(excinfo.value)
+    assert recorder.calls == 0
+
+
+def test_S2b_smoke_fit_config_rejects_a_foreign_row():
+    full_row = H.build_manifest("A")[0]
+    with pytest.raises(HarnessStop):
+        H.smoke_fit_config(full_row)
+
+
+# --- future artifact schema (definition only) ------------------------------
+
+
+def test_S2b_artifact_schema_is_defined_and_nothing_is_written(tmp_path):
+    required = {
+        "run_code_sha", "approved_main_sha", "protocol_hash", "estimand", "role",
+        "K_TRUE", "replicate", "K", "start", "data_seed", "split_seed", "model_seed",
+        "pre_fit_test_hash", "pre_fit_train_hash", "post_fit_test_hash",
+        "post_fit_train_hash", "anchor_test_hash", "anchor_train_hash",
+        "boundary_version", "fit_status", "internal_retry", "warning_count",
+        "q_failure", "nan_occurred", "finite_state", "heldout_mean_log_score",
+        "score_config_hash", "canary_provenance", "real_canary_fits_executed",
+        "real_smoke_fits_executed",
+    }
+    assert set(H.SMOKE_ARTIFACT_COLUMNS) == required
+    assert len(H.SMOKE_ARTIFACT_COLUMNS) == len(required)
+
+    canary = H._run_real_canary_test_only(_test_authorization(),
+                                          adapter=_test_adapter(_FakeFitRecorder()))
+    smoke = H._run_real_smoke_test_only(_test_authorization(),
+                                        adapter=_test_adapter(_FakeFitRecorder()))
+    rows = H.build_smoke_artifact_rows(canary, smoke, "0" * 40)
+    assert len(rows) == 6
+    assert all(len(row) == len(H.SMOKE_ARTIFACT_COLUMNS) for row in rows)
+    by_name = dict(zip(H.SMOKE_ARTIFACT_COLUMNS, rows[0]))
+    assert by_name["real_canary_fits_executed"] == 0
+    assert by_name["real_smoke_fits_executed"] == 0
+    assert list(tmp_path.iterdir()) == [], "S2b must not write any artifact"
+
+
+def test_S2b_no_smoke_artifact_is_created():
+    """S2b defines the schema only: the results tree must be untouched.
+
+    (Pre-existing Phase 7d ``k_selection_score_pilot_smoke_*`` files are a
+    different experiment; the check is that S2b adds or changes nothing.)
+    """
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain", "--", "expfam/results"],
+        capture_output=True, text=True, cwd=ROOT)
+    assert status.returncode == 0, status.stderr
+    assert status.stdout.strip() == "", status.stdout
+
+    assert not hasattr(H, "write_smoke_artifacts")
+    assert not hasattr(H, "run_smoke_cli")
+    for name in dir(H):
+        assert not (name.startswith("write_") and "smoke" in name), name
+
+
+# --- real EM exclusion -----------------------------------------------------
+
+
+def test_S2b_fake_orchestration_imports_no_em_in_a_fresh_process():
+    code = (
+        "import sys;"
+        "sys.path.insert(0, r'" + str(HERE) + "');"
+        "import numpy as np;"
+        "import run_k_true_robustness_sweep as H;"
+        "from run_heldout_k_selection_pilot import CanaryFitResult, InitializationSnapshot;"
+        "calls = [];"
+        "\ndef fake(**kw):\n"
+        "    calls.append(kw['seed']);\n"
+        "    Z = np.random.default_rng(kw['seed']).normal(size=(kw['Y'].shape[0], kw['k']));\n"
+        "    init = InitializationSnapshot(Z=Z.copy(), F=Z[:1].copy(), w0=-1.0, w=1.5, sigma_y=None);\n"
+        "    return CanaryFitResult(initialization=init, Z=Z, F=Z[:1].copy(), w0=-1.0, w=1.5,\n"
+        "        sigma_y=None, Q_strict=-1.0, train_objective_diagnostics={},\n"
+        "        internal_retry=0, q_failure=False, warnings=(), nan_occurred=False)\n"
+        "a = H._make_test_smoke_authorization();"
+        "H._run_real_canary_test_only(a, adapter=H._make_test_fit_adapter(fake, score_targets=()));"
+        "H._run_real_smoke_test_only(a, adapter=H._make_test_fit_adapter(fake, score_targets=()));"
+        "print(len(calls), 'em_runner' in sys.modules,"
+        " 'model_dual_expfam_consistent' in sys.modules)"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stderr
+    assert out.stdout.strip() == "8 False False"
+
+
+def test_S2b_zero_em_modes_report_the_execution_authorization_state(capsys):
+    assert H.main(["--smoke-authorization"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["execution_authorization_present"] is False
+    assert payload["authorized"] is False
+    assert payload["expected_canary_fits"] == 2
+    assert payload["expected_smoke_fits"] == 6
+    assert payload["expected_real_em_budget"] == 8
+    assert payload["real_canary_fits_executed"] == 0
+    assert payload["real_smoke_fits_executed"] == 0
+    assert payload["smoke_protocol_hash"] == H.smoke_protocol_hash()
+    assert payload["em_fits_executed"] == 0
+
+
+# ---------------------------------------------------------------------------
+# HIGH-01: the approved main SHA must bind to a TRUSTED reviewed SHA
+# ---------------------------------------------------------------------------
+#
+# Format validation alone let any well-formed SHA through to the real adapter.
+# The gate is now identity against a single trusted source that no caller,
+# environment variable, CLI flag or repository state can influence.
+
+
+class _AdapterTripwire:
+    """Counts constructions AND fits of the stand-in real EM adapter."""
+
+    constructions = 0
+    fits = 0
+
+    def __init__(self):
+        type(self).constructions += 1
+
+    def fit(self, invocation):          # pragma: no cover - must never run
+        type(self).fits += 1
+        raise AssertionError("the real EM adapter was reached")
+
+    @classmethod
+    def reset(cls):
+        cls.constructions = 0
+        cls.fits = 0
+
+
+def _production_authorization(**overrides):
+    """A record carrying the PRODUCTION authority sentinel.
+
+    Building one here is the exact path the reviewer found; the test exists to
+    prove it still cannot reach a real adapter.  No production code issues one.
+    """
+
+    fields = {
+        "issue_number": H.SMOKE_ISSUE_NUMBER,
+        "approved_main_sha": "1" * H.SMOKE_SHA_LENGTH,
+        "protocol_hash": H.smoke_protocol_hash(),
+        "estimand": H.SMOKE_ESTIMAND,
+        "k_true": H.SMOKE_K_TRUE,
+        "replicate": H.SMOKE_REPLICATE,
+        "smoke_fit_count": H.EXPECTED_SMOKE_FITS,
+        "canary_fit_count": H.EXPECTED_CANARY_FITS,
+        "data_seed_base": H.SMOKE_DATA_SEED_BASE,
+        "model_seed_base": H.SMOKE_MODEL_SEED_BASE,
+        "split_seed": H.SMOKE_SPLIT_SEED,
+        "independent_review_pass": True,
+        "human_smoke_approval": True,
+        "authorization_version": H.SMOKE_AUTHORIZATION_VERSION,
+    }
+    fields.update(overrides)
+    return H.SmokeExecutionAuthorization(_authority=H._SMOKE_EXECUTION_AUTHORITY, **fields)
+
+
+def test_HIGH01_trusted_main_sha_is_absent_in_this_branch():
+    assert H.current_expected_smoke_main_sha() is None
+
+
+def test_HIGH01_trusted_sha_source_is_a_literal(monkeypatch):
+    """§21: the trusted source cannot be steered by env, CLI, git or the record."""
+
+    executable = _executable_body(H.current_expected_smoke_main_sha)
+    assert executable.strip() == "return None"
+    for forbidden in ("getenv", "environ", "argv", "subprocess", "git", "run(",
+                      "approved_main_sha", "authorization", "Path", "open("):
+        assert forbidden not in executable, forbidden
+
+    for name in ("APPROVED_MAIN_SHA", "SMOKE_APPROVED_SHA", "HUMAN_SMOKE_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_APPROVED_MAIN_SHA"):
+        monkeypatch.setenv(name, "a" * 40)
+    assert H.current_expected_smoke_main_sha() is None
+    assert H.current_smoke_execution_authorization() is None
+
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--approved-main-sha", "--main-sha", "--sha", "--approved",
+                      "--human-approved", "--reviewed"):
+        assert forbidden not in options, forbidden
+
+
+def test_HIGH01_expected_sha_is_not_a_public_entrypoint_parameter():
+    """§7/§12: callers cannot supply the value they are checked against."""
+
+    for entrypoint in (H.run_real_canary, H.run_real_smoke,
+                       H.validate_smoke_execution_authorization,
+                       H.prepare_smoke_cell, H.main):
+        parameters = _inspect.signature(entrypoint).parameters
+        assert "expected_main_sha" not in parameters, entrypoint.__name__
+        assert "approved_main_sha" not in parameters, entrypoint.__name__
+    # the internal validator is the only place that takes it, and it is private
+    assert "expected_main_sha" in _inspect.signature(
+        H._validate_smoke_execution_authorization).parameters
+
+
+def test_HIGH01_identity_gate_is_not_a_self_comparison():
+    """§22: the record must be compared to the trusted value, not to itself."""
+
+    executable = _executable_body(H._validate_smoke_execution_authorization)
+    assert "authorization.approved_main_sha == expected_main_sha" in executable
+    assert "authorization.approved_main_sha == authorization.approved_main_sha" not in executable
+
+    production = _executable_body(H.validate_smoke_execution_authorization)
+    assert "current_expected_smoke_main_sha()" in production
+    assert "authorization.approved_main_sha" not in production
+
+
+def test_HIGH01_production_wrapper_never_selects_the_test_path():
+    """Production callers always pass test_only=False literally."""
+
+    for caller in (H.run_real_canary, H.run_real_smoke):
+        source = _inspect.getsource(caller)
+        assert "test_only=False" in source
+        assert "test_only=True" not in source
+        assert "_TEST_EXPECTED_MAIN_SHA" not in source
+    for name in ("main", "_require_em_authorization", "_build_parser",
+                 "current_expected_smoke_main_sha"):
+        assert "_TEST_EXPECTED_MAIN_SHA" not in _inspect.getsource(getattr(H, name)), name
+
+
+# --- §13: trusted SHA absent ----------------------------------------------
+
+
+@pytest.mark.parametrize("entrypoint", ["run_real_canary", "run_real_smoke"])
+def test_HIGH01_absent_trusted_sha_blocks_a_valid_looking_authorization(monkeypatch,
+                                                                       entrypoint):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    assert H.current_expected_smoke_main_sha() is None
+
+    authorization = _production_authorization(approved_main_sha="1" * 40)
+    with pytest.raises(HarnessStop) as excinfo:
+        getattr(H, entrypoint)(authorization)
+
+    assert "no reviewed main SHA has been authorized" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0
+    assert _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+
+
+# --- §14: trusted SHA present but different (the key regression) -----------
+
+
+@pytest.mark.parametrize("entrypoint", ["run_real_canary", "run_real_smoke"])
+def test_HIGH01_wrong_but_well_formed_sha_is_rejected(monkeypatch, entrypoint):
+    """Both SHAs are format-valid; only identity separates them."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "current_expected_smoke_main_sha", lambda: "a" * 40)
+
+    authorization = _production_authorization(approved_main_sha="b" * 40)
+    H._require_full_commit_sha(authorization.approved_main_sha, "record")   # format is fine
+    H._require_full_commit_sha("a" * 40, "trusted")
+
+    with pytest.raises(HarnessStop) as excinfo:
+        getattr(H, entrypoint)(authorization)
+
+    assert "approved main SHA does not match the reviewed execution SHA" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0
+    assert _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+
+
+def test_HIGH01_sha_identity_fails_before_other_field_errors(monkeypatch):
+    """§18: a wrong SHA is not masked by an unrelated protocol error."""
+
+    monkeypatch.setattr(H, "current_expected_smoke_main_sha", lambda: "a" * 40)
+    authorization = _production_authorization(approved_main_sha="b" * 40,
+                                              issue_number=999,
+                                              protocol_hash="tampered",
+                                              human_smoke_approval=False)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(authorization, test_only=False)
+    assert "approved main SHA does not match the reviewed execution SHA" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("bad_trusted", ["", "a" * 39, "a" * 41, "A" * 40,
+                                         "g" * 40, 12345, b"a" * 40])
+def test_HIGH01_malformed_trusted_sha_fails_closed(monkeypatch, bad_trusted):
+    """§6: the trusted side is format-checked too; a bad one never authorizes."""
+
+    monkeypatch.setattr(H, "current_expected_smoke_main_sha", lambda: bad_trusted)
+    authorization = _production_authorization(approved_main_sha=str(bad_trusted)
+                                              if isinstance(bad_trusted, str) else "a" * 40)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(authorization, test_only=False)
+    assert "trusted reviewed main SHA" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("bad_record", ["", "a" * 39, "A" * 40, "z" * 40, None, 1])
+def test_HIGH01_malformed_record_sha_fails_closed(monkeypatch, bad_record):
+    monkeypatch.setattr(H, "current_expected_smoke_main_sha", lambda: "a" * 40)
+    authorization = _production_authorization(approved_main_sha=bad_record)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(authorization, test_only=False)
+    assert "approved_main_sha is not a full lowercase commit SHA" in str(excinfo.value)
+
+
+# --- §15: test-only positive; §16: no production positive ------------------
+
+
+def test_HIGH01_test_only_trusted_sha_positive_validation():
+    """The test path validates against its own trusted SHA and passes."""
+
+    assert H._TEST_EXPECTED_MAIN_SHA == "a" * 40
+    authorization = H._make_test_smoke_authorization()
+    assert authorization.approved_main_sha == H._TEST_EXPECTED_MAIN_SHA
+    H.validate_smoke_execution_authorization(authorization, test_only=True)
+
+    # ... and the same record is still refused on the production path
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(authorization, test_only=False)
+
+
+@pytest.mark.parametrize("wrong", ["b" * 40, "0" * 40, "f" * 40])
+def test_HIGH01_test_path_also_requires_sha_identity(wrong):
+    authorization = H._make_test_smoke_authorization(approved_main_sha=wrong)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(authorization, test_only=True)
+    assert "approved main SHA does not match the reviewed execution SHA" in str(excinfo.value)
+
+
+def test_HIGH01_no_production_authorization_can_pass_in_this_branch():
+    """§16: production execution is intentionally impossible on this branch."""
+
+    assert H.current_expected_smoke_main_sha() is None
+    for sha in ("0" * 40, "1" * 40, "a" * 40, "6e3641bdb8470415601e60f21f54ede20af0926e"):
+        with pytest.raises(HarnessStop):
+            H.validate_smoke_execution_authorization(
+                _production_authorization(approved_main_sha=sha), test_only=False)
+
+
+def test_HIGH01_fake_orchestration_still_completes_end_to_end():
+    """§25: the identity gate does not break the test-only orchestration."""
+
+    canary_recorder = _FakeFitRecorder()
+    canary = H._run_real_canary_test_only(H._make_test_smoke_authorization(),
+                                          adapter=_test_adapter(canary_recorder))
+    smoke_recorder = _FakeFitRecorder()
+    smoke = H._run_real_smoke_test_only(H._make_test_smoke_authorization(),
+                                        adapter=_test_adapter(smoke_recorder))
+    assert canary_recorder.calls == 2 and smoke_recorder.calls == 6
+    assert canary.approved_main_sha == smoke.approved_main_sha == H._TEST_EXPECTED_MAIN_SHA
+    assert canary.real_canary_fits_executed == 0 and smoke.real_smoke_fits_executed == 0
+    assert len(smoke.rows) == 6
+    assert "em_runner" not in sys.modules
+
+
+def test_HIGH01_authorization_report_exposes_the_trusted_sha_state(capsys):
+    """§19: report presence only -- never a placeholder or dummy SHA."""
+
+    assert H.main(["--smoke-authorization"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["trusted_main_sha_present"] is False
+    assert payload["execution_authorization_present"] is False
+    assert payload["authorized"] is False
+    rendered = json.dumps(payload)
+    for leak in ("0" * 40, "1" * 40, "a" * 40, "approved_main_sha"):
+        assert leak not in rendered, leak
