@@ -10,6 +10,7 @@ Test ids follow the implementation-plan contract (T01-T32, A01-A25).
 from __future__ import annotations
 
 import csv
+import dataclasses
 import importlib
 import math
 import subprocess
@@ -1227,3 +1228,905 @@ def test_G_expected_set_built_without_importing_harness():
     assert "H." not in source
     module_source = inspect.getsource(A)
     assert "import run_k_true_robustness_sweep" not in module_source
+
+
+# ===========================================================================
+# Phase 8b S2 — direct pre-smoke leakage falsification (Issue #51)
+# ===========================================================================
+#
+# Every test here uses the SEALED fake adapter: it accepts no callback, so no
+# test can inject arbitrary code -- or a captured ScoreOnlyTarget -- into the
+# fit call.  No test reaches em_runner or any model module: real EM calls = 0.
+
+
+import inspect as _inspect  # noqa: E402
+
+import numpy as _np  # noqa: E402
+from run_heldout_k_selection_pilot import (  # noqa: E402
+    make_score_only_target,
+    make_training_y_values,
+)
+
+
+def _leakage_fixture(estimand: str = "A", index: int = 0):
+    """A valid train-only request plus a FRESH mutable mask state."""
+
+    anchors = H.read_phase7e_anchor_masks()
+    row = H.build_manifest(estimand)[index]
+    split = H.build_split_record(row.k_true, row.replicate)
+    data = H._generate_cell(estimand, row.k_true, row.replicate)
+    Y = _np.array(data["Y"], dtype=_np.float64)
+    training = make_training_y_values(Y, split.train_mask)
+    score_target = make_score_only_target(Y, split.test_mask)
+    request = H.build_fit_request(row, training, split.train_mask, split.test_mask,
+                                  anchors[row.replicate])
+    state = H.MutableMaskState(test_mask=_np.array(split.test_mask, dtype=bool),
+                               train_mask=_np.array(split.train_mask, dtype=bool))
+    return row, split, Y, score_target, request, state
+
+
+def _executable_body(func) -> str:
+    """The function's source with its docstring removed."""
+
+    import ast as _ast
+    import textwrap as _textwrap
+
+    tree = _ast.parse(_textwrap.dedent(_inspect.getsource(func)))
+    body = tree.body[0].body
+    if body and isinstance(body[0], _ast.Expr) and isinstance(body[0].value, _ast.Constant):
+        body = body[1:]
+    return "\n".join(_ast.unparse(node) for node in body)
+
+
+def _sealed(state, mode=None):
+    if mode is None:
+        return H.SealedFakeFitAdapter(state)
+    return H.SealedFakeFitAdapter(state, mode)
+
+
+# --- positive control ------------------------------------------------------
+
+
+def test_valid_sealed_fake_adapter_one_call():
+    """Without this control, the negative tests could be failing for other reasons."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    adapter = _sealed(state)
+    result, report = H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+
+    assert adapter.calls == 1
+    assert adapter.mutations_applied == 0
+    assert report.pre_fit_passed and report.post_fit_passed
+    assert report.pre_fit_test_mask_hash == report.post_fit_test_mask_hash == request.anchor_mask_hash
+    assert report.pre_fit_train_mask_hash == report.post_fit_train_mask_hash \
+        == request.anchor_train_mask_hash
+    assert result["k_est"] == row.k
+
+
+def test_S2_positive_both_estimands():
+    for estimand in ("A", "B"):
+        row, _split, _Y, target, request, state = _leakage_fixture(estimand)
+        adapter = _sealed(state)
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+        assert adapter.calls == 1
+        assert request.role == H.resolve_role(estimand)
+        assert request.w_true == H.resolve_w_true(estimand, row.k_true)
+
+
+def test_same_content_mask_clone_passes():
+    """Content hashes, not object identity: a clone of the masks still passes."""
+
+    row, split, _Y, target, request, _state = _leakage_fixture()
+    clone = H.MutableMaskState(test_mask=_np.array(split.test_mask, dtype=bool),
+                               train_mask=_np.array(split.train_mask, dtype=bool))
+    assert clone.test_mask is not split.test_mask and clone.train_mask is not split.train_mask
+    adapter = _sealed(clone)
+    # one shared MutableMaskState -- copied ARRAYS are fine, a copied STATE is not
+    assert adapter.mask_state is clone
+    _, report = H.Phase8bFitBoundary(adapter).run(request, row, clone, target)
+    assert adapter.calls == 1 and report.post_fit_passed
+    assert report.pre_fit_test_mask_hash == report.post_fit_test_mask_hash
+
+
+# --- A01: raw held-out Y injection -----------------------------------------
+
+
+def test_A01_raw_heldout_y_injection_boundary_calls_zero():
+    """Inject the true held-out Y into the fit matrix at held-out positions."""
+
+    row, split, Y, target, request, state = _leakage_fixture()
+    payload = request.fit_payload
+
+    leaked = _np.array(payload.Y_fit, dtype=_np.float64)
+    rows_i, cols_i = _np.where(_np.triu(split.test_mask, 1))
+    leaked[rows_i, cols_i] = Y[rows_i, cols_i]        # real held-out outcomes
+    leaked[cols_i, rows_i] = Y[rows_i, cols_i]
+    assert not _np.array_equal(leaked, payload.Y_fit), "injection must change the matrix"
+
+    tampered_payload = H.FitPayload(
+        Y_fit=leaked,
+        train_mask=payload.train_mask,
+        payload_hash=H.stable_array_hash(leaked),      # attacker also fixes the hash
+        train_mask_hash=payload.train_mask_hash,
+        expected_shape=payload.expected_shape,
+        expected_dtype=payload.expected_dtype,
+        provenance_version=payload.provenance_version,
+        canary_value=payload.canary_value,
+        _authority=payload._authority,
+    )
+    tampered = dataclasses.replace(request, fit_payload=tampered_payload)
+
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+
+    assert "held-out Y reached the fit payload" in str(excinfo.value)
+    assert adapter.calls == 0, "the fit must be refused BEFORE the adapter is called"
+
+
+def test_A01_partial_injection_single_dyad_rejected():
+    """Even one leaked dyad must be refused."""
+
+    row, split, Y, target, request, state = _leakage_fixture()
+    payload = request.fit_payload
+    leaked = _np.array(payload.Y_fit, dtype=_np.float64)
+    rows_i, cols_i = _np.where(_np.triu(split.test_mask, 1))
+    idx = next(i for i in range(len(rows_i))
+               if Y[rows_i[i], cols_i[i]] != float(H.MASKED_CANARY_VALUE))
+    r, c = rows_i[idx], cols_i[idx]
+    leaked[r, c] = Y[r, c]
+    leaked[c, r] = Y[r, c]
+
+    tampered = dataclasses.replace(request, fit_payload=dataclasses.replace(
+        payload, Y_fit=leaked, payload_hash=H.stable_array_hash(leaked)))
+
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0
+
+
+def test_A01_payload_hash_mismatch_rejected_before_fit():
+    """A silent matrix edit that does not update the hash is also refused."""
+
+    row, split, _Y, target, request, state = _leakage_fixture()
+    payload = request.fit_payload
+    leaked = _np.array(payload.Y_fit, dtype=_np.float64)
+    rows_i, cols_i = _np.where(_np.triu(split.test_mask, 1))
+    leaked[rows_i[0], cols_i[0]] = 1.0
+    leaked[cols_i[0], rows_i[0]] = 1.0
+    tampered = dataclasses.replace(request, fit_payload=dataclasses.replace(payload, Y_fit=leaked))
+
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert "payload hash mismatch" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+def test_A01_builder_refuses_full_Y_as_training_values():
+    """make_training_y_values(Y, test_mask) cannot be passed off as training data."""
+
+    row, split, Y, _target, _request, _state = _leakage_fixture()
+    wrong = make_training_y_values(Y, split.test_mask)   # held-out dyads, typed as training
+    anchors = H.read_phase7e_anchor_masks()
+    with pytest.raises(HarnessStop):
+        H.build_fit_request(row, wrong, split.train_mask, split.test_mask, anchors[row.replicate])
+
+
+# --- A02: ScoreOnlyTarget rejection through the production boundary ---------
+
+
+class _TargetHoldingAdapter:
+    """A malicious adapter that captured the real Phase 7e ScoreOnlyTarget."""
+
+    def __init__(self, target):
+        self.target = target
+        self.calls = 0
+
+    def fit(self, request):
+        self.calls += 1
+        return {"fake": True, "leaked": self.target.values}
+
+
+def test_A02_score_only_target_adapter_rejected_calls_zero():
+    """An adapter holding the scoring target never receives a fit."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    adapter = _TargetHoldingAdapter(target)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+
+    assert "unauthorized fit adapter type" in str(excinfo.value)
+    assert adapter.calls == 0, "the malicious adapter must never be invoked"
+
+
+def test_A02_score_only_target_request_rejected_calls_zero():
+    """A wrapper request smuggling the scoring target never reaches a fit."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    @dataclasses.dataclass(frozen=True)
+    class SmuggledRequest:
+        inner: H.Phase8bFitRequest
+        stowaway: object
+
+    smuggled = SmuggledRequest(request, target)
+    adapter = _sealed(state)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(smuggled, row, state, target)
+
+    assert "Phase8bFitRequest" in str(excinfo.value)
+    assert adapter.calls == 0
+    # the same object graph is also refused by the deep leakage walk
+    with pytest.raises(HarnessStop) as deep:
+        H._require_no_score_target(smuggled, target)
+    assert "ScoreOnlyTarget reached fit boundary" in str(deep.value)
+
+
+def test_A02_target_values_alias_rejected_before_fit():
+    """A raw alias of target.values riding along the request is refused."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    class AliasCarrier:
+        def __init__(self, values):
+            self.smuggled_values = values
+
+    tampered = dataclasses.replace(request, fit_config=AliasCarrier(target.values))
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert "target.values" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+def test_A02_score_target_memory_view_rejected():
+    """A numpy view that shares memory with target.values is still caught."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    view = target.values[:]
+    assert _np.shares_memory(view, target.values)
+
+    class ViewCarrier:
+        def __init__(self, values):
+            self.v = values
+
+    tampered = dataclasses.replace(request, fit_config=ViewCarrier(view))
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0
+
+
+def test_A02_request_has_no_scoring_field():
+    """Structural guarantee: the request type cannot hold a scoring target."""
+
+    _row, _split, _Y, _target, request, _state = _leakage_fixture()
+    field_names = {f.name for f in dataclasses.fields(request)}
+    for forbidden in ("score_target", "target", "held_out_target", "test_values",
+                      "Y_full", "Y", "test_mask"):
+        assert forbidden not in field_names, forbidden
+    for forbidden in ("score_target", "target", "held_out_target", "test_values", "Y_full"):
+        assert not hasattr(request, forbidden)
+
+
+def test_A02_sealed_adapter_schema_has_no_target_or_callback_field():
+    """§6: the sealed adapter's field set is checked explicitly, not by DFS."""
+
+    assert H.SealedFakeFitAdapter.__slots__ == H.SEALED_FAKE_ADAPTER_SLOTS
+    assert set(H.SEALED_FAKE_ADAPTER_SLOTS) == {
+        "calls", "mutation_mode", "mask_state", "mutations_applied",
+        "last_payload_hash", "last_k_est",
+    }
+    _row, _split, _Y, _target, _request, state = _leakage_fixture()
+    adapter = _sealed(state)
+    for forbidden in H.FORBIDDEN_ADAPTER_ATTRS:
+        assert not hasattr(adapter, forbidden), forbidden
+    assert not hasattr(adapter, "__dict__"), "sealed adapter must not accept new attributes"
+    with pytest.raises(AttributeError):
+        adapter.score_target = object()
+
+
+# --- adapter policy: no arbitrary code surface -----------------------------
+
+
+def test_arbitrary_callback_adapter_rejected():
+    """An adapter carrying an arbitrary fit hook is refused before the fit."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    class CallbackAdapter:
+        def __init__(self, on_fit):
+            self.on_fit = on_fit
+            self.calls = 0
+
+        def fit(self, req):
+            self.calls += 1
+            self.on_fit(req)
+            return {"fake": True}
+
+    captured = []
+    adapter = CallbackAdapter(lambda req: captured.append(target.values))
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+    assert "unauthorized fit adapter type" in str(excinfo.value)
+    assert adapter.calls == 0 and captured == []
+
+
+def test_adapter_subclass_rejected():
+    """Exact-type policy: even a subclass of the sealed adapter is refused."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    class SubclassAdapter(H.SealedFakeFitAdapter):
+        __slots__ = ()
+
+    adapter = SubclassAdapter(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+    assert "unauthorized fit adapter type" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+def test_sealed_adapter_source_has_no_arbitrary_hook():
+    """§4: no callback/closure/partial injection point survives in the adapter."""
+
+    source = _inspect.getsource(H.SealedFakeFitAdapter)
+    for token in ("on_fit", "callback", "lambda", "partial", "closure", "__call__"):
+        assert token not in source, token
+    signature = _inspect.signature(H.SealedFakeFitAdapter.__init__)
+    assert list(signature.parameters) == ["self", "mask_state", "mutation_mode"]
+    assert not hasattr(H, "CountingFakeFitAdapter"), "the callback adapter must be gone"
+
+
+def test_S2_real_em_adapter_is_refused_by_the_boundary():
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    class AuthorizedEMFitAdapter:      # name-matched stand-in
+        calls = 0
+
+        def fit(self, request):        # pragma: no cover - must never run
+            raise AssertionError("real EM adapter must not be reachable here")
+
+    adapter = AuthorizedEMFitAdapter()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+    assert "real EM adapter is not authorized" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+# --- A03: mask mutation performed INSIDE the adapter ------------------------
+
+
+def _mutation_case(mode):
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    adapter = _sealed(state, mode)
+    boundary = H.Phase8bFitBoundary(adapter)
+    with pytest.raises(HarnessStop) as excinfo:
+        boundary.run(request, row, state, target)
+    assert adapter.calls == 1, "the mutation must be caught AFTER the fit, before scoring"
+    assert adapter.mutations_applied == 1, "the adapter must actually have mutated the mask"
+    return str(excinfo.value), state, request
+
+
+def test_A03_test_mask_mutated_inside_adapter():
+    message, state, request = _mutation_case(H.FakeMutationMode.TEST_MASK)
+    assert "post-fit" in message and "test mask" in message
+    assert H.compute_split_mask_hash(state.test_mask) != request.pre_fit_test_mask_hash
+    assert H.compute_train_mask_hash(state.train_mask) == request.pre_fit_train_mask_hash
+
+
+def test_A03_train_mask_mutated_inside_adapter():
+    message, state, request = _mutation_case(H.FakeMutationMode.TRAIN_MASK)
+    assert "post-fit" in message and "train mask" in message
+    assert H.compute_train_mask_hash(state.train_mask) != request.pre_fit_train_mask_hash
+    assert H.compute_split_mask_hash(state.test_mask) == request.pre_fit_test_mask_hash
+
+
+def test_A03_both_masks_mutated_inside_adapter():
+    message, state, request = _mutation_case(H.FakeMutationMode.BOTH_MASKS)
+    assert "post-fit" in message
+    assert H.compute_split_mask_hash(state.test_mask) != request.pre_fit_test_mask_hash
+    assert H.compute_train_mask_hash(state.train_mask) != request.pre_fit_train_mask_hash
+
+
+def test_A03_score_not_reached_after_postfit_failure():
+    """The caller's score / artifact / selection steps never run."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    counters = {"score": 0, "artifact": 0, "selection": 0}
+    adapter = _sealed(state, H.FakeMutationMode.TEST_MASK)
+    boundary = H.Phase8bFitBoundary(adapter)
+
+    with pytest.raises(HarnessStop):
+        result, _report = boundary.run(request, row, state, target)
+        counters["score"] += 1          # unreachable: run() raised
+        counters["artifact"] += 1
+        counters["selection"] += 1
+
+    assert adapter.calls == 1
+    assert counters == {"score": 0, "artifact": 0, "selection": 0}
+
+
+def test_A03_no_caller_supplied_post_fit_mask_argument():
+    """§8: the post-fit hash cannot come from a caller-supplied value."""
+
+    signature = _inspect.signature(H.Phase8bFitBoundary.run)
+    assert list(signature.parameters) == ["self", "request", "manifest_row",
+                                          "mask_state", "score_target"]
+    for method in (H.Phase8bFitBoundary.run, H.Phase8bFitBoundary.check_post_fit):
+        assert "post_fit_masks" not in _inspect.signature(method).parameters
+
+
+def test_A03_boundary_rereads_the_same_mask_state_object():
+    """The boundary must hash the live state, not a copy taken pre-fit."""
+
+    source = _inspect.getsource(H.Phase8bFitBoundary.run)
+    assert "self.check_post_fit(request, mask_state, result, score_target)" in source
+    assert "_require_post_fit_masks" in _inspect.getsource(H.Phase8bFitBoundary.check_post_fit)
+
+
+# --- A03 identity binding: the fit must touch the monitored state ----------
+
+
+def test_adapter_mask_state_must_be_boundary_mask_state():
+    """A same-content DECOY state must be refused BEFORE the fit.
+
+    Content hashing says whether a mask changed; it cannot say whose mask
+    changed.  Without an identity binding the adapter could mutate state A
+    while the boundary re-hashes an untouched twin B and reports PASS.
+    """
+
+    row, split, _Y, target, request, state_a = _leakage_fixture()
+    state_b = H.MutableMaskState(test_mask=_np.array(state_a.test_mask, dtype=bool),
+                                 train_mask=_np.array(state_a.train_mask, dtype=bool))
+    # same content, different objects -- on every level
+    assert state_b is not state_a
+    assert state_b.test_mask is not state_a.test_mask
+    assert _np.array_equal(state_b.test_mask, state_a.test_mask)
+    assert _np.array_equal(state_b.train_mask, state_a.train_mask)
+    assert H.compute_split_mask_hash(state_b.test_mask) == \
+        H.compute_split_mask_hash(state_a.test_mask)
+
+    before_a = (_np.array(state_a.test_mask), _np.array(state_a.train_mask))
+    before_b = (_np.array(state_b.test_mask), _np.array(state_b.train_mask))
+
+    adapter = H.SealedFakeFitAdapter(state_a)          # adapter holds A
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state_b, target)   # boundary watches B
+
+    assert "adapter/boundary mask state mismatch" in str(excinfo.value)
+    assert adapter.calls == 0, "a mismatched pair must never reach the fit"
+    assert adapter.mutations_applied == 0
+    assert _np.array_equal(state_a.test_mask, before_a[0])
+    assert _np.array_equal(state_a.train_mask, before_a[1])
+    assert _np.array_equal(state_b.test_mask, before_b[0])
+    assert _np.array_equal(state_b.train_mask, before_b[1])
+
+
+def test_decoy_state_attack_is_refused_before_any_mutation():
+    """The stronger form: the adapter is armed to mutate, and still never runs.
+
+    The point is not "fit, then detect"; it is "a mismatched pair is not
+    allowed to fit at all", so no mutation is ever performed.
+    """
+
+    row, _split, _Y, target, request, state_a = _leakage_fixture()
+    decoy = H.MutableMaskState(test_mask=_np.array(state_a.test_mask, dtype=bool),
+                               train_mask=_np.array(state_a.train_mask, dtype=bool))
+    adapter = H.SealedFakeFitAdapter(state_a, H.FakeMutationMode.TEST_MASK)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, decoy, target)
+
+    assert "adapter/boundary mask state mismatch" in str(excinfo.value)
+    assert adapter.calls == 0
+    assert adapter.mutations_applied == 0
+    # neither state moved, so the boundary never had to rely on a hash compare
+    assert H.compute_split_mask_hash(state_a.test_mask) == request.pre_fit_test_mask_hash
+    assert H.compute_split_mask_hash(decoy.test_mask) == request.pre_fit_test_mask_hash
+
+
+def test_binding_is_identity_not_content():
+    """`np.array_equal` on the masks is explicitly not sufficient."""
+
+    row, _split, _Y, target, request, state_a = _leakage_fixture()
+    twin = H.MutableMaskState(test_mask=state_a.test_mask, train_mask=state_a.train_mask)
+    # even sharing the very same arrays is not enough: the STATE must be shared
+    assert twin.test_mask is state_a.test_mask and twin.train_mask is state_a.train_mask
+    assert twin is not state_a
+
+    adapter = H.SealedFakeFitAdapter(state_a)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, twin, target)
+    assert "adapter/boundary mask state mismatch" in str(excinfo.value)
+    assert adapter.calls == 0
+
+    executable = _executable_body(H._require_adapter_state_binding)
+    assert "adapter_state is mask_state" in executable
+    assert "array_equal" not in executable, "the binding must not fall back to content"
+
+
+@pytest.mark.parametrize("broken", ["adapter_state_type", "boundary_state_type",
+                                    "adapter_state_missing"])
+def test_state_binding_fails_closed_on_malformed_inputs(broken):
+    """§4: a malformed state raises HarnessStop, never AttributeError/TypeError."""
+
+    _row, _split, _Y, _target, _request, state = _leakage_fixture()
+
+    class LooseAdapter:
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+
+    if broken == "adapter_state_type":
+        adapter, boundary_state = LooseAdapter(mask_state=object()), state
+    elif broken == "boundary_state_type":
+        adapter, boundary_state = H.SealedFakeFitAdapter(state), object()
+    else:
+        adapter, boundary_state = LooseAdapter(), state
+
+    with pytest.raises(HarnessStop):
+        H._require_adapter_state_binding(adapter, boundary_state)
+
+
+def test_state_binding_is_checked_before_the_fit():
+    """The guard runs in check_pre_fit, ahead of the adapter call."""
+
+    pre_source = _inspect.getsource(H.Phase8bFitBoundary.check_pre_fit)
+    run_source = _inspect.getsource(H.Phase8bFitBoundary.run)
+    assert "_require_adapter_state_binding(self._adapter, mask_state)" in pre_source
+    assert run_source.index("self.check_pre_fit(") < run_source.index("self._adapter.fit(")
+    # and re-verified after the fit as defence in depth
+    assert "_require_adapter_state_binding" in _inspect.getsource(
+        H.Phase8bFitBoundary.check_post_fit)
+
+
+def test_self_check_fails_if_state_binding_guard_disabled(monkeypatch):
+    """§15: the binding case alone can fail the machine leakage gate."""
+
+    monkeypatch.setattr(H, "_require_adapter_state_binding", lambda *a, **k: None)
+    result = H.run_leakage_self_check()
+    assert result["all_passed"] is False
+    assert result["cases"]["A03_adapter_state_binding"]["passed"] is False
+    # with the guard gone the decoy attack actually goes through: the fit runs
+    # and the boundary's post-fit check on the untouched twin does NOT reject
+    assert result["cases"]["A03_adapter_state_binding"]["rejected"] is False
+    assert H.current_smoke_authorization().leakage_gate_pass is False
+
+
+# --- manifest binding negatives --------------------------------------------
+
+
+@pytest.mark.parametrize("field,value", [
+    ("k", 6),
+    ("start", 2),
+    ("model_seed", 999999),
+    ("data_seed", 999999),
+    ("split_seed", 999999),
+    ("k_true", 5),
+    ("estimand", "B"),
+    ("role", "sensitivity"),
+    ("w_true", 9.9),
+    ("w0_true", 0.5),
+])
+def test_S2_manifest_binding_mismatch_rejected_before_fit(field, value):
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    tampered = dataclasses.replace(request, **{field: value})
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0, f"{field} mismatch must be caught before the fit"
+
+
+@pytest.mark.parametrize("field", ["frozen_config_hash", "score_config_hash"])
+def test_S2_config_hash_mismatch_rejected(field):
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    tampered = dataclasses.replace(request, **{field: "tampered"})
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0
+
+
+# --- pre-fit hash negatives ------------------------------------------------
+
+
+@pytest.mark.parametrize("field", [
+    "pre_fit_test_mask_hash",
+    "pre_fit_train_mask_hash",
+    "anchor_mask_hash",
+    "anchor_train_mask_hash",
+])
+def test_S2_pre_fit_hash_mismatch_rejected_before_fit(field):
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    tampered = dataclasses.replace(request, **{field: "0" * 64})
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0
+
+
+def test_S2_test_only_anchor_match_is_not_enough():
+    """Matching the anchor on the test side alone must not pass."""
+
+    row, split, _Y, target, request, _state = _leakage_fixture()
+    other = H.build_split_record(H.NEW_K_TRUE[0], 2 if split.replicate != 2 else 3)
+    state = H.MutableMaskState(test_mask=_np.array(split.test_mask, dtype=bool),
+                               train_mask=_np.array(other.train_mask, dtype=bool))
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(request, row, state, target)
+    assert "train mask" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+# --- fail-closed input validation ------------------------------------------
+
+
+def test_S2_malformed_fit_config_fails_closed_with_harness_stop():
+    """A malformed sub-object must raise HarnessStop, not AttributeError."""
+
+    row, _split, _Y, target, request, state = _leakage_fixture()
+
+    class NotAFitConfig:
+        pass
+
+    tampered = dataclasses.replace(request, fit_config=NotAFitConfig())
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert adapter.calls == 0
+
+
+@pytest.mark.parametrize("bad", ["manifest_row", "mask_state"])
+def test_S2_malformed_boundary_inputs_fail_closed(bad):
+    row, _split, _Y, target, request, state = _leakage_fixture()
+    adapter = _sealed(state)
+    args = {"manifest_row": row, "mask_state": state}
+    args[bad] = object()
+    with pytest.raises(HarnessStop):
+        H.Phase8bFitBoundary(adapter).run(request, args["manifest_row"],
+                                          args["mask_state"], target)
+    assert adapter.calls == 0
+
+
+def test_S2_leakage_check_precedes_binding_check():
+    """A request that is BOTH leaking and mis-bound reports the leakage."""
+
+    row, split, Y, target, request, state = _leakage_fixture()
+    payload = request.fit_payload
+    leaked = _np.array(payload.Y_fit, dtype=_np.float64)
+    r, c = _np.where(_np.triu(split.test_mask, 1))
+    leaked[r, c] = Y[r, c]
+    leaked[c, r] = Y[r, c]
+    tampered = dataclasses.replace(
+        request,
+        fit_payload=dataclasses.replace(payload, Y_fit=leaked,
+                                        payload_hash=H.stable_array_hash(leaked)),
+        model_seed=123456,           # also mis-bound
+    )
+    adapter = _sealed(state)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.Phase8bFitBoundary(adapter).run(tampered, row, state, target)
+    assert "held-out Y reached the fit payload" in str(excinfo.value)
+    assert adapter.calls == 0
+
+
+# --- HIGH-01: the self-check is derived from the attacks -------------------
+
+
+def test_leakage_self_check_runs_all_cases():
+    result = H.run_leakage_self_check()
+
+    assert set(result["cases"]) == set(H.LEAKAGE_SELF_CHECK_CASE_NAMES)
+    assert set(H.LEAKAGE_SELF_CHECK_CASE_NAMES) == {
+        "positive_control",
+        "A01_raw_held_out_y",
+        "A02_malicious_adapter",
+        "A02_smuggled_request",
+        "A03_test_mask_mutation",
+        "A03_train_mask_mutation",
+        "A03_both_mask_mutation",
+        "A03_adapter_state_binding",
+        "anchor_pre_fit_binding",
+    }
+    assert result["all_passed"] is True
+    assert all(case["passed"] for case in result["cases"].values())
+
+    cases = result["cases"]
+    assert cases["positive_control"]["rejected"] is False
+    assert cases["positive_control"]["adapter_calls"] == 1
+    for name in ("A01_raw_held_out_y", "A02_malicious_adapter",
+                 "A02_smuggled_request", "A03_adapter_state_binding",
+                 "anchor_pre_fit_binding"):
+        assert cases[name]["rejected"] is True, name
+        assert cases[name]["adapter_calls"] == 0, name
+    for name in ("A03_test_mask_mutation", "A03_train_mask_mutation",
+                 "A03_both_mask_mutation"):
+        assert cases[name]["rejected"] is True, name
+        assert cases[name]["adapter_calls"] == 1, name
+        assert "post-fit" in cases[name]["reason"], name
+
+    # §19: fake adapter calls are reported separately from real EM fits
+    assert result["fake_fit_calls_total"] == 4
+    assert result["real_em_fits_executed"] == 0
+    assert result["em_fits_executed"] == 0
+
+
+def test_leakage_self_check_is_not_hard_coded():
+    """§16: all_passed must be an AND over the cases, never a literal."""
+
+    import ast as _ast
+    import textwrap as _textwrap
+
+    tree = _ast.parse(_textwrap.dedent(_inspect.getsource(H.run_leakage_self_check)))
+    assigned = [node.value for node in _ast.walk(tree)
+                if isinstance(node, _ast.Assign)
+                and any(isinstance(t, _ast.Name) and t.id == "all_passed" for t in node.targets)]
+    assert len(assigned) == 1
+    value = assigned[0]
+    assert not isinstance(value, _ast.Constant), "all_passed is hard-coded"
+    assert isinstance(value, _ast.BoolOp) and isinstance(value.op, _ast.And)
+    # one conjunct enumerates the declared cases, the other ANDs their verdicts
+    rendered = [_ast.unparse(v) for v in value.values]
+    assert any("LEAKAGE_SELF_CHECK_CASE_NAMES" in r for r in rendered), rendered
+    assert any(r.startswith("all(") and "passed" in r for r in rendered), rendered
+
+
+def test_self_check_fails_if_A01_guard_disabled(monkeypatch):
+    monkeypatch.setattr(H, "_require_train_only_payload", lambda *a, **k: None)
+    result = H.run_leakage_self_check()
+    assert result["all_passed"] is False
+    assert result["cases"]["A01_raw_held_out_y"]["passed"] is False
+
+
+def test_self_check_fails_if_A02_guard_disabled(monkeypatch):
+    monkeypatch.setattr(H, "_require_adapter_authority", lambda *a, **k: None)
+    result = H.run_leakage_self_check()
+    assert result["all_passed"] is False
+    assert result["cases"]["A02_malicious_adapter"]["passed"] is False
+
+
+def test_self_check_fails_if_A03_guard_disabled(monkeypatch):
+    monkeypatch.setattr(H, "_require_post_fit_masks", lambda *a, **k: None)
+    result = H.run_leakage_self_check()
+    assert result["all_passed"] is False
+    for name in ("A03_test_mask_mutation", "A03_train_mask_mutation",
+                 "A03_both_mask_mutation"):
+        assert result["cases"][name]["passed"] is False, name
+
+
+def test_self_check_fails_if_a_case_raises(monkeypatch):
+    """A broken case fails closed instead of quietly disappearing."""
+
+    def boom():
+        raise RuntimeError("broken case")
+
+    cases = tuple(("A01_raw_held_out_y", boom, True, 0, "raw held-out Y") if c[0] ==
+                  "A01_raw_held_out_y" else c for c in H.LEAKAGE_SELF_CHECK_CASES)
+    monkeypatch.setattr(H, "LEAKAGE_SELF_CHECK_CASES", cases)
+    result = H.run_leakage_self_check()
+    assert result["all_passed"] is False
+    assert "RuntimeError" in result["cases"]["A01_raw_held_out_y"]["reason"]
+
+
+def test_leakage_gate_pass_is_derived_from_self_check(monkeypatch):
+    """§18: LEAKAGE_GATE_PASS is the self-check verdict, not a constant."""
+
+    assert H.current_smoke_authorization().leakage_gate_pass is True
+
+    monkeypatch.setattr(H, "run_leakage_self_check",
+                        lambda: {"all_passed": False, "cases": {}, "em_fits_executed": 0})
+    assert H.current_smoke_authorization().leakage_gate_pass is False
+
+    source = _inspect.getsource(H.current_smoke_authorization)
+    assert "run_leakage_self_check()" in source
+    assert 'leakage_gate_pass=bool(leakage["all_passed"])' in source
+
+
+def test_leakage_self_check_runs_no_em_in_a_fresh_process():
+    code = (
+        "import sys;"
+        "sys.path.insert(0, r'" + str(HERE) + "');"
+        "import run_k_true_robustness_sweep as H;"
+        "r = H.run_leakage_self_check();"
+        "print(r['all_passed'], r['fake_fit_calls_total'], r['real_em_fits_executed'],"
+        " 'em_runner' in sys.modules, 'model_dual_expfam_consistent' in sys.modules)"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stderr
+    assert out.stdout.strip() == "True 4 0 False False"
+
+
+# --- smoke authorization ---------------------------------------------------
+
+
+def test_S2_smoke_still_hard_stopped():
+    for command in (["--smoke", "--allow-em"],
+                    ["--canary", "--allow-em"],
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+        with pytest.raises(HarnessStop) as excinfo:
+            H.main(command)
+        assert "not authorized" in str(excinfo.value)
+
+
+def test_S2_authorization_human_gates_are_never_granted_by_code():
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert not authorization.authorized()
+    missing = authorization.missing()
+    assert "INDEPENDENT_REVIEW_PASS" in missing and "HUMAN_SMOKE_APPROVAL" in missing
+    assert set(H.HUMAN_ONLY_SMOKE_GATES) == {"INDEPENDENT_REVIEW_PASS", "HUMAN_SMOKE_APPROVAL"}
+
+
+def test_S2_machine_gates_pass():
+    authorization = H.current_smoke_authorization()
+    assert authorization.zero_em_gate_pass is True
+    assert authorization.leakage_gate_pass is True
+    assert authorization.anchor_mask_gate_pass is True
+    assert set(H.SMOKE_GATE_NAMES) == {
+        "ZERO_EM_GATE_PASS", "LEAKAGE_GATE_PASS", "ANCHOR_MASK_GATE_PASS",
+        "INDEPENDENT_REVIEW_PASS", "HUMAN_SMOKE_APPROVAL",
+    }
+
+
+# --- audit: leakage-gate provenance schema ---------------------------------
+
+
+def _leakage_gate_rows(estimand: str, anchors, mutate=None) -> list[tuple]:
+    role = H.resolve_role(estimand)
+    rows = []
+    for row in H.build_manifest(estimand):
+        a = anchors[row.replicate]
+        rows.append([
+            estimand, role, row.k_true, row.replicate, row.k, row.start,
+            a.test_mask_hash, a.train_mask_hash, a.test_mask_hash, a.train_mask_hash,
+            a.test_mask_hash, a.train_mask_hash, "True", "True", "clean",
+            A.LEAKAGE_BOUNDARY_VERSION,
+        ])
+    if mutate:
+        mutate(rows)
+    return rows
+
+
+def test_S2_audit_leakage_gate_positive_control(anchors):
+    auditor = A.Auditor()
+    rows = [dict(zip(A.LEAKAGE_GATE_COLUMNS, r)) for r in _leakage_gate_rows("B", anchors)]
+    anchor_map = {r: (a.test_mask_hash, a.train_mask_hash) for r, a in anchors.items()}
+    A.audit_leakage_gate(rows, "B", anchor_map, auditor)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+
+
+@pytest.mark.parametrize("column,check", [
+    ("post_fit_test_mask_hash", "leakage_test_mask_changed"),
+    ("post_fit_train_mask_hash", "leakage_train_mask_changed"),
+    ("pre_fit_passed", "leakage_pre_fit_failed"),
+    ("post_fit_passed", "leakage_post_fit_failed"),
+    ("fit_boundary_status", "leakage_boundary_status"),
+    ("boundary_version", "leakage_boundary_version"),
+])
+def test_S2_audit_leakage_gate_negatives(anchors, column, check):
+    auditor = A.Auditor()
+    rows = [dict(zip(A.LEAKAGE_GATE_COLUMNS, r)) for r in _leakage_gate_rows("B", anchors)]
+    rows[0][column] = "tampered"
+    anchor_map = {r: (a.test_mask_hash, a.train_mask_hash) for r, a in anchors.items()}
+    A.audit_leakage_gate(rows, "B", anchor_map, auditor)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+def test_S2_audit_leakage_gate_row_count_and_duplicates(anchors):
+    anchor_map = {r: (a.test_mask_hash, a.train_mask_hash) for r, a in anchors.items()}
+    rows = [dict(zip(A.LEAKAGE_GATE_COLUMNS, r)) for r in _leakage_gate_rows("B", anchors)]
+
+    auditor = A.Auditor()
+    A.audit_leakage_gate(rows[:-1], "B", anchor_map, auditor)
+    assert any(f.check == "leakage_row_count" for f in auditor.blockers)
+
+    auditor2 = A.Auditor()
+    A.audit_leakage_gate(rows[:-1] + [dict(rows[0])], "B", anchor_map, auditor2)
+    assert any(f.check == "leakage_duplicate_key" for f in auditor2.blockers)

@@ -28,7 +28,8 @@ import csv
 import json
 import math
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
+from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -44,15 +45,22 @@ for _path in (str(RESEARCH_AUDIT), str(EXPERIMENTAL), str(EXPFAM_SRC)):
 
 # Phase 7e reuse.  Importing this module does not import em_runner.
 from run_heldout_k_selection_pilot import (  # noqa: E402
+    FitPayload,
     FrozenFitConfig,
     FrozenScoreConfig,
     HarnessStop,
+    ScoreOnlyTarget,
     SplitDiagnostics,
+    TrainingYValues,
     _expected_test_pairs,
     _readonly_copy,
+    _reject_forbidden_fit_objects,
     _require,
+    build_fit_payload,
     frozen_score_config,
     make_pair_split,
+    make_score_only_target,
+    make_training_y_values,
     score_config_hash,
     select_k_from_two_starts,
     stable_array_hash,
@@ -1258,12 +1266,781 @@ def run_record_diagnostics(out_dir: Path | None = None) -> dict[str, Any]:
     return payload
 
 
+
+
+# ===========================================================================
+# Phase 8b S2 — direct pre-smoke leakage boundary (Issue #51)
+# ===========================================================================
+#
+# S1 hard-stopped the fit path, so A01-A03 falsification was carried only by
+# the reused Phase 7e boundary.  S2 makes the Phase 8b boundary directly
+# testable WITHOUT opening the real EM path: an injectable adapter lets the
+# adversarial tests prove that a leaking payload is refused *before* any fit
+# call, and that a post-fit mask substitution is caught *before* scoring.
+#
+# This does NOT authorize smoke.  ``--smoke`` remains hard-stopped.
+
+
+LEAKAGE_BOUNDARY_VERSION = "phase8b-leakage-boundary-v1"
+MASKED_CANARY_VALUE = 0          # held-out dyads are filled with this constant
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bFitRequest:
+    """Immutable, train-only fit request.
+
+    There is deliberately **no field that can hold a scoring target**: the
+    held-out true Y has no representation on this object at all.
+    """
+
+    estimand: str
+    role: str
+    k_true: int
+    replicate: int
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    w_true: float
+    w0_true: float
+    fit_payload: FitPayload
+    fit_config: FrozenFitConfig
+    pre_fit_test_mask_hash: str
+    pre_fit_train_mask_hash: str
+    anchor_mask_hash: str
+    anchor_train_mask_hash: str
+    frozen_config_hash: str
+    score_config_hash: str
+    boundary_version: str = LEAKAGE_BOUNDARY_VERSION
+
+    def manifest_key(self) -> tuple[str, int, int, int, int]:
+        return (self.estimand, self.k_true, self.replicate, self.k, self.start)
+
+
+def build_fit_request(
+    manifest_row: ManifestRow,
+    training_values: TrainingYValues,
+    train_mask: np.ndarray,
+    test_mask: np.ndarray,
+    anchor: AnchorMask,
+) -> Phase8bFitRequest:
+    """Assemble a train-only request.  The held-out Y is never an argument."""
+
+    _require(type(training_values) is TrainingYValues, "fit request requires TrainingYValues")
+    payload = build_fit_payload(training_values, train_mask, MASKED_CANARY_VALUE)
+    return Phase8bFitRequest(
+        estimand=manifest_row.estimand,
+        role=manifest_row.role,
+        k_true=manifest_row.k_true,
+        replicate=manifest_row.replicate,
+        k=manifest_row.k,
+        start=manifest_row.start,
+        data_seed=manifest_row.data_seed,
+        split_seed=manifest_row.split_seed,
+        model_seed=manifest_row.model_seed,
+        w_true=manifest_row.w_true,
+        w0_true=manifest_row.w0_true,
+        fit_payload=payload,
+        fit_config=FrozenFitConfig(
+            family_x=FAMILY_X,
+            family_y=FAMILY_Y,
+            k_est=manifest_row.k,
+            L=L_SAMPLES,
+            num_iter=NUM_ITER,
+            seed=manifest_row.model_seed,
+            numerics_mode=NUMERICS_MODE,
+        ),
+        pre_fit_test_mask_hash=compute_split_mask_hash(test_mask),
+        pre_fit_train_mask_hash=compute_train_mask_hash(train_mask),
+        anchor_mask_hash=anchor.test_mask_hash,
+        anchor_train_mask_hash=anchor.train_mask_hash,
+        frozen_config_hash=frozen_config_hash(),
+        score_config_hash=score_config_hash(frozen_score_config()),
+    )
+
+
+# --- sealed fake adapter (S2) ---------------------------------------------
+#
+# The Phase 8b fake adapter is *sealed*: it takes no callback, lambda, partial
+# or closure, so no arbitrary code -- and in particular nothing that could
+# capture a ScoreOnlyTarget -- can be injected into the fit call.  The only
+# adversarial behaviour it can perform is one of a finite, explicit set of
+# mask mutations applied to the live mask state during the fit.
+
+
+class FakeMutationMode(Enum):
+    """The complete set of adversarial behaviours a fake fit may perform."""
+
+    NONE = "none"
+    TEST_MASK = "test_mask"
+    TRAIN_MASK = "train_mask"
+    BOTH_MASKS = "both_masks"
+
+
+@dataclass(slots=True)
+class MutableMaskState:
+    """The live masks the boundary hashes before AND after the fit.
+
+    The boundary re-reads *this* object after the adapter returns, so a
+    mutation performed inside ``fit`` is observable.  There is deliberately no
+    caller-supplied post-fit mask argument: the post-fit hash can only come
+    from the state the fit itself had access to.
+    """
+
+    test_mask: np.ndarray
+    train_mask: np.ndarray
+
+
+def _flip_one_upper_dyad(mask: np.ndarray) -> np.ndarray:
+    """Flip a single symmetric off-diagonal entry of a pair mask."""
+
+    flipped = np.array(mask, dtype=bool)
+    i, j = 0, 1
+    flipped[i, j] = not bool(flipped[i, j])
+    flipped[j, i] = flipped[i, j]
+    return flipped
+
+
+SEALED_FAKE_ADAPTER_SLOTS = (
+    "calls",
+    "mutation_mode",
+    "mask_state",
+    "mutations_applied",
+    "last_payload_hash",
+    "last_k_est",
+)
+
+# Names that would give an adapter a route to the held-out outcome or to
+# arbitrary injected code.  None of them may exist on an authorized adapter.
+FORBIDDEN_ADAPTER_ATTRS = (
+    "target", "score_target", "held_out_target", "test_values", "Y_full", "Y",
+    "on_fit", "callback", "hook", "func", "fn", "closure",
+)
+
+
+class SealedFakeFitAdapter:
+    """Test-only fit adapter with no arbitrary-code surface.
+
+    It records how many times the boundary actually invoked a fit, so an
+    adversarial test can assert ``calls == 0`` (refused before the fit) or
+    ``calls == 1`` (refused after the fit, before any score).  It never
+    imports or reaches ``em_runner``.
+    """
+
+    __slots__ = SEALED_FAKE_ADAPTER_SLOTS
+
+    def __init__(self, mask_state: MutableMaskState,
+                 mutation_mode: FakeMutationMode = FakeMutationMode.NONE) -> None:
+        _require(type(mask_state) is MutableMaskState,
+                 "sealed fake adapter requires a MutableMaskState")
+        _require(type(mutation_mode) is FakeMutationMode,
+                 "sealed fake adapter requires a FakeMutationMode")
+        self.calls = 0
+        self.mutation_mode = mutation_mode
+        self.mask_state = mask_state
+        self.mutations_applied = 0
+        self.last_payload_hash: str | None = None
+        self.last_k_est: int | None = None
+
+    def fit(self, request: Phase8bFitRequest) -> dict[str, Any]:
+        _require(type(request) is Phase8bFitRequest,
+                 "sealed fake adapter requires a Phase8bFitRequest")
+        self.calls += 1
+        self.last_payload_hash = request.fit_payload.payload_hash
+        self.last_k_est = request.k
+        self._mutate()
+        return {"fake": True, "k_est": request.k, "model_seed": request.model_seed}
+
+    def _mutate(self) -> None:
+        """The only adversarial action available: flip one dyad of a mask."""
+
+        mode = self.mutation_mode
+        if mode is FakeMutationMode.NONE:
+            return
+        state = self.mask_state
+        if mode in (FakeMutationMode.TEST_MASK, FakeMutationMode.BOTH_MASKS):
+            state.test_mask = _flip_one_upper_dyad(state.test_mask)
+        if mode in (FakeMutationMode.TRAIN_MASK, FakeMutationMode.BOTH_MASKS):
+            state.train_mask = _flip_one_upper_dyad(state.train_mask)
+        self.mutations_applied += 1
+
+
+def _require_adapter_authority(adapter: Any, score_target: ScoreOnlyTarget | None) -> None:
+    """A02: only the sealed, callback-free fake adapter may receive a fit.
+
+    Phase 8b S2 authorizes no real adapter at all, so an exact-type policy is
+    the tightest boundary available: a subclass, a wrapper, or anything that
+    captured a ``ScoreOnlyTarget`` is refused *before* the fit.  When the real
+    adapter is eventually opened it needs its own human-gated authority model.
+    """
+
+    _require(type(adapter).__name__ != "AuthorizedEMFitAdapter",
+             "the real EM adapter is not authorized in Phase 8b S2")
+    _require(type(adapter) is SealedFakeFitAdapter,
+             f"unauthorized fit adapter type: {type(adapter).__name__}")
+    _require(tuple(SealedFakeFitAdapter.__slots__) == SEALED_FAKE_ADAPTER_SLOTS,
+             "sealed fake adapter field schema changed")
+    for name in FORBIDDEN_ADAPTER_ATTRS:
+        _require(not hasattr(adapter, name), f"fit adapter exposes a forbidden field: {name}")
+    _require(type(adapter.mutation_mode) is FakeMutationMode,
+             "fake adapter mutation mode is unauthorized")
+    _require(type(adapter.mask_state) is MutableMaskState,
+             "fake adapter mask state is unauthorized")
+    _require(type(adapter.calls) is int and adapter.calls >= 0,
+             "fake adapter call counter is unauthorized")
+    # Defence in depth: nothing held in a sealed slot may be (or alias) the
+    # target.  The slot values are passed explicitly because the deep walker
+    # cannot see through ``__slots__``.
+    _reject_forbidden_fit_objects(
+        [getattr(adapter, name, None) for name in SEALED_FAKE_ADAPTER_SLOTS],
+        [score_target] if score_target is not None else [],
+    )
+
+
+def _require_adapter_state_binding(adapter: Any, mask_state: Any) -> None:
+    """A03: the adapter must hold the very state the boundary monitors.
+
+    Content hashing answers *whether* a mask changed; it cannot answer *whose*
+    mask changed.  If the adapter mutates state A while the boundary re-hashes
+    a same-content state B, a fit-time mutation is invisible.  So the binding
+    is by identity -- ``is``, not ``np.array_equal`` -- and it is required
+    before the fit, so a mismatched pair never reaches ``fit`` at all.
+
+    This is a different question from the mask *content* semantics: putting
+    freshly copied arrays inside one shared ``MutableMaskState`` stays legal.
+    """
+
+    _require(type(mask_state) is MutableMaskState,
+             "boundary requires a MutableMaskState")
+    adapter_state = getattr(adapter, "mask_state", None)
+    _require(adapter_state is not None, "fit adapter exposes no mask state to bind")
+    _require(type(adapter_state) is MutableMaskState,
+             "fake adapter mask state is unauthorized")
+    _require(adapter_state is mask_state,
+             "adapter/boundary mask state mismatch: the fit adapter does not hold "
+             "the mask state the boundary monitors")
+
+
+def _require_train_only_payload(request: Phase8bFitRequest, test_mask: np.ndarray) -> None:
+    """A01: prove the fit matrix carries no held-out outcome.
+
+    The payload is rebuilt from the train mask with a constant canary at every
+    held-out dyad, so any injected true Y at a held-out position changes both
+    the payload hash and the held-out slice.
+    """
+
+    payload = request.fit_payload
+    _require(type(payload) is FitPayload, "fit payload type is unauthorized")
+    _require(payload.provenance_version == "masked-fit-matrix-v1",
+             "fit payload provenance version changed")
+    _require(payload.canary_value == MASKED_CANARY_VALUE, "fit payload canary changed")
+
+    matrix = np.asarray(payload.Y_fit, dtype=np.float64)
+    _require(matrix.shape == payload.expected_shape, "fit payload shape changed")
+    _require(stable_array_hash(matrix) == payload.payload_hash, "fit payload hash mismatch")
+
+    held_out = np.asarray(test_mask, dtype=bool)
+    _require(held_out.shape == matrix.shape, "test mask shape does not match the fit payload")
+    held_out_values = matrix[np.triu(held_out, 1)]
+    _require(
+        bool(np.all(held_out_values == float(MASKED_CANARY_VALUE))),
+        "raw held-out Y reached the fit payload",
+    )
+
+    train = np.asarray(payload.train_mask, dtype=bool)
+    _require(stable_array_hash(train) == payload.train_mask_hash, "fit payload train mask changed")
+    _require(not np.any(train & held_out), "fit payload train mask overlaps the held-out mask")
+
+
+def _require_no_score_target(request: Phase8bFitRequest,
+                             score_target: ScoreOnlyTarget | None) -> None:
+    """A02: no scoring object, and no alias of its values, may reach the fit."""
+
+    for name in ("score_target", "target", "held_out_target", "test_values", "Y_full"):
+        _require(not hasattr(request, name), f"fit request exposes a scoring field: {name}")
+    targets = [score_target] if score_target is not None else []
+    # Deep traversal: rejects the object itself, its values array and any alias
+    # that shares memory with it, anywhere in the request graph.
+    _reject_forbidden_fit_objects(request, targets)
+
+
+def _require_manifest_binding(request: Phase8bFitRequest, manifest_row: ManifestRow) -> None:
+    """Every scientific coordinate must match the frozen manifest row."""
+
+    checks = (
+        ("estimand", request.estimand, manifest_row.estimand),
+        ("role", request.role, manifest_row.role),
+        ("K_TRUE", request.k_true, manifest_row.k_true),
+        ("replicate", request.replicate, manifest_row.replicate),
+        ("K", request.k, manifest_row.k),
+        ("start", request.start, manifest_row.start),
+        ("data_seed", request.data_seed, manifest_row.data_seed),
+        ("split_seed", request.split_seed, manifest_row.split_seed),
+        ("model_seed", request.model_seed, manifest_row.model_seed),
+        ("w_true", request.w_true, manifest_row.w_true),
+        ("w0_true", request.w0_true, manifest_row.w0_true),
+    )
+    for name, actual, expected in checks:
+        _require(actual == expected, f"fit request {name} does not match the manifest: "
+                                     f"{actual!r} != {expected!r}")
+    _require(type(request.fit_config) is FrozenFitConfig,
+             "fit request fit_config type is unauthorized")
+    _require(request.role == resolve_role(request.estimand), "fit request role is not the frozen role")
+    _require(request.w_true == resolve_w_true(request.estimand, request.k_true),
+             "fit request w_true does not match the frozen estimand rule")
+    _require(request.fit_config.k_est == manifest_row.k, "fit config k_est does not match candidate K")
+    _require(request.fit_config.seed == manifest_row.model_seed, "fit config seed is not the model seed")
+    _require(request.frozen_config_hash == frozen_config_hash(), "frozen config hash changed")
+    _require(request.score_config_hash == score_config_hash(frozen_score_config()),
+             "score config hash changed")
+    _require(request.boundary_version == LEAKAGE_BOUNDARY_VERSION, "leakage boundary version changed")
+
+
+def _require_mask_hashes(request: Phase8bFitRequest, train_mask: np.ndarray,
+                         test_mask: np.ndarray, label: str) -> None:
+    """Both sides must match the pre-fit values AND the Phase 7e anchor."""
+
+    test_hash = compute_split_mask_hash(test_mask)
+    train_hash = compute_train_mask_hash(train_mask)
+    _require(test_hash == request.pre_fit_test_mask_hash,
+             f"{label}: test mask hash differs from the pre-fit value")
+    _require(train_hash == request.pre_fit_train_mask_hash,
+             f"{label}: train mask hash differs from the pre-fit value")
+    _require(test_hash == request.anchor_mask_hash,
+             f"{label}: test mask hash differs from the Phase 7e anchor")
+    _require(train_hash == request.anchor_train_mask_hash,
+             f"{label}: train mask hash differs from the Phase 7e anchor")
+
+
+@dataclass(frozen=True, slots=True)
+class LeakageGateReport:
+    pre_fit_passed: bool
+    post_fit_passed: bool
+    fit_calls: int
+    pre_fit_test_mask_hash: str
+    pre_fit_train_mask_hash: str
+    post_fit_test_mask_hash: str
+    post_fit_train_mask_hash: str
+    anchor_mask_hash: str
+    anchor_train_mask_hash: str
+    boundary_version: str
+
+
+def _require_post_fit_masks(request: Phase8bFitRequest, mask_state: MutableMaskState) -> None:
+    """A03: re-hash the LIVE mask state after the adapter returns.
+
+    This is the guard that catches a mutation performed *inside* the fit: the
+    hashes come from the same object the adapter held, not from a value the
+    caller supplied afterwards.
+    """
+
+    _require(type(mask_state) is MutableMaskState, "boundary requires a MutableMaskState")
+    _require_mask_hashes(request, mask_state.train_mask, mask_state.test_mask, "post-fit")
+
+
+class Phase8bFitBoundary:
+    """Fail-closed boundary around a single fit invocation.
+
+    ``run`` refuses a leaking request or an unauthorized adapter BEFORE calling
+    the adapter, and refuses a mask mutated during the fit AFTER the adapter
+    returns but BEFORE any score is taken.
+    """
+
+    __slots__ = ("_adapter",)
+
+    def __init__(self, adapter: Any) -> None:
+        # Cheap structural check only.  The *authority* decision belongs to
+        # ``check_pre_fit`` so that every adversarial case can be falsified
+        # through the real ``run`` path rather than at construction time.
+        _require(adapter is not None and hasattr(adapter, "fit"), "adapter must expose fit()")
+        self._adapter = adapter
+
+    def check_pre_fit(self, request: Phase8bFitRequest, manifest_row: ManifestRow,
+                      mask_state: MutableMaskState,
+                      score_target: ScoreOnlyTarget | None) -> None:
+        _require(type(request) is Phase8bFitRequest, "boundary requires a Phase8bFitRequest")
+        _require(type(manifest_row) is ManifestRow, "boundary requires a ManifestRow")
+        _require(type(mask_state) is MutableMaskState, "boundary requires a MutableMaskState")
+        # Leakage checks run first: a smuggled held-out outcome -- on the
+        # adapter or in the request -- is the most severe condition and must
+        # not be masked by an unrelated binding error.
+        _require_adapter_authority(self._adapter, score_target)
+        _require_adapter_state_binding(self._adapter, mask_state)
+        _require_no_score_target(request, score_target)
+        _require_train_only_payload(request, mask_state.test_mask)
+        _require_mask_hashes(request, mask_state.train_mask, mask_state.test_mask, "pre-fit")
+        _require_manifest_binding(request, manifest_row)
+
+    def check_post_fit(self, request: Phase8bFitRequest, mask_state: MutableMaskState,
+                       result: Any, score_target: ScoreOnlyTarget | None) -> None:
+        _require_post_fit_masks(request, mask_state)
+        _require_train_only_payload(request, mask_state.test_mask)
+        _require_no_score_target(request, score_target)
+        _require_adapter_authority(self._adapter, score_target)
+        _require_adapter_state_binding(self._adapter, mask_state)
+        if result is not None:
+            _reject_forbidden_fit_objects(result, [score_target] if score_target is not None else [])
+
+    def run(self, request: Phase8bFitRequest, manifest_row: ManifestRow,
+            mask_state: MutableMaskState,
+            score_target: ScoreOnlyTarget | None) -> tuple[Any, LeakageGateReport]:
+        """Pre-fit gate -> exactly one adapter call -> post-fit gate.
+
+        The caller cannot supply a post-fit mask: the boundary re-reads the
+        same ``mask_state`` the adapter was able to touch.
+        """
+
+        self.check_pre_fit(request, manifest_row, mask_state, score_target)
+        pre_test = compute_split_mask_hash(mask_state.test_mask)
+        pre_train = compute_train_mask_hash(mask_state.train_mask)
+
+        result = self._adapter.fit(request)
+
+        self.check_post_fit(request, mask_state, result, score_target)
+        return result, LeakageGateReport(
+            pre_fit_passed=True,
+            post_fit_passed=True,
+            fit_calls=getattr(self._adapter, "calls", 1),
+            pre_fit_test_mask_hash=pre_test,
+            pre_fit_train_mask_hash=pre_train,
+            post_fit_test_mask_hash=compute_split_mask_hash(mask_state.test_mask),
+            post_fit_train_mask_hash=compute_train_mask_hash(mask_state.train_mask),
+            anchor_mask_hash=request.anchor_mask_hash,
+            anchor_train_mask_hash=request.anchor_train_mask_hash,
+            boundary_version=LEAKAGE_BOUNDARY_VERSION,
+        )
+
+
+# ===========================================================================
+# Smoke authorization gate (S2 adds the gate; it does NOT open smoke)
+# ===========================================================================
+
+
+SMOKE_GATE_NAMES = (
+    "ZERO_EM_GATE_PASS",
+    "LEAKAGE_GATE_PASS",
+    "ANCHOR_MASK_GATE_PASS",
+    "INDEPENDENT_REVIEW_PASS",
+    "HUMAN_SMOKE_APPROVAL",
+)
+
+# Gates a human must grant.  Code must never set these to True on its own.
+HUMAN_ONLY_SMOKE_GATES = ("INDEPENDENT_REVIEW_PASS", "HUMAN_SMOKE_APPROVAL")
+
+
+@dataclass(frozen=True, slots=True)
+class SmokeAuthorization:
+    zero_em_gate_pass: bool = False
+    leakage_gate_pass: bool = False
+    anchor_mask_gate_pass: bool = False
+    independent_review_pass: bool = False
+    human_smoke_approval: bool = False
+
+    def as_dict(self) -> dict[str, bool]:
+        return {
+            "ZERO_EM_GATE_PASS": self.zero_em_gate_pass,
+            "LEAKAGE_GATE_PASS": self.leakage_gate_pass,
+            "ANCHOR_MASK_GATE_PASS": self.anchor_mask_gate_pass,
+            "INDEPENDENT_REVIEW_PASS": self.independent_review_pass,
+            "HUMAN_SMOKE_APPROVAL": self.human_smoke_approval,
+        }
+
+    def missing(self) -> list[str]:
+        return [name for name, granted in self.as_dict().items() if not granted]
+
+    def authorized(self) -> bool:
+        return not self.missing()
+
+
+def current_smoke_authorization() -> SmokeAuthorization:
+    """The machine-checkable gates may be computed; the human gates may not.
+
+    ``INDEPENDENT_REVIEW_PASS`` and ``HUMAN_SMOKE_APPROVAL`` are always False
+    here by construction: no code path in this repository may grant them.
+    """
+
+    zero_em = run_validate_only()["em_fits_executed"] == 0
+    anchors = read_phase7e_anchor_masks()
+    mask_gates = run_mask_gate(anchors=anchors)
+    leakage = run_leakage_self_check()
+    return SmokeAuthorization(
+        zero_em_gate_pass=bool(zero_em),
+        leakage_gate_pass=bool(leakage["all_passed"]),
+        anchor_mask_gate_pass=all(g.passed for g in mask_gates),
+        independent_review_pass=False,   # human-only
+        human_smoke_approval=False,      # human-only
+    )
+
+
+# ===========================================================================
+# Leakage self-check: direct adversarial falsification (Issue #51, HIGH-01)
+# ===========================================================================
+#
+# LEAKAGE_GATE_PASS is derived from THIS battery, not from a positive control.
+# Each case declares what the boundary must do -- reject or accept, with how
+# many adapter calls and with which refusal reason -- and a case that does not
+# behave exactly that way fails the whole gate.
+
+
+@dataclass(frozen=True, slots=True)
+class _AdversarialTargetHoldingAdapter:
+    """Self-check fixture: an unauthorized adapter that captured the target.
+
+    It must never receive a fit.  ``fit`` is deliberately functional (it counts
+    the call and would hand back the held-out values) so that disabling the
+    adapter authority guard makes the A02 case visibly fail instead of
+    silently still passing.
+    """
+
+    score_target: Any
+    calls: list[int]
+
+    def fit(self, request: Phase8bFitRequest) -> dict[str, Any]:
+        self.calls.append(1)
+        return {"fake": True, "leaked": self.score_target.values}
+
+
+@dataclass(frozen=True, slots=True)
+class _SmuggledRequestWrapper:
+    """Self-check fixture: a wrapper that tries to carry the scoring target."""
+
+    inner: Phase8bFitRequest
+    stowaway: Any
+
+
+_LEAKAGE_FIXTURE_CACHE: dict[int, tuple[Any, ...]] = {}
+
+
+def _leakage_self_check_fixture(index: int = 0):
+    """A valid train-only request plus a FRESH mutable mask state.
+
+    The immutable half is memoised; the mask state is rebuilt every call so one
+    adversarial case cannot contaminate the next.
+    """
+
+    cached = _LEAKAGE_FIXTURE_CACHE.get(index)
+    if cached is None:
+        estimand = PRIMARY_ESTIMAND
+        anchors = read_phase7e_anchor_masks()
+        row = build_manifest(estimand)[index]
+        split = build_split_record(row.k_true, row.replicate)
+        data = _generate_cell(estimand, row.k_true, row.replicate)
+        Y = _readonly_copy(data["Y"], np.float64)
+        training = make_training_y_values(Y, split.train_mask)
+        score_target = make_score_only_target(Y, split.test_mask)
+        request = build_fit_request(row, training, split.train_mask, split.test_mask,
+                                    anchors[row.replicate])
+        cached = (row, split, Y, score_target, request)
+        _LEAKAGE_FIXTURE_CACHE[index] = cached
+    row, split, Y, score_target, request = cached
+    state = MutableMaskState(
+        test_mask=np.array(split.test_mask, dtype=bool),
+        train_mask=np.array(split.train_mask, dtype=bool),
+    )
+    return row, split, Y, score_target, request, state
+
+
+def _guarded_boundary_run(adapter: Any, request: Any, manifest_row: ManifestRow,
+                          mask_state: MutableMaskState,
+                          score_target: ScoreOnlyTarget | None) -> tuple[bool, str, int]:
+    """Run one case through the real boundary; report (rejected, reason, calls)."""
+
+    boundary = Phase8bFitBoundary(adapter)
+    try:
+        boundary.run(request, manifest_row, mask_state, score_target)
+    except HarnessStop as stop:
+        return True, str(stop), _adapter_calls(adapter)
+    return False, "", _adapter_calls(adapter)
+
+
+def _adapter_calls(adapter: Any) -> int:
+    calls = getattr(adapter, "calls", 0)
+    return len(calls) if isinstance(calls, list) else int(calls)
+
+
+def _case_positive_control() -> tuple[bool, str, int]:
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    adapter = SealedFakeFitAdapter(state)
+    return _guarded_boundary_run(adapter, request, row, state, target)
+
+
+def _case_raw_held_out_y() -> tuple[bool, str, int]:
+    """A01: the real held-out outcomes are written into the fit matrix."""
+
+    row, split, Y, target, request, state = _leakage_self_check_fixture()
+    payload = request.fit_payload
+    leaked = np.array(payload.Y_fit, dtype=np.float64)
+    rows_i, cols_i = np.where(np.triu(split.test_mask, 1))
+    leaked[rows_i, cols_i] = Y[rows_i, cols_i]
+    leaked[cols_i, rows_i] = Y[rows_i, cols_i]
+    if np.array_equal(leaked, payload.Y_fit):
+        return False, "A01 injection was a no-op", 0
+    tampered = replace(request, fit_payload=replace(
+        payload, Y_fit=leaked, payload_hash=stable_array_hash(leaked)))
+    adapter = SealedFakeFitAdapter(state)
+    return _guarded_boundary_run(adapter, tampered, row, state, target)
+
+
+def _case_malicious_adapter() -> tuple[bool, str, int]:
+    """A02: the adapter itself holds the ScoreOnlyTarget."""
+
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    adapter = _AdversarialTargetHoldingAdapter(score_target=target, calls=[])
+    return _guarded_boundary_run(adapter, request, row, state, target)
+
+
+def _case_smuggled_request() -> tuple[bool, str, int]:
+    """A02: a wrapper request carries the ScoreOnlyTarget alongside the real one."""
+
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    adapter = SealedFakeFitAdapter(state)
+    smuggled = _SmuggledRequestWrapper(inner=request, stowaway=target)
+    return _guarded_boundary_run(adapter, smuggled, row, state, target)
+
+
+def _case_mask_mutation(mode: FakeMutationMode) -> tuple[bool, str, int]:
+    """A03: the adapter mutates the live mask state during the fit."""
+
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    adapter = SealedFakeFitAdapter(state, mode)
+    rejected, reason, calls = _guarded_boundary_run(adapter, request, row, state, target)
+    if adapter.mutations_applied != 1:
+        return False, "the adapter did not mutate the mask during the fit", calls
+    return rejected, reason, calls
+
+
+def _case_test_mask_mutation() -> tuple[bool, str, int]:
+    return _case_mask_mutation(FakeMutationMode.TEST_MASK)
+
+
+def _case_train_mask_mutation() -> tuple[bool, str, int]:
+    return _case_mask_mutation(FakeMutationMode.TRAIN_MASK)
+
+
+def _case_both_mask_mutation() -> tuple[bool, str, int]:
+    return _case_mask_mutation(FakeMutationMode.BOTH_MASKS)
+
+
+def _case_adapter_state_binding() -> tuple[bool, str, int]:
+    """A03: the adapter holds a same-content DECOY state, not the monitored one.
+
+    Without the identity binding this attack is invisible: the adapter mutates
+    its own state during the fit while the boundary re-hashes an untouched
+    twin and reports post-fit PASS.
+    """
+
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    decoy = MutableMaskState(
+        test_mask=np.array(state.test_mask, dtype=bool),
+        train_mask=np.array(state.train_mask, dtype=bool),
+    )
+    if decoy is state or not np.array_equal(decoy.test_mask, state.test_mask):
+        return False, "the decoy state was not a distinct same-content twin", 0
+    # The adapter would mutate its own state; the boundary watches the decoy.
+    adapter = SealedFakeFitAdapter(state, FakeMutationMode.TEST_MASK)
+    rejected, reason, calls = _guarded_boundary_run(adapter, request, row, decoy, target)
+    if adapter.mutations_applied != 0:
+        return False, "the adapter mutated although the fit was refused", calls
+    return rejected, reason, calls
+
+
+def _case_anchor_pre_fit_binding() -> tuple[bool, str, int]:
+    """The Phase 7e anchor binding must be checked before the fit."""
+
+    row, _split, _Y, target, request, state = _leakage_self_check_fixture()
+    tampered = replace(request, anchor_mask_hash="0" * 64)
+    adapter = SealedFakeFitAdapter(state)
+    return _guarded_boundary_run(adapter, tampered, row, state, target)
+
+
+# (name, case, expect_rejected, expect_adapter_calls, expected reason fragment)
+LEAKAGE_SELF_CHECK_CASES: tuple[tuple[str, Any, bool, int, str], ...] = (
+    ("positive_control", _case_positive_control, False, 1, ""),
+    ("A01_raw_held_out_y", _case_raw_held_out_y, True, 0,
+     "raw held-out Y reached the fit payload"),
+    ("A02_malicious_adapter", _case_malicious_adapter, True, 0,
+     "unauthorized fit adapter type"),
+    ("A02_smuggled_request", _case_smuggled_request, True, 0,
+     "boundary requires a Phase8bFitRequest"),
+    ("A03_test_mask_mutation", _case_test_mask_mutation, True, 1,
+     "post-fit: test mask hash differs"),
+    ("A03_train_mask_mutation", _case_train_mask_mutation, True, 1,
+     "post-fit: train mask hash differs"),
+    ("A03_both_mask_mutation", _case_both_mask_mutation, True, 1,
+     "post-fit: test mask hash differs"),
+    ("A03_adapter_state_binding", _case_adapter_state_binding, True, 0,
+     "adapter/boundary mask state mismatch"),
+    ("anchor_pre_fit_binding", _case_anchor_pre_fit_binding, True, 0,
+     "differs from the Phase 7e anchor"),
+)
+
+LEAKAGE_SELF_CHECK_CASE_NAMES = tuple(case[0] for case in LEAKAGE_SELF_CHECK_CASES)
+
+
+def run_leakage_self_check() -> dict[str, Any]:
+    """Falsify every leakage guard directly.  Real EM fits = 0.
+
+    ``passed`` on a case means *the attack was rejected as specified*, never
+    that the attack succeeded.  ``all_passed`` is the AND over every declared
+    case; a missing, erroring, wrongly-timed or wrongly-reasoned case makes it
+    False.  The fake adapter is called several times across the battery, which
+    is why the fake and real counters are reported separately.
+    """
+
+    cases: dict[str, dict[str, Any]] = {}
+    fake_fit_calls_total = 0
+    for name, case_fn, expect_rejected, expect_calls, expect_reason in LEAKAGE_SELF_CHECK_CASES:
+        try:
+            rejected, reason, calls = case_fn()
+        except Exception as exc:  # fail closed: a broken case is a failed gate
+            cases[name] = {
+                "passed": False,
+                "rejected": False,
+                "adapter_calls": -1,
+                "expected_rejected": expect_rejected,
+                "expected_adapter_calls": expect_calls,
+                "expected_reason": expect_reason,
+                "reason": f"self-check case raised {type(exc).__name__}: {exc}",
+            }
+            continue
+        fake_fit_calls_total += max(int(calls), 0)
+        reason_ok = (expect_reason in reason) if expect_rejected else (reason == "")
+        cases[name] = {
+            "passed": bool(rejected == expect_rejected and calls == expect_calls and reason_ok),
+            "rejected": bool(rejected),
+            "adapter_calls": int(calls),
+            "expected_rejected": expect_rejected,
+            "expected_adapter_calls": expect_calls,
+            "expected_reason": expect_reason,
+            "reason": reason,
+        }
+    all_passed = (
+        set(cases) == set(LEAKAGE_SELF_CHECK_CASE_NAMES)
+        and all(case["passed"] for case in cases.values())
+    )
+    return {
+        "mode": "leakage-gate",
+        "all_passed": bool(all_passed),
+        "cases": cases,
+        "case_names": list(LEAKAGE_SELF_CHECK_CASE_NAMES),
+        "fake_fit_calls_total": fake_fit_calls_total,
+        "real_em_fits_executed": 0,
+        "em_fits_executed": 0,
+        "boundary_version": LEAKAGE_BOUNDARY_VERSION,
+    }
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Phase 8b K_TRUE robustness harness (Issue #49)")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--validate-only", action="store_true", help="static checks; EM fits = 0")
     mode.add_argument("--config-gate", action="store_true", help="G/M/MC gates; EM fits = 0")
     mode.add_argument("--record-diagnostics", action="store_true", help="RECORD ONLY; EM fits = 0")
+    mode.add_argument("--leakage-gate", action="store_true",
+                      help="exercise the leakage boundary with a fake adapter; EM fits = 0")
+    mode.add_argument("--smoke-authorization", action="store_true",
+                      help="report the smoke authorization gates; EM fits = 0")
     mode.add_argument("--canary", action="store_true", help="leakage falsification (requires EM gates)")
     mode.add_argument("--smoke", action="store_true", help="smoke selection (requires EM gates)")
     mode.add_argument("--full", action="store_true", help="full sweep (requires EM gates)")
@@ -1301,6 +2078,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = run_config_gate()
     elif args.record_diagnostics:
         result = run_record_diagnostics(args.out_dir)
+    elif args.leakage_gate:
+        result = run_leakage_self_check()
+        result.setdefault("mode", "leakage-gate")
+    elif args.smoke_authorization:
+        authorization = current_smoke_authorization()
+        result = {
+            "mode": "smoke-authorization",
+            "em_fits_executed": 0,
+            "gates": authorization.as_dict(),
+            "missing": authorization.missing(),
+            "authorized": authorization.authorized(),
+            "human_only_gates": list(HUMAN_ONLY_SMOKE_GATES),
+            "note": "S2 adds the gate; smoke remains hard-stopped until a human grants "
+                    "INDEPENDENT_REVIEW_PASS and HUMAN_SMOKE_APPROVAL",
+        }
     elif args.canary:
         _require_em_authorization(args, "canary")
         raise AssertionError("unreachable")
