@@ -413,23 +413,41 @@ MC5  各 new row の anchor_match == True
 
 ### 4.1 manifest（estimand あたり 168 行、`k_true → replicate → K → start` 昇順で凍結）
 
+列は 19 個。**§3.4 の M1 が要求する mask provenance 列をすべて含む**
+（`train_mask_hash` と `anchor_train_mask_hash` を含む）。
+
 ```csv
-fit_index,estimand,role,K_TRUE,replicate,K,start,data_seed,split_seed,split_mask_hash,
-mask_design,mask_group_id,anchor_mask_hash,intentional_seed_reuse,
-model_seed,w0_true,w_true
-1,B,sensitivity,1,1,1,1,51101,<split>,<hash>,S_C,r1,<anchor_hash>,True,541011,-1.0,2.598076211353316
-...
-168,B,sensitivity,5,3,7,2,51503,<split>,<hash>,S_C,r3,<anchor_hash>,True,583072,-1.0,1.161895003862225
+fit_index,estimand,role,K_TRUE,replicate,K,start,data_seed,split_seed,split_mask_hash,train_mask_hash,mask_design,mask_group_id,anchor_mask_hash,anchor_train_mask_hash,intentional_seed_reuse,model_seed,w0_true,w_true
+1,B,sensitivity,1,1,1,1,51101,42001,<test_hash>,<train_hash>,S_C,r1,<anchor_test_hash>,<anchor_train_hash>,True,541011,-1.0,2.598076211353316
+2,B,sensitivity,1,1,1,2,51101,42001,<test_hash>,<train_hash>,S_C,r1,<anchor_test_hash>,<anchor_train_hash>,True,541012,-1.0,2.598076211353316
+168,B,sensitivity,5,3,7,2,51503,42003,<test_hash>,<train_hash>,S_C,r3,<anchor_test_hash>,<anchor_train_hash>,True,583072,-1.0,1.161895003862225
 ```
 
-（上例は `HIERARCHY = H3_A` の場合。`H3_B` なら `role = coequal_B`、
-`ESTIMANDS != "AB"` なら `role = single`。§2.2b）
+Option A（`role = primary`）なら先頭 3 列が `<idx>,A,primary,...` となり、
+`w_true` は全行 `1.5` になる。
 
-Phase 7e schema との差分:
+（上例は `HIERARCHY = H3_A` の場合。`H3_B` なら `role = coequal_B`、
+`ESTIMANDS != "AB"` なら `role = single`。§2.2b。
+`split_seed` は current config が `MASK_DESIGN = S_C` のため `42000 + replicate`。）
+
+**header と全 sample row の field 数は一致していなければならない**（T12q 相当の検査対象）。
+
+Phase 7e schema との差分（**M1 の要求と完全に一致させる**）:
 **`estimand` / `role` / `K_TRUE` / `w0_true` / `w_true` に加え、
-§3.4 の mask provenance 列（`split_mask_hash` / `mask_design` / `mask_group_id` /
-`anchor_mask_hash` / `intentional_seed_reuse`）を追加**（design §10.5）。
-exact field name は既存 schema との整合を見て決めてよいが、上記の意味は必ず保持する。
+§3.4 の mask provenance 列を追加**（design §10.4 / §10.5）:
+
+```
+split_mask_hash          = stable_array_hash(test_mask)      （canonical、§3.4.0）
+train_mask_hash          = stable_array_hash(train_mask)
+mask_design              = S_A | S_B | S_C
+mask_group_id            = 同一 mask を共有する cell 群の識別子
+anchor_mask_hash         = Phase 7e stored test_mask_hash
+anchor_train_mask_hash   = Phase 7e stored train_mask_hash
+intentional_seed_reuse   = split seed の共有が意図的であることの明示フラグ
+```
+
+exact field name は既存 schema との整合を見て決めてよいが、
+**上記 7 列の意味はすべて保持する（M1 で必須、schema table で欠落という状態を作らない）。**
 
 `mask_group_id` は「同一 mask を共有する cell 群」の識別子である。
 S_A では `(K_TRUE, replicate)` ごとに別 ID、
@@ -594,7 +612,7 @@ K_TRUE=3 の 3 行は Phase 7e の `replicate_selection.csv` から**読み取�
 | T17 | `‖F‖_F² == d(1−uniq)`（全 k、tol 1e-9） | design (5.5) |
 | T18 | k=1 で `F` の rank == 1、全行ノルムが `√(1−uniq)` | K_TRUE=1 boundary |
 | T19 | k=1 で `Z → −Z` に対し score が不変 | O(1) 不変性 |
-| T20 | **config gate（G1–G5 および §3.4 の M0–M2 / MA / MB / MC）が違反時に `HarnessStop`** | fail-closed |
+| T20 | **config gate（G1–G5 および §3.4 の M0–M3 / MA / MB / MC1–MC5）が違反時に `HarnessStop`** | fail-closed |
 | T21 | **`diagnostics` の値がいかなる場合も full run を停止させない** | **HIGH-03: false failure の防止** |
 | T22 | `--full` が `--allow-em` 無しで拒否 | CLI gate |
 | T23 | `--full` が `--confirm-k-true-sweep` 無しで拒否 | CLI gate |
@@ -683,7 +701,7 @@ python tools/research_audit/run_k_true_robustness_sweep.py \
   Human Gate 2026-09-01 で確定済み）
 - **`role` が manifest / runinfo / report template に `A→primary` / `B→sensitivity` で固定されている**
   （design §16 Reporting freeze）
-- **`--config-gate` の MC1–MC4（S_C anchor mask 一致）が PASS**
+- **`--config-gate` の M0–M3 / MC1–MC5（S_C anchor mask 一致、test/train 両側）が PASS**
 - `--validate-only` / `--config-gate` / `--canary` / `--smoke` がすべて PASS
 - **smoke に対する independent review が完了し、人間が full run を明示的に承認している**
 - working tree が clean で、出力先ディレクトリが存在しない

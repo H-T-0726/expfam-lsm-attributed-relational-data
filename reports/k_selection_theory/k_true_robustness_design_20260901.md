@@ -738,13 +738,36 @@ split_seed = 42000 + replicate
 
 **重要:** `K_TRUE=3` を再実行しない。
 **既存 Phase 7e anchor の mask を reference とし、新規 `K_TRUE` の mask をその reference へ揃える。**
-実装時には最低限、replicate ごとに
+
+**canonical hash contract（frozen・implementation plan §3.4.0 と同一）:**
+
+Phase 7e artifact が保存している mask hash 列は **`train_mask_hash` と `test_mask_hash` の 2 つ**であり、
+**`split_mask_hash` という列は存在しない。** Phase 8a 側の field は次のとおり定義する。
 
 ```
-split_mask_hash(new K_TRUE, rep) == split_mask_hash(phase7e K3 anchor, rep)
+canonical Phase 8a field:
+    split_mask_hash        := stable_array_hash(test_mask)
+
+Phase 7e anchor correspondence:
+    anchor_mask_hash       := Phase 7e stored test_mask_hash
+
+blocking train-side evidence:
+    anchor_train_mask_hash := Phase 7e stored train_mask_hash
+    train_mask_hash        := stable_array_hash(train_mask)
 ```
 
-を **full fit より前の zero-EM provenance gate** で assert する（implementation plan §3.4）。
+H4 で揃えたい科学的対象は **held-out pair-index mask（= `test_mask`）** であるため、
+canonical object を `test_mask` に固定する。
+
+実装時には最低限、replicate ごとに **test 側と train 側の両方**を
+
+```
+stable_array_hash(test_mask_new)  == Phase 7e stored test_mask_hash(rep)
+stable_array_hash(train_mask_new) == Phase 7e stored train_mask_hash(rep)
+```
+
+として **full fit より前の zero-EM provenance gate** で assert する（implementation plan §3.4）。
+あわせて `validate_pair_masks` により train/test の complement semantics も確認する。
 
 **S-c を採用する場合でも、次のようには呼ばない:**
 
@@ -768,11 +791,13 @@ S-a / S-b は *alternatives considered — NOT SELECTED* として履歴のた�
 
 **S-c 採用に伴う運用条件（frozen）:**
 
-- **`K_TRUE = 3` を再実行しない。** Phase 7e artifact の保存済み `split_mask_hash` /
-  split seed / provenance を **read-only reference** として使用する。
+- **`K_TRUE = 3` を再実行しない。** Phase 7e artifact の保存済み
+  **`test_mask_hash` / `train_mask_hash`**（Phase 8a ではそれぞれ `anchor_mask_hash` /
+  `anchor_train_mask_hash` として扱う）・split seed・provenance を
+  **read-only reference** として使用する。
 - 新規 `K_TRUE ∈ {1,2,4,5}` の mask を、その reference へ揃える。
 - **full fit の前に §10.4 の zero-EM provenance gate を必ず通す**
-  （implementation plan §3.4 の MC1–MC4）。
+  （implementation plan §3.4 の M0–M3 / MC1–MC5。test 側と train 側の両方を検査する）。
 - 一致しない場合は STOP。seed rescue / Phase 7e rerun / tolerance relaxation /
   post-hoc mask replacement / failed cell drop / **new reference mask generation** をすべて禁止する。
 
@@ -1065,7 +1090,7 @@ Codex independent review の分類を反映した最終 triage。
 ```
 implementation
   -> static / adversarial tests
-  -> zero-EM provenance gate (MC1-MC4 を含む)
+  -> zero-EM provenance gate (M0-M3 / MC1-MC5 を含む)
   -> smoke
   -> independent review
   -> explicit human approval
@@ -1187,9 +1212,11 @@ Phase 7e : split_seed = 42000 + replicate   （reference・変更しない）
 **必須条件（frozen）:**
 
 - **`K_TRUE = 3` を再実行しない。**
-- Phase 7e artifact の保存済み `split_mask_hash` / split seed / provenance を
-  **read-only reference** として使用する。
-- **full fit の前に zero-EM gate（implementation plan §3.4 MC1–MC4）を必ず通す。**
+- Phase 7e artifact の保存済み **`test_mask_hash` / `train_mask_hash`**・split seed・provenance を
+  **read-only reference** として使用する（Phase 8a ではそれぞれ `anchor_mask_hash` /
+  `anchor_train_mask_hash`。canonical 定義は §10.4）。
+- **full fit の前に zero-EM gate（implementation plan §3.4 の M0–M3 / MC1–MC5）を必ず通す。**
+  **test 側と train 側の両方**が anchor と一致することを要求する。
 - **同一 mask は same dataset を意味しない。** 各 `K_TRUE` の `Z` / `F` / `X` / `Y` は
   その `K_TRUE` に応じた generator output であり、揃っているのは held-out pair index のみである。
 
