@@ -14,6 +14,7 @@ import dataclasses
 import importlib
 import json
 import math
+import pathlib
 import subprocess
 import sys
 from pathlib import Path
@@ -2675,7 +2676,7 @@ def test_S2b_smoke_fit_config_rejects_a_foreign_row():
 
 def test_S2b_artifact_schema_is_defined_and_nothing_is_written(tmp_path):
     required = {
-        "run_code_sha", "approved_main_sha", "protocol_hash", "estimand", "role",
+        "run_code_sha", "approved_scientific_main_sha", "protocol_hash", "estimand", "role",
         "K_TRUE", "replicate", "K", "start", "data_seed", "split_seed", "model_seed",
         "pre_fit_test_hash", "pre_fit_train_hash", "post_fit_test_hash",
         "post_fit_train_hash", "anchor_test_hash", "anchor_train_hash",
@@ -2798,7 +2799,7 @@ def _production_authorization(**overrides):
     """
 
     fields = {
-        "issue_number": H.SMOKE_ISSUE_NUMBER,
+        "issue_number": H.SMOKE_EXECUTION_ISSUE_NUMBER,
         "approved_main_sha": "1" * H.SMOKE_SHA_LENGTH,
         "protocol_hash": H.smoke_protocol_hash(),
         "estimand": H.SMOKE_ESTIMAND,
@@ -2817,23 +2818,30 @@ def _production_authorization(**overrides):
     return H.SmokeExecutionAuthorization(_authority=H._SMOKE_EXECUTION_AUTHORITY, **fields)
 
 
-def test_HIGH01_trusted_main_sha_is_absent_in_this_branch():
-    assert H.current_expected_smoke_main_sha() is None
+def test_S2c_trusted_main_sha_is_the_approved_baseline():
+    """Issue #55 §6: the reviewed PR #54 merge commit, exactly."""
+
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert H.current_expected_smoke_main_sha() == H.APPROVED_SCIENTIFIC_MAIN_SHA
+    H._require_full_commit_sha(H.APPROVED_SCIENTIFIC_MAIN_SHA, "baseline")
+    # binding the baseline is NOT an execution approval
+    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_authorization().authorized() is False
 
 
 def test_HIGH01_trusted_sha_source_is_a_literal(monkeypatch):
     """§21: the trusted source cannot be steered by env, CLI, git or the record."""
 
     executable = _executable_body(H.current_expected_smoke_main_sha)
-    assert executable.strip() == "return None"
+    assert executable.strip() == "return APPROVED_SCIENTIFIC_MAIN_SHA"
     for forbidden in ("getenv", "environ", "argv", "subprocess", "git", "run(",
-                      "approved_main_sha", "authorization", "Path", "open("):
+                      "rev-parse", "approved_main_sha", "authorization", "Path", "open("):
         assert forbidden not in executable, forbidden
 
     for name in ("APPROVED_MAIN_SHA", "SMOKE_APPROVED_SHA", "HUMAN_SMOKE_APPROVAL",
                  "INDEPENDENT_REVIEW_PASS", "PHASE8B_APPROVED_MAIN_SHA"):
-        monkeypatch.setenv(name, "a" * 40)
-    assert H.current_expected_smoke_main_sha() is None
+        monkeypatch.setenv(name, "b" * 40)
+    assert H.current_expected_smoke_main_sha() == H.APPROVED_SCIENTIFIC_MAIN_SHA
     assert H.current_smoke_execution_authorization() is None
 
     options = {option for action in H._build_parser()._actions
@@ -2865,18 +2873,29 @@ def test_HIGH01_identity_gate_is_not_a_self_comparison():
     assert "authorization.approved_main_sha == authorization.approved_main_sha" not in executable
 
     production = _executable_body(H.validate_smoke_execution_authorization)
-    assert "current_expected_smoke_main_sha()" in production
+    assert "trusted_main_sha_for(test_only)" in production
     assert "authorization.approved_main_sha" not in production
+
+    # and the single trusted resolver reads the production source for real runs
+    resolver = _executable_body(H.trusted_main_sha_for)
+    assert "current_expected_smoke_main_sha()" in resolver
+    assert "authorization" not in resolver
+    assert H.trusted_main_sha_for(False) == H.current_expected_smoke_main_sha()
+    assert H.trusted_main_sha_for(True) == H._TEST_EXPECTED_MAIN_SHA
 
 
 def test_HIGH01_production_wrapper_never_selects_the_test_path():
     """Production callers always pass test_only=False literally."""
 
-    for caller in (H.run_real_canary, H.run_real_smoke):
+    for caller in (H.run_real_canary, H.run_real_smoke, H.run_real_canary_cli,
+                   H.run_real_smoke_cli):
         source = _inspect.getsource(caller)
-        assert "test_only=False" in source
         assert "test_only=True" not in source
         assert "_TEST_EXPECTED_MAIN_SHA" not in source
+    # they all delegate to the one production workflow, which is test_only=False
+    workflow = _inspect.getsource(H._run_production_execution)
+    assert "test_only=False" in workflow
+    assert "test_only=True" not in workflow
     for name in ("main", "_require_em_authorization", "_build_parser",
                  "current_expected_smoke_main_sha"):
         assert "_TEST_EXPECTED_MAIN_SHA" not in _inspect.getsource(getattr(H, name)), name
@@ -2890,7 +2909,7 @@ def test_HIGH01_absent_trusted_sha_blocks_a_valid_looking_authorization(monkeypa
                                                                        entrypoint):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
-    assert H.current_expected_smoke_main_sha() is None
+    monkeypatch.setattr(H, "current_expected_smoke_main_sha", lambda: None)
 
     authorization = _production_authorization(approved_main_sha="1" * 40)
     with pytest.raises(HarnessStop) as excinfo:
@@ -2985,14 +3004,31 @@ def test_HIGH01_test_path_also_requires_sha_identity(wrong):
     assert "approved main SHA does not match the reviewed execution SHA" in str(excinfo.value)
 
 
-def test_HIGH01_no_production_authorization_can_pass_in_this_branch():
-    """§16: production execution is intentionally impossible on this branch."""
+def test_S2c_only_the_approved_baseline_sha_validates():
+    """The bound baseline is accepted; every other well-formed SHA is refused."""
 
-    assert H.current_expected_smoke_main_sha() is None
-    for sha in ("0" * 40, "1" * 40, "a" * 40, "6e3641bdb8470415601e60f21f54ede20af0926e"):
-        with pytest.raises(HarnessStop):
+    # positive: validation alone, never orchestration -- no real fit is attempted
+    H.validate_smoke_execution_authorization(
+        _production_authorization(approved_main_sha=H.APPROVED_SCIENTIFIC_MAIN_SHA),
+        test_only=False)
+
+    for sha in ("0" * 40, "1" * 40, "a" * 40,
+                "6e3641bdb8470415601e60f21f54ede20af0926e",
+                "e72eaf864b617a6e84837b57e0b80ae1eee52320"):
+        with pytest.raises(HarnessStop) as excinfo:
             H.validate_smoke_execution_authorization(
                 _production_authorization(approved_main_sha=sha), test_only=False)
+        assert "approved main SHA does not match" in str(excinfo.value)
+
+
+def test_S2c_production_execution_is_still_impossible():
+    """§46: a valid SHA binding is not an execution authorization."""
+
+    assert H.current_smoke_execution_authorization() is None
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert authorization.authorized() is False
 
 
 def test_HIGH01_fake_orchestration_still_completes_end_to_end():
@@ -3016,9 +3052,3606 @@ def test_HIGH01_authorization_report_exposes_the_trusted_sha_state(capsys):
 
     assert H.main(["--smoke-authorization"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["trusted_main_sha_present"] is False
+    assert payload["trusted_main_sha_present"] is True
     assert payload["execution_authorization_present"] is False
     assert payload["authorized"] is False
     rendered = json.dumps(payload)
     for leak in ("0" * 40, "1" * 40, "a" * 40, "approved_main_sha"):
         assert leak not in rendered, leak
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA not in rendered
+
+
+# ===========================================================================
+# Phase 8b S2c-A — baseline binding, execution artifacts, audit (Issue #55)
+# ===========================================================================
+#
+# The production orchestration is driven end-to-end with a Phase 7e test-only
+# fit adapter writing into tmp_path.  Real EM executions remain 0 and no
+# artifact is ever written under expfam/results.
+
+
+import hashlib as _hashlib  # noqa: E402
+import shutil as _shutil  # noqa: E402
+
+
+APPROVED_BASELINE = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+
+def _stamp_canary_audit_digests(directory):
+    """Re-bind a fixture's verdict to the fixture's own canary artifacts.
+
+    Test-only, and for the same reason the baseline is re-stamped: the auditor
+    audits a copy stamped with the real frozen baseline, so the bytes it hashed
+    are not the bytes of the test-only fixture.  Attacks mutate the artifacts
+    AFTER this call, so the stale-PASS binding remains under test.
+    """
+
+    path = directory / A.CANARY_AUDIT_FILENAME
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    for name, key in A.CANARY_AUDIT_CONTENT_KEYS:
+        payload[key] = _hashlib.sha256((directory / name).read_bytes()).hexdigest()
+    path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    return payload
+
+
+def _write_test_canary_audit(directory):
+    """Publish canary_audit.json with the INDEPENDENT auditor, test-only lineage.
+
+    The auditor hard-codes the real frozen baseline (that is the point of it
+    being independent), so the fixture audits a copy stamped with that baseline
+    and then re-stamps the verdict with the test-only trusted SHA.  The verdict
+    itself is produced by ``audit_k_true_robustness_sweep``, never by the
+    runner.
+    """
+
+    staging = directory.parent / (directory.name + "_auditstage")
+    _shutil.copytree(directory, staging)
+    for name in ("authorization.json", "canary.json"):
+        _patch_json(staging / name, approved_scientific_main_sha=APPROVED_BASELINE)
+    auditor = A.audit_canary_run_dir(staging, expect_execution_mode="test_only")
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    A.write_canary_audit_report(staging, auditor)
+    payload = json.loads((staging / A.CANARY_AUDIT_FILENAME).read_text(encoding="utf-8"))
+    payload["approved_scientific_main_sha"] = H._TEST_EXPECTED_MAIN_SHA
+    (directory / A.CANARY_AUDIT_FILENAME).write_text(
+        json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    _shutil.rmtree(staging)
+    return _stamp_canary_audit_digests(directory)
+
+
+def _fake_run(out_dir, *, authorization=None, run_code_sha="0" * 40, audit_canary=True):
+    """Drive the production canary+smoke wiring with fake fits into tmp_path."""
+
+    authorization = authorization or _test_authorization()
+    canary_recorder = _FakeFitRecorder()
+    canary = H._execute_real_canary_test_only(
+        authorization, out_dir, adapter=_test_adapter(canary_recorder),
+        run_code_sha=run_code_sha)
+    if audit_canary:
+        _write_test_canary_audit(out_dir)
+    smoke_recorder = _FakeFitRecorder()
+    smoke = H._execute_real_smoke_test_only(
+        authorization, out_dir, adapter=_test_adapter(smoke_recorder),
+        run_code_sha=run_code_sha)
+    return canary, smoke, canary_recorder, smoke_recorder
+
+
+def _promote_to_real_fixture(source, destination):
+    """Artifact-level fixture: the same files stamped as a real execution.
+
+    The audit is an artifact-only auditor, so it is exercised against a
+    synthesized artifact set exactly like the config/selection audits are.
+    """
+
+    _shutil.copytree(source, destination)
+    patches = {
+        "authorization.json": {"approved_scientific_main_sha": APPROVED_BASELINE},
+        "canary.json": {"approved_scientific_main_sha": APPROVED_BASELINE,
+                        "execution_mode": "real", "real_canary_fits_executed": 2},
+        "canary_audit.json": {"approved_scientific_main_sha": APPROVED_BASELINE,
+                              "canary_execution_mode": "real",
+                              "actual_canary_fits": 2},
+        "runinfo.json": {"approved_scientific_main_sha": APPROVED_BASELINE,
+                         "actual_canary_fits": 2, "actual_smoke_fits": 6,
+                         "working_tree_clean": True,
+                         "approved_baseline_is_ancestor": True},
+        "smoke_summary.json": {"approved_scientific_main_sha": APPROVED_BASELINE,
+                               "actual_smoke_fits": 6},
+    }
+    for name, patch in patches.items():
+        path = destination / name
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload.update(patch)
+        path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+
+    # the canary artifacts were just re-stamped; re-bind the verdict to them
+    _stamp_canary_audit_digests(destination)
+
+    path = destination / "smoke_fit_results.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    canary_i = header.index("real_canary_fits_executed")
+    smoke_i = header.index("real_smoke_fits_executed")
+    baseline_i = header.index("approved_scientific_main_sha")
+    fixed = [lines[0]]
+    for line in lines[1:]:
+        cells = line.split(",")
+        cells[canary_i], cells[smoke_i] = "2", "6"
+        cells[baseline_i] = APPROVED_BASELINE
+        fixed.append(",".join(cells))
+    path.write_text("\n".join(fixed) + "\n", encoding="utf-8")
+    return destination
+
+
+def _real_fixture(tmp_path):
+    fake_dir = tmp_path / "fake"
+    _fake_run(fake_dir)
+    return _promote_to_real_fixture(fake_dir, tmp_path / "real")
+
+
+def _patch_json(path, **updates):
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(updates)
+    path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    return payload
+
+
+def _csv_rows(path):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return lines[0].split(","), [line.split(",") for line in lines[1:]]
+
+
+def _write_csv_rows(path, header, rows):
+    path.write_text("\n".join([",".join(header), *(",".join(r) for r in rows)]) + "\n",
+                    encoding="utf-8")
+
+
+# --- approved scientific baseline ------------------------------------------
+
+
+def test_S2c_baseline_is_the_pr54_merge_commit():
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == APPROVED_BASELINE
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == APPROVED_BASELINE
+    assert H.current_expected_smoke_main_sha() == APPROVED_BASELINE
+
+
+def test_S2c_run_code_sha_is_provenance_not_approval():
+    """§7: git may supply provenance, never approval."""
+
+    trusted = _executable_body(H.current_expected_smoke_main_sha)
+    for forbidden in ("subprocess", "rev-parse", "_git_output", "current_run_code_sha"):
+        assert forbidden not in trusted, forbidden
+
+    provenance = _executable_body(H.current_run_code_sha)
+    assert "_git_output" in provenance
+    assert "APPROVED_SCIENTIFIC_MAIN_SHA" not in provenance
+
+    # the two are separate fields everywhere they are recorded
+    assert "run_code_sha" in H.SMOKE_ARTIFACT_COLUMNS
+    assert "approved_scientific_main_sha" in H.SMOKE_ARTIFACT_COLUMNS
+
+
+def test_S2c_ancestry_check_is_a_guard_not_an_approval():
+    """§27: descending from the baseline does not make a commit approved."""
+
+    assert H.approved_baseline_is_ancestor() is True
+    source = _inspect.getsource(H.approved_baseline_is_ancestor)
+    assert "never an approval" in source
+    # and it is not consulted by the authorization validator
+    assert "approved_baseline_is_ancestor" not in _inspect.getsource(
+        H._validate_smoke_execution_authorization)
+
+
+# --- issue lineage ---------------------------------------------------------
+
+
+def test_S2c_protocol_and_execution_issues_are_separate():
+    assert H.SMOKE_PROTOCOL_ISSUE_NUMBER == 53
+    assert H.SMOKE_EXECUTION_ISSUE_NUMBER == 55
+    assert A.SMOKE_PROTOCOL_ISSUE_NUMBER == 53
+    assert A.SMOKE_EXECUTION_ISSUE_NUMBER == 55
+    # the protocol hash carries the PROTOCOL issue only
+    assert H.smoke_protocol_config()["issue"] == 53
+    assert not hasattr(H, "SMOKE_ISSUE_NUMBER"), "the ambiguous name must be gone"
+    # the authorization carries the EXECUTION issue only
+    assert H._make_test_smoke_authorization().issue_number == 55
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(
+            H._make_test_smoke_authorization(issue_number=53), test_only=True)
+
+
+def test_S2c_protocol_hash_is_unchanged_by_the_execution_lineage():
+    """§45: execution metadata must not perturb the scientific protocol hash."""
+
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    config = H.smoke_protocol_config()
+    assert 55 not in config.values()
+    assert "execution_issue" not in config
+    assert "approved_scientific_main_sha" not in config
+    assert "run_code_sha" not in config
+
+
+# --- current authorization state -------------------------------------------
+
+
+def test_S2c_execution_authorization_is_still_absent():
+    assert H.current_smoke_execution_authorization() is None
+    gates = H.current_smoke_authorization()
+    assert gates.independent_review_pass is False
+    assert gates.human_smoke_approval is False
+    assert gates.authorized() is False
+
+
+@pytest.mark.parametrize("command", ["canary", "smoke"])
+def test_S2c_cli_gate_still_refuses_every_em_command(command):
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main([f"--{command}", "--allow-em"])
+    message = str(excinfo.value)
+    assert "not authorized" in message
+    assert "SmokeExecutionAuthorization" in message
+    assert APPROVED_BASELINE in message, "the bound baseline should be reported"
+
+
+def test_S2c_full_remains_isolated():
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    assert "never be reused for --full" in str(excinfo.value)
+    executable = _executable_body(H._require_em_authorization)
+    full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
+    assert "current_smoke_execution_authorization" not in full_branch
+
+
+def test_S2c_real_adapter_is_unreachable_through_the_cli(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+        with pytest.raises(HarnessStop):
+            H.main(command)
+    assert _AdapterTripwire.constructions == 0
+    assert _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+
+
+def test_S2c_production_cli_helpers_never_touch_the_test_path():
+    forbidden = ("_execute_real_canary_test_only", "_execute_real_smoke_test_only",
+                 "_make_test_smoke_authorization", "_make_test_fit_adapter",
+                 "_TEST_EXPECTED_MAIN_SHA")
+    for function in (H.run_real_canary_cli, H.run_real_smoke_cli, H.main,
+                     H._require_em_authorization, H._build_parser):
+        source = _inspect.getsource(function)
+        for name in forbidden:
+            assert name not in source, (function.__name__, name)
+    assert "test_only=False" in _inspect.getsource(H._run_production_execution)
+    for name in forbidden:
+        assert name not in _inspect.getsource(H._run_production_execution), name
+
+
+# --- artifact contract -----------------------------------------------------
+
+
+def test_S2c_artifact_contract_is_frozen():
+    assert H.SMOKE_ARTIFACT_DIRNAME == "k_true_robustness_smoke_20260901"
+    assert H.SMOKE_ARTIFACT_DIR == (
+        ROOT / "expfam" / "results" / "k_selection" / H.SMOKE_ARTIFACT_DIRNAME)
+    assert set(H.SMOKE_ARTIFACT_FILES) == {
+        "authorization.json", "canary.json", "canary_audit.json", "runinfo.json",
+        "smoke_fit_results.csv", "smoke_summary.json", "audit_report.json"}
+    # the independent canary verdict is a distinct, reserved filename
+    assert H.CANARY_AUDIT_FILENAME == A.CANARY_AUDIT_FILENAME == "canary_audit.json"
+    assert set(A.CANARY_AUDIT_INPUT_FILES) == {"authorization.json", "canary.json"}
+    # audit_report.json is the audit OUTPUT, never a required input
+    assert "audit_report.json" not in H.SMOKE_AUDIT_INPUT_FILES
+    assert set(H.SMOKE_AUDIT_INPUT_FILES) == set(A.SMOKE_AUDIT_INPUT_FILES)
+    assert tuple(H.SMOKE_ARTIFACT_COLUMNS) == A.SMOKE_FIT_RESULTS_COLUMNS
+
+
+def test_S2c_no_artifact_directory_is_created_by_this_branch():
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    status = subprocess.run(["git", "status", "--porcelain", "--", "expfam/results"],
+                            capture_output=True, text=True, cwd=ROOT)
+    assert status.returncode == 0 and status.stdout.strip() == "", status.stdout
+
+
+def test_S2c_artifact_directory_must_be_new(tmp_path):
+    directory = tmp_path / "run"
+    H.require_new_smoke_artifact_dir(directory)
+    assert directory.is_dir()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_new_smoke_artifact_dir(directory)
+    assert "already exists" in str(excinfo.value)
+
+
+def test_S2c_existing_files_are_never_overwritten(tmp_path):
+    path = tmp_path / "canary.json"
+    H.write_json_artifact(path, {"a": 1})
+    with pytest.raises(HarnessStop) as excinfo:
+        H.write_json_artifact(path, {"a": 2})
+    assert "refusing to overwrite" in str(excinfo.value)
+    assert json.loads(path.read_text(encoding="utf-8")) == {"a": 1}
+
+
+def test_S2c_artifact_directory_cannot_be_a_phase7e_path():
+    with pytest.raises(HarnessStop):
+        H.require_new_smoke_artifact_dir(H.PHASE7E_DIR)
+    with pytest.raises(HarnessStop):
+        H.require_existing_smoke_artifact_dir(H.PHASE7E_DIR)
+
+
+def test_S2c_writes_are_atomic(tmp_path, monkeypatch):
+    """A failed write leaves neither a partial file nor a temp file behind."""
+
+    path = tmp_path / "runinfo.json"
+    real_replace = __import__("os").replace
+
+    def exploding_replace(src, dst):
+        raise OSError("simulated crash before rename")
+
+    monkeypatch.setattr("os.replace", exploding_replace)
+    with pytest.raises(OSError):
+        H.write_json_artifact(path, {"a": 1})
+    monkeypatch.setattr("os.replace", real_replace)
+
+    assert not path.exists(), "no partial artifact may survive"
+    assert list(tmp_path.iterdir()) == [], "no temporary file may be left behind"
+
+
+@pytest.mark.parametrize("content", ["", "   ", "{", '{"a": 1', "[1,2]", "null"])
+def test_S2c_partial_or_malformed_json_is_refused(tmp_path, content):
+    path = tmp_path / "canary.json"
+    path.write_text(content, encoding="utf-8")
+    with pytest.raises(HarnessStop):
+        H.read_json_artifact(path)
+
+
+def test_S2c_smoke_contract_mode_is_zero_em(capsys):
+    assert H.main(["--smoke-contract"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["em_fits_executed"] == 0
+    assert payload["artifact_directory_exists"] is False
+    assert payload["approved_scientific_main_sha"] == APPROVED_BASELINE
+    assert payload["trusted_main_sha_present"] is True
+    assert payload["execution_authorization_present"] is False
+    assert payload["protocol_origin_issue"] == 53 and payload["execution_issue"] == 55
+    assert payload["expected_canary_fits"] == 2 and payload["expected_smoke_fits"] == 6
+    assert payload["expected_real_em_budget"] == 8
+    assert payload["selected_k_interpretation"] == "record_only"
+    assert payload["k_recovery_evaluated"] is False
+    assert payload["real_canary_fits_executed"] == 0
+    assert payload["real_smoke_fits_executed"] == 0
+
+
+# --- fake end-to-end execution wiring --------------------------------------
+
+
+def test_S2c_fake_end_to_end_writes_the_frozen_artifact_set(tmp_path):
+    out = tmp_path / "run"
+    canary, smoke, canary_recorder, smoke_recorder = _fake_run(out)
+
+    assert canary_recorder.calls == 2
+    assert canary_recorder.seeds == [641011, 641011]
+    assert smoke_recorder.calls == 6
+    assert smoke_recorder.seeds == [641021, 641022, 641031, 641032, 641041, 641042]
+
+    assert sorted(p.name for p in out.iterdir()) == [
+        "authorization.json", "canary.json", "canary_audit.json", "runinfo.json",
+        "smoke_fit_results.csv", "smoke_summary.json"]
+    assert not any(p.name.startswith(".tmp-") for p in out.iterdir())
+
+    assert canary["canary_status"] == "PASS"
+    assert canary["real_canary_fits_executed"] == 0
+    assert smoke["real_smoke_fits_executed"] == 0
+    assert smoke["selected_k_interpretation"] == "record_only"
+    assert smoke["k_recovery_evaluated"] is False
+    assert "em_runner" not in sys.modules
+
+
+def test_S2c_smoke_artifacts_carry_the_frozen_protocol(tmp_path):
+    out = tmp_path / "run"
+    _fake_run(out)
+    header, rows = _csv_rows(out / "smoke_fit_results.csv")
+    assert tuple(header) == H.SMOKE_ARTIFACT_COLUMNS
+    assert len(rows) == 6
+    by_name = [dict(zip(header, row)) for row in rows]
+    assert [(int(r["K"]), int(r["start"])) for r in by_name] == [
+        (2, 1), (2, 2), (3, 1), (3, 2), (4, 1), (4, 2)]
+    assert [int(r["model_seed"]) for r in by_name] == [
+        641021, 641022, 641031, 641032, 641041, 641042]
+    assert {int(r["data_seed"]) for r in by_name} == {61101}
+    assert {int(r["split_seed"]) for r in by_name} == {42001}
+
+    summary = json.loads((out / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert summary["k_recovery_evaluated"] is False
+    assert summary["selected_k_interpretation"] == "record_only"
+    assert summary["candidate_k"] == [2, 3, 4] and summary["k_true"] == 1
+
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["full_fits_executed"] == 0
+    assert runinfo["phase7e_rerun_count"] == 0
+    assert runinfo["execution_issue"] == 55
+    assert runinfo["protocol_origin_issue"] == 53
+    assert runinfo["invocation_mode"] and runinfo["requested_command"]
+    assert runinfo["approved_scientific_main_sha"] == APPROVED_BASELINE
+    assert runinfo["run_code_sha"] != runinfo["approved_scientific_main_sha"]
+
+
+# --- canary-before-smoke lineage gate --------------------------------------
+
+
+def test_S2c_smoke_requires_canary_evidence(tmp_path):
+    out = tmp_path / "run"
+    out.mkdir()
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha="0" * 40)
+    assert "canary.json" in str(excinfo.value)
+    assert recorder.calls == 0, "smoke must not fit without canary evidence"
+
+
+@pytest.mark.parametrize("updates,fragment", [
+    ({"status": "FAIL"}, "status is not PASS"),
+    ({"execution_mode": "test_only_but_claimed"}, "execution mode"),
+    ({"approved_scientific_main_sha": "b" * 40}, "approved baseline"),
+    ({"protocol_hash": "tampered"}, "protocol hash"),
+    ({"execution_issue_number": 53}, "execution issue"),
+    ({"protocol_origin_issue_number": 55}, "protocol origin issue"),
+    ({"data_seed": 51101}, "data seed"),
+    ({"split_seed": 42002}, "split seed"),
+    ({"model_seed": 641021}, "model seed"),
+    ({"k_est": 3}, "K_est"),
+    ({"actual_fit_count": 1}, "exactly two canary fits"),
+    ({"expected_fit_count": 6}, "expected fit count"),
+    ({"real_canary_fits_executed": 2}, "real-fit count"),
+    ({"anchor_test_hash": "0" * 64}, "test anchor"),
+    ({"anchor_train_hash": "0" * 64}, "train anchor"),
+    ({"initialization_equal": False}, "initialization"),
+    ({"final_outputs_equal": False}, "final outputs"),
+    ({"internal_retry": 1}, "internal retry"),
+    ({"warning_count": 1}, "warnings"),
+    ({"q_failure": True}, "Q failure"),
+    ({"nan_occurred": True}, "NaN"),
+    ({"finite_state": False}, "nonfinite"),
+    ({"canary_atol": 1e-6}, "atol"),
+    ({"canary_rtol": 1e-3}, "rtol"),
+    ({"boundary_version": "v0"}, "boundary version"),
+])
+def test_S2c_tampered_canary_evidence_blocks_smoke(tmp_path, updates, fragment):
+    out = tmp_path / "run"
+    canary_recorder = _FakeFitRecorder()
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(canary_recorder),
+                                     run_code_sha="0" * 40)
+    assert canary_recorder.calls == 2
+    _patch_json(out / "canary.json", **updates)
+
+    smoke_recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(smoke_recorder),
+                                        run_code_sha="0" * 40)
+    assert fragment in str(excinfo.value), str(excinfo.value)
+    assert smoke_recorder.calls == 0, "smoke must not fit on bad canary evidence"
+
+
+@pytest.mark.parametrize("content", ["", "{", '{"status": "PASS"'])
+def test_S2c_partial_canary_evidence_blocks_smoke(tmp_path, content):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    (out / "canary.json").write_text(content, encoding="utf-8")
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop):
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha="0" * 40)
+    assert recorder.calls == 0
+
+
+def test_S2c_canary_evidence_missing_a_key_blocks_smoke(tmp_path):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    payload.pop("initialization_equal")
+    (out / "canary.json").write_text(json.dumps(payload), encoding="utf-8")
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha="0" * 40)
+    assert "incomplete" in str(excinfo.value)
+    assert recorder.calls == 0
+
+
+def test_S2c_canary_from_another_lineage_blocks_smoke(tmp_path):
+    """Canary evidence written for a different run directory is not accepted."""
+
+    other = tmp_path / "other"
+    H._execute_real_canary_test_only(_test_authorization(), other,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _patch_json(other / "canary.json", protocol_hash="a different protocol")
+    target = tmp_path / "run"
+    target.mkdir()
+    _shutil.copy(other / "canary.json", target / "canary.json")
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop):
+        H._execute_real_smoke_test_only(_test_authorization(), target,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha="0" * 40)
+    assert recorder.calls == 0
+
+
+def test_S2c_a_test_only_canary_cannot_authorize_a_production_smoke(tmp_path):
+    """The real/test execution modes are disjoint in both directions."""
+
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    assert payload["execution_mode"] == "test_only"
+    assert payload["real_canary_fits_executed"] == 0
+    production = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_canary_pass_evidence(out, production,
+                                       current_run_code_sha="0" * 40, test_only=False)
+    assert "execution mode" in str(excinfo.value) or "approved baseline" in str(excinfo.value)
+
+
+# --- independent smoke audit -----------------------------------------------
+
+
+def test_S2c_audit_positive_control(tmp_path):
+    auditor = A.audit_smoke_run_dir(_real_fixture(tmp_path))
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+
+
+def test_S2c_audit_does_not_import_the_harness():
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    for function in (A.audit_smoke_run_dir, A.audit_smoke_summary, A.audit_smoke_fit_rows):
+        body = _inspect.getsource(function)
+        assert "H." not in body
+        assert "run_k_true_robustness_sweep" not in body
+
+
+def test_S2c_audit_recomputes_seeds_and_keys_independently():
+    assert A.expected_smoke_data_seed() == 61101
+    assert A.expected_smoke_manifest_keys() == ((2, 1), (2, 2), (3, 1), (3, 2), (4, 1), (4, 2))
+    assert [A.expected_smoke_model_seed(k, s)
+            for k, s in A.expected_smoke_manifest_keys()] == [
+        641021, 641022, 641031, 641032, 641041, 641042]
+    assert A.CANARY_MODEL_SEED == 641011 and A.SMOKE_SPLIT_SEED == 42001
+
+
+@pytest.mark.parametrize("name", list(A.SMOKE_AUDIT_INPUT_FILES))
+def test_S2c_audit_requires_every_input_file(tmp_path, name):
+    directory = _real_fixture(tmp_path)
+    (directory / name).unlink()
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check in ("required_artifact_missing", "smoke_artifact_missing")
+               for f in auditor.blockers)
+
+
+def test_S2c_audit_rejects_an_unexpected_artifact(tmp_path):
+    directory = _real_fixture(tmp_path)
+    (directory / "extra.csv").write_text("x\n", encoding="utf-8")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_unexpected_artifact" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("name,updates,check", [
+    ("authorization.json", {"approved_scientific_main_sha": "b" * 40}, "smoke_auth_baseline_sha"),
+    ("authorization.json", {"execution_issue_number": 53}, "smoke_auth_execution_issue"),
+    ("authorization.json", {"protocol_origin_issue_number": 55}, "smoke_auth_protocol_issue"),
+    ("authorization.json", {"independent_review_pass": False}, "smoke_auth_independent_review"),
+    ("authorization.json", {"human_smoke_approval": False}, "smoke_auth_human_approval"),
+    ("authorization.json", {"expected_smoke_fits": 12}, "smoke_auth_smoke_count"),
+    ("authorization.json", {"split_seed": 42002}, "smoke_auth_split_seed"),
+    ("authorization.json", {"smoke_model_seeds": [1, 2, 3, 4, 5, 6]}, "smoke_auth_model_seeds"),
+    ("canary.json", {"status": "FAIL"}, "smoke_canary_status"),
+    ("canary.json", {"execution_mode": "test_only"}, "smoke_canary_execution_mode"),
+    ("canary.json", {"real_canary_fits_executed": 1}, "smoke_canary_real_fit_count"),
+    ("canary.json", {"internal_retry": 1}, "smoke_canary_retry"),
+    ("canary.json", {"warning_count": 2}, "smoke_canary_warnings"),
+    ("canary.json", {"q_failure": True}, "smoke_canary_q_failure"),
+    ("canary.json", {"nan_occurred": True}, "smoke_canary_nan"),
+    ("canary.json", {"anchor_test_hash": "0" * 64}, "smoke_canary_anchor_test"),
+    ("canary.json", {"model_seed": 641021}, "smoke_canary_model_seed"),
+    ("runinfo.json", {"actual_canary_fits": 3}, "smoke_runinfo_canary_count"),
+    ("runinfo.json", {"actual_smoke_fits": 5}, "smoke_runinfo_smoke_count"),
+    ("runinfo.json", {"full_fits_executed": 336}, "smoke_runinfo_full_fits"),
+    ("runinfo.json", {"phase7e_rerun_count": 1}, "smoke_runinfo_phase7e_rerun"),
+    ("runinfo.json", {"working_tree_clean": False}, "smoke_runinfo_working_tree"),
+    ("runinfo.json", {"expected_real_em_budget": 344}, "smoke_runinfo_budget"),
+    ("smoke_summary.json", {"k_recovery_evaluated": True}, "smoke_summary_k_recovery_flag"),
+    ("smoke_summary.json", {"selected_k_interpretation": "evidence"},
+     "smoke_summary_selected_k_interpretation"),
+    ("smoke_summary.json", {"actual_smoke_fits": 5}, "smoke_summary_fit_count"),
+    ("smoke_summary.json", {"candidate_k": [1, 2, 3]}, "smoke_summary_candidates"),
+])
+def test_S2c_audit_json_negatives(tmp_path, name, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+def test_S2c_audit_detects_a_tampered_selected_k(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    other = [k for k in (2, 3, 4) if k != summary["selected_k"]][0]
+    _patch_json(directory / "smoke_summary.json", selected_k=other)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_selected_k" for f in auditor.blockers)
+
+
+def test_S2c_audit_detects_a_tampered_mean(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    summary["per_k"]["3"]["mean"] = summary["per_k"]["3"]["mean"] + 0.5
+    (directory / "smoke_summary.json").write_text(json.dumps(summary), encoding="utf-8")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_arithmetic" for f in auditor.blockers)
+
+
+def test_S2c_audit_detects_consistent_score_tampering(tmp_path):
+    """Changing a CSV score without changing the summary is caught."""
+
+    directory = _real_fixture(tmp_path)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    index = header.index("heldout_mean_log_score")
+    rows[0][index] = str(float(rows[0][index]) + 1.0)
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+    auditor = A.audit_smoke_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "smoke_summary_arithmetic" in checks
+
+
+@pytest.mark.parametrize("column,value,check", [
+    ("model_seed", "999999", "smoke_fit_model_seed"),
+    ("split_seed", "42002", "smoke_fit_split_seed"),
+    ("data_seed", "51101", "smoke_fit_data_seed"),
+    ("approved_scientific_main_sha", "b" * 40, "smoke_fit_baseline_sha"),
+    ("fit_status", "retried", "smoke_fit_status"),
+    ("internal_retry", "1", "smoke_fit_retry"),
+    ("warning_count", "2", "smoke_fit_warnings"),
+    ("q_failure", "True", "smoke_fit_q_failure"),
+    ("nan_occurred", "True", "smoke_fit_nan"),
+    ("finite_state", "False", "smoke_fit_finite"),
+    ("heldout_mean_log_score", "nan", "smoke_fit_score"),
+    ("pre_fit_test_hash", "0" * 64, "smoke_fit_mask"),
+    ("post_fit_train_hash", "0" * 64, "smoke_fit_mask"),
+    ("real_canary_fits_executed", "0", "smoke_fit_canary_count"),
+    ("real_smoke_fits_executed", "5", "smoke_fit_smoke_count"),
+    ("boundary_version", "v0", "smoke_fit_boundary_version"),
+    ("K_TRUE", "3", "smoke_fit_cell"),
+    ("estimand", "B", "smoke_fit_estimand"),
+])
+def test_S2c_audit_csv_negatives(tmp_path, column, value, check):
+    directory = _real_fixture(tmp_path)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    rows[0][header.index(column)] = value
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+def test_S2c_audit_row_count_and_order_negatives(tmp_path):
+    directory = _real_fixture(tmp_path)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows[:-1])
+    assert any(f.check == "smoke_fit_row_count"
+               for f in A.audit_smoke_run_dir(directory).blockers)
+
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows + [list(rows[0])])
+    assert any(f.check == "smoke_fit_row_count"
+               for f in A.audit_smoke_run_dir(directory).blockers)
+
+    _write_csv_rows(directory / "smoke_fit_results.csv", header,
+                    [rows[1], rows[0], *rows[2:]])
+    assert any(f.check == "smoke_fit_key_order"
+               for f in A.audit_smoke_run_dir(directory).blockers)
+
+    duplicated = [list(rows[0]), list(rows[0]), *rows[2:]]
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, duplicated)
+    checks = {f.check for f in A.audit_smoke_run_dir(directory).blockers}
+    assert "smoke_fit_duplicate_key" in checks
+
+
+def test_S2c_audit_detects_cross_file_lineage_drift(tmp_path):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", protocol_hash="drifted")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_protocol_hash_lineage" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("winner", [2, 3, 4])
+def test_S2c_audit_passes_for_any_selected_k(tmp_path, winner):
+    """§44: the audit recomputes selected_k but never evaluates K recovery."""
+
+    forced = {k: (0.9 if k == winner else 0.1) for k in H.SMOKE_K_CANDIDATES}
+    out = tmp_path / "fake"
+    authorization = _test_authorization()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _write_test_canary_audit(out)
+    H._execute_real_smoke_test_only(
+        authorization, out,
+        adapter=_test_adapter(_FakeFitRecorder(forced_scores=forced)),
+        run_code_sha="0" * 40)
+    directory = _promote_to_real_fixture(out, tmp_path / "real")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert summary["selected_k"] in (2, 3, 4)
+    assert summary["k_recovery_evaluated"] is False
+
+
+def test_S2c_audit_never_compares_selected_k_to_k_true():
+    body = _inspect.getsource(A.audit_smoke_summary)
+    assert "SMOKE_K_TRUE" not in body
+    assert "recovery" in body  # only as the explicit non-evaluation flag
+
+
+def test_S2c_audit_cli_smoke_mode(tmp_path, capsys):
+    directory = _real_fixture(tmp_path)
+    assert A.main(["--run-dir", str(directory), "--mode", "smoke"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["verdict"] == "PASS" and report["mode"] == "smoke"
+
+    _patch_json(directory / "canary.json", status="FAIL")
+    assert A.main(["--run-dir", str(directory), "--mode", "smoke"]) == 1
+
+
+# --- real EM exclusion -----------------------------------------------------
+
+
+def test_S2c_zero_em_paths_import_no_em_in_a_fresh_process():
+    code = (
+        "import sys;"
+        "sys.path.insert(0, r'" + str(HERE) + "');"
+        "import run_k_true_robustness_sweep as H;"
+        "import audit_k_true_robustness_sweep as A;"
+        "H.run_validate_only(); H.run_config_gate(); H.run_leakage_self_check();"
+        "H.current_smoke_authorization(); H.run_smoke_contract();"
+        "H.current_expected_smoke_main_sha(); H.current_smoke_execution_authorization();"
+        "print('em_runner' in sys.modules,"
+        " 'model_dual_expfam_consistent' in sys.modules,"
+        " H.current_smoke_execution_authorization() is None)"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stderr
+    assert out.stdout.strip() == "False False True"
+
+
+# ===========================================================================
+# S2c-A review findings HIGH-01..03 / MEDIUM-01..03 (Issue #55 rereview)
+# ===========================================================================
+
+
+# --- HIGH-01: canary/smoke run-code identity -------------------------------
+
+
+def test_HIGH01_S2c_same_run_sha_positive(tmp_path):
+    """Identical run-code SHA: the six smoke fits proceed."""
+
+    out = tmp_path / "run"
+    authorization = _test_authorization()
+    canary_recorder = _FakeFitRecorder()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(canary_recorder),
+                                     run_code_sha="0" * 40)
+    assert canary_recorder.calls == 2
+    _write_test_canary_audit(out)
+
+    smoke_recorder = _FakeFitRecorder()
+    H._execute_real_smoke_test_only(authorization, out,
+                                    adapter=_test_adapter(smoke_recorder),
+                                    run_code_sha="0" * 40)
+    assert smoke_recorder.calls == 6
+
+
+def test_HIGH01_S2c_wrong_valid_run_sha_blocks_smoke(tmp_path, monkeypatch):
+    """Both SHAs are format-valid; only identity separates them."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    seen_targets = []
+    real_target = H.make_score_only_target
+    monkeypatch.setattr(H, "make_score_only_target",
+                        lambda Y, mask: (seen_targets.append(1), real_target(Y, mask))[1])
+
+    out = tmp_path / "run"
+    authorization = _test_authorization()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    evidence = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    assert evidence["run_code_sha"] == "0" * 40
+
+    smoke_recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_smoke_test_only(authorization, out,
+                                        adapter=_test_adapter(smoke_recorder),
+                                        run_code_sha="1" * 40)
+
+    assert "run code SHA does not match the current smoke execution" in str(excinfo.value)
+    assert smoke_recorder.calls == 0
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert seen_targets == [], "no ScoreOnlyTarget may be built"
+    assert not (out / "smoke_fit_results.csv").exists()
+
+
+@pytest.mark.parametrize("bad", ["", "0" * 39, "0" * 41, "A" * 40, "z" * 40, None, 7])
+def test_HIGH01_S2c_malformed_run_sha_blocks_smoke(tmp_path, bad):
+    out = tmp_path / "run"
+    authorization = _test_authorization()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _patch_json(out / "canary.json", run_code_sha=bad)
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop):
+        H._execute_real_smoke_test_only(authorization, out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha="0" * 40)
+    assert recorder.calls == 0
+
+
+def test_HIGH01_S2c_run_sha_binding_is_a_required_keyword():
+    parameters = _inspect.signature(H.require_canary_pass_evidence).parameters
+    assert parameters["current_run_code_sha"].kind is _inspect.Parameter.KEYWORD_ONLY
+    assert parameters["current_run_code_sha"].default is _inspect.Parameter.empty
+    # ast.unparse normalises quoting, so compare against the normalised form
+    body = _executable_body(H.require_canary_pass_evidence)
+    assert "payload['run_code_sha'] == current_run_code_sha" in body
+    assert "_require_full_commit_sha(current_run_code_sha" in body
+
+
+# --- HIGH-02: frozen protocol hash + cross-file run SHA --------------------
+
+
+def test_HIGH02_S2c_audit_freezes_the_protocol_hash_independently():
+    assert A.EXPECTED_SMOKE_PROTOCOL_HASH == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert A.EXPECTED_SMOKE_PROTOCOL_HASH == H.smoke_protocol_hash()
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    assert "smoke_protocol_hash()" not in source
+
+
+def test_HIGH02_S2c_self_consistent_fake_protocol_hash_is_rejected(tmp_path):
+    """All five artifacts agree on a fabricated hash; the audit still blocks."""
+
+    directory = _real_fixture(tmp_path)
+    fake = "f" * 64
+    for name in ("authorization.json", "canary.json", "runinfo.json", "smoke_summary.json"):
+        _patch_json(directory / name, protocol_hash=fake)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    index = header.index("protocol_hash")
+    for row in rows:
+        row[index] = fake
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+
+    auditor = A.audit_smoke_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "smoke_protocol_hash_frozen" in checks, checks
+    assert len(auditor.blockers) > 0
+
+
+@pytest.mark.parametrize("name", ["authorization.json", "canary.json",
+                                  "runinfo.json", "smoke_summary.json"])
+def test_HIGH02_S2c_per_file_protocol_hash_is_checked(tmp_path, name):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, protocol_hash="f" * 64)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_protocol_hash_frozen" for f in auditor.blockers)
+
+
+def test_HIGH02_S2c_canary_run_sha_drift_is_rejected(tmp_path):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary.json", run_code_sha="1" * 40)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_run_code_sha_lineage" for f in auditor.blockers)
+
+
+def test_HIGH02_S2c_single_csv_row_run_sha_drift_is_rejected(tmp_path):
+    directory = _real_fixture(tmp_path)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    rows[3][header.index("run_code_sha")] = "1" * 40
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_run_code_sha_lineage" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("name", ["runinfo.json", "smoke_summary.json",
+                                  "authorization.json"])
+def test_HIGH02_S2c_malformed_run_sha_is_rejected(tmp_path, name):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, run_code_sha="not-a-sha")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_run_code_sha_format" for f in auditor.blockers)
+
+
+def test_HIGH02_S2c_summary_carries_the_full_lineage(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    for key in ("run_code_sha", "approved_scientific_main_sha", "protocol_hash",
+                "execution_issue_number", "protocol_origin_issue_number"):
+        assert key in summary, key
+
+
+# --- HIGH-03: the production output directory is frozen --------------------
+
+
+@pytest.mark.parametrize("command", ["canary", "smoke"])
+def test_HIGH03_S2c_production_rejects_an_out_dir(tmp_path, command, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    target = tmp_path / "attacker"
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main([f"--{command}", "--allow-em", "--out-dir", str(target)])
+    assert "--out-dir is not accepted" in str(excinfo.value)
+    assert not target.exists()
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+
+
+def test_HIGH03_S2c_production_cli_uses_only_the_frozen_directory():
+    for function in (H.run_real_canary_cli, H.run_real_smoke_cli,
+                     H.run_real_canary, H.run_real_smoke):
+        assert "args.out_dir" not in _inspect.getsource(function)
+    # the single production workflow hard-codes the frozen directory
+    workflow = _executable_body(H._run_production_execution)
+    assert "SMOKE_ARTIFACT_DIR" in workflow
+    assert "out_dir" not in workflow.replace("SMOKE_ARTIFACT_DIR", "")
+    gate = _executable_body(H._require_em_authorization)
+    assert "out_dir" in gate and "SMOKE_ARTIFACT_DIR" in gate
+
+
+def test_HIGH03_S2c_only_the_test_path_can_redirect_the_directory():
+    for function in (H.run_real_canary_cli, H.run_real_smoke_cli, H.main):
+        source = _inspect.getsource(function)
+        for name in ("_execute_real_canary_test_only", "_execute_real_smoke_test_only"):
+            assert name not in source, (function.__name__, name)
+    for function in (H._execute_real_canary_test_only, H._execute_real_smoke_test_only):
+        assert "out_dir" in _inspect.signature(function).parameters
+
+
+def test_HIGH03_S2c_out_dir_still_works_for_diagnostics(tmp_path):
+    result = H.run_record_diagnostics(tmp_path / "diag")
+    assert result["em_fits_executed"] == 0
+    assert (tmp_path / "diag").is_dir()
+
+
+# --- MEDIUM-01: durable audit report ---------------------------------------
+
+
+def test_MEDIUM01_S2c_audit_report_is_published(tmp_path):
+    directory = _real_fixture(tmp_path)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers
+    path = A.write_smoke_audit_report(directory, auditor)
+
+    assert path.name == "audit_report.json"
+    assert len(list(directory.glob("audit_report.json"))) == 1
+    report = json.loads(path.read_text(encoding="utf-8"))
+    for key in ("audit_version", "approved_scientific_main_sha", "run_code_sha",
+                "protocol_hash", "protocol_origin_issue", "execution_issue", "status",
+                "blocker_count", "high_count", "medium_count", "findings",
+                "expected_canary_fits", "actual_canary_fits", "expected_smoke_fits",
+                "actual_smoke_fits", "selected_k", "selected_k_interpretation",
+                "k_recovery_evaluated", "audited_files"):
+        assert key in report, key
+    assert report["status"] == "PASS"
+    assert report["blocker_count"] == 0 and report["high_count"] == 0
+    assert report["approved_scientific_main_sha"] == APPROVED_BASELINE
+    assert report["protocol_hash"] == A.EXPECTED_SMOKE_PROTOCOL_HASH
+    assert report["expected_canary_fits"] == 2 and report["actual_canary_fits"] == 2
+    assert report["expected_smoke_fits"] == 6 and report["actual_smoke_fits"] == 6
+    assert report["k_recovery_evaluated"] is False
+    assert report["selected_k_interpretation"] == "record_only"
+    assert sorted(report["audited_files"]) == sorted(A.SMOKE_AUDIT_INPUT_FILES)
+
+
+def test_MEDIUM01_S2c_audit_report_records_failure(tmp_path):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary.json", status="FAIL")
+    auditor = A.audit_smoke_run_dir(directory)
+    A.write_smoke_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "FAIL"
+    assert report["blocker_count"] > 0
+    assert any(f["check"] == "smoke_canary_status" for f in report["findings"])
+
+
+def test_MEDIUM01_S2c_audit_report_is_never_overwritten(tmp_path):
+    directory = _real_fixture(tmp_path)
+    A.write_smoke_audit_report(directory, A.audit_smoke_run_dir(directory))
+    first = (directory / "audit_report.json").read_text(encoding="utf-8")
+
+    _patch_json(directory / "canary.json", status="FAIL")
+    with pytest.raises(FileExistsError):
+        A.write_smoke_audit_report(directory, A.audit_smoke_run_dir(directory))
+    assert (directory / "audit_report.json").read_text(encoding="utf-8") == first
+
+
+def test_MEDIUM01_S2c_audit_report_write_is_atomic(tmp_path, monkeypatch):
+    directory = _real_fixture(tmp_path)
+    auditor = A.audit_smoke_run_dir(directory)
+    real_replace = __import__("os").replace
+    monkeypatch.setattr("os.replace", lambda src, dst: (_ for _ in ()).throw(OSError("boom")))
+    with pytest.raises(OSError):
+        A.write_smoke_audit_report(directory, auditor)
+    monkeypatch.setattr("os.replace", real_replace)
+    assert not (directory / "audit_report.json").exists()
+    assert not any(p.name.startswith(".tmp-") for p in directory.iterdir())
+
+
+def test_MEDIUM01_S2c_audit_report_survives_a_malformed_artifact_set(tmp_path):
+    directory = _real_fixture(tmp_path)
+    (directory / "runinfo.json").write_text("{ broken", encoding="utf-8")
+    auditor = A.audit_smoke_run_dir(directory)
+    A.write_smoke_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "FAIL"
+    assert report["run_code_sha"] is None
+
+
+def test_MEDIUM01_S2c_audit_cli_publishes_the_report(tmp_path, capsys):
+    directory = _real_fixture(tmp_path)
+    assert A.main(["--run-dir", str(directory), "--mode", "smoke", "--write-report"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["verdict"] == "PASS"
+    assert (directory / "audit_report.json").is_file()
+    assert payload["audit_report"].endswith("audit_report.json")
+
+
+def test_MEDIUM01_S2c_audit_report_is_not_an_audit_input(tmp_path):
+    directory = _real_fixture(tmp_path)
+    A.write_smoke_audit_report(directory, A.audit_smoke_run_dir(directory))
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert "audit_report.json" not in A.SMOKE_AUDIT_INPUT_FILES
+
+
+# --- MEDIUM-02: preflight before any side effect ---------------------------
+
+
+def test_MEDIUM02_S2c_preflight_failure_leaves_no_residue(tmp_path, monkeypatch):
+    """A failing zero-EM gate stops before dir, evidence and adapter."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "run_leakage_self_check",
+                        lambda: {"all_passed": False, "cases": {},
+                                 "em_fits_executed": 0, "real_em_fits_executed": 0})
+    out = tmp_path / "run"
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_canary_test_only(_test_authorization(), out,
+                                         adapter=_test_adapter(recorder),
+                                         run_code_sha="0" * 40)
+    assert "leakage self-check" in str(excinfo.value)
+    assert not out.exists(), "no artifact directory may be reserved"
+    assert recorder.calls == 0
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+
+
+def test_MEDIUM02_S2c_anchor_failure_leaves_no_residue(tmp_path, monkeypatch):
+    other = H.build_split_record(H.NEW_K_TRUE[0], 2)
+    monkeypatch.setattr(H, "build_split_record", lambda k_true, replicate: other)
+    out = tmp_path / "run"
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_canary_test_only(_test_authorization(), out,
+                                         adapter=_test_adapter(recorder),
+                                         run_code_sha="0" * 40)
+    assert "Phase 7e anchor" in str(excinfo.value)
+    assert not out.exists()
+    assert recorder.calls == 0
+
+
+def test_MEDIUM02_S2c_existing_directory_stops_before_the_adapter(tmp_path, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    out = tmp_path / "run"
+    out.mkdir()
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_canary_test_only(_test_authorization(), out,
+                                         adapter=_test_adapter(recorder),
+                                         run_code_sha="0" * 40)
+    assert "already exists" in str(excinfo.value)
+    assert recorder.calls == 0
+    assert _AdapterTripwire.constructions == 0
+    assert list(out.iterdir()) == []
+
+
+def test_MEDIUM02_S2c_preflight_precedes_every_side_effect():
+    """Static order: prepare -> reserve dir -> evidence -> adapter -> fit."""
+
+    body = _executable_body(H._execute_real_canary)
+    order = [body.index(token) for token in (
+        "prepare_smoke_cell(", "require_new_smoke_artifact_dir(",
+        "write_json_artifact(", "_resolve_fit_adapter(", "_run_real_canary(")]
+    assert order == sorted(order), body
+
+    smoke_body = _executable_body(H._execute_real_smoke)
+    smoke_order = [smoke_body.index(token) for token in (
+        "prepare_smoke_cell(", "require_canary_pass_evidence(",
+        "_resolve_fit_adapter(", "_run_real_smoke(")]
+    assert smoke_order == sorted(smoke_order), smoke_body
+    # smoke never reserves a new directory
+    assert "require_new_smoke_artifact_dir" not in smoke_body
+
+
+def test_MEDIUM02_S2c_production_adapter_is_built_only_after_preflight():
+    body = _executable_body(H._resolve_fit_adapter)
+    assert "AuthorizedEMFitAdapter()" in body
+    for function in (H._execute_real_canary, H._execute_real_smoke):
+        source = _executable_body(function)
+        assert "AuthorizedEMFitAdapter()" not in source
+    with pytest.raises(HarnessStop):
+        H._resolve_fit_adapter(object(), True)
+    with pytest.raises(HarnessStop):
+        H._resolve_fit_adapter("a pre-built adapter", False)
+
+
+# --- MEDIUM-03: strict audit parsers ---------------------------------------
+
+
+@pytest.mark.parametrize("column,value", [
+    ("K", "not-an-int"),
+    ("K", ""),
+    ("K", "nan"),
+    ("K", "2.0"),
+    ("start", "1.5"),
+    ("data_seed", ""),
+    ("split_seed", "abc"),
+    ("model_seed", "inf"),
+    ("model_seed", "-inf"),
+    ("internal_retry", "?"),
+    ("warning_count", "nan"),
+    ("K_TRUE", "one"),
+    ("replicate", " "),
+    ("real_canary_fits_executed", "two"),
+    ("real_smoke_fits_executed", "6.0"),
+    ("heldout_mean_log_score", "nan"),
+    ("heldout_mean_log_score", "inf"),
+    ("heldout_mean_log_score", "-inf"),
+    ("heldout_mean_log_score", ""),
+    ("heldout_mean_log_score", "not-a-score"),
+    ("q_failure", "0"),
+    ("nan_occurred", "yes"),
+    ("finite_state", "1"),
+])
+def test_MEDIUM03_S2c_malformed_csv_field_is_a_blocker_not_a_crash(tmp_path, column, value):
+    directory = _real_fixture(tmp_path)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    rows[0][header.index(column)] = value
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert len(auditor.blockers) > 0, (column, value)
+    # and a structured report can still be published
+    A.write_smoke_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "FAIL"
+
+
+def test_MEDIUM03_S2c_strict_parsers_never_raise():
+    auditor = A.Auditor()
+    for row, column in (({}, "K"), ({"K": ""}, "K"), ({"K": "x"}, "K"),
+                        ({"K": "2.0"}, "K"), ({"K": "nan"}, "K"), ({"K": None}, "K")):
+        assert A._parse_int_field(row, column, auditor, "c", "l") is None
+    assert A._parse_int_field({"K": "2"}, "K", auditor, "c", "l") == 2
+    assert A._parse_int_field({"K": "-3"}, "K", auditor, "c", "l") == -3
+
+    for row in ({}, {"s": ""}, {"s": "x"}, {"s": "nan"}, {"s": "inf"}, {"s": "-inf"}):
+        assert A._parse_finite_float_field(row, "s", auditor, "c", "l") is None
+    assert A._parse_finite_float_field({"s": "-0.5"}, "s", auditor, "c", "l") == -0.5
+
+    assert A._parse_bool_field({"b": "True"}, "b", auditor, "c", "l") is True
+    assert A._parse_bool_field({"b": "False"}, "b", auditor, "c", "l") is False
+    for row in ({}, {"b": ""}, {"b": "1"}, {"b": "yes"}, {"b": "TRUE"}):
+        assert A._parse_bool_field(row, "b", auditor, "c", "l") is None
+    assert auditor.blockers, "every rejection must be recorded"
+
+
+def test_MEDIUM03_S2c_false_token_is_not_treated_as_truthy():
+    auditor = A.Auditor()
+    assert A._parse_bool_field({"q_failure": "False"}, "q_failure", auditor, "c", "l") is False
+    assert bool("False") is True, "the naive truth test would be wrong"
+    assert not auditor.blockers
+
+
+def test_MEDIUM03_S2c_audit_cli_exit_codes(tmp_path, capsys):
+    directory = _real_fixture(tmp_path)
+    assert A.main(["--run-dir", str(directory), "--mode", "smoke"]) == 0
+    capsys.readouterr()
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    rows[0][header.index("K")] = "not-an-int"
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+    assert A.main(["--run-dir", str(directory), "--mode", "smoke"]) == 1
+
+
+# --- full positive end-to-end with the audit report ------------------------
+
+
+def test_S2c_full_e2e_with_audit_report(tmp_path):
+    out = tmp_path / "fake"
+    authorization = _test_authorization()
+    canary_recorder = _FakeFitRecorder()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(canary_recorder),
+                                     run_code_sha="0" * 40)
+    _write_test_canary_audit(out)
+    smoke_recorder = _FakeFitRecorder()
+    H._execute_real_smoke_test_only(authorization, out,
+                                    adapter=_test_adapter(smoke_recorder),
+                                    run_code_sha="0" * 40)
+    assert canary_recorder.calls == 2 and smoke_recorder.calls == 6
+
+    directory = _promote_to_real_fixture(out, tmp_path / "real")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_smoke_audit_report(directory, auditor)
+
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "PASS"
+    assert sorted(p.name for p in directory.iterdir()) == [
+        "audit_report.json", "authorization.json", "canary.json", "canary_audit.json",
+        "runinfo.json", "smoke_fit_results.csv", "smoke_summary.json"]
+    assert "em_runner" not in sys.modules
+
+
+def test_S2c_frozen_science_after_the_fixes():
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == APPROVED_BASELINE
+    assert (H.SMOKE_PROTOCOL_ISSUE_NUMBER, H.SMOKE_EXECUTION_ISSUE_NUMBER) == (53, 55)
+    assert (H.SMOKE_ESTIMAND, H.SMOKE_ROLE) == ("A", "primary")
+    assert (H.SMOKE_K_TRUE, H.SMOKE_REPLICATE) == (1, 1)
+    assert H.SMOKE_K_CANDIDATES == (2, 3, 4) and H.SMOKE_STARTS == (1, 2)
+    assert (H.EXPECTED_CANARY_FITS, H.EXPECTED_SMOKE_FITS) == (2, 6)
+    assert H.smoke_data_seed(1, 1) == 61101 and H.CANARY_MODEL_SEED == 641011
+    assert [H.smoke_model_seed(1, 1, k, s) for k in (2, 3, 4) for s in (1, 2)] == [
+        641021, 641022, 641031, 641032, 641041, 641042]
+    assert H.SMOKE_SPLIT_SEED == 42001
+    assert len(H.build_manifest("A")) == len(H.build_manifest("B")) == 168
+    assert H.EXPECTED_NEW_FITS == 336
+    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_authorization().authorized() is False
+
+
+# ===========================================================================
+# HIGH: public production entry points must not bypass the S2c orchestration
+# ===========================================================================
+#
+# ``run_real_canary`` / ``run_real_smoke`` used to validate the authorization
+# and then construct the real adapter themselves, skipping the preflight and
+# -- for smoke -- the canary lineage entirely.  They are now thin wrappers over
+# the single production workflow.
+
+
+def _stage_production_probe(monkeypatch, tmp_path, *, run_code_sha="1" * 40):
+    """Point the frozen production directory at tmp_path and arm a tripwire.
+
+    ``SMOKE_ARTIFACT_DIR`` is a module constant, not a caller parameter: this
+    redirect exists only so the production workflow can be exercised without
+    writing under expfam/results.
+    """
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "SMOKE_ARTIFACT_DIR", tmp_path / "frozen_smoke")
+    monkeypatch.setattr(H, "working_tree_is_clean", lambda: True)
+    monkeypatch.setattr(H, "current_run_code_sha", lambda: run_code_sha)
+    monkeypatch.setattr(H, "approved_baseline_is_ancestor", lambda sha=None: True)
+    return H.SMOKE_ARTIFACT_DIR
+
+
+def _valid_production_authorization():
+    return _production_authorization(approved_main_sha=H.APPROVED_SCIENTIFIC_MAIN_SHA)
+
+
+# --- A: direct run_real_canary with a failing preflight ---------------------
+
+
+def test_HIGHPUB_direct_canary_stops_at_the_preflight(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path)
+    monkeypatch.setattr(H, "run_leakage_self_check",
+                        lambda: {"all_passed": False, "cases": {},
+                                 "em_fits_executed": 0, "real_em_fits_executed": 0})
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_canary(_valid_production_authorization())
+
+    assert "leakage self-check" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not directory.exists(), "no artifact directory may be reserved"
+    assert not (directory / "authorization.json").exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_HIGHPUB_direct_canary_stops_on_an_anchor_failure(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path)
+    other = H.build_split_record(H.NEW_K_TRUE[0], 2)
+    monkeypatch.setattr(H, "build_split_record", lambda k_true, replicate: other)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_canary(_valid_production_authorization())
+
+    assert "Phase 7e anchor" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not directory.exists()
+
+
+# --- B: direct run_real_smoke with no canary evidence -----------------------
+
+
+def test_HIGHPUB_direct_smoke_requires_canary_evidence(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_smoke(_valid_production_authorization())
+
+    message = str(excinfo.value)
+    assert "smoke artifact directory does not exist" in message or "canary.json" in message
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (directory / "smoke_fit_results.csv").exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_HIGHPUB_direct_smoke_with_empty_directory_requires_canary(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path)
+    directory.mkdir(parents=True)
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_smoke(_valid_production_authorization())
+
+    assert "canary.json" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert list(directory.iterdir()) == []
+
+
+# --- C: direct run_real_smoke with a canary from a different run ------------
+
+
+def _stage_real_looking_canary(directory, *, run_code_sha):
+    """Write a PASS canary that claims a real execution under ``run_code_sha``."""
+
+    staging = directory.parent / "staging"
+    H._execute_real_canary_test_only(_test_authorization(), staging,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha=run_code_sha)
+    payload = json.loads((staging / "canary.json").read_text(encoding="utf-8"))
+    payload.update({
+        "execution_mode": "real",
+        "real_canary_fits_executed": 2,
+        "approved_scientific_main_sha": H.APPROVED_SCIENTIFIC_MAIN_SHA,
+        "run_code_sha": run_code_sha,
+    })
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "canary.json").write_text(json.dumps(payload), encoding="utf-8")
+    return payload
+
+
+def test_HIGHPUB_direct_smoke_rejects_a_canary_from_another_run(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path, run_code_sha="1" * 40)
+    evidence = _stage_real_looking_canary(directory, run_code_sha="0" * 40)
+    assert evidence["run_code_sha"] == "0" * 40
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_smoke(_valid_production_authorization())
+
+    assert "run code SHA does not match the current smoke execution" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (directory / "smoke_fit_results.csv").exists()
+
+
+def test_HIGHPUB_direct_smoke_rejects_a_failed_canary(tmp_path, monkeypatch):
+    directory = _stage_production_probe(monkeypatch, tmp_path, run_code_sha="1" * 40)
+    _stage_real_looking_canary(directory, run_code_sha="1" * 40)
+    _patch_json(directory / "canary.json", status="FAIL")
+
+    with pytest.raises(HarnessStop) as excinfo:
+        H.run_real_smoke(_valid_production_authorization())
+
+    assert "status is not PASS" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+
+
+def test_HIGHPUB_direct_smoke_rejects_a_test_only_canary(tmp_path, monkeypatch):
+    """A canary produced by the fake path can never authorize a real smoke."""
+
+    directory = _stage_production_probe(monkeypatch, tmp_path, run_code_sha="1" * 40)
+    staging = tmp_path / "staging"
+    H._execute_real_canary_test_only(_test_authorization(), staging,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="1" * 40)
+    directory.mkdir(parents=True, exist_ok=True)
+    _shutil.copy(staging / "canary.json", directory / "canary.json")
+
+    with pytest.raises(HarnessStop):
+        H.run_real_smoke(_valid_production_authorization())
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+
+
+# --- D: one adapter construction site, one production workflow --------------
+
+
+def test_HIGHPUB_adapter_is_constructed_in_exactly_one_place():
+    import ast as _ast
+
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    tree = _ast.parse(source)
+    sites = []
+    for node in _ast.walk(tree):
+        if not (isinstance(node, _ast.Call) and isinstance(node.func, _ast.Name)
+                and node.func.id == "AuthorizedEMFitAdapter"):
+            continue
+        owner = None
+        for candidate in _ast.walk(tree):
+            if isinstance(candidate, _ast.FunctionDef) and \
+                    candidate.lineno <= node.lineno <= (candidate.end_lineno or node.lineno):
+                if owner is None or candidate.lineno > owner.lineno:
+                    owner = candidate
+        sites.append(owner.name if owner else "<module>")
+    assert sites == ["_resolve_fit_adapter"], sites
+
+
+def test_HIGHPUB_public_entrypoints_are_thin_wrappers():
+    for function in (H.run_real_canary, H.run_real_smoke):
+        body = _executable_body(function)
+        assert "_run_production_execution" in body
+        assert "AuthorizedEMFitAdapter" not in body
+        assert "validate_smoke_execution_authorization" not in body
+        assert "_run_real_canary(" not in body and "_run_real_smoke(" not in body
+        # single argument: no caller-supplied lineage, directory or SHA
+        assert list(_inspect.signature(function).parameters) == ["authorization"]
+
+
+def test_HIGHPUB_cli_and_public_share_one_workflow():
+    for function in (H.run_real_canary_cli, H.run_real_smoke_cli):
+        body = _executable_body(function)
+        assert "_run_production_execution" in body
+        assert "AuthorizedEMFitAdapter" not in body
+        assert "_execute_real_canary(" not in body and "_execute_real_smoke(" not in body
+
+    workflow = _executable_body(H._run_production_execution)
+    for token in ("validate_smoke_execution_authorization", "current_run_code_sha()",
+                  "_require_execution_preconditions", "SMOKE_ARTIFACT_DIR",
+                  "test_only=False", "test_adapter=None"):
+        assert token in workflow, token
+    assert "args" not in workflow and "out_dir=" not in workflow
+
+
+def test_HIGHPUB_no_caller_controlled_bypass_parameters():
+    forbidden = ("canary_pass", "canary_report", "skip_canary_check", "out_dir",
+                 "run_code_sha", "current_run_code_sha", "expected_main_sha",
+                 "approved_main_sha", "adapter", "test_only")
+    for function in (H.run_real_canary, H.run_real_smoke,
+                     H.run_real_canary_cli, H.run_real_smoke_cli):
+        parameters = set(_inspect.signature(function).parameters)
+        assert not (parameters & set(forbidden)), (function.__name__, parameters)
+    workflow_parameters = set(_inspect.signature(H._run_production_execution).parameters)
+    assert workflow_parameters == {"authorization", "command"}
+
+
+def test_HIGHPUB_production_callgraph_never_reaches_the_test_path():
+    forbidden = ("_execute_real_canary_test_only", "_execute_real_smoke_test_only",
+                 "_run_real_canary_test_only", "_run_real_smoke_test_only",
+                 "_make_test_smoke_authorization", "_make_test_fit_adapter",
+                 "_TEST_EXPECTED_MAIN_SHA", "_SMOKE_TEST_AUTHORITY")
+    for function in (H.run_real_canary, H.run_real_smoke, H._run_production_execution,
+                     H.run_real_canary_cli, H.run_real_smoke_cli, H.main):
+        source = _inspect.getsource(function)
+        for name in forbidden:
+            assert name not in source, (function.__name__, name)
+
+
+# --- E: the valid test-only lineage still completes --------------------------
+
+
+def test_HIGHPUB_valid_test_only_lineage_still_runs_two_then_six(tmp_path):
+    out = tmp_path / "run"
+    authorization = _test_authorization()
+    canary_recorder = _FakeFitRecorder()
+    H._execute_real_canary_test_only(authorization, out,
+                                     adapter=_test_adapter(canary_recorder),
+                                     run_code_sha="0" * 40)
+    _write_test_canary_audit(out)
+    smoke_recorder = _FakeFitRecorder()
+    H._execute_real_smoke_test_only(authorization, out,
+                                    adapter=_test_adapter(smoke_recorder),
+                                    run_code_sha="0" * 40)
+    assert canary_recorder.calls == 2 and smoke_recorder.calls == 6
+
+    directory = _promote_to_real_fixture(out, tmp_path / "real")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers and not auditor.highs
+    A.write_smoke_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "PASS"
+    assert "em_runner" not in sys.modules
+
+
+def test_HIGHPUB_current_state_keeps_production_unreachable(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    assert H.current_smoke_execution_authorization() is None
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+        with pytest.raises(HarnessStop):
+            H.main(command)
+    for entrypoint in (H.run_real_canary, H.run_real_smoke):
+        with pytest.raises(HarnessStop):
+            entrypoint(H.current_smoke_execution_authorization())
+        with pytest.raises(HarnessStop):
+            entrypoint(_test_authorization())
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+
+
+# ===========================================================================
+# PR #56 review: HIGH-01 canary audit gate / MEDIUM-01 ancestry condition
+# ===========================================================================
+
+
+# --- HIGH-01: the independent canary audit gates the smoke -----------------
+
+
+def test_CANARYAUDIT_module_is_independent_of_the_runner():
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    for function in (A.audit_canary_run_dir, A.build_canary_audit_report,
+                     A.write_canary_audit_report):
+        body = _inspect.getsource(function)
+        assert "run_k_true_robustness_sweep" not in body
+        assert "select_k_from_two_starts" not in body
+
+
+def test_CANARYAUDIT_runs_on_canary_evidence_alone(tmp_path):
+    """Only authorization.json + canary.json exist right after the canary."""
+
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    assert sorted(p.name for p in out.iterdir()) == ["authorization.json", "canary.json"]
+    for absent in ("runinfo.json", "smoke_fit_results.csv", "smoke_summary.json"):
+        assert not (out / absent).exists()
+
+    _patch_json(out / "authorization.json", approved_scientific_main_sha=APPROVED_BASELINE)
+    _patch_json(out / "canary.json", approved_scientific_main_sha=APPROVED_BASELINE)
+    auditor = A.audit_canary_run_dir(out, expect_execution_mode="test_only")
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    assert set(A.CANARY_AUDIT_INPUT_FILES) == {"authorization.json", "canary.json"}
+    for absent in ("runinfo.json", "smoke_fit_results.csv", "smoke_summary.json"):
+        assert absent not in A.CANARY_AUDIT_INPUT_FILES
+
+
+def test_CANARYAUDIT_report_content_and_atomicity(tmp_path, monkeypatch):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    payload = _write_test_canary_audit(out)
+
+    for key in ("audit_version", "status", "blocker_count", "high_count", "findings",
+                "approved_scientific_main_sha", "run_code_sha", "protocol_hash",
+                "protocol_origin_issue", "execution_issue", "expected_canary_fits",
+                "actual_canary_fits", "audited_files"):
+        assert key in payload, key
+    assert payload["status"] == "PASS"
+    assert payload["blocker_count"] == 0 and payload["high_count"] == 0
+    assert payload["protocol_hash"] == A.EXPECTED_SMOKE_PROTOCOL_HASH
+    assert payload["protocol_origin_issue"] == 53 and payload["execution_issue"] == 55
+    assert payload["expected_canary_fits"] == 2
+    assert sorted(payload["audited_files"]) == ["authorization.json", "canary.json"]
+    assert (out / "canary_audit.json").is_file()
+    assert not (out / "audit_report.json").exists(), "the final report name is reserved"
+
+
+def test_CANARYAUDIT_report_is_never_overwritten(tmp_path):
+    out = tmp_path / "run"
+    _fake_run(out)
+    first = (out / "canary_audit.json").read_text(encoding="utf-8")
+    auditor = A.audit_canary_run_dir(out, expect_execution_mode="test_only")
+    with pytest.raises(FileExistsError):
+        A.write_canary_audit_report(out, auditor)
+    assert (out / "canary_audit.json").read_text(encoding="utf-8") == first
+
+
+def test_CANARYAUDIT_report_write_is_atomic(tmp_path, monkeypatch):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    auditor = A.audit_canary_run_dir(out, expect_execution_mode="test_only")
+    real_replace = __import__("os").replace
+    monkeypatch.setattr("os.replace", lambda src, dst: (_ for _ in ()).throw(OSError("boom")))
+    with pytest.raises(OSError):
+        A.write_canary_audit_report(out, auditor)
+    monkeypatch.setattr("os.replace", real_replace)
+    assert not (out / "canary_audit.json").exists()
+    assert not any(p.name.startswith(".tmp-") for p in out.iterdir())
+
+
+def test_CANARYAUDIT_failed_canary_yields_a_FAIL_verdict(tmp_path):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _patch_json(out / "canary.json", status="FAIL",
+                approved_scientific_main_sha=APPROVED_BASELINE)
+    _patch_json(out / "authorization.json", approved_scientific_main_sha=APPROVED_BASELINE)
+    auditor = A.audit_canary_run_dir(out, expect_execution_mode="test_only")
+    A.write_canary_audit_report(out, auditor)
+    payload = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert payload["status"] == "FAIL" and payload["blocker_count"] > 0
+
+
+def test_CANARYAUDIT_cli_mode(tmp_path, capsys):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    # the CLI audits a real-baseline canary; stamp the copy accordingly
+    for name in ("authorization.json", "canary.json"):
+        _patch_json(out / name, approved_scientific_main_sha=APPROVED_BASELINE)
+    _patch_json(out / "canary.json", execution_mode="real", real_canary_fits_executed=2)
+
+    assert A.main(["--run-dir", str(out), "--mode", "canary", "--write-report"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["verdict"] == "PASS" and report["mode"] == "canary"
+    assert report["canary_audit"].endswith("canary_audit.json")
+    assert (out / "canary_audit.json").is_file()
+    assert not (out / "audit_report.json").exists()
+
+
+def test_CANARYAUDIT_cli_exit_code_on_failure(tmp_path, capsys):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    assert A.main(["--run-dir", str(out), "--mode", "canary"]) == 1
+
+
+# --- HIGH-01 negatives: smoke must not start ------------------------------
+
+
+def _canary_only(tmp_path, *, run_code_sha="0" * 40):
+    out = tmp_path / "run"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha=run_code_sha)
+    return out
+
+
+def _attempt_smoke(out, monkeypatch, *, run_code_sha="0" * 40):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    recorder = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha=run_code_sha)
+    assert recorder.calls == 0, "no smoke fit may run"
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (out / "smoke_fit_results.csv").exists()
+    return str(excinfo.value)
+
+
+def test_CANARYAUDIT_A_missing_verdict_blocks_smoke(tmp_path, monkeypatch):
+    out = _canary_only(tmp_path)
+    assert not (out / "canary_audit.json").exists()
+    message = _attempt_smoke(out, monkeypatch)
+    assert "canary_audit.json" in message
+
+
+@pytest.mark.parametrize("updates,fragment", [
+    ({"status": "FAIL"}, "independent canary audit did not pass"),
+    ({"blocker_count": 1}, "blocking findings"),
+    ({"high_count": 2}, "blocking findings"),
+    ({"run_code_sha": "1" * 40}, "run code SHA does not match"),
+    ({"run_code_sha": "not-a-sha"}, "run code SHA"),
+    ({"protocol_hash": "f" * 64}, "protocol hash"),
+    ({"approved_scientific_main_sha": "b" * 40}, "approved baseline"),
+    ({"execution_issue": 53}, "different execution issue"),
+    ({"protocol_origin_issue": 55}, "protocol origin issue"),
+    ({"expected_canary_fits": 6}, "expected fit count"),
+    ({"actual_canary_fits": 1}, "fit count does not match"),
+    ({"canary_execution_mode": "real"}, "canary audit covers"),
+    ({"canary_status": "FAIL"}, "did not cover a PASS canary"),
+    ({"audit_version": "v0"}, "audit version changed"),
+    ({"audited_files": ["canary.json"]}, "did not read authorization.json"),
+])
+def test_CANARYAUDIT_tampered_verdict_blocks_smoke(tmp_path, monkeypatch, updates, fragment):
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    _patch_json(out / "canary_audit.json", **updates)
+    message = _attempt_smoke(out, monkeypatch)
+    assert fragment in message, message
+
+
+@pytest.mark.parametrize("content", ["", "   ", "{", '{"status": "PASS"', "[1,2]", "null"])
+def test_CANARYAUDIT_malformed_verdict_blocks_smoke(tmp_path, monkeypatch, content):
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    (out / "canary_audit.json").write_text(content, encoding="utf-8")
+    _attempt_smoke(out, monkeypatch)
+
+
+def test_CANARYAUDIT_incomplete_verdict_blocks_smoke(tmp_path, monkeypatch):
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    payload = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop("canary_execution_mode")
+    (out / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    message = _attempt_smoke(out, monkeypatch)
+    assert "incomplete" in message
+
+
+def test_CANARYAUDIT_test_only_verdict_cannot_authorize_production(tmp_path):
+    """A test-only canary verdict is not evidence for a real smoke."""
+
+    out = _canary_only(tmp_path)
+    payload = _write_test_canary_audit(out)
+    assert payload["canary_execution_mode"] == "test_only"
+
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    production = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    with pytest.raises(HarnessStop):
+        H.require_canary_audit_pass(out, production, canary_payload,
+                                    current_run_code_sha="0" * 40, test_only=False)
+
+
+def test_CANARYAUDIT_J_valid_verdict_allows_exactly_six(tmp_path):
+    out = tmp_path / "run"
+    _canary, _smoke, canary_recorder, smoke_recorder = _fake_run(out)
+    assert canary_recorder.calls == 2 and smoke_recorder.calls == 6
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["canary_audit_status"] == "PASS"
+    assert "em_runner" not in sys.modules
+
+
+def test_CANARYAUDIT_gate_runs_before_the_adapter():
+    body = _executable_body(H._execute_real_smoke)
+    order = [body.index(token) for token in (
+        "prepare_smoke_cell(", "require_existing_smoke_artifact_dir(",
+        "require_canary_pass_evidence(", "require_canary_audit_pass(",
+        "_resolve_fit_adapter(", "_run_real_smoke(")]
+    assert order == sorted(order), body
+
+
+def test_CANARYAUDIT_runner_never_writes_the_verdict():
+    """§9 trust boundary: only the audit module publishes canary_audit.json."""
+
+    runner = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "write_canary_audit_report" not in runner
+    assert "build_canary_audit_report" not in runner
+    # the runner references the filename only to READ and REQUIRE it
+    body = _executable_body(H.require_canary_audit_pass)
+    assert "read_json_artifact" in body
+    assert "write_json_artifact" not in body
+    for function in (H._execute_real_canary, H._execute_real_smoke):
+        source = _executable_body(function)
+        assert "CANARY_AUDIT_FILENAME" not in source or "write" not in source.split(
+            "CANARY_AUDIT_FILENAME")[0][-40:]
+    assert hasattr(A, "write_canary_audit_report")
+
+
+def test_CANARYAUDIT_final_audit_requires_the_verdict(tmp_path):
+    directory = _real_fixture(tmp_path)
+    assert (directory / "canary_audit.json").is_file()
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+
+    (directory / "canary_audit.json").unlink()
+    auditor2 = A.audit_smoke_run_dir(directory)
+    assert any(f.check in ("required_artifact_missing", "smoke_artifact_missing")
+               for f in auditor2.blockers)
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"status": "FAIL"}, "smoke_canary_audit_status"),
+    ({"blocker_count": 1}, "smoke_canary_audit_counts"),
+    ({"approved_scientific_main_sha": "b" * 40}, "smoke_canary_audit_baseline"),
+    ({"protocol_hash": "f" * 64}, "smoke_protocol_hash_frozen"),
+    ({"execution_issue": 53}, "smoke_canary_audit_execution_issue"),
+    ({"actual_canary_fits": 1}, "smoke_canary_audit_fit_count"),
+    ({"canary_execution_mode": "test_only"}, "smoke_canary_audit_execution_mode"),
+    ({"audit_version": "v0"}, "smoke_canary_audit_version"),
+])
+def test_CANARYAUDIT_final_audit_negatives(tmp_path, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+# --- MEDIUM-01: the ancestry flag must be exactly True ---------------------
+
+
+def test_ANCESTRY_flag_must_be_true(tmp_path):
+    directory = _real_fixture(tmp_path)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers
+
+    _patch_json(directory / "runinfo.json", approved_baseline_is_ancestor=False)
+    auditor2 = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_runinfo_lineage" for f in auditor2.blockers)
+
+
+def test_ANCESTRY_descendant_commit_no_longer_slips_through(tmp_path):
+    """The old condition was vacuous for every normal descendant commit."""
+
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "runinfo.json",
+                run_code_sha="f" * 40, approved_baseline_is_ancestor=False)
+    header, rows = _csv_rows(directory / "smoke_fit_results.csv")
+    index = header.index("run_code_sha")
+    for row in rows:
+        row[index] = "f" * 40
+    _write_csv_rows(directory / "smoke_fit_results.csv", header, rows)
+    for name in ("authorization.json", "canary.json", "canary_audit.json",
+                 "smoke_summary.json"):
+        _patch_json(directory / name, run_code_sha="f" * 40)
+
+    auditor = A.audit_smoke_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    # the run-code lineage itself is consistent ...
+    assert "smoke_run_code_sha_lineage" not in checks, checks
+    # ... but the ancestry requirement now blocks
+    assert "smoke_runinfo_lineage" in checks, checks
+
+
+@pytest.mark.parametrize("value", [None, "True", 1, "yes", 0, False])
+def test_ANCESTRY_non_true_values_are_rejected(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "runinfo.json", approved_baseline_is_ancestor=value)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_runinfo_lineage" for f in auditor.blockers), value
+
+
+def test_ANCESTRY_condition_is_unconditional():
+    body = _executable_body(A.audit_smoke_runinfo)
+    assert "approved_baseline_is_ancestor" in body
+    # the vacuous disjunction must be gone
+    assert "!= APPROVED_SCIENTIFIC_MAIN_SHA" not in body
+    assert " or payload.get('approved_baseline_is_ancestor')" not in body
+
+
+# --- everything else must still hold ---------------------------------------
+
+
+def test_FINAL_previous_protections_are_intact():
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert A.EXPECTED_SMOKE_PROTOCOL_HASH == H.smoke_protocol_hash()
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == APPROVED_BASELINE
+    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_authorization().authorized() is False
+    assert (H.EXPECTED_CANARY_FITS, H.EXPECTED_SMOKE_FITS,
+            H.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
+    assert H.smoke_data_seed(1, 1) == 61101 and H.SMOKE_SPLIT_SEED == 42001
+    assert H.CANARY_MODEL_SEED == 641011
+    assert [H.smoke_model_seed(1, 1, k, s) for k in (2, 3, 4) for s in (1, 2)] == [
+        641021, 641022, 641031, 641032, 641041, 641042]
+    assert len(H.build_manifest("A")) == len(H.build_manifest("B")) == 168
+    assert H.EXPECTED_NEW_FITS == 336
+
+
+# ===========================================================================
+# PR #56 rereview MEDIUM: the canary-only auditor must check every frozen field
+# ===========================================================================
+#
+# A canary_audit.json marked PASS has to mean "the frozen canary protocol was
+# independently verified in full".  Before this fix, estimand, role, K_TRUE,
+# replicate, the protocol-origin issue, both frozen tolerances and the boundary
+# version could all be tampered with and the canary-only audit still passed.
+
+
+def _canary_audit_fixture(tmp_path, **canary_updates):
+    """A canary-only artifact set stamped for a real execution."""
+
+    out = tmp_path / "canary_only"
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _patch_json(out / "authorization.json",
+                approved_scientific_main_sha=APPROVED_BASELINE)
+    _patch_json(out / "canary.json",
+                approved_scientific_main_sha=APPROVED_BASELINE,
+                execution_mode="real", real_canary_fits_executed=2)
+    if canary_updates:
+        _patch_json(out / "canary.json", **canary_updates)
+    return out
+
+
+def _write_raw_canary(path, **updates):
+    """Write canary.json allowing NaN/Infinity literals for malformed fixtures."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(updates)
+    path.write_text(json.dumps(payload, allow_nan=True), encoding="utf-8")
+
+
+# --- independent frozen constants ------------------------------------------
+
+
+def test_CANARYAUDIT_frozen_constants_match_phase7e_source():
+    """The tolerances are restated independently, not imported."""
+
+    from run_heldout_k_selection_pilot import CANARY_ATOL, CANARY_RTOL
+
+    assert A.EXPECTED_CANARY_ATOL == float(CANARY_ATOL) == 1e-12
+    assert A.EXPECTED_CANARY_RTOL == float(CANARY_RTOL) == 1e-10
+    assert A.EXPECTED_LEAKAGE_BOUNDARY_VERSION == "phase8b-leakage-boundary-v1"
+    assert A.SMOKE_ESTIMAND == "A" and A.SMOKE_ROLE == "primary"
+    assert A.SMOKE_K_TRUE == 1 and A.SMOKE_REPLICATE == 1
+    assert A.SMOKE_PROTOCOL_ISSUE_NUMBER == 53 and A.SMOKE_EXECUTION_ISSUE_NUMBER == 55
+
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    assert "from run_heldout_k_selection_pilot import" not in source
+    body = _inspect.getsource(A.audit_smoke_canary)
+    assert "H." not in body and "run_k_true_robustness_sweep" not in body
+
+
+def test_CANARYAUDIT_positive_control_still_passes(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+
+
+# --- A-H: one frozen field mutated at a time -------------------------------
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"estimand": "B"}, "smoke_canary_estimand"),
+    ({"role": "sensitivity"}, "smoke_canary_role"),
+    ({"k_true": 2}, "smoke_canary_k_true"),
+    ({"replicate": 2}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 55}, "smoke_canary_protocol_issue"),
+    ({"canary_atol": 1e-6}, "smoke_canary_atol"),
+    ({"canary_rtol": 1e-3}, "smoke_canary_rtol"),
+    ({"boundary_version": "wrong-version"}, "smoke_canary_boundary_version"),
+])
+def test_CANARYAUDIT_frozen_field_mutation_blocks(tmp_path, updates, check):
+    out = _canary_audit_fixture(tmp_path, **updates)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+    # a FAIL verdict may be published, a PASS one never
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "FAIL"
+    assert verdict["blocker_count"] > 0
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"estimand": None}, "smoke_canary_estimand"),
+    ({"role": None}, "smoke_canary_role"),
+    ({"k_true": "1"}, "smoke_canary_k_true"),
+    ({"k_true": True}, "smoke_canary_k_true"),
+    ({"replicate": 1.5}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 54}, "smoke_canary_protocol_issue"),
+    ({"protocol_origin_issue_number": None}, "smoke_canary_protocol_issue"),
+    ({"boundary_version": None}, "smoke_canary_boundary_version"),
+])
+def test_CANARYAUDIT_frozen_field_type_mutation_blocks(tmp_path, updates, check):
+    out = _canary_audit_fixture(tmp_path, **updates)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+@pytest.mark.parametrize("field", ["estimand", "role", "k_true", "replicate",
+                                   "protocol_origin_issue_number", "canary_atol",
+                                   "canary_rtol", "boundary_version"])
+def test_CANARYAUDIT_missing_frozen_field_blocks(tmp_path, field):
+    out = _canary_audit_fixture(tmp_path)
+    payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    payload.pop(field)
+    (out / "canary.json").write_text(json.dumps(payload), encoding="utf-8")
+    auditor = A.audit_canary_run_dir(out)
+    assert auditor.blockers, field
+
+
+# --- malformed tolerances ---------------------------------------------------
+
+
+@pytest.mark.parametrize("key,value", [
+    ("canary_atol", None),
+    ("canary_atol", "1e-6"),
+    ("canary_atol", "1e-12"),
+    ("canary_atol", float("nan")),
+    ("canary_atol", float("inf")),
+    ("canary_atol", float("-inf")),
+    ("canary_atol", True),
+    ("canary_atol", [1e-12]),
+    ("canary_rtol", None),
+    ("canary_rtol", "1e-3"),
+    ("canary_rtol", "1e-10"),
+    ("canary_rtol", float("nan")),
+    ("canary_rtol", float("inf")),
+    ("canary_rtol", float("-inf")),
+    ("canary_rtol", True),
+    ("canary_rtol", {"v": 1e-10}),
+])
+def test_CANARYAUDIT_malformed_tolerance_fails_closed(tmp_path, key, value):
+    out = _canary_audit_fixture(tmp_path)
+    _write_raw_canary(out / "canary.json", **{key: value})
+
+    auditor = A.audit_canary_run_dir(out)          # must not raise
+    check = "smoke_canary_atol" if key == "canary_atol" else "smoke_canary_rtol"
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, value, sorted({f.check for f in auditor.blockers}))
+
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "FAIL"
+
+
+def test_CANARYAUDIT_exact_float_helper_never_raises():
+    auditor = A.Auditor()
+    for payload in ({}, {"t": None}, {"t": "1e-12"}, {"t": True},
+                    {"t": float("nan")}, {"t": float("inf")}, {"t": [1]},
+                    {"t": 1e-6}):
+        A._require_exact_float(payload, "t", 1e-12, auditor, "c")
+    assert len(auditor.blockers) == 8
+    clean = A.Auditor()
+    A._require_exact_float({"t": 1e-12}, "t", 1e-12, clean, "c")
+    assert not clean.blockers
+
+
+def test_CANARYAUDIT_relaxed_tolerance_cannot_be_published_as_pass(tmp_path):
+    """§12: no mutated canary may ever yield status=PASS."""
+
+    for updates in ({"canary_atol": 1e-3}, {"canary_rtol": 1.0},
+                    {"estimand": "B"}, {"k_true": 4},
+                    {"boundary_version": "v0"},
+                    {"protocol_origin_issue_number": 55}):
+        directory = _canary_audit_fixture(tmp_path / f"case{abs(hash(str(updates)))}",
+                                          **updates)
+        auditor = A.audit_canary_run_dir(directory)
+        A.write_canary_audit_report(directory, auditor)
+        verdict = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+        assert verdict["status"] != "PASS", updates
+
+
+# --- the CLI refuses to stamp PASS on a mutated canary ---------------------
+
+
+def test_CANARYAUDIT_cli_reports_fail_for_a_mutated_frozen_field(tmp_path, capsys):
+    out = _canary_audit_fixture(tmp_path, canary_atol=1e-6)
+    assert A.main(["--run-dir", str(out), "--mode", "canary", "--write-report"]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["verdict"] == "FAIL"
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "FAIL"
+
+
+# --- the final smoke audit inherits the same checks ------------------------
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"estimand": "B"}, "smoke_canary_estimand"),
+    ({"role": "sensitivity"}, "smoke_canary_role"),
+    ({"k_true": 3}, "smoke_canary_k_true"),
+    ({"replicate": 3}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 55}, "smoke_canary_protocol_issue"),
+    ({"canary_atol": 1e-6}, "smoke_canary_atol"),
+    ({"canary_rtol": 1e-3}, "smoke_canary_rtol"),
+    ({"boundary_version": "v0"}, "smoke_canary_boundary_version"),
+])
+def test_CANARYAUDIT_final_smoke_audit_checks_the_same_fields(tmp_path, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary.json", **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+# --- positive smoke control still runs -------------------------------------
+
+
+def test_CANARYAUDIT_positive_lineage_still_runs_six(tmp_path):
+    out = tmp_path / "run"
+    _canary, _smoke, canary_recorder, smoke_recorder = _fake_run(out)
+    assert canary_recorder.calls == 2 and smoke_recorder.calls == 6
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+
+    directory = _promote_to_real_fixture(out, tmp_path / "real")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    A.write_smoke_audit_report(directory, auditor)
+    assert json.loads(
+        (directory / "audit_report.json").read_text(encoding="utf-8"))["status"] == "PASS"
+    assert "em_runner" not in sys.modules
+
+
+# ===========================================================================
+# PR #56 rereview MEDIUM: frozen integer fields need a strict integer type
+# ===========================================================================
+#
+# ``1.0 == 1``, ``53.0 == 53`` and ``True == 1`` are all true in Python, so a
+# frozen integer compared by value alone could be replaced by an equal float or
+# bool and the independent canary audit would still publish PASS.  Every frozen
+# integer in the canary evidence (canary.json, authorization.json and the
+# published canary_audit.json verdict) now requires ``type(value) is int``.
+
+
+def test_STRICTINT_helper_requires_an_exact_int_and_never_raises():
+    rejected = (
+        {},                       # missing key
+        {"v": 1.0},               # equal float
+        {"v": True},              # bool is not an int here
+        {"v": False},
+        {"v": "1"},               # no string coercion
+        {"v": None},
+        {"v": []},
+        {"v": {}},
+        {"v": float("nan")},
+        {"v": float("inf")},
+        {"v": float("-inf")},
+        {"v": 2},                 # right type, wrong value
+    )
+    for payload in rejected:
+        auditor = A.Auditor()
+        A._require_exact_int(payload, "v", 1, auditor, "c")   # must not raise
+        assert len(auditor.blockers) == 1, payload
+        assert auditor.blockers[0].check == "c"
+
+    clean = A.Auditor()
+    A._require_exact_int({"v": 1}, "v", 1, clean, "c")
+    A._require_exact_int({"v": 53}, "v", 53, clean, "c")
+    A._require_exact_int({"v": 0}, "v", 0, clean, "c")
+    assert not clean.findings
+
+
+def test_STRICTINT_helper_does_not_use_isinstance_or_coercion():
+    body = _inspect.getsource(A._require_exact_int)
+    assert "type(value) is not int" in body
+    assert "isinstance(" not in body
+    assert "int(value)" not in body and "float(value)" not in body
+
+
+def test_STRICTINT_list_helper_requires_exact_ints():
+    for payload in ({}, {"v": None}, {"v": [1.0, 2]}, {"v": [True, 2]},
+                    {"v": ["1", 2]}, {"v": (1, 2)}, {"v": [1]}, {"v": [2, 1]}):
+        auditor = A.Auditor()
+        A._require_exact_int_list(payload, "v", [1, 2], auditor, "c")
+        assert len(auditor.blockers) == 1, payload
+    clean = A.Auditor()
+    A._require_exact_int_list({"v": [1, 2]}, "v", [1, 2], clean, "c")
+    assert not clean.findings
+
+
+# --- the three fields named in the review ----------------------------------
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"k_true": 1.0}, "smoke_canary_k_true"),
+    ({"replicate": 1.0}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 53.0}, "smoke_canary_protocol_issue"),
+])
+def test_STRICTINT_equal_float_cannot_replace_a_frozen_int(tmp_path, updates, check):
+    out = _canary_audit_fixture(tmp_path, **updates)
+    auditor = A.audit_canary_run_dir(out)                 # must not raise
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "FAIL"
+    assert verdict["blocker_count"] > 0
+
+
+@pytest.mark.parametrize("value", [1.0, True, False, "1", None, [], {}, 2])
+def test_STRICTINT_canary_k_true_rejects_every_non_int(tmp_path, value):
+    out = _canary_audit_fixture(tmp_path, k_true=value)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == "smoke_canary_k_true" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("value", [1.0, True, False, "1", None, 2])
+def test_STRICTINT_canary_replicate_rejects_every_non_int(tmp_path, value):
+    out = _canary_audit_fixture(tmp_path, replicate=value)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == "smoke_canary_replicate" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("value", [53.0, True, "53", None, 55, 0])
+def test_STRICTINT_canary_protocol_issue_rejects_every_non_int(tmp_path, value):
+    out = _canary_audit_fixture(tmp_path, protocol_origin_issue_number=value)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == "smoke_canary_protocol_issue" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("key", ["k_true", "replicate", "protocol_origin_issue_number"])
+def test_STRICTINT_canary_nonfinite_int_field_fails_closed(tmp_path, key):
+    for name, value in (("nan", float("nan")), ("inf", float("inf")),
+                        ("ninf", float("-inf"))):
+        out = _canary_audit_fixture(tmp_path / f"{key}_{name}")
+        _write_raw_canary(out / "canary.json", **{key: value})
+        auditor = A.audit_canary_run_dir(out)             # must not raise
+        assert auditor.blockers, (key, value)
+        A.write_canary_audit_report(out, auditor)
+        verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+        assert verdict["status"] == "FAIL"
+
+
+# --- every other frozen integer in canary.json -----------------------------
+
+
+@pytest.mark.parametrize("key,check", [
+    ("execution_issue_number", "smoke_canary_execution_issue"),
+    ("expected_fit_count", "smoke_canary_fit_count"),
+    ("actual_fit_count", "smoke_canary_fit_count"),
+    ("real_canary_fits_executed", "smoke_canary_real_fit_count"),
+    ("k_est", "smoke_canary_cell"),
+    ("start", "smoke_canary_cell"),
+    ("model_seed", "smoke_canary_model_seed"),
+    ("data_seed", "smoke_canary_data_seed"),
+    ("split_seed", "smoke_canary_split_seed"),
+    ("internal_retry", "smoke_canary_retry"),
+    ("warning_count", "smoke_canary_warnings"),
+])
+def test_STRICTINT_every_canary_integer_field_rejects_an_equal_float(tmp_path, key, check):
+    baseline = _canary_audit_fixture(tmp_path / "baseline")
+    frozen = json.loads((baseline / "canary.json").read_text(encoding="utf-8"))
+    assert type(frozen[key]) is int, (key, frozen[key])
+
+    out = _canary_audit_fixture(tmp_path / "float", **{key: float(frozen[key])})
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, sorted({f.check for f in auditor.blockers}))
+
+    if frozen[key] in (0, 1):
+        out_bool = _canary_audit_fixture(tmp_path / "bool", **{key: bool(frozen[key])})
+        auditor_bool = A.audit_canary_run_dir(out_bool)
+        assert any(f.check == check for f in auditor_bool.blockers), key
+
+
+# --- authorization.json frozen integers ------------------------------------
+
+
+@pytest.mark.parametrize("key,check", [
+    ("execution_issue_number", "smoke_auth_execution_issue"),
+    ("protocol_origin_issue_number", "smoke_auth_protocol_issue"),
+    ("expected_canary_fits", "smoke_auth_canary_count"),
+    ("expected_smoke_fits", "smoke_auth_smoke_count"),
+    ("k_true", "smoke_auth_cell"),
+    ("replicate", "smoke_auth_cell"),
+    ("split_seed", "smoke_auth_split_seed"),
+    ("data_seed", "smoke_auth_data_seed"),
+    ("canary_model_seed", "smoke_auth_canary_seed"),
+])
+def test_STRICTINT_every_authorization_integer_field_rejects_an_equal_float(
+        tmp_path, key, check):
+    out = _canary_audit_fixture(tmp_path)
+    frozen = json.loads((out / "authorization.json").read_text(encoding="utf-8"))
+    assert type(frozen[key]) is int, (key, frozen[key])
+
+    _patch_json(out / "authorization.json", **{key: float(frozen[key])})
+    auditor = A.audit_canary_run_dir(out)                 # must not raise
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, sorted({f.check for f in auditor.blockers}))
+
+
+@pytest.mark.parametrize("value", [1.0, True, False, "1", None])
+def test_STRICTINT_authorization_k_true_rejects_every_non_int(tmp_path, value):
+    out = _canary_audit_fixture(tmp_path)
+    _patch_json(out / "authorization.json", k_true=value)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == "smoke_auth_cell" for f in auditor.blockers), value
+
+
+def test_STRICTINT_authorization_model_seed_vector_rejects_equal_floats(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    frozen = json.loads((out / "authorization.json").read_text(encoding="utf-8"))
+    assert all(type(seed) is int for seed in frozen["smoke_model_seeds"])
+    _patch_json(out / "authorization.json",
+                smoke_model_seeds=[float(seed) for seed in frozen["smoke_model_seeds"]])
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == "smoke_auth_model_seeds" for f in auditor.blockers)
+
+
+# --- the published canary verdict, re-checked by the final smoke audit -----
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"blocker_count": 0.0}, "smoke_canary_audit_counts"),
+    ({"high_count": 0.0}, "smoke_canary_audit_counts"),
+    ({"blocker_count": False}, "smoke_canary_audit_counts"),
+    ({"execution_issue": 55.0}, "smoke_canary_audit_execution_issue"),
+    ({"protocol_origin_issue": 53.0}, "smoke_canary_audit_protocol_issue"),
+    ({"expected_canary_fits": 2.0}, "smoke_canary_audit_fit_count"),
+    ({"actual_canary_fits": 2.0}, "smoke_canary_audit_fit_count"),
+])
+def test_STRICTINT_canary_verdict_integer_fields_are_strict(tmp_path, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+# --- final smoke audit inherits the strict canary typing -------------------
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"k_true": 1.0}, "smoke_canary_k_true"),
+    ({"replicate": 1.0}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 53.0}, "smoke_canary_protocol_issue"),
+    ({"k_true": True}, "smoke_canary_k_true"),
+    ({"replicate": "1"}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": None}, "smoke_canary_protocol_issue"),
+])
+def test_STRICTINT_final_smoke_audit_rejects_the_same_types(tmp_path, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary.json", **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+
+
+# --- positive control: the canonical integers still pass -------------------
+
+
+def test_STRICTINT_canonical_integers_still_pass(tmp_path):
+    out = _canary_audit_fixture(tmp_path, k_true=1, replicate=1,
+                                protocol_origin_issue_number=53)
+    canary = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    assert (type(canary["k_true"]), type(canary["replicate"]),
+            type(canary["protocol_origin_issue_number"])) == (int, int, int)
+
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS" and verdict["blocker_count"] == 0
+
+
+def test_STRICTINT_no_regression_for_the_full_smoke_fixture(tmp_path):
+    directory = _real_fixture(tmp_path)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+
+
+# ===========================================================================
+# PR #56 rereview: the same strict-integer sweep over the FINAL smoke JSON
+# ===========================================================================
+#
+# Same root cause as the canary sweep above (``55 == 55.0``, ``0 == False``):
+# runinfo.json and smoke_summary.json carry frozen/evidence integers that were
+# still compared by value alone.  Booleans keep their ``is True`` / ``is False``
+# contract and float fields keep their finite/exact-float contract; only integer
+# schema fields are tightened here.
+
+
+def _final_audit(directory):
+    """Audit a final smoke fixture and publish the report; return both."""
+
+    auditor = A.audit_smoke_run_dir(directory)
+    A.write_smoke_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    return auditor, report
+
+
+# --- runinfo.json: equal floats --------------------------------------------
+
+
+@pytest.mark.parametrize("key,check", [
+    ("execution_issue", "smoke_runinfo_execution_issue"),
+    ("protocol_origin_issue", "smoke_runinfo_protocol_issue"),
+    ("expected_real_em_budget", "smoke_runinfo_budget"),
+    ("expected_canary_fits", "smoke_runinfo_expected_canary_fits"),
+    ("expected_smoke_fits", "smoke_runinfo_expected_smoke_fits"),
+    ("actual_canary_fits", "smoke_runinfo_canary_count"),
+    ("actual_smoke_fits", "smoke_runinfo_smoke_count"),
+    ("full_fits_executed", "smoke_runinfo_full_fits"),
+    ("phase7e_rerun_count", "smoke_runinfo_phase7e_rerun"),
+])
+def test_STRICTINTFINAL_runinfo_rejects_an_equal_float(tmp_path, key, check):
+    directory = _real_fixture(tmp_path)
+    frozen = json.loads((directory / "runinfo.json").read_text(encoding="utf-8"))
+    assert type(frozen[key]) is int, (key, frozen[key])
+
+    _patch_json(directory / "runinfo.json", **{key: float(frozen[key])})
+    auditor, report = _final_audit(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, sorted({f.check for f in auditor.blockers}))
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+@pytest.mark.parametrize("key,value,check", [
+    ("execution_issue", True, "smoke_runinfo_execution_issue"),
+    ("actual_canary_fits", True, "smoke_runinfo_canary_count"),
+    ("expected_canary_fits", True, "smoke_runinfo_expected_canary_fits"),
+    ("full_fits_executed", False, "smoke_runinfo_full_fits"),
+    ("phase7e_rerun_count", False, "smoke_runinfo_phase7e_rerun"),
+    ("actual_smoke_fits", "6", "smoke_runinfo_smoke_count"),
+    ("expected_real_em_budget", None, "smoke_runinfo_budget"),
+    ("protocol_origin_issue", "53", "smoke_runinfo_protocol_issue"),
+])
+def test_STRICTINTFINAL_runinfo_rejects_bools_strings_and_none(tmp_path, key, value, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "runinfo.json", **{key: value})
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, value, sorted({f.check for f in auditor.blockers}))
+
+
+@pytest.mark.parametrize("key,check", [
+    ("execution_issue", "smoke_runinfo_execution_issue"),
+    ("expected_canary_fits", "smoke_runinfo_expected_canary_fits"),
+    ("full_fits_executed", "smoke_runinfo_full_fits"),
+])
+def test_STRICTINTFINAL_runinfo_missing_integer_field_blocks(tmp_path, key, check):
+    directory = _real_fixture(tmp_path)
+    payload = json.loads((directory / "runinfo.json").read_text(encoding="utf-8"))
+    payload.pop(key)
+    (directory / "runinfo.json").write_text(json.dumps(payload), encoding="utf-8")
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), key
+
+
+# --- runinfo.json: booleans are NOT integers -------------------------------
+
+
+@pytest.mark.parametrize("key,value,check", [
+    ("working_tree_clean", 1, "smoke_runinfo_working_tree"),
+    ("working_tree_clean", 1.0, "smoke_runinfo_working_tree"),
+    ("approved_baseline_is_ancestor", 1, "smoke_runinfo_lineage"),
+    ("approved_baseline_is_ancestor", "True", "smoke_runinfo_lineage"),
+])
+def test_STRICTINTFINAL_runinfo_booleans_stay_literal(tmp_path, key, value, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "runinfo.json", **{key: value})
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), (key, value)
+
+
+# --- smoke_summary.json: equal floats --------------------------------------
+
+
+@pytest.mark.parametrize("key,check", [
+    ("execution_issue_number", "smoke_summary_execution_issue"),
+    ("protocol_origin_issue_number", "smoke_summary_protocol_issue"),
+    ("k_true", "smoke_summary_k_true"),
+    ("expected_smoke_fits", "smoke_summary_fit_count"),
+    ("actual_smoke_fits", "smoke_summary_fit_count"),
+    ("selected_k", "smoke_summary_selected_k"),
+])
+def test_STRICTINTFINAL_summary_rejects_an_equal_float(tmp_path, key, check):
+    directory = _real_fixture(tmp_path)
+    frozen = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert type(frozen[key]) is int, (key, frozen[key])
+
+    _patch_json(directory / "smoke_summary.json", **{key: float(frozen[key])})
+    auditor, report = _final_audit(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, sorted({f.check for f in auditor.blockers}))
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+@pytest.mark.parametrize("key,value,check", [
+    ("k_true", True, "smoke_summary_k_true"),
+    ("k_true", "1", "smoke_summary_k_true"),
+    ("k_true", None, "smoke_summary_k_true"),
+    ("execution_issue_number", True, "smoke_summary_execution_issue"),
+    ("protocol_origin_issue_number", None, "smoke_summary_protocol_issue"),
+    ("actual_smoke_fits", "6", "smoke_summary_fit_count"),
+])
+def test_STRICTINTFINAL_summary_rejects_bools_strings_and_none(tmp_path, key, value, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", **{key: value})
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert any(f.check == check for f in auditor.blockers), \
+        (key, value, sorted({f.check for f in auditor.blockers}))
+
+
+# --- selected_k: integer schema, frozen candidate set, recomputed value ----
+
+
+@pytest.mark.parametrize("value", [True, "3", None, 1.0, 3.0, []])
+def test_STRICTINTFINAL_selected_k_rejects_every_non_int(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", selected_k=value)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_selected_k" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("value", [1, 5, 0, -3])
+def test_STRICTINTFINAL_selected_k_must_be_in_the_frozen_candidate_set(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", selected_k=value)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_selected_k" for f in auditor.blockers), value
+
+
+def test_STRICTINTFINAL_selected_k_float_of_the_real_value_blocks(tmp_path):
+    """§24: the actual selected K, written as a float, must not pass."""
+
+    directory = _real_fixture(tmp_path)
+    selected = json.loads(
+        (directory / "smoke_summary.json").read_text(encoding="utf-8"))["selected_k"]
+    assert type(selected) is int and selected in (2, 3, 4)
+
+    _patch_json(directory / "smoke_summary.json", selected_k=float(selected))
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_summary_selected_k" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+def test_STRICTINTFINAL_selected_k_interpretation_is_untouched(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert summary["selected_k_interpretation"] == "record_only"
+    assert summary["k_recovery_evaluated"] is False
+    body = _inspect.getsource(A.audit_smoke_summary)
+    assert "SMOKE_K_TRUE" not in body          # K recovery is never evaluated
+    assert "recovery" in body
+
+
+@pytest.mark.parametrize("value", [1, 0, "False", None])
+def test_STRICTINTFINAL_k_recovery_flag_stays_a_literal_bool(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", k_recovery_evaluated=value)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_k_recovery_flag" for f in auditor.blockers), value
+
+
+# --- candidate_k / tie_candidates: element-wise strict integers -------------
+
+
+@pytest.mark.parametrize("value", [
+    [2.0, 3, 4],
+    [2, 3.0, 4],
+    [2, 3, 4.0],
+    [True, 3, 4],
+    ["2", 3, 4],
+    [2, 3],
+    [2, 3, 4, 5],
+    None,
+])
+def test_STRICTINTFINAL_candidate_k_rejects_non_int_elements(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "smoke_summary.json", candidate_k=value)
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_summary_candidates" for f in auditor.blockers), value
+    assert report["status"] == "FAIL"
+
+
+def test_STRICTINTFINAL_tie_candidates_reject_equal_floats_and_bools(tmp_path):
+    directory = _real_fixture(tmp_path)
+    tied = json.loads(
+        (directory / "smoke_summary.json").read_text(encoding="utf-8"))["tie_candidates"]
+    assert tied and all(type(t) is int for t in tied)
+
+    for value in ([float(t) for t in tied], [True], ["2"], [bool(tied[0])]):
+        _patch_json(directory / "smoke_summary.json", tie_candidates=value)
+        auditor = A.audit_smoke_run_dir(directory)      # must not raise
+        assert any(f.check == "smoke_summary_tie_candidates" for f in auditor.blockers), value
+
+
+def test_STRICTINTFINAL_tie_candidates_accept_the_recomputed_set(tmp_path):
+    directory = _real_fixture(tmp_path)
+    tied = json.loads(
+        (directory / "smoke_summary.json").read_text(encoding="utf-8"))["tie_candidates"]
+    _patch_json(directory / "smoke_summary.json", tie_candidates=list(reversed(tied)))
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not any(f.check == "smoke_summary_tie_candidates" for f in auditor.blockers)
+
+
+# --- per_k keys stay strings ----------------------------------------------
+
+
+def test_STRICTINTFINAL_per_k_keys_are_string_typed_and_exact(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert set(summary["per_k"]) == {"2", "3", "4"}
+    assert all(type(key) is str for key in summary["per_k"])
+
+    body = _inspect.getsource(A.audit_smoke_summary)
+    assert "int(k)" not in body                 # no key coercion was introduced
+
+    for mutated in ({"2": summary["per_k"]["2"], "3": summary["per_k"]["3"]},
+                    dict(summary["per_k"], **{"5": summary["per_k"]["4"]})):
+        _patch_json(directory / "smoke_summary.json", per_k=mutated)
+        auditor = A.audit_smoke_run_dir(directory)
+        assert any(f.check == "smoke_summary_per_k" for f in auditor.blockers), mutated
+
+
+# --- float schema fields are NOT integerised -------------------------------
+
+
+def test_STRICTINTFINAL_float_fields_keep_their_float_contract(tmp_path):
+    directory = _real_fixture(tmp_path)
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    assert all(isinstance(entry["mean"], float) for entry in summary["per_k"].values())
+    canary = json.loads((directory / "canary.json").read_text(encoding="utf-8"))
+    assert isinstance(canary["canary_atol"], float) and canary["canary_atol"] == 1e-12
+    assert isinstance(canary["canary_rtol"], float) and canary["canary_rtol"] == 1e-10
+
+    auditor = A.audit_smoke_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+
+
+# --- the helpers themselves -------------------------------------------------
+
+
+def test_STRICTINTFINAL_member_helper_is_strict_and_never_raises():
+    for payload in ({}, {"v": 3.0}, {"v": True}, {"v": "3"}, {"v": None},
+                    {"v": []}, {"v": 1}, {"v": 5}):
+        auditor = A.Auditor()
+        A._require_exact_int_member(payload, "v", (2, 3, 4), auditor, "c")
+        assert len(auditor.blockers) == 1, payload
+    clean = A.Auditor()
+    for value in (2, 3, 4):
+        A._require_exact_int_member({"v": value}, "v", (2, 3, 4), clean, "c")
+    assert not clean.findings
+    body = _inspect.getsource(A._require_exact_int_member)
+    assert "type(value) is not int" in body and "isinstance(" not in body
+
+
+def test_STRICTINTFINAL_sorted_list_helper_is_element_strict():
+    auditor = A.Auditor()
+    A._require_exact_int_list({"v": [3, 2]}, "v", [2, 3], auditor, "c", sort=True)
+    assert not auditor.findings
+    for value in ([2.0, 3], [True, 3], ["2", 3], [2], (2, 3)):
+        bad = A.Auditor()
+        A._require_exact_int_list({"v": value}, "v", [2, 3], bad, "c", sort=True)
+        assert len(bad.blockers) == 1, value
+
+
+# --- positive control -------------------------------------------------------
+
+
+def test_STRICTINTFINAL_canonical_final_fixture_still_passes(tmp_path):
+    directory = _real_fixture(tmp_path)
+    runinfo = json.loads((directory / "runinfo.json").read_text(encoding="utf-8"))
+    summary = json.loads((directory / "smoke_summary.json").read_text(encoding="utf-8"))
+    for key, expected in (("execution_issue", 55), ("protocol_origin_issue", 53),
+                          ("expected_real_em_budget", 8), ("expected_canary_fits", 2),
+                          ("expected_smoke_fits", 6), ("actual_canary_fits", 2),
+                          ("actual_smoke_fits", 6), ("full_fits_executed", 0),
+                          ("phase7e_rerun_count", 0)):
+        assert type(runinfo[key]) is int and runinfo[key] == expected, key
+    for key, expected in (("execution_issue_number", 55),
+                          ("protocol_origin_issue_number", 53),
+                          ("k_true", 1), ("expected_smoke_fits", 6),
+                          ("actual_smoke_fits", 6)):
+        assert type(summary[key]) is int and summary[key] == expected, key
+    assert summary["candidate_k"] == [2, 3, 4]
+    assert all(type(k) is int for k in summary["candidate_k"])
+    assert runinfo["approved_baseline_is_ancestor"] is True
+    assert runinfo["working_tree_clean"] is True
+
+    auditor, report = _final_audit(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    assert report["status"] == "PASS" and report["blocker_count"] == 0
+    assert summary["selected_k_interpretation"] == "record_only"
+    assert summary["k_recovery_evaluated"] is False
+
+
+# --- canary regression ------------------------------------------------------
+
+
+@pytest.mark.parametrize("updates,check", [
+    ({"k_true": 1.0}, "smoke_canary_k_true"),
+    ({"replicate": 1.0}, "smoke_canary_replicate"),
+    ({"protocol_origin_issue_number": 53.0}, "smoke_canary_protocol_issue"),
+])
+def test_STRICTINTFINAL_canary_sweep_has_not_regressed(tmp_path, updates, check):
+    out = _canary_audit_fixture(tmp_path, **updates)
+    auditor = A.audit_canary_run_dir(out)
+    assert any(f.check == check for f in auditor.blockers), \
+        (check, sorted({f.check for f in auditor.blockers}))
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "FAIL"
+
+
+def test_STRICTINTFINAL_canary_positive_control_still_passes(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+
+
+# --- frozen protocol and authorization are untouched ------------------------
+
+
+def test_STRICTINTFINAL_protocol_and_authorization_are_unchanged():
+    assert A.EXPECTED_SMOKE_PROTOCOL_HASH == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert (A.SMOKE_ESTIMAND, A.SMOKE_ROLE) == ("A", "primary")
+    assert A.SMOKE_K_TRUE == 1 and A.SMOKE_REPLICATE == 1
+    assert A.SMOKE_K_CANDIDATES == (2, 3, 4) and A.SMOKE_STARTS == (1, 2)
+    assert (A.EXPECTED_CANARY_FITS, A.EXPECTED_SMOKE_FITS,
+            A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
+    assert H.EXPECTED_NEW_FITS == 336
+    assert H.current_smoke_execution_authorization() is None
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert authorization.authorized() is False
+
+
+# ===========================================================================
+# PR #56 rereview: canary_audit.json.medium_count strict-integer boundary
+# ===========================================================================
+#
+# medium_count was the one published count with no contract at all: missing,
+# 0.0, False and "0" were all accepted.  It is NOT frozen at zero -- the PASS
+# policy is BLOCKER=0 and HIGH=0, and a MEDIUM finding does not block -- so the
+# contract is "present, exactly int, >= 0, and equal to the MEDIUM findings".
+
+
+def _medium_finding(check="synthetic", detail="schema control"):
+    return {"severity": "MEDIUM", "check": check, "detail": detail}
+
+
+# --- §9: type attacks on the published verdict ------------------------------
+
+
+@pytest.mark.parametrize("value", [0.0, False, True, "0", None, -1, [], {}, 1.0])
+def test_MEDIUMCOUNT_final_audit_rejects_a_non_int(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", medium_count=value)
+    auditor, report = _final_audit(directory)          # must not raise
+    assert any(f.check == "smoke_canary_audit_medium_count" for f in auditor.blockers), \
+        (value, sorted({f.check for f in auditor.blockers}))
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+def test_MEDIUMCOUNT_final_audit_rejects_a_missing_count(tmp_path):
+    directory = _real_fixture(tmp_path)
+    payload = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop("medium_count")
+    (directory / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_medium_count" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+def test_MEDIUMCOUNT_helper_is_strict_and_never_raises():
+    for payload in ({}, {"v": 0.0}, {"v": False}, {"v": True}, {"v": "0"},
+                    {"v": None}, {"v": -1}, {"v": []}, {"v": float("nan")}):
+        auditor = A.Auditor()
+        assert A._require_nonnegative_int(payload, "v", auditor, "c") is None, payload
+        assert len(auditor.blockers) == 1, payload
+    clean = A.Auditor()
+    for value in (0, 1, 7):
+        assert A._require_nonnegative_int({"v": value}, "v", clean, "c") == value
+    assert not clean.findings
+    body = _inspect.getsource(A._require_nonnegative_int)
+    assert "type(value) is not int" in body and "isinstance(" not in body
+
+
+# --- §10 / §6: the counts must agree with the findings they summarise -------
+
+
+def test_MEDIUMCOUNT_count_must_match_zero_medium_findings(tmp_path):
+    directory = _real_fixture(tmp_path)
+    verdict = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["findings"] == [] and verdict["medium_count"] == 0
+
+    _patch_json(directory / "canary_audit.json", medium_count=1)
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_count_consistency" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+def test_MEDIUMCOUNT_count_must_match_one_medium_finding(tmp_path):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json",
+                findings=[_medium_finding()], medium_count=0)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_canary_audit_count_consistency" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("severity,key", [("BLOCKER", "blocker_count"),
+                                          ("HIGH", "high_count")])
+def test_MEDIUMCOUNT_blocking_counts_must_match_the_findings(tmp_path, severity, key):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json",
+                findings=[{"severity": severity, "check": "x", "detail": "y"}])
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_canary_audit_count_consistency" for f in auditor.blockers), key
+
+
+@pytest.mark.parametrize("findings", [None, "[]", {}, [1, 2], ["MEDIUM"]])
+def test_MEDIUMCOUNT_findings_must_be_a_list_of_objects(tmp_path, findings):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", findings=findings)
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert any(f.check == "smoke_canary_audit_findings" for f in auditor.blockers), findings
+
+
+# --- §12 / §5: a PASS verdict may carry MEDIUM findings ---------------------
+
+
+def test_MEDIUMCOUNT_a_medium_finding_does_not_break_the_pass_policy(tmp_path):
+    """§5: PASS iff BLOCKER=0 and HIGH=0.  MEDIUM alone changes nothing."""
+
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json",
+                findings=[_medium_finding()], medium_count=1)
+    auditor, report = _final_audit(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    assert report["status"] == "PASS"
+
+
+def test_MEDIUMCOUNT_pass_policy_is_still_decided_by_blocker_and_high(tmp_path):
+    """The published verdict itself: MEDIUM does not turn a PASS into a FAIL."""
+
+    auditor = A.Auditor()
+    auditor.record("MEDIUM", "synthetic", "a non-blocking observation")
+    report = A.build_canary_audit_report(auditor, tmp_path)
+    assert report["status"] == "PASS"
+    assert report["blocker_count"] == 0 and report["high_count"] == 0
+    assert report["medium_count"] == 1 and type(report["medium_count"]) is int
+
+    blocking = A.Auditor()
+    blocking.blocker("synthetic", "a blocking finding")
+    assert A.build_canary_audit_report(blocking, tmp_path)["status"] == "FAIL"
+
+
+def test_MEDIUMCOUNT_published_verdict_is_self_consistent(tmp_path):
+    """What the auditor publishes must satisfy the contract it enforces."""
+
+    auditor = A.Auditor()
+    auditor.record("MEDIUM", "synthetic", "a non-blocking observation")
+    report = A.build_canary_audit_report(auditor, tmp_path)
+    checker = A.Auditor()
+    A.audit_canary_verdict_counts(report, checker)
+    assert not checker.findings, [f"{f.check}: {f.detail}" for f in checker.findings]
+
+
+# --- §11: the canonical verdict ---------------------------------------------
+
+
+def test_MEDIUMCOUNT_positive_control(tmp_path):
+    directory = _real_fixture(tmp_path)
+    verdict = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["blocker_count"] == 0 and verdict["high_count"] == 0
+    assert verdict["medium_count"] == 0 and verdict["findings"] == []
+    assert type(verdict["medium_count"]) is int
+    assert verdict["status"] == "PASS"
+
+    auditor, report = _final_audit(directory)
+    assert not auditor.blockers and not auditor.highs
+    assert report["status"] == "PASS"
+
+
+def test_MEDIUMCOUNT_canary_only_verdict_carries_the_count(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    auditor = A.audit_canary_run_dir(out)
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    assert type(verdict["medium_count"]) is int and verdict["medium_count"] == 0
+
+
+# --- §7 / §13: the runner's smoke gate --------------------------------------
+
+
+def test_MEDIUMCOUNT_runner_required_keys_include_the_count():
+    assert "medium_count" in H.CANARY_AUDIT_REQUIRED_KEYS
+    for key in ("blocker_count", "high_count", "findings", "status"):
+        assert key in H.CANARY_AUDIT_REQUIRED_KEYS, key
+    contract = H.run_smoke_contract()
+    assert "medium_count" in contract["canary_audit_keys"]
+    assert contract["em_fits_executed"] == 0
+
+
+def test_MEDIUMCOUNT_smoke_gate_rejects_a_missing_count(tmp_path, monkeypatch):
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    payload = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop("medium_count")
+    (out / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    message = _attempt_smoke(out, monkeypatch)
+    assert "incomplete" in message and "medium_count" in message
+
+
+@pytest.mark.parametrize("value", [0.0, False, True, "0", None, -1])
+def test_MEDIUMCOUNT_smoke_gate_rejects_a_non_int(tmp_path, monkeypatch, value):
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    _patch_json(out / "canary_audit.json", medium_count=value)
+    message = _attempt_smoke(out, monkeypatch)
+    assert "medium_count" in message, message
+
+
+def test_MEDIUMCOUNT_smoke_gate_still_accepts_a_medium_finding(tmp_path, monkeypatch):
+    """Schema hardening only: a PASS verdict with a MEDIUM still authorises."""
+
+    out = _canary_only(tmp_path)
+    _write_test_canary_audit(out)
+    _patch_json(out / "canary_audit.json", findings=[_medium_finding()], medium_count=1)
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    verdict = H.require_canary_audit_pass(out, _test_authorization(), canary_payload,
+                                          current_run_code_sha="0" * 40, test_only=True)
+    assert verdict["medium_count"] == 1 and verdict["status"] == "PASS"
+
+
+def test_MEDIUMCOUNT_runner_still_only_reads_the_verdict():
+    runner = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "write_canary_audit_report" not in runner
+    assert "build_canary_audit_report" not in runner
+    body = _executable_body(H.require_canary_audit_pass)
+    assert "read_json_artifact" in body and "write_json_artifact" not in body
+
+
+# --- §15: previously fixed fields have not regressed ------------------------
+
+
+@pytest.mark.parametrize("name,updates,check", [
+    ("canary.json", {"k_true": 1.0}, "smoke_canary_k_true"),
+    ("canary.json", {"replicate": 1.0}, "smoke_canary_replicate"),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}, "smoke_canary_protocol_issue"),
+    ("runinfo.json", {"execution_issue": 55.0}, "smoke_runinfo_execution_issue"),
+    ("runinfo.json", {"expected_real_em_budget": 8.0}, "smoke_runinfo_budget"),
+    ("runinfo.json", {"actual_smoke_fits": 6.0}, "smoke_runinfo_smoke_count"),
+    ("runinfo.json", {"full_fits_executed": 0.0}, "smoke_runinfo_full_fits"),
+    ("smoke_summary.json", {"k_true": 1.0}, "smoke_summary_k_true"),
+    ("smoke_summary.json", {"candidate_k": [2.0, 3, 4]}, "smoke_summary_candidates"),
+    ("canary_audit.json", {"blocker_count": 0.0}, "smoke_canary_audit_counts"),
+    ("canary_audit.json", {"actual_canary_fits": 2.0}, "smoke_canary_audit_fit_count"),
+])
+def test_MEDIUMCOUNT_strict_int_sweep_has_not_regressed(tmp_path, name, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (name, sorted({f.check for f in auditor.blockers}))
+
+
+def test_MEDIUMCOUNT_selected_k_float_still_blocks(tmp_path):
+    directory = _real_fixture(tmp_path)
+    selected = json.loads(
+        (directory / "smoke_summary.json").read_text(encoding="utf-8"))["selected_k"]
+    _patch_json(directory / "smoke_summary.json", selected_k=float(selected))
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_summary_selected_k" for f in auditor.blockers)
+
+
+# --- §16 / §17: frozen science and the authorization ------------------------
+
+
+def test_MEDIUMCOUNT_frozen_science_and_authorization_are_unchanged():
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert A.EXPECTED_SMOKE_PROTOCOL_HASH == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert H.smoke_protocol_hash() == A.EXPECTED_SMOKE_PROTOCOL_HASH
+    assert (A.SMOKE_PROTOCOL_ISSUE_NUMBER, A.SMOKE_EXECUTION_ISSUE_NUMBER) == (53, 55)
+    assert (A.SMOKE_ESTIMAND, A.SMOKE_ROLE) == ("A", "primary")
+    assert A.SMOKE_K_TRUE == 1 and A.SMOKE_REPLICATE == 1
+    assert A.SMOKE_K_CANDIDATES == (2, 3, 4) and A.SMOKE_STARTS == (1, 2)
+    assert (A.EXPECTED_CANARY_FITS, A.EXPECTED_SMOKE_FITS,
+            A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
+    assert H.EXPECTED_NEW_FITS == 336
+
+    assert H.current_smoke_execution_authorization() is None
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert authorization.authorized() is False
+
+
+# ===========================================================================
+# PR #56 remote review HIGH: bind the canary verdict to the audited content
+# ===========================================================================
+#
+# A canary_audit.json PASS used to name the baseline, the protocol hash, the
+# issues and the run-code SHA, but nothing about the bytes it audited.  Anyone
+# could mutate authorization.json or canary.json after the audit and the runner
+# would still accept the stale PASS.  The verdict now carries the SHA-256 of the
+# exact bytes the auditor read, and both the runner gate and the final smoke
+# audit rehash the files and compare.
+
+
+def _sha256_file(path):
+    return _hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _smoke_after(out, monkeypatch, *, run_code_sha="0" * 40):
+    """Attempt the production-equivalent smoke; return (proceeded, message)."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    recorder = _FakeFitRecorder()
+    try:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha=run_code_sha)
+        proceeded, message = True, ""
+    except HarnessStop as error:
+        proceeded, message = False, str(error)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    return proceeded, message, recorder.calls
+
+
+def _audited_canary_dir(tmp_path, name="run"):
+    out = tmp_path / name
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _write_test_canary_audit(out)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    return out
+
+
+# --- the exact-byte digest itself -------------------------------------------
+
+
+def test_CONTENTBIND_digest_is_sha256_of_the_exact_file_bytes(tmp_path):
+    path = tmp_path / "artifact.json"
+    path.write_bytes(b'{"a": 1}\r\n')
+    auditor = A.Auditor()
+    payload, digest = A._read_json_and_digest(path, auditor)
+    assert payload == {"a": 1}
+    assert digest == _hashlib.sha256(b'{"a": 1}\r\n').hexdigest()
+    assert digest == A._sha256_hex(path.read_bytes())
+    assert len(digest) == 64 and digest == digest.lower()
+    assert not auditor.findings
+
+    # the bytes are what is hashed, not a canonical reserialization
+    other = tmp_path / "other.json"
+    other.write_bytes(b'{"a":1}')
+    _payload, other_digest = A._read_json_and_digest(other, A.Auditor())
+    assert other_digest != digest
+
+
+def test_CONTENTBIND_reader_reads_the_file_exactly_once():
+    body = _inspect.getsource(A._read_json_and_digest)
+    assert body.count("read_bytes()") == 1
+    assert "read_text(" not in body
+    # the digest must not be recomputed when the report is built
+    builder = _inspect.getsource(A.build_canary_audit_report)
+    assert "_sha256_hex(" not in builder and "hashlib" not in builder
+    assert "read_bytes" not in builder
+    assert "auditor.audited_digests" in builder
+
+
+def test_CONTENTBIND_audit_module_hashes_independently():
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    assert "import hashlib" in source
+    for function in (A._sha256_hex, A._read_json_and_digest,
+                     A.audit_canary_verdict_content_binding):
+        body = _inspect.getsource(function)
+        assert "run_k_true_robustness_sweep" not in body
+
+
+def test_CONTENTBIND_digest_survives_a_malformed_payload(tmp_path):
+    path = tmp_path / "broken.json"
+    path.write_bytes(b"{not json")
+    auditor = A.Auditor()
+    payload, digest = A._read_json_and_digest(path, auditor)
+    assert payload is None
+    assert digest == _hashlib.sha256(b"{not json").hexdigest()
+    assert auditor.blockers
+
+
+# --- the published verdict ---------------------------------------------------
+
+
+def test_CONTENTBIND_canary_verdict_records_both_digests(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert auditor.audited_digests == {
+        "authorization.json": _sha256_file(out / "authorization.json"),
+        "canary.json": _sha256_file(out / "canary.json"),
+    }
+
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+    for key in ("authorization_content_sha256", "canary_content_sha256"):
+        value = verdict[key]
+        assert type(value) is str and len(value) == 64
+        assert set(value) <= set("0123456789abcdef")
+
+
+def test_CONTENTBIND_cli_published_verdict_is_bound(tmp_path, capsys):
+    out = _canary_audit_fixture(tmp_path)
+    assert A.main(["--run-dir", str(out), "--mode", "canary", "--write-report"]) == 0
+    capsys.readouterr()
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+
+
+def test_CONTENTBIND_hex_helper_is_strict():
+    for value in ("abc", "0" * 63, "0" * 65, "A" * 64, "0" * 63 + "g",
+                  None, 1, True, ["0" * 64], "0" * 64 + " "):
+        auditor = A.Auditor()
+        assert A._require_sha256_hex({"d": value}, "d", auditor, "c") is None, value
+        assert len(auditor.blockers) == 1, value
+    missing = A.Auditor()
+    assert A._require_sha256_hex({}, "d", missing, "c") is None
+    assert len(missing.blockers) == 1
+    clean = A.Auditor()
+    assert A._require_sha256_hex({"d": "a1" * 32}, "d", clean, "c") == "a1" * 32
+    assert not clean.findings
+    body = _inspect.getsource(A._require_sha256_hex)
+    assert ".lower()" not in body and ".upper()" not in body      # nothing is normalised
+
+
+# --- final smoke audit: attacks A / B / C ------------------------------------
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_CONTENTBIND_final_audit_detects_a_post_audit_mutation(tmp_path, name, updates):
+    directory = _real_fixture(tmp_path)
+    before = _sha256_file(directory / name)
+    _patch_json(directory / name, **updates)
+    assert _sha256_file(directory / name) != before, "the mutation must change the bytes"
+
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers), \
+        (name, sorted({f.check for f in auditor.blockers}))
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+def test_CONTENTBIND_final_audit_detects_a_whitespace_only_mutation(tmp_path):
+    """Exact-byte contract: reformatting the same JSON is still a change."""
+
+    directory = _real_fixture(tmp_path)
+    path = directory / "authorization.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps(payload, sort_keys=True, indent=4), encoding="utf-8")
+
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_final_audit_rejects_a_tampered_digest(tmp_path, key):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", **{key: "0" * 64})
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("value", ["abc", "0" * 63, "A" * 64, "0" * 63 + "z", None, 1, True])
+def test_CONTENTBIND_final_audit_rejects_a_malformed_digest(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", canary_content_sha256=value)
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert any(f.check == "smoke_canary_audit_content_digest" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_final_audit_rejects_a_missing_digest(tmp_path, key):
+    directory = _real_fixture(tmp_path)
+    payload = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop(key)
+    (directory / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_digest" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+# --- the runner gate: attacks A / B / C / D / E ------------------------------
+
+
+def test_CONTENTBIND_runner_required_keys_include_both_digests():
+    for key in ("authorization_content_sha256", "canary_content_sha256"):
+        assert key in H.CANARY_AUDIT_REQUIRED_KEYS, key
+        assert key in H.run_smoke_contract()["canary_audit_keys"], key
+    assert H.run_smoke_contract()["em_fits_executed"] == 0
+
+
+def test_CONTENTBIND_runner_verifies_before_the_adapter():
+    body = _executable_body(H._execute_real_smoke)
+    order = [body.index(token) for token in (
+        "prepare_smoke_cell(", "require_existing_smoke_artifact_dir(",
+        "require_canary_pass_evidence(", "require_canary_audit_pass(",
+        "_resolve_fit_adapter(", "_run_real_smoke(")]
+    assert order == sorted(order), body
+    gate = _executable_body(H.require_canary_audit_pass)
+    assert "hashlib.sha256(" in gate and "read_bytes()" in gate
+    # the runner verifies, it never produces a verdict
+    assert "write_json_artifact" not in gate
+    runner = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "build_canary_audit_report" not in runner
+    assert "write_canary_audit_report" not in runner
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_CONTENTBIND_smoke_stops_on_a_post_audit_mutation(tmp_path, monkeypatch,
+                                                          name, updates):
+    out = _audited_canary_dir(tmp_path)
+    _patch_json(out / name, **updates)
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    assert name in message and "changed after the independent canary audit" in message
+    assert not (out / "smoke_fit_results.csv").exists()
+
+
+@pytest.mark.parametrize("key,value", [
+    ("canary_content_sha256", "0" * 64),
+    ("authorization_content_sha256", "0" * 64),
+    ("canary_content_sha256", "abc"),
+    ("canary_content_sha256", "A" * 64),
+    ("canary_content_sha256", "0" * 63 + "z"),
+    ("canary_content_sha256", None),
+    ("canary_content_sha256", 1),
+    ("authorization_content_sha256", True),
+])
+def test_CONTENTBIND_smoke_stops_on_a_tampered_or_malformed_digest(tmp_path, monkeypatch,
+                                                                   key, value):
+    out = _audited_canary_dir(tmp_path)
+    _patch_json(out / "canary_audit.json", **{key: value})
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    # either the format check names the key, or the rehash reports the mismatch
+    assert key in message or "changed after the independent canary audit" in message, message
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_smoke_stops_on_a_missing_digest(tmp_path, monkeypatch, key):
+    out = _audited_canary_dir(tmp_path)
+    payload = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop(key)
+    (out / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    assert "incomplete" in message and key in message
+
+
+# --- positive control --------------------------------------------------------
+
+
+def test_CONTENTBIND_unchanged_artifacts_still_run_six_fake_fits(tmp_path, monkeypatch):
+    out = _audited_canary_dir(tmp_path)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+
+    proceeded, _message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is True and fits == 6
+    assert "em_runner" not in sys.modules
+
+
+def test_CONTENTBIND_final_audit_positive_control(tmp_path):
+    directory = _real_fixture(tmp_path)
+    verdict = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == \
+        _sha256_file(directory / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(directory / "canary.json")
+    auditor, report = _final_audit(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    assert report["status"] == "PASS"
+
+
+# --- the scientific protocol is untouched ------------------------------------
+
+
+def test_CONTENTBIND_protocol_hash_is_unchanged():
+    config = H.smoke_protocol_config()
+    for key in config:
+        assert "content_sha256" not in key, key
+    assert "sha256" not in _inspect.getsource(H.smoke_protocol_config)
+    assert H.smoke_protocol_hash() == A.EXPECTED_SMOKE_PROTOCOL_HASH == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert (A.SMOKE_PROTOCOL_ISSUE_NUMBER, A.SMOKE_EXECUTION_ISSUE_NUMBER) == (53, 55)
+    assert (A.SMOKE_ESTIMAND, A.SMOKE_ROLE) == ("A", "primary")
+    assert A.SMOKE_K_TRUE == 1 and A.SMOKE_REPLICATE == 1
+    assert A.SMOKE_K_CANDIDATES == (2, 3, 4) and A.SMOKE_STARTS == (1, 2)
+    assert (A.EXPECTED_CANARY_FITS, A.EXPECTED_SMOKE_FITS,
+            A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
+    assert H.EXPECTED_NEW_FITS == 336
+
+    assert H.current_smoke_execution_authorization() is None
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert authorization.authorized() is False
+
+
+# --- previously fixed protections have not regressed -------------------------
+
+
+@pytest.mark.parametrize("name,updates,check", [
+    ("canary_audit.json", {"medium_count": 0.0}, "smoke_canary_audit_medium_count"),
+    ("canary_audit.json", {"blocker_count": 0.0}, "smoke_canary_audit_counts"),
+    ("runinfo.json", {"execution_issue": 55.0}, "smoke_runinfo_execution_issue"),
+    ("runinfo.json", {"approved_baseline_is_ancestor": 1}, "smoke_runinfo_lineage"),
+    ("smoke_summary.json", {"k_true": 1.0}, "smoke_summary_k_true"),
+    ("smoke_summary.json", {"candidate_k": [2.0, 3, 4]}, "smoke_summary_candidates"),
+])
+def test_CONTENTBIND_previous_protections_hold(tmp_path, name, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (name, sorted({f.check for f in auditor.blockers}))
+
+
+# ===========================================================================
+# PR #56 content-binding rereview MEDIUM 1: one audit-time snapshot
+# ===========================================================================
+#
+# The verdict used to take its digests from the audit but its metadata from a
+# second read at report-build time, so a file changed in between produced a
+# report that mixed new metadata with an old digest.  Every source-derived field
+# now comes from the payload the auditor parsed, out of the same bytes it hashed.
+
+
+import ast as _ast          # noqa: E402
+import textwrap as _textwrap  # noqa: E402
+
+
+def _audit_snapshot_dir(tmp_path, name="snapshot"):
+    """A production-lineage canary artifact pair, audited but not yet reported."""
+
+    out = _canary_audit_fixture(tmp_path / name)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    return out, auditor
+
+
+def test_SNAPSHOTBIND_auditor_stores_payload_and_digest_from_one_read(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    assert set(auditor.audited_payloads) == {"authorization.json", "canary.json"}
+    assert set(auditor.audited_digests) == {"authorization.json", "canary.json"}
+    for name in ("authorization.json", "canary.json"):
+        raw = (out / name).read_bytes()
+        assert auditor.audited_digests[name] == _hashlib.sha256(raw).hexdigest()
+        assert auditor.audited_payloads[name] == json.loads(raw.decode("utf-8"))
+
+
+def test_SNAPSHOTBIND_snapshot_is_an_independent_copy(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    stored = auditor.audited_payloads["canary.json"]
+    fresh, _digest = A._read_json_and_digest(out / "canary.json", A.Auditor())
+    assert stored == fresh and stored is not fresh
+    assert "copy.deepcopy(" in _inspect.getsource(A.audit_canary_run_dir)
+
+    first = A.build_canary_audit_report(auditor, out)
+    second = A.build_canary_audit_report(auditor, out)
+    assert first == second, "the verdict must not depend on when it is built"
+
+
+@pytest.mark.parametrize("key,mutation,report_key", [
+    ("status", "FAIL", "canary_status"),
+    ("execution_mode", "test_only", "canary_execution_mode"),
+    ("real_canary_fits_executed", 0, "actual_canary_fits"),
+    ("run_code_sha", "1" * 40, "run_code_sha"),
+])
+def test_SNAPSHOTBIND_report_keeps_the_audited_values(tmp_path, key, mutation, report_key):
+    """§7: mutate the source AFTER the audit, BEFORE the report is built."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    audited_value = json.loads((out / "canary.json").read_text(encoding="utf-8"))[key]
+    audited_digest = auditor.audited_digests["canary.json"]
+    assert audited_value != mutation
+
+    _patch_json(out / "canary.json", **{key: mutation})
+    current_digest = _hashlib.sha256((out / "canary.json").read_bytes()).hexdigest()
+    assert current_digest != audited_digest
+
+    report = A.build_canary_audit_report(auditor, out)
+    assert report[report_key] == audited_value, "the report followed the current file"
+    assert report[report_key] != mutation
+    assert report["canary_content_sha256"] == audited_digest
+    assert report["canary_content_sha256"] != current_digest
+
+
+def test_SNAPSHOTBIND_authorization_variant(tmp_path):
+    """§8: the authorization snapshot and digest are equally audit-time."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    audited_digest = auditor.audited_digests["authorization.json"]
+    audited_payload = dict(auditor.audited_payloads["authorization.json"])
+
+    _patch_json(out / "authorization.json", harmless_extra_field="x")
+    current_digest = _hashlib.sha256((out / "authorization.json").read_bytes()).hexdigest()
+    assert current_digest != audited_digest
+
+    report = A.build_canary_audit_report(auditor, out)
+    assert report["authorization_content_sha256"] == audited_digest
+    assert report["authorization_content_sha256"] != current_digest
+    assert auditor.audited_payloads["authorization.json"] == audited_payload
+    assert "harmless_extra_field" not in auditor.audited_payloads["authorization.json"]
+
+
+def test_SNAPSHOTBIND_audited_files_reflect_what_was_read(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    (out / "canary.json").unlink()               # gone after the audit
+    report = A.build_canary_audit_report(auditor, out)
+    assert sorted(report["audited_files"]) == ["authorization.json", "canary.json"]
+
+
+def test_SNAPSHOTBIND_builder_never_rereads_the_source(tmp_path):
+    """§10: static proof, alongside the behavioural tests above."""
+
+    tree = _ast.parse(_textwrap.dedent(_inspect.getsource(A.build_canary_audit_report)))
+    forbidden_attributes = {"read_text", "read_bytes", "load", "loads", "is_file",
+                            "open", "iterdir", "stat"}
+    for node in _ast.walk(tree):
+        if isinstance(node, _ast.Attribute):
+            assert node.attr not in forbidden_attributes, node.attr
+        if isinstance(node, _ast.Name):
+            assert node.id not in {"open", "json"}, node.id
+    assert "auditor.audited_payloads" in _inspect.getsource(A.build_canary_audit_report)
+
+
+def test_SNAPSHOTBIND_stale_snapshot_report_is_rejected_by_the_runner(tmp_path):
+    """§9: internally consistent snapshot, and still no stale PASS for the smoke."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    _patch_json(out / "canary.json", warning_count=1)      # changed after the audit
+    A.write_canary_audit_report(out, auditor)              # snapshot verdict, PASS
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    assert verdict["canary_content_sha256"] == auditor.audited_digests["canary.json"]
+
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_canary_audit_pass(out, authorization, canary_payload,
+                                    current_run_code_sha="0" * 40, test_only=False)
+    assert "changed after the independent canary audit" in str(excinfo.value)
+
+
+# ===========================================================================
+# PR #56 content-binding rereview MEDIUM 2: no-restamp audit -> runner
+# ===========================================================================
+#
+# Every other integration fixture re-stamps the verdict for the test-only
+# lineage.  These two tests use production-lineage artifacts end to end: the
+# real auditor writes the verdict, nothing touches it, and the runner gate
+# consumes exactly those bytes.  No adapter is built and no EM runs.
+
+
+def _no_restamp_guard(monkeypatch):
+    def _forbidden(*args, **kwargs):
+        raise AssertionError("the direct integration test must not restamp digests")
+
+    monkeypatch.setattr(sys.modules[__name__], "_stamp_canary_audit_digests", _forbidden)
+
+
+def _direct_audited_dir(tmp_path, monkeypatch, name="direct"):
+    """audit module -> persisted verdict, with no copy/restamp of any kind."""
+
+    _no_restamp_guard(monkeypatch)
+    out = _canary_audit_fixture(tmp_path / name)
+    auditor = A.audit_canary_run_dir(out)          # the real independent auditor
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_canary_audit_report(out, auditor)      # the audit module persists it
+    return out
+
+
+def test_DIRECTBIND_untouched_verdict_passes_the_runner_gate(tmp_path, monkeypatch):
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    verdict_bytes = (out / "canary_audit.json").read_bytes()
+    verdict = json.loads(verdict_bytes)
+    authorization_bytes = (out / "authorization.json").read_bytes()
+    canary_bytes = (out / "canary.json").read_bytes()
+
+    # §17: the persisted digests are the digests of these exact files
+    assert verdict["status"] == "PASS"
+    assert verdict["authorization_content_sha256"] == \
+        _hashlib.sha256(authorization_bytes).hexdigest()
+    assert verdict["canary_content_sha256"] == _hashlib.sha256(canary_bytes).hexdigest()
+
+    canary_payload = json.loads(canary_bytes.decode("utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    accepted = H.require_canary_audit_pass(out, authorization, canary_payload,
+                                           current_run_code_sha="0" * 40, test_only=False)
+    assert accepted["status"] == "PASS"
+
+    # §16: nothing was re-stamped, rewritten or rehashed along the way
+    assert (out / "canary_audit.json").read_bytes() == verdict_bytes
+    assert (out / "authorization.json").read_bytes() == authorization_bytes
+    assert (out / "canary.json").read_bytes() == canary_bytes
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert not (out / "smoke_fit_results.csv").exists()
+
+
+def test_DIRECTBIND_uses_the_production_frozen_constants(tmp_path, monkeypatch):
+    """§14: the artifacts match production; no constant is patched to fit."""
+
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    authorization = json.loads((out / "authorization.json").read_text(encoding="utf-8"))
+    canary = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == H.APPROVED_SCIENTIFIC_MAIN_SHA \
+        == H.current_expected_smoke_main_sha() == APPROVED_BASELINE
+    for payload in (authorization, canary, verdict):
+        assert payload["approved_scientific_main_sha"] == APPROVED_BASELINE
+        assert payload["protocol_hash"] == H.smoke_protocol_hash() \
+            == A.EXPECTED_SMOKE_PROTOCOL_HASH
+    assert verdict["execution_issue"] == 55 and verdict["protocol_origin_issue"] == 53
+    assert verdict["canary_execution_mode"] == "real"
+    assert verdict["actual_canary_fits"] == A.EXPECTED_CANARY_FITS == 2
+    # the production authorization gate is untouched by this test
+    assert H.current_smoke_execution_authorization() is None
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_DIRECTBIND_mutation_after_the_untouched_verdict_stops_the_runner(
+        tmp_path, monkeypatch, name, updates):
+    """§19: the persistent regression for the original HIGH, with no restamping."""
+
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    verdict_bytes = (out / "canary_audit.json").read_bytes()
+    _patch_json(out / name, **updates)
+
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_canary_audit_pass(out, authorization, canary_payload,
+                                    current_run_code_sha="0" * 40, test_only=False)
+    message = str(excinfo.value)
+    assert name in message and "changed after the independent canary audit" in message
+    assert (out / "canary_audit.json").read_bytes() == verdict_bytes
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
