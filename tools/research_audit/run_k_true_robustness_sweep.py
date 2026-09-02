@@ -2170,9 +2170,24 @@ FULL_LEAKAGE_GATE_COLUMNS = (
     "pre_fit_passed", "post_fit_passed", "fit_boundary_status", "boundary_version",
 )
 
+# Three DIFFERENT commit SHAs, never interchangeable:
+#   role 1  scientific_baseline_sha           always APPROVED_SCIENTIFIC_MAIN_SHA
+#           -- the reviewed scientific/operational baseline (PR #54 merge).
+#   role 2  reviewed_full_execution_main_sha  the main SHA reviewed and approved
+#           for THIS 336-fit sweep; it is the full authorization's
+#           ``approved_main_sha`` and is a DESCENDANT of role 1.
+#   role 3  run_code_sha                      the commit that actually executed;
+#           provenance only, never approval, and a descendant of role 2.
+FULL_SHA_ROLE_FIELDS = (
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
+    "run_code_sha",
+)
+
 FULL_FIT_RESULTS_COLUMNS = (
     "run_code_sha",
-    "approved_scientific_main_sha",
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
     "protocol_hash",
     "fit_index",
     "estimand",
@@ -3560,10 +3575,18 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     if not test_only:
         _require(working_tree_clean_before_execution,
                  "the working tree is dirty before the full execution; refusing to start")
-        # HIGH-03: the ancestry guard is bound to the FULL authorization baseline.
+        # HIGH-03 / HIGH-05: the ancestry chain over the three separated roles.
+        #   scientific baseline -> reviewed full-execution baseline -> run code
+        _require(authorization.approved_main_sha != APPROVED_SCIENTIFIC_MAIN_SHA,
+                 "the reviewed full-execution baseline must not be the scientific "
+                 "baseline: they are different roles")
+        _require(approved_baseline_is_ancestor_of(APPROVED_SCIENTIFIC_MAIN_SHA,
+                                                  authorization.approved_main_sha),
+                 "the scientific baseline is not an ancestor of the reviewed "
+                 "full-execution baseline")
         _require(approved_baseline_is_ancestor_of(authorization.approved_main_sha,
                                                   run_code_sha),
-                 "the full approved baseline is not an ancestor of this commit")
+                 "the reviewed full-execution baseline is not an ancestor of this commit")
     directory = require_new_full_artifact_dir(out_dir)
     write_json_artifact(directory / "authorization.json",
                         build_full_authorization_payload(authorization, run_code_sha))
@@ -3651,7 +3674,11 @@ def build_full_authorization_payload(authorization: Any, run_code_sha: str) -> d
         "authorization_version": authorization.authorization_version,
         "execution_issue_number": authorization.issue_number,
         "protocol_origin_issue_number": authorization.protocol_origin_issue_number,
-        "approved_scientific_main_sha": authorization.approved_main_sha,
+        # role 1: frozen, always the reviewed scientific baseline
+        "scientific_baseline_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        # role 2: the main SHA reviewed and approved for this 336-fit sweep
+        "reviewed_full_execution_main_sha": authorization.approved_main_sha,
+        # role 3: which commit executed (provenance, never approval)
         "run_code_sha": run_code_sha,
         "protocol_hash": authorization.protocol_hash,
         "estimands": list(authorization.estimands),
@@ -3678,6 +3705,7 @@ def build_full_artifact_rows(rows: Sequence[Phase8bFullRow], run_code_sha: str,
     _require_full_commit_sha(run_code_sha, "run code SHA")
     return [(
         run_code_sha,
+        APPROVED_SCIENTIFIC_MAIN_SHA,
         authorization.approved_main_sha,
         full_protocol_hash(),
         row.fit_index,
@@ -3731,7 +3759,8 @@ def build_full_summary_payload(report: Phase8bFullReport, run_code_sha: str) -> 
         "artifact_version": FULL_ARTIFACT_VERSION,
         "execution_issue_number": FULL_EXECUTION_ISSUE_NUMBER,
         "protocol_origin_issue_number": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
-        "approved_scientific_main_sha": report.approved_main_sha,
+        "scientific_baseline_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "reviewed_full_execution_main_sha": report.approved_main_sha,
         "run_code_sha": run_code_sha,
         "protocol_hash": report.protocol_hash,
         "score_config_hash": score_config_hash(frozen_score_config()),
@@ -3771,14 +3800,22 @@ def build_full_runinfo_payload(*, run_code_sha: str, out_dir: Path,
     created its own artifact directory; git status is never re-read here.
     """
 
-    _require_full_commit_sha(approved_main_sha, "approved main SHA")
+    _require_full_commit_sha(approved_main_sha, "reviewed full execution main SHA")
     return {
         "artifact_version": FULL_ARTIFACT_VERSION,
         "phase": PHASE,
         "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
         "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        # the three separated roles (HIGH-05)
         "run_code_sha": run_code_sha,
-        "approved_scientific_main_sha": approved_main_sha,
+        "scientific_baseline_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "reviewed_full_execution_main_sha": approved_main_sha,
+        # recorded ancestry conclusions over the same chain
+        "scientific_baseline_is_ancestor_of_reviewed_full":
+            approved_baseline_is_ancestor_of(APPROVED_SCIENTIFIC_MAIN_SHA,
+                                             approved_main_sha),
+        "reviewed_full_baseline_is_ancestor_of_run_code":
+            approved_baseline_is_ancestor_of(approved_main_sha, run_code_sha),
         "approved_baseline_is_ancestor":
             approved_baseline_is_ancestor_of(approved_main_sha, run_code_sha),
         "protocol_hash": full_protocol_hash(),

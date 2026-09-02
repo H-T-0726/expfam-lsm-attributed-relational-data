@@ -7617,14 +7617,18 @@ def test_FULLGATE_audit_rejects_a_wrong_authorization_payload(tmp_path):
         "estimands": ["A"],                       # not A+B
         "mask_design": "S_C", "random_design": "CRN",
         "independent_review_pass": True, "human_full_approval": True,
-        "approved_scientific_main_sha": "a" * 40, "run_code_sha": "a" * 40,
+        # role 1 wrong, and role 2 == role 3
+        "scientific_baseline_sha": "a" * 40,
+        "reviewed_full_execution_main_sha": "a" * 40,
+        "run_code_sha": "a" * 40,
     }
     auditor = A.Auditor()
     A.audit_full_authorization(payload, auditor)
     checks = {f.check for f in auditor.blockers}
     for expected in ("full_auth_execution_issue", "full_auth_fits_per_estimand",
                      "full_auth_k_true_grid", "full_auth_anchor_excluded",
-                     "full_auth_estimands", "full_auth_baseline_not_run_sha"):
+                     "full_auth_estimands", "full_auth_baseline_not_run_sha",
+                     "full_auth_scientific_baseline"):
         assert expected in checks, (expected, sorted(checks))
 
 
@@ -7752,7 +7756,11 @@ def _promote_full_fixture(source, destination):
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload.update({"actual_full_fits": 336, "working_tree_clean": True,
                     "working_tree_clean_before_execution": True,
-                    "approved_baseline_is_ancestor": True})
+                    "approved_baseline_is_ancestor": True,
+                    # the test lineage uses fabricated SHAs, so the ancestry
+                    # conclusions a real run computes with git are stamped here
+                    "scientific_baseline_is_ancestor_of_reviewed_full": True,
+                    "reviewed_full_baseline_is_ancestor_of_run_code": True})
     path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
     csv_path = destination / "full_fit_results.csv"
     lines = csv_path.read_text(encoding="utf-8").splitlines()
@@ -8274,18 +8282,23 @@ def test_FINDINGS_runinfo_baseline_comes_from_the_authorization(tmp_path):
         (tmp_path / "run" / "authorization.json").read_text(encoding="utf-8"))
     runinfo = json.loads((tmp_path / "run" / "runinfo.json").read_text(encoding="utf-8"))
     summary = json.loads((tmp_path / "run" / "full_summary.json").read_text(encoding="utf-8"))
-    baseline = authorization["approved_scientific_main_sha"]
+    baseline = authorization["reviewed_full_execution_main_sha"]
     assert baseline == H._FULL_TEST_EXPECTED_MAIN_SHA
-    assert runinfo["approved_scientific_main_sha"] == baseline
-    assert summary["approved_scientific_main_sha"] == baseline
+    assert runinfo["reviewed_full_execution_main_sha"] == baseline
+    assert summary["reviewed_full_execution_main_sha"] == baseline
     rows = list(csv.DictReader(
         (tmp_path / "run" / "full_fit_results.csv").open(encoding="utf-8")))
-    assert {r["approved_scientific_main_sha"] for r in rows} == {baseline}
+    assert {r["reviewed_full_execution_main_sha"] for r in rows} == {baseline}
     assert baseline != runinfo["run_code_sha"]
-    # the global smoke-era baseline is NOT silently reused
+    # HIGH-05: role 1 is the frozen constant, role 2 comes from the caller
+    assert runinfo["scientific_baseline_sha"] == H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert authorization["scientific_baseline_sha"] == H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert summary["scientific_baseline_sha"] == H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert {r["scientific_baseline_sha"] for r in rows} == {H.APPROVED_SCIENTIFIC_MAIN_SHA}
+    assert baseline != H.APPROVED_SCIENTIFIC_MAIN_SHA, "the two roles are distinct values"
     body = _executable_body(H.build_full_runinfo_payload)
-    assert "APPROVED_SCIENTIFIC_MAIN_SHA" not in body
-    assert "approved_main_sha" in body
+    assert "'scientific_baseline_sha': APPROVED_SCIENTIFIC_MAIN_SHA" in body
+    assert "'reviewed_full_execution_main_sha': approved_main_sha" in body
     assert "approved_baseline_is_ancestor_of(" in body
 
 
@@ -8294,19 +8307,25 @@ def test_FINDINGS_audit_rejects_a_split_baseline(tmp_path, target):
     _run_full_fake(tmp_path / "run")
     directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
     if target == "csv_row":
-        path = directory / "full_fit_results.csv"
-        lines = path.read_text(encoding="utf-8").splitlines()
-        header = lines[0].split(",")
-        index = header.index("approved_scientific_main_sha")
-        cells = lines[5].split(",")
-        cells[index] = "d" * 40
-        lines[5] = ",".join(cells)
-        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _patch_full_csv_cell(directory, "reviewed_full_execution_main_sha", 5, "d" * 40)
     else:
-        _patch_json(directory / target, approved_scientific_main_sha="d" * 40)
+        _patch_json(directory / target, reviewed_full_execution_main_sha="d" * 40)
     auditor = A.audit_full_run_dir(directory)
     assert any(f.check == "full_baseline_sha_lineage" for f in auditor.blockers), \
         sorted({f.check for f in auditor.blockers})
+
+
+def _patch_full_csv_cell(directory, column, line_number, value):
+    """Overwrite one cell of full_fit_results.csv (1-based data line)."""
+
+    path = directory / "full_fit_results.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    index = header.index(column)
+    cells = lines[line_number].split(",")
+    cells[index] = value
+    lines[line_number] = ",".join(cells)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def test_FINDINGS_audit_rejects_a_baseline_equal_to_the_run_sha(tmp_path):
@@ -8378,3 +8397,247 @@ def test_FINDINGS_full_executes_both_estimands_when_scoped_ab(tmp_path):
         per_estimand[row["estimand"]] = per_estimand.get(row["estimand"], 0) + 1
     assert per_estimand == {"A": 168, "B": 168}
     assert recorder.calls == 336
+
+
+# ===========================================================================
+# PR #60 re-review: HIGH-05 (SHA roles) / MEDIUM-06 (fit order)
+# ===========================================================================
+
+
+def _full_fixture(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    return _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+
+
+# --- HIGH-05: three separated roles ----------------------------------------
+
+
+def test_ROLES_three_fields_exist_in_every_artifact(tmp_path):
+    directory = _full_fixture(tmp_path)
+    authorization = json.loads((directory / "authorization.json").read_text(encoding="utf-8"))
+    runinfo = json.loads((directory / "runinfo.json").read_text(encoding="utf-8"))
+    summary = json.loads((directory / "full_summary.json").read_text(encoding="utf-8"))
+    rows = list(csv.DictReader((directory / "full_fit_results.csv").open(encoding="utf-8")))
+
+    for payload in (authorization, runinfo, summary):
+        for field in H.FULL_SHA_ROLE_FIELDS:
+            assert field in payload, field
+    for field in H.FULL_SHA_ROLE_FIELDS:
+        assert field in rows[0], field
+
+    scientific = H.APPROVED_SCIENTIFIC_MAIN_SHA
+    reviewed = authorization["reviewed_full_execution_main_sha"]
+    run_code = authorization["run_code_sha"]
+    assert scientific == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert len({scientific, reviewed, run_code}) == 3, "the three roles are distinct values"
+
+    for payload in (authorization, runinfo, summary):
+        assert payload["scientific_baseline_sha"] == scientific
+        assert payload["reviewed_full_execution_main_sha"] == reviewed
+        assert payload["run_code_sha"] == run_code
+    assert {r["scientific_baseline_sha"] for r in rows} == {scientific}
+    assert {r["reviewed_full_execution_main_sha"] for r in rows} == {reviewed}
+    assert {r["run_code_sha"] for r in rows} == {run_code}
+    # the ambiguous legacy name is gone from the full artifacts
+    for payload in (authorization, runinfo, summary):
+        assert "approved_scientific_main_sha" not in payload
+    assert "approved_scientific_main_sha" not in rows[0]
+
+
+def test_ROLES_audit_holds_the_scientific_literal_independently():
+    assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert A.FULL_SHA_ROLE_FIELDS == H.FULL_SHA_ROLE_FIELDS
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+
+
+def test_ROLES_reviewed_full_sha_source_is_still_absent():
+    """The literal is unknown until PR #60 merges; the gate stays closed."""
+
+    assert H.current_expected_full_main_sha() is None
+    assert H.current_full_execution_authorization() is None
+    assert H.trusted_full_main_sha_for(test_only=False) is None
+    body = _executable_body(H.current_expected_full_main_sha)
+    assert body.strip() == "return None"
+
+
+def test_ROLES_production_lineage_chain_is_required():
+    body = _executable_body(H._execute_real_full)
+    assert "APPROVED_SCIENTIFIC_MAIN_SHA, authorization.approved_main_sha" in \
+        body.replace("\n", " ").replace("  ", " ") or \
+        "approved_baseline_is_ancestor_of(APPROVED_SCIENTIFIC_MAIN_SHA" in body
+    assert "approved_baseline_is_ancestor_of(authorization.approved_main_sha" in body
+    assert "must not be the scientific" in body
+
+
+@pytest.mark.parametrize("target", ["authorization.json", "runinfo.json",
+                                    "full_summary.json", "csv_row"])
+def test_ROLES_tamper_scientific_baseline_fails(tmp_path, target):
+    directory = _full_fixture(tmp_path)
+    if target == "csv_row":
+        _patch_full_csv_cell(directory, "scientific_baseline_sha", 7, "e" * 40)
+    else:
+        _patch_json(directory / target, scientific_baseline_sha="e" * 40)
+    auditor = A.audit_full_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "full_scientific_baseline_sha" in checks or \
+        "full_auth_scientific_baseline" in checks, sorted(checks)
+
+
+@pytest.mark.parametrize("target", ["runinfo.json", "full_summary.json", "csv_row"])
+def test_ROLES_tamper_reviewed_full_sha_fails(tmp_path, target):
+    directory = _full_fixture(tmp_path)
+    if target == "csv_row":
+        _patch_full_csv_cell(directory, "reviewed_full_execution_main_sha", 9, "f" * 40)
+    else:
+        _patch_json(directory / target, reviewed_full_execution_main_sha="f" * 40)
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_baseline_sha_lineage" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("target", ["runinfo.json", "full_summary.json", "csv_row"])
+def test_ROLES_tamper_run_code_sha_fails(tmp_path, target):
+    directory = _full_fixture(tmp_path)
+    if target == "csv_row":
+        _patch_full_csv_cell(directory, "run_code_sha", 3, "1" * 40)
+    else:
+        _patch_json(directory / target, run_code_sha="1" * 40)
+    auditor = A.audit_full_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "full_baseline_sha_lineage" in checks or "full_run_code_sha_lineage" in checks, \
+        sorted(checks)
+
+
+def test_ROLES_reviewed_sha_in_the_scientific_field_fails(tmp_path):
+    """Putting role 2's SHA into role 1's field must never pass."""
+
+    directory = _full_fixture(tmp_path)
+    reviewed = json.loads(
+        (directory / "authorization.json").read_text(encoding="utf-8")
+    )["reviewed_full_execution_main_sha"]
+    for name in ("authorization.json", "runinfo.json", "full_summary.json"):
+        _patch_json(directory / name, scientific_baseline_sha=reviewed)
+    auditor = A.audit_full_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "full_scientific_baseline_sha" in checks or \
+        "full_auth_scientific_baseline" in checks, sorted(checks)
+
+
+@pytest.mark.parametrize("field", ["scientific_baseline_is_ancestor_of_reviewed_full",
+                                   "reviewed_full_baseline_is_ancestor_of_run_code"])
+def test_ROLES_missing_ancestry_conclusion_fails(tmp_path, field):
+    directory = _full_fixture(tmp_path)
+    _patch_json(directory / "runinfo.json", **{field: False})
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check in ("full_scientific_baseline_ancestry",
+                           "full_reviewed_baseline_ancestry")
+               for f in auditor.blockers)
+
+
+def test_ROLES_clean_fixture_still_passes(tmp_path):
+    directory = _full_fixture(tmp_path)
+    auditor = A.audit_full_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+
+
+# --- MEDIUM-06: fit_index and the deterministic order ----------------------
+
+
+def test_ORDER_auditor_rebuilds_the_order_independently():
+    ordered = A.expected_ordered_full_keys()
+    assert len(ordered) == 336
+    assert ordered[0] == ("A", 1, 1, 1, 1)
+    assert ordered[13] == ("A", 1, 1, 7, 2)
+    assert ordered[14] == ("A", 1, 2, 1, 1)
+    assert ordered[167] == ("A", 5, 3, 7, 2)
+    assert ordered[168] == ("B", 1, 1, 1, 1)
+    assert ordered[-1] == ("B", 5, 3, 7, 2)
+    assert set(ordered) == A.expected_full_keys()
+    assert len(set(ordered)) == len(ordered)
+    body = _inspect.getsource(A.expected_ordered_full_keys)
+    assert "run_k_true_robustness_sweep" not in body and "H." not in body
+    # and it agrees with what the harness actually executed
+    assert [(e, kt, rp) for e, kt, rp in H.full_execution_order()] == \
+        list(dict.fromkeys((k[0], k[1], k[2]) for k in ordered))
+
+
+def test_ORDER_clean_run_matches_the_frozen_order(tmp_path):
+    directory = _full_fixture(tmp_path)
+    rows = list(csv.DictReader((directory / "full_fit_results.csv").open(encoding="utf-8")))
+    observed = [(r["estimand"], int(r["K_TRUE"]), int(r["replicate"]),
+                 int(r["K"]), int(r["start"])) for r in rows]
+    assert tuple(observed) == A.expected_ordered_full_keys()
+    assert [int(r["fit_index"]) for r in rows] == list(range(1, 337))
+    auditor = A.audit_full_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+
+
+def test_ORDER_swapped_fit_index_fails(tmp_path):
+    """1. fit_index of two rows swapped, rows left in place."""
+
+    directory = _full_fixture(tmp_path)
+    _patch_full_csv_cell(directory, "fit_index", 10, "20")
+    _patch_full_csv_cell(directory, "fit_index", 20, "10")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_fit_index_position" for f in auditor.blockers)
+
+
+def test_ORDER_swapped_rows_with_fixed_index_fails(tmp_path):
+    """2. two whole rows swapped while fit_index stays 1..336 in place."""
+
+    directory = _full_fixture(tmp_path)
+    path = directory / "full_fit_results.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    index = header.index("fit_index")
+    first, second = lines[30].split(","), lines[60].split(",")
+    first[index], second[index] = second[index], first[index]   # keep 1..336 in place
+    lines[30], lines[60] = ",".join(second), ",".join(first)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_fit_execution_order" for f in auditor.blockers), \
+        sorted({f.check for f in auditor.blockers})
+
+
+def test_ORDER_duplicate_fit_index_fails(tmp_path):
+    """3. a duplicated fit_index."""
+
+    directory = _full_fixture(tmp_path)
+    _patch_full_csv_cell(directory, "fit_index", 40, "39")
+    auditor = A.audit_full_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "full_fit_index_sequence" in checks or "full_fit_index_position" in checks, \
+        sorted(checks)
+
+
+def test_ORDER_out_of_range_fit_index_fails(tmp_path):
+    """4. fit_index 337."""
+
+    directory = _full_fixture(tmp_path)
+    _patch_full_csv_cell(directory, "fit_index", 336, "337")
+    auditor = A.audit_full_run_dir(directory)
+    checks = {f.check for f in auditor.blockers}
+    assert "full_fit_index_sequence" in checks or "full_fit_index_position" in checks, \
+        sorted(checks)
+
+
+def test_ORDER_four_independent_checks_exist():
+    body = _inspect.getsource(A.audit_full_fit_rows)
+    for check in ("full_fit_row_count", "full_fit_key_set", "full_fit_execution_order",
+                  "full_fit_index_sequence", "full_fit_index_position"):
+        assert check in body, check
+
+
+def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    directory = _full_fixture(tmp_path)
+    A.audit_full_run_dir(directory)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert H.current_full_execution_authorization() is None
+    assert H.current_expected_full_main_sha() is None
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()

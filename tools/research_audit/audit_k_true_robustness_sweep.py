@@ -1767,9 +1767,22 @@ FULL_FAILURE_FILENAME = "failure.json"
 FULL_AUDIT_REPORT_VERSION = "phase8b-full-audit-v1"
 FULL_AUDIT_REPORT_FILENAME = "audit_report.json"
 
+# HIGH-05: the frozen scientific baseline, restated INDEPENDENTLY here.  It is
+# role 1 and never varies; the reviewed full-execution SHA (role 2) is a future
+# merge commit whose literal is not known yet, so the audit only requires it to
+# be a single consistent value that is NOT role 1 and NOT role 3.
+EXPECTED_SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+FULL_SHA_ROLE_FIELDS = (
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
+    "run_code_sha",
+)
+
 FULL_FIT_RESULTS_COLUMNS = (
     "run_code_sha",
-    "approved_scientific_main_sha",
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
     "protocol_hash",
     "fit_index",
     "estimand",
@@ -1793,6 +1806,22 @@ FULL_FIT_RESULTS_COLUMNS = (
     "finite_state",
     "real_full_fits_executed",
 )
+
+
+def expected_ordered_full_keys() -> tuple[tuple[str, int, int, int, int], ...]:
+    """The 336 cells in the frozen deterministic EXECUTION order.
+
+    Rebuilt here from the frozen grid alone -- the harness order helper is never
+    imported.  Order: estimand A->B, K_TRUE 1,2,4,5, replicate 1..3,
+    candidate K 1..7, start 1,2.
+    """
+
+    return tuple((estimand, k_true, replicate, k, start)
+                 for estimand in EXPECTED_FULL_ESTIMANDS
+                 for k_true in NEW_K_TRUE
+                 for replicate in REPLICATES
+                 for k in K_CANDIDATES
+                 for start in STARTS)
 
 
 def expected_full_keys() -> set[tuple[str, int, int, int, int]]:
@@ -1851,14 +1880,21 @@ def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> No
                     "full_auth_independent_review", "INDEPENDENT_REVIEW_PASS is not True")
     auditor.require(payload.get("human_full_approval") is True,
                     "full_auth_human_approval", "HUMAN_FULL_APPROVAL is not True")
-    # The reviewed baseline for a full run is its own value; it must still be a
-    # full lowercase commit SHA and must never be the run-code SHA.
-    baseline = payload.get("approved_scientific_main_sha")
-    auditor.require(_is_full_commit_sha(baseline), "full_auth_baseline_format",
-                    f"approved_scientific_main_sha is not a commit SHA: {baseline!r}")
-    auditor.require(baseline != payload.get("run_code_sha"),
+    # HIGH-05: the three roles are separate fields with separate meanings.
+    auditor.require(payload.get("scientific_baseline_sha")
+                    == EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                    "full_auth_scientific_baseline",
+                    f"scientific_baseline_sha: {payload.get('scientific_baseline_sha')!r}")
+    reviewed = payload.get("reviewed_full_execution_main_sha")
+    auditor.require(_is_full_commit_sha(reviewed), "full_auth_baseline_format",
+                    f"reviewed_full_execution_main_sha is not a commit SHA: {reviewed!r}")
+    auditor.require(reviewed != payload.get("run_code_sha"),
                     "full_auth_baseline_not_run_sha",
-                    "the approved baseline must not be the run-code SHA")
+                    "the reviewed full-execution baseline must not be the run-code SHA")
+    auditor.require(reviewed != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                    "full_auth_sha_role_collision",
+                    "the reviewed full-execution baseline must not be the scientific "
+                    "baseline")
 
 
 def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> None:
@@ -1874,6 +1910,8 @@ def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> Non
 
     keys: list[tuple[str, int, int, int, int]] = []
     per_estimand: dict[str, int] = {}
+    fit_indices: list[int] = []
+    ordered_observed: list[tuple[int, tuple[str, int, int, int, int]]] = []
     for index, row in enumerate(rows, start=1):
         label = f"row {index}"
         estimand = row.get("estimand")
@@ -1888,6 +1926,15 @@ def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> Non
         if None in (k_true, replicate, k, start):
             continue
         keys.append((estimand, k_true, replicate, k, start))
+        # MEDIUM-06: row position, recorded fit_index and the frozen execution
+        # order must all agree.
+        recorded_index = _parse_int_field(row, "fit_index", auditor,
+                                          "full_fit_index_parse", label)
+        if recorded_index is not None:
+            fit_indices.append(recorded_index)
+            auditor.require(recorded_index == index, "full_fit_index_position",
+                            f"{label}: fit_index {recorded_index} is not the row position")
+            ordered_observed.append((index, (estimand, k_true, replicate, k, start)))
         auditor.require(k_true != ANCHOR_K_TRUE, "full_fit_anchor_reexecuted",
                         f"{label}: the Phase 7e anchor K_TRUE was re-executed")
         auditor.require(row.get("role") == ROLE_BY_ESTIMAND[estimand], "full_fit_role",
@@ -1929,6 +1976,20 @@ def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> Non
                     f"{len(keys) - len(set(keys))} duplicate cells")
     auditor.require(set(keys) == expected_full_keys(), "full_fit_key_set",
                     "the executed cells are not exactly the frozen 336-cell grid")
+
+    # MEDIUM-06: four INDEPENDENT checks -- row count, unique set, exact ordered
+    # sequence, and fit_index 1..336.  The unordered set check alone would
+    # accept a shuffled sweep.
+    auditor.require(sorted(fit_indices) == list(range(1, EXPECTED_FULL_FITS + 1)),
+                    "full_fit_index_sequence",
+                    f"fit_index is not exactly 1..{EXPECTED_FULL_FITS} without duplicates")
+    expected_order = expected_ordered_full_keys()
+    mismatches = [f"row {position}: {observed} != {expected_order[position - 1]}"
+                  for position, observed in ordered_observed
+                  if position <= len(expected_order)
+                  and observed != expected_order[position - 1]]
+    auditor.require(not mismatches, "full_fit_execution_order",
+                    f"the executed order is not the frozen order: {mismatches[:3]}")
     auditor.require(per_estimand == {e: EXPECTED_FULL_FITS_PER_ESTIMAND
                                      for e in EXPECTED_FULL_ESTIMANDS},
                     "full_fit_ab_split",
@@ -1936,39 +1997,83 @@ def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> Non
                     f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
 
 
+def _collect_role(payloads: Mapping[str, Mapping[str, Any]],
+                  rows: Sequence[dict[str, str]] | None, field: str) -> dict[str, Any]:
+    observed: dict[str, Any] = {name: p.get(field) for name, p in payloads.items()}
+    if rows:
+        for index, row in enumerate(rows, start=1):
+            observed[f"full_fit_results.csv row {index}"] = row.get(field)
+    return observed
+
+
 def audit_full_baseline_lineage(payloads: Mapping[str, Mapping[str, Any]],
                                 rows: Sequence[dict[str, str]] | None,
                                 auditor: Auditor) -> None:
-    """HIGH-03: every full artifact must name EXACTLY ONE approved baseline.
+    """HIGH-03 + HIGH-05: three commit-SHA roles, never interchangeable.
 
-    authorization.json, runinfo.json, full_summary.json and all 336 CSV rows are
-    compared against each other.  A single disagreeing value is a BLOCKER: an
-    artifact set that names two baselines cannot say which review approved it.
+    role 1  ``scientific_baseline_sha``            EXACT frozen literal
+    role 2  ``reviewed_full_execution_main_sha``   exactly one value, != role 1
+    role 3  ``run_code_sha``                       exactly one value, != role 2
+
+    authorization.json, runinfo.json, full_summary.json and all 336 CSV rows
+    must agree.  One disagreement is a BLOCKER: an artifact set that names two
+    baselines cannot say which review approved it, and one that puts a SHA in
+    another role's field has lost the meaning of its own provenance.
     """
 
-    observed: dict[str, Any] = {name: p.get("approved_scientific_main_sha")
-                                for name, p in payloads.items()}
-    if rows:
-        for index, row in enumerate(rows, start=1):
-            observed[f"full_fit_results.csv row {index}"] =                 row.get("approved_scientific_main_sha")
-    for name, value in observed.items():
-        auditor.require(_is_full_commit_sha(value), "full_baseline_sha_format",
-                        f"{name}: {value!r}")
-    distinct = sorted({value for value in observed.values() if value is not None})
-    auditor.require(len(distinct) <= 1, "full_baseline_sha_lineage",
-                    f"artifacts name different approved baselines: {distinct}")
-    # provenance must never be substituted for approval
-    for name, payload in payloads.items():
-        auditor.require(payload.get("approved_scientific_main_sha")
-                        != payload.get("run_code_sha"),
-                        "full_baseline_not_run_sha",
-                        f"{name}: the approved baseline equals the run-code SHA")
-    if rows:
-        for index, row in enumerate(rows, start=1):
-            if row.get("approved_scientific_main_sha") == row.get("run_code_sha"):
-                auditor.blocker("full_baseline_not_run_sha",
-                                f"full_fit_results.csv row {index}: baseline == run SHA")
-                break
+    roles = {field: _collect_role(payloads, rows, field) for field in FULL_SHA_ROLE_FIELDS}
+
+    # role 1: the exact frozen literal, everywhere
+    for name, value in roles["scientific_baseline_sha"].items():
+        auditor.require(value == EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_scientific_baseline_sha",
+                        f"{name}: {value!r} != {EXPECTED_SCIENTIFIC_BASELINE_SHA}")
+
+    # roles 2 and 3: well-formed and single-valued
+    for field in ("reviewed_full_execution_main_sha", "run_code_sha"):
+        for name, value in roles[field].items():
+            auditor.require(_is_full_commit_sha(value), "full_baseline_sha_format",
+                            f"{name}: {field} is not a commit SHA: {value!r}")
+        distinct = sorted({v for v in roles[field].values() if v is not None})
+        auditor.require(len(distinct) <= 1, "full_baseline_sha_lineage",
+                        f"artifacts name different {field} values: {distinct}")
+
+    # the roles must not collapse into each other
+    reviewed = sorted({v for v in roles["reviewed_full_execution_main_sha"].values()
+                       if v is not None})
+    run_code = sorted({v for v in roles["run_code_sha"].values() if v is not None})
+    for value in reviewed:
+        auditor.require(value != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_sha_role_collision",
+                        "the reviewed full-execution SHA must not be the scientific "
+                        "baseline: they are different roles")
+    for value in run_code:
+        auditor.require(value not in reviewed, "full_baseline_not_run_sha",
+                        "the run-code SHA must not be the reviewed full-execution "
+                        "baseline: provenance is never approval")
+        auditor.require(value != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_sha_role_collision",
+                        "the run-code SHA must not be the scientific baseline")
+
+    # the authorization's reviewed SHA is what every other artifact must carry
+    authorization = payloads.get("authorization.json")
+    if authorization is not None and reviewed:
+        auditor.require(
+            authorization.get("reviewed_full_execution_main_sha") == reviewed[0],
+            "full_authorization_reviewed_sha",
+            "the artifacts do not carry the authorization's reviewed full SHA")
+
+    # recorded ancestry over the same chain (the producer computes it with git)
+    runinfo = payloads.get("runinfo.json")
+    if runinfo is not None:
+        auditor.require(runinfo.get("scientific_baseline_is_ancestor_of_reviewed_full")
+                        is True, "full_scientific_baseline_ancestry",
+                        "the scientific baseline is not recorded as an ancestor of the "
+                        "reviewed full-execution baseline")
+        auditor.require(runinfo.get("reviewed_full_baseline_is_ancestor_of_run_code")
+                        is True, "full_reviewed_baseline_ancestry",
+                        "the reviewed full-execution baseline is not recorded as an "
+                        "ancestor of the run-code SHA")
 
 
 def audit_full_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
