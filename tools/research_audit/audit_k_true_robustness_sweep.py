@@ -1728,6 +1728,652 @@ def _is_full_commit_sha(value: Any) -> bool:
             and all(character in "0123456789abcdef" for character in value))
 
 
+# ===========================================================================
+# Phase 8b S3 -- independent audit of the full 336-fit sweep (Issue #59)
+# ===========================================================================
+#
+# Every expectation below is restated here on purpose.  The audit never imports
+# the harness, so a harness-side edit cannot move the bar it is judged against.
+
+FULL_EXECUTION_ISSUE_NUMBER = 59
+FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER = 49
+FULL_PROTOCOL_VERSION = "phase8b-full-protocol-v1"
+FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v1"
+FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v1"
+EXPECTED_FULL_PROTOCOL_HASH = \
+    "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
+
+EXPECTED_FULL_FITS_PER_ESTIMAND = FITS_PER_ESTIMAND          # 168
+EXPECTED_FULL_FITS = 2 * FITS_PER_ESTIMAND                   # 336
+EXPECTED_FULL_ESTIMANDS = ("A", "B")
+# 24 newly executed cells + 6 Phase 7e anchor references.
+FULL_SELECTION_MATRIX_ROWS = len(EXPECTED_FULL_ESTIMANDS) * len(FULL_K_TRUE_GRID) * len(REPLICATES)
+PHASE7E_ANCHOR_FIT_COUNT = 42
+
+FULL_AUDIT_INPUT_FILES = (
+    "authorization.json",
+    "manifest.csv",
+    "mask_provenance.csv",
+    "config_gate.csv",
+    "leakage_gate.csv",
+    "full_fit_results.csv",
+    "selection_matrix.csv",
+    "full_summary.json",
+    "runinfo.json",
+)
+# Present only for a run that stopped early.  Known, never required, and its
+# presence can never coexist with a PASS (the completed artifacts are missing).
+FULL_FAILURE_FILENAME = "failure.json"
+FULL_AUDIT_REPORT_VERSION = "phase8b-full-audit-v1"
+FULL_AUDIT_REPORT_FILENAME = "audit_report.json"
+
+# HIGH-05: the frozen scientific baseline, restated INDEPENDENTLY here.  It is
+# role 1 and never varies; the reviewed full-execution SHA (role 2) is a future
+# merge commit whose literal is not known yet, so the audit only requires it to
+# be a single consistent value that is NOT role 1 and NOT role 3.
+EXPECTED_SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+FULL_SHA_ROLE_FIELDS = (
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
+    "run_code_sha",
+)
+
+FULL_FIT_RESULTS_COLUMNS = (
+    "run_code_sha",
+    "scientific_baseline_sha",
+    "reviewed_full_execution_main_sha",
+    "protocol_hash",
+    "fit_index",
+    "estimand",
+    "role",
+    "K_TRUE",
+    "replicate",
+    "K",
+    "start",
+    "data_seed",
+    "split_seed",
+    "model_seed",
+    "mask_design",
+    "mask_group_id",
+    "anchor_mask_hash",
+    "anchor_train_mask_hash",
+    "heldout_mean_log_score",
+    "internal_retry",
+    "warning_count",
+    "q_failure",
+    "nan_occurred",
+    "finite_state",
+    "real_full_fits_executed",
+)
+
+
+def expected_ordered_full_keys() -> tuple[tuple[str, int, int, int, int], ...]:
+    """The 336 cells in the frozen deterministic EXECUTION order.
+
+    Rebuilt here from the frozen grid alone -- the harness order helper is never
+    imported.  Order: estimand A->B, K_TRUE 1,2,4,5, replicate 1..3,
+    candidate K 1..7, start 1,2.
+    """
+
+    return tuple((estimand, k_true, replicate, k, start)
+                 for estimand in EXPECTED_FULL_ESTIMANDS
+                 for k_true in NEW_K_TRUE
+                 for replicate in REPLICATES
+                 for k in K_CANDIDATES
+                 for start in STARTS)
+
+
+def expected_full_keys() -> set[tuple[str, int, int, int, int]]:
+    """The exact 336 (estimand, K_TRUE, replicate, K, start) cells."""
+
+    return {(estimand, k_true, replicate, k, start)
+            for estimand in EXPECTED_FULL_ESTIMANDS
+            for k_true in NEW_K_TRUE
+            for replicate in REPLICATES
+            for k in K_CANDIDATES
+            for start in STARTS}
+
+
+def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    """The committed full authorization, re-checked against frozen constants."""
+
+    auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
+                    "full_auth_version", str(payload.get("artifact_version")))
+    auditor.require(payload.get("authorization_version") == FULL_AUTHORIZATION_VERSION,
+                    "full_auth_authorization_version",
+                    str(payload.get("authorization_version")))
+    auditor.require(payload.get("protocol_hash") == EXPECTED_FULL_PROTOCOL_HASH,
+                    "full_auth_protocol_hash", str(payload.get("protocol_hash")))
+    _require_exact_int(payload, "execution_issue_number", FULL_EXECUTION_ISSUE_NUMBER,
+                       auditor, "full_auth_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue_number",
+                       FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+                       auditor, "full_auth_protocol_issue")
+    _require_exact_int(payload, "fits_per_estimand", EXPECTED_FULL_FITS_PER_ESTIMAND,
+                       auditor, "full_auth_fits_per_estimand")
+    _require_exact_int(payload, "total_fit_count", EXPECTED_FULL_FITS,
+                       auditor, "full_auth_total_fits")
+    _require_exact_int(payload, "data_seed_base", DATA_SEED_BASE,
+                       auditor, "full_auth_data_seed_base")
+    _require_exact_int(payload, "model_seed_base", MODEL_SEED_BASE,
+                       auditor, "full_auth_model_seed_base")
+    _require_exact_int(payload, "anchor_split_seed_base", ANCHOR_SPLIT_SEED_BASE,
+                       auditor, "full_auth_split_seed_base")
+    _require_exact_int_list(payload, "k_true_grid", list(NEW_K_TRUE),
+                            auditor, "full_auth_k_true_grid")
+    _require_exact_int_list(payload, "candidate_k", list(K_CANDIDATES),
+                            auditor, "full_auth_candidate_k")
+    _require_exact_int_list(payload, "starts", list(STARTS), auditor, "full_auth_starts")
+    _require_exact_int_list(payload, "replicates", list(REPLICATES),
+                            auditor, "full_auth_replicates")
+    auditor.require(list(payload.get("estimands") or []) == list(EXPECTED_FULL_ESTIMANDS),
+                    "full_auth_estimands", str(payload.get("estimands")))
+    auditor.require(ANCHOR_K_TRUE not in list(payload.get("k_true_grid") or []),
+                    "full_auth_anchor_excluded",
+                    "the Phase 7e anchor K_TRUE appears in the full grid")
+    auditor.require(payload.get("mask_design") == MASK_DESIGN,
+                    "full_auth_mask_design", str(payload.get("mask_design")))
+    auditor.require(payload.get("random_design") == RANDOM_DESIGN,
+                    "full_auth_random_design", str(payload.get("random_design")))
+    auditor.require(payload.get("independent_review_pass") is True,
+                    "full_auth_independent_review", "INDEPENDENT_REVIEW_PASS is not True")
+    auditor.require(payload.get("human_full_approval") is True,
+                    "full_auth_human_approval", "HUMAN_FULL_APPROVAL is not True")
+    # HIGH-05: the three roles are separate fields with separate meanings.
+    auditor.require(payload.get("scientific_baseline_sha")
+                    == EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                    "full_auth_scientific_baseline",
+                    f"scientific_baseline_sha: {payload.get('scientific_baseline_sha')!r}")
+    reviewed = payload.get("reviewed_full_execution_main_sha")
+    auditor.require(_is_full_commit_sha(reviewed), "full_auth_baseline_format",
+                    f"reviewed_full_execution_main_sha is not a commit SHA: {reviewed!r}")
+    auditor.require(reviewed != payload.get("run_code_sha"),
+                    "full_auth_baseline_not_run_sha",
+                    "the reviewed full-execution baseline must not be the run-code SHA")
+    auditor.require(reviewed != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                    "full_auth_sha_role_collision",
+                    "the reviewed full-execution baseline must not be the scientific "
+                    "baseline")
+
+
+def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> None:
+    """Exactly 336 rows, exactly 168 per estimand, exactly the frozen grid."""
+
+    header = tuple(rows[0]) if rows else ()
+    if not auditor.require(header == FULL_FIT_RESULTS_COLUMNS, "full_fit_columns",
+                           f"header differs from the frozen schema: {list(header)}"):
+        return
+    if not auditor.require(len(rows) == EXPECTED_FULL_FITS, "full_fit_row_count",
+                           f"{len(rows)} != {EXPECTED_FULL_FITS}"):
+        return
+
+    keys: list[tuple[str, int, int, int, int]] = []
+    per_estimand: dict[str, int] = {}
+    fit_indices: list[int] = []
+    ordered_observed: list[tuple[int, tuple[str, int, int, int, int]]] = []
+    for index, row in enumerate(rows, start=1):
+        label = f"row {index}"
+        estimand = row.get("estimand")
+        if not auditor.require(estimand in EXPECTED_FULL_ESTIMANDS, "full_fit_estimand",
+                               f"{label}: {estimand!r}"):
+            continue
+        per_estimand[estimand] = per_estimand.get(estimand, 0) + 1
+        k_true = _parse_int_field(row, "K_TRUE", auditor, "full_fit_key_parse", label)
+        replicate = _parse_int_field(row, "replicate", auditor, "full_fit_key_parse", label)
+        k = _parse_int_field(row, "K", auditor, "full_fit_key_parse", label)
+        start = _parse_int_field(row, "start", auditor, "full_fit_key_parse", label)
+        if None in (k_true, replicate, k, start):
+            continue
+        keys.append((estimand, k_true, replicate, k, start))
+        # MEDIUM-06: row position, recorded fit_index and the frozen execution
+        # order must all agree.
+        recorded_index = _parse_int_field(row, "fit_index", auditor,
+                                          "full_fit_index_parse", label)
+        if recorded_index is not None:
+            fit_indices.append(recorded_index)
+            auditor.require(recorded_index == index, "full_fit_index_position",
+                            f"{label}: fit_index {recorded_index} is not the row position")
+            ordered_observed.append((index, (estimand, k_true, replicate, k, start)))
+        auditor.require(k_true != ANCHOR_K_TRUE, "full_fit_anchor_reexecuted",
+                        f"{label}: the Phase 7e anchor K_TRUE was re-executed")
+        auditor.require(row.get("role") == ROLE_BY_ESTIMAND[estimand], "full_fit_role",
+                        f"{label}: {row.get('role')!r}")
+        auditor.require(row.get("mask_design") == MASK_DESIGN, "full_fit_mask_design",
+                        f"{label}: {row.get('mask_design')!r}")
+        # seeds recomputed independently from the frozen rules
+        data_seed = _parse_int_field(row, "data_seed", auditor, "full_fit_seed", label)
+        split_seed = _parse_int_field(row, "split_seed", auditor, "full_fit_seed", label)
+        model_seed = _parse_int_field(row, "model_seed", auditor, "full_fit_seed", label)
+        if data_seed is not None:
+            auditor.require(data_seed == expected_data_seed(k_true, replicate),
+                            "full_fit_data_seed", f"{label}: {data_seed}")
+        if split_seed is not None:
+            auditor.require(split_seed == expected_split_seed(replicate),
+                            "full_fit_split_seed", f"{label}: {split_seed}")
+        if model_seed is not None:
+            auditor.require(model_seed == expected_model_seed(k_true, replicate, k, start),
+                            "full_fit_model_seed", f"{label}: {model_seed}")
+        for column in ("internal_retry", "warning_count"):
+            value = _parse_int_field(row, column, auditor, "full_fit_counters", label)
+            if value is not None:
+                auditor.require(value == 0, "full_fit_counters", f"{label}: {column}={value}")
+        for column, expected in (("q_failure", False), ("nan_occurred", False),
+                                 ("finite_state", True)):
+            value = _parse_bool_field(row, column, auditor, "full_fit_flags", label)
+            if value is not None:
+                auditor.require(value is expected, "full_fit_flags",
+                                f"{label}: {column}={value}")
+        executed = _parse_int_field(row, "real_full_fits_executed", auditor,
+                                    "full_fit_executed_count", label)
+        if executed is not None:
+            auditor.require(executed == EXPECTED_FULL_FITS, "full_fit_executed_count",
+                            f"{label}: {executed} != {EXPECTED_FULL_FITS}")
+        _parse_finite_float_field(row, "heldout_mean_log_score", auditor,
+                                  "full_fit_score", label)
+
+    auditor.require(len(set(keys)) == len(keys), "full_fit_duplicate_key",
+                    f"{len(keys) - len(set(keys))} duplicate cells")
+    auditor.require(set(keys) == expected_full_keys(), "full_fit_key_set",
+                    "the executed cells are not exactly the frozen 336-cell grid")
+
+    # MEDIUM-06: four INDEPENDENT checks -- row count, unique set, exact ordered
+    # sequence, and fit_index 1..336.  The unordered set check alone would
+    # accept a shuffled sweep.
+    auditor.require(sorted(fit_indices) == list(range(1, EXPECTED_FULL_FITS + 1)),
+                    "full_fit_index_sequence",
+                    f"fit_index is not exactly 1..{EXPECTED_FULL_FITS} without duplicates")
+    expected_order = expected_ordered_full_keys()
+    mismatches = [f"row {position}: {observed} != {expected_order[position - 1]}"
+                  for position, observed in ordered_observed
+                  if position <= len(expected_order)
+                  and observed != expected_order[position - 1]]
+    auditor.require(not mismatches, "full_fit_execution_order",
+                    f"the executed order is not the frozen order: {mismatches[:3]}")
+    auditor.require(per_estimand == {e: EXPECTED_FULL_FITS_PER_ESTIMAND
+                                     for e in EXPECTED_FULL_ESTIMANDS},
+                    "full_fit_ab_split",
+                    f"A/B split is not {EXPECTED_FULL_FITS_PER_ESTIMAND}/"
+                    f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
+
+
+def _collect_role(payloads: Mapping[str, Mapping[str, Any]],
+                  rows: Sequence[dict[str, str]] | None, field: str) -> dict[str, Any]:
+    observed: dict[str, Any] = {name: p.get(field) for name, p in payloads.items()}
+    if rows:
+        for index, row in enumerate(rows, start=1):
+            observed[f"full_fit_results.csv row {index}"] = row.get(field)
+    return observed
+
+
+def audit_full_baseline_lineage(payloads: Mapping[str, Mapping[str, Any]],
+                                rows: Sequence[dict[str, str]] | None,
+                                auditor: Auditor) -> None:
+    """HIGH-03 + HIGH-05: three commit-SHA roles, never interchangeable.
+
+    role 1  ``scientific_baseline_sha``            EXACT frozen literal
+    role 2  ``reviewed_full_execution_main_sha``   exactly one value, != role 1
+    role 3  ``run_code_sha``                       exactly one value, != role 2
+
+    authorization.json, runinfo.json, full_summary.json and all 336 CSV rows
+    must agree.  One disagreement is a BLOCKER: an artifact set that names two
+    baselines cannot say which review approved it, and one that puts a SHA in
+    another role's field has lost the meaning of its own provenance.
+    """
+
+    roles = {field: _collect_role(payloads, rows, field) for field in FULL_SHA_ROLE_FIELDS}
+
+    # role 1: the exact frozen literal, everywhere
+    for name, value in roles["scientific_baseline_sha"].items():
+        auditor.require(value == EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_scientific_baseline_sha",
+                        f"{name}: {value!r} != {EXPECTED_SCIENTIFIC_BASELINE_SHA}")
+
+    # roles 2 and 3: well-formed and single-valued
+    for field in ("reviewed_full_execution_main_sha", "run_code_sha"):
+        for name, value in roles[field].items():
+            auditor.require(_is_full_commit_sha(value), "full_baseline_sha_format",
+                            f"{name}: {field} is not a commit SHA: {value!r}")
+        distinct = sorted({v for v in roles[field].values() if v is not None})
+        auditor.require(len(distinct) <= 1, "full_baseline_sha_lineage",
+                        f"artifacts name different {field} values: {distinct}")
+
+    # the roles must not collapse into each other
+    reviewed = sorted({v for v in roles["reviewed_full_execution_main_sha"].values()
+                       if v is not None})
+    run_code = sorted({v for v in roles["run_code_sha"].values() if v is not None})
+    for value in reviewed:
+        auditor.require(value != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_sha_role_collision",
+                        "the reviewed full-execution SHA must not be the scientific "
+                        "baseline: they are different roles")
+    for value in run_code:
+        auditor.require(value not in reviewed, "full_baseline_not_run_sha",
+                        "the run-code SHA must not be the reviewed full-execution "
+                        "baseline: provenance is never approval")
+        auditor.require(value != EXPECTED_SCIENTIFIC_BASELINE_SHA,
+                        "full_sha_role_collision",
+                        "the run-code SHA must not be the scientific baseline")
+
+    # the authorization's reviewed SHA is what every other artifact must carry
+    authorization = payloads.get("authorization.json")
+    if authorization is not None and reviewed:
+        auditor.require(
+            authorization.get("reviewed_full_execution_main_sha") == reviewed[0],
+            "full_authorization_reviewed_sha",
+            "the artifacts do not carry the authorization's reviewed full SHA")
+
+    # recorded ancestry over the same chain (the producer computes it with git)
+    runinfo = payloads.get("runinfo.json")
+    if runinfo is not None:
+        auditor.require(runinfo.get("scientific_baseline_is_ancestor_of_reviewed_full")
+                        is True, "full_scientific_baseline_ancestry",
+                        "the scientific baseline is not recorded as an ancestor of the "
+                        "reviewed full-execution baseline")
+        auditor.require(runinfo.get("reviewed_full_baseline_is_ancestor_of_run_code")
+                        is True, "full_reviewed_baseline_ancestry",
+                        "the reviewed full-execution baseline is not recorded as an "
+                        "ancestor of the run-code SHA")
+
+
+def audit_full_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    """Counters that bound the execution: 336 fits, nothing else re-run."""
+
+    auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
+                    "full_runinfo_version", str(payload.get("artifact_version")))
+    auditor.require(payload.get("protocol_hash") == EXPECTED_FULL_PROTOCOL_HASH,
+                    "full_runinfo_protocol_hash", str(payload.get("protocol_hash")))
+    _require_exact_int(payload, "execution_issue", FULL_EXECUTION_ISSUE_NUMBER,
+                       auditor, "full_runinfo_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue", FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+                       auditor, "full_runinfo_protocol_issue")
+    _require_exact_int(payload, "expected_full_fits", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_expected_fits")
+    _require_exact_int(payload, "actual_full_fits", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_actual_fits")
+    _require_exact_int(payload, "phase7e_rerun_count", 0,
+                       auditor, "full_runinfo_phase7e_rerun")
+    _require_exact_int(payload, "canary_fits_executed", 0,
+                       auditor, "full_runinfo_canary_fits")
+    _require_exact_int(payload, "smoke_fits_executed", 0,
+                       auditor, "full_runinfo_smoke_fits")
+    _require_exact_int(payload, "replacement_fits_executed", 0,
+                       auditor, "full_runinfo_replacement_fits")
+    # BLOCKER-01: the recorded value is the state BEFORE the run created its own
+    # artifact directory; a post-execution git status would always be dirty.
+    auditor.require(payload.get("working_tree_clean") is True,
+                    "full_runinfo_working_tree",
+                    "the working tree was dirty before the execution")
+    auditor.require(payload.get("working_tree_clean_before_execution") is True,
+                    "full_runinfo_working_tree_frozen",
+                    "the pre-execution working-tree state is missing or not True")
+    auditor.require(payload.get("approved_baseline_is_ancestor") is True,
+                    "full_runinfo_lineage",
+                    "the approved baseline is not recorded as an ancestor")
+    # HIGH-02: the fit-call counters must agree with a complete run.
+    _require_exact_int(payload, "attempted_fit_count", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_attempted_fits")
+    _require_exact_int(payload, "clean_fit_calls", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_clean_fits")
+    _require_exact_int(payload, "scored_rows", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_scored_rows")
+    auditor.require(payload.get("mask_design") == MASK_DESIGN,
+                    "full_runinfo_mask_design", str(payload.get("mask_design")))
+
+
+def audit_full_summary(payload: Mapping[str, Any], scores: Mapping[str, Any],
+                       auditor: Auditor) -> None:
+    """Per-estimand selection recomputed independently from the fit rows."""
+
+    auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
+                    "full_summary_version", str(payload.get("artifact_version")))
+    auditor.require(payload.get("protocol_hash") == EXPECTED_FULL_PROTOCOL_HASH,
+                    "full_summary_protocol_hash", str(payload.get("protocol_hash")))
+    _require_exact_int(payload, "expected_full_fits", EXPECTED_FULL_FITS,
+                       auditor, "full_summary_fit_count")
+    _require_exact_int(payload, "actual_full_fits", EXPECTED_FULL_FITS,
+                       auditor, "full_summary_fit_count")
+    auditor.require(payload.get("k_recovery_evaluated") is True,
+                    "full_summary_k_recovery_flag",
+                    "the full grid contains K_TRUE, so recovery IS evaluated here")
+    selected = payload.get("selected_k")
+    if not auditor.require(isinstance(selected, Mapping), "full_summary_selected_k",
+                           f"selected_k is not an object: {selected!r}"):
+        return
+    for estimand in EXPECTED_FULL_ESTIMANDS:
+        for k_true in NEW_K_TRUE:
+            for replicate in REPLICATES:
+                cell = f"{estimand}/K{k_true}/r{replicate}"
+                recomputed = scores.get((estimand, k_true, replicate))
+                if recomputed is None:
+                    auditor.blocker("full_summary_cell_missing", cell)
+                    continue
+                reported = selected.get(cell)
+                if type(reported) is not int:
+                    auditor.blocker("full_summary_selected_k",
+                                    f"{cell}: {reported!r} is not an int")
+                    continue
+                auditor.require(reported == recomputed, "full_summary_selected_k",
+                                f"{cell}: reported {reported}, recomputed {recomputed}")
+
+
+def recompute_full_selection(rows: Sequence[dict[str, str]],
+                             auditor: Auditor) -> dict[tuple[str, int, int], int]:
+    """2-start mean -> maximum -> tie <= 1e-12 -> smallest K, per cell."""
+
+    by_cell: dict[tuple[str, int, int], dict[int, dict[int, float]]] = {}
+    for index, row in enumerate(rows, start=1):
+        label = f"row {index}"
+        estimand = row.get("estimand")
+        k_true = _parse_int_field(row, "K_TRUE", auditor, "full_selection_parse", label)
+        replicate = _parse_int_field(row, "replicate", auditor, "full_selection_parse", label)
+        k = _parse_int_field(row, "K", auditor, "full_selection_parse", label)
+        start = _parse_int_field(row, "start", auditor, "full_selection_parse", label)
+        score = _parse_finite_float_field(row, "heldout_mean_log_score", auditor,
+                                          "full_selection_parse", label)
+        if estimand not in EXPECTED_FULL_ESTIMANDS or None in (k_true, replicate, k, start) \
+                or score is None:
+            continue
+        by_cell.setdefault((estimand, k_true, replicate), {}).setdefault(k, {})[start] = score
+
+    selected: dict[tuple[str, int, int], int] = {}
+    for cell, by_k in by_cell.items():
+        if set(by_k) != set(K_CANDIDATES):
+            auditor.blocker("full_selection_candidates", f"{cell}: {sorted(by_k)}")
+            continue
+        if any(set(v) != set(STARTS) for v in by_k.values()):
+            auditor.blocker("full_selection_starts", str(cell))
+            continue
+        selected[cell] = select_k_independently(by_k)
+    return selected
+
+
+def collect_full_cell_scores(rows: Sequence[dict[str, str]],
+                            ) -> dict[tuple[str, int, int], dict[int, dict[int, float]]]:
+    """(estimand, K_TRUE, replicate) -> K -> start -> score, parsed leniently.
+
+    Malformed rows are simply skipped here; ``audit_full_fit_rows`` is what
+    turns them into BLOCKERs, so a parse problem is never silently tolerated.
+    """
+
+    grouped: dict[tuple[str, int, int], dict[int, dict[int, float]]] = {}
+    for row in rows:
+        try:
+            cell = (row["estimand"], int(row["K_TRUE"]), int(row["replicate"]))
+            grouped.setdefault(cell, {}).setdefault(int(row["K"]), {})[int(row["start"])] =                 float(row[SCORE_COLUMN])
+        except (KeyError, TypeError, ValueError):
+            continue
+    return grouped
+
+
+def audit_full_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Auditor:
+    """Independent, fail-closed audit of one full 336-fit execution directory."""
+
+    auditor = Auditor()
+    run_dir = Path(run_dir)
+    if not run_dir.is_dir():
+        auditor.blocker("full_run_dir_missing", str(run_dir))
+        return auditor
+
+    for name in FULL_AUDIT_INPUT_FILES:
+        if not (run_dir / name).is_file():
+            auditor.blocker("required_artifact_missing", f"full mode requires {name}")
+
+    anchors = read_phase7e_anchor(auditor, phase7e_dir)
+
+    authorization = _read_json(run_dir / "authorization.json", auditor)
+    if authorization is not None:
+        audit_full_authorization(authorization, auditor)
+
+    runinfo = _read_json(run_dir / "runinfo.json", auditor)
+    if runinfo is not None:
+        audit_full_runinfo(runinfo, auditor)
+
+    def _per_estimand(rows: Sequence[dict[str, str]] | None, name: str, audit) -> None:
+        """Run a per-estimand audit; an EMPTY slice is a BLOCKER, never a skip.
+
+        A partial run has no rows for the estimand it never reached, and the
+        per-estimand auditors index row 0 -- guarding here keeps the audit
+        fail-closed instead of crashing.
+        """
+
+        if not rows:
+            return
+        for estimand in EXPECTED_FULL_ESTIMANDS:
+            subset = [r for r in rows if r.get("estimand") == estimand]
+            if not subset:
+                auditor.blocker("full_estimand_slice_missing",
+                                f"{name}: no rows for estimand {estimand}")
+                continue
+            audit(subset, estimand)
+
+    manifest_rows = _read_csv(run_dir / "manifest.csv", auditor)
+    _per_estimand(manifest_rows, "manifest.csv",
+                  lambda rows, estimand: audit_manifest(rows, estimand, auditor))
+    if manifest_rows:
+        auditor.require(len(manifest_rows) == EXPECTED_FULL_FITS, "full_manifest_row_count",
+                        f"{len(manifest_rows)} != {EXPECTED_FULL_FITS}")
+
+    provenance_rows = _read_csv(run_dir / "mask_provenance.csv", auditor)
+    _per_estimand(provenance_rows, "mask_provenance.csv",
+                  lambda rows, estimand: audit_mask_provenance(rows, estimand, anchors, auditor))
+
+    leakage_rows = _read_csv(run_dir / "leakage_gate.csv", auditor)
+    _per_estimand(leakage_rows, "leakage_gate.csv",
+                  lambda rows, estimand: audit_leakage_gate(rows, estimand, anchors, auditor))
+
+    fit_rows = _read_csv(run_dir / "full_fit_results.csv", auditor)
+    scores: dict[tuple[str, int, int], int] = {}
+    full_cell_scores: dict[tuple[str, int, int], dict[int, dict[int, float]]] = {}
+    if fit_rows:
+        audit_full_fit_rows(fit_rows, auditor)
+        scores = recompute_full_selection(fit_rows, auditor)
+        full_cell_scores = collect_full_cell_scores(fit_rows)
+
+    # The integrated selection view: 24 newly executed cells + 6 Phase 7e
+    # anchor references = 30 logical rows.  The anchor rows are re-derived from
+    # the Phase 7e artifact itself, never trusted from this run.
+    matrix_rows = _read_csv(run_dir / "selection_matrix.csv", auditor)
+    if matrix_rows:
+        auditor.require(len(matrix_rows) == FULL_SELECTION_MATRIX_ROWS,
+                        "full_selection_matrix_row_count",
+                        f"{len(matrix_rows)} != {FULL_SELECTION_MATRIX_ROWS}")
+        anchor_selected = recompute_anchor_selection(auditor, phase7e_dir)
+        for estimand in EXPECTED_FULL_ESTIMANDS:
+            subset = [r for r in matrix_rows if r.get("estimand") == estimand]
+            per_estimand_scores = {
+                (k_true, replicate): by_k
+                for (e, k_true, replicate), by_k in full_cell_scores.items()
+                if e == estimand}
+            if not subset:
+                auditor.blocker("full_estimand_slice_missing",
+                                f"selection_matrix.csv: no rows for estimand {estimand}")
+                continue
+            audit_selection_matrix(subset, estimand, per_estimand_scores,
+                                   anchor_selected, auditor)
+        # The anchor contributes REFERENCES, never re-executed fits.
+        anchor_rows = [r for r in matrix_rows if r.get("K_TRUE") == str(ANCHOR_K_TRUE)]
+        auditor.require(len(anchor_rows) == len(EXPECTED_FULL_ESTIMANDS) * len(REPLICATES),
+                        "full_anchor_reference_count", f"{len(anchor_rows)} anchor rows")
+        auditor.require(all(r.get("run_code_sha") == PHASE7E_RUN_CODE_SHA for r in anchor_rows),
+                        "full_anchor_reference_sha", "anchor rows must carry the Phase 7e SHA")
+
+    summary = _read_json(run_dir / "full_summary.json", auditor)
+    if summary is not None:
+        audit_full_summary(summary, scores, auditor)
+
+    payloads = {name: payload for name, payload in
+                (("authorization.json", authorization), ("runinfo.json", runinfo),
+                 ("full_summary.json", summary)) if payload is not None}
+    audit_full_baseline_lineage(payloads, fit_rows, auditor)
+    protocol_hashes = {p.get("protocol_hash") for p in payloads.values()}
+    auditor.require(protocol_hashes == {EXPECTED_FULL_PROTOCOL_HASH},
+                    "full_protocol_hash_lineage",
+                    f"protocol hashes are not the single frozen value: {protocol_hashes}")
+    observed = {name: p.get("run_code_sha") for name, p in payloads.items()}
+    for name, sha in observed.items():
+        auditor.require(_is_full_commit_sha(sha), "full_run_code_sha_format",
+                        f"{name}: {sha!r}")
+    auditor.require(len(set(observed.values())) <= 1, "full_run_code_sha_lineage",
+                    f"artifacts name different run-code SHAs: {observed}")
+    if fit_rows:
+        csv_shas = {row.get("run_code_sha") for row in fit_rows}
+        auditor.require(csv_shas == set(observed.values()) or len(csv_shas) == 1,
+                        "full_run_code_sha_lineage",
+                        f"CSV run-code SHAs are not a single value: {csv_shas}")
+
+    known = set(FULL_AUDIT_INPUT_FILES) | {FULL_AUDIT_REPORT_FILENAME, FULL_FAILURE_FILENAME}
+    unexpected = sorted(p.name for p in run_dir.iterdir() if p.name not in known)
+    auditor.require(not unexpected, "full_unexpected_artifact", str(unexpected))
+    # A partial run is never auditable as complete: failure.json marks it, and
+    # the missing completed artifacts already made this a FAIL.
+    if (run_dir / FULL_FAILURE_FILENAME).is_file():
+        auditor.blocker("full_partial_execution",
+                        "failure.json is present: this directory holds partial evidence "
+                        "from a run that stopped early and can never be completed or reused")
+    return auditor
+
+
+def build_full_audit_report(auditor: Auditor, run_dir: Path) -> dict[str, Any]:
+    """Structured full-run verdict.  Safe to build for a malformed artifact set."""
+
+    blockers = len(auditor.blockers)
+    highs = len(auditor.highs)
+    mediums = len([f for f in auditor.findings if f.severity == "MEDIUM"])
+    audited = sorted(name for name in FULL_AUDIT_INPUT_FILES
+                     if (Path(run_dir) / name).is_file())
+    return {
+        "audit_version": FULL_AUDIT_REPORT_VERSION,
+        "status": "PASS" if blockers == 0 and highs == 0 else "FAIL",
+        "blocker_count": blockers,
+        "high_count": highs,
+        "medium_count": mediums,
+        "findings": [{"severity": f.severity, "check": f.check, "detail": f.detail}
+                     for f in auditor.findings],
+        "protocol_hash": EXPECTED_FULL_PROTOCOL_HASH,
+        "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "expected_full_fits": EXPECTED_FULL_FITS,
+        "expected_full_fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "audited_files": audited,
+        "run_dir": str(run_dir),
+    }
+
+
+def write_full_audit_report(run_dir: Path, auditor: Auditor) -> Path:
+    """Publish the full verdict exactly once.  An existing verdict is a stop."""
+
+    directory = Path(run_dir)
+    if not directory.is_dir():
+        raise FileNotFoundError(f"audit run directory does not exist: {directory}")
+    path = directory / FULL_AUDIT_REPORT_FILENAME
+    if path.exists():
+        raise FileExistsError(
+            f"{FULL_AUDIT_REPORT_FILENAME} already exists; a previous verdict is "
+            f"never overwritten: {path}")
+    return _atomic_write_json(path, build_full_audit_report(auditor, directory))
+
+
 # ---------------------------------------------------------------------------
 # durable audit evidence
 # ---------------------------------------------------------------------------
@@ -1883,7 +2529,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--estimand", choices=ESTIMANDS, default=None,
                         help="required for config/selection mode; unused by smoke mode")
-    parser.add_argument("--mode", choices=[*sorted(AUDIT_MODES), "canary", "smoke"],
+    parser.add_argument("--mode", choices=[*sorted(AUDIT_MODES), "canary", "smoke", "full"],
                         default="config")
     parser.add_argument("--phase7e-dir", type=Path, default=None)
     parser.add_argument("--write-report", action="store_true",
@@ -1900,6 +2546,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = _render(auditor, args.run_dir, SMOKE_ESTIMAND, "smoke")
         if args.write_report:
             report["audit_report"] = str(write_smoke_audit_report(args.run_dir, auditor))
+    elif args.mode == "full":
+        auditor = audit_full_run_dir(args.run_dir, args.phase7e_dir)
+        report = _render(auditor, args.run_dir, "AB", "full")
+        if args.write_report:
+            report["audit_report"] = str(write_full_audit_report(args.run_dir, auditor))
     else:
         if args.estimand is None:
             parser.error(f"--estimand is required for {args.mode} mode")
