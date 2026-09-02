@@ -1,0 +1,24 @@
+{
+  "actual_canary_fits": 2,
+  "approved_scientific_main_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "audit_version": "phase8b-canary-audit-v1",
+  "audited_files": [
+    "authorization.json",
+    "canary.json"
+  ],
+  "authorization_content_sha256": "d468304104fbae49657a7dba4be1b72a16dded7e1c72239d64646185266d92af",
+  "blocker_count": 0,
+  "canary_content_sha256": "6d9302709a6b591a22afc6078f852a88a591257edbfce7c4d45ce6a1ab99c2b7",
+  "canary_execution_mode": "real",
+  "canary_status": "PASS",
+  "execution_issue": 55,
+  "expected_canary_fits": 2,
+  "findings": [],
+  "high_count": 0,
+  "medium_count": 0,
+  "protocol_hash": "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+  "protocol_origin_issue": 53,
+  "run_code_sha": "a56b8aebd136915dbecd9a154256cdf494a3e2f1",
+  "run_dir": "expfam\\results\\k_selection\\k_true_robustness_smoke_20260901",
+  "status": "PASS"
+}

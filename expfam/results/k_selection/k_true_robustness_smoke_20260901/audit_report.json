@@ -1,0 +1,29 @@
+{
+  "actual_canary_fits": 2,
+  "actual_smoke_fits": 6,
+  "approved_scientific_main_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "audit_version": "phase8b-smoke-audit-v1",
+  "audited_files": [
+    "authorization.json",
+    "canary.json",
+    "canary_audit.json",
+    "runinfo.json",
+    "smoke_fit_results.csv",
+    "smoke_summary.json"
+  ],
+  "blocker_count": 0,
+  "execution_issue": 55,
+  "expected_canary_fits": 2,
+  "expected_smoke_fits": 6,
+  "findings": [],
+  "high_count": 0,
+  "k_recovery_evaluated": false,
+  "medium_count": 0,
+  "protocol_hash": "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+  "protocol_origin_issue": 53,
+  "run_code_sha": "a56b8aebd136915dbecd9a154256cdf494a3e2f1",
+  "run_dir": "expfam\\results\\k_selection\\k_true_robustness_smoke_20260901",
+  "selected_k": 2,
+  "selected_k_interpretation": "record_only",
+  "status": "PASS"
+}

@@ -1,0 +1,31 @@
+{
+  "approved_scientific_main_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "artifact_version": "phase8b-smoke-artifact-v1",
+  "authorization_version": "phase8b-smoke-authorization-v1",
+  "canary_model_seed": 641011,
+  "data_seed": 61101,
+  "data_seed_base": 61000,
+  "estimand": "A",
+  "execution_issue_number": 55,
+  "expected_canary_fits": 2,
+  "expected_real_em_budget": 8,
+  "expected_smoke_fits": 6,
+  "human_smoke_approval": true,
+  "independent_review_pass": true,
+  "k_true": 1,
+  "model_seed_base": 630000,
+  "protocol_hash": "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+  "protocol_origin_issue_number": 53,
+  "replicate": 1,
+  "role": "primary",
+  "run_code_sha": "a56b8aebd136915dbecd9a154256cdf494a3e2f1",
+  "smoke_model_seeds": [
+    641021,
+    641022,
+    641031,
+    641032,
+    641041,
+    641042
+  ],
+  "split_seed": 42001
+}
