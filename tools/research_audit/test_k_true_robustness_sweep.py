@@ -464,7 +464,7 @@ def test_T23_full_requires_confirm_flag():
 
 def test_T23b_full_is_refused_even_with_every_flag():
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     assert "not authorized" in str(excinfo.value)
 
 
@@ -2056,7 +2056,7 @@ def test_leakage_self_check_runs_no_em_in_a_fresh_process():
 def test_S2_full_stays_hard_stopped_and_smoke_only_reaches_the_guard(monkeypatch):
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     assert "not authorized" in str(excinfo.value)
     assert reached == [], "--full must never reach the production workflow"
 
@@ -2470,7 +2470,7 @@ def test_S2b_full_remains_blocked_by_its_own_gate():
     """Issue #59 gave --full its OWN schema; a smoke record still cannot reach it."""
 
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     message = str(excinfo.value)
     assert "not authorized" in message
     assert "never be reused for --full" in message
@@ -2488,7 +2488,7 @@ def test_S2b_real_adapter_is_never_reached_by_the_test_suite(monkeypatch):
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", Tripwire)
     _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
-                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
         with pytest.raises(HarnessStop):
             H.main(command)
     for entrypoint in (H.run_real_canary, H.run_real_smoke):
@@ -3344,7 +3344,7 @@ def test_S2c_cli_gate_hands_the_committed_authorization_to_the_workflow(command,
 
 def test_S2c_full_remains_isolated():
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     assert "never be reused for --full" in str(excinfo.value)
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
@@ -3356,7 +3356,7 @@ def test_S2c_real_adapter_is_unreachable_through_the_cli(monkeypatch):
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
-                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
         with pytest.raises(HarnessStop):
             H.main(command)
     assert _AdapterTripwire.constructions == 0
@@ -4648,7 +4648,7 @@ def test_HIGHPUB_current_state_keeps_production_out_of_the_test_suite(monkeypatc
     _block_production_execution(monkeypatch)
     assert H.current_smoke_execution_authorization() is not None
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
-                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
+                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
         with pytest.raises(HarnessStop):
             H.main(command)
     for entrypoint in (H.run_real_canary, H.run_real_smoke):
@@ -6942,7 +6942,7 @@ def test_AUTHORIZATIONONLY_a_plain_object_is_rejected():
 def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     message = str(excinfo.value)
     assert "not authorized" in message and "never be reused for --full" in message
     assert reached == [], "--full must not reach the production workflow"
@@ -7226,7 +7226,7 @@ def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
         with pytest.raises(HarnessStop):
             H.main(command)
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     assert "never be reused for --full" in str(excinfo.value)
     assert [name for name, _auth in reached] == ["canary", "smoke"]
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
@@ -7324,7 +7324,7 @@ def test_FULLGATE_cli_full_is_refused_and_never_reaches_a_fit(monkeypatch):
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
     message = str(excinfo.value)
     assert "not authorized" in message
     assert "never be reused for --full" in message
@@ -7339,7 +7339,7 @@ def test_FULLGATE_full_refuses_an_out_dir(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     with pytest.raises(HarnessStop) as excinfo:
-        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A",
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB",
                 "--out-dir", "attacker"])
     assert "--out-dir is not accepted" in str(excinfo.value)
     assert not pathlib.Path("attacker").exists()
@@ -7751,6 +7751,7 @@ def _promote_full_fixture(source, destination):
     path = destination / "runinfo.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload.update({"actual_full_fits": 336, "working_tree_clean": True,
+                    "working_tree_clean_before_execution": True,
                     "approved_baseline_is_ancestor": True})
     path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
     csv_path = destination / "full_fit_results.csv"
@@ -8087,3 +8088,293 @@ def test_FULLEXEC_zero_real_em_in_every_path(tmp_path, monkeypatch):
     assert runinfo["canary_fits_executed"] == 0 and runinfo["smoke_fits_executed"] == 0
     assert runinfo["replacement_fits_executed"] == 0
     _assert_no_new_production_artifacts()
+
+
+# ===========================================================================
+# PR #60 remote review: BLOCKER-01 / HIGH-02 / HIGH-03 / MEDIUM-04
+# ===========================================================================
+
+
+# --- BLOCKER-01: the working-tree state is frozen BEFORE the run writes ----
+
+
+def test_FINDINGS_working_tree_state_is_frozen_before_the_artifact_dir(tmp_path, monkeypatch):
+    """A correct run creates untracked output; that must not make it unauditable.
+
+    Production timing: clean BEFORE the directory exists -> the directory is
+    created -> git status is now dirty -> runinfo still records the frozen
+    pre-execution True -> the independent audit can PASS.
+    """
+
+    out = tmp_path / "run"
+    observations = []
+
+    def _clean_then_dirty():
+        # True only while the artifact directory does not exist yet
+        clean = not out.exists()
+        observations.append(clean)
+        return clean
+
+    monkeypatch.setattr(H, "working_tree_is_clean", _clean_then_dirty)
+    _run_full_fake(out)
+
+    assert observations == [True], "git status must be read exactly once, before the write"
+    assert out.exists(), "the run created its own untracked artifact directory"
+    assert H.working_tree_is_clean() is False, "the tree is now 'dirty' by that definition"
+
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["working_tree_clean"] is True
+    assert runinfo["working_tree_clean_before_execution"] is True
+
+    directory = _promote_full_fixture(out, tmp_path / "real")
+    auditor = A.audit_full_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+
+
+def test_FINDINGS_runinfo_never_rereads_git_status():
+    body = _executable_body(H.build_full_runinfo_payload)
+    assert "working_tree_is_clean()" not in body
+    assert "working_tree_clean_before_execution" in body
+    executor = _executable_body(H._execute_real_full)
+    # exactly one evaluation, and it happens before the directory is reserved
+    assert executor.count("working_tree_is_clean()") == 1
+    assert executor.index("working_tree_is_clean()") < \
+        executor.index("require_new_full_artifact_dir(")
+
+
+def test_FINDINGS_dirty_tree_still_blocks_a_production_run(tmp_path, monkeypatch):
+    """The production path keeps the clean-tree requirement; test-only records it.
+
+    A production attempt cannot even reach that check today -- the authorization
+    boundary refuses first -- so the requirement is pinned in the source and the
+    earlier refusal is asserted here.
+    """
+
+    monkeypatch.setattr(H, "working_tree_is_clean", lambda: False)
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_full(_full_test_authorization(), tmp_path / "run",
+                             test_adapter=None, test_only=False,
+                             run_code_sha="0" * 40)
+    assert "provenance is unauthorized" in str(excinfo.value)
+    assert not (tmp_path / "run").exists()
+
+    body = _executable_body(H._execute_real_full)
+    assert "if not test_only:" in body
+    assert "the working tree is dirty before the full execution" in body
+    assert "approved_baseline_is_ancestor_of(" in body
+    # the requirement sits before the directory is reserved
+    assert body.index("the working tree is dirty before the full execution") <         body.index("require_new_full_artifact_dir(")
+
+
+def test_FINDINGS_audit_requires_the_frozen_pre_execution_state(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    _patch_json(directory / "runinfo.json", working_tree_clean_before_execution=False)
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_runinfo_working_tree_frozen" for f in auditor.blockers)
+
+
+# --- HIGH-02: the failing fit index comes from the fit-call boundary -------
+
+
+@pytest.mark.parametrize("fail_at", [1, 14, 15, 100, 336])
+def test_FINDINGS_failure_index_is_exact(tmp_path, fail_at):
+    out = tmp_path / "run"
+    recorder = _DirtyAtFitRecorder(fail_at=fail_at, mode="retry")
+    with pytest.raises(HarnessStop):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    assert recorder.calls == fail_at, "the sweep must stop at the failing fit"
+    failure = json.loads((out / "failure.json").read_text(encoding="utf-8"))
+    assert failure["failed_fit_index"] == fail_at
+    assert failure["attempted_fit_count"] == fail_at
+    assert failure["clean_fit_calls"] == fail_at - 1
+    assert failure["failure_phase"] == "fit"
+    assert failure["replacement_fits_executed"] == 0 and failure["retry_count"] == 0
+    # the scored rows are whole cells only: scoring is deferred to the cell end
+    assert failure["scored_rows"] == ((fail_at - 1) // 14) * 14
+
+
+def test_FINDINGS_failure_index_is_exact_for_an_adapter_exception(tmp_path):
+    out = tmp_path / "run"
+    recorder = _DirtyAtFitRecorder(fail_at=100, mode="raise")
+    with pytest.raises(RuntimeError):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    assert recorder.calls == 100
+    failure = json.loads((out / "failure.json").read_text(encoding="utf-8"))
+    assert failure["attempted_fit_count"] == 100 and failure["failed_fit_index"] == 100
+    assert failure["clean_fit_calls"] == 99 and failure["failure_phase"] == "fit"
+
+
+def test_FINDINGS_a_score_failure_is_not_reported_as_a_fit_failure(tmp_path, monkeypatch):
+    """Deferred scoring can fail after 14 clean fits; that is not a fit failure."""
+
+    calls = {"n": 0}
+    real_score = H.score_heldout_bernoulli
+
+    def _failing_score(target, eta_pairs):
+        calls["n"] += 1
+        if calls["n"] == 3:
+            raise RuntimeError("injected score failure")
+        return real_score(target, eta_pairs)
+
+    monkeypatch.setattr(H, "score_heldout_bernoulli", _failing_score)
+    out = tmp_path / "run"
+    recorder = _FakeFitRecorder()
+    with pytest.raises(RuntimeError):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    assert recorder.calls == 14, "a whole cell was fitted before scoring began"
+    failure = json.loads((out / "failure.json").read_text(encoding="utf-8"))
+    assert failure["failure_phase"] == "score"
+    assert failure["attempted_fit_count"] == 14
+    assert failure["clean_fit_calls"] == 14, "the 14 clean fits are not lost"
+    assert failure["scored_rows"] == 2
+
+
+def test_FINDINGS_progress_counters_are_owned_by_the_fit_boundary():
+    body = _executable_body(H._run_full_cell)
+    assert "progress.begin_fit()" in body
+    assert body.index("progress.begin_fit()") < body.index("boundary.call(0)")
+    assert "progress.fit_completed_clean()" in body
+    assert "progress.begin_scoring()" in body and "progress.row_scored()" in body
+    failure_body = _executable_body(H.write_full_failure_json)
+    for forbidden in ("len(completed)", "completed_fits", "scored_rows + 1"):
+        assert forbidden not in failure_body, forbidden
+
+
+def test_FINDINGS_complete_run_records_the_counters(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    runinfo = json.loads((tmp_path / "run" / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["attempted_fit_count"] == 336
+    assert runinfo["clean_fit_calls"] == 336
+    assert runinfo["scored_rows"] == 336
+    assert not (tmp_path / "run" / "failure.json").exists()
+
+
+@pytest.mark.parametrize("field", ["attempted_fit_count", "clean_fit_calls", "scored_rows"])
+def test_FINDINGS_audit_requires_the_counters(tmp_path, field):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    _patch_json(directory / "runinfo.json", **{field: 335})
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check.startswith("full_runinfo_") for f in auditor.blockers)
+
+
+# --- HIGH-03: one approved baseline across every full artifact -------------
+
+
+def test_FINDINGS_runinfo_baseline_comes_from_the_authorization(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    authorization = json.loads(
+        (tmp_path / "run" / "authorization.json").read_text(encoding="utf-8"))
+    runinfo = json.loads((tmp_path / "run" / "runinfo.json").read_text(encoding="utf-8"))
+    summary = json.loads((tmp_path / "run" / "full_summary.json").read_text(encoding="utf-8"))
+    baseline = authorization["approved_scientific_main_sha"]
+    assert baseline == H._FULL_TEST_EXPECTED_MAIN_SHA
+    assert runinfo["approved_scientific_main_sha"] == baseline
+    assert summary["approved_scientific_main_sha"] == baseline
+    rows = list(csv.DictReader(
+        (tmp_path / "run" / "full_fit_results.csv").open(encoding="utf-8")))
+    assert {r["approved_scientific_main_sha"] for r in rows} == {baseline}
+    assert baseline != runinfo["run_code_sha"]
+    # the global smoke-era baseline is NOT silently reused
+    body = _executable_body(H.build_full_runinfo_payload)
+    assert "APPROVED_SCIENTIFIC_MAIN_SHA" not in body
+    assert "approved_main_sha" in body
+    assert "approved_baseline_is_ancestor_of(" in body
+
+
+@pytest.mark.parametrize("target", ["runinfo.json", "full_summary.json", "csv_row"])
+def test_FINDINGS_audit_rejects_a_split_baseline(tmp_path, target):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    if target == "csv_row":
+        path = directory / "full_fit_results.csv"
+        lines = path.read_text(encoding="utf-8").splitlines()
+        header = lines[0].split(",")
+        index = header.index("approved_scientific_main_sha")
+        cells = lines[5].split(",")
+        cells[index] = "d" * 40
+        lines[5] = ",".join(cells)
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        _patch_json(directory / target, approved_scientific_main_sha="d" * 40)
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_baseline_sha_lineage" for f in auditor.blockers), \
+        sorted({f.check for f in auditor.blockers})
+
+
+def test_FINDINGS_audit_rejects_a_baseline_equal_to_the_run_sha(tmp_path):
+    _run_full_fake(tmp_path / "run", run_code_sha="c" * 40)
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check in ("full_baseline_not_run_sha", "full_auth_baseline_not_run_sha")
+               for f in auditor.blockers)
+
+
+def test_FINDINGS_full_ancestry_helper_is_explicit():
+    body = _executable_body(H.approved_baseline_is_ancestor_of)
+    assert "APPROVED_SCIENTIFIC_MAIN_SHA" not in body
+    assert "approved_main_sha" in body
+    parameters = list(_inspect.signature(H.approved_baseline_is_ancestor_of).parameters)
+    assert parameters == ["approved_main_sha", "run_code_sha"]
+    # the smoke helper is untouched
+    smoke_body = _executable_body(H.approved_baseline_is_ancestor)
+    assert "APPROVED_SCIENTIFIC_MAIN_SHA" in smoke_body
+
+
+# --- MEDIUM-04: --full always means the complete A+B sweep -----------------
+
+
+@pytest.mark.parametrize("estimand", ["A", "B"])
+def test_FINDINGS_full_refuses_a_per_estimand_scope(estimand, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", estimand])
+    message = str(excinfo.value)
+    assert "always executes the complete AB sweep" in message
+    assert "336" in message and "168" in message
+    assert _AdapterTripwire.constructions == 0
+
+
+@pytest.mark.parametrize("argv", [
+    ["--full", "--allow-em", "--confirm-k-true-sweep"],
+    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
+])
+def test_FINDINGS_full_scope_ab_reaches_the_authorization_gate(argv, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(argv)
+    assert "not authorized" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0
+
+
+def test_FINDINGS_full_scope_constant_matches_the_frozen_estimands():
+    assert H.FULL_ESTIMAND_SCOPE == "AB" == H.ESTIMANDS
+    assert "".join(H.active_estimands()) == H.FULL_ESTIMAND_SCOPE
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    assert "--estimand" in options
+    choices = next(a.choices for a in H._build_parser()._actions
+                   if a.option_strings and a.option_strings[0] == "--estimand")
+    assert set(choices) == {"A", "B", "AB"}
+    # per-estimand modes still work for the zero-EM audits
+    assert H.main(["--validate-only"]) == 0
+
+
+def test_FINDINGS_full_executes_both_estimands_when_scoped_ab(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    rows = list(csv.DictReader(
+        (tmp_path / "run" / "full_fit_results.csv").open(encoding="utf-8")))
+    per_estimand = {}
+    for row in rows:
+        per_estimand[row["estimand"]] = per_estimand.get(row["estimand"], 0) + 1
+    assert per_estimand == {"A": 168, "B": 168}
+    assert recorder.calls == 336

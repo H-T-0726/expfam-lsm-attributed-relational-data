@@ -1936,6 +1936,41 @@ def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> Non
                     f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
 
 
+def audit_full_baseline_lineage(payloads: Mapping[str, Mapping[str, Any]],
+                                rows: Sequence[dict[str, str]] | None,
+                                auditor: Auditor) -> None:
+    """HIGH-03: every full artifact must name EXACTLY ONE approved baseline.
+
+    authorization.json, runinfo.json, full_summary.json and all 336 CSV rows are
+    compared against each other.  A single disagreeing value is a BLOCKER: an
+    artifact set that names two baselines cannot say which review approved it.
+    """
+
+    observed: dict[str, Any] = {name: p.get("approved_scientific_main_sha")
+                                for name, p in payloads.items()}
+    if rows:
+        for index, row in enumerate(rows, start=1):
+            observed[f"full_fit_results.csv row {index}"] =                 row.get("approved_scientific_main_sha")
+    for name, value in observed.items():
+        auditor.require(_is_full_commit_sha(value), "full_baseline_sha_format",
+                        f"{name}: {value!r}")
+    distinct = sorted({value for value in observed.values() if value is not None})
+    auditor.require(len(distinct) <= 1, "full_baseline_sha_lineage",
+                    f"artifacts name different approved baselines: {distinct}")
+    # provenance must never be substituted for approval
+    for name, payload in payloads.items():
+        auditor.require(payload.get("approved_scientific_main_sha")
+                        != payload.get("run_code_sha"),
+                        "full_baseline_not_run_sha",
+                        f"{name}: the approved baseline equals the run-code SHA")
+    if rows:
+        for index, row in enumerate(rows, start=1):
+            if row.get("approved_scientific_main_sha") == row.get("run_code_sha"):
+                auditor.blocker("full_baseline_not_run_sha",
+                                f"full_fit_results.csv row {index}: baseline == run SHA")
+                break
+
+
 def audit_full_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
     """Counters that bound the execution: 336 fits, nothing else re-run."""
 
@@ -1959,11 +1994,24 @@ def audit_full_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
                        auditor, "full_runinfo_smoke_fits")
     _require_exact_int(payload, "replacement_fits_executed", 0,
                        auditor, "full_runinfo_replacement_fits")
+    # BLOCKER-01: the recorded value is the state BEFORE the run created its own
+    # artifact directory; a post-execution git status would always be dirty.
     auditor.require(payload.get("working_tree_clean") is True,
-                    "full_runinfo_working_tree", "the working tree was dirty")
+                    "full_runinfo_working_tree",
+                    "the working tree was dirty before the execution")
+    auditor.require(payload.get("working_tree_clean_before_execution") is True,
+                    "full_runinfo_working_tree_frozen",
+                    "the pre-execution working-tree state is missing or not True")
     auditor.require(payload.get("approved_baseline_is_ancestor") is True,
                     "full_runinfo_lineage",
                     "the approved baseline is not recorded as an ancestor")
+    # HIGH-02: the fit-call counters must agree with a complete run.
+    _require_exact_int(payload, "attempted_fit_count", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_attempted_fits")
+    _require_exact_int(payload, "clean_fit_calls", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_clean_fits")
+    _require_exact_int(payload, "scored_rows", EXPECTED_FULL_FITS,
+                       auditor, "full_runinfo_scored_rows")
     auditor.require(payload.get("mask_design") == MASK_DESIGN,
                     "full_runinfo_mask_design", str(payload.get("mask_design")))
 
@@ -2152,6 +2200,7 @@ def audit_full_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audito
     payloads = {name: payload for name, payload in
                 (("authorization.json", authorization), ("runinfo.json", runinfo),
                  ("full_summary.json", summary)) if payload is not None}
+    audit_full_baseline_lineage(payloads, fit_rows, auditor)
     protocol_hashes = {p.get("protocol_hash") for p in payloads.values()}
     auditor.require(protocol_hashes == {EXPECTED_FULL_PROTOCOL_HASH},
                     "full_protocol_hash_lineage",

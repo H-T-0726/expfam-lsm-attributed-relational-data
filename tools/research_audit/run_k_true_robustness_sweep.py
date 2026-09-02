@@ -2132,6 +2132,8 @@ EXPECTED_FULL_FITS_PER_ESTIMAND = FITS_PER_ESTIMAND          # 168
 EXPECTED_FULL_FITS = EXPECTED_NEW_FITS                       # 336
 # The Phase 7e K_TRUE=3 anchor (42 fits) is REUSED, never re-executed.
 EXPECTED_FULL_PHASE7E_RERUN_FITS = 0
+# --full is the complete sweep; there is no per-estimand full run.
+FULL_ESTIMAND_SCOPE = "AB"
 # The integrated selection view spans K_TRUE {1,2,3,4,5}: the 4 newly executed
 # values plus the READ-ONLY Phase 7e anchor.  The anchor contributes 42 unique
 # fits that are referenced, never re-executed and never added to the 336.
@@ -3187,6 +3189,48 @@ class Phase8bFullCellResult:
     tie_candidates: tuple[int, ...]
 
 
+@dataclass(slots=True)
+class FullExecutionProgress:
+    """Counters owned by the fit-call boundary, not by the scoring phase.
+
+    ``attempted_fit_count`` is incremented BEFORE each adapter call, so a fit
+    that raises or returns a dirty result is still counted as attempted and its
+    index is exact.  Deriving the failing index from the scored rows would be
+    wrong by up to a whole cell, because scoring is deferred to the end of the
+    cell.  ``clean_fit_calls`` records fits that completed cleanly even if their
+    cell never reached the scoring phase, so that evidence is not lost.
+    """
+
+    attempted_fit_count: int = 0
+    clean_fit_calls: int = 0
+    scored_rows: int = 0
+    phase: str = "fit"
+
+    def begin_fit(self) -> int:
+        self.phase = "fit"
+        self.attempted_fit_count += 1
+        return self.attempted_fit_count
+
+    def fit_completed_clean(self) -> None:
+        self.clean_fit_calls += 1
+
+    def begin_scoring(self) -> None:
+        self.phase = "score"
+
+    def row_scored(self) -> None:
+        self.scored_rows += 1
+
+    def failed_fit_index(self) -> int:
+        """The 1-based index of the fit that stopped the run.
+
+        During the fit phase that is the fit currently being attempted; during
+        the deferred scoring phase no NEW fit was attempted, so the last
+        attempted index is reported and ``phase`` says it was a score failure.
+        """
+
+        return self.attempted_fit_count
+
+
 @dataclass(frozen=True, slots=True)
 class Phase8bFullReport:
     protocol_hash: str
@@ -3264,13 +3308,12 @@ def prepare_full_cell(authorization: Any, estimand: str, k_true: int, replicate:
 
 
 def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
-                   first_fit_index: int,
-                   on_row: Any = None) -> tuple[Phase8bFullCellResult, int]:
+                   progress: FullExecutionProgress,
+                   on_row: Any = None) -> Phase8bFullCellResult:
     """Phase A: all 14 fits of one cell.  Phase B: the deferred score phase."""
 
     frozen_score_hash = score_config_hash(frozen_score_config())
     stored: list[Any] = []
-    fit_index = first_fit_index
     for row in cell.manifest:
         config = full_fit_config(row)
         if test_only:
@@ -3283,12 +3326,15 @@ def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
                      "production full run requires the sealed Phase 7e EM adapter")
             boundary = FitCallBoundary.from_preflight(
                 cell.prepared, cell.preflight, config, adapter)
+        # Counted BEFORE the call: a raising or dirty fit is still attempted.
+        fit_index = progress.begin_fit()
         label = (f"phase8b full fit {fit_index}/{EXPECTED_FULL_FITS} "
                  f"{cell.estimand}/K_TRUE={cell.k_true}/r{cell.replicate}/K={row.k}/"
                  f"start={row.start}")
         result = boundary.call(0)
         # A dirty fit stops the whole sweep here: no retry, no replacement.
         _require_clean_smoke_fit(result, label)
+        progress.fit_completed_clean()
         _require(boundary.test_mask_hash == cell.anchor.test_mask_hash,
                  f"{label}: post-fit test mask differs from the Phase 7e anchor")
         _require(boundary.train_mask_hash == cell.anchor.train_mask_hash,
@@ -3296,9 +3342,9 @@ def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
         stored.append((fit_index, row, _store_smoke_fit(row, result, config, cell.prepared,
                                                         frozen_score_hash),
                        boundary.test_mask_hash, boundary.train_mask_hash))
-        fit_index += 1
 
     # Phase B: the outcome-bearing target exists only after every fit is done.
+    progress.begin_scoring()
     target = make_score_only_target(cell.score_Y, cell.prepared.test_mask)
     _require(target.test_mask_hash == cell.prepared.test_mask_hash,
              "score target mask hash mismatch")
@@ -3333,6 +3379,7 @@ def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
             post_fit_train_hash=post_train_hash,
         )
         rows.append(full_row)
+        progress.row_scored()
         if on_row is not None:
             on_row(full_row)
 
@@ -3358,11 +3405,12 @@ def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
         mean_scores=tuple(means),
         selected_k=int(selection.selected_k),
         tie_candidates=tuple(int(k) for k in selection.tie_candidates),
-    ), fit_index
+    )
 
 
 def _run_real_full(authorization: Any, *, adapter: Any, test_only: bool,
-                   on_row: Any = None) -> Phase8bFullReport:
+                   on_row: Any = None,
+                   progress: FullExecutionProgress | None = None) -> Phase8bFullReport:
     """Exactly 336 clean fits in the frozen order, or an immediate stop."""
 
     validate_full_execution_authorization(authorization, test_only=test_only)
@@ -3372,21 +3420,26 @@ def _run_real_full(authorization: Any, *, adapter: Any, test_only: bool,
     check_seed_collisions(manifests)
     check_full_anchor_agreement(anchors)
 
+    progress = FullExecutionProgress() if progress is None else progress
     cells: list[Phase8bFullCellResult] = []
     rows: list[Phase8bFullRow] = []
-    fit_index = 1
     for estimand, k_true, replicate in full_execution_order():
         cell = prepare_full_cell(authorization, estimand, k_true, replicate,
                                  test_only=test_only, anchors=anchors)
-        result, fit_index = _run_full_cell(cell, adapter=adapter, test_only=test_only,
-                                           first_fit_index=fit_index, on_row=on_row)
+        result = _run_full_cell(cell, adapter=adapter, test_only=test_only,
+                                progress=progress, on_row=on_row)
         cells.append(result)
         rows.extend(result.rows)
 
-    executed = fit_index - 1
+    executed = progress.attempted_fit_count
     _require(executed == EXPECTED_FULL_FITS,
              f"full run executed {executed} fits, not {EXPECTED_FULL_FITS}")
     _require(len(rows) == EXPECTED_FULL_FITS, "full run did not score exactly 336 fits")
+    _require(progress.clean_fit_calls == EXPECTED_FULL_FITS,
+             f"full run recorded {progress.clean_fit_calls} clean fits, "
+             f"not {EXPECTED_FULL_FITS}")
+    _require(progress.scored_rows == EXPECTED_FULL_FITS,
+             f"full run scored {progress.scored_rows} rows, not {EXPECTED_FULL_FITS}")
     _require(len(cells) == len(full_execution_order()), "full run cell count changed")
     per_estimand = {e: sum(1 for row in rows if row.estimand == e)
                     for e in active_estimands()}
@@ -3441,9 +3494,14 @@ def build_full_selection_matrix(cells: Sequence[Phase8bFullCellResult],
     return ordered
 
 
-def write_full_failure_json(out_dir: Path, *, fit_index: int, completed_fits: int,
+def write_full_failure_json(out_dir: Path, *, progress: FullExecutionProgress,
                             reason: str, run_code_sha: str) -> Path:
-    """Record WHY the sweep stopped.  Partial evidence is never deleted."""
+    """Record WHY and exactly WHERE the sweep stopped.
+
+    The counters come from the fit-call boundary, never from the scored rows:
+    scoring is deferred to the end of a 14-fit cell, so a scored-row count
+    cannot locate a fit that failed inside a cell.
+    """
 
     return write_json_artifact(Path(out_dir) / FULL_FAILURE_FILENAME, {
         "artifact_version": FULL_ARTIFACT_VERSION,
@@ -3454,8 +3512,13 @@ def write_full_failure_json(out_dir: Path, *, fit_index: int, completed_fits: in
         "protocol_hash": full_protocol_hash(),
         "run_code_sha": run_code_sha,
         "expected_full_fits": EXPECTED_FULL_FITS,
-        "completed_full_fits": int(completed_fits),
-        "failed_fit_index": int(fit_index),
+        # attempted includes the fit that failed; clean counts fits that
+        # completed cleanly even if their cell never reached scoring.
+        "attempted_fit_count": int(progress.attempted_fit_count),
+        "failed_fit_index": int(progress.failed_fit_index()),
+        "clean_fit_calls": int(progress.clean_fit_calls),
+        "scored_rows": int(progress.scored_rows),
+        "failure_phase": str(progress.phase),
         "reason": str(reason)[:2000],
         "policy": list(FULL_PARTIAL_FAILURE_POLICY),
         "replacement_fits_executed": 0,
@@ -3489,6 +3552,18 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     validate_full_execution_authorization(authorization, test_only=test_only)
     _require_full_commit_sha(run_code_sha, "run code SHA")
     run_full_preflight()
+    # BLOCKER-01: the working tree is evaluated EXACTLY ONCE, before this run
+    # creates its own artifact directory.  Re-reading git status afterwards
+    # would report the run's own untracked output as a dirty tree and make a
+    # correct execution unauditable.  The frozen value is what is recorded.
+    working_tree_clean_before_execution = working_tree_is_clean()
+    if not test_only:
+        _require(working_tree_clean_before_execution,
+                 "the working tree is dirty before the full execution; refusing to start")
+        # HIGH-03: the ancestry guard is bound to the FULL authorization baseline.
+        _require(approved_baseline_is_ancestor_of(authorization.approved_main_sha,
+                                                  run_code_sha),
+                 "the full approved baseline is not an ancestor of this commit")
     directory = require_new_full_artifact_dir(out_dir)
     write_json_artifact(directory / "authorization.json",
                         build_full_authorization_payload(authorization, run_code_sha))
@@ -3507,9 +3582,10 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     # --- phase 2: only now may a fit-capable adapter exist ---------------
     adapter = _resolve_fit_adapter(test_adapter, test_only)
     completed: list[Phase8bFullRow] = []
+    progress = FullExecutionProgress()
     try:
         report = _run_real_full(authorization, adapter=adapter, test_only=test_only,
-                                on_row=completed.append)
+                                on_row=completed.append, progress=progress)
     except BaseException as error:
         # Partial evidence is written and kept.  No summary, no selection
         # matrix, no completed runinfo -> no audit can return PASS.
@@ -3518,8 +3594,7 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
                                                     authorization, executed=len(completed)))
         write_csv_artifact(directory / "leakage_gate.csv", FULL_LEAKAGE_GATE_COLUMNS,
                            build_full_leakage_gate_rows(completed))
-        write_full_failure_json(directory, fit_index=len(completed) + 1,
-                                completed_fits=len(completed), reason=str(error),
+        write_full_failure_json(directory, progress=progress, reason=str(error),
                                 run_code_sha=run_code_sha)
         raise
 
@@ -3535,10 +3610,14 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     completed_at = _utc_now()
     write_json_artifact(directory / "runinfo.json", build_full_runinfo_payload(
         run_code_sha=run_code_sha, out_dir=directory,
+        approved_main_sha=authorization.approved_main_sha,
         requested_command="--full", invocation_mode="cli",
         started_at=started_at, completed_at=completed_at,
-        working_tree_clean=working_tree_is_clean(),
+        working_tree_clean_before_execution=working_tree_clean_before_execution,
         actual_full_fits=report.real_full_fits_executed,
+        attempted_fit_count=progress.attempted_fit_count,
+        clean_fit_calls=progress.clean_fit_calls,
+        scored_rows=progress.scored_rows,
     ))
     return {
         "mode": "full",
@@ -3678,31 +3757,47 @@ def build_full_summary_payload(report: Phase8bFullReport, run_code_sha: str) -> 
 
 
 def build_full_runinfo_payload(*, run_code_sha: str, out_dir: Path,
+                               approved_main_sha: str,
                                requested_command: str, invocation_mode: str,
                                started_at: str, completed_at: str,
-                               working_tree_clean: bool,
-                               actual_full_fits: int) -> dict[str, Any]:
+                               working_tree_clean_before_execution: bool,
+                               actual_full_fits: int,
+                               attempted_fit_count: int,
+                               clean_fit_calls: int,
+                               scored_rows: int) -> dict[str, Any]:
+    """HIGH-03: the baseline is supplied by the caller (the full authorization).
+
+    BLOCKER-01: ``working_tree_clean`` records the value frozen BEFORE this run
+    created its own artifact directory; git status is never re-read here.
+    """
+
+    _require_full_commit_sha(approved_main_sha, "approved main SHA")
     return {
         "artifact_version": FULL_ARTIFACT_VERSION,
         "phase": PHASE,
         "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
         "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
         "run_code_sha": run_code_sha,
-        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
-        "approved_baseline_is_ancestor": approved_baseline_is_ancestor(run_code_sha),
+        "approved_scientific_main_sha": approved_main_sha,
+        "approved_baseline_is_ancestor":
+            approved_baseline_is_ancestor_of(approved_main_sha, run_code_sha),
         "protocol_hash": full_protocol_hash(),
         "score_config_hash": score_config_hash(frozen_score_config()),
         "frozen_config_hash": frozen_config_hash(),
         "mask_design": MASK_DESIGN,
         "random_design": RANDOM_DESIGN,
         "hierarchy": HIERARCHY,
-        "working_tree_clean": bool(working_tree_clean),
+        "working_tree_clean": bool(working_tree_clean_before_execution),
+        "working_tree_clean_before_execution": bool(working_tree_clean_before_execution),
         "invocation_mode": invocation_mode,
         "requested_command": requested_command,
         "started_at": started_at,
         "completed_at": completed_at,
         "expected_full_fits": EXPECTED_FULL_FITS,
         "actual_full_fits": int(actual_full_fits),
+        "attempted_fit_count": int(attempted_fit_count),
+        "clean_fit_calls": int(clean_fit_calls),
+        "scored_rows": int(scored_rows),
         "expected_full_fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
         "canary_fits_executed": 0,
         "smoke_fits_executed": 0,
@@ -4276,6 +4371,25 @@ def approved_baseline_is_ancestor(run_code_sha: str | None = None) -> bool:
     head = current_run_code_sha() if run_code_sha is None else run_code_sha
     completed = subprocess.run(
         ["git", "merge-base", "--is-ancestor", APPROVED_SCIENTIFIC_MAIN_SHA, head],
+        capture_output=True, text=True, cwd=str(ROOT), check=False)
+    return completed.returncode == 0
+
+
+def approved_baseline_is_ancestor_of(approved_main_sha: str,
+                                    run_code_sha: str) -> bool:
+    """Is ``approved_main_sha`` in the history of ``run_code_sha``?
+
+    Explicit about WHICH baseline it checks.  ``approved_baseline_is_ancestor``
+    hard-codes the smoke-era global baseline, which is the wrong value for a
+    full run whose authorization names its own reviewed SHA.
+    """
+
+    import subprocess  # noqa: PLC0415
+
+    _require_full_commit_sha(approved_main_sha, "approved main SHA")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    completed = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", approved_main_sha, run_code_sha],
         capture_output=True, text=True, cwd=str(ROOT), check=False)
     return completed.returncode == 0
 
@@ -5002,7 +5116,9 @@ def _build_parser() -> argparse.ArgumentParser:
     mode.add_argument("--full", action="store_true", help="full sweep (requires EM gates)")
     parser.add_argument("--allow-em", action="store_true")
     parser.add_argument("--confirm-k-true-sweep", action="store_true")
-    parser.add_argument("--estimand", choices=("A", "B"))
+    # "AB" exists for --full only: the frozen full protocol is A+B = 336 fits
+    # and a per-estimand full run is not part of it.
+    parser.add_argument("--estimand", choices=("A", "B", "AB"))
     # --out-dir applies to --record-diagnostics only; a real canary/smoke
     # refuses it (the production artifact directory is frozen).
     parser.add_argument("--out-dir", type=Path, default=None,
@@ -5041,9 +5157,16 @@ def _require_em_authorization(args: argparse.Namespace,
     _require(bool(args.allow_em), f"{command} requires --allow-em")
     if command == "full":
         _require(bool(args.confirm_k_true_sweep), "--full requires --confirm-k-true-sweep")
-        _require(args.estimand is not None, "--full requires --estimand")
-        _require(args.estimand in active_estimands(),
-                 "--estimand is inconsistent with the frozen ESTIMANDS")
+        # MEDIUM-04: --full is always the complete A+B sweep.  Accepting
+        # "--estimand A" would suggest a 168-fit half run, which the frozen
+        # protocol does not define.
+        _require(args.estimand in (None, FULL_ESTIMAND_SCOPE),
+                 f"--full always executes the complete {FULL_ESTIMAND_SCOPE} sweep of "
+                 f"{EXPECTED_FULL_FITS} fits ({EXPECTED_FULL_FITS_PER_ESTIMAND} per "
+                 f"estimand); a per-estimand full run is not part of the frozen "
+                 f"protocol. Pass --estimand {FULL_ESTIMAND_SCOPE} or omit it.")
+        _require(FULL_ESTIMAND_SCOPE == "".join(active_estimands()),
+                 "--full scope is inconsistent with the frozen ESTIMANDS")
         _require(getattr(args, "out_dir", None) is None,
                  "--out-dir is not accepted for a real full run: the production "
                  f"artifact directory is frozen at {FULL_ARTIFACT_DIR}")
