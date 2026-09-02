@@ -338,3 +338,25 @@ Phase 6 の実験（issue #27 / #31 / #33）と Phase 7b / 7e の実験は既に
 数値主張の根拠として引用する場合は上の実験表の該当行（および一次 CSV）へ遡ること。
 per-column（lineage F）と objective-consistent（lineage E）はいずれも **prototype・本文採用不可**である
 （root `CLAUDE.md` §3、`RESEARCH_MASTER.md` §12.1）。
+
+---
+
+## Phase 8b S2c real smoke execution（2026-09-02、issue #55、objective-consistent prototype使用）
+
+Phase 8b K_TRUE robustness harness の **frozen execution pipeline を実データ規模の合成セルで
+運用検証**するために、人間が Issue #55 で明示承認した予算どおり **real canary 2 fits →
+証跡の永続化 → 独立 canary audit（PASS）→ real smoke 6 fits → 独立 final audit** を
+exactly once 実行したもの。**total real EM は 8 fits ちょうど**で、full 336-fit sweep は
+実行しておらず承認もされていない（`full_fits_executed = 0`）。Phase 7e の成果物は再実行して
+いない（`phase7e_rerun_count = 0`）。objective-consistent 実装は experimental/prototype であり、
+**本文採用不可**。
+
+**これは K recovery evidence ではない。** candidate K = {2,3,4} に K_TRUE = 1 は含まれておらず、
+一致は設計上不可能である。したがって `selected_k = 2` は `selected_k_interpretation = record_only`
+の運用記録にすぎず、artifact 自身も `k_recovery_evaluated = False` を記録している。
+本実行の目的は **凍結実行パイプラインの operational validation** であり、K 選択の正しさ・
+consistency・true-K recovery・実データ妥当性はいずれも主張しない。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果CSV | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| Phase 8b S2c real smoke execution | 凍結セル estimand=A / role=primary / K_TRUE=1 / replicate=1 に対し、candidate K={2,3,4} × starts={1,2} の **6 fits** を実行（family_x=poisson、family_y=bernoulli、n=75、d=15、L=5、num_iter=8、`numerics_mode="consistent"`、test_ratio=0.20、mask_design=S_C、random_design=CRN、w0_true=-1.0、w_true=1.5）。事前に leakage falsification 用の **real canary 2 fits**（K_est=1、start=1、model_seed=641011）を実行し、証跡を永続化したうえで独立 canary audit を通してから smoke を開始した。seeds: data_seed=61101、split_seed=42001、smoke model_seed={641021,641022,641031,641032,641041,641042} | `tools/research_audit/run_k_true_robustness_sweep.py`（`--canary --allow-em` / `--smoke --allow-em`）, `tools/research_audit/audit_k_true_robustness_sweep.py`（`--mode canary --write-report` / `--mode smoke --write-report`）, `expfam/src/experimental/model_dual_expfam_consistent.py` | `expfam/results/k_selection/k_true_robustness_smoke_20260901/smoke_fit_results.csv`, 同ディレクトリ `smoke_summary.json`, `runinfo.json`, `authorization.json`, `canary.json`, `canary_audit.json`, `audit_report.json` | （なし） | current_support | ✗ | objective-consistent prototype; Issue #55（protocol origin は Issue #53）; **operational validation のみ**。RUN_CODE_SHA `a56b8aebd136915dbecd9a154256cdf494a3e2f1`、approved scientific baseline `68c78e1191889609dead05ea5a9fb11525ce92e2`（両者は別物。前者は実行コード provenance、後者は承認された科学ベースライン）、frozen protocol hash `1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09`。**実行数**: canary 2 / smoke 6 / total real EM 8 / full 0 / Phase7e rerun 0。**結果（記述のみ）**: 2-start mean held-out score は K=2 −0.49184576285600023、K=3 −0.5038382403069639、K=4 −0.5331053010194591、`selected_k = 2`、`tie_candidates = [2]`。**integrity**: canary status PASS（initialization_equal / final_outputs_equal true、internal retry 0、warning 0、q_failure false、NaN 0、finite true、frozen tolerance atol 1e-12 / rtol 1e-10、Phase 7e replicate-1 anchor mask hash 一致）、独立 canary audit PASS（BLOCKER 0 / HIGH 0 / MEDIUM 0）、独立 final smoke audit PASS（BLOCKER 0 / HIGH 0 / MEDIUM 0、findings 空）、`canary_audit.json` は authorization.json / canary.json の exact-byte SHA-256 を記録し監査後も一致。**限定**: ①**K_TRUE=1 は candidate set {2,3,4} の外にあるため、これは K-recovery evidence ではない**。`selected_k` は record_only、`k_recovery_evaluated = False` ②replicate は 1 個のみで反復ではない。p 値・信頼区間・検出力・bootstrap は一切計算していない ③score は plug-in held-out mean log score であり posterior predictive / marginal likelihood / ELBO ではない ④transductive dyad holdout であり inductive 一般化は評価していない ⑤prototype・本文採用不可 ⑥再実行・置換 fit・seed 変更・tolerance 緩和・retry はいずれも行っていない |

@@ -1,0 +1,40 @@
+{
+  "actual_smoke_fits": 6,
+  "approved_scientific_main_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "artifact_version": "phase8b-smoke-artifact-v1",
+  "candidate_k": [
+    2,
+    3,
+    4
+  ],
+  "execution_issue_number": 55,
+  "expected_smoke_fits": 6,
+  "k_recovery_evaluated": false,
+  "k_true": 1,
+  "per_k": {
+    "2": {
+      "mean": -0.49184576285600023,
+      "start_1": -0.4840886085714855,
+      "start_2": -0.4996029171405149
+    },
+    "3": {
+      "mean": -0.5038382403069639,
+      "start_1": -0.5063648717805492,
+      "start_2": -0.5013116088333784
+    },
+    "4": {
+      "mean": -0.5331053010194591,
+      "start_1": -0.5289145391337368,
+      "start_2": -0.5372960629051814
+    }
+  },
+  "protocol_hash": "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+  "protocol_origin_issue_number": 53,
+  "run_code_sha": "a56b8aebd136915dbecd9a154256cdf494a3e2f1",
+  "score_config_hash": "aae47803a349add9823cd36ed45cc9c2d81bbee435af4c9d64cbb6359de0fa8b",
+  "selected_k": 2,
+  "selected_k_interpretation": "record_only",
+  "tie_candidates": [
+    2
+  ]
+}
