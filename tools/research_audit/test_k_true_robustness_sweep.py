@@ -6950,9 +6950,10 @@ def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
-    # Issue #59: --full resolves through its OWN gate, which is absent
+    # Issue #59: --full resolves through its OWN gate.  S3-B bound the reviewed
+    # baseline; the committed authorization record is still absent.
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() is None
+    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.current_smoke_execution_authorization().smoke_fit_count == 6
     assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
 
@@ -7278,13 +7279,16 @@ def _full_rejects(**changes):
 # --- the gate is absent, and separate from the smoke gate -------------------
 
 
-def test_FULLGATE_both_full_human_gates_are_absent():
+def test_FULLGATE_the_full_authorization_record_is_absent():
+    """S3-B bound the reviewed baseline; the human authorization is still absent."""
+
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() is None
+    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     # the smoke gate is present; that must not leak into the full gate
     assert H.current_smoke_execution_authorization() is not None
     assert H.current_expected_smoke_main_sha() is not None
-    assert H.trusted_full_main_sha_for(test_only=False) is None
+    assert H.current_expected_full_main_sha() != H.current_expected_smoke_main_sha()
 
 
 def test_FULLGATE_smoke_authorization_can_never_authorize_full():
@@ -7469,7 +7473,7 @@ def test_FULLGATE_preflight_is_zero_em_and_exact():
     assert report["hierarchy"] == "H3_A" and report["mask_design"] == "S_C"
     assert report["random_design"] == "CRN" and report["estimands"] == ["A", "B"]
     assert report["full_execution_authorization_present"] is False
-    assert report["trusted_full_main_sha_present"] is False
+    assert report["trusted_full_main_sha_present"] is True
     assert report["phase7e_rerun_fits"] == 0
     assert "em_runner" not in sys.modules
     _assert_no_new_production_artifacts()
@@ -8452,14 +8456,14 @@ def test_ROLES_audit_holds_the_scientific_literal_independently():
     assert "import run_k_true_robustness_sweep" not in source
 
 
-def test_ROLES_reviewed_full_sha_source_is_still_absent():
-    """The literal is unknown until PR #60 merges; the gate stays closed."""
+def test_ROLES_reviewed_full_sha_is_bound_but_unauthorized():
+    """S3-B bound role 2 to the reviewed S3-A merge; the gate stays closed."""
 
-    assert H.current_expected_full_main_sha() is None
+    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.current_full_execution_authorization() is None
-    assert H.trusted_full_main_sha_for(test_only=False) is None
     body = _executable_body(H.current_expected_full_main_sha)
-    assert body.strip() == "return None"
+    assert body.strip() == "return REVIEWED_FULL_EXECUTION_MAIN_SHA"
 
 
 def test_ROLES_production_lineage_chain_is_required():
@@ -8638,6 +8642,159 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() is None
+    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
+
+
+# ===========================================================================
+# Issue #59 Phase 8b S3-B: reviewed full-execution baseline binding ONLY
+# ===========================================================================
+#
+# The reviewed S3-A merge SHA is now the trusted role-2 value.  Nothing else
+# changed: no production FullExecutionAuthorization record exists, neither
+# human gate is granted, and --full still stops before any adapter.
+
+REVIEWED_FULL_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+
+def test_BASELINE_reviewed_full_sha_is_the_exact_literal():
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == REVIEWED_FULL_MAIN_SHA
+    assert H.current_expected_full_main_sha() == REVIEWED_FULL_MAIN_SHA
+    assert H.trusted_full_main_sha_for(test_only=False) == REVIEWED_FULL_MAIN_SHA
+    H._require_full_commit_sha(H.current_expected_full_main_sha(), "reviewed full SHA")
+
+
+def test_BASELINE_roles_stay_separate():
+    scientific = H.APPROVED_SCIENTIFIC_MAIN_SHA
+    reviewed = H.current_expected_full_main_sha()
+    assert scientific == SCIENTIFIC_BASELINE_SHA
+    assert reviewed == REVIEWED_FULL_MAIN_SHA
+    assert reviewed != scientific, "role 1 and role 2 are different values"
+    # role 1 is unchanged by this binding
+    assert H.current_expected_smoke_main_sha() == scientific
+    assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == scientific
+    # role 3 is not fixed by this PR
+    assert H.current_full_execution_authorization() is None
+
+
+def test_BASELINE_authorization_record_is_still_absent():
+    assert H.current_full_execution_authorization() is None
+    body = _executable_body(H.current_full_execution_authorization)
+    assert body.strip() == "return None"
+    assert "FullExecutionAuthorization(" not in body
+    for forbidden in ("human_full_approval", "independent_review_pass"):
+        assert forbidden not in body, forbidden
+    # no production record is constructed anywhere outside the test factory
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    constructions = [line.strip() for line in source.splitlines()
+                     if "FullExecutionAuthorization(" in line
+                     and "type(" not in line and "is FullExecutionAuthorization" not in line]
+    assert len(constructions) == 1, constructions      # the test-only factory only
+    assert "_FULL_TEST_AUTHORITY" in source.split("FullExecutionAuthorization(")[-1][:400]
+
+
+@pytest.mark.parametrize("argv", [
+    ["--full", "--allow-em", "--confirm-k-true-sweep"],
+    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
+])
+def test_BASELINE_full_still_hard_stops(argv, monkeypatch, tmp_path):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(argv)
+    message = str(excinfo.value)
+    assert "not authorized" in message
+    assert "NO committed FullExecutionAuthorization record exists" in message
+    assert "HUMAN_FULL_APPROVAL" in message
+    assert "never be reused for --full" in message
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (tmp_path / "frozen_full").exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_BASELINE_refusal_message_is_no_longer_stale():
+    """The reviewed baseline exists now; the message must not deny that."""
+
+    body = _executable_body(H._require_em_authorization)
+    full_branch = body.split("if command == 'full':")[1]
+    assert "no reviewed main SHA has been approved" not in full_branch
+    assert "REVIEWED_FULL_EXECUTION_MAIN_SHA" in full_branch
+
+
+def test_BASELINE_smoke_isolation_is_unchanged():
+    smoke = H.current_smoke_execution_authorization()
+    assert smoke is not None
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(smoke, test_only=False)
+    assert "FullExecutionAuthorization" in str(excinfo.value)
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(H._make_test_full_authorization(),
+                                                 test_only=False)
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+
+
+def test_BASELINE_a_valid_looking_record_still_needs_the_human_gates():
+    """Even a record naming the reviewed baseline is refused unless committed."""
+
+    forged = H._make_test_full_authorization(
+        approved_main_sha=REVIEWED_FULL_MAIN_SHA)
+    # the test-only sentinel can never satisfy the production path
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(forged, test_only=False)
+    assert "provenance is unauthorized" in str(excinfo.value)
+    # and the production source still hands nothing out
+    assert H.current_full_execution_authorization() is None
+
+
+def test_BASELINE_source_is_a_committed_literal():
+    """§5: the trusted source is never derived at runtime."""
+
+    tree = _ast.parse(_textwrap.dedent(
+        _inspect.getsource(H.current_expected_full_main_sha)))
+    calls = [getattr(n.func, "id", getattr(n.func, "attr", "?"))
+             for n in _ast.walk(tree) if isinstance(n, _ast.Call)]
+    assert calls == [], f"the trusted source must not call anything: {calls}"
+    names = {n.id for n in _ast.walk(tree) if isinstance(n, _ast.Name)}
+    # "str" is the return annotation; the only value referenced is the literal
+    assert names - {"str"} == {"REVIEWED_FULL_EXECUTION_MAIN_SHA"}
+    body = _executable_body(H.current_expected_full_main_sha)
+    for forbidden in ("os.", "environ", "getenv", "argv", "sys.", "subprocess", "git",
+                      "rev-parse", "current_run_code_sha", "Path", "open(", "json",
+                      "config", "branch", "HEAD"):
+        assert forbidden not in body, forbidden
+    # the literal itself is a module-level committed constant
+    module_source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert f'REVIEWED_FULL_EXECUTION_MAIN_SHA = "{REVIEWED_FULL_MAIN_SHA}"' in module_source
+
+
+def test_BASELINE_env_and_cli_cannot_change_it(monkeypatch):
+    for name in ("REVIEWED_FULL_EXECUTION_MAIN_SHA", "PHASE8B_FULL_MAIN_SHA",
+                 "APPROVED_MAIN_SHA", "PHASE8B_FULL_AUTHORIZED"):
+        monkeypatch.setenv(name, "9" * 40)
+    monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full"])
+    assert H.current_expected_full_main_sha() == REVIEWED_FULL_MAIN_SHA
+    assert H.current_full_execution_authorization() is None
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--full-main-sha", "--reviewed-full-sha", "--approve-full",
+                      "--human-full-approved"):
+        assert forbidden not in options, forbidden
+
+
+def test_BASELINE_zero_em_state_is_unchanged(tmp_path, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    report = H.run_full_preflight()
+    assert report["em_fits_executed"] == 0
+    assert report["real_full_fits_executed"] == 0
+    assert report["trusted_full_main_sha_present"] is True
+    assert report["full_execution_authorization_present"] is False
+    assert report["manifest"]["total_fits"] == 336
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()

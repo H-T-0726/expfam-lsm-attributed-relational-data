@@ -2800,18 +2800,32 @@ def full_protocol_hash() -> str:
     return stable_config_hash(full_protocol_config())
 
 
+# --- REVIEWED FULL-EXECUTION BASELINE (frozen, Issue #59 S3-B) -------------
+# The S3-A merge commit: the independently reviewed main SHA that the 336-fit
+# execution gate was approved against.  This is ROLE 2 and is deliberately NOT
+# the scientific baseline (role 1, APPROVED_SCIENTIFIC_MAIN_SHA) nor the
+# run-code SHA (role 3, recorded at execution time).  Committed literal: it is
+# never read from the CLI, the environment, a config file, the current branch
+# or ``git rev-parse HEAD``.
+REVIEWED_FULL_EXECUTION_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+
+
 def current_expected_full_main_sha() -> str | None:
     """The trusted reviewed baseline for a real FULL execution.
 
-    None in this branch: no main SHA has been reviewed and approved for the
-    336-fit sweep.  Like the smoke equivalent it is a committed literal source,
-    never read from the CLI, the environment, a config file, the current branch
-    or ``git rev-parse HEAD``.  It is deliberately NOT
+    Bound (Issue #59) to the reviewed S3-A merge commit.  It is a committed
+    literal, never read from the CLI, the environment, a config file, the
+    current branch or ``git rev-parse HEAD`` -- each of those would let the
+    running code declare itself approved.  It is deliberately NOT
     ``current_expected_smoke_main_sha()``: approving the 8-fit smoke baseline
     must not silently approve a 336-fit sweep.
+
+    Binding this SHA does NOT authorize execution.  The 336-fit sweep still
+    needs a committed ``FullExecutionAuthorization`` carrying the two human
+    gates, and ``current_full_execution_authorization()`` returns None.
     """
 
-    return None
+    return REVIEWED_FULL_EXECUTION_MAIN_SHA
 
 
 def trusted_full_main_sha_for(test_only: bool) -> str | None:
@@ -5210,10 +5224,13 @@ def _require_em_authorization(args: argparse.Namespace,
         full_authorization = current_full_execution_authorization()
         if full_authorization is None:
             raise HarnessStop(
-                "full is not authorized in Phase 8b S3-A: the 336-fit sweep has its "
-                "own FullExecutionAuthorization schema, validator and zero-EM "
-                "preflight (Issue #59), but no committed record exists and no "
-                "reviewed main SHA has been approved for it. A smoke "
+                "full is not authorized in Phase 8b: the reviewed full-execution "
+                f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} is bound (Issue #59) "
+                "and the 336-fit sweep has its own FullExecutionAuthorization "
+                "schema, validator and zero-EM preflight, but NO committed "
+                "FullExecutionAuthorization record exists. Recording "
+                "INDEPENDENT_REVIEW_PASS and HUMAN_FULL_APPROVAL against that "
+                "reviewed baseline is a separate human gate. A smoke "
                 "authorization must never be reused for --full."
             )
         validate_full_execution_authorization(full_authorization, test_only=False)
