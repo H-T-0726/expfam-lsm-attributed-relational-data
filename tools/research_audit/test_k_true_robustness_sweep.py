@@ -462,10 +462,19 @@ def test_T23_full_requires_confirm_flag():
     assert "confirm-k-true-sweep" in str(excinfo.value)
 
 
-def test_T23b_full_is_refused_even_with_every_flag():
-    with pytest.raises(HarnessStop) as excinfo:
+def test_T23b_full_reaches_only_the_guarded_workflow(monkeypatch):
+    """S3-C committed the human authorization, so --full clears that gate.
+
+    No test may continue into the real 336-fit workflow, so it is replaced by a
+    stop and only the wiring is asserted.
+    """
+
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].total_fit_count == 336
 
 
 def test_T23c_smoke_and_canary_reach_only_the_guarded_workflow(monkeypatch):
@@ -482,9 +491,11 @@ def test_T23c_smoke_and_canary_reach_only_the_guarded_workflow(monkeypatch):
 
 
 def test_T24_estimand_must_match_frozen_set(monkeypatch):
+    reached = _block_full_production_execution(monkeypatch)
     monkeypatch.setattr(H, "ESTIMANDS", "A")
     with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "B"])
+    assert reached == [], "a per-estimand scope never reaches the full workflow"
 
 
 def test_T24b_unfrozen_hierarchy_stops(monkeypatch):
@@ -2054,11 +2065,12 @@ def test_leakage_self_check_runs_no_em_in_a_fresh_process():
 
 
 def test_S2_full_stays_hard_stopped_and_smoke_only_reaches_the_guard(monkeypatch):
+    full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
-    with pytest.raises(HarnessStop) as excinfo:
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == [], "--full must never reach the production workflow"
+    assert reached == [], "--full must never reach the SMOKE production workflow"
+    assert len(full_reached) == 1, "--full reaches its own workflow, and stops there"
 
     for command in (["--smoke", "--allow-em"], ["--canary", "--allow-em"]):
         with pytest.raises(HarnessStop):
@@ -2466,14 +2478,13 @@ def test_S2b_cli_canary_and_smoke_pass_the_committed_authorization_through(monke
         assert authorization.is_test_only() is False
 
 
-def test_S2b_full_remains_blocked_by_its_own_gate():
+def test_S2b_full_resolves_only_through_its_own_gate(monkeypatch):
     """Issue #59 gave --full its OWN schema; a smoke record still cannot reach it."""
 
-    with pytest.raises(HarnessStop) as excinfo:
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    message = str(excinfo.value)
-    assert "not authorized" in message
-    assert "never be reused for --full" in message
+    assert len(reached) == 1 and type(reached[0]) is H.FullExecutionAuthorization
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split('_require(command in')[0]
     assert "current_smoke_execution_authorization" not in full_branch
@@ -2487,6 +2498,7 @@ def test_S2b_real_adapter_is_never_reached_by_the_test_suite(monkeypatch):
 
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", Tripwire)
     _block_production_execution(monkeypatch)
+    _block_full_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
         with pytest.raises(HarnessStop):
@@ -3342,10 +3354,11 @@ def test_S2c_cli_gate_hands_the_committed_authorization_to_the_workflow(command,
     assert authorization.is_test_only() is False
 
 
-def test_S2c_full_remains_isolated():
-    with pytest.raises(HarnessStop) as excinfo:
+def test_S2c_full_remains_isolated(monkeypatch):
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "never be reused for --full" in str(excinfo.value)
+    assert len(reached) == 1, "--full uses its own workflow, never the smoke one"
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
@@ -3355,6 +3368,7 @@ def test_S2c_real_adapter_is_unreachable_through_the_cli(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     _block_production_execution(monkeypatch)
+    _block_full_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
         with pytest.raises(HarnessStop):
@@ -4646,6 +4660,7 @@ def test_HIGHPUB_current_state_keeps_production_out_of_the_test_suite(monkeypatc
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     _block_production_execution(monkeypatch)
+    _block_full_production_execution(monkeypatch)
     assert H.current_smoke_execution_authorization() is not None
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"]):
@@ -6767,6 +6782,50 @@ def _assert_no_new_production_artifacts():
     assert status.returncode == 0 and status.stdout.strip() == "", status.stdout
 
 
+class _RealAdapterForbidden:
+    """Constructing the real EM adapter inside the test suite is a hard error."""
+
+    def __init__(self, *args, **kwargs):          # pragma: no cover - must not run
+        raise AssertionError(
+            "SAFETY NET: the real AuthorizedEMFitAdapter was constructed by the "
+            "test suite; the Phase 8b suite executes zero real EM")
+
+    def fit(self, invocation):                    # pragma: no cover - must not run
+        raise AssertionError("SAFETY NET: real EM fit was invoked by the test suite")
+
+
+@pytest.fixture(autouse=True)
+def _forbid_the_real_em_adapter(monkeypatch):
+    """Last-resort zero-EM net for every test in this module.
+
+    A test that needs to count adapter constructions still installs its own
+    tripwire; this only guarantees that nothing can reach real EM by accident
+    now that a production full authorization record exists.
+    """
+
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _RealAdapterForbidden)
+
+
+def _block_full_production_execution(monkeypatch):
+    """ZERO-EM guard for the production FULL workflow.
+
+    The committed authorization is real, so ``--full --allow-em`` legitimately
+    clears the authorization gate.  Replacing the single production full
+    workflow with a stop keeps the suite at zero real fits while the CLI wiring
+    is still asserted.  Returns the list of authorizations it intercepted.
+    """
+
+    reached = []
+
+    def _blocked(authorization):
+        reached.append(authorization)
+        raise HarnessStop(
+            "test guard: the real 336-fit full execution is never run by the test suite")
+
+    monkeypatch.setattr(H, "_run_production_full_execution", _blocked)
+    return reached
+
+
 def _block_production_execution(monkeypatch):
     """ZERO-EM guard: a test may reach the production workflow, never run it.
 
@@ -6939,23 +6998,23 @@ def test_AUTHORIZATIONONLY_a_plain_object_is_rejected():
 # --- full remains impossible ------------------------------------------------
 
 
-def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
+def test_AUTHORIZATIONONLY_full_uses_a_separate_authorization(monkeypatch):
+    full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
-    with pytest.raises(HarnessStop) as excinfo:
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    message = str(excinfo.value)
-    assert "not authorized" in message and "never be reused for --full" in message
-    assert reached == [], "--full must not reach the production workflow"
+    assert reached == [], "--full must not reach the SMOKE production workflow"
+    assert len(full_reached) == 1
 
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
-    # Issue #59: --full resolves through its OWN gate.  S3-B bound the reviewed
-    # baseline; the committed authorization record is still absent.
-    assert H.current_full_execution_authorization() is None
+    # Issue #59 S3-C: --full has its OWN committed record, bound to its OWN
+    # reviewed baseline.  The smoke budget is a different, smaller number.
+    assert H.current_full_execution_authorization().total_fit_count == 336
     assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.current_smoke_execution_authorization().smoke_fit_count == 6
-    assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
+    assert H.EXPECTED_NEW_FITS == 336
 
 
 def test_AUTHORIZATIONONLY_budget_is_exactly_two_plus_six():
@@ -7222,13 +7281,14 @@ def test_AUTHORIZATIONTYPE_frozen_expectations_are_untouched():
 def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"]):
         with pytest.raises(HarnessStop):
             H.main(command)
-    with pytest.raises(HarnessStop) as excinfo:
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "never be reused for --full" in str(excinfo.value)
+    assert len(full_reached) == 1
     assert [name for name, _auth in reached] == ["canary", "smoke"]
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     _assert_no_new_production_artifacts()
@@ -7279,15 +7339,17 @@ def _full_rejects(**changes):
 # --- the gate is absent, and separate from the smoke gate -------------------
 
 
-def test_FULLGATE_the_full_authorization_record_is_absent():
-    """S3-B bound the reviewed baseline; the human authorization is still absent."""
+def test_FULLGATE_the_full_authorization_record_is_committed():
+    """S3-C committed the human authorization against the reviewed baseline."""
 
-    assert H.current_full_execution_authorization() is None
+    authorization = H.current_full_execution_authorization()
+    assert authorization is not None and authorization.is_test_only() is False
+    H.validate_full_execution_authorization(authorization, test_only=False)
+    assert authorization.approved_main_sha == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
-    # the smoke gate is present; that must not leak into the full gate
+    # the smoke gate is a different record bound to a different baseline
     assert H.current_smoke_execution_authorization() is not None
-    assert H.current_expected_smoke_main_sha() is not None
     assert H.current_expected_full_main_sha() != H.current_expected_smoke_main_sha()
 
 
@@ -7320,20 +7382,20 @@ def test_FULLGATE_sentinels_and_baselines_are_distinct():
     source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
     uses = [line.strip() for line in source.splitlines()
             if "_FULL_EXECUTION_AUTHORITY" in line]
-    assert len(uses) == 2, uses          # definition + validator selection only
+    # definition, validator selection, and the single committed record
+    assert len(uses) == 3, uses
 
 
 def test_FULLGATE_cli_full_is_refused_and_never_reaches_a_fit(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
-    with pytest.raises(HarnessStop) as excinfo:
+    with pytest.raises(HarnessStop):
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    message = str(excinfo.value)
-    assert "not authorized" in message
-    assert "never be reused for --full" in message
-    assert "FullExecutionAuthorization" in message
-    assert reached == []
+    assert reached == [], "--full never touches the smoke workflow"
+    assert len(full_reached) == 1
+    assert full_reached[0].human_full_approval is True
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     _assert_no_new_production_artifacts()
@@ -7354,14 +7416,15 @@ def test_FULLGATE_no_cli_or_env_can_fabricate_a_full_authorization(monkeypatch):
     for name in ("PHASE8B_HUMAN_FULL_APPROVAL", "HUMAN_FULL_APPROVAL",
                  "INDEPENDENT_REVIEW_PASS", "PHASE8B_FULL_AUTHORIZED"):
         monkeypatch.setenv(name, "1")
-    assert H.current_full_execution_authorization() is None
     options = {option for action in H._build_parser()._actions
                for option in action.option_strings}
     for forbidden in ("--human-full-approved", "--full-approved", "--authorize-full",
                       "--approve-full", "--full-fit-count"):
         assert forbidden not in options, forbidden
-    body = _executable_body(H.current_full_execution_authorization)
-    assert body.strip() == "return None"
+    # the committed record is unchanged by any of them
+    authorization = H.current_full_execution_authorization()
+    assert authorization.human_full_approval is True
+    assert authorization.approved_main_sha == H.current_expected_full_main_sha()
 
 
 # --- validator: strict types, exact grid, literal human gates ---------------
@@ -7472,7 +7535,7 @@ def test_FULLGATE_preflight_is_zero_em_and_exact():
     assert report["mask_gate_failed"] == []
     assert report["hierarchy"] == "H3_A" and report["mask_design"] == "S_C"
     assert report["random_design"] == "CRN" and report["estimands"] == ["A", "B"]
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["trusted_full_main_sha_present"] is True
     assert report["phase7e_rerun_fits"] == 0
     assert "em_runner" not in sys.modules
@@ -7674,9 +7737,9 @@ def test_FULLGATE_stage_executes_zero_real_em(monkeypatch):
     H.run_full_preflight()
     H.build_full_manifests()
     H.check_full_anchor_agreement()
-    with pytest.raises(HarnessStop):
-        H.validate_full_execution_authorization(
-            H.current_full_execution_authorization(), test_only=False)
+    # the committed record validates, and validating executes nothing
+    H.validate_full_execution_authorization(
+        H.current_full_execution_authorization(), test_only=False)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
@@ -7925,6 +7988,7 @@ def test_FULLEXEC_absent_authorization_constructs_no_adapter(monkeypatch, tmp_pa
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
+    _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop):
         H.run_real_full(H.current_full_execution_authorization())
     with pytest.raises(HarnessStop):
@@ -8358,6 +8422,7 @@ def test_FINDINGS_full_ancestry_helper_is_explicit():
 def test_FINDINGS_full_refuses_a_per_estimand_scope(estimand, monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", estimand])
     message = str(excinfo.value)
@@ -8373,9 +8438,10 @@ def test_FINDINGS_full_refuses_a_per_estimand_scope(estimand, monkeypatch):
 def test_FINDINGS_full_scope_ab_reaches_the_authorization_gate(argv, monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
-    with pytest.raises(HarnessStop) as excinfo:
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main(argv)
-    assert "not authorized" in str(excinfo.value)
+    assert len(reached) == 1, "the complete AB scope reaches the authorization gate"
     assert _AdapterTripwire.constructions == 0
 
 
@@ -8456,12 +8522,12 @@ def test_ROLES_audit_holds_the_scientific_literal_independently():
     assert "import run_k_true_robustness_sweep" not in source
 
 
-def test_ROLES_reviewed_full_sha_is_bound_but_unauthorized():
-    """S3-B bound role 2 to the reviewed S3-A merge; the gate stays closed."""
+def test_ROLES_reviewed_full_sha_is_bound_and_authorized():
+    """S3-B bound role 2; S3-C committed the authorization against it."""
 
     assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
-    assert H.current_full_execution_authorization() is None
+    assert H.current_full_execution_authorization().approved_main_sha == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     body = _executable_body(H.current_expected_full_main_sha)
     assert body.strip() == "return REVIEWED_FULL_EXECUTION_MAIN_SHA"
 
@@ -8641,7 +8707,7 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
     A.audit_full_run_dir(directory)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert H.current_full_execution_authorization() is None
+    assert H.current_full_execution_authorization() is not None
     assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()
@@ -8676,52 +8742,50 @@ def test_BASELINE_roles_stay_separate():
     assert H.current_expected_smoke_main_sha() == scientific
     assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == scientific
     # role 3 is not fixed by this PR
-    assert H.current_full_execution_authorization() is None
+    assert H.current_full_execution_authorization().approved_main_sha == reviewed
 
 
-def test_BASELINE_authorization_record_is_still_absent():
-    assert H.current_full_execution_authorization() is None
+def test_BASELINE_authorization_record_is_committed():
+    authorization = H.current_full_execution_authorization()
+    assert authorization is not None
     body = _executable_body(H.current_full_execution_authorization)
-    assert body.strip() == "return None"
-    assert "FullExecutionAuthorization(" not in body
-    for forbidden in ("human_full_approval", "independent_review_pass"):
-        assert forbidden not in body, forbidden
-    # no production record is constructed anywhere outside the test factory
+    assert "FullExecutionAuthorization(" in body
+    assert "_FULL_EXECUTION_AUTHORITY" in body and "_FULL_TEST_AUTHORITY" not in body
+    # exactly two construction sites: the committed record and the test factory
     source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
     constructions = [line.strip() for line in source.splitlines()
                      if "FullExecutionAuthorization(" in line
                      and "type(" not in line and "is FullExecutionAuthorization" not in line]
-    assert len(constructions) == 1, constructions      # the test-only factory only
-    assert "_FULL_TEST_AUTHORITY" in source.split("FullExecutionAuthorization(")[-1][:400]
+    assert len(constructions) == 2, constructions
 
 
 @pytest.mark.parametrize("argv", [
     ["--full", "--allow-em", "--confirm-k-true-sweep"],
     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
 ])
-def test_BASELINE_full_still_hard_stops(argv, monkeypatch, tmp_path):
+def test_BASELINE_full_reaches_the_guarded_workflow_only(argv, monkeypatch, tmp_path):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
-    with pytest.raises(HarnessStop) as excinfo:
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main(argv)
-    message = str(excinfo.value)
-    assert "not authorized" in message
-    assert "NO committed FullExecutionAuthorization record exists" in message
-    assert "HUMAN_FULL_APPROVAL" in message
-    assert "never be reused for --full" in message
+    assert len(reached) == 1
+    assert reached[0].approved_main_sha == H.current_expected_full_main_sha()
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert not (tmp_path / "frozen_full").exists()
     assert "em_runner" not in sys.modules
 
 
-def test_BASELINE_refusal_message_is_no_longer_stale():
-    """The reviewed baseline exists now; the message must not deny that."""
+def test_BASELINE_refusal_branch_is_fail_closed_dead_code():
+    """The record exists, so the refusal is unreachable -- but it must remain."""
 
     body = _executable_body(H._require_em_authorization)
     full_branch = body.split("if command == 'full':")[1]
     assert "no reviewed main SHA has been approved" not in full_branch
     assert "REVIEWED_FULL_EXECUTION_MAIN_SHA" in full_branch
+    assert "if full_authorization is None:" in full_branch
+    assert "raise HarnessStop" in full_branch
 
 
 def test_BASELINE_smoke_isolation_is_unchanged():
@@ -8737,17 +8801,17 @@ def test_BASELINE_smoke_isolation_is_unchanged():
         "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
 
 
-def test_BASELINE_a_valid_looking_record_still_needs_the_human_gates():
-    """Even a record naming the reviewed baseline is refused unless committed."""
+def test_BASELINE_a_forged_record_still_fails_the_provenance_gate():
+    """Only the committed record carries the production authority sentinel."""
 
     forged = H._make_test_full_authorization(
         approved_main_sha=REVIEWED_FULL_MAIN_SHA)
-    # the test-only sentinel can never satisfy the production path
     with pytest.raises(HarnessStop) as excinfo:
         H.validate_full_execution_authorization(forged, test_only=False)
     assert "provenance is unauthorized" in str(excinfo.value)
-    # and the production source still hands nothing out
-    assert H.current_full_execution_authorization() is None
+    committed = H.current_full_execution_authorization()
+    assert committed.is_test_only() is False
+    assert forged.is_test_only() is True
 
 
 def test_BASELINE_source_is_a_committed_literal():
@@ -8777,7 +8841,9 @@ def test_BASELINE_env_and_cli_cannot_change_it(monkeypatch):
         monkeypatch.setenv(name, "9" * 40)
     monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full"])
     assert H.current_expected_full_main_sha() == REVIEWED_FULL_MAIN_SHA
-    assert H.current_full_execution_authorization() is None
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == REVIEWED_FULL_MAIN_SHA
+    assert authorization.total_fit_count == 336
     options = {option for action in H._build_parser()._actions
                for option in action.option_strings}
     for forbidden in ("--full-main-sha", "--reviewed-full-sha", "--approve-full",
@@ -8792,9 +8858,272 @@ def test_BASELINE_zero_em_state_is_unchanged(tmp_path, monkeypatch):
     assert report["em_fits_executed"] == 0
     assert report["real_full_fits_executed"] == 0
     assert report["trusted_full_main_sha_present"] is True
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["manifest"]["total_fits"] == 336
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()
+
+
+# ===========================================================================
+# Issue #59 Phase 8b S3-C: the committed human authorization for 336 fits
+# ===========================================================================
+#
+# The human granted ONE clean attempt at exactly 336 new real EM fits
+# (Issue #59 comment 5511177444).  Nothing here executes EM: the production
+# `--full --allow-em` command is deliberately NEVER invoked in this suite; the
+# record is exercised through the validator, static source inspection, the
+# zero-EM preflight and the fake-adapter executor only.
+
+AUTHORIZED_FULL_FIELDS = {
+    "issue_number": 59,
+    "protocol_origin_issue_number": 49,
+    "approved_main_sha": "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f",
+    "protocol_hash": "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+    "estimands": ("A", "B"),
+    "k_true_grid": (1, 2, 4, 5),
+    "candidate_k": (1, 2, 3, 4, 5, 6, 7),
+    "starts": (1, 2),
+    "replicates": (1, 2, 3),
+    "fits_per_estimand": 168,
+    "total_fit_count": 336,
+    "data_seed_base": 51000,
+    "model_seed_base": 530000,
+    "anchor_split_seed_base": 42000,
+    "mask_design": "S_C",
+    "random_design": "CRN",
+    "hierarchy": "H3_A",
+    "independent_review_pass": True,
+    "human_full_approval": True,
+    "authorization_version": "phase8b-full-authorization-v1",
+}
+
+
+def test_AUTHZ_record_is_present_and_exact():
+    authorization = H.current_full_execution_authorization()
+    assert authorization is not None
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.is_test_only() is False
+    for name, expected in AUTHORIZED_FULL_FIELDS.items():
+        actual = getattr(authorization, name)
+        assert actual == expected, name
+        assert type(actual) is type(expected), (name, type(actual))
+
+
+def test_AUTHZ_reviewed_baseline_matches_the_trusted_source():
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert authorization.approved_main_sha == H.current_expected_full_main_sha()
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    # role 1 is a different value and is untouched
+    assert authorization.approved_main_sha != H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    # role 3 has no literal anywhere
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "run_code_sha =" not in source.replace("    run_code_sha =", "")
+    assert authorization.protocol_hash == H.full_protocol_hash()
+
+
+def test_AUTHZ_human_gates_are_literal_true():
+    authorization = H.current_full_execution_authorization()
+    assert authorization.independent_review_pass is True
+    assert authorization.human_full_approval is True
+    H.validate_full_execution_authorization(authorization, test_only=False)
+
+
+def test_AUTHZ_production_authority_sentinel():
+    authorization = H.current_full_execution_authorization()
+    assert authorization._authority is H._FULL_EXECUTION_AUTHORITY
+    for wrong in (H._FULL_TEST_AUTHORITY, H._SMOKE_EXECUTION_AUTHORITY,
+                  H._SMOKE_TEST_AUTHORITY, None):
+        assert authorization._authority is not wrong
+    body = _executable_body(H.current_full_execution_authorization)
+    assert "_FULL_EXECUTION_AUTHORITY" in body
+    for forbidden in ("_FULL_TEST_AUTHORITY", "_SMOKE_EXECUTION_AUTHORITY",
+                      "_SMOKE_TEST_AUTHORITY"):
+        assert forbidden not in body, forbidden
+
+
+def test_AUTHZ_grid_multiplies_to_exactly_336():
+    a = H.current_full_execution_authorization()
+    product = (len(a.estimands) * len(a.k_true_grid) * len(a.replicates)
+               * len(a.candidate_k) * len(a.starts))
+    assert product == 336 == a.total_fit_count
+    assert len(a.k_true_grid) * len(a.replicates) * len(a.candidate_k) * len(a.starts) \
+        == 168 == a.fits_per_estimand
+    assert a.fits_per_estimand * len(a.estimands) == a.total_fit_count
+    # and the executor plans exactly that
+    manifests = H.build_full_manifests()
+    report = H.validate_full_manifests(manifests)
+    assert report == {"fits_per_estimand": {"A": 168, "B": 168}, "total_fits": 336}
+
+
+def test_AUTHZ_anchor_k_true_is_excluded_and_never_rerun():
+    a = H.current_full_execution_authorization()
+    assert 3 not in a.k_true_grid
+    assert H.ANCHOR_K_TRUE == 3
+    assert H.EXPECTED_FULL_PHASE7E_RERUN_FITS == 0
+    assert H.PHASE7E_ANCHOR_FIT_COUNT == 42
+    report = H.run_full_preflight()
+    assert report["phase7e_rerun_fits"] == 0
+    assert report["anchor_agreement"]["phase7e_rerun_fits"] == 0
+    assert report["em_fits_executed"] == 0
+
+
+def test_AUTHZ_smoke_isolation_is_unchanged():
+    smoke = H.current_smoke_execution_authorization()
+    full = H.current_full_execution_authorization()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(smoke, test_only=False)
+    assert "FullExecutionAuthorization" in str(excinfo.value)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(full, test_only=False)
+    assert "SmokeExecutionAuthorization" in str(excinfo.value)
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(full, test_only=True)
+    assert smoke.approved_main_sha != full.approved_main_sha
+    assert H.smoke_protocol_hash() != H.full_protocol_hash()
+
+
+def test_AUTHZ_record_is_committed_literals_only():
+    """§7: no runtime source may participate in the authorization decision."""
+
+    tree = _ast.parse(_textwrap.dedent(
+        _inspect.getsource(H.current_full_execution_authorization)))
+    calls = [getattr(n.func, "id", getattr(n.func, "attr", "?"))
+             for n in _ast.walk(tree) if isinstance(n, _ast.Call)]
+    assert calls == ["FullExecutionAuthorization"], calls
+    names = {n.id for n in _ast.walk(tree) if isinstance(n, _ast.Name)}
+    assert names == {"FullExecutionAuthorization", "REVIEWED_FULL_EXECUTION_MAIN_SHA",
+                     "_FULL_EXECUTION_AUTHORITY"}, names
+    body = _executable_body(H.current_full_execution_authorization)
+    for forbidden in ("os.", "environ", "getenv", "argv", "sys.", "subprocess",
+                      "requests", "urllib", "github", "api", "rev-parse", "branch",
+                      "HEAD", "Path", "open(", "json", "config", "input(",
+                      "current_run_code_sha", "full_protocol_hash()",
+                      "APPROVED_SCIENTIFIC_MAIN_SHA"):
+        assert forbidden not in body, forbidden
+
+
+def test_AUTHZ_no_network_in_the_authorization_path():
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    for forbidden in ("import requests", "import urllib", "http://", "https://api.",
+                      "gh api", "GITHUB_TOKEN"):
+        assert forbidden not in source, forbidden
+
+
+def test_AUTHZ_env_and_cli_cannot_change_the_record(monkeypatch):
+    for name in ("HUMAN_FULL_APPROVAL", "PHASE8B_HUMAN_FULL_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_FULL_AUTHORIZED",
+                 "PHASE8B_FULL_FIT_COUNT", "REVIEWED_FULL_EXECUTION_MAIN_SHA"):
+        monkeypatch.setenv(name, "9" * 40)
+    monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full",
+                                      "--full-fit-count", "672"])
+    authorization = H.current_full_execution_authorization()
+    for name, expected in AUTHORIZED_FULL_FIELDS.items():
+        assert getattr(authorization, name) == expected, name
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--approve-full", "--human-full-approved", "--full-fit-count",
+                      "--authorize-full", "--full-main-sha"):
+        assert forbidden not in options, forbidden
+
+
+# --- human authorization provenance -----------------------------------------
+
+
+def test_AUTHZ_human_provenance_is_committed_metadata():
+    assert H.FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER == 59
+    assert H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5511177444
+    assert type(H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID) is int
+    scope = H.FULL_HUMAN_AUTHORIZATION_SCOPE
+    for fragment in ("336", "A=168", "B=168", "rerun=0", "retry=0", "replacement=0"):
+        assert fragment in scope, fragment
+    exclusions = H.FULL_HUMAN_AUTHORIZATION_EXCLUSIONS
+    for excluded in ("rerun_after_success", "rerun_after_partial_failure",
+                     "replacement_fit", "retry", "alternate_seed", "relaxed_tolerance",
+                     "phase7e_anchor_rerun", "canary_rerun", "smoke_rerun",
+                     "any_337th_fit"):
+        assert excluded in exclusions, excluded
+
+
+def test_AUTHZ_one_time_semantics_are_documented_and_enforced():
+    """The authorization permits ONE clean attempt; no resume mode exists."""
+
+    doc = H.current_full_execution_authorization.__doc__
+    for fragment in ("ONE", "rerun", "replacement", "retry", "337th"):
+        assert fragment in doc, fragment
+    # the artifact directory policy is unchanged and refuses reuse
+    body = _executable_body(H.require_new_full_artifact_dir)
+    assert "not directory.exists()" in body
+    assert "refusing to overwrite or resume" in body
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    for forbidden in ("--resume", "resume_from", "allow_resume", "skip_completed"):
+        assert forbidden not in source, forbidden
+    assert H.FULL_PARTIAL_FAILURE_POLICY[-1] == "rerun_requires_a_new_human_gate"
+
+
+def test_AUTHZ_existing_directory_still_refuses(tmp_path):
+    out = tmp_path / "existing"
+    out.mkdir()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_new_full_artifact_dir(out)
+    assert "already exists" in str(excinfo.value)
+
+
+def test_AUTHZ_a_second_attempt_executes_no_replacement_fit(tmp_path):
+    """One clean attempt only: the frozen directory blocks any second run."""
+
+    recorder = _run_full_fake(tmp_path / "run")
+    assert recorder.calls == 336
+    second = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_full_test_only(H._make_test_full_authorization(),
+                                       tmp_path / "run",
+                                       adapter=_test_adapter(second),
+                                       run_code_sha="0" * 40)
+    assert "already exists" in str(excinfo.value)
+    assert second.calls == 0, "a rerun must not execute a single fit"
+
+
+# --- this PR executes nothing ------------------------------------------------
+
+
+def test_AUTHZ_this_pr_executes_zero_real_em(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    report = H.run_full_preflight()
+    assert report["em_fits_executed"] == 0
+    assert report["real_full_fits_executed"] == 0
+    assert report["full_execution_authorization_present"] is True
+    assert report["trusted_full_main_sha_present"] is True
+    assert report["artifact_directory_exists"] is False
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
+
+
+def test_AUTHZ_the_suite_never_invokes_the_production_full_command():
+    """No test drives `--full --allow-em` into the real workflow.
+
+    Every such test installs ``_block_full_production_execution`` first, and an
+    autouse fixture forbids constructing the real EM adapter at all.
+    """
+
+    source = pathlib.Path(__file__).read_text(encoding="utf-8")
+    tree = _ast.parse(source)
+    lines = source.splitlines()
+    offenders = []
+    for node in tree.body:
+        if isinstance(node, _ast.FunctionDef) and node.name.startswith("test_"):
+            body = "\n".join(lines[node.lineno - 1: node.end_lineno])
+            drives_full = ('"--full"' in body and '"--allow-em"' in body
+                           and '"--confirm-k-true-sweep"' in body) \
+                or "H.run_real_full(" in body or "H._run_production_full_execution(" in body
+            if drives_full and "_block_full_production_execution(" not in body \
+                    and "--out-dir" not in body:
+                offenders.append(node.name)
+    assert offenders == [], offenders
+    assert "_forbid_the_real_em_adapter" in source
