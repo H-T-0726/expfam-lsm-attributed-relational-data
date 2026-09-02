@@ -468,10 +468,17 @@ def test_T23b_full_is_refused_even_with_every_flag():
     assert "not authorized" in str(excinfo.value)
 
 
-def test_T23c_smoke_and_canary_are_refused():
+def test_T23c_smoke_and_canary_reach_only_the_guarded_workflow(monkeypatch):
+    """Issue #55 committed the authorization, so the CLI clears that gate now.
+
+    No test may continue into the real workflow, so it is replaced by a stop.
+    """
+
+    reached = _block_production_execution(monkeypatch)
     for command in ("--smoke", "--canary"):
         with pytest.raises(HarnessStop):
             H.main([command, "--allow-em"])
+    assert [name for name, _auth in reached] == ["smoke", "canary"]
 
 
 def test_T24_estimand_must_match_frozen_set(monkeypatch):
@@ -2046,13 +2053,17 @@ def test_leakage_self_check_runs_no_em_in_a_fresh_process():
 # --- smoke authorization ---------------------------------------------------
 
 
-def test_S2_smoke_still_hard_stopped():
-    for command in (["--smoke", "--allow-em"],
-                    ["--canary", "--allow-em"],
-                    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
-        with pytest.raises(HarnessStop) as excinfo:
+def test_S2_full_stays_hard_stopped_and_smoke_only_reaches_the_guard(monkeypatch):
+    reached = _block_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    assert "not authorized" in str(excinfo.value)
+    assert reached == [], "--full must never reach the production workflow"
+
+    for command in (["--smoke", "--allow-em"], ["--canary", "--allow-em"]):
+        with pytest.raises(HarnessStop):
             H.main(command)
-        assert "not authorized" in str(excinfo.value)
+    assert [name for name, _auth in reached] == ["smoke", "canary"]
 
 
 def test_S2_authorization_human_gates_are_never_granted_by_code():
@@ -2330,8 +2341,13 @@ def test_S2b_protocol_hash_is_stable_and_binds_the_protocol(monkeypatch):
 # --- authorization contract ------------------------------------------------
 
 
-def test_S2b_production_authorization_is_unavailable():
-    assert H.current_smoke_execution_authorization() is None
+def test_S2b_production_authorization_is_committed():
+    """Issue #55 recorded the human approval; the record is a committed literal."""
+
+    authorization = H.current_smoke_execution_authorization()
+    assert authorization is not None and authorization.is_test_only() is False
+    H.validate_smoke_execution_authorization(authorization, test_only=False)
+    assert authorization.issue_number == 55
 
 
 def test_S2b_no_cli_or_env_can_assert_human_approval(monkeypatch):
@@ -2344,13 +2360,16 @@ def test_S2b_no_cli_or_env_can_assert_human_approval(monkeypatch):
     for name in ("PHASE8B_HUMAN_SMOKE_APPROVAL", "HUMAN_SMOKE_APPROVAL",
                  "INDEPENDENT_REVIEW_PASS", "PHASE8B_SMOKE_AUTHORIZED"):
         monkeypatch.setenv(name, "1")
-    assert H.current_smoke_execution_authorization() is None
+    # the committed record is unchanged by any of them
+    authorization = H.current_smoke_execution_authorization()
+    assert authorization.human_smoke_approval is True
+    assert authorization.approved_main_sha == H.APPROVED_SCIENTIFIC_MAIN_SHA
     assert H.current_smoke_authorization().authorized() is False
 
     executable = _executable_body(H.current_smoke_execution_authorization)
-    assert "return None" in executable
-    for forbidden in ("environ", "getenv", "argv", "args", "SmokeExecutionAuthorization"):
+    for forbidden in ("environ", "getenv", "argv", "args", "input(", "open("):
         assert forbidden not in executable, forbidden
+    assert H.current_smoke_execution_authorization().human_smoke_approval is True
 
 
 def test_S2b_authorization_requires_the_production_authority():
@@ -2415,21 +2434,36 @@ def test_S2b_test_authority_is_unreachable_from_production():
 # --- production entry points are implemented but disabled ------------------
 
 
-def test_S2b_production_entrypoints_refuse_a_missing_authorization():
+def test_S2b_production_entrypoints_refuse_a_test_only_authorization(monkeypatch):
+    """A test-only record is still refused; the committed one only reaches the guard."""
+
+    # no guard yet: the workflow validates the authorization as its FIRST step,
+    # so a test-only record is refused before any preflight, directory or adapter
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    for entrypoint in (H.run_real_canary, H.run_real_smoke):
+        with pytest.raises(HarnessStop) as excinfo:
+            entrypoint(_test_authorization())
+        assert "provenance is unauthorized" in str(excinfo.value)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+
+    reached = _block_production_execution(monkeypatch)
     for entrypoint in (H.run_real_canary, H.run_real_smoke):
         with pytest.raises(HarnessStop):
             entrypoint(H.current_smoke_execution_authorization())
-        with pytest.raises(HarnessStop):
-            entrypoint(_test_authorization())
+    assert [name for name, _auth in reached] == ["canary", "smoke"]
 
 
-def test_S2b_cli_canary_and_smoke_remain_hard_stopped():
+def test_S2b_cli_canary_and_smoke_pass_the_committed_authorization_through(monkeypatch):
+    reached = _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"]):
-        with pytest.raises(HarnessStop) as excinfo:
+        with pytest.raises(HarnessStop):
             H.main(command)
-        message = str(excinfo.value)
-        assert "not authorized" in message
-        assert "SmokeExecutionAuthorization" in message
+    assert [name for name, _auth in reached] == ["canary", "smoke"]
+    for _name, authorization in reached:
+        assert type(authorization) is H.SmokeExecutionAuthorization
+        assert authorization.is_test_only() is False
 
 
 def test_S2b_full_remains_blocked_and_has_no_authorization_schema():
@@ -2445,12 +2479,13 @@ def test_S2b_full_remains_blocked_and_has_no_authorization_schema():
     assert "current_smoke_execution_authorization" not in full_branch
 
 
-def test_S2b_real_adapter_is_never_reached_without_authorization(monkeypatch):
+def test_S2b_real_adapter_is_never_reached_by_the_test_suite(monkeypatch):
     class Tripwire:
         def fit(self, invocation):          # pragma: no cover - must never run
-            raise AssertionError("the real EM adapter was reached without authorization")
+            raise AssertionError("the real EM adapter was reached from a test")
 
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", Tripwire)
+    _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
         with pytest.raises(HarnessStop):
@@ -2752,7 +2787,8 @@ def test_S2b_fake_orchestration_imports_no_em_in_a_fresh_process():
 def test_S2b_zero_em_modes_report_the_execution_authorization_state(capsys):
     assert H.main(["--smoke-authorization"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["execution_authorization_present"] is False
+    assert payload["execution_authorization_present"] is True
+    # the machine-checkable gate record is a different thing and still False
     assert payload["authorized"] is False
     assert payload["expected_canary_fits"] == 2
     assert payload["expected_smoke_fits"] == 6
@@ -2824,8 +2860,10 @@ def test_S2c_trusted_main_sha_is_the_approved_baseline():
     assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
     assert H.current_expected_smoke_main_sha() == H.APPROVED_SCIENTIFIC_MAIN_SHA
     H._require_full_commit_sha(H.APPROVED_SCIENTIFIC_MAIN_SHA, "baseline")
-    # binding the baseline is NOT an execution approval
-    assert H.current_smoke_execution_authorization() is None
+    # the baseline binding and the execution authorization stay separate values:
+    # the record is checked AGAINST this source, never derived from it
+    assert H.current_smoke_execution_authorization().approved_main_sha == \
+        H.current_expected_smoke_main_sha()
     assert H.current_smoke_authorization().authorized() is False
 
 
@@ -2842,7 +2880,8 @@ def test_HIGH01_trusted_sha_source_is_a_literal(monkeypatch):
                  "INDEPENDENT_REVIEW_PASS", "PHASE8B_APPROVED_MAIN_SHA"):
         monkeypatch.setenv(name, "b" * 40)
     assert H.current_expected_smoke_main_sha() == H.APPROVED_SCIENTIFIC_MAIN_SHA
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization().approved_main_sha == \
+        H.APPROVED_SCIENTIFIC_MAIN_SHA
 
     options = {option for action in H._build_parser()._actions
                for option in action.option_strings}
@@ -3021,10 +3060,12 @@ def test_S2c_only_the_approved_baseline_sha_validates():
         assert "approved main SHA does not match" in str(excinfo.value)
 
 
-def test_S2c_production_execution_is_still_impossible():
-    """§46: a valid SHA binding is not an execution authorization."""
+def test_S2c_machine_gate_never_grants_the_human_gates():
+    """§46: the machine-checkable gate record never asserts the human gates.
 
-    assert H.current_smoke_execution_authorization() is None
+    It stays a different object from the committed execution authorization.
+    """
+
     authorization = H.current_smoke_authorization()
     assert authorization.independent_review_pass is False
     assert authorization.human_smoke_approval is False
@@ -3053,7 +3094,7 @@ def test_HIGH01_authorization_report_exposes_the_trusted_sha_state(capsys):
     assert H.main(["--smoke-authorization"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["trusted_main_sha_present"] is True
-    assert payload["execution_authorization_present"] is False
+    assert payload["execution_authorization_present"] is True
     assert payload["authorized"] is False
     rendered = json.dumps(payload)
     for leak in ("0" * 40, "1" * 40, "a" * 40, "approved_main_sha"):
@@ -3275,8 +3316,10 @@ def test_S2c_protocol_hash_is_unchanged_by_the_execution_lineage():
 # --- current authorization state -------------------------------------------
 
 
-def test_S2c_execution_authorization_is_still_absent():
-    assert H.current_smoke_execution_authorization() is None
+def test_S2c_execution_authorization_is_present_and_valid():
+    authorization = H.current_smoke_execution_authorization()
+    assert authorization is not None and authorization.is_test_only() is False
+    H.validate_smoke_execution_authorization(authorization, test_only=False)
     gates = H.current_smoke_authorization()
     assert gates.independent_review_pass is False
     assert gates.human_smoke_approval is False
@@ -3284,13 +3327,18 @@ def test_S2c_execution_authorization_is_still_absent():
 
 
 @pytest.mark.parametrize("command", ["canary", "smoke"])
-def test_S2c_cli_gate_still_refuses_every_em_command(command):
-    with pytest.raises(HarnessStop) as excinfo:
+def test_S2c_cli_gate_hands_the_committed_authorization_to_the_workflow(command,
+                                                                       monkeypatch):
+    """Issue #55 authorized 2+6, so the CLI clears the gate; tests never run it."""
+
+    reached = _block_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop):
         H.main([f"--{command}", "--allow-em"])
-    message = str(excinfo.value)
-    assert "not authorized" in message
-    assert "SmokeExecutionAuthorization" in message
-    assert APPROVED_BASELINE in message, "the bound baseline should be reported"
+    assert [name for name, _auth in reached] == [command]
+    authorization = reached[0][1]
+    assert type(authorization) is H.SmokeExecutionAuthorization
+    assert authorization.approved_main_sha == APPROVED_BASELINE
+    assert authorization.is_test_only() is False
 
 
 def test_S2c_full_remains_isolated():
@@ -3305,6 +3353,7 @@ def test_S2c_full_remains_isolated():
 def test_S2c_real_adapter_is_unreachable_through_the_cli(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _block_production_execution(monkeypatch)
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
         with pytest.raises(HarnessStop):
@@ -3412,7 +3461,7 @@ def test_S2c_smoke_contract_mode_is_zero_em(capsys):
     assert payload["artifact_directory_exists"] is False
     assert payload["approved_scientific_main_sha"] == APPROVED_BASELINE
     assert payload["trusted_main_sha_present"] is True
-    assert payload["execution_authorization_present"] is False
+    assert payload["execution_authorization_present"] is True
     assert payload["protocol_origin_issue"] == 53 and payload["execution_issue"] == 55
     assert payload["expected_canary_fits"] == 2 and payload["expected_smoke_fits"] == 6
     assert payload["expected_real_em_budget"] == 8
@@ -3829,7 +3878,7 @@ def test_S2c_zero_em_paths_import_no_em_in_a_fresh_process():
         "H.current_expected_smoke_main_sha(); H.current_smoke_execution_authorization();"
         "print('em_runner' in sys.modules,"
         " 'model_dual_expfam_consistent' in sys.modules,"
-        " H.current_smoke_execution_authorization() is None)"
+        " H.current_smoke_execution_authorization() is not None)"
     )
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
     assert out.returncode == 0, out.stderr
@@ -4333,7 +4382,7 @@ def test_S2c_frozen_science_after_the_fixes():
     assert H.SMOKE_SPLIT_SEED == 42001
     assert len(H.build_manifest("A")) == len(H.build_manifest("B")) == 168
     assert H.EXPECTED_NEW_FITS == 336
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
     assert H.current_smoke_authorization().authorized() is False
 
 
@@ -4590,10 +4639,11 @@ def test_HIGHPUB_valid_test_only_lineage_still_runs_two_then_six(tmp_path):
     assert "em_runner" not in sys.modules
 
 
-def test_HIGHPUB_current_state_keeps_production_unreachable(monkeypatch):
+def test_HIGHPUB_current_state_keeps_production_out_of_the_test_suite(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
-    assert H.current_smoke_execution_authorization() is None
+    _block_production_execution(monkeypatch)
+    assert H.current_smoke_execution_authorization() is not None
     for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"],
                     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"]):
         with pytest.raises(HarnessStop):
@@ -4949,7 +4999,7 @@ def test_FINAL_previous_protections_are_intact():
         "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
     assert A.EXPECTED_SMOKE_PROTOCOL_HASH == H.smoke_protocol_hash()
     assert H.APPROVED_SCIENTIFIC_MAIN_SHA == APPROVED_BASELINE
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
     assert H.current_smoke_authorization().authorized() is False
     assert (H.EXPECTED_CANARY_FITS, H.EXPECTED_SMOKE_FITS,
             H.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
@@ -5803,7 +5853,7 @@ def test_STRICTINTFINAL_protocol_and_authorization_are_unchanged():
     assert (A.EXPECTED_CANARY_FITS, A.EXPECTED_SMOKE_FITS,
             A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
     assert H.EXPECTED_NEW_FITS == 336
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
     authorization = H.current_smoke_authorization()
     assert authorization.independent_review_pass is False
     assert authorization.human_smoke_approval is False
@@ -6067,7 +6117,7 @@ def test_MEDIUMCOUNT_frozen_science_and_authorization_are_unchanged():
             A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
     assert H.EXPECTED_NEW_FITS == 336
 
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
     authorization = H.current_smoke_authorization()
     assert authorization.independent_review_pass is False
     assert authorization.human_smoke_approval is False
@@ -6397,7 +6447,7 @@ def test_CONTENTBIND_protocol_hash_is_unchanged():
             A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
     assert H.EXPECTED_NEW_FITS == 336
 
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
     authorization = H.current_smoke_authorization()
     assert authorization.independent_review_pass is False
     assert authorization.human_smoke_approval is False
@@ -6627,7 +6677,7 @@ def test_DIRECTBIND_uses_the_production_frozen_constants(tmp_path, monkeypatch):
     assert verdict["canary_execution_mode"] == "real"
     assert verdict["actual_canary_fits"] == A.EXPECTED_CANARY_FITS == 2
     # the production authorization gate is untouched by this test
-    assert H.current_smoke_execution_authorization() is None
+    assert H.current_smoke_execution_authorization() is not None
 
 
 @pytest.mark.parametrize("name,updates", [
@@ -6655,3 +6705,508 @@ def test_DIRECTBIND_mutation_after_the_untouched_verdict_stops_the_runner(
     assert name in message and "changed after the independent canary audit" in message
     assert (out / "canary_audit.json").read_bytes() == verdict_bytes
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+
+
+# ===========================================================================
+# Issue #55 authorization-only stage: the committed execution authorization
+# ===========================================================================
+#
+# The human approval was recorded in Issue #55, so
+# ``current_smoke_execution_authorization()`` now returns a committed record
+# instead of None.  Its scope is exactly 2 real canary fits and, only after the
+# independent canary audit passes, 6 real smoke fits -- 8 real EM fits in total.
+# This stage implements and reviews that record; it executes NOTHING.
+#
+# Because the authorization exists, a test that drives the production CLI would
+# otherwise continue past the authorization gate into the real workflow.  Every
+# such test installs ``_block_production_execution`` first, so the single
+# production workflow is replaced by a stop: the wiring is still asserted, no
+# adapter is built, no artifact directory is reserved and no EM runs.
+
+
+AUTHORIZED_SMOKE_FIELDS = {
+    "issue_number": 55,
+    "approved_main_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+    "protocol_hash": "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+    "estimand": "A",
+    "k_true": 1,
+    "replicate": 1,
+    "smoke_fit_count": 6,
+    "canary_fit_count": 2,
+    "data_seed_base": 61000,
+    "model_seed_base": 630000,
+    "split_seed": 42001,
+    "independent_review_pass": True,
+    "human_smoke_approval": True,
+    "authorization_version": "phase8b-smoke-authorization-v1",
+}
+
+
+def _block_production_execution(monkeypatch):
+    """ZERO-EM guard: a test may reach the production workflow, never run it.
+
+    The authorization is committed, so ``--canary`` / ``--smoke`` legitimately
+    clear the authorization gate.  Replacing the single production workflow with
+    a stop keeps the whole suite at zero real fits while the CLI wiring is still
+    asserted.  Returns the list of (command, authorization) it intercepted.
+    """
+
+    reached = []
+
+    def _blocked(authorization, command):
+        reached.append((command, authorization))
+        raise HarnessStop(
+            f"test guard: the real {command} execution is never run by the test suite")
+
+    monkeypatch.setattr(H, "_run_production_execution", _blocked)
+    return reached
+
+
+# --- the committed record ---------------------------------------------------
+
+
+def test_AUTHORIZATIONONLY_record_is_present_and_exact():
+    authorization = H.current_smoke_execution_authorization()
+    assert authorization is not None
+    assert type(authorization) is H.SmokeExecutionAuthorization
+    assert authorization.is_test_only() is False
+    for name, expected in AUTHORIZED_SMOKE_FIELDS.items():
+        actual = getattr(authorization, name)
+        assert actual == expected, name
+        assert type(actual) is type(expected), (name, type(actual))
+    assert authorization._authority is H._SMOKE_EXECUTION_AUTHORITY
+    assert authorization._authority is not H._SMOKE_TEST_AUTHORITY
+
+
+def test_AUTHORIZATIONONLY_record_validates_against_the_frozen_protocol():
+    authorization = H.current_smoke_execution_authorization()
+    H.validate_smoke_execution_authorization(authorization, test_only=False)   # no EM
+    # the record agrees with the independently frozen implementation constants
+    assert authorization.approved_main_sha == H.current_expected_smoke_main_sha()
+    assert authorization.protocol_hash == H.smoke_protocol_hash()
+    assert authorization.issue_number == H.SMOKE_EXECUTION_ISSUE_NUMBER == 55
+    assert authorization.canary_fit_count == H.EXPECTED_CANARY_FITS == 2
+    assert authorization.smoke_fit_count == H.EXPECTED_SMOKE_FITS == 6
+    assert (authorization.canary_fit_count + authorization.smoke_fit_count
+            == H.EXPECTED_REAL_EM_BUDGET == 8)
+    assert authorization.authorization_version == H.SMOKE_AUTHORIZATION_VERSION
+    assert "em_runner" not in sys.modules
+
+
+def test_AUTHORIZATIONONLY_record_is_not_valid_for_the_test_only_lineage():
+    """The production record must not double as a test-only authorization."""
+
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(
+            H.current_smoke_execution_authorization(), test_only=True)
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(_test_authorization(), test_only=False)
+
+
+# --- literality: committed values, not self-generated ones ------------------
+
+
+def test_AUTHORIZATIONONLY_record_is_committed_literals():
+    """§15: nothing about the record may be derived at runtime."""
+
+    body = _executable_body(H.current_smoke_execution_authorization)
+    for forbidden in ("os.", "environ", "getenv", "argv", "sys.", "subprocess",
+                      "_git_output", "git", "rev-parse", "Path", "open(",
+                      "read_text", "read_bytes", "json", "input(", "config"):
+        assert forbidden not in body, forbidden
+    # not signed with the very constants it is validated against
+    for forbidden in ("smoke_protocol_hash()", "current_expected_smoke_main_sha()",
+                      "APPROVED_SCIENTIFIC_MAIN_SHA", "SMOKE_EXECUTION_ISSUE_NUMBER",
+                      "SMOKE_K_TRUE", "SMOKE_REPLICATE", "EXPECTED_SMOKE_FITS",
+                      "EXPECTED_CANARY_FITS", "SMOKE_DATA_SEED_BASE",
+                      "SMOKE_MODEL_SEED_BASE", "SMOKE_SPLIT_SEED",
+                      "SMOKE_AUTHORIZATION_VERSION"):
+        assert forbidden not in body, forbidden
+    assert "_SMOKE_EXECUTION_AUTHORITY" in body
+    assert "_SMOKE_TEST_AUTHORITY" not in body
+    for literal in ("68c78e1191889609dead05ea5a9fb11525ce92e2",
+                    "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+                    "phase8b-smoke-authorization-v1"):
+        assert literal in body, literal
+
+
+def test_AUTHORIZATIONONLY_no_cli_or_env_can_fabricate_or_change_it(monkeypatch):
+    for name in ("PHASE8B_HUMAN_SMOKE_APPROVAL", "HUMAN_SMOKE_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_SMOKE_AUTHORIZED",
+                 "APPROVED_MAIN_SHA", "PHASE8B_SMOKE_FIT_COUNT"):
+        monkeypatch.setenv(name, "b" * 40)
+    monkeypatch.setattr(sys, "argv", ["run", "--smoke", "--allow-em", "--approve"])
+    authorization = H.current_smoke_execution_authorization()
+    for name, expected in AUTHORIZED_SMOKE_FIELDS.items():
+        assert getattr(authorization, name) == expected, name
+
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--human-approved", "--reviewed", "--approve", "--approved",
+                      "--independent-review-pass", "--human-smoke-approval",
+                      "--approved-main-sha", "--smoke-fit-count", "--budget"):
+        assert forbidden not in options, forbidden
+
+
+def test_AUTHORIZATIONONLY_no_public_factory_for_the_production_authority():
+    public = [name for name in dir(H) if not name.startswith("_")]
+    for name in public:
+        assert "SMOKE_EXECUTION_AUTHORITY" not in name, name
+    # the only construction sites of the production sentinel
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    uses = [line.strip() for line in source.splitlines()
+            if "_SMOKE_EXECUTION_AUTHORITY" in line]
+    assert len(uses) == 3, uses          # definition, validator selection, the record
+    assert "_make_test_smoke_authorization" not in \
+        _inspect.getsource(H.current_smoke_execution_authorization)
+
+
+# --- falsification: every frozen field is load-bearing ----------------------
+
+
+@pytest.mark.parametrize("field,value", [
+    ("approved_main_sha", "0" * 40),
+    ("approved_main_sha", "4e89a10cacc855975cd76f891605e3758e6d2835"),
+    ("approved_main_sha", "not-a-sha"),
+    ("protocol_hash", "f" * 64),
+    ("issue_number", 53),
+    ("issue_number", 56),
+    ("estimand", "B"),
+    ("k_true", 3),
+    ("replicate", 2),
+    ("smoke_fit_count", 12),
+    ("smoke_fit_count", 336),
+    ("canary_fit_count", 1),
+    ("canary_fit_count", 4),
+    ("data_seed_base", 51000),
+    ("model_seed_base", 530000),
+    ("split_seed", 42002),
+    ("independent_review_pass", False),
+    ("human_smoke_approval", False),
+    ("authorization_version", "phase8b-smoke-authorization-v2"),
+])
+def test_AUTHORIZATIONONLY_mutated_record_is_rejected(field, value):
+    mutated = dataclasses.replace(H.current_smoke_execution_authorization(),
+                                  **{field: value})
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(mutated, test_only=False)
+    assert "em_runner" not in sys.modules
+
+
+@pytest.mark.parametrize("authority", ["test", "none", "other"])
+def test_AUTHORIZATIONONLY_wrong_authority_is_rejected(authority):
+    sentinel = {"test": H._SMOKE_TEST_AUTHORITY, "none": None,
+                "other": object()}[authority]
+    mutated = dataclasses.replace(H.current_smoke_execution_authorization(),
+                                  _authority=sentinel)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(mutated, test_only=False)
+    assert "provenance" in str(excinfo.value) or "authorization" in str(excinfo.value)
+
+
+def test_AUTHORIZATIONONLY_a_plain_object_is_rejected():
+    for candidate in (None, object(), {"issue_number": 55},
+                      dataclasses.asdict(H.current_smoke_execution_authorization())):
+        with pytest.raises(HarnessStop):
+            H.validate_smoke_execution_authorization(candidate, test_only=False)
+
+
+# --- full remains impossible ------------------------------------------------
+
+
+def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
+    reached = _block_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    message = str(excinfo.value)
+    assert "not authorized" in message and "never be reused for --full" in message
+    assert reached == [], "--full must not reach the production workflow"
+
+    executable = _executable_body(H._require_em_authorization)
+    full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
+    assert "current_smoke_execution_authorization" not in full_branch
+    for name in dir(H):
+        assert "FullExecutionAuthorization" not in name
+    assert H.current_smoke_execution_authorization().smoke_fit_count == 6
+    assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
+
+
+def test_AUTHORIZATIONONLY_budget_is_exactly_two_plus_six():
+    authorization = H.current_smoke_execution_authorization()
+    assert authorization.canary_fit_count == 2
+    assert authorization.smoke_fit_count == 6
+    assert H.EXPECTED_REAL_EM_BUDGET == 8
+    contract = H.run_smoke_contract()
+    assert contract["expected_canary_fits"] == 2
+    assert contract["expected_smoke_fits"] == 6
+    assert contract["expected_real_em_budget"] == 8
+    assert contract["em_fits_executed"] == 0
+    assert contract["real_canary_fits_executed"] == 0
+    assert contract["real_smoke_fits_executed"] == 0
+    assert contract["execution_authorization_present"] is True
+    assert contract["artifact_directory_exists"] is False
+
+
+# --- this stage executes nothing --------------------------------------------
+
+
+def test_AUTHORIZATIONONLY_stage_executes_zero_fits(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    reached = _block_production_execution(monkeypatch)
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"]):
+        with pytest.raises(HarnessStop):
+            H.main(command)
+    assert [name for name, _auth in reached] == ["canary", "smoke"]
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_AUTHORIZATIONONLY_production_directory_is_never_created():
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    assert H.SMOKE_ARTIFACT_DIR.name == "k_true_robustness_smoke_20260901"
+    assert H.run_smoke_contract()["artifact_directory_exists"] is False
+
+
+def test_AUTHORIZATIONONLY_zero_em_modes_still_import_no_em(tmp_path):
+    code = (
+        "import sys;"
+        "sys.path.insert(0, r'" + str(HERE) + "');"
+        "import run_k_true_robustness_sweep as H;"
+        "a = H.current_smoke_execution_authorization();"
+        "H.validate_smoke_execution_authorization(a, test_only=False);"
+        "H.run_validate_only(); H.run_smoke_contract();"
+        "print(a is not None, a.is_test_only(), 'em_runner' in sys.modules,"
+        " 'model_dual_expfam_fixed' in sys.modules,"
+        " H.SMOKE_ARTIFACT_DIR.exists())"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stderr
+    assert out.stdout.strip() == "True False False False False"
+
+
+# --- the legacy machine-checkable gate stays a separate concept -------------
+
+
+def test_AUTHORIZATIONONLY_machine_gate_record_is_unchanged():
+    """§9: ``current_smoke_authorization`` is the computed-gate report, not the
+    execution authorization, and its human-only gates stay False by construction."""
+
+    gates = H.current_smoke_authorization()
+    assert gates.independent_review_pass is False
+    assert gates.human_smoke_approval is False
+    assert gates.authorized() is False
+    assert type(gates) is not H.SmokeExecutionAuthorization
+    source = _inspect.getsource(H.current_smoke_authorization)
+    assert "current_smoke_execution_authorization" not in source
+
+
+# ===========================================================================
+# Issue #55 authorization-only MEDIUM-01: strict typing on the frozen fields
+# ===========================================================================
+#
+# The validator compared the frozen authorization fields by value alone, so
+# Python equality (``1.0 == 1``, ``True == 1``) accepted an equal float or bool
+# in place of a frozen integer -- on the record that releases the real 2+6
+# execution.  Exact type identity is now required before the value comparison,
+# with no coercion (``isinstance`` would admit bool; ``int(...)`` would
+# normalise an invalid value into a valid one).
+
+
+AUTHORIZATION_INTEGER_FIELDS = {
+    "issue_number": 55,
+    "k_true": 1,
+    "replicate": 1,
+    "smoke_fit_count": 6,
+    "canary_fit_count": 2,
+    "data_seed_base": 61000,
+    "model_seed_base": 630000,
+    "split_seed": 42001,
+}
+
+
+def _authorized_record():
+    return H.current_smoke_execution_authorization()
+
+
+def _rejects(**changes):
+    mutated = dataclasses.replace(_authorized_record(), **changes)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_smoke_execution_authorization(mutated, test_only=False)
+    return str(excinfo.value)
+
+
+# --- the rule itself --------------------------------------------------------
+
+
+def test_AUTHORIZATIONTYPE_validator_requires_exact_type_then_value():
+    body = _executable_body(H._validate_smoke_execution_authorization)
+    assert "type(actual) is type(expected)" in body
+    assert "isinstance(actual" not in body
+    for forbidden in ("int(actual)", "float(actual)", "str(actual)", "bool(actual)"):
+        assert forbidden not in body, forbidden
+    # the value comparison is still there, after the type gate
+    assert "actual == expected" in body
+    assert body.index("type(actual) is type(expected)") < body.index("actual == expected")
+
+
+# --- positive control -------------------------------------------------------
+
+
+def test_AUTHORIZATIONTYPE_production_record_still_validates():
+    authorization = _authorized_record()
+    assert authorization is not None and authorization.is_test_only() is False
+    H.validate_smoke_execution_authorization(authorization, test_only=False)   # no EM
+    for name, expected in AUTHORIZATION_INTEGER_FIELDS.items():
+        value = getattr(authorization, name)
+        assert type(value) is int and value == expected, name
+    assert "em_runner" not in sys.modules
+
+
+# --- §9: an equal float for every frozen integer field ----------------------
+
+
+@pytest.mark.parametrize("field,expected", sorted(AUTHORIZATION_INTEGER_FIELDS.items()))
+def test_AUTHORIZATIONTYPE_equal_float_is_rejected(field, expected):
+    substitute = float(expected)
+    assert substitute == expected, "the attack must be value-equal"
+    message = _rejects(**{field: substitute})
+    assert field in message and "is not a int" in message
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+
+
+# --- §10: equal bools ------------------------------------------------------
+
+
+@pytest.mark.parametrize("field", ["k_true", "replicate"])
+def test_AUTHORIZATIONTYPE_equal_bool_is_rejected(field):
+    assert True == 1 and getattr(_authorized_record(), field) == 1
+    message = _rejects(**{field: True})
+    assert field in message and "bool" in message
+
+
+@pytest.mark.parametrize("field", sorted(AUTHORIZATION_INTEGER_FIELDS))
+def test_AUTHORIZATIONTYPE_string_and_none_are_rejected(field, ):
+    expected = AUTHORIZATION_INTEGER_FIELDS[field]
+    for substitute in (str(expected), None, [expected], {expected}):
+        message = _rejects(**{field: substitute})
+        assert field in message
+
+
+def test_AUTHORIZATIONTYPE_string_fields_keep_their_type_and_value():
+    for field, substitute in (("protocol_hash", 0), ("estimand", 0),
+                              ("authorization_version", 1),
+                              ("protocol_hash", None), ("estimand", None),
+                              ("authorization_version", None)):
+        message = _rejects(**{field: substitute})
+        assert field in message
+    # the frozen values themselves are unchanged
+    authorization = _authorized_record()
+    assert authorization.protocol_hash == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert authorization.estimand == "A"
+    assert authorization.authorization_version == "phase8b-smoke-authorization-v1"
+
+
+def test_AUTHORIZATIONTYPE_approved_main_sha_check_is_not_weakened():
+    for substitute in ("68C78E1191889609DEAD05EA5A9FB11525CE92E2", "68c78e11", 0, None,
+                       "4e89a10cacc855975cd76f891605e3758e6d2835"):
+        message = _rejects(approved_main_sha=substitute)
+        assert "SHA" in message or "approved main SHA" in message
+    assert _authorized_record().approved_main_sha == \
+        "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+
+# --- §10: the human gates keep their literal-bool contract -----------------
+
+
+def test_AUTHORIZATIONTYPE_human_gates_stay_literal_bools():
+    body = _executable_body(H._validate_smoke_execution_authorization)
+    assert "authorization.independent_review_pass is True" in body
+    assert "authorization.human_smoke_approval is True" in body
+    for field in ("independent_review_pass", "human_smoke_approval"):
+        for substitute in (1, 1.0, "True", None, False):
+            _rejects(**{field: substitute})
+    # and the genuine bools still pass
+    authorization = _authorized_record()
+    assert authorization.independent_review_pass is True
+    assert authorization.human_smoke_approval is True
+    H.validate_smoke_execution_authorization(authorization, test_only=False)
+
+
+# --- §11: nothing that used to be rejected has become acceptable -----------
+
+
+@pytest.mark.parametrize("field,value", [
+    ("approved_main_sha", "0" * 40),
+    ("protocol_hash", "f" * 64),
+    ("issue_number", 53),
+    ("estimand", "B"),
+    ("k_true", 3),
+    ("replicate", 2),
+    ("smoke_fit_count", 12),
+    ("smoke_fit_count", 336),
+    ("canary_fit_count", 1),
+    ("data_seed_base", 51000),
+    ("model_seed_base", 530000),
+    ("split_seed", 42002),
+    ("independent_review_pass", False),
+    ("human_smoke_approval", False),
+    ("authorization_version", "phase8b-smoke-authorization-v2"),
+])
+def test_AUTHORIZATIONTYPE_value_falsification_still_rejects(field, value):
+    _rejects(**{field: value})
+
+
+def test_AUTHORIZATIONTYPE_authority_and_shape_falsification_still_rejects():
+    for sentinel in (H._SMOKE_TEST_AUTHORITY, None, object()):
+        _rejects(_authority=sentinel)
+    for candidate in (None, object(), {"issue_number": 55},
+                      dataclasses.asdict(_authorized_record())):
+        with pytest.raises(HarnessStop):
+            H.validate_smoke_execution_authorization(candidate, test_only=False)
+
+
+# --- the fix changes nothing else ------------------------------------------
+
+
+def test_AUTHORIZATIONTYPE_frozen_expectations_are_untouched():
+    assert H.SMOKE_EXECUTION_ISSUE_NUMBER == 55
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert (H.SMOKE_ESTIMAND, H.SMOKE_K_TRUE, H.SMOKE_REPLICATE) == ("A", 1, 1)
+    assert (H.EXPECTED_SMOKE_FITS, H.EXPECTED_CANARY_FITS) == (6, 2)
+    assert (H.SMOKE_DATA_SEED_BASE, H.SMOKE_MODEL_SEED_BASE, H.SMOKE_SPLIT_SEED) == \
+        (61000, 630000, 42001)
+    assert H.SMOKE_AUTHORIZATION_VERSION == "phase8b-smoke-authorization-v1"
+    assert H.EXPECTED_NEW_FITS == 336
+    # the record is still committed literals, not self-generated
+    body = _executable_body(H.current_smoke_execution_authorization)
+    for forbidden in ("environ", "getenv", "argv", "subprocess", "rev-parse",
+                      "smoke_protocol_hash()", "current_expected_smoke_main_sha()",
+                      "APPROVED_SCIENTIFIC_MAIN_SHA"):
+        assert forbidden not in body, forbidden
+
+
+def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    reached = _block_production_execution(monkeypatch)
+    for command in (["--canary", "--allow-em"], ["--smoke", "--allow-em"]):
+        with pytest.raises(HarnessStop):
+            H.main(command)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    assert "never be reused for --full" in str(excinfo.value)
+    assert [name for name, _auth in reached] == ["canary", "smoke"]
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    assert "em_runner" not in sys.modules
+
+    contract = H.run_smoke_contract()
+    assert contract["execution_authorization_present"] is True
+    assert contract["em_fits_executed"] == 0
+    assert contract["real_canary_fits_executed"] == 0
+    assert contract["real_smoke_fits_executed"] == 0

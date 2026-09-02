@@ -2055,13 +2055,18 @@ def run_leakage_self_check() -> dict[str, Any]:
 # Phase 8b S2b — human-gated real canary + frozen 6-fit smoke (Issue #53)
 # ===========================================================================
 #
-# The production canary/smoke orchestration lives here, but it CANNOT run:
-# every real-EM entry point demands a committed ``SmokeExecutionAuthorization``
-# and no code path in this repository issues one.  ``current_smoke_execution_``
-# ``authorization()`` returns None by construction because the two human gates
-# are literals.  The zero-EM command paths never touch this section, so
-# ``em_runner`` stays unimported (it is imported only inside the Phase 7e
-# ``AuthorizedEMFitAdapter.fit``, which only an authorized run can reach).
+# The production canary/smoke orchestration is implemented here, and a
+# committed production ``SmokeExecutionAuthorization`` now exists (Issue #55):
+# it records the explicitly reviewed and human-approved budget of exactly 2 real
+# canary fits plus exactly 6 real smoke fits.  Being authorized is still not the
+# same as running: every real execution has to clear the zero-EM/preflight gates,
+# the run-code and baseline lineage, canary-before-smoke, and the independent
+# canary audit -- and a human still has to issue the command.  The full 336-fit
+# sweep lies outside this authorization entirely.  The zero-EM command paths
+# never touch this section, so ``em_runner`` stays unimported (it is imported
+# only inside the Phase 7e ``AuthorizedEMFitAdapter.fit``, which only an
+# authorized run can reach), and the authorization-only implementation and
+# review work has itself executed zero real fits.
 #
 # Phase 7e is reused, never modified: its sealed adapter, fit-call boundary,
 # training-only data preparation, two-canary falsification, clean-fit gate and
@@ -2430,8 +2435,10 @@ def current_expected_smoke_main_sha() -> str | None:
     code declare itself approved.  ``run_code_sha`` is recorded separately as
     provenance and is never an approval source.
 
-    Binding this SHA does NOT authorize execution: the execution authorization
-    record is still absent (see ``current_smoke_execution_authorization``).
+    Binding this SHA is not by itself the execution authorization: that is a
+    separate committed record (see ``current_smoke_execution_authorization``),
+    and this function stays the only trusted source of the baseline it is
+    checked against.
     """
 
     return APPROVED_SCIENTIFIC_MAIN_SHA
@@ -2496,7 +2503,16 @@ def _validate_smoke_execution_authorization(authorization: Any, *,
         ("authorization_version", authorization.authorization_version,
          SMOKE_AUTHORIZATION_VERSION),
     )
+    # Exact type BEFORE value: Python equality alone would accept an equal
+    # float or bool for a frozen integer (``1.0 == 1``, ``True == 1``), and this
+    # record is the trust boundary that releases the real 2+6 execution.
+    # ``type(...) is type(...)`` on purpose -- ``isinstance`` admits bool -- and
+    # nothing is coerced, so an invalid value can never be normalised into a
+    # valid one.
     for name, actual, expected in checks:
+        _require(type(actual) is type(expected),
+                 f"smoke authorization {name} is not a {type(expected).__name__}: "
+                 f"{actual!r} ({type(actual).__name__})")
         _require(actual == expected,
                  f"smoke authorization {name} does not match the frozen protocol: "
                  f"{actual!r} != {expected!r}")
@@ -2522,16 +2538,43 @@ def validate_smoke_execution_authorization(authorization: Any, *, test_only: boo
 
 
 def current_smoke_execution_authorization() -> SmokeExecutionAuthorization | None:
-    """Always None in this branch.
+    """The committed execution authorization recorded for Issue #55.
 
-    S2b implements the schema and the validator, not the record.  The approved
-    main SHA cannot even exist yet: it is the SHA of main AFTER this branch is
-    reviewed and merged, so hard-coding this branch's own SHA here would be a
-    self-signed approval.  A later execution Issue commits the record together
-    with the two human gates.
+    Every value below is a reviewed literal.  Nothing here is read from the CLI,
+    the environment, a config file, the current branch, ``git rev-parse HEAD``,
+    an artifact on disk, or from the frozen constants this record is validated
+    against -- a record built out of the values it will be compared with could
+    never disagree with them, which is exactly what the independent review of
+    this record has to be able to detect.
+
+    Scope, and nothing wider: 2 real canary fits, then 6 real smoke fits only if
+    the independent canary audit passes, for a total real EM budget of 8.  It
+    does NOT authorize the full 336-fit sweep, replacement fits, seed rescue,
+    tolerance relaxation, a Phase 7e rerun, or any automatic continuation.
+
+    Holding this record does not by itself run anything: every real execution
+    still has to clear the full preflight (clean working tree, approved-baseline
+    ancestry, leakage self-check, Phase 7e anchors) and, for the smoke, the
+    independent canary audit -- and a human still has to issue the command.
     """
 
-    return None
+    return SmokeExecutionAuthorization(
+        issue_number=55,
+        approved_main_sha="68c78e1191889609dead05ea5a9fb11525ce92e2",
+        protocol_hash="1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09",
+        estimand="A",
+        k_true=1,
+        replicate=1,
+        smoke_fit_count=6,
+        canary_fit_count=2,
+        data_seed_base=61000,
+        model_seed_base=630000,
+        split_seed=42001,
+        independent_review_pass=True,
+        human_smoke_approval=True,
+        authorization_version="phase8b-smoke-authorization-v1",
+        _authority=_SMOKE_EXECUTION_AUTHORITY,
+    )
 
 
 def _make_test_smoke_authorization(
@@ -3548,7 +3591,7 @@ def require_canary_audit_pass(out_dir: Path, authorization: Any,
 
 
 # ---------------------------------------------------------------------------
-# production execution wiring (unreachable while the authorization is absent)
+# production execution wiring (authorized by Issue #55 for 2 canary + 6 smoke)
 # ---------------------------------------------------------------------------
 
 
@@ -3736,14 +3779,14 @@ def _run_production_execution(authorization: Any, command: str) -> dict[str, Any
 
 
 def run_real_canary_cli(args: argparse.Namespace) -> dict[str, Any]:
-    """Production canary CLI path.  Unreachable while the authorization is absent."""
+    """Production canary CLI path.  Authorized for exactly 2 real canary fits."""
 
     authorization = _require_em_authorization(args, "canary")
     return _run_production_execution(authorization, "canary")
 
 
 def run_real_smoke_cli(args: argparse.Namespace) -> dict[str, Any]:
-    """Production smoke CLI path.  Unreachable while the authorization is absent."""
+    """Production smoke CLI path.  Authorized for exactly 6 real smoke fits."""
 
     authorization = _require_em_authorization(args, "smoke")
     return _run_production_execution(authorization, "smoke")
@@ -3830,14 +3873,21 @@ def _require_em_authorization(args: argparse.Namespace,
                               command: str) -> SmokeExecutionAuthorization:
     """Every EM-bearing command needs a committed execution authorization.
 
-    Returns the validated authorization so the caller can proceed; it raises
-    for every command that is not authorized, which is all of them here.
+    Returns the validated authorization so the caller can proceed, and fails
+    closed otherwise: a missing or invalid record raises before anything else.
 
     ``--allow-em`` is a speed bump, not proof of anything.  The real gate is
-    ``current_smoke_execution_authorization()``, which returns None in this
-    branch by construction: no CLI flag, environment variable or config file
-    can produce a ``SmokeExecutionAuthorization``, because its provenance
-    sentinel is module-private and nothing hands it out.
+    ``current_smoke_execution_authorization()``, whose committed record is
+    validated here against the frozen scientific baseline, the frozen protocol
+    hash, the exact fit counts and seeds, the independent review approval and
+    the explicit human smoke approval.  No CLI flag, environment variable or
+    config file can produce a ``SmokeExecutionAuthorization``, because its
+    provenance sentinel is module-private and nothing hands it out.
+
+    The current authorization permits ONLY the frozen execution it describes:
+    2 real canary fits and 6 real smoke fits.  Clearing this gate says nothing
+    about whether anything has run -- the preflight, lineage, canary-before-
+    smoke and independent-audit gates all still apply downstream.
 
     ``--full`` has NO authorization schema at all.  A smoke authorization can
     never be widened into a full-run authorization: the two are separate human
