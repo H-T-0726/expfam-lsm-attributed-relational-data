@@ -2446,7 +2446,7 @@ def test_S2b_production_entrypoints_refuse_a_test_only_authorization(monkeypatch
             entrypoint(_test_authorization())
         assert "provenance is unauthorized" in str(excinfo.value)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
 
     reached = _block_production_execution(monkeypatch)
     for entrypoint in (H.run_real_canary, H.run_real_smoke):
@@ -2466,17 +2466,18 @@ def test_S2b_cli_canary_and_smoke_pass_the_committed_authorization_through(monke
         assert authorization.is_test_only() is False
 
 
-def test_S2b_full_remains_blocked_and_has_no_authorization_schema():
+def test_S2b_full_remains_blocked_by_its_own_gate():
+    """Issue #59 gave --full its OWN schema; a smoke record still cannot reach it."""
+
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
     message = str(excinfo.value)
     assert "not authorized" in message
     assert "never be reused for --full" in message
-    for name in dir(H):
-        assert "FullExecutionAuthorization" not in name
     executable = _executable_body(H._require_em_authorization)
-    full_branch = executable.split('if command == \'full\':')[1].split('_require(command in')[0]
+    full_branch = executable.split("if command == 'full':")[1].split('_require(command in')[0]
     assert "current_smoke_execution_authorization" not in full_branch
+    assert "current_full_execution_authorization" in full_branch
 
 
 def test_S2b_real_adapter_is_never_reached_by_the_test_suite(monkeypatch):
@@ -3396,11 +3397,10 @@ def test_S2c_artifact_contract_is_frozen():
     assert tuple(H.SMOKE_ARTIFACT_COLUMNS) == A.SMOKE_FIT_RESULTS_COLUMNS
 
 
-def test_S2c_no_artifact_directory_is_created_by_this_branch():
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
-    status = subprocess.run(["git", "status", "--porcelain", "--", "expfam/results"],
-                            capture_output=True, text=True, cwd=ROOT)
-    assert status.returncode == 0 and status.stdout.strip() == "", status.stdout
+def test_S2c_no_new_artifact_is_created_by_this_branch():
+    """The archived S2c evidence is tracked; nothing new or modified may appear."""
+
+    _assert_no_new_production_artifacts()
 
 
 def test_S2c_artifact_directory_must_be_new(tmp_path):
@@ -3458,7 +3458,10 @@ def test_S2c_smoke_contract_mode_is_zero_em(capsys):
     assert H.main(["--smoke-contract"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["em_fits_executed"] == 0
-    assert payload["artifact_directory_exists"] is False
+    # the archived evidence directory is tracked in the repository, so the
+    # contract must report the truth rather than a hard-coded False
+    assert payload["artifact_directory_exists"] == H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
     assert payload["approved_scientific_main_sha"] == APPROVED_BASELINE
     assert payload["trusted_main_sha_present"] is True
     assert payload["execution_authorization_present"] is True
@@ -4654,7 +4657,7 @@ def test_HIGHPUB_current_state_keeps_production_out_of_the_test_suite(monkeypatc
         with pytest.raises(HarnessStop):
             entrypoint(_test_authorization())
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
 
 
 # ===========================================================================
@@ -6742,6 +6745,28 @@ AUTHORIZED_SMOKE_FIELDS = {
 }
 
 
+ARCHIVED_SMOKE_ARTIFACTS = frozenset({
+    "authorization.json", "canary.json", "canary_audit.json", "runinfo.json",
+    "smoke_fit_results.csv", "smoke_summary.json", "audit_report.json",
+})
+
+
+def _assert_no_new_production_artifacts():
+    """The archived S2c evidence may exist; nothing new or modified may appear.
+
+    PR #58 committed the 7 frozen artifacts, so asserting that the production
+    directory does not exist would now assert the opposite of the intended
+    invariant.  What must stay true is that no test creates, modifies or adds a
+    production artifact.
+    """
+
+    if H.SMOKE_ARTIFACT_DIR.exists():
+        assert {p.name for p in H.SMOKE_ARTIFACT_DIR.iterdir()} == ARCHIVED_SMOKE_ARTIFACTS
+    status = subprocess.run(["git", "status", "--porcelain", "--", "expfam/results"],
+                            capture_output=True, text=True, cwd=ROOT)
+    assert status.returncode == 0 and status.stdout.strip() == "", status.stdout
+
+
 def _block_production_execution(monkeypatch):
     """ZERO-EM guard: a test may reach the production workflow, never run it.
 
@@ -6925,8 +6950,9 @@ def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
-    for name in dir(H):
-        assert "FullExecutionAuthorization" not in name
+    # Issue #59: --full resolves through its OWN gate, which is absent
+    assert H.current_full_execution_authorization() is None
+    assert H.current_expected_full_main_sha() is None
     assert H.current_smoke_execution_authorization().smoke_fit_count == 6
     assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
 
@@ -6944,7 +6970,8 @@ def test_AUTHORIZATIONONLY_budget_is_exactly_two_plus_six():
     assert contract["real_canary_fits_executed"] == 0
     assert contract["real_smoke_fits_executed"] == 0
     assert contract["execution_authorization_present"] is True
-    assert contract["artifact_directory_exists"] is False
+    assert contract["artifact_directory_exists"] == H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
 
 
 # --- this stage executes nothing --------------------------------------------
@@ -6959,14 +6986,15 @@ def test_AUTHORIZATIONONLY_stage_executes_zero_fits(monkeypatch):
             H.main(command)
     assert [name for name, _auth in reached] == ["canary", "smoke"]
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
     assert "em_runner" not in sys.modules
 
 
-def test_AUTHORIZATIONONLY_production_directory_is_never_created():
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+def test_AUTHORIZATIONONLY_production_directory_is_never_written_by_a_test():
     assert H.SMOKE_ARTIFACT_DIR.name == "k_true_robustness_smoke_20260901"
-    assert H.run_smoke_contract()["artifact_directory_exists"] is False
+    assert H.run_smoke_contract()["artifact_directory_exists"] == \
+        H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
 
 
 def test_AUTHORIZATIONONLY_zero_em_modes_still_import_no_em(tmp_path):
@@ -6978,12 +7006,12 @@ def test_AUTHORIZATIONONLY_zero_em_modes_still_import_no_em(tmp_path):
         "H.validate_smoke_execution_authorization(a, test_only=False);"
         "H.run_validate_only(); H.run_smoke_contract();"
         "print(a is not None, a.is_test_only(), 'em_runner' in sys.modules,"
-        " 'model_dual_expfam_fixed' in sys.modules,"
-        " H.SMOKE_ARTIFACT_DIR.exists())"
+        " 'model_dual_expfam_fixed' in sys.modules)"
     )
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT)
     assert out.returncode == 0, out.stderr
-    assert out.stdout.strip() == "True False False False False"
+    assert out.stdout.strip() == "True False False False"
+    _assert_no_new_production_artifacts()
 
 
 # --- the legacy machine-checkable gate stays a separate concept -------------
@@ -7073,7 +7101,7 @@ def test_AUTHORIZATIONTYPE_equal_float_is_rejected(field, expected):
     assert substitute == expected, "the attack must be value-equal"
     message = _rejects(**{field: substitute})
     assert field in message and "is not a int" in message
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
 
 
 # --- §10: equal bools ------------------------------------------------------
@@ -7202,7 +7230,7 @@ def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
     assert "never be reused for --full" in str(excinfo.value)
     assert [name for name, _auth in reached] == ["canary", "smoke"]
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
-    assert not H.SMOKE_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
     assert "em_runner" not in sys.modules
 
     contract = H.run_smoke_contract()
@@ -7210,3 +7238,852 @@ def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
     assert contract["em_fits_executed"] == 0
     assert contract["real_canary_fits_executed"] == 0
     assert contract["real_smoke_fits_executed"] == 0
+
+
+# ===========================================================================
+# Issue #59 Phase 8b S3-A: the full 336-fit execution gate
+# ===========================================================================
+#
+# The 336-fit sweep is a SECOND human gate, independent of the smoke.  S3-A
+# implements the schema, the validator, the zero-EM preflight and the
+# independent audit contract; it commits no record and executes no fit.
+#
+# The load-bearing property is negative: a SmokeExecutionAuthorization -- the
+# one record that actually exists and is valid today -- must never authorize
+# --full, by type, by sentinel and by validator.
+
+
+FULL_INTEGER_FIELDS = {
+    "issue_number": 59,
+    "protocol_origin_issue_number": 49,
+    "fits_per_estimand": 168,
+    "total_fit_count": 336,
+    "data_seed_base": 51000,
+    "model_seed_base": 530000,
+    "anchor_split_seed_base": 42000,
+}
+
+
+def _full_authorization(**overrides):
+    return H._make_test_full_authorization(**overrides)
+
+
+def _full_rejects(**changes):
+    mutated = dataclasses.replace(_full_authorization(), **changes)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(mutated, test_only=True)
+    return str(excinfo.value)
+
+
+# --- the gate is absent, and separate from the smoke gate -------------------
+
+
+def test_FULLGATE_both_full_human_gates_are_absent():
+    assert H.current_full_execution_authorization() is None
+    assert H.current_expected_full_main_sha() is None
+    # the smoke gate is present; that must not leak into the full gate
+    assert H.current_smoke_execution_authorization() is not None
+    assert H.current_expected_smoke_main_sha() is not None
+    assert H.trusted_full_main_sha_for(test_only=False) is None
+
+
+def test_FULLGATE_smoke_authorization_can_never_authorize_full():
+    """The headline requirement of Issue #59."""
+
+    smoke = H.current_smoke_execution_authorization()
+    assert type(smoke) is H.SmokeExecutionAuthorization
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(smoke, test_only=False)
+    assert "FullExecutionAuthorization" in str(excinfo.value)
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(smoke, test_only=True)
+    # and the reverse: a full record cannot stand in for a smoke authorization
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(_full_authorization(), test_only=True)
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(_full_authorization(), test_only=False)
+
+
+def test_FULLGATE_sentinels_and_baselines_are_distinct():
+    assert H._FULL_EXECUTION_AUTHORITY is not H._SMOKE_EXECUTION_AUTHORITY
+    assert H._FULL_TEST_AUTHORITY is not H._SMOKE_TEST_AUTHORITY
+    assert H._FULL_EXECUTION_AUTHORITY is not H._FULL_TEST_AUTHORITY
+    assert H._FULL_TEST_EXPECTED_MAIN_SHA != H._TEST_EXPECTED_MAIN_SHA
+    # no public factory hands out the production sentinel
+    for name in dir(H):
+        if not name.startswith("_"):
+            assert "FULL_EXECUTION_AUTHORITY" not in name.upper() or name.startswith("_")
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    uses = [line.strip() for line in source.splitlines()
+            if "_FULL_EXECUTION_AUTHORITY" in line]
+    assert len(uses) == 2, uses          # definition + validator selection only
+
+
+def test_FULLGATE_cli_full_is_refused_and_never_reaches_a_fit(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    reached = _block_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A"])
+    message = str(excinfo.value)
+    assert "not authorized" in message
+    assert "never be reused for --full" in message
+    assert "FullExecutionAuthorization" in message
+    assert reached == []
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    _assert_no_new_production_artifacts()
+
+
+def test_FULLGATE_full_refuses_an_out_dir(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "A",
+                "--out-dir", "attacker"])
+    assert "--out-dir is not accepted" in str(excinfo.value)
+    assert not pathlib.Path("attacker").exists()
+    assert _AdapterTripwire.constructions == 0
+
+
+def test_FULLGATE_no_cli_or_env_can_fabricate_a_full_authorization(monkeypatch):
+    for name in ("PHASE8B_HUMAN_FULL_APPROVAL", "HUMAN_FULL_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_FULL_AUTHORIZED"):
+        monkeypatch.setenv(name, "1")
+    assert H.current_full_execution_authorization() is None
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--human-full-approved", "--full-approved", "--authorize-full",
+                      "--approve-full", "--full-fit-count"):
+        assert forbidden not in options, forbidden
+    body = _executable_body(H.current_full_execution_authorization)
+    assert body.strip() == "return None"
+
+
+# --- validator: strict types, exact grid, literal human gates ---------------
+
+
+def test_FULLGATE_valid_test_only_record_passes():
+    H.validate_full_execution_authorization(_full_authorization(), test_only=True)
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(_full_authorization(), test_only=False)
+
+
+@pytest.mark.parametrize("field,expected", sorted(FULL_INTEGER_FIELDS.items()))
+def test_FULLGATE_equal_float_and_bool_are_rejected(field, expected):
+    message = _full_rejects(**{field: float(expected)})
+    assert field in message and "is not a int" in message
+    if expected in (0, 1):
+        assert field in _full_rejects(**{field: bool(expected)})
+
+
+@pytest.mark.parametrize("field,value", [
+    ("issue_number", 55),
+    ("protocol_origin_issue_number", 53),
+    ("protocol_hash", "f" * 64),
+    ("estimands", ("A",)),
+    ("estimands", ("A", "B", "C")),
+    ("k_true_grid", (1, 2, 3, 4, 5)),
+    ("k_true_grid", (1, 2, 4)),
+    ("candidate_k", (1, 2, 3, 4, 5, 6)),
+    ("starts", (1,)),
+    ("replicates", (1, 2)),
+    ("fits_per_estimand", 84),
+    ("total_fit_count", 168),
+    ("total_fit_count", 378),
+    ("data_seed_base", 61000),
+    ("model_seed_base", 630000),
+    ("anchor_split_seed_base", 52000),
+    ("mask_design", "S_A"),
+    ("mask_design", "S_B"),
+    ("random_design", "INDEPENDENT"),
+    ("hierarchy", "H3_B"),
+    ("independent_review_pass", False),
+    ("human_full_approval", False),
+    ("authorization_version", "phase8b-full-authorization-v2"),
+    ("approved_main_sha", "0" * 40),
+    ("approved_main_sha", "not-a-sha"),
+])
+def test_FULLGATE_frozen_field_mutation_is_rejected(field, value):
+    _full_rejects(**{field: value})
+
+
+def test_FULLGATE_anchor_k_true_can_never_enter_the_grid():
+    message = _full_rejects(k_true_grid=(1, 2, 3, 4, 5), fits_per_estimand=210,
+                            total_fit_count=420)
+    assert "anchor" in message or "grid" in message or "k_true_grid" in message
+    # even a grid that multiplies correctly must not contain the anchor
+    assert H.ANCHOR_K_TRUE == 3 and 3 not in H.NEW_K_TRUE
+
+
+def test_FULLGATE_grid_must_multiply_to_the_declared_budget():
+    message = _full_rejects(fits_per_estimand=336)
+    assert "multiplies" in message or "fits_per_estimand" in message
+    message = _full_rejects(candidate_k=(1, 2, 3, 4, 5, 6, 7, 8))
+    assert "candidate_k" in message
+
+
+@pytest.mark.parametrize("authority", ["smoke_execution", "smoke_test", "none", "other"])
+def test_FULLGATE_wrong_authority_is_rejected(authority):
+    sentinel = {"smoke_execution": H._SMOKE_EXECUTION_AUTHORITY,
+                "smoke_test": H._SMOKE_TEST_AUTHORITY,
+                "none": None, "other": object()}[authority]
+    message = _full_rejects(_authority=sentinel)
+    assert "provenance" in message
+
+
+def test_FULLGATE_human_gates_are_literal_bools():
+    body = _inspect.getsource(H._validate_full_execution_authorization)
+    assert "authorization.independent_review_pass is True" in body
+    assert "authorization.human_full_approval is True" in body
+    assert "== True" not in body
+    for field in ("independent_review_pass", "human_full_approval"):
+        for value in (1, 1.0, "True", None, False):
+            _full_rejects(**{field: value})
+
+
+def test_FULLGATE_validator_checks_type_before_value():
+    body = _inspect.getsource(H._validate_full_execution_authorization)
+    assert body.index("type(actual) is type(expected)") < body.index("actual == expected")
+    assert "isinstance(actual" not in body
+    for forbidden in ("int(actual)", "float(actual)", "str(actual)", "bool(actual)"):
+        assert forbidden not in body
+
+
+# --- zero-EM preflight: 336, 168/168, anchors, seeds ------------------------
+
+
+def test_FULLGATE_preflight_is_zero_em_and_exact():
+    report = H.run_full_preflight()
+    assert report["em_fits_executed"] == 0
+    assert report["real_full_fits_executed"] == 0
+    assert report["expected_full_fits"] == 336
+    assert report["expected_full_fits_per_estimand"] == 168
+    assert report["manifest"]["total_fits"] == 336
+    assert report["manifest"]["fits_per_estimand"] == {"A": 168, "B": 168}
+    assert report["anchor_agreement"]["mismatches"] == []
+    assert report["anchor_agreement"]["cells_checked"] == 12
+    assert report["anchor_agreement"]["phase7e_rerun_fits"] == 0
+    assert report["seed_collisions"]["unintended_collisions"] == []
+    assert report["mask_gate_failed"] == []
+    assert report["hierarchy"] == "H3_A" and report["mask_design"] == "S_C"
+    assert report["random_design"] == "CRN" and report["estimands"] == ["A", "B"]
+    assert report["full_execution_authorization_present"] is False
+    assert report["trusted_full_main_sha_present"] is False
+    assert report["phase7e_rerun_fits"] == 0
+    assert "em_runner" not in sys.modules
+    _assert_no_new_production_artifacts()
+
+
+def test_FULLGATE_preflight_cli_mode_is_zero_em(capsys):
+    assert H.main(["--full-preflight"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["mode"] == "full-preflight"
+    assert payload["em_fits_executed"] == 0
+    assert payload["manifest"]["total_fits"] == 336
+    assert payload["artifact_directory_exists"] is False
+    assert "em_runner" not in sys.modules
+
+
+def test_FULLGATE_manifest_is_exactly_336_over_two_estimands():
+    manifests = H.build_full_manifests()
+    assert sorted(manifests) == ["A", "B"]
+    report = H.validate_full_manifests(manifests)
+    assert report == {"fits_per_estimand": {"A": 168, "B": 168}, "total_fits": 336}
+    keys = {(e, r.k_true, r.replicate, r.k, r.start)
+            for e, rows in manifests.items() for r in rows}
+    assert len(keys) == 336
+    assert {k[1] for k in keys} == {1, 2, 4, 5}
+    assert 3 not in {k[1] for k in keys}, "the Phase 7e anchor must not be re-executed"
+    assert {k[3] for k in keys} == set(range(1, 8))
+    assert {k[4] for k in keys} == {1, 2}
+
+
+@pytest.mark.parametrize("mutation", ["drop_row", "drop_estimand", "duplicate_row",
+                                      "anchor_row", "extra_row"])
+def test_FULLGATE_manifest_validation_is_fail_closed(mutation):
+    manifests = {e: list(rows) for e, rows in H.build_full_manifests().items()}
+    if mutation == "drop_row":
+        manifests["A"] = manifests["A"][:-1]
+    elif mutation == "drop_estimand":
+        manifests.pop("B")
+    elif mutation == "duplicate_row":
+        manifests["A"] = manifests["A"][:-1] + [manifests["A"][0]]
+    elif mutation == "anchor_row":
+        manifests["A"] = manifests["A"][:-1] + [
+            dataclasses.replace(manifests["A"][-1], k_true=H.ANCHOR_K_TRUE)]
+    elif mutation == "extra_row":
+        manifests["A"] = manifests["A"] + [manifests["A"][0]]
+    with pytest.raises(HarnessStop):
+        H.validate_full_manifests(manifests)
+
+
+def test_FULLGATE_anchor_agreement_is_checked_without_em():
+    report = H.check_full_anchor_agreement()
+    assert report["mismatches"] == []
+    assert report["cells_checked"] == len(H.NEW_K_TRUE) * len(H.REPLICATES) == 12
+    assert report["mask_design"] == "S_C"
+    assert report["phase7e_rerun_fits"] == 0
+    assert "em_runner" not in sys.modules
+    body = _inspect.getsource(H.check_full_anchor_agreement)
+    for forbidden in ("AuthorizedEMFitAdapter", "_run_real_", "adapter"):
+        assert forbidden not in body
+
+
+def test_FULLGATE_anchor_agreement_fails_closed_on_a_wrong_anchor():
+    anchors = H.read_phase7e_anchor_masks()
+    tampered = dict(anchors)
+    tampered[1] = dataclasses.replace(anchors[1], test_mask_hash="0" * 64)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.check_full_anchor_agreement(tampered)
+    assert "anchor agreement failed" in str(excinfo.value)
+    with pytest.raises(HarnessStop):
+        H.check_full_anchor_agreement({1: anchors[1]})
+
+
+def test_FULLGATE_seed_collision_check_covers_the_full_sweep():
+    report = H.check_seed_collisions(H.build_full_manifests())
+    assert report["unintended_collisions"] == []
+    assert report["model_seeds_per_estimand"] == {"A": 168, "B": 168}
+    assert report["model_seed_distinct"] == 168        # CRN: shared across estimands
+    assert report["cross_estimand_sharing_is_intentional"] is True
+    assert report["phase7e_split_seed_reused"] == [42001, 42002, 42003]
+    assert report["intentional_seed_reuse"] is True
+    # the full seed space must not touch the smoke block
+    smoke = H.smoke_seed_space()
+    full = H.phase8_full_seed_space()
+    for role in ("data", "model"):
+        assert not (smoke[role] & full[role]), role
+
+
+# --- independent full audit -------------------------------------------------
+
+
+def test_FULLGATE_audit_restates_the_full_contract_independently():
+    assert A.EXPECTED_FULL_PROTOCOL_HASH == H.full_protocol_hash()
+    assert A.EXPECTED_FULL_FITS == 336 and A.EXPECTED_FULL_FITS_PER_ESTIMAND == 168
+    assert len(A.expected_full_keys()) == 336
+    assert A.FULL_FIT_RESULTS_COLUMNS == H.FULL_FIT_RESULTS_COLUMNS
+    assert set(A.FULL_AUDIT_INPUT_FILES) == set(H.FULL_AUDIT_INPUT_FILES)
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+
+
+def test_FULLGATE_audit_of_a_missing_directory_is_fail_closed(tmp_path):
+    auditor = A.audit_full_run_dir(tmp_path / "nope")
+    assert any(f.check == "full_run_dir_missing" for f in auditor.blockers)
+    report = A.build_full_audit_report(auditor, tmp_path / "nope")
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+def test_FULLGATE_audit_of_an_empty_directory_requires_every_artifact(tmp_path):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    auditor = A.audit_full_run_dir(directory)
+    missing = [f.detail for f in auditor.blockers if f.check == "required_artifact_missing"]
+    assert len(missing) == len(A.FULL_AUDIT_INPUT_FILES)
+    report = A.build_full_audit_report(auditor, directory)
+    assert report["status"] == "FAIL"
+    assert report["audit_version"] == "phase8b-full-audit-v1"
+    assert report["expected_full_fits"] == 336
+
+
+def test_FULLGATE_audit_report_is_never_overwritten(tmp_path):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    auditor = A.audit_full_run_dir(directory)
+    A.write_full_audit_report(directory, auditor)
+    assert (directory / "audit_report.json").is_file()
+    with pytest.raises(FileExistsError):
+        A.write_full_audit_report(directory, auditor)
+
+
+def test_FULLGATE_audit_rejects_a_wrong_authorization_payload(tmp_path):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    payload = {
+        "artifact_version": "phase8b-full-artifact-v1",
+        "authorization_version": "phase8b-full-authorization-v1",
+        "protocol_hash": A.EXPECTED_FULL_PROTOCOL_HASH,
+        "execution_issue_number": 55,             # smoke issue: wrong
+        "protocol_origin_issue_number": 49,
+        "fits_per_estimand": 168.0,               # equal float: wrong type
+        "total_fit_count": 336,
+        "data_seed_base": 51000, "model_seed_base": 530000,
+        "anchor_split_seed_base": 42000,
+        "k_true_grid": [1, 2, 3, 4, 5],           # contains the anchor
+        "candidate_k": [1, 2, 3, 4, 5, 6, 7],
+        "starts": [1, 2], "replicates": [1, 2, 3],
+        "estimands": ["A"],                       # not A+B
+        "mask_design": "S_C", "random_design": "CRN",
+        "independent_review_pass": True, "human_full_approval": True,
+        "approved_scientific_main_sha": "a" * 40, "run_code_sha": "a" * 40,
+    }
+    auditor = A.Auditor()
+    A.audit_full_authorization(payload, auditor)
+    checks = {f.check for f in auditor.blockers}
+    for expected in ("full_auth_execution_issue", "full_auth_fits_per_estimand",
+                     "full_auth_k_true_grid", "full_auth_anchor_excluded",
+                     "full_auth_estimands", "full_auth_baseline_not_run_sha"):
+        assert expected in checks, (expected, sorted(checks))
+
+
+def test_FULLGATE_audit_fit_row_contract(tmp_path):
+    auditor = A.Auditor()
+    A.audit_full_fit_rows([], auditor)
+    assert any(f.check == "full_fit_columns" for f in auditor.blockers)
+
+    header = {c: "" for c in A.FULL_FIT_RESULTS_COLUMNS}
+    auditor = A.Auditor()
+    A.audit_full_fit_rows([dict(header)], auditor)
+    assert any(f.check == "full_fit_row_count" for f in auditor.blockers)
+
+
+def test_FULLGATE_audit_key_set_is_the_frozen_grid():
+    keys = A.expected_full_keys()
+    assert len(keys) == 336
+    assert {k[0] for k in keys} == {"A", "B"}
+    assert {k[1] for k in keys} == {1, 2, 4, 5}
+    assert 3 not in {k[1] for k in keys}
+    per_estimand = {e: sum(1 for k in keys if k[0] == e) for e in ("A", "B")}
+    assert per_estimand == {"A": 168, "B": 168}
+
+
+def test_FULLGATE_audit_cli_exposes_full_mode(tmp_path, capsys):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    assert A.main(["--run-dir", str(directory), "--mode", "full"]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["mode"] == "full" and report["verdict"] == "FAIL"
+
+
+# --- nothing in this stage runs EM ------------------------------------------
+
+
+def test_FULLGATE_stage_executes_zero_real_em(monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    H.run_full_preflight()
+    H.build_full_manifests()
+    H.check_full_anchor_agreement()
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(
+            H.current_full_execution_authorization(), test_only=False)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
+
+
+def test_FULLGATE_full_artifact_directory_is_frozen_and_absent():
+    assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_20260902"
+    assert H.FULL_ARTIFACT_DIR == (
+        ROOT / "expfam" / "results" / "k_selection" / H.FULL_ARTIFACT_DIRNAME)
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    assert H.FULL_ARTIFACT_DIR != H.SMOKE_ARTIFACT_DIR
+    assert "audit_report.json" not in H.FULL_AUDIT_INPUT_FILES
+    assert set(H.FULL_ARTIFACT_FILES) - set(H.FULL_AUDIT_INPUT_FILES) == {"audit_report.json"}
+
+
+def test_FULLGATE_frozen_design_is_unchanged():
+    assert H.ESTIMANDS == "AB"                    # H1
+    assert H.RANDOM_DESIGN == "CRN"               # H2
+    assert H.HIERARCHY == "H3_A"                  # H3
+    assert H.MASK_DESIGN == "S_C"                 # H4
+    assert H.NEW_K_TRUE == (1, 2, 4, 5) and H.ANCHOR_K_TRUE == 3
+    assert H.K_CANDIDATES == (1, 2, 3, 4, 5, 6, 7)
+    assert H.REPLICATES == (1, 2, 3) and H.START_LABELS == (1, 2)
+    assert H.FITS_PER_ESTIMAND == 168 and H.EXPECTED_NEW_FITS == 336
+    # the smoke protocol is untouched by the full gate
+    assert H.smoke_protocol_hash() == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert H.full_protocol_hash() != H.smoke_protocol_hash()
+
+
+# ===========================================================================
+# Issue #59 Phase 8b S3-A: the production full executor (336 fits)
+# ===========================================================================
+#
+# Exercised with the fake adapter only.  Real EM stays at 0: the production
+# authorization and the production reviewed baseline are both absent, so
+# ``--full --allow-em`` cannot run, and every test below uses the test-only
+# lineage with a temp directory.
+
+
+class _DirtyAtFitRecorder(_FakeFitRecorder):
+    """A fake adapter that returns ONE dirty fit at a chosen call index."""
+
+    def __init__(self, fail_at, mode="retry"):
+        super().__init__()
+        self.fail_at = fail_at
+        self.mode = mode
+
+    def __call__(self, **kwargs):
+        result = super().__call__(**kwargs)
+        if self.calls != self.fail_at:
+            return result
+        if self.mode == "raise":
+            raise RuntimeError(f"injected adapter failure at fit {self.calls}")
+        overrides = {"retry": {"internal_retry": 1},
+                     "warning": {"warnings": ("injected",)},
+                     "q_failure": {"q_failure": True},
+                     "nan": {"nan_occurred": True}}[self.mode]
+        return dataclasses.replace(result, **overrides)
+
+
+def _full_test_authorization(**overrides):
+    return H._make_test_full_authorization(**overrides)
+
+
+def _run_full_fake(out_dir, recorder=None, run_code_sha="0" * 40):
+    recorder = recorder or _FakeFitRecorder()
+    H._execute_real_full_test_only(_full_test_authorization(), out_dir,
+                                   adapter=_test_adapter(recorder),
+                                   run_code_sha=run_code_sha)
+    return recorder
+
+
+def _promote_full_fixture(source, destination):
+    """The same artifacts stamped as a real, complete execution."""
+
+    _shutil.copytree(source, destination)
+    path = destination / "runinfo.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update({"actual_full_fits": 336, "working_tree_clean": True,
+                    "approved_baseline_is_ancestor": True})
+    path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    csv_path = destination / "full_fit_results.csv"
+    lines = csv_path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    index = header.index("real_full_fits_executed")
+    fixed = [lines[0]]
+    for line in lines[1:]:
+        cells = line.split(",")
+        cells[index] = "336"
+        fixed.append(",".join(cells))
+    csv_path.write_text("\n".join(fixed) + "\n", encoding="utf-8")
+    return destination
+
+
+# --- exactly 336, in the frozen order ---------------------------------------
+
+
+def test_FULLEXEC_executes_exactly_336_fake_fits(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    assert recorder.calls == 336, "the sweep must call the adapter exactly 336 times"
+    assert len(recorder.seeds) == 336 and len(set(recorder.seeds)) == 168  # CRN across A/B
+    assert "em_runner" not in sys.modules
+
+
+def test_FULLEXEC_order_is_deterministic_and_frozen(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    expected_seeds = [
+        H.expected_model_seed(k_true, replicate, k, start, estimand)
+        for estimand in ("A", "B")
+        for k_true in (1, 2, 4, 5)
+        for replicate in (1, 2, 3)
+        for k in range(1, 8)
+        for start in (1, 2)
+    ]
+    assert recorder.seeds == expected_seeds
+    assert recorder.k_values == [k for _ in range(24) for k in range(1, 8) for _ in (1, 2)]
+    # a second identical run reproduces the same order exactly
+    again = _run_full_fake(tmp_path / "run2")
+    assert again.seeds == recorder.seeds
+
+
+def test_FULLEXEC_execution_order_helper_matches_the_grid():
+    order = H.full_execution_order()
+    assert len(order) == 24
+    assert order[0] == ("A", 1, 1) and order[-1] == ("B", 5, 3)
+    assert [c[0] for c in order] == ["A"] * 12 + ["B"] * 12
+    assert {c[1] for c in order} == {1, 2, 4, 5}
+    assert 3 not in {c[1] for c in order}
+
+
+def test_FULLEXEC_never_makes_a_337th_call(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    assert recorder.calls == 336
+    # the run is over; nothing may call the adapter again
+    before = recorder.calls
+    with pytest.raises(HarnessStop):
+        H._execute_real_full_test_only(_full_test_authorization(), tmp_path / "run",
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    assert recorder.calls == before, "a re-run must not add a single fit"
+
+
+def test_FULLEXEC_k_true_3_is_never_fitted(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    rows = list(csv.DictReader((tmp_path / "run" / "full_fit_results.csv").open(encoding="utf-8")))
+    assert len(rows) == 336
+    assert {int(r["K_TRUE"]) for r in rows} == {1, 2, 4, 5}
+    assert all(int(r["K_TRUE"]) != 3 for r in rows)
+    # the anchor seed block was never touched by any fit
+    anchor_seeds = {530000 + 1000 * 3 + 10 * k + s for k in range(1, 8) for s in (1, 2)}
+    assert not (set(recorder.seeds) & anchor_seeds)
+
+
+# --- partial failure policy --------------------------------------------------
+
+
+@pytest.mark.parametrize("mode", ["retry", "warning", "q_failure", "nan", "raise"])
+def test_FULLEXEC_middle_failure_stops_immediately(tmp_path, mode):
+    recorder = _DirtyAtFitRecorder(fail_at=100, mode=mode)
+    out = tmp_path / "run"
+    with pytest.raises((HarnessStop, RuntimeError)):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    # the failing fit is the last one attempted: no replacement, no retry
+    assert recorder.calls == 100, f"{recorder.calls} fits ran; the sweep must stop at 100"
+    assert (out / "failure.json").is_file()
+    failure = json.loads((out / "failure.json").read_text(encoding="utf-8"))
+    assert failure["status"] == "FAILED"
+    assert failure["expected_full_fits"] == 336
+    assert failure["replacement_fits_executed"] == 0 and failure["retry_count"] == 0
+    assert "no_replacement_fit" in failure["policy"]
+    assert "rerun_requires_a_new_human_gate" in failure["policy"]
+
+
+def test_FULLEXEC_partial_run_produces_no_summary_and_no_audit_pass(tmp_path):
+    out = tmp_path / "run"
+    recorder = _DirtyAtFitRecorder(fail_at=17, mode="retry")
+    with pytest.raises(HarnessStop):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(recorder),
+                                       run_code_sha="0" * 40)
+    # partial evidence is preserved ...
+    assert (out / "full_fit_results.csv").is_file()
+    partial = list(csv.DictReader((out / "full_fit_results.csv").open(encoding="utf-8")))
+    assert len(partial) == 14, "the completed cell's rows are kept"
+    # ... and the completed artifacts do NOT exist
+    for absent in ("full_summary.json", "selection_matrix.csv", "runinfo.json"):
+        assert not (out / absent).exists(), absent
+    auditor = A.audit_full_run_dir(out)
+    report = A.build_full_audit_report(auditor, out)
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+    assert any(f.check == "full_partial_execution" for f in auditor.blockers)
+
+
+def test_FULLEXEC_same_authorization_cannot_rerun_after_a_failure(tmp_path):
+    out = tmp_path / "run"
+    with pytest.raises(HarnessStop):
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(_DirtyAtFitRecorder(5)),
+                                       run_code_sha="0" * 40)
+    second = _FakeFitRecorder()
+    with pytest.raises(HarnessStop) as excinfo:
+        H._execute_real_full_test_only(_full_test_authorization(), out,
+                                       adapter=_test_adapter(second),
+                                       run_code_sha="0" * 40)
+    assert "already exists" in str(excinfo.value)
+    assert second.calls == 0, "a re-run must not execute a single replacement fit"
+    assert (out / "failure.json").is_file(), "partial evidence must not be deleted"
+
+
+def test_FULLEXEC_failure_policy_is_declared():
+    assert H.FULL_PARTIAL_FAILURE_POLICY == (
+        "stop_immediately", "no_replacement_fit", "no_retry", "no_seed_rescue",
+        "no_tolerance_change", "preserve_partial_evidence", "no_completed_summary",
+        "no_audit_pass", "rerun_requires_a_new_human_gate")
+    body = _executable_body(H._run_full_cell)
+    for forbidden in ("except", "retry", "replacement", "fallback"):
+        assert forbidden not in body.lower().replace("internal_retry", ""), forbidden
+
+
+# --- authorization boundary at the executor ---------------------------------
+
+
+def test_FULLEXEC_smoke_authorization_cannot_execute_full(tmp_path):
+    recorder = _FakeFitRecorder()
+    for authorization in (H.current_smoke_execution_authorization(), _test_authorization()):
+        with pytest.raises(HarnessStop) as excinfo:
+            H._execute_real_full_test_only(authorization, tmp_path / "run",
+                                           adapter=_test_adapter(recorder),
+                                           run_code_sha="0" * 40)
+        assert "FullExecutionAuthorization" in str(excinfo.value)
+    assert recorder.calls == 0
+    assert not (tmp_path / "run").exists()
+
+
+def test_FULLEXEC_absent_authorization_constructs_no_adapter(monkeypatch, tmp_path):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
+    with pytest.raises(HarnessStop):
+        H.run_real_full(H.current_full_execution_authorization())
+    with pytest.raises(HarnessStop):
+        H._run_production_full_execution(_full_test_authorization())
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (tmp_path / "frozen_full").exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_FULLEXEC_production_path_never_takes_a_prebuilt_adapter():
+    for function in (H.run_real_full, H.run_real_full_cli, H._run_production_full_execution):
+        parameters = set(_inspect.signature(function).parameters)
+        assert not (parameters & {"adapter", "test_adapter", "out_dir", "test_only",
+                                  "run_code_sha"}), function.__name__
+    body = _executable_body(H._run_production_full_execution)
+    assert "FULL_ARTIFACT_DIR" in body and "test_only=False" in body
+    for forbidden in ("_execute_real_full_test_only", "_make_test_full_authorization",
+                      "_FULL_TEST_AUTHORITY", "_TestAuthorizedFitAdapter"):
+        assert forbidden not in _inspect.getsource(H._run_production_full_execution)
+
+
+# --- the integrated selection matrix ----------------------------------------
+
+
+def test_FULLEXEC_selection_matrix_is_30_logical_rows(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    rows = list(csv.DictReader((tmp_path / "run" / "selection_matrix.csv").open(encoding="utf-8")))
+    assert len(rows) == 30
+    assert tuple(rows[0]) == A.SELECTION_MATRIX_COLUMNS
+    keys = {(r["estimand"], int(r["K_TRUE"]), int(r["replicate"])) for r in rows}
+    assert keys == {(e, kt, rp) for e in ("A", "B") for kt in (1, 2, 3, 4, 5)
+                    for rp in (1, 2, 3)}
+    lineage = {}
+    for row in rows:
+        lineage[row["lineage"]] = lineage.get(row["lineage"], 0) + 1
+    assert lineage == {"phase8a_new": 24, "phase7e_anchor": 6}
+
+
+def test_FULLEXEC_anchor_rows_reference_phase7e_and_are_not_re_executed(tmp_path):
+    recorder = _run_full_fake(tmp_path / "run")
+    rows = list(csv.DictReader((tmp_path / "run" / "selection_matrix.csv").open(encoding="utf-8")))
+    anchor_rows = [r for r in rows if int(r["K_TRUE"]) == 3]
+    assert len(anchor_rows) == 6
+    for row in anchor_rows:
+        assert row["lineage"] == "phase7e_anchor"
+        assert row["run_code_sha"] == H.PHASE7E_RUN_CODE_SHA
+        assert row["artifact_dir"] == H.PHASE7E_ARTIFACT_DIR
+    # the anchor selections come from the Phase 7e artifact, not from this run
+    anchor_source = list(csv.DictReader(
+        (H.PHASE7E_DIR / "replicate_selection.csv").open(encoding="utf-8")))
+    expected = {int(r["replicate"]): int(r["selected_k"]) for r in anchor_source}
+    for row in anchor_rows:
+        assert int(row["selected_k"]) == expected[int(row["replicate"])]
+    # and the 336 executed fits never include an anchor fit
+    assert recorder.calls == 336
+    assert H.PHASE7E_ANCHOR_FIT_COUNT == 42
+    anchor_fits = list(csv.DictReader((H.PHASE7E_DIR / "fit_results.csv").open(encoding="utf-8")))
+    unique = {(int(r["replicate"]), int(r["K"]), int(r["start"])) for r in anchor_fits}
+    assert len(unique) == 42, "the Phase 7e anchor still holds exactly 42 unique fits"
+    summary = json.loads((tmp_path / "run" / "full_summary.json").read_text(encoding="utf-8"))
+    assert summary["anchor_unique_fits"] == 42
+    assert summary["actual_full_fits"] == 336, "anchor fits are never added to the 336"
+
+
+def test_FULLEXEC_selection_matrix_has_the_required_columns(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    rows = list(csv.DictReader((tmp_path / "run" / "selection_matrix.csv").open(encoding="utf-8")))
+    for column in ("estimand", "role", "K_TRUE", "replicate", "selected_k", "signed_error",
+                   "abs_error", "lineage", "run_code_sha", "artifact_dir"):
+        assert column in rows[0], column
+    for row in rows:
+        signed = int(row["selected_k"]) - int(row["K_TRUE"])
+        assert int(row["signed_error"]) == signed
+        assert int(row["abs_error"]) == abs(signed)
+        assert row["role"] == ("primary" if row["estimand"] == "A" else "sensitivity")
+
+
+# --- the audit of a complete run --------------------------------------------
+
+
+def test_FULLEXEC_complete_run_passes_the_independent_audit(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    auditor = A.audit_full_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_full_audit_report(directory, auditor)
+    report = json.loads((directory / "audit_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "PASS"
+    assert report["expected_full_fits"] == 336
+
+
+def test_FULLEXEC_recovery_mismatch_does_not_fail_the_operational_audit(tmp_path):
+    """§4: audit PASS never depends on selected_k == K_TRUE."""
+
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    rows = list(csv.DictReader((directory / "selection_matrix.csv").open(encoding="utf-8")))
+    new_rows = [r for r in rows if r["lineage"] == "phase8a_new"]
+    mismatched = [r for r in new_rows if int(r["selected_k"]) != int(r["K_TRUE"])]
+    assert mismatched, "the fake run should not recover K_TRUE everywhere"
+    auditor = A.audit_full_run_dir(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    # the audit never inspects recovery as a gate
+    body = _inspect.getsource(A.audit_selection_matrix)
+    assert "== k_true" not in body.replace(" ", "").lower() or "signed" in body
+
+
+def test_FULLEXEC_audit_detects_a_tampered_selection(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    path = directory / "selection_matrix.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    k_index, sel_index = header.index("K_TRUE"), header.index("selected_k")
+    fixed = [lines[0]]
+    for line in lines[1:]:
+        cells = line.split(",")
+        if cells[k_index] != "3" and cells[sel_index] == cells[k_index]:
+            cells[sel_index] = str(int(cells[sel_index]) + 1)
+        fixed.append(",".join(cells))
+    path.write_text("\n".join(fixed) + "\n", encoding="utf-8")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check in ("matrix_selected_k_recomputed", "matrix_signed_error")
+               for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("lineage", "phase7e_anchor"),
+    ("run_code_sha", "b9311e64a7b36c0a8a9704fff0ee7b38efe36a8a"),
+    ("artifact_dir", "expfam/results/k_selection/heldout_full_pilot_20260824"),
+])
+def test_FULLEXEC_audit_rejects_a_new_row_claiming_the_anchor(tmp_path, field, value):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    path = directory / "selection_matrix.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = lines[0].split(",")
+    k_index, index = header.index("K_TRUE"), header.index(field)
+    fixed = [lines[0]]
+    for line in lines[1:]:
+        cells = line.split(",")
+        if cells[k_index] == "1":
+            cells[index] = value
+        fixed.append(",".join(cells))
+    path.write_text("\n".join(fixed) + "\n", encoding="utf-8")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check.startswith("matrix_new_") for f in auditor.blockers)
+
+
+def test_FULLEXEC_audit_detects_a_missing_fit(tmp_path):
+    _run_full_fake(tmp_path / "run")
+    directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
+    path = directory / "full_fit_results.csv"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    path.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
+    auditor = A.audit_full_run_dir(directory)
+    assert any(f.check == "full_fit_row_count" for f in auditor.blockers)
+
+
+def test_FULLEXEC_zero_real_em_in_every_path(tmp_path, monkeypatch):
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    recorder = _run_full_fake(tmp_path / "run")
+    assert recorder.calls == 336
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    summary = json.loads((tmp_path / "run" / "full_summary.json").read_text(encoding="utf-8"))
+    assert summary["actual_full_fits"] == 336
+    runinfo = json.loads((tmp_path / "run" / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["actual_full_fits"] == 0, "test-only lineage records 0 REAL fits"
+    assert runinfo["phase7e_rerun_count"] == 0
+    assert runinfo["canary_fits_executed"] == 0 and runinfo["smoke_fits_executed"] == 0
+    assert runinfo["replacement_fits_executed"] == 0
+    _assert_no_new_production_artifacts()

@@ -2117,6 +2117,85 @@ EXPECTED_CANARY_FITS = 2
 # Future human-authorized real-EM budget.  This branch executes 0.
 EXPECTED_REAL_EM_BUDGET = EXPECTED_CANARY_FITS + EXPECTED_SMOKE_FITS  # 8
 
+# --- FROZEN FULL SWEEP (Issue #59, S3) -------------------------------------
+# The 336-fit sweep is a SEPARATE human gate from the smoke.  Nothing here
+# widens the smoke authorization: the two records have different types, different
+# private authority sentinels and different validators.
+FULL_EXECUTION_ISSUE_NUMBER = 59
+FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER = 49
+FULL_PROTOCOL_VERSION = "phase8b-full-protocol-v1"
+FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v1"
+FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v1"
+
+# A + B, K_TRUE {1,2,4,5} x replicate {1,2,3} x K {1..7} x start {1,2}.
+EXPECTED_FULL_FITS_PER_ESTIMAND = FITS_PER_ESTIMAND          # 168
+EXPECTED_FULL_FITS = EXPECTED_NEW_FITS                       # 336
+# The Phase 7e K_TRUE=3 anchor (42 fits) is REUSED, never re-executed.
+EXPECTED_FULL_PHASE7E_RERUN_FITS = 0
+# The integrated selection view spans K_TRUE {1,2,3,4,5}: the 4 newly executed
+# values plus the READ-ONLY Phase 7e anchor.  The anchor contributes 42 unique
+# fits that are referenced, never re-executed and never added to the 336.
+FULL_K_TRUE_GRID = tuple(sorted(set(NEW_K_TRUE) | {ANCHOR_K_TRUE}))
+FULL_SELECTION_MATRIX_ROWS = len(ESTIMANDS) * len(FULL_K_TRUE_GRID) * len(REPLICATES)  # 30
+PHASE7E_ANCHOR_FIT_COUNT = 42
+
+# --- FUTURE FULL ARTIFACT SCHEMA (definition only; nothing is written) -----
+FULL_ARTIFACT_DIRNAME = "k_true_robustness_full_20260902"
+FULL_ARTIFACT_DIR = ROOT / "expfam" / "results" / "k_selection" / FULL_ARTIFACT_DIRNAME
+FULL_ARTIFACT_FILES = (
+    "authorization.json",
+    "manifest.csv",
+    "mask_provenance.csv",
+    "config_gate.csv",
+    "leakage_gate.csv",
+    "full_fit_results.csv",
+    "selection_matrix.csv",
+    "full_summary.json",
+    "runinfo.json",
+    "audit_report.json",
+)
+# Written ONLY when a run stops early.  Its presence is by itself proof that the
+# directory holds partial evidence and can never be completed or reused.
+FULL_FAILURE_FILENAME = "failure.json"
+# audit_report.json is the audit OUTPUT and is never a required input.
+FULL_AUDIT_INPUT_FILES = tuple(n for n in FULL_ARTIFACT_FILES if n != "audit_report.json")
+
+FULL_LEAKAGE_GATE_COLUMNS = (
+    "estimand", "role", "K_TRUE", "replicate", "K", "start",
+    "pre_fit_test_mask_hash", "pre_fit_train_mask_hash",
+    "post_fit_test_mask_hash", "post_fit_train_mask_hash",
+    "anchor_mask_hash", "anchor_train_mask_hash",
+    "pre_fit_passed", "post_fit_passed", "fit_boundary_status", "boundary_version",
+)
+
+FULL_FIT_RESULTS_COLUMNS = (
+    "run_code_sha",
+    "approved_scientific_main_sha",
+    "protocol_hash",
+    "fit_index",
+    "estimand",
+    "role",
+    "K_TRUE",
+    "replicate",
+    "K",
+    "start",
+    "data_seed",
+    "split_seed",
+    "model_seed",
+    "mask_design",
+    "mask_group_id",
+    "anchor_mask_hash",
+    "anchor_train_mask_hash",
+    "heldout_mean_log_score",
+    "internal_retry",
+    "warning_count",
+    "q_failure",
+    "nan_occurred",
+    "finite_state",
+    "real_full_fits_executed",
+)
+
+
 # --- FUTURE SMOKE ARTIFACT SCHEMA (definition only; nothing is written) ----
 SMOKE_ARTIFACT_COLUMNS = (
     "run_code_sha",
@@ -2602,6 +2681,1059 @@ def _make_test_smoke_authorization(
     }
     fields.update(overrides)
     return SmokeExecutionAuthorization(_authority=_SMOKE_TEST_AUTHORITY, **fields)
+
+
+# ===========================================================================
+# Phase 8b S3 -- full 336-fit execution authorization (Issue #59)
+# ===========================================================================
+#
+# Deliberately a SEPARATE gate from the smoke.  A ``SmokeExecutionAuthorization``
+# can never authorize ``--full``: the record type differs, the private authority
+# sentinel differs, and the validator checks both.  Two independent human gates
+# are therefore required before 336 real fits can run, and BOTH are absent here:
+#
+#   * ``current_expected_full_main_sha()``     -> None (no reviewed baseline yet)
+#   * ``current_full_execution_authorization()`` -> None (no committed record yet)
+#
+# S3-A implements the schema, the validator, the zero-EM preflight and the
+# independent audit contract.  It does NOT commit the record and executes 0 fits.
+
+_FULL_EXECUTION_AUTHORITY = object()
+_FULL_TEST_AUTHORITY = object()
+
+
+@dataclass(frozen=True, slots=True)
+class FullExecutionAuthorization:
+    """A committed record binding one reviewed main SHA to the frozen 336-fit sweep.
+
+    There is deliberately no public constructor path: ``_authority`` must be a
+    module-private sentinel that no CLI flag, environment variable or config
+    file can produce.  It is a DIFFERENT sentinel from the smoke one.
+    """
+
+    issue_number: int
+    protocol_origin_issue_number: int
+    approved_main_sha: str
+    protocol_hash: str
+    estimands: tuple[str, ...]
+    k_true_grid: tuple[int, ...]
+    candidate_k: tuple[int, ...]
+    starts: tuple[int, ...]
+    replicates: tuple[int, ...]
+    fits_per_estimand: int
+    total_fit_count: int
+    data_seed_base: int
+    model_seed_base: int
+    anchor_split_seed_base: int
+    mask_design: str
+    random_design: str
+    hierarchy: str
+    independent_review_pass: bool
+    human_full_approval: bool
+    authorization_version: str
+    _authority: Any = field(repr=False, compare=False, default=None)
+
+    def is_test_only(self) -> bool:
+        return self._authority is _FULL_TEST_AUTHORITY
+
+
+def full_protocol_config() -> dict[str, Any]:
+    """Everything a full authorization is bound to.  Any change changes the hash."""
+
+    return {
+        "phase": PHASE,
+        # The protocol-origin issue, not the execution issue.
+        "issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "protocol_version": FULL_PROTOCOL_VERSION,
+        "estimands": list(ESTIMANDS),
+        "hierarchy": HIERARCHY,
+        "k_true_grid": list(NEW_K_TRUE),
+        "anchor_k_true": ANCHOR_K_TRUE,
+        "candidate_k": list(K_CANDIDATES),
+        "starts": list(START_LABELS),
+        "replicates": list(REPLICATES),
+        "fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "total_fit_count": EXPECTED_FULL_FITS,
+        "data_seed_base": DATA_SEED_BASE,
+        "model_seed_base": MODEL_SEED_BASE,
+        "anchor_split_seed_base": ANCHOR_SPLIT_SEED_BASE,
+        "estimand_seed_offset": dict(ESTIMAND_SEED_OFFSET),
+        "family_x": FAMILY_X,
+        "family_y": FAMILY_Y,
+        "n_nodes": N_NODES,
+        "n_features": N_FEATURES,
+        "L": L_SAMPLES,
+        "num_iter": NUM_ITER,
+        "test_ratio": TEST_RATIO,
+        "numerics_mode": NUMERICS_MODE,
+        "var_f": VAR_F,
+        "uniq": UNIQ,
+        "w0_true": W0_TRUE,
+        "w_ref": W_REF,
+        "k_ref": K_REF,
+        "mask_design": MASK_DESIGN,
+        "random_design": RANDOM_DESIGN,
+        "score_config_hash": score_config_hash(frozen_score_config()),
+        "frozen_config_hash": frozen_config_hash(),
+        "boundary_version": LEAKAGE_BOUNDARY_VERSION,
+    }
+
+
+def full_protocol_hash() -> str:
+    return stable_config_hash(full_protocol_config())
+
+
+def current_expected_full_main_sha() -> str | None:
+    """The trusted reviewed baseline for a real FULL execution.
+
+    None in this branch: no main SHA has been reviewed and approved for the
+    336-fit sweep.  Like the smoke equivalent it is a committed literal source,
+    never read from the CLI, the environment, a config file, the current branch
+    or ``git rev-parse HEAD``.  It is deliberately NOT
+    ``current_expected_smoke_main_sha()``: approving the 8-fit smoke baseline
+    must not silently approve a 336-fit sweep.
+    """
+
+    return None
+
+
+def trusted_full_main_sha_for(test_only: bool) -> str | None:
+    return _FULL_TEST_EXPECTED_MAIN_SHA if test_only else current_expected_full_main_sha()
+
+
+# Test-only trusted SHA for the full lineage.  Distinct from the smoke one so a
+# test-only smoke lineage can never stand in for a test-only full lineage.
+_FULL_TEST_EXPECTED_MAIN_SHA = "c" * SMOKE_SHA_LENGTH
+
+
+def _validate_full_execution_authorization(authorization: Any, *,
+                                           expected_main_sha: Any,
+                                           authority: Any) -> None:
+    """Internal validator for the 336-fit sweep.  Fails closed on everything.
+
+    Type identity is required before value equality on every frozen field:
+    ``1.0 == 1`` and ``True == 1`` are true in Python, and this record is the
+    trust boundary that would release 336 real fits.
+    """
+
+    _require(type(authorization) is FullExecutionAuthorization,
+             "real full execution requires a FullExecutionAuthorization")
+    _require(authorization._authority is authority,
+             "full execution authorization provenance is unauthorized")
+
+    _require(expected_main_sha is not None,
+             "no reviewed main SHA has been authorized for real full execution")
+    _require_full_commit_sha(expected_main_sha, "trusted reviewed full main SHA")
+    _require_full_commit_sha(authorization.approved_main_sha,
+                             "full authorization approved_main_sha")
+    _require(authorization.approved_main_sha == expected_main_sha,
+             "approved main SHA does not match the reviewed full execution SHA")
+
+    checks = (
+        ("issue_number", authorization.issue_number, FULL_EXECUTION_ISSUE_NUMBER),
+        ("protocol_origin_issue_number", authorization.protocol_origin_issue_number,
+         FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER),
+        ("protocol_hash", authorization.protocol_hash, full_protocol_hash()),
+        ("estimands", authorization.estimands, tuple(ESTIMANDS)),
+        ("k_true_grid", authorization.k_true_grid, tuple(NEW_K_TRUE)),
+        ("candidate_k", authorization.candidate_k, tuple(K_CANDIDATES)),
+        ("starts", authorization.starts, tuple(START_LABELS)),
+        ("replicates", authorization.replicates, tuple(REPLICATES)),
+        ("fits_per_estimand", authorization.fits_per_estimand,
+         EXPECTED_FULL_FITS_PER_ESTIMAND),
+        ("total_fit_count", authorization.total_fit_count, EXPECTED_FULL_FITS),
+        ("data_seed_base", authorization.data_seed_base, DATA_SEED_BASE),
+        ("model_seed_base", authorization.model_seed_base, MODEL_SEED_BASE),
+        ("anchor_split_seed_base", authorization.anchor_split_seed_base,
+         ANCHOR_SPLIT_SEED_BASE),
+        ("mask_design", authorization.mask_design, MASK_DESIGN),
+        ("random_design", authorization.random_design, RANDOM_DESIGN),
+        ("hierarchy", authorization.hierarchy, HIERARCHY),
+        ("authorization_version", authorization.authorization_version,
+         FULL_AUTHORIZATION_VERSION),
+    )
+    for name, actual, expected in checks:
+        _require(type(actual) is type(expected),
+                 f"full authorization {name} is not a {type(expected).__name__}: "
+                 f"{actual!r} ({type(actual).__name__})")
+        _require(actual == expected,
+                 f"full authorization {name} does not match the frozen protocol: "
+                 f"{actual!r} != {expected!r}")
+    # The grid must multiply out to exactly the frozen budget; a record that
+    # merely names 336 while carrying a different grid is refused.
+    product = (len(authorization.k_true_grid) * len(authorization.replicates)
+               * len(authorization.candidate_k) * len(authorization.starts))
+    _require(product == authorization.fits_per_estimand,
+             f"full authorization grid multiplies to {product}, not "
+             f"{authorization.fits_per_estimand}")
+    _require(authorization.fits_per_estimand * len(authorization.estimands)
+             == authorization.total_fit_count,
+             "full authorization per-estimand count does not multiply to the total")
+    _require(ANCHOR_K_TRUE not in authorization.k_true_grid,
+             "the Phase 7e anchor K_TRUE must never appear in the full grid")
+    _require(authorization.independent_review_pass is True,
+             "full authorization is missing INDEPENDENT_REVIEW_PASS")
+    _require(authorization.human_full_approval is True,
+             "full authorization is missing HUMAN_FULL_APPROVAL")
+
+
+def validate_full_execution_authorization(authorization: Any, *, test_only: bool) -> None:
+    """Bind a full authorization to the trusted reviewed-main SHA and the protocol."""
+
+    _validate_full_execution_authorization(
+        authorization,
+        expected_main_sha=trusted_full_main_sha_for(test_only),
+        authority=_FULL_TEST_AUTHORITY if test_only else _FULL_EXECUTION_AUTHORITY,
+    )
+
+
+def current_full_execution_authorization() -> FullExecutionAuthorization | None:
+    """Always None in this branch.
+
+    S3-A implements the schema, the validator, the zero-EM preflight and the
+    independent audit contract for the 336-fit sweep -- not the record.  The
+    approved main SHA cannot exist yet: it is the SHA of main AFTER this branch
+    is reviewed and merged, so hard-coding this branch's own SHA here would be a
+    self-signed approval.  A later execution Issue commits the record together
+    with the two human gates.
+    """
+
+    return None
+
+
+def _make_test_full_authorization(
+    *,
+    approved_main_sha: str = _FULL_TEST_EXPECTED_MAIN_SHA,
+    **overrides: Any,
+) -> FullExecutionAuthorization:
+    """Static-test-only factory.  No CLI or production path references it."""
+
+    fields: dict[str, Any] = {
+        "issue_number": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue_number": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "approved_main_sha": approved_main_sha,
+        "protocol_hash": full_protocol_hash(),
+        "estimands": tuple(ESTIMANDS),
+        "k_true_grid": tuple(NEW_K_TRUE),
+        "candidate_k": tuple(K_CANDIDATES),
+        "starts": tuple(START_LABELS),
+        "replicates": tuple(REPLICATES),
+        "fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "total_fit_count": EXPECTED_FULL_FITS,
+        "data_seed_base": DATA_SEED_BASE,
+        "model_seed_base": MODEL_SEED_BASE,
+        "anchor_split_seed_base": ANCHOR_SPLIT_SEED_BASE,
+        "mask_design": MASK_DESIGN,
+        "random_design": RANDOM_DESIGN,
+        "hierarchy": HIERARCHY,
+        "independent_review_pass": True,
+        "human_full_approval": True,
+        "authorization_version": FULL_AUTHORIZATION_VERSION,
+    }
+    fields.update(overrides)
+    return FullExecutionAuthorization(_authority=_FULL_TEST_AUTHORITY, **fields)
+
+
+# ---------------------------------------------------------------------------
+# Zero-EM full preflight (Issue #59 S3-A)
+# ---------------------------------------------------------------------------
+
+
+def build_full_manifests(masks: Mapping[int, "SplitRecord"] | None = None,
+                         anchors: Mapping[int, AnchorMask] | None = None,
+                         ) -> dict[str, list[ManifestRow]]:
+    """The complete frozen sweep: one 168-row manifest per estimand."""
+
+    return {estimand: build_manifest(estimand, masks=masks, anchors=anchors)
+            for estimand in active_estimands()}
+
+
+def validate_full_manifests(manifests: Mapping[str, Sequence[ManifestRow]]) -> dict[str, Any]:
+    """Exactly 336 fits, exactly 168 per estimand, exactly the frozen grid.
+
+    Fails closed: every deviation raises before a single fit could be requested.
+    """
+
+    _require(set(manifests) == set(active_estimands()),
+             f"full manifests must cover exactly {list(active_estimands())}")
+    per_estimand: dict[str, int] = {}
+    for estimand, rows in manifests.items():
+        validate_manifest(rows, estimand)
+        _require(len(rows) == EXPECTED_FULL_FITS_PER_ESTIMAND,
+                 f"estimand {estimand} manifest is not {EXPECTED_FULL_FITS_PER_ESTIMAND} rows")
+        per_estimand[estimand] = len(rows)
+    total = sum(per_estimand.values())
+    _require(total == EXPECTED_FULL_FITS,
+             f"full sweep must be exactly {EXPECTED_FULL_FITS} fits, got {total}")
+    _require(sorted(set(per_estimand.values())) == [EXPECTED_FULL_FITS_PER_ESTIMAND],
+             f"A/B split is not {EXPECTED_FULL_FITS_PER_ESTIMAND}/"
+             f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
+    for estimand, rows in manifests.items():
+        _require(all(row.k_true != ANCHOR_K_TRUE for row in rows),
+                 "the Phase 7e anchor K_TRUE must never be re-executed")
+    return {"fits_per_estimand": per_estimand, "total_fits": total}
+
+
+def check_full_anchor_agreement(anchors: Mapping[int, AnchorMask] | None = None,
+                                ) -> dict[str, Any]:
+    """S_C: every full-run split must reproduce the Phase 7e anchor masks.
+
+    Zero EM: the masks are rebuilt from the frozen split rule and compared with
+    the read-only Phase 7e anchor on BOTH the test and the train side.
+    """
+
+    anchors = read_phase7e_anchor_masks() if anchors is None else anchors
+    _require(set(anchors) == set(REPLICATES),
+             f"Phase 7e anchors must cover replicates {list(REPLICATES)}")
+    checked = 0
+    mismatches: list[str] = []
+    for k_true in NEW_K_TRUE:
+        for replicate in REPLICATES:
+            record = build_split_record(k_true, replicate)
+            anchor = anchors[replicate]
+            checked += 1
+            if record.split_mask_hash != anchor.test_mask_hash:
+                mismatches.append(f"K{k_true}/r{replicate}: test mask hash")
+            if record.train_mask_hash != anchor.train_mask_hash:
+                mismatches.append(f"K{k_true}/r{replicate}: train mask hash")
+            if record.split_seed != ANCHOR_SPLIT_SEED_BASE + replicate:
+                mismatches.append(f"K{k_true}/r{replicate}: split seed")
+    _require(not mismatches, f"S_C anchor agreement failed: {mismatches}")
+    return {
+        "mask_design": MASK_DESIGN,
+        "cells_checked": checked,
+        "replicates": list(REPLICATES),
+        "anchor_dir": str(PHASE7E_DIR),
+        "phase7e_rerun_fits": EXPECTED_FULL_PHASE7E_RERUN_FITS,
+        "mismatches": mismatches,
+    }
+
+
+def run_full_preflight() -> dict[str, Any]:
+    """Every zero-EM gate the 336-fit sweep must clear.  EM fits = 0.
+
+    Fail-closed by construction: each helper raises ``HarnessStop`` instead of
+    returning a soft verdict, so a caller cannot proceed past a failed gate.
+    """
+
+    anchors = read_phase7e_anchor_masks()
+    masks = {r: build_split_record(NEW_K_TRUE[0], r) for r in REPLICATES}
+    manifests = build_full_manifests(masks=masks, anchors=anchors)
+    manifest_report = validate_full_manifests(manifests)
+    anchor_report = check_full_anchor_agreement(anchors)
+    seed_report = check_seed_collisions(manifests)
+
+    gates = run_mask_gate(anchors=anchors)
+    failed = [f"{g.name}/{g.scope}" for g in gates if not g.passed]
+    _require(not failed, f"mask gate failed: {failed}")
+
+    validate_only = run_validate_only()
+    config_gate = run_config_gate()
+    leakage = run_leakage_self_check()
+    _require(validate_only["em_fits_executed"] == 0, "validate-only executed EM")
+    _require(config_gate["em_fits_executed"] == 0, "config gate executed EM")
+    _require(leakage["all_passed"] is True, "leakage self-check did not pass")
+    _require(leakage["real_em_fits_executed"] == 0, "leakage self-check executed real EM")
+
+    return {
+        "mode": "full-preflight",
+        "em_fits_executed": 0,
+        "real_full_fits_executed": 0,
+        "issue": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "protocol_hash": full_protocol_hash(),
+        "protocol_version": FULL_PROTOCOL_VERSION,
+        "authorization_version": FULL_AUTHORIZATION_VERSION,
+        "expected_full_fits": EXPECTED_FULL_FITS,
+        "expected_full_fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "manifest": manifest_report,
+        "anchor_agreement": anchor_report,
+        "seed_collisions": seed_report,
+        "mask_gate_total": len(gates),
+        "mask_gate_failed": failed,
+        "leakage_gate_cases": len(leakage["cases"]),
+        "leakage_boundary_version": leakage["boundary_version"],
+        "hierarchy": HIERARCHY,
+        "mask_design": MASK_DESIGN,
+        "random_design": RANDOM_DESIGN,
+        "estimands": list(active_estimands()),
+        "artifact_directory": str(FULL_ARTIFACT_DIR),
+        "artifact_directory_exists": FULL_ARTIFACT_DIR.exists(),
+        "artifact_files": list(FULL_ARTIFACT_FILES),
+        "full_fit_results_columns": list(FULL_FIT_RESULTS_COLUMNS),
+        "trusted_full_main_sha_present": current_expected_full_main_sha() is not None,
+        "full_execution_authorization_present":
+            current_full_execution_authorization() is not None,
+        "phase7e_rerun_fits": EXPECTED_FULL_PHASE7E_RERUN_FITS,
+        "phase7e_anchor_dir": str(PHASE7E_DIR),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Full 336-fit executor (Issue #59 S3-A)
+# ---------------------------------------------------------------------------
+#
+# PARTIAL FAILURE POLICY (frozen).  If fit N of 336 is not clean:
+#
+#   1. the run stops immediately at that fit -- nothing after it is attempted;
+#   2. NO replacement fit, NO retry, NO alternative seed, NO relaxed tolerance;
+#   3. the partial evidence already on disk is PRESERVED, never deleted;
+#   4. ``failure.json`` records which fit stopped the run and why;
+#   5. no ``full_summary.json``, no ``selection_matrix.csv`` and no completed
+#      ``runinfo.json`` are produced, so no audit can return PASS;
+#   6. the frozen artifact directory now exists, so the SAME authorization can
+#      never start a second run -- a new execution needs a new human gate.
+
+FULL_PARTIAL_FAILURE_POLICY = (
+    "stop_immediately",
+    "no_replacement_fit",
+    "no_retry",
+    "no_seed_rescue",
+    "no_tolerance_change",
+    "preserve_partial_evidence",
+    "no_completed_summary",
+    "no_audit_pass",
+    "rerun_requires_a_new_human_gate",
+)
+
+
+def full_fit_config(row: ManifestRow) -> FrozenFitConfig:
+    """Bind ONE frozen full-manifest row to its fit configuration.
+
+    Every value comes from that single row; nothing is read from a neighbouring
+    row, a previous fit or a mutable accumulator.
+    """
+
+    _require(type(row) is ManifestRow, "full fit config requires a ManifestRow")
+    _require(row.estimand in active_estimands(), "full estimand is unexpected")
+    _require(row.role == resolve_role(row.estimand), "full role is inconsistent")
+    _require(row.k_true in NEW_K_TRUE, "full K_TRUE is outside the frozen grid")
+    _require(row.k_true != ANCHOR_K_TRUE, "the Phase 7e anchor K_TRUE must never be re-executed")
+    _require(row.replicate in REPLICATES, "full replicate is unexpected")
+    _require(row.k in K_CANDIDATES, "full candidate K is unexpected")
+    _require(row.start in START_LABELS, "full start is unexpected")
+    _require(row.data_seed == expected_data_seed(row.k_true, row.replicate, row.estimand),
+             "full data seed changed")
+    _require(row.split_seed == expected_split_seed(row.k_true, row.replicate),
+             "full split seed changed")
+    _require(row.model_seed == expected_model_seed(row.k_true, row.replicate, row.k,
+                                                   row.start, row.estimand),
+             "full model seed changed")
+    _require(row.mask_design == MASK_DESIGN, "full mask design changed")
+    return FrozenFitConfig(
+        family_x=FAMILY_X,
+        family_y=FAMILY_Y,
+        k_est=row.k,
+        L=L_SAMPLES,
+        num_iter=NUM_ITER,
+        seed=row.model_seed,
+        numerics_mode=NUMERICS_MODE,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class FullPreparedCell:
+    """One (estimand, K_TRUE, replicate) cell, prepared train-only, before any fit."""
+
+    estimand: str
+    role: str
+    k_true: int
+    replicate: int
+    split: SplitRecord
+    anchor: AnchorMask
+    preflight: Any
+    prepared: Any
+    score_Y: np.ndarray
+    manifest: tuple[ManifestRow, ...]
+    protocol_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bFullRow:
+    fit_index: int
+    estimand: str
+    role: str
+    k_true: int
+    replicate: int
+    k: int
+    start: int
+    data_seed: int
+    split_seed: int
+    model_seed: int
+    mask_group_id: str
+    anchor_mask_hash: str
+    anchor_train_mask_hash: str
+    heldout_mean_log_score: float
+    internal_retry: int
+    warning_count: int
+    q_failure: bool
+    nan_occurred: bool
+    finite_state: bool
+    pre_fit_test_hash: str
+    pre_fit_train_hash: str
+    post_fit_test_hash: str
+    post_fit_train_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bFullCellResult:
+    estimand: str
+    role: str
+    k_true: int
+    replicate: int
+    rows: tuple[Phase8bFullRow, ...]
+    mean_scores: tuple[tuple[int, float], ...]
+    selected_k: int
+    tie_candidates: tuple[int, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class Phase8bFullReport:
+    protocol_hash: str
+    approved_main_sha: str
+    rows: tuple[Phase8bFullRow, ...]
+    cells: tuple[Phase8bFullCellResult, ...]
+    real_full_fits_executed: int
+    test_only: bool
+
+
+def full_execution_order() -> tuple[tuple[str, int, int], ...]:
+    """The frozen deterministic cell order: estimand -> K_TRUE -> replicate."""
+
+    return tuple((estimand, k_true, replicate)
+                 for estimand in active_estimands()
+                 for k_true in NEW_K_TRUE
+                 for replicate in REPLICATES)
+
+
+def prepare_full_cell(authorization: Any, estimand: str, k_true: int, replicate: int, *,
+                      test_only: bool,
+                      anchors: Mapping[int, AnchorMask] | None = None) -> FullPreparedCell:
+    """Authorization -> anchor masks -> train-only data for exactly one cell."""
+
+    validate_full_execution_authorization(authorization, test_only=test_only)
+    _require(full_protocol_hash() == authorization.protocol_hash,
+             "full protocol hash changed after authorization")
+    anchors = read_phase7e_anchor_masks() if anchors is None else anchors
+    anchor = anchors[replicate]
+    split = build_split_record(k_true, replicate)
+    _require(split.split_mask_hash == anchor.test_mask_hash,
+             f"S_C: {estimand}/K{k_true}/r{replicate} test mask differs from the anchor")
+    _require(split.train_mask_hash == anchor.train_mask_hash,
+             f"S_C: {estimand}/K{k_true}/r{replicate} train mask differs from the anchor")
+
+    rows = tuple(row for row in build_manifest(estimand, masks={replicate: split},
+                                               anchors={replicate: anchor})
+                 if row.k_true == k_true and row.replicate == replicate)
+    _require(len(rows) == len(K_CANDIDATES) * len(START_LABELS),
+             f"cell manifest is not {len(K_CANDIDATES) * len(START_LABELS)} rows")
+
+    data = _generate_cell(estimand, k_true, replicate)
+    X = _readonly_copy(data["X"], np.float64)
+    Y = _readonly_copy(data["Y"], np.float64)
+    split_plan = SplitPlan(
+        replicate=replicate,
+        split_seed=split.split_seed,
+        expected_test_pairs=_expected_test_pairs(N_NODES, TEST_RATIO),
+        train_mask=split.train_mask,
+        test_mask=split.test_mask,
+        diagnostics=split.diagnostics,
+    )
+    preflight = authorize_canary_preflight(split_plan)
+    prepared = prepare_training_data(
+        X, Y, preflight=preflight,
+        train_mask=split.train_mask, test_mask=split.test_mask,
+    )
+    _require(prepared.test_mask_hash == anchor.test_mask_hash,
+             "prepared test mask hash differs from the Phase 7e anchor")
+    _require(prepared.train_mask_hash == anchor.train_mask_hash,
+             "prepared train mask hash differs from the Phase 7e anchor")
+    return FullPreparedCell(
+        estimand=estimand,
+        role=resolve_role(estimand),
+        k_true=k_true,
+        replicate=replicate,
+        split=split,
+        anchor=anchor,
+        preflight=preflight,
+        prepared=prepared,
+        score_Y=Y,
+        manifest=rows,
+        protocol_hash=full_protocol_hash(),
+    )
+
+
+def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
+                   first_fit_index: int,
+                   on_row: Any = None) -> tuple[Phase8bFullCellResult, int]:
+    """Phase A: all 14 fits of one cell.  Phase B: the deferred score phase."""
+
+    frozen_score_hash = score_config_hash(frozen_score_config())
+    stored: list[Any] = []
+    fit_index = first_fit_index
+    for row in cell.manifest:
+        config = full_fit_config(row)
+        if test_only:
+            _require(type(adapter) is _TestAuthorizedFitAdapter,
+                     "test full run requires the test adapter")
+            boundary = FitCallBoundary._from_preflight_test_only(
+                cell.prepared, cell.preflight, config, adapter)
+        else:
+            _require(type(adapter) is AuthorizedEMFitAdapter,
+                     "production full run requires the sealed Phase 7e EM adapter")
+            boundary = FitCallBoundary.from_preflight(
+                cell.prepared, cell.preflight, config, adapter)
+        label = (f"phase8b full fit {fit_index}/{EXPECTED_FULL_FITS} "
+                 f"{cell.estimand}/K_TRUE={cell.k_true}/r{cell.replicate}/K={row.k}/"
+                 f"start={row.start}")
+        result = boundary.call(0)
+        # A dirty fit stops the whole sweep here: no retry, no replacement.
+        _require_clean_smoke_fit(result, label)
+        _require(boundary.test_mask_hash == cell.anchor.test_mask_hash,
+                 f"{label}: post-fit test mask differs from the Phase 7e anchor")
+        _require(boundary.train_mask_hash == cell.anchor.train_mask_hash,
+                 f"{label}: post-fit train mask differs from the Phase 7e anchor")
+        stored.append((fit_index, row, _store_smoke_fit(row, result, config, cell.prepared,
+                                                        frozen_score_hash),
+                       boundary.test_mask_hash, boundary.train_mask_hash))
+        fit_index += 1
+
+    # Phase B: the outcome-bearing target exists only after every fit is done.
+    target = make_score_only_target(cell.score_Y, cell.prepared.test_mask)
+    _require(target.test_mask_hash == cell.prepared.test_mask_hash,
+             "score target mask hash mismatch")
+    rows: list[Phase8bFullRow] = []
+    for index, manifest_row, fit, post_test_hash, post_train_hash in stored:
+        eta_pairs = heldout_raw_eta_pairs(fit.Z, fit.w0, fit.w, cell.prepared.test_mask)
+        score = score_heldout_bernoulli(target, eta_pairs)
+        _require(bool(np.isfinite(score)), f"full held-out score is nonfinite at fit {index}")
+        full_row = Phase8bFullRow(
+            fit_index=index,
+            estimand=cell.estimand,
+            role=cell.role,
+            k_true=cell.k_true,
+            replicate=cell.replicate,
+            k=manifest_row.k,
+            start=manifest_row.start,
+            data_seed=manifest_row.data_seed,
+            split_seed=manifest_row.split_seed,
+            model_seed=manifest_row.model_seed,
+            mask_group_id=manifest_row.mask_group_id,
+            anchor_mask_hash=cell.anchor.test_mask_hash,
+            anchor_train_mask_hash=cell.anchor.train_mask_hash,
+            heldout_mean_log_score=float(score),
+            internal_retry=fit.internal_retry,
+            warning_count=len(fit.warnings),
+            q_failure=fit.q_failure,
+            nan_occurred=fit.nan_occurred,
+            finite_state=True,
+            pre_fit_test_hash=cell.split.split_mask_hash,
+            pre_fit_train_hash=cell.split.train_mask_hash,
+            post_fit_test_hash=post_test_hash,
+            post_fit_train_hash=post_train_hash,
+        )
+        rows.append(full_row)
+        if on_row is not None:
+            on_row(full_row)
+
+    start_scores = [StartScore(row.k, row.start, np.float64(row.heldout_mean_log_score))
+                    for row in rows]
+    selection = select_k_from_two_starts(start_scores, K_CANDIDATES, START_LABELS)
+    means: list[tuple[int, float]] = []
+    for k in K_CANDIDATES:
+        by_start = {row.start: row.heldout_mean_log_score for row in rows if row.k == k}
+        _require(set(by_start) == set(START_LABELS), "full aggregation start set changed")
+        expected_mean = np.mean(np.asarray([by_start[1], by_start[2]], dtype=np.float64),
+                                dtype=np.float64)
+        _require(np.float64(selection.mean_scores[k]) == expected_mean,
+                 "full aggregation is not the unweighted two-start mean")
+        means.append((int(k), float(expected_mean)))
+
+    return Phase8bFullCellResult(
+        estimand=cell.estimand,
+        role=cell.role,
+        k_true=cell.k_true,
+        replicate=cell.replicate,
+        rows=tuple(rows),
+        mean_scores=tuple(means),
+        selected_k=int(selection.selected_k),
+        tie_candidates=tuple(int(k) for k in selection.tie_candidates),
+    ), fit_index
+
+
+def _run_real_full(authorization: Any, *, adapter: Any, test_only: bool,
+                   on_row: Any = None) -> Phase8bFullReport:
+    """Exactly 336 clean fits in the frozen order, or an immediate stop."""
+
+    validate_full_execution_authorization(authorization, test_only=test_only)
+    anchors = read_phase7e_anchor_masks()
+    manifests = build_full_manifests()
+    validate_full_manifests(manifests)
+    check_seed_collisions(manifests)
+    check_full_anchor_agreement(anchors)
+
+    cells: list[Phase8bFullCellResult] = []
+    rows: list[Phase8bFullRow] = []
+    fit_index = 1
+    for estimand, k_true, replicate in full_execution_order():
+        cell = prepare_full_cell(authorization, estimand, k_true, replicate,
+                                 test_only=test_only, anchors=anchors)
+        result, fit_index = _run_full_cell(cell, adapter=adapter, test_only=test_only,
+                                           first_fit_index=fit_index, on_row=on_row)
+        cells.append(result)
+        rows.extend(result.rows)
+
+    executed = fit_index - 1
+    _require(executed == EXPECTED_FULL_FITS,
+             f"full run executed {executed} fits, not {EXPECTED_FULL_FITS}")
+    _require(len(rows) == EXPECTED_FULL_FITS, "full run did not score exactly 336 fits")
+    _require(len(cells) == len(full_execution_order()), "full run cell count changed")
+    per_estimand = {e: sum(1 for row in rows if row.estimand == e)
+                    for e in active_estimands()}
+    _require(per_estimand == {e: EXPECTED_FULL_FITS_PER_ESTIMAND for e in active_estimands()},
+             f"A/B split is not {EXPECTED_FULL_FITS_PER_ESTIMAND}/"
+             f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
+    keys = [(row.estimand, row.k_true, row.replicate, row.k, row.start) for row in rows]
+    _require(len(set(keys)) == len(keys), "duplicate full fit key")
+    _require(tuple(row.fit_index for row in rows) == tuple(range(1, EXPECTED_FULL_FITS + 1)),
+             "full fit order is not the frozen deterministic order")
+    _require(all(row.k_true != ANCHOR_K_TRUE for row in rows),
+             "the Phase 7e anchor K_TRUE was executed")
+    return Phase8bFullReport(
+        protocol_hash=full_protocol_hash(),
+        approved_main_sha=authorization.approved_main_sha,
+        rows=tuple(rows),
+        cells=tuple(cells),
+        real_full_fits_executed=0 if test_only else EXPECTED_FULL_FITS,
+        test_only=test_only,
+    )
+
+
+def build_full_selection_matrix(cells: Sequence[Phase8bFullCellResult],
+                                run_code_sha: str) -> list[tuple[Any, ...]]:
+    """30 logical rows: 24 newly executed cells + 6 Phase 7e anchor references.
+
+    The K_TRUE=3 rows are READ from the Phase 7e artifact.  They reference the
+    same 42 unique anchor fits and are never re-executed or re-counted.
+    """
+
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    rows: list[tuple[Any, ...]] = []
+    for estimand in active_estimands():
+        for k_true in NEW_K_TRUE:
+            for replicate in REPLICATES:
+                matching = [c for c in cells
+                            if c.estimand == estimand and c.k_true == k_true
+                            and c.replicate == replicate]
+                _require(len(matching) == 1,
+                         f"missing selection for {estimand}/K{k_true}/r{replicate}")
+                cell = matching[0]
+                signed = cell.selected_k - k_true
+                rows.append((
+                    estimand, cell.role, k_true, replicate, cell.selected_k,
+                    signed, abs(signed), selection_label(signed),
+                    LINEAGE_NEW, run_code_sha, FULL_ARTIFACT_DIRNAME,
+                ))
+        rows.extend(build_selection_matrix_anchor_rows(estimand))
+    ordered = sorted(rows, key=lambda r: (r[0], r[2], r[3]))
+    _require(len(ordered) == len(ESTIMANDS) * len(FULL_K_TRUE_GRID) * len(REPLICATES),
+             "the integrated selection matrix is not 30 logical rows")
+    return ordered
+
+
+def write_full_failure_json(out_dir: Path, *, fit_index: int, completed_fits: int,
+                            reason: str, run_code_sha: str) -> Path:
+    """Record WHY the sweep stopped.  Partial evidence is never deleted."""
+
+    return write_json_artifact(Path(out_dir) / FULL_FAILURE_FILENAME, {
+        "artifact_version": FULL_ARTIFACT_VERSION,
+        "status": "FAILED",
+        "phase": PHASE,
+        "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "protocol_hash": full_protocol_hash(),
+        "run_code_sha": run_code_sha,
+        "expected_full_fits": EXPECTED_FULL_FITS,
+        "completed_full_fits": int(completed_fits),
+        "failed_fit_index": int(fit_index),
+        "reason": str(reason)[:2000],
+        "policy": list(FULL_PARTIAL_FAILURE_POLICY),
+        "replacement_fits_executed": 0,
+        "retry_count": 0,
+    })
+
+
+def require_new_full_artifact_dir(out_dir: Path | None = None) -> Path:
+    """The full execution directory must not exist yet.
+
+    After a partial failure the directory DOES exist, so the same authorization
+    can never start a second run: a new execution needs a new human gate.
+    """
+
+    directory = FULL_ARTIFACT_DIR if out_dir is None else Path(out_dir)
+    require_not_phase7e_path(directory)
+    _require(not directory.exists(),
+             f"full artifact directory already exists; refusing to overwrite or resume: "
+             f"{directory}")
+    directory.mkdir(parents=True, exist_ok=False)
+    return directory
+
+
+def _execute_real_full(authorization: Any, out_dir: Path | None, *,
+                       test_adapter: Any, test_only: bool,
+                       run_code_sha: str) -> dict[str, Any]:
+    """Zero-EM preflight -> reserve dir -> evidence -> adapter -> 336 fits."""
+
+    started_at = _utc_now()
+    # --- phase 1: no adapter may exist yet -------------------------------
+    validate_full_execution_authorization(authorization, test_only=test_only)
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    run_full_preflight()
+    directory = require_new_full_artifact_dir(out_dir)
+    write_json_artifact(directory / "authorization.json",
+                        build_full_authorization_payload(authorization, run_code_sha))
+    manifests = build_full_manifests(anchors=read_phase7e_anchor_masks())
+    write_csv_artifact(directory / "manifest.csv", MANIFEST_COLUMNS,
+                       [row.as_row() for estimand in active_estimands()
+                        for row in manifests[estimand]])
+    anchors = read_phase7e_anchor_masks()
+    write_csv_artifact(directory / "mask_provenance.csv", MASK_PROVENANCE_COLUMNS,
+                       [row.as_row() for estimand in active_estimands()
+                        for row in build_mask_provenance(estimand, anchors)])
+    write_csv_artifact(directory / "config_gate.csv", CONFIG_GATE_COLUMNS,
+                       [(g.gate, g.scope, g.passed, g.detail)
+                        for g in run_mask_gate(anchors=anchors)])
+
+    # --- phase 2: only now may a fit-capable adapter exist ---------------
+    adapter = _resolve_fit_adapter(test_adapter, test_only)
+    completed: list[Phase8bFullRow] = []
+    try:
+        report = _run_real_full(authorization, adapter=adapter, test_only=test_only,
+                                on_row=completed.append)
+    except BaseException as error:
+        # Partial evidence is written and kept.  No summary, no selection
+        # matrix, no completed runinfo -> no audit can return PASS.
+        write_csv_artifact(directory / "full_fit_results.csv", FULL_FIT_RESULTS_COLUMNS,
+                           build_full_artifact_rows(completed, run_code_sha,
+                                                    authorization, executed=len(completed)))
+        write_csv_artifact(directory / "leakage_gate.csv", FULL_LEAKAGE_GATE_COLUMNS,
+                           build_full_leakage_gate_rows(completed))
+        write_full_failure_json(directory, fit_index=len(completed) + 1,
+                                completed_fits=len(completed), reason=str(error),
+                                run_code_sha=run_code_sha)
+        raise
+
+    write_csv_artifact(directory / "full_fit_results.csv", FULL_FIT_RESULTS_COLUMNS,
+                       build_full_artifact_rows(report.rows, run_code_sha, authorization,
+                                                executed=EXPECTED_FULL_FITS))
+    write_csv_artifact(directory / "leakage_gate.csv", FULL_LEAKAGE_GATE_COLUMNS,
+                       build_full_leakage_gate_rows(report.rows))
+    write_csv_artifact(directory / "selection_matrix.csv", SELECTION_MATRIX_COLUMNS,
+                       build_full_selection_matrix(report.cells, run_code_sha))
+    write_json_artifact(directory / "full_summary.json",
+                        build_full_summary_payload(report, run_code_sha))
+    completed_at = _utc_now()
+    write_json_artifact(directory / "runinfo.json", build_full_runinfo_payload(
+        run_code_sha=run_code_sha, out_dir=directory,
+        requested_command="--full", invocation_mode="cli",
+        started_at=started_at, completed_at=completed_at,
+        working_tree_clean=working_tree_is_clean(),
+        actual_full_fits=report.real_full_fits_executed,
+    ))
+    return {
+        "mode": "full",
+        "artifact_directory": str(directory),
+        "em_fits_executed": EXPECTED_FULL_FITS,
+        "real_full_fits_executed": report.real_full_fits_executed,
+        "canary_fits_executed": 0,
+        "smoke_fits_executed": 0,
+        "phase7e_rerun_count": 0,
+        "started_at": started_at,
+        "completed_at": completed_at,
+    }
+
+
+def _execute_real_full_test_only(authorization: Any, out_dir: Path, *,
+                                 adapter: Any, run_code_sha: str) -> dict[str, Any]:
+    """Static-test-only path.  It is the ONLY way to redirect the output dir."""
+
+    _require(type(adapter) is _TestAuthorizedFitAdapter, "test full requires the test adapter")
+    _require(out_dir is not None, "the test-only path requires an explicit temp directory")
+    return _execute_real_full(authorization, out_dir, test_adapter=adapter, test_only=True,
+                              run_code_sha=run_code_sha)
+
+
+def build_full_authorization_payload(authorization: Any, run_code_sha: str) -> dict[str, Any]:
+    _require(type(authorization) is FullExecutionAuthorization,
+             "full authorization payload requires a FullExecutionAuthorization")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    return {
+        "artifact_version": FULL_ARTIFACT_VERSION,
+        "authorization_version": authorization.authorization_version,
+        "execution_issue_number": authorization.issue_number,
+        "protocol_origin_issue_number": authorization.protocol_origin_issue_number,
+        "approved_scientific_main_sha": authorization.approved_main_sha,
+        "run_code_sha": run_code_sha,
+        "protocol_hash": authorization.protocol_hash,
+        "estimands": list(authorization.estimands),
+        "k_true_grid": list(authorization.k_true_grid),
+        "candidate_k": list(authorization.candidate_k),
+        "starts": list(authorization.starts),
+        "replicates": list(authorization.replicates),
+        "fits_per_estimand": authorization.fits_per_estimand,
+        "total_fit_count": authorization.total_fit_count,
+        "data_seed_base": authorization.data_seed_base,
+        "model_seed_base": authorization.model_seed_base,
+        "anchor_split_seed_base": authorization.anchor_split_seed_base,
+        "mask_design": authorization.mask_design,
+        "random_design": authorization.random_design,
+        "hierarchy": authorization.hierarchy,
+        "independent_review_pass": authorization.independent_review_pass,
+        "human_full_approval": authorization.human_full_approval,
+        "partial_failure_policy": list(FULL_PARTIAL_FAILURE_POLICY),
+    }
+
+
+def build_full_artifact_rows(rows: Sequence[Phase8bFullRow], run_code_sha: str,
+                             authorization: Any, *, executed: int) -> list[tuple[Any, ...]]:
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    return [(
+        run_code_sha,
+        authorization.approved_main_sha,
+        full_protocol_hash(),
+        row.fit_index,
+        row.estimand,
+        row.role,
+        row.k_true,
+        row.replicate,
+        row.k,
+        row.start,
+        row.data_seed,
+        row.split_seed,
+        row.model_seed,
+        MASK_DESIGN,
+        row.mask_group_id,
+        row.anchor_mask_hash,
+        row.anchor_train_mask_hash,
+        repr(row.heldout_mean_log_score),
+        row.internal_retry,
+        row.warning_count,
+        row.q_failure,
+        row.nan_occurred,
+        row.finite_state,
+        int(executed),
+    ) for row in rows]
+
+
+def build_full_leakage_gate_rows(rows: Sequence[Phase8bFullRow]) -> list[tuple[Any, ...]]:
+    """Per-fit leakage evidence: pre-fit == post-fit == the Phase 7e anchor."""
+
+    return [(
+        row.estimand, row.role, row.k_true, row.replicate, row.k, row.start,
+        row.pre_fit_test_hash, row.pre_fit_train_hash,
+        row.post_fit_test_hash, row.post_fit_train_hash,
+        row.anchor_mask_hash, row.anchor_train_mask_hash,
+        True, True, "clean", LEAKAGE_BOUNDARY_VERSION,
+    ) for row in rows]
+
+
+def build_full_summary_payload(report: Phase8bFullReport, run_code_sha: str) -> dict[str, Any]:
+    _require(type(report) is Phase8bFullReport, "summary requires a Phase8bFullReport")
+    _require_full_commit_sha(run_code_sha, "run code SHA")
+    per_cell: dict[str, Any] = {}
+    for cell in report.cells:
+        key = f"{cell.estimand}/K{cell.k_true}/r{cell.replicate}"
+        per_cell[key] = {
+            "selected_k": cell.selected_k,
+            "tie_candidates": list(cell.tie_candidates),
+            "mean_scores": {str(k): value for k, value in cell.mean_scores},
+        }
+    return {
+        "artifact_version": FULL_ARTIFACT_VERSION,
+        "execution_issue_number": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue_number": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "approved_scientific_main_sha": report.approved_main_sha,
+        "run_code_sha": run_code_sha,
+        "protocol_hash": report.protocol_hash,
+        "score_config_hash": score_config_hash(frozen_score_config()),
+        "expected_full_fits": EXPECTED_FULL_FITS,
+        "actual_full_fits": len(report.rows),
+        "expected_full_fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "estimands": list(active_estimands()),
+        "candidate_k": list(K_CANDIDATES),
+        "k_true_grid": list(NEW_K_TRUE),
+        "per_cell": per_cell,
+        "selected_k": {f"{c.estimand}/K{c.k_true}/r{c.replicate}": c.selected_k
+                       for c in report.cells},
+        # The full grid DOES contain K_TRUE, so recovery is evaluated and
+        # recorded.  It is a scientific outcome, never an audit gate.
+        "k_recovery_evaluated": True,
+        "k_recovery_is_not_an_audit_gate": True,
+        "anchor_k_true": ANCHOR_K_TRUE,
+        "anchor_lineage": LINEAGE_ANCHOR,
+        "anchor_artifact_dir": PHASE7E_ARTIFACT_DIR,
+        "anchor_run_code_sha": PHASE7E_RUN_CODE_SHA,
+        "anchor_unique_fits": PHASE7E_ANCHOR_FIT_COUNT,
+    }
+
+
+def build_full_runinfo_payload(*, run_code_sha: str, out_dir: Path,
+                               requested_command: str, invocation_mode: str,
+                               started_at: str, completed_at: str,
+                               working_tree_clean: bool,
+                               actual_full_fits: int) -> dict[str, Any]:
+    return {
+        "artifact_version": FULL_ARTIFACT_VERSION,
+        "phase": PHASE,
+        "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
+        "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        "run_code_sha": run_code_sha,
+        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "approved_baseline_is_ancestor": approved_baseline_is_ancestor(run_code_sha),
+        "protocol_hash": full_protocol_hash(),
+        "score_config_hash": score_config_hash(frozen_score_config()),
+        "frozen_config_hash": frozen_config_hash(),
+        "mask_design": MASK_DESIGN,
+        "random_design": RANDOM_DESIGN,
+        "hierarchy": HIERARCHY,
+        "working_tree_clean": bool(working_tree_clean),
+        "invocation_mode": invocation_mode,
+        "requested_command": requested_command,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "expected_full_fits": EXPECTED_FULL_FITS,
+        "actual_full_fits": int(actual_full_fits),
+        "expected_full_fits_per_estimand": EXPECTED_FULL_FITS_PER_ESTIMAND,
+        "canary_fits_executed": 0,
+        "smoke_fits_executed": 0,
+        "replacement_fits_executed": 0,
+        "phase7e_rerun_count": 0,
+        "anchor_unique_fits": PHASE7E_ANCHOR_FIT_COUNT,
+        "partial_failure_policy": list(FULL_PARTIAL_FAILURE_POLICY),
+        "artifact_directory": str(out_dir),
+        "artifact_files": list(FULL_ARTIFACT_FILES),
+    }
+
+
+def run_real_full(authorization: Any) -> dict[str, Any]:
+    """Production full entry point.
+
+    A thin wrapper over the single production workflow: it never validates,
+    constructs an adapter or fits on its own.
+    """
+
+    return _run_production_full_execution(authorization)
+
+
+def _run_production_full_execution(authorization: Any) -> dict[str, Any]:
+    """THE production workflow for the 336-fit sweep."""
+
+    validate_full_execution_authorization(authorization, test_only=False)
+    run_code_sha = current_run_code_sha()
+    _require_execution_preconditions(run_code_sha)
+    return _execute_real_full(authorization, FULL_ARTIFACT_DIR,
+                              test_adapter=None, test_only=False,
+                              run_code_sha=run_code_sha)
 
 
 # ---------------------------------------------------------------------------
@@ -3785,6 +4917,13 @@ def run_real_canary_cli(args: argparse.Namespace) -> dict[str, Any]:
     return _run_production_execution(authorization, "canary")
 
 
+def run_real_full_cli(args: argparse.Namespace) -> dict[str, Any]:
+    """Production full CLI path.  Authorized for exactly 336 real fits."""
+
+    authorization = _require_em_authorization(args, "full")
+    return _run_production_full_execution(authorization)
+
+
 def run_real_smoke_cli(args: argparse.Namespace) -> dict[str, Any]:
     """Production smoke CLI path.  Authorized for exactly 6 real smoke fits."""
 
@@ -3856,6 +4995,8 @@ def _build_parser() -> argparse.ArgumentParser:
                       help="report the smoke authorization gates; EM fits = 0")
     mode.add_argument("--smoke-contract", action="store_true",
                       help="report the frozen execution/artifact contract; EM fits = 0")
+    mode.add_argument("--full-preflight", action="store_true",
+                      help="every zero-EM gate the 336-fit sweep must clear; EM fits = 0")
     mode.add_argument("--canary", action="store_true", help="leakage falsification (requires EM gates)")
     mode.add_argument("--smoke", action="store_true", help="smoke selection (requires EM gates)")
     mode.add_argument("--full", action="store_true", help="full sweep (requires EM gates)")
@@ -3889,9 +5030,12 @@ def _require_em_authorization(args: argparse.Namespace,
     about whether anything has run -- the preflight, lineage, canary-before-
     smoke and independent-audit gates all still apply downstream.
 
-    ``--full`` has NO authorization schema at all.  A smoke authorization can
-    never be widened into a full-run authorization: the two are separate human
-    gates and full is refused before anything else is even considered.
+    ``--full`` has its OWN authorization schema (``FullExecutionAuthorization``,
+    Issue #59) with its own private authority sentinel, its own reviewed-baseline
+    source and its own validator.  A smoke authorization can never be widened
+    into a full-run authorization: full is resolved through
+    ``current_full_execution_authorization()`` and nothing else, and both of its
+    human gates are absent in this branch.
     """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")
@@ -3900,11 +5044,21 @@ def _require_em_authorization(args: argparse.Namespace,
         _require(args.estimand is not None, "--full requires --estimand")
         _require(args.estimand in active_estimands(),
                  "--estimand is inconsistent with the frozen ESTIMANDS")
-        raise HarnessStop(
-            "full is not authorized in Phase 8b: the 336-fit sweep is a separate "
-            "S3 human gate and has no execution authorization schema. A smoke "
-            "authorization must never be reused for --full."
-        )
+        _require(getattr(args, "out_dir", None) is None,
+                 "--out-dir is not accepted for a real full run: the production "
+                 f"artifact directory is frozen at {FULL_ARTIFACT_DIR}")
+        full_authorization = current_full_execution_authorization()
+        if full_authorization is None:
+            raise HarnessStop(
+                "full is not authorized in Phase 8b S3-A: the 336-fit sweep has its "
+                "own FullExecutionAuthorization schema, validator and zero-EM "
+                "preflight (Issue #59), but no committed record exists and no "
+                "reviewed main SHA has been approved for it. A smoke "
+                "authorization must never be reused for --full."
+            )
+        validate_full_execution_authorization(full_authorization, test_only=False)
+        run_full_preflight()
+        return full_authorization
 
     _require(command in ("canary", "smoke"), f"unknown EM command {command!r}")
     # HIGH-03: a real execution writes to exactly one frozen directory.  A
@@ -3965,6 +5119,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "hard-stopped until a human records INDEPENDENT_REVIEW_PASS and "
                     "HUMAN_SMOKE_APPROVAL against a reviewed main SHA",
         }
+    elif args.full_preflight:
+        result = run_full_preflight()
     elif args.smoke_contract:
         result = run_smoke_contract()
     elif args.canary:
@@ -3973,11 +5129,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif args.smoke:
         result = run_real_smoke_cli(args)
     elif args.full:
-        _require_em_authorization(args, "full")
-        raise AssertionError("unreachable")
+        result = run_real_full_cli(args)
     else:  # pragma: no cover - argparse enforces one mode
         raise HarnessStop("no mode selected")
-    if not (args.canary or args.smoke):
+    if not (args.canary or args.smoke or args.full):
         _require(result["em_fits_executed"] == 0, "no-EM path reported a nonzero fit count")
     print(json.dumps(result, sort_keys=True, allow_nan=False, ensure_ascii=False))
     return 0
