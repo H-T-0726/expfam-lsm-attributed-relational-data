@@ -1897,6 +1897,119 @@ def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> No
                     "baseline")
 
 
+def audit_full_manifest_global_index(rows: Sequence[dict[str, str]],
+                                     auditor: Auditor) -> None:
+    """The persisted full ``manifest.csv`` must be ONE global 336-row plan.
+
+    The per-estimand audit (:func:`audit_manifest`) validates each 168-row half
+    on its own and therefore accepts a manifest whose ``fit_index`` restarts at
+    the A/B boundary -- ``1..168, 1..168`` -- while the executed
+    ``full_fit_results.csv`` carries the global ``1..336``.  This check closes
+    that gap independently: the expected order is rebuilt here from the frozen
+    grid alone, the harness is never imported, and BOTH the index sequence and
+    the exact row position are required, so a correct set of indices in the
+    wrong rows is still rejected.
+    """
+
+    if not auditor.require(len(rows) == EXPECTED_FULL_FITS,
+                           "full_manifest_global_row_count",
+                           f"{len(rows)} != {EXPECTED_FULL_FITS}"):
+        return
+
+    expected_order = expected_ordered_full_keys()
+    fit_indices: list[int] = []
+    observed_keys: list[tuple[str, int, int, int, int]] = []
+    per_estimand: dict[str, int] = {}
+    anchor_rows = 0
+    position_mismatches: list[str] = []
+    order_mismatches: list[str] = []
+    for position, row in enumerate(rows, start=1):
+        label = f"manifest row {position}"
+        estimand = row.get("estimand")
+        if not auditor.require(estimand in EXPECTED_FULL_ESTIMANDS,
+                               "full_manifest_global_estimand", f"{label}: {estimand!r}"):
+            continue
+        per_estimand[estimand] = per_estimand.get(estimand, 0) + 1
+        k_true = _parse_int_field(row, "K_TRUE", auditor, "full_manifest_global_key", label)
+        replicate = _parse_int_field(row, "replicate", auditor,
+                                     "full_manifest_global_key", label)
+        k = _parse_int_field(row, "K", auditor, "full_manifest_global_key", label)
+        start = _parse_int_field(row, "start", auditor, "full_manifest_global_key", label)
+        if k_true == ANCHOR_K_TRUE:
+            anchor_rows += 1
+        if None in (k_true, replicate, k, start):
+            continue
+        key = (estimand, k_true, replicate, k, start)
+        observed_keys.append(key)
+        if position <= len(expected_order) and key != expected_order[position - 1]:
+            order_mismatches.append(f"row {position}: {key} != {expected_order[position - 1]}")
+        recorded = _parse_int_field(row, "fit_index", auditor,
+                                    "full_manifest_global_index_parse", label)
+        if recorded is None:
+            continue
+        fit_indices.append(recorded)
+        if recorded != position:
+            position_mismatches.append(f"row {position}: fit_index {recorded}")
+
+    auditor.require(len(set(fit_indices)) == len(fit_indices),
+                    "full_manifest_global_index_duplicate",
+                    f"{len(fit_indices) - len(set(fit_indices))} duplicate fit_index values")
+    auditor.require(tuple(fit_indices) == tuple(range(1, EXPECTED_FULL_FITS + 1)),
+                    "full_manifest_global_index_sequence",
+                    f"fit_index is not the global 1..{EXPECTED_FULL_FITS} sequence: "
+                    f"{fit_indices[:3]}...{fit_indices[-3:]}")
+    auditor.require(not position_mismatches, "full_manifest_global_index_position",
+                    f"fit_index disagrees with the row position: {position_mismatches[:3]}")
+    auditor.require(len(set(observed_keys)) == len(observed_keys),
+                    "full_manifest_global_duplicate_key",
+                    f"{len(observed_keys) - len(set(observed_keys))} duplicate cells")
+    auditor.require(not order_mismatches, "full_manifest_global_order",
+                    f"the manifest is not in the frozen execution order: {order_mismatches[:3]}")
+    auditor.require(tuple(observed_keys) == expected_order, "full_manifest_global_key_order",
+                    "the manifest cell sequence is not the frozen 336-key order")
+    auditor.require(per_estimand == {e: EXPECTED_FULL_FITS_PER_ESTIMAND
+                                     for e in EXPECTED_FULL_ESTIMANDS},
+                    "full_manifest_global_ab_split",
+                    f"A/B split is not {EXPECTED_FULL_FITS_PER_ESTIMAND}/"
+                    f"{EXPECTED_FULL_FITS_PER_ESTIMAND}: {per_estimand}")
+    auditor.require(anchor_rows == 0, "full_manifest_global_anchor_excluded",
+                    f"{anchor_rows} rows carry the Phase 7e anchor K_TRUE={ANCHOR_K_TRUE}")
+    first, second = EXPECTED_FULL_ESTIMANDS[0], EXPECTED_FULL_ESTIMANDS[-1]
+    for estimand, expected_first in ((first, 1),
+                                     (second, EXPECTED_FULL_FITS_PER_ESTIMAND + 1)):
+        values = [index for index, row in enumerate(rows, start=1)
+                  if row.get("estimand") == estimand]
+        if values:
+            expected_last = expected_first + EXPECTED_FULL_FITS_PER_ESTIMAND - 1
+            auditor.require(values == list(range(expected_first, expected_last + 1)),
+                            "full_manifest_global_estimand_block",
+                            f"estimand {estimand} does not occupy rows "
+                            f"{expected_first}..{expected_last}")
+
+
+def audit_full_manifest_matches_results(manifest_rows: Sequence[dict[str, str]],
+                                        fit_rows: Sequence[dict[str, str]],
+                                        auditor: Auditor) -> None:
+    """The planned fit N and the executed fit N must be the same fit.
+
+    Only the identity columns the manifest actually carries are compared; no
+    outcome-bearing field participates.
+    """
+
+    if len(manifest_rows) != EXPECTED_FULL_FITS or len(fit_rows) != EXPECTED_FULL_FITS:
+        return
+    identity = ("fit_index", "estimand", "role", "K_TRUE", "replicate", "K", "start",
+                "data_seed", "split_seed", "model_seed", "mask_group_id")
+    mismatches: list[str] = []
+    for position, (planned, executed) in enumerate(zip(manifest_rows, fit_rows), start=1):
+        for column in identity:
+            if planned.get(column) != executed.get(column):
+                mismatches.append(f"row {position}: {column} "
+                                  f"{planned.get(column)!r} != {executed.get(column)!r}")
+    auditor.require(not mismatches, "full_manifest_result_alignment",
+                    f"manifest and results disagree fit by fit: {mismatches[:3]}")
+
+
 def audit_full_fit_rows(rows: Sequence[dict[str, str]], auditor: Auditor) -> None:
     """Exactly 336 rows, exactly 168 per estimand, exactly the frozen grid."""
 
@@ -2253,6 +2366,8 @@ def audit_full_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audito
     if manifest_rows:
         auditor.require(len(manifest_rows) == EXPECTED_FULL_FITS, "full_manifest_row_count",
                         f"{len(manifest_rows)} != {EXPECTED_FULL_FITS}")
+        # The full manifest is ONE 336-row plan, not two concatenated halves.
+        audit_full_manifest_global_index(manifest_rows, auditor)
 
     provenance_rows = _read_csv(run_dir / "mask_provenance.csv", auditor)
     _per_estimand(provenance_rows, "mask_provenance.csv",
@@ -2269,6 +2384,8 @@ def audit_full_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audito
         audit_full_fit_rows(fit_rows, auditor)
         scores = recompute_full_selection(fit_rows, auditor)
         full_cell_scores = collect_full_cell_scores(fit_rows)
+        if manifest_rows:
+            audit_full_manifest_matches_results(manifest_rows, fit_rows, auditor)
 
     # The integrated selection view: 24 newly executed cells + 6 Phase 7e
     # anchor references = 30 logical rows.  The anchor rows are re-derived from

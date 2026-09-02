@@ -2134,6 +2134,10 @@ EXPECTED_FULL_FITS = EXPECTED_NEW_FITS                       # 336
 EXPECTED_FULL_PHASE7E_RERUN_FITS = 0
 # --full is the complete sweep; there is no per-estimand full run.
 FULL_ESTIMAND_SCOPE = "AB"
+# The frozen order the 336 fits are planned, executed, persisted and audited in.
+# The GLOBAL manifest fit_index is assigned along exactly this order, so it is
+# asserted explicitly instead of being inherited from dict iteration order.
+FULL_ESTIMAND_ORDER = ("A", "B")
 # The integrated selection view spans K_TRUE {1,2,3,4,5}: the 4 newly executed
 # values plus the READ-ONLY Phase 7e anchor.  The anchor contributes 42 unique
 # fits that are referenced, never re-executed and never added to the 336.
@@ -2809,12 +2813,19 @@ def full_protocol_hash() -> str:
 # or ``git rev-parse HEAD``.
 REVIEWED_FULL_EXECUTION_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
 
-# --- HUMAN AUTHORIZATION PROVENANCE (frozen, Issue #59 S3-C) ---------------
-# The human granted the 336-fit execution in this Issue comment.  The id is
-# committed PROVENANCE ONLY: nothing at runtime contacts GitHub, and no network
-# call, environment variable, CLI flag or config file participates in the
-# authorization decision.  The decision lives entirely in the committed record
-# returned by ``current_full_execution_authorization()``.
+# --- HUMAN AUTHORIZATION PROVENANCE (HISTORICAL, Issue #59 S3-C) -----------
+# The human granted the 336-fit execution in this Issue comment against the
+# PRE-FIX execution path.  The ids and the scope are kept as historical
+# evidence and are never deleted, but the record they authorized is NO LONGER
+# ACTIVE: S3-D changed the execution code (the persisted full manifest now
+# carries global fit indices), so that approval is STALE for the code in this
+# file.  Real EM executed under it: 0.  A fresh reviewed full-execution
+# baseline and a fresh explicit human approval are required before
+# ``current_full_execution_authorization()`` may return a record again.
+#
+# The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
+# and no network call, environment variable, CLI flag or config file ever
+# participates in an authorization decision.
 FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
 FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 # What the human authorized, in words, so a reviewer can compare it with the
@@ -2951,53 +2962,41 @@ def validate_full_execution_authorization(authorization: Any, *, test_only: bool
 
 
 def current_full_execution_authorization() -> FullExecutionAuthorization | None:
-    """The committed execution authorization for the frozen 336-fit sweep.
+    """No ACTIVE production authorization exists for this execution code.
 
-    Granted by the human in Issue #59 comment
-    ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` against the independently
-    reviewed baseline ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (role 2).  Every
-    value below is a committed literal: nothing is read from the CLI, the
-    environment, a config file, the current branch, ``git rev-parse HEAD``, the
-    GitHub API, or from the frozen constants this record is validated against.
+    History, kept deliberately explicit:
 
-    Scope, and nothing wider -- see ``FULL_HUMAN_AUTHORIZATION_SCOPE``: ONE
-    clean attempt at exactly 336 new real EM fits, 168 per estimand, over the
-    frozen grid.  It does NOT authorize a rerun after success or after a partial
-    failure, a replacement fit, a retry, an alternate seed, a relaxed tolerance,
-    a Phase 7e K_TRUE=3 rerun, a canary or smoke rerun, or any 337th fit; each
-    of those needs a NEW explicit human authorization
-    (``FULL_HUMAN_AUTHORIZATION_EXCLUSIONS``).
+    * S3-B bound the reviewed full-execution baseline
+      ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (role 2).
+    * S3-C committed a real ``FullExecutionAuthorization`` for exactly 336 fits,
+      granted by the human in Issue #59 comment
+      ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID``
+      (``FULL_HUMAN_AUTHORIZATION_SCOPE``).
+    * That authorization was NEVER consumed: real full EM executed under it = 0,
+      and the production artifact directory was never created.
+    * S3-D then CHANGED the execution path -- the persisted full manifest now
+      carries global ``fit_index`` 1..336 instead of restarting at the A/B
+      boundary.
 
-    Holding this record still does not run anything by itself: the execution
-    must clear the full zero-EM preflight, the clean-tree requirement, the
-    scientific -> reviewed -> run-code ancestry chain, and the frozen
-    artifact-directory policy that refuses to overwrite, resume or reuse an
-    existing directory -- and a human still has to issue the command.
+    An approval is an approval of specific reviewed code, not of an intention.
+    Because the execution code changed after the approval was given, the S3-C
+    approval is STALE and must not remain executable, so production full
+    execution is intentionally CLOSED here and this returns ``None``.
+
+    Reopening it is a separate, ordered human gate and cannot happen in this
+    commit:
+
+    1. this fix is independently reviewed and merged;
+    2. its exact merge SHA is frozen as the revised reviewed full-execution
+       baseline (role 2);
+    3. a FRESH explicit human approval is recorded against that baseline;
+    4. a separate authorization-only PR commits the new record.
+
+    Nothing here is fabricated: no new approval is asserted, and the historical
+    provenance above is preserved rather than rewritten.
     """
 
-    return FullExecutionAuthorization(
-        issue_number=59,
-        protocol_origin_issue_number=49,
-        approved_main_sha=REVIEWED_FULL_EXECUTION_MAIN_SHA,
-        protocol_hash="2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
-        estimands=("A", "B"),
-        k_true_grid=(1, 2, 4, 5),
-        candidate_k=(1, 2, 3, 4, 5, 6, 7),
-        starts=(1, 2),
-        replicates=(1, 2, 3),
-        fits_per_estimand=168,
-        total_fit_count=336,
-        data_seed_base=51000,
-        model_seed_base=530000,
-        anchor_split_seed_base=42000,
-        mask_design="S_C",
-        random_design="CRN",
-        hierarchy="H3_A",
-        independent_review_pass=True,
-        human_full_approval=True,
-        authorization_version="phase8b-full-authorization-v1",
-        _authority=_FULL_EXECUTION_AUTHORITY,
-    )
+    return None
 
 
 def _make_test_full_authorization(
@@ -3041,10 +3040,52 @@ def _make_test_full_authorization(
 def build_full_manifests(masks: Mapping[int, "SplitRecord"] | None = None,
                          anchors: Mapping[int, AnchorMask] | None = None,
                          ) -> dict[str, list[ManifestRow]]:
-    """The complete frozen sweep: one 168-row manifest per estimand."""
+    """The complete frozen sweep with GLOBAL fit indices: A 1..168, B 169..336.
 
-    return {estimand: build_manifest(estimand, masks=masks, anchors=anchors)
-            for estimand in active_estimands()}
+    ``build_manifest`` remains a per-estimand 168-row builder whose ``fit_index``
+    is LOCAL to its estimand -- that is the right contract for a single-estimand
+    manifest and is deliberately unchanged.
+
+    The full sweep, however, is ONE 336-fit execution.  Concatenating two local
+    blocks would persist ``manifest.csv`` fit_index ``1..168, 1..168`` while the
+    execution counter and ``full_fit_results.csv`` carry the global ``1..336``,
+    so the two artifacts would disagree about which fit is which and the
+    provenance of every B row would be ambiguous.  This builder is therefore the
+    single place where the global index is assigned, and everything downstream
+    -- preflight validation, cell preparation, the persisted CSV and the
+    independent audit -- uses the SAME globally indexed rows.
+
+    The offset follows the frozen execution order, which is asserted here rather
+    than inherited from dict iteration order.
+    """
+
+    estimands = active_estimands()
+    _require(estimands == FULL_ESTIMAND_ORDER,
+             f"the frozen full execution order is {list(FULL_ESTIMAND_ORDER)}, "
+             f"got {list(estimands)}")
+    manifests: dict[str, list[ManifestRow]] = {}
+    index = 0
+    for estimand in estimands:
+        rows: list[ManifestRow] = []
+        for row in build_manifest(estimand, masks=masks, anchors=anchors):
+            index += 1
+            rows.append(replace(row, fit_index=index))
+        manifests[estimand] = rows
+    return manifests
+
+
+def flatten_full_manifests(manifests: Mapping[str, Sequence[ManifestRow]],
+                           ) -> list[ManifestRow]:
+    """The 336 rows in the frozen execution order, A before B.
+
+    The persisted ``manifest.csv``, the executor and the validator all read the
+    full manifest through this one helper, so none of them can silently order
+    the rows differently.
+    """
+
+    _require(set(manifests) == set(FULL_ESTIMAND_ORDER),
+             f"full manifests must cover exactly {list(FULL_ESTIMAND_ORDER)}")
+    return [row for estimand in FULL_ESTIMAND_ORDER for row in manifests[estimand]]
 
 
 def validate_full_manifests(manifests: Mapping[str, Sequence[ManifestRow]]) -> dict[str, Any]:
@@ -3070,7 +3111,51 @@ def validate_full_manifests(manifests: Mapping[str, Sequence[ManifestRow]]) -> d
     for estimand, rows in manifests.items():
         _require(all(row.k_true != ANCHOR_K_TRUE for row in rows),
                  "the Phase 7e anchor K_TRUE must never be re-executed")
-    return {"fits_per_estimand": per_estimand, "total_fits": total}
+
+    # --- the GLOBAL persisted-index contract --------------------------------
+    # A concatenated 1..168, 1..168 manifest passes every per-estimand check
+    # above, so the global contract is enforced separately and explicitly.
+    flattened = flatten_full_manifests(manifests)
+    _require(len(flattened) == EXPECTED_FULL_FITS,
+             f"the flattened full manifest is {len(flattened)} rows, "
+             f"not {EXPECTED_FULL_FITS}")
+    indices = tuple(row.fit_index for row in flattened)
+    _require(all(type(index) is int for index in indices),
+             "full manifest fit_index must be a plain int")
+    _require(len(set(indices)) == len(indices), "duplicate full manifest fit_index")
+    _require(indices == tuple(range(1, EXPECTED_FULL_FITS + 1)),
+             f"full manifest fit_index is not the global 1..{EXPECTED_FULL_FITS} "
+             f"sequence in the frozen execution order: {indices[:3]}...{indices[-3:]}")
+    for position, row in enumerate(flattened, start=1):
+        _require(row.fit_index == position,
+                 f"full manifest row {position} carries fit_index {row.fit_index}")
+    keys = [(row.estimand, row.k_true, row.replicate, row.k, row.start)
+            for row in flattened]
+    _require(len(set(keys)) == len(keys), "duplicate full manifest cell key")
+    first, second = FULL_ESTIMAND_ORDER
+    per_estimand_indices = {
+        estimand: tuple(row.fit_index for row in flattened if row.estimand == estimand)
+        for estimand in FULL_ESTIMAND_ORDER
+    }
+    _require(per_estimand_indices[first]
+             == tuple(range(1, EXPECTED_FULL_FITS_PER_ESTIMAND + 1)),
+             f"estimand {first} does not carry global fit_index "
+             f"1..{EXPECTED_FULL_FITS_PER_ESTIMAND}")
+    _require(per_estimand_indices[second]
+             == tuple(range(EXPECTED_FULL_FITS_PER_ESTIMAND + 1,
+                            EXPECTED_FULL_FITS + 1)),
+             f"estimand {second} does not carry global fit_index "
+             f"{EXPECTED_FULL_FITS_PER_ESTIMAND + 1}..{EXPECTED_FULL_FITS}; "
+             f"a manifest that restarts at the A/B boundary is malformed")
+    return {
+        "fits_per_estimand": per_estimand,
+        "total_fits": total,
+        "global_fit_index_range": [indices[0], indices[-1]],
+        "fit_index_range_by_estimand": {
+            estimand: [values[0], values[-1]]
+            for estimand, values in per_estimand_indices.items()
+        },
+    }
 
 
 def check_full_anchor_agreement(anchors: Mapping[int, AnchorMask] | None = None,
@@ -3363,11 +3448,17 @@ def prepare_full_cell(authorization: Any, estimand: str, k_true: int, replicate:
     _require(split.train_mask_hash == anchor.train_mask_hash,
              f"S_C: {estimand}/K{k_true}/r{replicate} train mask differs from the anchor")
 
-    rows = tuple(row for row in build_manifest(estimand, masks={replicate: split},
-                                               anchors={replicate: anchor})
+    # The cell reads its rows out of the GLOBALLY indexed full manifest, so the
+    # fit_index a fit is executed under is the same number the persisted
+    # manifest.csv carries for it.
+    manifests = build_full_manifests(masks={replicate: split}, anchors={replicate: anchor})
+    rows = tuple(row for row in manifests[estimand]
                  if row.k_true == k_true and row.replicate == replicate)
     _require(len(rows) == len(K_CANDIDATES) * len(START_LABELS),
              f"cell manifest is not {len(K_CANDIDATES) * len(START_LABELS)} rows")
+    _require(tuple(row.fit_index for row in rows)
+             == tuple(range(rows[0].fit_index, rows[0].fit_index + len(rows))),
+             "cell manifest global fit indices are not contiguous")
 
     data = _generate_cell(estimand, k_true, replicate)
     X = _readonly_copy(data["X"], np.float64)
@@ -3425,6 +3516,10 @@ def _run_full_cell(cell: FullPreparedCell, *, adapter: Any, test_only: bool,
                 cell.prepared, cell.preflight, config, adapter)
         # Counted BEFORE the call: a raising or dirty fit is still attempted.
         fit_index = progress.begin_fit()
+        # The persisted manifest and the executed results must agree fit by fit.
+        _require(row.fit_index == fit_index,
+                 f"manifest global fit_index {row.fit_index} does not match the "
+                 f"execution index {fit_index}")
         label = (f"phase8b full fit {fit_index}/{EXPECTED_FULL_FITS} "
                  f"{cell.estimand}/K_TRUE={cell.k_true}/r{cell.replicate}/K={row.k}/"
                  f"start={row.start}")
@@ -3672,10 +3767,13 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     directory = require_new_full_artifact_dir(out_dir)
     write_json_artifact(directory / "authorization.json",
                         build_full_authorization_payload(authorization, run_code_sha))
+    # ONE globally indexed manifest: validated here, persisted unchanged, then
+    # independently re-derived by the auditor.  There is no second indexing
+    # implementation at CSV-write time.
     manifests = build_full_manifests(anchors=read_phase7e_anchor_masks())
+    validate_full_manifests(manifests)
     write_csv_artifact(directory / "manifest.csv", MANIFEST_COLUMNS,
-                       [row.as_row() for estimand in active_estimands()
-                        for row in manifests[estimand]])
+                       [row.as_row() for row in flatten_full_manifests(manifests)])
     anchors = read_phase7e_anchor_masks()
     write_csv_artifact(directory / "mask_provenance.csv", MASK_PROVENANCE_COLUMNS,
                        [row.as_row() for estimand in active_estimands()
@@ -5290,18 +5388,21 @@ def _require_em_authorization(args: argparse.Namespace,
                  "--out-dir is not accepted for a real full run: the production "
                  f"artifact directory is frozen at {FULL_ARTIFACT_DIR}")
         full_authorization = current_full_execution_authorization()
-        # Fail-closed defence in depth: the record is committed today, but if it
-        # is ever removed the gate must close again rather than fall through.
+        # Fail-closed: no ACTIVE record -> the gate closes before anything else.
         if full_authorization is None:
             raise HarnessStop(
                 "full is not authorized in Phase 8b: the reviewed full-execution "
                 f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} is bound (Issue #59) "
                 "and the 336-fit sweep has its own FullExecutionAuthorization "
                 "schema, validator and zero-EM preflight, but NO committed "
-                "FullExecutionAuthorization record exists. Recording "
-                "INDEPENDENT_REVIEW_PASS and HUMAN_FULL_APPROVAL against that "
-                "reviewed baseline is a separate human gate. A smoke "
-                "authorization must never be reused for --full."
+                "FullExecutionAuthorization record exists. The earlier human "
+                "approval (Issue #59 comment "
+                f"{FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID}) executed 0 real EM "
+                "and is STALE: the execution path changed afterwards, so it no "
+                "longer applies to this code. A revised reviewed baseline and a "
+                "FRESH INDEPENDENT_REVIEW_PASS plus HUMAN_FULL_APPROVAL are a "
+                "separate human gate. A smoke authorization must never be reused "
+                "for --full."
             )
         validate_full_execution_authorization(full_authorization, test_only=False)
         run_full_preflight()
