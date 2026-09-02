@@ -20,7 +20,9 @@ against each other is not sufficient, because a consistent tampering of
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
+import hashlib
 import json
 import math
 from dataclasses import dataclass
@@ -233,6 +235,14 @@ class Finding:
 class Auditor:
     def __init__(self) -> None:
         self.findings: list[Finding] = []
+        # SHA-256 of the exact bytes of every artifact this auditor parsed,
+        # captured at parse time so a published verdict can be bound to the
+        # content it audited rather than to a later re-read.
+        self.audited_digests: dict[str, str] = {}
+        # The parsed form of those same bytes.  A published verdict is built
+        # from this snapshot alone, so its metadata and its digest always
+        # describe ONE artifact state -- never a later, different one.
+        self.audited_payloads: dict[str, dict[str, Any]] = {}
 
     def record(self, severity: str, check: str, detail: str) -> None:
         self.findings.append(Finding(severity, check, detail))
@@ -908,6 +918,31 @@ def _require_exact_int_list(payload: Mapping[str, Any], key: str,
     auditor.require(reported == wanted, check, f"{key}: {reported!r} != {wanted!r}")
 
 
+_SHA256_HEX_CHARS = frozenset("0123456789abcdef")
+
+
+def _require_sha256_hex(payload: Mapping[str, Any], key: str, auditor: Auditor,
+                        check: str) -> str | None:
+    """A content digest: present, ``str``, exactly 64 lowercase hex characters.
+
+    Uppercase is rejected on purpose: one spelling only, so a digest comparison
+    can never be defeated by case.  Nothing is normalised.
+    """
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return None
+    value = payload[key]
+    if type(value) is not str:
+        auditor.blocker(check, f"{key} is not a string: {value!r} "
+                               f"({type(value).__name__})")
+        return None
+    if len(value) != 64 or not set(value) <= _SHA256_HEX_CHARS:
+        auditor.blocker(check, f"{key} is not 64 lowercase hex characters: {value!r}")
+        return None
+    return value
+
+
 def _require_nonnegative_int(payload: Mapping[str, Any], key: str,
                             auditor: Auditor, check: str) -> int | None:
     """A count field: present, exactly ``int``, never a bool, never negative.
@@ -968,22 +1003,51 @@ def _parse_bool_field(row: Mapping[str, str], column: str, auditor: Auditor,
     return None
 
 
-def _read_json(path: Path, auditor: Auditor) -> dict[str, Any] | None:
+def _sha256_hex(data: bytes) -> str:
+    """SHA-256 of exact artifact bytes.
+
+    Artifact integrity only: this is NOT the scientific protocol hash and never
+    enters ``smoke_protocol_config``.
+    """
+
+    return hashlib.sha256(data).hexdigest()
+
+
+def _read_json_and_digest(path: Path,
+                          auditor: Auditor) -> tuple[dict[str, Any] | None, str | None]:
+    """Read the artifact ONCE: hash those bytes and parse those same bytes.
+
+    Parsing first and hashing from a second read would leave a window in which
+    the file could change between the two, so the digest a verdict is bound to
+    would not be the digest of what was audited.
+    """
+
     if not path.is_file():
         auditor.blocker("smoke_artifact_missing", str(path.name))
-        return None
-    text = path.read_text(encoding="utf-8")
+        return None, None
+    raw = path.read_bytes()
+    digest = _sha256_hex(raw)
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        auditor.blocker("smoke_artifact_malformed", f"{path.name}: {error}")
+        return None, digest
     if text.strip() == "":
         auditor.blocker("smoke_artifact_empty", str(path.name))
-        return None
+        return None, digest
     try:
         payload = json.loads(text)
     except json.JSONDecodeError as error:
         auditor.blocker("smoke_artifact_malformed", f"{path.name}: {error}")
-        return None
+        return None, digest
     if not isinstance(payload, dict):
         auditor.blocker("smoke_artifact_not_object", str(path.name))
-        return None
+        return None, digest
+    return payload, digest
+
+
+def _read_json(path: Path, auditor: Auditor) -> dict[str, Any] | None:
+    payload, _digest = _read_json_and_digest(path, auditor)
     return payload
 
 
@@ -1370,8 +1434,19 @@ def audit_canary_run_dir(run_dir: Path, phase7e_dir: Path | None = None, *,
             auditor.blocker("required_artifact_missing", f"canary mode requires {name}")
 
     anchors = read_phase7e_anchor(auditor, phase7e_dir)
-    authorization = _read_json(run_dir / "authorization.json", auditor)
-    canary = _read_json(run_dir / "canary.json", auditor)
+    # One read per artifact: the digest and the parsed payload come from the
+    # same bytes, and the published verdict is bound to exactly those bytes.
+    authorization, authorization_digest = _read_json_and_digest(
+        run_dir / "authorization.json", auditor)
+    canary, canary_digest = _read_json_and_digest(run_dir / "canary.json", auditor)
+    for name, payload, digest in (("authorization.json", authorization, authorization_digest),
+                                  ("canary.json", canary, canary_digest)):
+        if digest is not None:
+            auditor.audited_digests[name] = digest
+        if payload is not None:
+            # deep-copied so nothing downstream can edit the snapshot the
+            # verdict will be built from
+            auditor.audited_payloads[name] = copy.deepcopy(payload)
 
     if authorization is not None:
         audit_smoke_authorization(authorization, auditor)
@@ -1391,23 +1466,27 @@ def audit_canary_run_dir(run_dir: Path, phase7e_dir: Path | None = None, *,
 
 
 def build_canary_audit_report(auditor: Auditor, run_dir: Path) -> dict[str, Any]:
-    """Structured canary verdict.  Safe to build for a malformed artifact set."""
+    """Structured canary verdict, built from ONE audit-time snapshot.
+
+    Every source-derived field comes from the payloads the auditor parsed, and
+    the digests come from the same bytes.  The source artifacts are deliberately
+    NOT re-read here: a re-read could describe a file that changed after the
+    audit, so the verdict would mix a new metadata snapshot with an old digest.
+    Safe to build for a malformed artifact set: missing snapshots yield None.
+    """
 
     def field(name: str, key: str, default: Any = None) -> Any:
-        path = Path(run_dir) / name
-        if not path.is_file():
+        payload = auditor.audited_payloads.get(name)
+        if not isinstance(payload, Mapping):
             return default
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
-            return default
-        return payload.get(key, default) if isinstance(payload, dict) else default
+        return payload.get(key, default)
 
     blockers = len(auditor.blockers)
     highs = len(auditor.highs)
     mediums = len([f for f in auditor.findings if f.severity == "MEDIUM"])
+    # what was actually read, not what happens to be on disk now
     audited = sorted(name for name in CANARY_AUDIT_INPUT_FILES
-                     if (Path(run_dir) / name).is_file())
+                     if name in auditor.audited_digests)
     return {
         "audit_version": CANARY_AUDIT_VERSION,
         "status": "PASS" if blockers == 0 and highs == 0 else "FAIL",
@@ -1426,6 +1505,10 @@ def build_canary_audit_report(auditor: Auditor, run_dir: Path) -> dict[str, Any]
         "canary_execution_mode": field("canary.json", "execution_mode"),
         "canary_status": field("canary.json", "status"),
         "audited_files": audited,
+        # Bound to the exact bytes the auditor read, taken from the audit itself
+        # and never recomputed here: a re-read could hash a different file.
+        "authorization_content_sha256": auditor.audited_digests.get("authorization.json"),
+        "canary_content_sha256": auditor.audited_digests.get("canary.json"),
         "run_dir": str(run_dir),
     }
 
@@ -1478,7 +1561,37 @@ def audit_canary_verdict_counts(payload: Mapping[str, Any], auditor: Auditor) ->
                         f"{key}={reported!r} but findings hold {recomputed} {severity}")
 
 
-def audit_canary_audit_report(payload: Mapping[str, Any], auditor: Auditor) -> None:
+CANARY_AUDIT_CONTENT_KEYS = (
+    ("authorization.json", "authorization_content_sha256"),
+    ("canary.json", "canary_content_sha256"),
+)
+
+
+def audit_canary_verdict_content_binding(
+        payload: Mapping[str, Any], auditor: Auditor,
+        source_digests: Mapping[str, str] | None = None) -> None:
+    """A PASS must still describe the artifacts that are on disk now.
+
+    The verdict names the SHA-256 of the exact authorization.json and canary.json
+    bytes it audited.  If either file changed afterwards the PASS is stale, and a
+    stale PASS is not evidence for the smoke.
+    """
+
+    for name, key in CANARY_AUDIT_CONTENT_KEYS:
+        recorded = _require_sha256_hex(payload, key, auditor,
+                                       "smoke_canary_audit_content_digest")
+        if recorded is None or source_digests is None:
+            continue
+        current = source_digests.get(name)
+        if current is None:
+            continue
+        auditor.require(recorded == current, "smoke_canary_audit_content_binding",
+                        f"{name} changed after the independent canary audit: the verdict "
+                        f"binds {recorded}, the file now hashes to {current}")
+
+
+def audit_canary_audit_report(payload: Mapping[str, Any], auditor: Auditor, *,
+                              source_digests: Mapping[str, str] | None = None) -> None:
     """Re-check the canary verdict when the final smoke audit runs."""
 
     auditor.require(payload.get("audit_version") == CANARY_AUDIT_VERSION,
@@ -1501,6 +1614,7 @@ def audit_canary_audit_report(payload: Mapping[str, Any], auditor: Auditor) -> N
     auditor.require(payload.get("canary_execution_mode") == "real",
                     "smoke_canary_audit_execution_mode",
                     str(payload.get("canary_execution_mode")))
+    audit_canary_verdict_content_binding(payload, auditor, source_digests)
 
 
 def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Auditor:
@@ -1518,17 +1632,21 @@ def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audit
 
     anchors = read_phase7e_anchor(auditor, phase7e_dir)
 
-    authorization = _read_json(run_dir / "authorization.json", auditor)
+    authorization, authorization_digest = _read_json_and_digest(
+        run_dir / "authorization.json", auditor)
     if authorization is not None:
         audit_smoke_authorization(authorization, auditor)
 
-    canary = _read_json(run_dir / "canary.json", auditor)
+    canary, canary_digest = _read_json_and_digest(run_dir / "canary.json", auditor)
     if canary is not None:
         audit_smoke_canary(canary, anchors, auditor)
 
+    source_digests = {name: digest for name, digest in
+                      (("authorization.json", authorization_digest),
+                       ("canary.json", canary_digest)) if digest is not None}
     canary_audit = _read_json(run_dir / CANARY_AUDIT_FILENAME, auditor)
     if canary_audit is not None:
-        audit_canary_audit_report(canary_audit, auditor)
+        audit_canary_audit_report(canary_audit, auditor, source_digests=source_digests)
 
     runinfo = _read_json(run_dir / "runinfo.json", auditor)
     if runinfo is not None:

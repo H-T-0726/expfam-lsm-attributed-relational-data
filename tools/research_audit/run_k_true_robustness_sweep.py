@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import sys
@@ -3045,7 +3046,7 @@ CANARY_AUDIT_REQUIRED_KEYS = (
     "approved_scientific_main_sha", "run_code_sha", "protocol_hash",
     "protocol_origin_issue", "execution_issue", "expected_canary_fits",
     "actual_canary_fits", "canary_execution_mode", "canary_status",
-    "audited_files",
+    "audited_files", "authorization_content_sha256", "canary_content_sha256",
 )
 
 CANARY_STATUS_PASS = "PASS"
@@ -3527,6 +3528,22 @@ def require_canary_audit_pass(out_dir: Path, authorization: Any,
     audited = list(payload["audited_files"])
     for name in ("authorization.json", "canary.json"):
         _require(name in audited, f"the canary audit did not read {name}")
+
+    # Content binding: the verdict names the exact bytes the independent audit
+    # read.  If either source artifact changed afterwards the PASS is stale, and
+    # this module can only detect that by rehashing the files itself.
+    for name, key in (("authorization.json", "authorization_content_sha256"),
+                      ("canary.json", "canary_content_sha256")):
+        recorded = payload[key]
+        _require(type(recorded) is str and len(recorded) == 64
+                 and all(character in "0123456789abcdef" for character in recorded),
+                 f"the canary audit {key} is not 64 lowercase hex characters: {recorded!r}")
+        source = directory / name
+        _require(source.is_file(), f"{name} is missing from the smoke artifact directory")
+        current = hashlib.sha256(source.read_bytes()).hexdigest()
+        _require(recorded == current,
+                 f"{name} changed after the independent canary audit: the verdict binds "
+                 f"{recorded}, the file now hashes to {current}")
     return payload
 
 

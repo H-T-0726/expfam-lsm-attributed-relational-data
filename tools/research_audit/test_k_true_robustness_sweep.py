@@ -3070,10 +3070,28 @@ def test_HIGH01_authorization_report_exposes_the_trusted_sha_state(capsys):
 # artifact is ever written under expfam/results.
 
 
+import hashlib as _hashlib  # noqa: E402
 import shutil as _shutil  # noqa: E402
 
 
 APPROVED_BASELINE = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+
+def _stamp_canary_audit_digests(directory):
+    """Re-bind a fixture's verdict to the fixture's own canary artifacts.
+
+    Test-only, and for the same reason the baseline is re-stamped: the auditor
+    audits a copy stamped with the real frozen baseline, so the bytes it hashed
+    are not the bytes of the test-only fixture.  Attacks mutate the artifacts
+    AFTER this call, so the stale-PASS binding remains under test.
+    """
+
+    path = directory / A.CANARY_AUDIT_FILENAME
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    for name, key in A.CANARY_AUDIT_CONTENT_KEYS:
+        payload[key] = _hashlib.sha256((directory / name).read_bytes()).hexdigest()
+    path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    return payload
 
 
 def _write_test_canary_audit(directory):
@@ -3098,7 +3116,7 @@ def _write_test_canary_audit(directory):
     (directory / A.CANARY_AUDIT_FILENAME).write_text(
         json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
     _shutil.rmtree(staging)
-    return payload
+    return _stamp_canary_audit_digests(directory)
 
 
 def _fake_run(out_dir, *, authorization=None, run_code_sha="0" * 40, audit_canary=True):
@@ -3145,6 +3163,9 @@ def _promote_to_real_fixture(source, destination):
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload.update(patch)
         path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+
+    # the canary artifacts were just re-stamped; re-bind the verdict to them
+    _stamp_canary_audit_digests(destination)
 
     path = destination / "smoke_fit_results.csv"
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -6051,3 +6072,586 @@ def test_MEDIUMCOUNT_frozen_science_and_authorization_are_unchanged():
     assert authorization.independent_review_pass is False
     assert authorization.human_smoke_approval is False
     assert authorization.authorized() is False
+
+
+# ===========================================================================
+# PR #56 remote review HIGH: bind the canary verdict to the audited content
+# ===========================================================================
+#
+# A canary_audit.json PASS used to name the baseline, the protocol hash, the
+# issues and the run-code SHA, but nothing about the bytes it audited.  Anyone
+# could mutate authorization.json or canary.json after the audit and the runner
+# would still accept the stale PASS.  The verdict now carries the SHA-256 of the
+# exact bytes the auditor read, and both the runner gate and the final smoke
+# audit rehash the files and compare.
+
+
+def _sha256_file(path):
+    return _hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _smoke_after(out, monkeypatch, *, run_code_sha="0" * 40):
+    """Attempt the production-equivalent smoke; return (proceeded, message)."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    recorder = _FakeFitRecorder()
+    try:
+        H._execute_real_smoke_test_only(_test_authorization(), out,
+                                        adapter=_test_adapter(recorder),
+                                        run_code_sha=run_code_sha)
+        proceeded, message = True, ""
+    except HarnessStop as error:
+        proceeded, message = False, str(error)
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    return proceeded, message, recorder.calls
+
+
+def _audited_canary_dir(tmp_path, name="run"):
+    out = tmp_path / name
+    H._execute_real_canary_test_only(_test_authorization(), out,
+                                     adapter=_test_adapter(_FakeFitRecorder()),
+                                     run_code_sha="0" * 40)
+    _write_test_canary_audit(out)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    return out
+
+
+# --- the exact-byte digest itself -------------------------------------------
+
+
+def test_CONTENTBIND_digest_is_sha256_of_the_exact_file_bytes(tmp_path):
+    path = tmp_path / "artifact.json"
+    path.write_bytes(b'{"a": 1}\r\n')
+    auditor = A.Auditor()
+    payload, digest = A._read_json_and_digest(path, auditor)
+    assert payload == {"a": 1}
+    assert digest == _hashlib.sha256(b'{"a": 1}\r\n').hexdigest()
+    assert digest == A._sha256_hex(path.read_bytes())
+    assert len(digest) == 64 and digest == digest.lower()
+    assert not auditor.findings
+
+    # the bytes are what is hashed, not a canonical reserialization
+    other = tmp_path / "other.json"
+    other.write_bytes(b'{"a":1}')
+    _payload, other_digest = A._read_json_and_digest(other, A.Auditor())
+    assert other_digest != digest
+
+
+def test_CONTENTBIND_reader_reads_the_file_exactly_once():
+    body = _inspect.getsource(A._read_json_and_digest)
+    assert body.count("read_bytes()") == 1
+    assert "read_text(" not in body
+    # the digest must not be recomputed when the report is built
+    builder = _inspect.getsource(A.build_canary_audit_report)
+    assert "_sha256_hex(" not in builder and "hashlib" not in builder
+    assert "read_bytes" not in builder
+    assert "auditor.audited_digests" in builder
+
+
+def test_CONTENTBIND_audit_module_hashes_independently():
+    source = _inspect.getsource(A)
+    assert "import run_k_true_robustness_sweep" not in source
+    assert "import hashlib" in source
+    for function in (A._sha256_hex, A._read_json_and_digest,
+                     A.audit_canary_verdict_content_binding):
+        body = _inspect.getsource(function)
+        assert "run_k_true_robustness_sweep" not in body
+
+
+def test_CONTENTBIND_digest_survives_a_malformed_payload(tmp_path):
+    path = tmp_path / "broken.json"
+    path.write_bytes(b"{not json")
+    auditor = A.Auditor()
+    payload, digest = A._read_json_and_digest(path, auditor)
+    assert payload is None
+    assert digest == _hashlib.sha256(b"{not json").hexdigest()
+    assert auditor.blockers
+
+
+# --- the published verdict ---------------------------------------------------
+
+
+def test_CONTENTBIND_canary_verdict_records_both_digests(tmp_path):
+    out = _canary_audit_fixture(tmp_path)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert auditor.audited_digests == {
+        "authorization.json": _sha256_file(out / "authorization.json"),
+        "canary.json": _sha256_file(out / "canary.json"),
+    }
+
+    A.write_canary_audit_report(out, auditor)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+    for key in ("authorization_content_sha256", "canary_content_sha256"):
+        value = verdict[key]
+        assert type(value) is str and len(value) == 64
+        assert set(value) <= set("0123456789abcdef")
+
+
+def test_CONTENTBIND_cli_published_verdict_is_bound(tmp_path, capsys):
+    out = _canary_audit_fixture(tmp_path)
+    assert A.main(["--run-dir", str(out), "--mode", "canary", "--write-report"]) == 0
+    capsys.readouterr()
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+
+
+def test_CONTENTBIND_hex_helper_is_strict():
+    for value in ("abc", "0" * 63, "0" * 65, "A" * 64, "0" * 63 + "g",
+                  None, 1, True, ["0" * 64], "0" * 64 + " "):
+        auditor = A.Auditor()
+        assert A._require_sha256_hex({"d": value}, "d", auditor, "c") is None, value
+        assert len(auditor.blockers) == 1, value
+    missing = A.Auditor()
+    assert A._require_sha256_hex({}, "d", missing, "c") is None
+    assert len(missing.blockers) == 1
+    clean = A.Auditor()
+    assert A._require_sha256_hex({"d": "a1" * 32}, "d", clean, "c") == "a1" * 32
+    assert not clean.findings
+    body = _inspect.getsource(A._require_sha256_hex)
+    assert ".lower()" not in body and ".upper()" not in body      # nothing is normalised
+
+
+# --- final smoke audit: attacks A / B / C ------------------------------------
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_CONTENTBIND_final_audit_detects_a_post_audit_mutation(tmp_path, name, updates):
+    directory = _real_fixture(tmp_path)
+    before = _sha256_file(directory / name)
+    _patch_json(directory / name, **updates)
+    assert _sha256_file(directory / name) != before, "the mutation must change the bytes"
+
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers), \
+        (name, sorted({f.check for f in auditor.blockers}))
+    assert report["status"] == "FAIL" and report["blocker_count"] > 0
+
+
+def test_CONTENTBIND_final_audit_detects_a_whitespace_only_mutation(tmp_path):
+    """Exact-byte contract: reformatting the same JSON is still a change."""
+
+    directory = _real_fixture(tmp_path)
+    path = directory / "authorization.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps(payload, sort_keys=True, indent=4), encoding="utf-8")
+
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers)
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_final_audit_rejects_a_tampered_digest(tmp_path, key):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", **{key: "0" * 64})
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_binding" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("value", ["abc", "0" * 63, "A" * 64, "0" * 63 + "z", None, 1, True])
+def test_CONTENTBIND_final_audit_rejects_a_malformed_digest(tmp_path, value):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / "canary_audit.json", canary_content_sha256=value)
+    auditor = A.audit_smoke_run_dir(directory)          # must not raise
+    assert any(f.check == "smoke_canary_audit_content_digest" for f in auditor.blockers), value
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_final_audit_rejects_a_missing_digest(tmp_path, key):
+    directory = _real_fixture(tmp_path)
+    payload = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop(key)
+    (directory / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    auditor, report = _final_audit(directory)
+    assert any(f.check == "smoke_canary_audit_content_digest" for f in auditor.blockers)
+    assert report["status"] == "FAIL"
+
+
+# --- the runner gate: attacks A / B / C / D / E ------------------------------
+
+
+def test_CONTENTBIND_runner_required_keys_include_both_digests():
+    for key in ("authorization_content_sha256", "canary_content_sha256"):
+        assert key in H.CANARY_AUDIT_REQUIRED_KEYS, key
+        assert key in H.run_smoke_contract()["canary_audit_keys"], key
+    assert H.run_smoke_contract()["em_fits_executed"] == 0
+
+
+def test_CONTENTBIND_runner_verifies_before_the_adapter():
+    body = _executable_body(H._execute_real_smoke)
+    order = [body.index(token) for token in (
+        "prepare_smoke_cell(", "require_existing_smoke_artifact_dir(",
+        "require_canary_pass_evidence(", "require_canary_audit_pass(",
+        "_resolve_fit_adapter(", "_run_real_smoke(")]
+    assert order == sorted(order), body
+    gate = _executable_body(H.require_canary_audit_pass)
+    assert "hashlib.sha256(" in gate and "read_bytes()" in gate
+    # the runner verifies, it never produces a verdict
+    assert "write_json_artifact" not in gate
+    runner = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "build_canary_audit_report" not in runner
+    assert "write_canary_audit_report" not in runner
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_CONTENTBIND_smoke_stops_on_a_post_audit_mutation(tmp_path, monkeypatch,
+                                                          name, updates):
+    out = _audited_canary_dir(tmp_path)
+    _patch_json(out / name, **updates)
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    assert name in message and "changed after the independent canary audit" in message
+    assert not (out / "smoke_fit_results.csv").exists()
+
+
+@pytest.mark.parametrize("key,value", [
+    ("canary_content_sha256", "0" * 64),
+    ("authorization_content_sha256", "0" * 64),
+    ("canary_content_sha256", "abc"),
+    ("canary_content_sha256", "A" * 64),
+    ("canary_content_sha256", "0" * 63 + "z"),
+    ("canary_content_sha256", None),
+    ("canary_content_sha256", 1),
+    ("authorization_content_sha256", True),
+])
+def test_CONTENTBIND_smoke_stops_on_a_tampered_or_malformed_digest(tmp_path, monkeypatch,
+                                                                   key, value):
+    out = _audited_canary_dir(tmp_path)
+    _patch_json(out / "canary_audit.json", **{key: value})
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    # either the format check names the key, or the rehash reports the mismatch
+    assert key in message or "changed after the independent canary audit" in message, message
+
+
+@pytest.mark.parametrize("key", ["authorization_content_sha256", "canary_content_sha256"])
+def test_CONTENTBIND_smoke_stops_on_a_missing_digest(tmp_path, monkeypatch, key):
+    out = _audited_canary_dir(tmp_path)
+    payload = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    payload.pop(key)
+    (out / "canary_audit.json").write_text(json.dumps(payload), encoding="utf-8")
+    proceeded, message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is False and fits == 0
+    assert "incomplete" in message and key in message
+
+
+# --- positive control --------------------------------------------------------
+
+
+def test_CONTENTBIND_unchanged_artifacts_still_run_six_fake_fits(tmp_path, monkeypatch):
+    out = _audited_canary_dir(tmp_path)
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == _sha256_file(out / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(out / "canary.json")
+
+    proceeded, _message, fits = _smoke_after(out, monkeypatch)
+    assert proceeded is True and fits == 6
+    assert "em_runner" not in sys.modules
+
+
+def test_CONTENTBIND_final_audit_positive_control(tmp_path):
+    directory = _real_fixture(tmp_path)
+    verdict = json.loads((directory / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["authorization_content_sha256"] == \
+        _sha256_file(directory / "authorization.json")
+    assert verdict["canary_content_sha256"] == _sha256_file(directory / "canary.json")
+    auditor, report = _final_audit(directory)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    assert report["status"] == "PASS"
+
+
+# --- the scientific protocol is untouched ------------------------------------
+
+
+def test_CONTENTBIND_protocol_hash_is_unchanged():
+    config = H.smoke_protocol_config()
+    for key in config:
+        assert "content_sha256" not in key, key
+    assert "sha256" not in _inspect.getsource(H.smoke_protocol_config)
+    assert H.smoke_protocol_hash() == A.EXPECTED_SMOKE_PROTOCOL_HASH == \
+        "1f6fae965cffcfc362836554a171152f2e60e67a801eb5ec09b034976315ec09"
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
+    assert (A.SMOKE_PROTOCOL_ISSUE_NUMBER, A.SMOKE_EXECUTION_ISSUE_NUMBER) == (53, 55)
+    assert (A.SMOKE_ESTIMAND, A.SMOKE_ROLE) == ("A", "primary")
+    assert A.SMOKE_K_TRUE == 1 and A.SMOKE_REPLICATE == 1
+    assert A.SMOKE_K_CANDIDATES == (2, 3, 4) and A.SMOKE_STARTS == (1, 2)
+    assert (A.EXPECTED_CANARY_FITS, A.EXPECTED_SMOKE_FITS,
+            A.EXPECTED_REAL_EM_BUDGET) == (2, 6, 8)
+    assert H.EXPECTED_NEW_FITS == 336
+
+    assert H.current_smoke_execution_authorization() is None
+    authorization = H.current_smoke_authorization()
+    assert authorization.independent_review_pass is False
+    assert authorization.human_smoke_approval is False
+    assert authorization.authorized() is False
+
+
+# --- previously fixed protections have not regressed -------------------------
+
+
+@pytest.mark.parametrize("name,updates,check", [
+    ("canary_audit.json", {"medium_count": 0.0}, "smoke_canary_audit_medium_count"),
+    ("canary_audit.json", {"blocker_count": 0.0}, "smoke_canary_audit_counts"),
+    ("runinfo.json", {"execution_issue": 55.0}, "smoke_runinfo_execution_issue"),
+    ("runinfo.json", {"approved_baseline_is_ancestor": 1}, "smoke_runinfo_lineage"),
+    ("smoke_summary.json", {"k_true": 1.0}, "smoke_summary_k_true"),
+    ("smoke_summary.json", {"candidate_k": [2.0, 3, 4]}, "smoke_summary_candidates"),
+])
+def test_CONTENTBIND_previous_protections_hold(tmp_path, name, updates, check):
+    directory = _real_fixture(tmp_path)
+    _patch_json(directory / name, **updates)
+    auditor = A.audit_smoke_run_dir(directory)
+    assert any(f.check == check for f in auditor.blockers), \
+        (name, sorted({f.check for f in auditor.blockers}))
+
+
+# ===========================================================================
+# PR #56 content-binding rereview MEDIUM 1: one audit-time snapshot
+# ===========================================================================
+#
+# The verdict used to take its digests from the audit but its metadata from a
+# second read at report-build time, so a file changed in between produced a
+# report that mixed new metadata with an old digest.  Every source-derived field
+# now comes from the payload the auditor parsed, out of the same bytes it hashed.
+
+
+import ast as _ast          # noqa: E402
+import textwrap as _textwrap  # noqa: E402
+
+
+def _audit_snapshot_dir(tmp_path, name="snapshot"):
+    """A production-lineage canary artifact pair, audited but not yet reported."""
+
+    out = _canary_audit_fixture(tmp_path / name)
+    auditor = A.audit_canary_run_dir(out)
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    return out, auditor
+
+
+def test_SNAPSHOTBIND_auditor_stores_payload_and_digest_from_one_read(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    assert set(auditor.audited_payloads) == {"authorization.json", "canary.json"}
+    assert set(auditor.audited_digests) == {"authorization.json", "canary.json"}
+    for name in ("authorization.json", "canary.json"):
+        raw = (out / name).read_bytes()
+        assert auditor.audited_digests[name] == _hashlib.sha256(raw).hexdigest()
+        assert auditor.audited_payloads[name] == json.loads(raw.decode("utf-8"))
+
+
+def test_SNAPSHOTBIND_snapshot_is_an_independent_copy(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    stored = auditor.audited_payloads["canary.json"]
+    fresh, _digest = A._read_json_and_digest(out / "canary.json", A.Auditor())
+    assert stored == fresh and stored is not fresh
+    assert "copy.deepcopy(" in _inspect.getsource(A.audit_canary_run_dir)
+
+    first = A.build_canary_audit_report(auditor, out)
+    second = A.build_canary_audit_report(auditor, out)
+    assert first == second, "the verdict must not depend on when it is built"
+
+
+@pytest.mark.parametrize("key,mutation,report_key", [
+    ("status", "FAIL", "canary_status"),
+    ("execution_mode", "test_only", "canary_execution_mode"),
+    ("real_canary_fits_executed", 0, "actual_canary_fits"),
+    ("run_code_sha", "1" * 40, "run_code_sha"),
+])
+def test_SNAPSHOTBIND_report_keeps_the_audited_values(tmp_path, key, mutation, report_key):
+    """§7: mutate the source AFTER the audit, BEFORE the report is built."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    audited_value = json.loads((out / "canary.json").read_text(encoding="utf-8"))[key]
+    audited_digest = auditor.audited_digests["canary.json"]
+    assert audited_value != mutation
+
+    _patch_json(out / "canary.json", **{key: mutation})
+    current_digest = _hashlib.sha256((out / "canary.json").read_bytes()).hexdigest()
+    assert current_digest != audited_digest
+
+    report = A.build_canary_audit_report(auditor, out)
+    assert report[report_key] == audited_value, "the report followed the current file"
+    assert report[report_key] != mutation
+    assert report["canary_content_sha256"] == audited_digest
+    assert report["canary_content_sha256"] != current_digest
+
+
+def test_SNAPSHOTBIND_authorization_variant(tmp_path):
+    """§8: the authorization snapshot and digest are equally audit-time."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    audited_digest = auditor.audited_digests["authorization.json"]
+    audited_payload = dict(auditor.audited_payloads["authorization.json"])
+
+    _patch_json(out / "authorization.json", harmless_extra_field="x")
+    current_digest = _hashlib.sha256((out / "authorization.json").read_bytes()).hexdigest()
+    assert current_digest != audited_digest
+
+    report = A.build_canary_audit_report(auditor, out)
+    assert report["authorization_content_sha256"] == audited_digest
+    assert report["authorization_content_sha256"] != current_digest
+    assert auditor.audited_payloads["authorization.json"] == audited_payload
+    assert "harmless_extra_field" not in auditor.audited_payloads["authorization.json"]
+
+
+def test_SNAPSHOTBIND_audited_files_reflect_what_was_read(tmp_path):
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    (out / "canary.json").unlink()               # gone after the audit
+    report = A.build_canary_audit_report(auditor, out)
+    assert sorted(report["audited_files"]) == ["authorization.json", "canary.json"]
+
+
+def test_SNAPSHOTBIND_builder_never_rereads_the_source(tmp_path):
+    """§10: static proof, alongside the behavioural tests above."""
+
+    tree = _ast.parse(_textwrap.dedent(_inspect.getsource(A.build_canary_audit_report)))
+    forbidden_attributes = {"read_text", "read_bytes", "load", "loads", "is_file",
+                            "open", "iterdir", "stat"}
+    for node in _ast.walk(tree):
+        if isinstance(node, _ast.Attribute):
+            assert node.attr not in forbidden_attributes, node.attr
+        if isinstance(node, _ast.Name):
+            assert node.id not in {"open", "json"}, node.id
+    assert "auditor.audited_payloads" in _inspect.getsource(A.build_canary_audit_report)
+
+
+def test_SNAPSHOTBIND_stale_snapshot_report_is_rejected_by_the_runner(tmp_path):
+    """§9: internally consistent snapshot, and still no stale PASS for the smoke."""
+
+    out, auditor = _audit_snapshot_dir(tmp_path)
+    _patch_json(out / "canary.json", warning_count=1)      # changed after the audit
+    A.write_canary_audit_report(out, auditor)              # snapshot verdict, PASS
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+    assert verdict["status"] == "PASS"
+    assert verdict["canary_content_sha256"] == auditor.audited_digests["canary.json"]
+
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_canary_audit_pass(out, authorization, canary_payload,
+                                    current_run_code_sha="0" * 40, test_only=False)
+    assert "changed after the independent canary audit" in str(excinfo.value)
+
+
+# ===========================================================================
+# PR #56 content-binding rereview MEDIUM 2: no-restamp audit -> runner
+# ===========================================================================
+#
+# Every other integration fixture re-stamps the verdict for the test-only
+# lineage.  These two tests use production-lineage artifacts end to end: the
+# real auditor writes the verdict, nothing touches it, and the runner gate
+# consumes exactly those bytes.  No adapter is built and no EM runs.
+
+
+def _no_restamp_guard(monkeypatch):
+    def _forbidden(*args, **kwargs):
+        raise AssertionError("the direct integration test must not restamp digests")
+
+    monkeypatch.setattr(sys.modules[__name__], "_stamp_canary_audit_digests", _forbidden)
+
+
+def _direct_audited_dir(tmp_path, monkeypatch, name="direct"):
+    """audit module -> persisted verdict, with no copy/restamp of any kind."""
+
+    _no_restamp_guard(monkeypatch)
+    out = _canary_audit_fixture(tmp_path / name)
+    auditor = A.audit_canary_run_dir(out)          # the real independent auditor
+    assert not auditor.blockers, [f"{f.check}: {f.detail}" for f in auditor.blockers]
+    assert not auditor.highs
+    A.write_canary_audit_report(out, auditor)      # the audit module persists it
+    return out
+
+
+def test_DIRECTBIND_untouched_verdict_passes_the_runner_gate(tmp_path, monkeypatch):
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    verdict_bytes = (out / "canary_audit.json").read_bytes()
+    verdict = json.loads(verdict_bytes)
+    authorization_bytes = (out / "authorization.json").read_bytes()
+    canary_bytes = (out / "canary.json").read_bytes()
+
+    # §17: the persisted digests are the digests of these exact files
+    assert verdict["status"] == "PASS"
+    assert verdict["authorization_content_sha256"] == \
+        _hashlib.sha256(authorization_bytes).hexdigest()
+    assert verdict["canary_content_sha256"] == _hashlib.sha256(canary_bytes).hexdigest()
+
+    canary_payload = json.loads(canary_bytes.decode("utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    accepted = H.require_canary_audit_pass(out, authorization, canary_payload,
+                                           current_run_code_sha="0" * 40, test_only=False)
+    assert accepted["status"] == "PASS"
+
+    # §16: nothing was re-stamped, rewritten or rehashed along the way
+    assert (out / "canary_audit.json").read_bytes() == verdict_bytes
+    assert (out / "authorization.json").read_bytes() == authorization_bytes
+    assert (out / "canary.json").read_bytes() == canary_bytes
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert not (out / "smoke_fit_results.csv").exists()
+
+
+def test_DIRECTBIND_uses_the_production_frozen_constants(tmp_path, monkeypatch):
+    """§14: the artifacts match production; no constant is patched to fit."""
+
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    authorization = json.loads((out / "authorization.json").read_text(encoding="utf-8"))
+    canary = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    verdict = json.loads((out / "canary_audit.json").read_text(encoding="utf-8"))
+
+    assert A.APPROVED_SCIENTIFIC_MAIN_SHA == H.APPROVED_SCIENTIFIC_MAIN_SHA \
+        == H.current_expected_smoke_main_sha() == APPROVED_BASELINE
+    for payload in (authorization, canary, verdict):
+        assert payload["approved_scientific_main_sha"] == APPROVED_BASELINE
+        assert payload["protocol_hash"] == H.smoke_protocol_hash() \
+            == A.EXPECTED_SMOKE_PROTOCOL_HASH
+    assert verdict["execution_issue"] == 55 and verdict["protocol_origin_issue"] == 53
+    assert verdict["canary_execution_mode"] == "real"
+    assert verdict["actual_canary_fits"] == A.EXPECTED_CANARY_FITS == 2
+    # the production authorization gate is untouched by this test
+    assert H.current_smoke_execution_authorization() is None
+
+
+@pytest.mark.parametrize("name,updates", [
+    ("canary.json", {"k_true": 1.0}),
+    ("canary.json", {"protocol_origin_issue_number": 53.0}),
+    ("authorization.json", {"k_true": 1.0}),
+    ("authorization.json", {"harmless_extra_field": "x"}),
+])
+def test_DIRECTBIND_mutation_after_the_untouched_verdict_stops_the_runner(
+        tmp_path, monkeypatch, name, updates):
+    """§19: the persistent regression for the original HIGH, with no restamping."""
+
+    out = _direct_audited_dir(tmp_path, monkeypatch)
+    verdict_bytes = (out / "canary_audit.json").read_bytes()
+    _patch_json(out / name, **updates)
+
+    canary_payload = json.loads((out / "canary.json").read_text(encoding="utf-8"))
+    authorization = _production_authorization(approved_main_sha=APPROVED_BASELINE)
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_canary_audit_pass(out, authorization, canary_payload,
+                                    current_run_code_sha="0" * 40, test_only=False)
+    message = str(excinfo.value)
+    assert name in message and "changed after the independent canary audit" in message
+    assert (out / "canary_audit.json").read_bytes() == verdict_bytes
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
