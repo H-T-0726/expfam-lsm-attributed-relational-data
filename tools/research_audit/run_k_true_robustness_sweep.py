@@ -3025,6 +3025,7 @@ SMOKE_ARTIFACT_DIR = SMOKE_ARTIFACT_ROOT / SMOKE_ARTIFACT_DIRNAME
 SMOKE_ARTIFACT_FILES = (
     "authorization.json",
     "canary.json",
+    "canary_audit.json",
     "runinfo.json",
     "smoke_fit_results.csv",
     "smoke_summary.json",
@@ -3032,6 +3033,20 @@ SMOKE_ARTIFACT_FILES = (
 )
 SMOKE_AUDIT_INPUT_FILES = tuple(
     name for name in SMOKE_ARTIFACT_FILES if name != "audit_report.json")
+
+# The independent canary verdict.  It is produced ONLY by
+# ``audit_k_true_robustness_sweep``; this module may read and require it, never
+# write it.  Letting the runner manufacture its own PASS would make the
+# independent audit step decorative.
+CANARY_AUDIT_FILENAME = "canary_audit.json"
+CANARY_AUDIT_VERSION = "phase8b-canary-audit-v1"
+CANARY_AUDIT_REQUIRED_KEYS = (
+    "audit_version", "status", "blocker_count", "high_count", "medium_count", "findings",
+    "approved_scientific_main_sha", "run_code_sha", "protocol_hash",
+    "protocol_origin_issue", "execution_issue", "expected_canary_fits",
+    "actual_canary_fits", "canary_execution_mode", "canary_status",
+    "audited_files",
+)
 
 CANARY_STATUS_PASS = "PASS"
 CANARY_STATUS_FAIL = "FAIL"
@@ -3309,7 +3324,8 @@ def build_smoke_runinfo_payload(*, run_code_sha: str, out_dir: Path,
                                 started_at: str, completed_at: str,
                                 working_tree_clean: bool,
                                 actual_canary_fits: int,
-                                actual_smoke_fits: int) -> dict[str, Any]:
+                                actual_smoke_fits: int,
+                                canary_audit_status: str) -> dict[str, Any]:
     return {
         "artifact_version": SMOKE_ARTIFACT_VERSION,
         "phase": PHASE,
@@ -3332,6 +3348,7 @@ def build_smoke_runinfo_payload(*, run_code_sha: str, out_dir: Path,
         "expected_smoke_fits": EXPECTED_SMOKE_FITS,
         "actual_canary_fits": int(actual_canary_fits),
         "actual_smoke_fits": int(actual_smoke_fits),
+        "canary_audit_status": canary_audit_status,
         "full_fits_executed": 0,
         "phase7e_rerun_count": 0,
         "artifact_directory": str(out_dir),
@@ -3443,6 +3460,76 @@ def require_canary_pass_evidence(out_dir: Path, authorization: Any,
     return payload
 
 
+def require_canary_audit_pass(out_dir: Path, authorization: Any,
+                              canary_payload: Mapping[str, Any], *,
+                              current_run_code_sha: str,
+                              test_only: bool = False) -> dict[str, Any]:
+    """Smoke may not begin without an INDEPENDENT canary audit that passed.
+
+    ``require_canary_pass_evidence`` is producer-side validation: the same code
+    that wrote the evidence deciding the evidence is fine.  The frozen order
+    (Issue #55) puts an independent audit between the canary and the smoke, so
+    this reads the verdict that ``audit_k_true_robustness_sweep`` published and
+    binds it to this execution's baseline, protocol, issues and run-code SHA.
+
+    This module never writes ``canary_audit.json``.
+    """
+
+    directory = require_existing_smoke_artifact_dir(out_dir)
+    payload = read_json_artifact(directory / CANARY_AUDIT_FILENAME)
+
+    missing = [key for key in CANARY_AUDIT_REQUIRED_KEYS if key not in payload]
+    _require(not missing, f"canary audit verdict is incomplete; missing {missing}")
+
+    _require(payload["audit_version"] == CANARY_AUDIT_VERSION,
+             "canary audit version changed")
+    _require(payload["status"] == "PASS",
+             f"the independent canary audit did not pass: {payload['status']!r}")
+    _require(payload["blocker_count"] == 0 and payload["high_count"] == 0,
+             "the independent canary audit recorded blocking findings: "
+             f"{payload['blocker_count']} BLOCKER / {payload['high_count']} HIGH")
+    # MEDIUM findings do not block a PASS; the count is still an integer >= 0,
+    # and an equal float/bool/string must not be accepted in its place.
+    _require(type(payload["medium_count"]) is int and payload["medium_count"] >= 0,
+             "the canary audit medium_count is not a non-negative integer: "
+             f"{payload['medium_count']!r}")
+
+    _require(payload["approved_scientific_main_sha"] == authorization.approved_main_sha
+             == trusted_main_sha_for(test_only),
+             "the canary audit was produced under a different approved baseline")
+    _require(payload["protocol_hash"] == authorization.protocol_hash == smoke_protocol_hash(),
+             "the canary audit protocol hash does not match this execution")
+    _require(payload["execution_issue"] == SMOKE_EXECUTION_ISSUE_NUMBER,
+             "the canary audit belongs to a different execution issue")
+    _require(payload["protocol_origin_issue"] == SMOKE_PROTOCOL_ISSUE_NUMBER,
+             "the canary audit protocol origin issue changed")
+
+    _require_full_commit_sha(payload["run_code_sha"], "canary audit run code SHA")
+    _require(payload["run_code_sha"] == current_run_code_sha,
+             "the canary audit run code SHA does not match the current smoke execution: "
+             f"{payload['run_code_sha']} != {current_run_code_sha}")
+    _require(payload["run_code_sha"] == canary_payload["run_code_sha"],
+             "the canary audit and the canary evidence name different run-code SHAs")
+
+    expected_mode = "test_only" if test_only else "real"
+    _require(payload["canary_execution_mode"] == expected_mode,
+             f"the canary audit covers a {payload['canary_execution_mode']!r} canary, "
+             f"expected {expected_mode!r}")
+    _require(payload["canary_status"] == canary_payload["status"] == CANARY_STATUS_PASS,
+             "the canary audit did not cover a PASS canary")
+
+    expected_real = 0 if test_only else EXPECTED_CANARY_FITS
+    _require(payload["expected_canary_fits"] == EXPECTED_CANARY_FITS,
+             "the canary audit expected fit count changed")
+    _require(payload["actual_canary_fits"] == expected_real,
+             "the canary audit fit count does not match the execution mode")
+
+    audited = list(payload["audited_files"])
+    for name in ("authorization.json", "canary.json"):
+        _require(name in audited, f"the canary audit did not read {name}")
+    return payload
+
+
 # ---------------------------------------------------------------------------
 # production execution wiring (unreachable while the authorization is absent)
 # ---------------------------------------------------------------------------
@@ -3531,6 +3618,11 @@ def _execute_real_smoke(authorization: Any, out_dir: Path | None, *,
     directory = require_existing_smoke_artifact_dir(out_dir)
     canary_payload = require_canary_pass_evidence(
         directory, authorization, current_run_code_sha=run_code_sha, test_only=test_only)
+    # The INDEPENDENT canary verdict, produced by the audit module, gates the
+    # six fits.  A valid canary.json alone is not enough.
+    canary_audit = require_canary_audit_pass(
+        directory, authorization, canary_payload,
+        current_run_code_sha=run_code_sha, test_only=test_only)
     # --- phase 2: only now may a fit-capable adapter exist ---------------
     adapter = _resolve_fit_adapter(test_adapter, test_only)
     report = _run_real_smoke(authorization, adapter=adapter, test_only=test_only, cell=cell)
@@ -3550,6 +3642,7 @@ def _execute_real_smoke(authorization: Any, out_dir: Path | None, *,
         working_tree_clean=working_tree_is_clean(),
         actual_canary_fits=canary_payload["real_canary_fits_executed"],
         actual_smoke_fits=report.real_smoke_fits_executed,
+        canary_audit_status=canary_audit["status"],
     ))
     return {
         "mode": "smoke",
@@ -3559,6 +3652,7 @@ def _execute_real_smoke(authorization: Any, out_dir: Path | None, *,
         "selected_k": report.selected_k,
         "selected_k_interpretation": SELECTED_K_INTERPRETATION,
         "k_recovery_evaluated": False,
+        "canary_audit_status": canary_audit["status"],
         "real_canary_fits_executed": canary_payload["real_canary_fits_executed"],
         "real_smoke_fits_executed": report.real_smoke_fits_executed,
         "em_fits_executed": report.real_smoke_fits_executed,
@@ -3671,6 +3765,8 @@ def run_smoke_contract() -> dict[str, Any]:
         "audit_input_files": list(SMOKE_AUDIT_INPUT_FILES),
         "smoke_fit_results_columns": list(SMOKE_ARTIFACT_COLUMNS),
         "canary_evidence_keys": list(CANARY_EVIDENCE_REQUIRED_KEYS),
+        "canary_audit_keys": list(CANARY_AUDIT_REQUIRED_KEYS),
+        "canary_audit_filename": CANARY_AUDIT_FILENAME,
         "protocol_hash": smoke_protocol_hash(),
         "protocol_origin_issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
         "execution_issue": SMOKE_EXECUTION_ISSUE_NUMBER,

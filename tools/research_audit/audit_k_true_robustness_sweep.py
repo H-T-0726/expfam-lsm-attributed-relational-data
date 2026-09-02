@@ -713,10 +713,21 @@ CANARY_START = 1
 CANARY_MODEL_SEED = 641011
 CANARY_STATUS_PASS = "PASS"
 
+# Frozen canary comparison tolerances, restated INDEPENDENTLY.  The values were
+# read from the read-only Phase 7e source (``CANARY_ATOL``/``CANARY_RTOL`` in
+# run_heldout_k_selection_pilot.py), not guessed and not imported: an audit that
+# asks the audited code what tolerance it used cannot detect a relaxed one.
+EXPECTED_CANARY_ATOL = 1e-12
+EXPECTED_CANARY_RTOL = 1e-10
+
+# Restated independently for the same reason.
+EXPECTED_LEAKAGE_BOUNDARY_VERSION = "phase8b-leakage-boundary-v1"
+
 # audit_report.json is this module's OUTPUT, so it is never a required input.
 SMOKE_AUDIT_INPUT_FILES = (
     "authorization.json",
     "canary.json",
+    "canary_audit.json",
     "runinfo.json",
     "smoke_fit_results.csv",
     "smoke_summary.json",
@@ -824,6 +835,119 @@ def _parse_finite_float_field(row: Mapping[str, str], column: str, auditor: Audi
     return number
 
 
+def _require_exact_float(payload: Mapping[str, Any], key: str, expected: float,
+                         auditor: Auditor, check: str) -> None:
+    """A frozen numeric constant must be present, finite and exactly equal.
+
+    Never raises: a missing key, a string, a bool, NaN or +/-Inf is a BLOCKER.
+    There is deliberately no tolerance on the tolerance.
+    """
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return
+    value = payload[key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        auditor.blocker(check, f"{key} is not a number: {value!r}")
+        return
+    number = float(value)
+    if not math.isfinite(number):
+        auditor.blocker(check, f"{key} is nonfinite: {value!r}")
+        return
+    auditor.require(number == expected, check, f"{key}: {value!r} != {expected!r}")
+
+
+def _require_exact_int(payload: Mapping[str, Any], key: str, expected: int,
+                       auditor: Auditor, check: str) -> None:
+    """A frozen integer field must be present, an exact ``int`` and equal.
+
+    Value equality alone is not enough: ``1.0 == 1`` and ``True == 1`` are both
+    true in Python, so a float or a bool could otherwise be substituted for a
+    frozen integer and still be audited as PASS.  ``type(value) is int`` is
+    required on purpose -- ``isinstance`` would admit ``bool`` -- and nothing is
+    ever coerced: ``int("1")`` / ``int(1.0)`` would normalise invalid input away.
+    Never raises: a missing key, a float, a bool, a string, ``None`` or any
+    other type is a structured BLOCKER.
+    """
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return
+    value = payload[key]
+    if type(value) is not int:
+        auditor.blocker(check, f"{key} is not an int: {value!r} "
+                               f"({type(value).__name__})")
+        return
+    auditor.require(value == expected, check, f"{key}: {value!r} != {expected!r}")
+
+
+def _require_exact_int_list(payload: Mapping[str, Any], key: str,
+                            expected: Sequence[int], auditor: Auditor,
+                            check: str, *, sort: bool = False) -> None:
+    """The list form of :func:`_require_exact_int` (frozen integer vectors).
+
+    Every element must satisfy ``type(item) is int``: ``[2.0, 3, 4]`` and
+    ``[True, 3, 4]`` compare equal to ``[2, 3, 4]`` element-wise and would
+    otherwise be accepted.  ``sort=True`` compares the two sets in ascending
+    order (a reported tie set), never by coercing the entries.
+    """
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return
+    value = payload[key]
+    if not isinstance(value, list):
+        auditor.blocker(check, f"{key} is not a list: {value!r}")
+        return
+    bad = [item for item in value if type(item) is not int]
+    if bad:
+        auditor.blocker(check, f"{key} holds non-int entries: {bad!r}")
+        return
+    reported = sorted(value) if sort else list(value)
+    wanted = sorted(expected) if sort else list(expected)
+    auditor.require(reported == wanted, check, f"{key}: {reported!r} != {wanted!r}")
+
+
+def _require_nonnegative_int(payload: Mapping[str, Any], key: str,
+                            auditor: Auditor, check: str) -> int | None:
+    """A count field: present, exactly ``int``, never a bool, never negative.
+
+    Unlike :func:`_require_exact_int` the value is NOT frozen at one number: a
+    count that a PASS verdict tolerates (MEDIUM findings do not block) still has
+    an integer schema.  Returns the value so the caller can cross-check it.
+    """
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return None
+    value = payload[key]
+    if type(value) is not int:
+        auditor.blocker(check, f"{key} is not an int: {value!r} "
+                               f"({type(value).__name__})")
+        return None
+    if value < 0:
+        auditor.blocker(check, f"{key} is negative: {value!r}")
+        return None
+    return value
+
+
+def _require_exact_int_member(payload: Mapping[str, Any], key: str,
+                              allowed: Sequence[int], auditor: Auditor,
+                              check: str) -> None:
+    """A frozen integer field whose schema also fixes the admissible set."""
+
+    if key not in payload:
+        auditor.blocker(check, f"{key} is missing")
+        return
+    value = payload[key]
+    if type(value) is not int:
+        auditor.blocker(check, f"{key} is not an int: {value!r} "
+                               f"({type(value).__name__})")
+        return
+    auditor.require(value in tuple(allowed), check,
+                    f"{key}: {value!r} not in {list(allowed)!r}")
+
+
 def _parse_bool_field(row: Mapping[str, str], column: str, auditor: Auditor,
                       check: str, label: str) -> bool | None:
     """Strict boolean field.  Only the canonical tokens are accepted.
@@ -897,72 +1021,86 @@ def audit_smoke_authorization(payload: Mapping[str, Any], auditor: Auditor) -> N
                     "smoke_auth_baseline_sha",
                     f"expected {APPROVED_SCIENTIFIC_MAIN_SHA}, "
                     f"got {payload.get('approved_scientific_main_sha')!r}")
-    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
-                    "smoke_auth_execution_issue", str(payload.get("execution_issue_number")))
-    auditor.require(payload.get("protocol_origin_issue_number") == SMOKE_PROTOCOL_ISSUE_NUMBER,
-                    "smoke_auth_protocol_issue",
-                    str(payload.get("protocol_origin_issue_number")))
+    _require_exact_int(payload, "execution_issue_number", SMOKE_EXECUTION_ISSUE_NUMBER,
+                       auditor, "smoke_auth_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue_number", SMOKE_PROTOCOL_ISSUE_NUMBER,
+                       auditor, "smoke_auth_protocol_issue")
     auditor.require(payload.get("independent_review_pass") is True,
                     "smoke_auth_independent_review", "INDEPENDENT_REVIEW_PASS is not True")
     auditor.require(payload.get("human_smoke_approval") is True,
                     "smoke_auth_human_approval", "HUMAN_SMOKE_APPROVAL is not True")
-    auditor.require(payload.get("expected_canary_fits") == EXPECTED_CANARY_FITS,
-                    "smoke_auth_canary_count", str(payload.get("expected_canary_fits")))
-    auditor.require(payload.get("expected_smoke_fits") == EXPECTED_SMOKE_FITS,
-                    "smoke_auth_smoke_count", str(payload.get("expected_smoke_fits")))
+    _require_exact_int(payload, "expected_canary_fits", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_auth_canary_count")
+    _require_exact_int(payload, "expected_smoke_fits", EXPECTED_SMOKE_FITS,
+                       auditor, "smoke_auth_smoke_count")
     auditor.require(payload.get("estimand") == SMOKE_ESTIMAND
                     and payload.get("role") == SMOKE_ROLE,
                     "smoke_auth_estimand", str(payload.get("estimand")))
-    auditor.require(payload.get("k_true") == SMOKE_K_TRUE
-                    and payload.get("replicate") == SMOKE_REPLICATE,
-                    "smoke_auth_cell", str(payload.get("k_true")))
-    auditor.require(payload.get("split_seed") == SMOKE_SPLIT_SEED,
-                    "smoke_auth_split_seed", str(payload.get("split_seed")))
-    auditor.require(payload.get("data_seed") == expected_smoke_data_seed(),
-                    "smoke_auth_data_seed", str(payload.get("data_seed")))
-    auditor.require(payload.get("canary_model_seed") == CANARY_MODEL_SEED,
-                    "smoke_auth_canary_seed", str(payload.get("canary_model_seed")))
+    _require_exact_int(payload, "k_true", SMOKE_K_TRUE, auditor, "smoke_auth_cell")
+    _require_exact_int(payload, "replicate", SMOKE_REPLICATE, auditor, "smoke_auth_cell")
+    _require_exact_int(payload, "split_seed", SMOKE_SPLIT_SEED,
+                       auditor, "smoke_auth_split_seed")
+    _require_exact_int(payload, "data_seed", expected_smoke_data_seed(),
+                       auditor, "smoke_auth_data_seed")
+    _require_exact_int(payload, "canary_model_seed", CANARY_MODEL_SEED,
+                       auditor, "smoke_auth_canary_seed")
     expected_models = [expected_smoke_model_seed(k, start)
                        for k, start in expected_smoke_manifest_keys()]
-    auditor.require(list(payload.get("smoke_model_seeds") or []) == expected_models,
-                    "smoke_auth_model_seeds", str(payload.get("smoke_model_seeds")))
+    _require_exact_int_list(payload, "smoke_model_seeds", expected_models,
+                            auditor, "smoke_auth_model_seeds")
 
 
 def audit_smoke_canary(payload: Mapping[str, Any], anchors: Mapping[int, tuple[str, str]],
-                       auditor: Auditor) -> None:
+                       auditor: Auditor, *, expect_execution_mode: str = "real") -> None:
     _require_frozen_protocol_hash(payload, auditor, "canary.json")
     auditor.require(payload.get("status") == CANARY_STATUS_PASS,
                     "smoke_canary_status", str(payload.get("status")))
     auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
                     "smoke_canary_baseline_sha",
                     str(payload.get("approved_scientific_main_sha")))
-    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
-                    "smoke_canary_execution_issue", str(payload.get("execution_issue_number")))
-    auditor.require(payload.get("execution_mode") == "real", "smoke_canary_execution_mode",
-                    f"{payload.get('execution_mode')!r} is not a real execution")
-    auditor.require(payload.get("expected_fit_count") == EXPECTED_CANARY_FITS
-                    and payload.get("actual_fit_count") == EXPECTED_CANARY_FITS,
-                    "smoke_canary_fit_count",
-                    f"{payload.get('actual_fit_count')} != {EXPECTED_CANARY_FITS}")
-    auditor.require(payload.get("real_canary_fits_executed") == EXPECTED_CANARY_FITS,
-                    "smoke_canary_real_fit_count",
-                    f"{payload.get('real_canary_fits_executed')} != {EXPECTED_CANARY_FITS}")
-    auditor.require(payload.get("k_est") == CANARY_K_EST
-                    and payload.get("start") == CANARY_START,
-                    "smoke_canary_cell", str(payload.get("k_est")))
-    auditor.require(payload.get("model_seed") == CANARY_MODEL_SEED,
-                    "smoke_canary_model_seed", str(payload.get("model_seed")))
-    auditor.require(payload.get("data_seed") == expected_smoke_data_seed(),
-                    "smoke_canary_data_seed", str(payload.get("data_seed")))
-    auditor.require(payload.get("split_seed") == SMOKE_SPLIT_SEED,
-                    "smoke_canary_split_seed", str(payload.get("split_seed")))
+    _require_exact_int(payload, "execution_issue_number", SMOKE_EXECUTION_ISSUE_NUMBER,
+                       auditor, "smoke_canary_execution_issue")
+    # The canary must carry the protocol-origin issue itself; the authorization
+    # carrying it is not evidence about the canary.
+    _require_exact_int(payload, "protocol_origin_issue_number", SMOKE_PROTOCOL_ISSUE_NUMBER,
+                       auditor, "smoke_canary_protocol_issue")
+    auditor.require(payload.get("estimand") == SMOKE_ESTIMAND,
+                    "smoke_canary_estimand", str(payload.get("estimand")))
+    auditor.require(payload.get("role") == SMOKE_ROLE,
+                    "smoke_canary_role", str(payload.get("role")))
+    _require_exact_int(payload, "k_true", SMOKE_K_TRUE, auditor, "smoke_canary_k_true")
+    _require_exact_int(payload, "replicate", SMOKE_REPLICATE,
+                       auditor, "smoke_canary_replicate")
+    # Frozen tolerances: never relaxed, and never inspected before being fixed.
+    _require_exact_float(payload, "canary_atol", EXPECTED_CANARY_ATOL,
+                         auditor, "smoke_canary_atol")
+    _require_exact_float(payload, "canary_rtol", EXPECTED_CANARY_RTOL,
+                         auditor, "smoke_canary_rtol")
+    auditor.require(payload.get("boundary_version") == EXPECTED_LEAKAGE_BOUNDARY_VERSION,
+                    "smoke_canary_boundary_version", str(payload.get("boundary_version")))
+    auditor.require(payload.get("execution_mode") == expect_execution_mode,
+                    "smoke_canary_execution_mode",
+                    f"{payload.get('execution_mode')!r} != {expect_execution_mode!r}")
+    _require_exact_int(payload, "expected_fit_count", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_canary_fit_count")
+    _require_exact_int(payload, "actual_fit_count", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_canary_fit_count")
+    expected_real = EXPECTED_CANARY_FITS if expect_execution_mode == "real" else 0
+    _require_exact_int(payload, "real_canary_fits_executed", expected_real,
+                       auditor, "smoke_canary_real_fit_count")
+    _require_exact_int(payload, "k_est", CANARY_K_EST, auditor, "smoke_canary_cell")
+    _require_exact_int(payload, "start", CANARY_START, auditor, "smoke_canary_cell")
+    _require_exact_int(payload, "model_seed", CANARY_MODEL_SEED,
+                       auditor, "smoke_canary_model_seed")
+    _require_exact_int(payload, "data_seed", expected_smoke_data_seed(),
+                       auditor, "smoke_canary_data_seed")
+    _require_exact_int(payload, "split_seed", SMOKE_SPLIT_SEED,
+                       auditor, "smoke_canary_split_seed")
     auditor.require(payload.get("initialization_equal") is True
                     and payload.get("final_outputs_equal") is True,
                     "smoke_canary_invariance", "canary A/B outputs are not invariant")
-    auditor.require(payload.get("internal_retry") == 0, "smoke_canary_retry",
-                    str(payload.get("internal_retry")))
-    auditor.require(payload.get("warning_count") == 0, "smoke_canary_warnings",
-                    str(payload.get("warning_count")))
+    _require_exact_int(payload, "internal_retry", 0, auditor, "smoke_canary_retry")
+    _require_exact_int(payload, "warning_count", 0, auditor, "smoke_canary_warnings")
     auditor.require(payload.get("q_failure") is False, "smoke_canary_q_failure", "q_failure")
     auditor.require(payload.get("nan_occurred") is False, "smoke_canary_nan", "nan_occurred")
     auditor.require(payload.get("finite_state") is True, "smoke_canary_finite", "finite_state")
@@ -1083,11 +1221,14 @@ def audit_smoke_summary(payload: Mapping[str, Any],
     auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
                     "smoke_summary_baseline_sha",
                     str(payload.get("approved_scientific_main_sha")))
-    auditor.require(payload.get("execution_issue_number") == SMOKE_EXECUTION_ISSUE_NUMBER,
-                    "smoke_summary_execution_issue", str(payload.get("execution_issue_number")))
-    auditor.require(payload.get("expected_smoke_fits") == EXPECTED_SMOKE_FITS
-                    and payload.get("actual_smoke_fits") == EXPECTED_SMOKE_FITS,
-                    "smoke_summary_fit_count", str(payload.get("actual_smoke_fits")))
+    _require_exact_int(payload, "execution_issue_number", SMOKE_EXECUTION_ISSUE_NUMBER,
+                       auditor, "smoke_summary_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue_number", SMOKE_PROTOCOL_ISSUE_NUMBER,
+                       auditor, "smoke_summary_protocol_issue")
+    _require_exact_int(payload, "expected_smoke_fits", EXPECTED_SMOKE_FITS,
+                       auditor, "smoke_summary_fit_count")
+    _require_exact_int(payload, "actual_smoke_fits", EXPECTED_SMOKE_FITS,
+                       auditor, "smoke_summary_fit_count")
     # selected_k is recomputed below, but K recovery is never evaluated: K_TRUE=1
     # is not in the candidate set {2,3,4}, so agreement is impossible by design.
     auditor.require(payload.get("k_recovery_evaluated") is False,
@@ -1096,12 +1237,23 @@ def audit_smoke_summary(payload: Mapping[str, Any],
     auditor.require(payload.get("selected_k_interpretation") == "record_only",
                     "smoke_summary_selected_k_interpretation",
                     str(payload.get("selected_k_interpretation")))
-    auditor.require(list(payload.get("candidate_k") or []) == list(SMOKE_K_CANDIDATES),
-                    "smoke_summary_candidates", str(payload.get("candidate_k")))
+    _require_exact_int_list(payload, "candidate_k", SMOKE_K_CANDIDATES,
+                            auditor, "smoke_summary_candidates")
+    # selected_k stays record-only evidence, but its schema type is still an
+    # integer drawn from the frozen candidate set.  Checked here as well so a
+    # malformed value is a BLOCKER even when the recomputation below cannot run.
+    _require_exact_int_member(payload, "selected_k", SMOKE_K_CANDIDATES,
+                              auditor, "smoke_summary_selected_k")
 
     per_k = payload.get("per_k")
     if not auditor.require(isinstance(per_k, Mapping), "smoke_summary_per_k",
                            "per_k is missing or not an object"):
+        return
+    # per_k keys are strings by schema: compared as strings, never converted.
+    if not auditor.require(set(per_k) == {str(k) for k in SMOKE_K_CANDIDATES},
+                           "smoke_summary_per_k",
+                           f"per_k keys {sorted(map(str, per_k))} are not "
+                           f"{sorted(str(k) for k in SMOKE_K_CANDIDATES)}"):
         return
     if not auditor.require(set(scores) == set(SMOKE_K_CANDIDATES), "smoke_summary_score_set",
                            f"scores cover {sorted(scores)}"):
@@ -1130,11 +1282,21 @@ def audit_smoke_summary(payload: Mapping[str, Any],
     best = max(recomputed.values())
     tied = sorted(k for k, mean in recomputed.items() if best - mean <= TIE_TOLERANCE)
     selected = tied[0]
-    auditor.require(payload.get("selected_k") == selected, "smoke_summary_selected_k",
-                    f"reported {payload.get('selected_k')!r}, recomputed {selected}")
-    reported_ties = sorted(int(k) for k in (payload.get("tie_candidates") or []))
-    auditor.require(reported_ties == tied, "smoke_summary_tie_candidates",
-                    f"reported {reported_ties}, recomputed {tied}")
+    _require_exact_int(payload, "selected_k", selected, auditor, "smoke_summary_selected_k")
+    _require_exact_int_list(payload, "tie_candidates", tied, auditor,
+                            "smoke_summary_tie_candidates", sort=True)
+
+
+def audit_smoke_summary_provenance(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    """The cell provenance recorded in smoke_summary.json, as a schema check.
+
+    Deliberately NOT part of :func:`audit_smoke_summary`: that function must
+    contain no reference to the true K whatsoever, so that it cannot even appear
+    to compare ``selected_k`` with ``K_TRUE``.  Recording which cell produced the
+    summary is provenance; K recovery is still never evaluated.
+    """
+
+    _require_exact_int(payload, "k_true", SMOKE_K_TRUE, auditor, "smoke_summary_k_true")
 
 
 def audit_smoke_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
@@ -1143,27 +1305,202 @@ def audit_smoke_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
                     "smoke_runinfo_baseline_sha",
                     str(payload.get("approved_scientific_main_sha")))
     auditor.require(bool(payload.get("run_code_sha")), "smoke_runinfo_run_code_sha", "missing")
-    auditor.require(payload.get("run_code_sha") != APPROVED_SCIENTIFIC_MAIN_SHA
-                    or payload.get("approved_baseline_is_ancestor") is True,
-                    "smoke_runinfo_lineage", "run code SHA lineage is inconsistent")
-    auditor.require(payload.get("execution_issue") == SMOKE_EXECUTION_ISSUE_NUMBER,
-                    "smoke_runinfo_execution_issue", str(payload.get("execution_issue")))
-    auditor.require(payload.get("protocol_origin_issue") == SMOKE_PROTOCOL_ISSUE_NUMBER,
-                    "smoke_runinfo_protocol_issue", str(payload.get("protocol_origin_issue")))
-    auditor.require(payload.get("expected_real_em_budget") == EXPECTED_REAL_EM_BUDGET,
-                    "smoke_runinfo_budget", str(payload.get("expected_real_em_budget")))
-    auditor.require(payload.get("actual_canary_fits") == EXPECTED_CANARY_FITS,
-                    "smoke_runinfo_canary_count", str(payload.get("actual_canary_fits")))
-    auditor.require(payload.get("actual_smoke_fits") == EXPECTED_SMOKE_FITS,
-                    "smoke_runinfo_smoke_count", str(payload.get("actual_smoke_fits")))
-    auditor.require(payload.get("full_fits_executed") == 0, "smoke_runinfo_full_fits",
-                    str(payload.get("full_fits_executed")))
-    auditor.require(payload.get("phase7e_rerun_count") == 0, "smoke_runinfo_phase7e_rerun",
-                    str(payload.get("phase7e_rerun_count")))
+    # The reviewed baseline must be in this commit's history, unconditionally.
+    # The previous form ("run SHA differs from the baseline OR ancestry holds")
+    # was vacuous for every normal descendant commit, which is exactly the case
+    # a real execution runs in.
+    auditor.require(payload.get("approved_baseline_is_ancestor") is True,
+                    "smoke_runinfo_lineage",
+                    "the approved scientific baseline is not recorded as an ancestor "
+                    f"of the execution commit: {payload.get('approved_baseline_is_ancestor')!r}")
+    _require_exact_int(payload, "execution_issue", SMOKE_EXECUTION_ISSUE_NUMBER,
+                       auditor, "smoke_runinfo_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue", SMOKE_PROTOCOL_ISSUE_NUMBER,
+                       auditor, "smoke_runinfo_protocol_issue")
+    _require_exact_int(payload, "expected_real_em_budget", EXPECTED_REAL_EM_BUDGET,
+                       auditor, "smoke_runinfo_budget")
+    _require_exact_int(payload, "expected_canary_fits", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_runinfo_expected_canary_fits")
+    _require_exact_int(payload, "expected_smoke_fits", EXPECTED_SMOKE_FITS,
+                       auditor, "smoke_runinfo_expected_smoke_fits")
+    _require_exact_int(payload, "actual_canary_fits", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_runinfo_canary_count")
+    _require_exact_int(payload, "actual_smoke_fits", EXPECTED_SMOKE_FITS,
+                       auditor, "smoke_runinfo_smoke_count")
+    _require_exact_int(payload, "full_fits_executed", 0,
+                       auditor, "smoke_runinfo_full_fits")
+    _require_exact_int(payload, "phase7e_rerun_count", 0,
+                       auditor, "smoke_runinfo_phase7e_rerun")
     auditor.require(payload.get("working_tree_clean") is True,
                     "smoke_runinfo_working_tree", "the working tree was dirty")
     auditor.require(bool(payload.get("invocation_mode")) and bool(payload.get("requested_command")),
                     "smoke_runinfo_invocation", "invocation provenance is missing")
+
+
+# ---------------------------------------------------------------------------
+# Canary-only independent audit (Issue #55 execution order, step 3)
+# ---------------------------------------------------------------------------
+#
+# The frozen order is: 2 canary fits -> persist evidence -> INDEPENDENTLY AUDIT
+# that evidence -> only then 6 smoke fits.  The runner's own
+# ``require_canary_pass_evidence`` is producer-side validation and cannot serve
+# as that audit, so this module provides the independent one and publishes a
+# durable verdict the runner can only read.
+#
+# It runs on the two files that exist right after the canary; runinfo, the fit
+# CSV and the summary do not exist yet and are deliberately not required.
+
+CANARY_AUDIT_VERSION = "phase8b-canary-audit-v1"
+CANARY_AUDIT_FILENAME = "canary_audit.json"
+CANARY_AUDIT_INPUT_FILES = ("authorization.json", "canary.json")
+
+
+def audit_canary_run_dir(run_dir: Path, phase7e_dir: Path | None = None, *,
+                         expect_execution_mode: str = "real") -> Auditor:
+    """Independent, fail-closed audit of the canary evidence alone."""
+
+    auditor = Auditor()
+    run_dir = Path(run_dir)
+    if not run_dir.is_dir():
+        auditor.blocker("canary_run_dir_missing", str(run_dir))
+        return auditor
+
+    for name in CANARY_AUDIT_INPUT_FILES:
+        if not (run_dir / name).is_file():
+            auditor.blocker("required_artifact_missing", f"canary mode requires {name}")
+
+    anchors = read_phase7e_anchor(auditor, phase7e_dir)
+    authorization = _read_json(run_dir / "authorization.json", auditor)
+    canary = _read_json(run_dir / "canary.json", auditor)
+
+    if authorization is not None:
+        audit_smoke_authorization(authorization, auditor)
+    if canary is not None:
+        audit_smoke_canary(canary, anchors, auditor,
+                           expect_execution_mode=expect_execution_mode)
+
+    payloads = {name: payload for name, payload in
+                (("authorization.json", authorization), ("canary.json", canary))
+                if payload is not None}
+    protocol_hashes = {p.get("protocol_hash") for p in payloads.values()}
+    auditor.require(protocol_hashes == {EXPECTED_SMOKE_PROTOCOL_HASH},
+                    "canary_protocol_hash_lineage",
+                    f"protocol hashes are not the single frozen value: {protocol_hashes}")
+    audit_smoke_run_code_lineage(payloads, None, auditor)
+    return auditor
+
+
+def build_canary_audit_report(auditor: Auditor, run_dir: Path) -> dict[str, Any]:
+    """Structured canary verdict.  Safe to build for a malformed artifact set."""
+
+    def field(name: str, key: str, default: Any = None) -> Any:
+        path = Path(run_dir) / name
+        if not path.is_file():
+            return default
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            return default
+        return payload.get(key, default) if isinstance(payload, dict) else default
+
+    blockers = len(auditor.blockers)
+    highs = len(auditor.highs)
+    mediums = len([f for f in auditor.findings if f.severity == "MEDIUM"])
+    audited = sorted(name for name in CANARY_AUDIT_INPUT_FILES
+                     if (Path(run_dir) / name).is_file())
+    return {
+        "audit_version": CANARY_AUDIT_VERSION,
+        "status": "PASS" if blockers == 0 and highs == 0 else "FAIL",
+        "blocker_count": blockers,
+        "high_count": highs,
+        "medium_count": mediums,
+        "findings": [{"severity": f.severity, "check": f.check, "detail": f.detail}
+                     for f in auditor.findings],
+        "approved_scientific_main_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
+        "run_code_sha": field("canary.json", "run_code_sha"),
+        "protocol_hash": EXPECTED_SMOKE_PROTOCOL_HASH,
+        "protocol_origin_issue": SMOKE_PROTOCOL_ISSUE_NUMBER,
+        "execution_issue": SMOKE_EXECUTION_ISSUE_NUMBER,
+        "expected_canary_fits": EXPECTED_CANARY_FITS,
+        "actual_canary_fits": field("canary.json", "real_canary_fits_executed"),
+        "canary_execution_mode": field("canary.json", "execution_mode"),
+        "canary_status": field("canary.json", "status"),
+        "audited_files": audited,
+        "run_dir": str(run_dir),
+    }
+
+
+def write_canary_audit_report(run_dir: Path, auditor: Auditor) -> Path:
+    """Publish the canary verdict exactly once.  An existing verdict is a stop.
+
+    Deliberately a DIFFERENT file from ``audit_report.json``: that name is
+    reserved for the final smoke audit and is also never overwritten.
+    """
+
+    directory = Path(run_dir)
+    if not directory.is_dir():
+        raise FileNotFoundError(f"audit run directory does not exist: {directory}")
+    path = directory / CANARY_AUDIT_FILENAME
+    if path.exists():
+        raise FileExistsError(
+            f"{CANARY_AUDIT_FILENAME} already exists; a previous canary verdict is "
+            f"never overwritten: {path}")
+    return _atomic_write_json(path, build_canary_audit_report(auditor, directory))
+
+
+def audit_canary_verdict_counts(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    """The three published counts: integer schema, and true to ``findings``.
+
+    PASS policy is unchanged and is NOT re-decided here: a verdict passes iff it
+    records zero BLOCKER and zero HIGH findings, so those two counts stay frozen
+    at 0.  ``medium_count`` is deliberately NOT frozen -- a MEDIUM finding may be
+    recorded on a PASS verdict -- but it is still an integer >= 0, and all three
+    counts must agree with the findings list they summarise.
+    """
+
+    _require_exact_int(payload, "blocker_count", 0, auditor, "smoke_canary_audit_counts")
+    _require_exact_int(payload, "high_count", 0, auditor, "smoke_canary_audit_counts")
+    _require_nonnegative_int(payload, "medium_count", auditor,
+                             "smoke_canary_audit_medium_count")
+
+    findings = payload.get("findings")
+    if not isinstance(findings, list) or not all(isinstance(f, Mapping) for f in findings):
+        auditor.blocker("smoke_canary_audit_findings",
+                        f"findings is not a list of objects: {findings!r}")
+        return
+    for severity, key in (("BLOCKER", "blocker_count"), ("HIGH", "high_count"),
+                          ("MEDIUM", "medium_count")):
+        reported = payload.get(key)
+        if type(reported) is not int:
+            continue          # already recorded as a type BLOCKER above
+        recomputed = sum(1 for finding in findings if finding.get("severity") == severity)
+        auditor.require(reported == recomputed, "smoke_canary_audit_count_consistency",
+                        f"{key}={reported!r} but findings hold {recomputed} {severity}")
+
+
+def audit_canary_audit_report(payload: Mapping[str, Any], auditor: Auditor) -> None:
+    """Re-check the canary verdict when the final smoke audit runs."""
+
+    auditor.require(payload.get("audit_version") == CANARY_AUDIT_VERSION,
+                    "smoke_canary_audit_version", str(payload.get("audit_version")))
+    auditor.require(payload.get("status") == "PASS", "smoke_canary_audit_status",
+                    str(payload.get("status")))
+    audit_canary_verdict_counts(payload, auditor)
+    auditor.require(payload.get("approved_scientific_main_sha") == APPROVED_SCIENTIFIC_MAIN_SHA,
+                    "smoke_canary_audit_baseline",
+                    str(payload.get("approved_scientific_main_sha")))
+    _require_frozen_protocol_hash(payload, auditor, "canary_audit.json")
+    _require_exact_int(payload, "execution_issue", SMOKE_EXECUTION_ISSUE_NUMBER,
+                       auditor, "smoke_canary_audit_execution_issue")
+    _require_exact_int(payload, "protocol_origin_issue", SMOKE_PROTOCOL_ISSUE_NUMBER,
+                       auditor, "smoke_canary_audit_protocol_issue")
+    _require_exact_int(payload, "expected_canary_fits", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_canary_audit_fit_count")
+    _require_exact_int(payload, "actual_canary_fits", EXPECTED_CANARY_FITS,
+                       auditor, "smoke_canary_audit_fit_count")
+    auditor.require(payload.get("canary_execution_mode") == "real",
+                    "smoke_canary_audit_execution_mode",
+                    str(payload.get("canary_execution_mode")))
 
 
 def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Auditor:
@@ -1189,6 +1526,10 @@ def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audit
     if canary is not None:
         audit_smoke_canary(canary, anchors, auditor)
 
+    canary_audit = _read_json(run_dir / CANARY_AUDIT_FILENAME, auditor)
+    if canary_audit is not None:
+        audit_canary_audit_report(canary_audit, auditor)
+
     runinfo = _read_json(run_dir / "runinfo.json", auditor)
     if runinfo is not None:
         audit_smoke_runinfo(runinfo, auditor)
@@ -1199,10 +1540,12 @@ def audit_smoke_run_dir(run_dir: Path, phase7e_dir: Path | None = None) -> Audit
     summary = _read_json(run_dir / "smoke_summary.json", auditor)
     if summary is not None:
         audit_smoke_summary(summary, scores, auditor)
+        audit_smoke_summary_provenance(summary, auditor)
 
     # Cross-file lineage: exactly one protocol hash and one run-code SHA.
     payloads = {name: payload for name, payload in
                 (("authorization.json", authorization), ("canary.json", canary),
+                 (CANARY_AUDIT_FILENAME, canary_audit),
                  ("runinfo.json", runinfo), ("smoke_summary.json", summary))
                 if payload is not None}
     protocol_hashes = {p.get("protocol_hash") for p in payloads.values()}
@@ -1422,12 +1765,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--estimand", choices=ESTIMANDS, default=None,
                         help="required for config/selection mode; unused by smoke mode")
-    parser.add_argument("--mode", choices=[*sorted(AUDIT_MODES), "smoke"], default="config")
+    parser.add_argument("--mode", choices=[*sorted(AUDIT_MODES), "canary", "smoke"],
+                        default="config")
     parser.add_argument("--phase7e-dir", type=Path, default=None)
     parser.add_argument("--write-report", action="store_true",
-                        help="smoke mode: publish audit_report.json (never overwritten)")
+                        help="canary mode: publish canary_audit.json; smoke mode: publish "
+                             "audit_report.json (neither is ever overwritten)")
     args = parser.parse_args(argv)
-    if args.mode == "smoke":
+    if args.mode == "canary":
+        auditor = audit_canary_run_dir(args.run_dir, args.phase7e_dir)
+        report = _render(auditor, args.run_dir, SMOKE_ESTIMAND, "canary")
+        if args.write_report:
+            report["canary_audit"] = str(write_canary_audit_report(args.run_dir, auditor))
+    elif args.mode == "smoke":
         auditor = audit_smoke_run_dir(args.run_dir, args.phase7e_dir)
         report = _render(auditor, args.run_dir, SMOKE_ESTIMAND, "smoke")
         if args.write_report:
