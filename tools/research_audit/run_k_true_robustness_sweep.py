@@ -2809,6 +2809,38 @@ def full_protocol_hash() -> str:
 # or ``git rev-parse HEAD``.
 REVIEWED_FULL_EXECUTION_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
 
+# --- HUMAN AUTHORIZATION PROVENANCE (frozen, Issue #59 S3-C) ---------------
+# The human granted the 336-fit execution in this Issue comment.  The id is
+# committed PROVENANCE ONLY: nothing at runtime contacts GitHub, and no network
+# call, environment variable, CLI flag or config file participates in the
+# authorization decision.  The decision lives entirely in the committed record
+# returned by ``current_full_execution_authorization()``.
+FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
+FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
+# What the human authorized, in words, so a reviewer can compare it with the
+# record below without leaving the file.  ONE clean attempt at the frozen sweep.
+FULL_HUMAN_AUTHORIZATION_SCOPE = (
+    "exactly 336 new real EM fits (A=168, B=168) over the frozen grid "
+    "K_TRUE={1,2,4,5} x replicate={1,2,3} x K={1..7} x start={1,2}; "
+    "H1=A+B, H2=CRN, H3=H3-a, H4=S-c; "
+    "Phase 7e K_TRUE=3 anchor rerun=0, canary rerun=0, smoke rerun=0, "
+    "retry=0, replacement=0, seed rescue=0, tolerance relaxation=0"
+)
+# Everything the authorization does NOT cover.  Any of these needs a NEW
+# explicit human authorization; none of them is reachable by re-running.
+FULL_HUMAN_AUTHORIZATION_EXCLUSIONS = (
+    "rerun_after_success",
+    "rerun_after_partial_failure",
+    "replacement_fit",
+    "retry",
+    "alternate_seed",
+    "relaxed_tolerance",
+    "phase7e_anchor_rerun",
+    "canary_rerun",
+    "smoke_rerun",
+    "any_337th_fit",
+)
+
 
 def current_expected_full_main_sha() -> str | None:
     """The trusted reviewed baseline for a real FULL execution.
@@ -2919,17 +2951,53 @@ def validate_full_execution_authorization(authorization: Any, *, test_only: bool
 
 
 def current_full_execution_authorization() -> FullExecutionAuthorization | None:
-    """Always None in this branch.
+    """The committed execution authorization for the frozen 336-fit sweep.
 
-    S3-A implements the schema, the validator, the zero-EM preflight and the
-    independent audit contract for the 336-fit sweep -- not the record.  The
-    approved main SHA cannot exist yet: it is the SHA of main AFTER this branch
-    is reviewed and merged, so hard-coding this branch's own SHA here would be a
-    self-signed approval.  A later execution Issue commits the record together
-    with the two human gates.
+    Granted by the human in Issue #59 comment
+    ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` against the independently
+    reviewed baseline ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (role 2).  Every
+    value below is a committed literal: nothing is read from the CLI, the
+    environment, a config file, the current branch, ``git rev-parse HEAD``, the
+    GitHub API, or from the frozen constants this record is validated against.
+
+    Scope, and nothing wider -- see ``FULL_HUMAN_AUTHORIZATION_SCOPE``: ONE
+    clean attempt at exactly 336 new real EM fits, 168 per estimand, over the
+    frozen grid.  It does NOT authorize a rerun after success or after a partial
+    failure, a replacement fit, a retry, an alternate seed, a relaxed tolerance,
+    a Phase 7e K_TRUE=3 rerun, a canary or smoke rerun, or any 337th fit; each
+    of those needs a NEW explicit human authorization
+    (``FULL_HUMAN_AUTHORIZATION_EXCLUSIONS``).
+
+    Holding this record still does not run anything by itself: the execution
+    must clear the full zero-EM preflight, the clean-tree requirement, the
+    scientific -> reviewed -> run-code ancestry chain, and the frozen
+    artifact-directory policy that refuses to overwrite, resume or reuse an
+    existing directory -- and a human still has to issue the command.
     """
 
-    return None
+    return FullExecutionAuthorization(
+        issue_number=59,
+        protocol_origin_issue_number=49,
+        approved_main_sha=REVIEWED_FULL_EXECUTION_MAIN_SHA,
+        protocol_hash="2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+        estimands=("A", "B"),
+        k_true_grid=(1, 2, 4, 5),
+        candidate_k=(1, 2, 3, 4, 5, 6, 7),
+        starts=(1, 2),
+        replicates=(1, 2, 3),
+        fits_per_estimand=168,
+        total_fit_count=336,
+        data_seed_base=51000,
+        model_seed_base=530000,
+        anchor_split_seed_base=42000,
+        mask_design="S_C",
+        random_design="CRN",
+        hierarchy="H3_A",
+        independent_review_pass=True,
+        human_full_approval=True,
+        authorization_version="phase8b-full-authorization-v1",
+        _authority=_FULL_EXECUTION_AUTHORITY,
+    )
 
 
 def _make_test_full_authorization(
@@ -5222,6 +5290,8 @@ def _require_em_authorization(args: argparse.Namespace,
                  "--out-dir is not accepted for a real full run: the production "
                  f"artifact directory is frozen at {FULL_ARTIFACT_DIR}")
         full_authorization = current_full_execution_authorization()
+        # Fail-closed defence in depth: the record is committed today, but if it
+        # is ever removed the gate must close again rather than fall through.
         if full_authorization is None:
             raise HarnessStop(
                 "full is not authorized in Phase 8b: the reviewed full-execution "
