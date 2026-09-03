@@ -2859,7 +2859,12 @@ HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 # participates in an authorization decision.
 FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
 FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5526348064
-FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA = REVIEWED_FULL_EXECUTION_MAIN_SHA
+# The exact role-2 SHA named by human comment 5526348064.  This is deliberately
+# an independent literal rather than an alias: if role 2 is rebound later, this
+# approval remains pinned here and validation automatically makes it stale.
+FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA = (
+    "02ef35add45036975162b6a267f6428c3b380459"
+)
 # What the human authorized, in words, so a reviewer can compare it with the
 # record below without leaving the file.  ONE clean attempt at the frozen sweep.
 FULL_HUMAN_AUTHORIZATION_SCOPE = (
@@ -3044,8 +3049,8 @@ def current_full_execution_authorization() -> FullExecutionAuthorization | None:
     return FullExecutionAuthorization(
         issue_number=FULL_EXECUTION_ISSUE_NUMBER,
         protocol_origin_issue_number=FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
-        # role 2, the reviewed baseline this approval was granted against
-        approved_main_sha=REVIEWED_FULL_EXECUTION_MAIN_SHA,
+        # exact role-2 SHA explicitly named by fresh human approval 5526348064
+        approved_main_sha=FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA,
         protocol_hash=(
             "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
         ),
@@ -5437,8 +5442,8 @@ def _require_em_authorization(args: argparse.Namespace,
     Issue #59) with its own private authority sentinel, its own reviewed-baseline
     source and its own validator.  A smoke authorization can never be widened
     into a full-run authorization: full is resolved through
-    ``current_full_execution_authorization()`` and nothing else, and both of its
-    human gates are absent in this branch.
+    ``current_full_execution_authorization()`` and nothing else.  S3-F records
+    both full-run gates, independently pinned to the exact approved role-2 SHA.
     """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")

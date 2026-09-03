@@ -9728,6 +9728,39 @@ def test_S3F_fresh_and_historical_approval_provenance_are_distinct():
             == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
 
 
+def test_S3F_approval_sha_is_an_independent_exact_ast_literal():
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    tree = _ast.parse(source)
+    assignments = [
+        node for node in tree.body
+        if isinstance(node, _ast.Assign)
+        and any(isinstance(target, _ast.Name)
+                and target.id == "FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA"
+                for target in node.targets)
+    ]
+    assert len(assignments) == 1
+    value = assignments[0].value
+    assert isinstance(value, _ast.Constant)
+    assert type(value.value) is str
+    assert value.value == REVISED_REVIEWED_FULL_MAIN_SHA
+
+
+def test_S3F_future_role2_rebind_makes_current_approval_stale(monkeypatch):
+    authorization = H.current_full_execution_authorization()
+    assert (authorization.approved_main_sha
+            == H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA
+            == REVISED_REVIEWED_FULL_MAIN_SHA)
+
+    future_role2 = "f" * 40
+    monkeypatch.setattr(H, "REVIEWED_FULL_EXECUTION_MAIN_SHA", future_role2)
+    assert H.current_expected_full_main_sha() == future_role2
+    assert (H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA
+            == REVISED_REVIEWED_FULL_MAIN_SHA)
+    assert authorization.approved_main_sha != H.current_expected_full_main_sha()
+    with pytest.raises(HarnessStop, match="does not match the reviewed"):
+        H.validate_full_execution_authorization(authorization, test_only=False)
+
+
 def test_S3F_production_authorization_has_every_exact_frozen_field():
     authorization = H.current_full_execution_authorization()
     assert type(authorization) is H.FullExecutionAuthorization
