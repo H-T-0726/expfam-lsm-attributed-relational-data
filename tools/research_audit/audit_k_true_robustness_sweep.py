@@ -1777,13 +1777,14 @@ FULL_AUDIT_REPORT_FILENAME = "audit_report.json"
 # role 1 and never varies.
 EXPECTED_SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
 
-# Role 2, also restated INDEPENDENTLY here (Issue #59 S3-E).  This auditor never
+# Role 2, also restated INDEPENDENTLY here (Issue #59).  This auditor never
 # imports the runner: if it read the runner's constant, an artifact set produced
 # by a mutated runner would audit itself as approved.  The literal below is the
-# reviewed PR #63 merge commit on main -- the revised execution path carrying
-# global full-manifest fit indices 1..336.
+# reviewed PR #66 merge commit on main -- the fresh Attempt 2 execution path,
+# independently reviewed and human-merged, and the exact SHA named by the fresh
+# Attempt 2 human approval (Issue #59 comment 5529711820).
 EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
-    "02ef35add45036975162b6a267f6428c3b380459"
+    "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
 )
 
 # The superseded PRE-FIX reviewed baseline (S3-B/S3-C).  Kept as evidence so a
@@ -1792,6 +1793,15 @@ EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
 # the historical approval bound to it: 0.
 HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
     "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+)
+
+# The superseded ATTEMPT 1 reviewed baseline (PR #63 merge commit).  Attempt 1
+# ran under it and was ABORTED_BY_OPERATOR_INTERRUPT; the approval bound to it is
+# Attempt 1-specific and not transferable.  Kept for the same reason as the one
+# above: an artifact set naming it must be REJECTED, never silently accepted as
+# an Attempt 2 run.
+ATTEMPT1_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
+    "02ef35add45036975162b6a267f6428c3b380459"
 )
 
 FULL_SHA_ROLE_FIELDS = (
@@ -1949,6 +1959,11 @@ def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> No
                     "full_auth_stale_baseline",
                     "the authorization names the superseded pre-fix reviewed "
                     "baseline: that approval executed 0 real EM and is STALE")
+    auditor.require(reviewed != ATTEMPT1_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                    "full_auth_attempt1_baseline",
+                    "the authorization names the superseded Attempt 1 reviewed "
+                    "baseline: that approval is Attempt 1-specific and is not "
+                    "transferable to Attempt 2")
 
 
 def audit_full_manifest_global_index(rows: Sequence[dict[str, str]],
