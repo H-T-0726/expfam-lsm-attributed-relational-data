@@ -2124,8 +2124,8 @@ EXPECTED_REAL_EM_BUDGET = EXPECTED_CANARY_FITS + EXPECTED_SMOKE_FITS  # 8
 FULL_EXECUTION_ISSUE_NUMBER = 59
 FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER = 49
 FULL_PROTOCOL_VERSION = "phase8b-full-protocol-v1"
-FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v1"
-FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v1"
+FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v2"
+FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v2"
 
 # A + B, K_TRUE {1,2,4,5} x replicate {1,2,3} x K {1..7} x start {1,2}.
 EXPECTED_FULL_FITS_PER_ESTIMAND = FITS_PER_ESTIMAND          # 168
@@ -2145,8 +2145,34 @@ FULL_K_TRUE_GRID = tuple(sorted(set(NEW_K_TRUE) | {ANCHOR_K_TRUE}))
 FULL_SELECTION_MATRIX_ROWS = len(ESTIMANDS) * len(FULL_K_TRUE_GRID) * len(REPLICATES)  # 30
 PHASE7E_ANCHOR_FIT_COUNT = 42
 
-# --- FUTURE FULL ARTIFACT SCHEMA (definition only; nothing is written) -----
-FULL_ARTIFACT_DIRNAME = "k_true_robustness_full_20260902"
+# --- FULL ATTEMPT LINEAGE (execution provenance; not scientific protocol) ---
+# Attempt 1 was interrupted by the operator during fit 3.  Its seven partial
+# evidence files remain immutable and are never inputs to Attempt 2.
+HISTORICAL_ABORTED_FULL_ATTEMPT_ID = "phase8b-full-attempt-1"
+HISTORICAL_ABORTED_FULL_ARTIFACT_DIRNAME = "k_true_robustness_full_20260902"
+HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH = (
+    "expfam/results/k_selection/k_true_robustness_full_20260902"
+)
+HISTORICAL_ABORTED_FULL_ARTIFACT_DIR = ROOT / HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH
+HISTORICAL_ABORTED_FULL_REASON = "operator_interrupt"
+HISTORICAL_ABORTED_FULL_EVIDENCE_CHECKPOINT = 5528360013
+HISTORICAL_ABORTED_FULL_ARTIFACT_SHA256 = (
+    ("authorization.json", "e11216ff56ac107f5ae6b5b7d7996182a047d57412098dd354313cc88c925ba7"),
+    ("config_gate.csv", "8507b0071db10a0d27f8ed9a1e2c23ba3104db48f346652b12995cb8c74cb956"),
+    ("failure.json", "543bd103c4d890fa387c4625c235afa9306905b2823d30fc3a31b6256dfeb9ed"),
+    ("full_fit_results.csv", "56333c91d9d346db4975246cc25ac43cae3982fd7207b2194326bd7561912586"),
+    ("leakage_gate.csv", "538dc0b0fcb61f34699779ef1fa46075484747ac2ee754956e72debd7d0f1cec"),
+    ("manifest.csv", "14c084e5588c7ea288ce7fb6e433b7645c727062ed9d265f29a76f4762c4f4d0"),
+    ("mask_provenance.csv", "dd122535a6681db2d95558a47c9ee3e93963b223ef1f5acdf20256ff48b70036"),
+)
+
+# Attempt 2 is a fresh 336-fit lineage starting from global fit_index 1.  The
+# path is frozen before review and must not exist until a newly reviewed and
+# freshly authorized production execution starts.
+FULL_EXECUTION_ATTEMPT_ID = "phase8b-full-attempt-2"
+FULL_FRESH_ATTEMPT_REASON = "operator_interrupt"
+FULL_PARTIAL_RESULTS_REUSED = False
+FULL_ARTIFACT_DIRNAME = "k_true_robustness_full_attempt2_20260904"
 FULL_ARTIFACT_DIR = ROOT / "expfam" / "results" / "k_selection" / FULL_ARTIFACT_DIRNAME
 FULL_ARTIFACT_FILES = (
     "authorization.json",
@@ -2756,6 +2782,11 @@ class FullExecutionAuthorization:
     independent_review_pass: bool
     human_full_approval: bool
     authorization_version: str
+    execution_attempt_id: str
+    prior_aborted_attempt_id: str
+    prior_aborted_artifact_dir: str
+    fresh_attempt_reason: str
+    partial_results_reused: bool
     _authority: Any = field(repr=False, compare=False, default=None)
 
     def is_test_only(self) -> bool:
@@ -2844,14 +2875,15 @@ REVIEWED_FULL_EXECUTION_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
 # transferred, and it authorizes NOTHING in this file.
 HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 
-# --- HUMAN AUTHORIZATION PROVENANCE (CURRENT, Issue #59 S3-F) --------------
-# The FRESH explicit human approval for the revised execution path.  It was
+# --- HUMAN AUTHORIZATION PROVENANCE (CONSUMED ATTEMPT 1, Issue #59 S3-F) ----
+# The explicit human approval for the original execution attempt.  It was
 # granted against the CURRENT reviewed baseline
 # ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (02ef35ad...) and the frozen protocol
-# hash 2d19c5fe...  It is the approval the committed record in
-# ``current_full_execution_authorization()`` represents, and it is deliberately
-# a DIFFERENT comment id from the historical one above: the two must never be
-# conflated.  One-time and scope-limited -- see
+# hash 2d19c5fe...  Attempt 1 consumed this one-time approval before an operator
+# interrupt stopped fit 3.  It is retained only as historical provenance and
+# ``current_full_execution_authorization()`` does not return it.  It is a
+# DIFFERENT comment id from the earlier stale one above: the two must never be
+# conflated.  Its original scope remains recorded below.
 # ``FULL_HUMAN_AUTHORIZATION_SCOPE`` and ``..._EXCLUSIONS`` below.
 #
 # The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
@@ -2965,6 +2997,16 @@ def _validate_full_execution_authorization(authorization: Any, *,
         ("hierarchy", authorization.hierarchy, HIERARCHY),
         ("authorization_version", authorization.authorization_version,
          FULL_AUTHORIZATION_VERSION),
+        ("execution_attempt_id", authorization.execution_attempt_id,
+         FULL_EXECUTION_ATTEMPT_ID),
+        ("prior_aborted_attempt_id", authorization.prior_aborted_attempt_id,
+         HISTORICAL_ABORTED_FULL_ATTEMPT_ID),
+        ("prior_aborted_artifact_dir", authorization.prior_aborted_artifact_dir,
+         HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH),
+        ("fresh_attempt_reason", authorization.fresh_attempt_reason,
+         FULL_FRESH_ATTEMPT_REASON),
+        ("partial_results_reused", authorization.partial_results_reused,
+         FULL_PARTIAL_RESULTS_REUSED),
     )
     for name, actual, expected in checks:
         _require(type(actual) is type(expected),
@@ -3002,7 +3044,7 @@ def validate_full_execution_authorization(authorization: Any, *, test_only: bool
 
 
 def current_full_execution_authorization() -> FullExecutionAuthorization | None:
-    """The ACTIVE production authorization for ONE frozen 336-fit execution.
+    """No ACTIVE production authorization exists for fresh Attempt 2.
 
     Provenance, kept deliberately explicit and never conflated:
 
@@ -3024,54 +3066,23 @@ def current_full_execution_authorization() -> FullExecutionAuthorization | None:
       1..336), so that approval went STALE and the record was withdrawn.
     * S3-E rebound role 2 to the reviewed merge commit of that fix.  Rebinding
       reviewed code provenance is not an approval, so the gate stayed closed.
-    * S3-F (here) records the FRESH explicit human approval given in Issue #59
+    * S3-F recorded the FRESH explicit human approval given in Issue #59
       comment ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064)
-      against role 2 02ef35ad... and the frozen protocol hash 2d19c5fe...
-      The historical approval is NOT reused: it authorizes nothing here.
+      against role 2 02ef35ad... for Attempt 1.
+    * Attempt 1 was aborted by an accidental operator KeyboardInterrupt during
+      fit 3.  Its approval was consumed by that attempt and is never reusable.
+      Its partial rows are provenance only and have no scientific meaning.
+    * Attempt 2 has a distinct immutable path and authorization schema.  It must
+      start at fit_index 1 and execute 336 new fits; no Attempt 1 row is an input.
 
-    The record below is a COMMITTED, reviewable literal.  Nothing in it is
-    derived from ``git rev-parse HEAD``, the current branch, the environment,
-    a CLI flag, a config file, an artifact file or the GitHub/Issue API -- each
-    of those would let the running code declare itself approved.  The validator
-    re-checks every field against the frozen protocol constants before a single
-    fit may run.
-
-    Committing it does NOT execute anything: real full EM under this approval is
-    still 0 and the production artifact directory is still absent.  The
-    authorization is ONE-TIME and SCOPE-LIMITED
-    (``FULL_HUMAN_AUTHORIZATION_SCOPE``); everything in
-    ``FULL_HUMAN_AUTHORIZATION_EXCLUSIONS`` -- a Phase 7e anchor rerun, a canary
-    or smoke rerun, a retry, a replacement fit, an alternate seed, a relaxed
-    tolerance, a partial rerun, a rerun after success or failure, or any 337th
-    fit -- remains UNAUTHORIZED and needs a new explicit human gate.
+    A fresh Attempt 2 record may be committed only after this execution-path
+    change is independently reviewed, merged, bound as a new role 2, and a new
+    human approval explicitly targets that exact SHA.  Until then the gate is
+    intentionally closed here.  No CLI, environment, runtime state, historical
+    approval or smoke authorization can reopen it.
     """
 
-    return FullExecutionAuthorization(
-        issue_number=FULL_EXECUTION_ISSUE_NUMBER,
-        protocol_origin_issue_number=FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
-        # exact role-2 SHA explicitly named by fresh human approval 5526348064
-        approved_main_sha=FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA,
-        protocol_hash=(
-            "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
-        ),
-        estimands=("A", "B"),
-        k_true_grid=(1, 2, 4, 5),
-        candidate_k=(1, 2, 3, 4, 5, 6, 7),
-        starts=(1, 2),
-        replicates=(1, 2, 3),
-        fits_per_estimand=168,
-        total_fit_count=336,
-        data_seed_base=51000,
-        model_seed_base=530000,
-        anchor_split_seed_base=42000,
-        mask_design="S_C",
-        random_design="CRN",
-        hierarchy="H3_A",
-        independent_review_pass=True,
-        human_full_approval=True,
-        authorization_version="phase8b-full-authorization-v1",
-        _authority=_FULL_EXECUTION_AUTHORITY,
-    )
+    return None
 
 
 def _make_test_full_authorization(
@@ -3102,6 +3113,11 @@ def _make_test_full_authorization(
         "independent_review_pass": True,
         "human_full_approval": True,
         "authorization_version": FULL_AUTHORIZATION_VERSION,
+        "execution_attempt_id": FULL_EXECUTION_ATTEMPT_ID,
+        "prior_aborted_attempt_id": HISTORICAL_ABORTED_FULL_ATTEMPT_ID,
+        "prior_aborted_artifact_dir": HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH,
+        "fresh_attempt_reason": FULL_FRESH_ATTEMPT_REASON,
+        "partial_results_reused": FULL_PARTIAL_RESULTS_REUSED,
     }
     fields.update(overrides)
     return FullExecutionAuthorization(_authority=_FULL_TEST_AUTHORITY, **fields)
@@ -3318,6 +3334,13 @@ def run_full_preflight() -> dict[str, Any]:
         "estimands": list(active_estimands()),
         "artifact_directory": str(FULL_ARTIFACT_DIR),
         "artifact_directory_exists": FULL_ARTIFACT_DIR.exists(),
+        "execution_attempt_id": FULL_EXECUTION_ATTEMPT_ID,
+        "fresh_attempt_reason": FULL_FRESH_ATTEMPT_REASON,
+        "partial_results_reused": FULL_PARTIAL_RESULTS_REUSED,
+        "prior_aborted_attempt_id": HISTORICAL_ABORTED_FULL_ATTEMPT_ID,
+        "prior_aborted_artifact_directory": str(HISTORICAL_ABORTED_FULL_ARTIFACT_DIR),
+        "prior_aborted_attempt_evidence_intact":
+            historical_aborted_full_evidence_is_intact(),
         "artifact_files": list(FULL_ARTIFACT_FILES),
         "full_fit_results_columns": list(FULL_FIT_RESULTS_COLUMNS),
         "trusted_full_main_sha_present": current_expected_full_main_sha() is not None,
@@ -3772,6 +3795,11 @@ def write_full_failure_json(out_dir: Path, *, progress: FullExecutionProgress,
 
     return write_json_artifact(Path(out_dir) / FULL_FAILURE_FILENAME, {
         "artifact_version": FULL_ARTIFACT_VERSION,
+        "execution_attempt_id": FULL_EXECUTION_ATTEMPT_ID,
+        "prior_aborted_attempt_id": HISTORICAL_ABORTED_FULL_ATTEMPT_ID,
+        "prior_aborted_artifact_dir": HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH,
+        "fresh_attempt_reason": FULL_FRESH_ATTEMPT_REASON,
+        "partial_results_reused": FULL_PARTIAL_RESULTS_REUSED,
         "status": "FAILED",
         "phase": PHASE,
         "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
@@ -3823,7 +3851,12 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     # creates its own artifact directory.  Re-reading git status afterwards
     # would report the run's own untracked output as a dirty tree and make a
     # correct execution unauditable.  The frozen value is what is recorded.
-    working_tree_clean_before_execution = working_tree_is_clean()
+    observed_tree_clean_before_execution = fresh_full_execution_tree_is_clean()
+    # Test-only fixture lineage must not depend on a developer's uncommitted
+    # files; the production branch below always uses the real observation.
+    working_tree_clean_before_execution = (
+        True if test_only else observed_tree_clean_before_execution
+    )
     if not test_only:
         _require(working_tree_clean_before_execution,
                  "the working tree is dirty before the full execution; refusing to start")
@@ -3927,6 +3960,11 @@ def build_full_authorization_payload(authorization: Any, run_code_sha: str) -> d
     return {
         "artifact_version": FULL_ARTIFACT_VERSION,
         "authorization_version": authorization.authorization_version,
+        "execution_attempt_id": authorization.execution_attempt_id,
+        "prior_aborted_attempt_id": authorization.prior_aborted_attempt_id,
+        "prior_aborted_artifact_dir": authorization.prior_aborted_artifact_dir,
+        "fresh_attempt_reason": authorization.fresh_attempt_reason,
+        "partial_results_reused": authorization.partial_results_reused,
         "execution_issue_number": authorization.issue_number,
         "protocol_origin_issue_number": authorization.protocol_origin_issue_number,
         # role 1: frozen, always the reviewed scientific baseline
@@ -4012,6 +4050,11 @@ def build_full_summary_payload(report: Phase8bFullReport, run_code_sha: str) -> 
         }
     return {
         "artifact_version": FULL_ARTIFACT_VERSION,
+        "execution_attempt_id": FULL_EXECUTION_ATTEMPT_ID,
+        "prior_aborted_attempt_id": HISTORICAL_ABORTED_FULL_ATTEMPT_ID,
+        "prior_aborted_artifact_dir": HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH,
+        "fresh_attempt_reason": FULL_FRESH_ATTEMPT_REASON,
+        "partial_results_reused": FULL_PARTIAL_RESULTS_REUSED,
         "execution_issue_number": FULL_EXECUTION_ISSUE_NUMBER,
         "protocol_origin_issue_number": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
         "scientific_baseline_sha": APPROVED_SCIENTIFIC_MAIN_SHA,
@@ -4058,6 +4101,11 @@ def build_full_runinfo_payload(*, run_code_sha: str, out_dir: Path,
     _require_full_commit_sha(approved_main_sha, "reviewed full execution main SHA")
     return {
         "artifact_version": FULL_ARTIFACT_VERSION,
+        "execution_attempt_id": FULL_EXECUTION_ATTEMPT_ID,
+        "prior_aborted_attempt_id": HISTORICAL_ABORTED_FULL_ATTEMPT_ID,
+        "prior_aborted_artifact_dir": HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH,
+        "fresh_attempt_reason": FULL_FRESH_ATTEMPT_REASON,
+        "partial_results_reused": FULL_PARTIAL_RESULTS_REUSED,
         "phase": PHASE,
         "execution_issue": FULL_EXECUTION_ISSUE_NUMBER,
         "protocol_origin_issue": FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
@@ -4117,7 +4165,7 @@ def _run_production_full_execution(authorization: Any) -> dict[str, Any]:
 
     validate_full_execution_authorization(authorization, test_only=False)
     run_code_sha = current_run_code_sha()
-    _require_execution_preconditions(run_code_sha)
+    _require_execution_preconditions(run_code_sha, fresh_full_attempt=True)
     return _execute_real_full(authorization, FULL_ARTIFACT_DIR,
                               test_adapter=None, test_only=False,
                               run_code_sha=run_code_sha)
@@ -4633,6 +4681,46 @@ def _git_output(arguments: Sequence[str]) -> str:
     return completed.stdout.strip()
 
 
+def historical_aborted_full_evidence_is_intact() -> bool:
+    """Verify the immutable Attempt 1 evidence without consuming any result.
+
+    This is execution provenance only.  Exact file-set and digest matching makes
+    any edit, deletion, rename or added file fail closed.  The partial CSV is
+    never parsed as scientific input for Attempt 2.
+    """
+
+    directory = HISTORICAL_ABORTED_FULL_ARTIFACT_DIR
+    if not directory.is_dir():
+        return False
+    expected = dict(HISTORICAL_ABORTED_FULL_ARTIFACT_SHA256)
+    actual_paths = {path.name: path for path in directory.iterdir() if path.is_file()}
+    if set(actual_paths) != set(expected):
+        return False
+    return all(
+        hashlib.sha256(actual_paths[name].read_bytes()).hexdigest() == digest
+        for name, digest in expected.items()
+    )
+
+
+def fresh_full_execution_tree_is_clean() -> bool:
+    """Allow only the exact preserved Attempt 1 evidence beside clean code.
+
+    A plain ``git status`` is necessarily non-empty on the execution machine
+    because Attempt 1 is intentionally untracked and immutable.  This stricter
+    replacement rejects every tracked change, every unrelated untracked path,
+    and every byte change in Attempt 1 while permitting precisely its seven
+    pinned evidence files.
+    """
+
+    status = _git_output(["status", "--porcelain=v1", "--untracked-files=all"])
+    actual = set(status.splitlines()) if status else set()
+    expected = {
+        f"?? {HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH}/{name}"
+        for name, _digest in HISTORICAL_ABORTED_FULL_ARTIFACT_SHA256
+    }
+    return actual == expected and historical_aborted_full_evidence_is_intact()
+
+
 def current_run_code_sha() -> str:
     """PROVENANCE ONLY: which commit executed.
 
@@ -5139,10 +5227,30 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _require_execution_preconditions(run_code_sha: str) -> None:
+def _require_execution_preconditions(run_code_sha: str, *,
+                                     fresh_full_attempt: bool = False) -> None:
+    """Preconditions shared by every real execution.
+
+    The tree rule is deliberately NOT shared.  The canary/smoke gate (Issue #55)
+    keeps its own unchanged plain clean-tree requirement; only the fresh
+    Attempt 2 full path (Issue #59) may tolerate the preserved Attempt 1
+    evidence, because that evidence is intentionally untracked and immutable.
+    Applying the Attempt 2 rule to canary/smoke would both couple two
+    deliberately separate authorizations and make the canary/smoke boundary
+    unsatisfiable wherever Attempt 1 does not exist.
+    """
+
     _require_full_commit_sha(run_code_sha, "run code SHA")
-    _require(working_tree_is_clean(),
-             "the working tree is dirty; refusing to start a real execution")
+    if fresh_full_attempt:
+        _require(fresh_full_execution_tree_is_clean(),
+                 "the execution tree is not clean except for the exact preserved "
+                 "Attempt 1 evidence; refusing to start a fresh real execution")
+        _require(not FULL_ARTIFACT_DIR.exists(),
+                 "the fresh Attempt 2 artifact directory already exists; refusing "
+                 "to overwrite or resume")
+    else:
+        _require(working_tree_is_clean(),
+                 "the working tree is dirty; refusing to start a real execution")
     _require(approved_baseline_is_ancestor(run_code_sha),
              "the approved scientific baseline is not an ancestor of this commit")
 
@@ -5442,8 +5550,9 @@ def _require_em_authorization(args: argparse.Namespace,
     Issue #59) with its own private authority sentinel, its own reviewed-baseline
     source and its own validator.  A smoke authorization can never be widened
     into a full-run authorization: full is resolved through
-    ``current_full_execution_authorization()`` and nothing else.  S3-F records
-    both full-run gates, independently pinned to the exact approved role-2 SHA.
+    ``current_full_execution_authorization()`` and nothing else.  The Attempt 1
+    approval is consumed and Attempt 2 remains closed until a new reviewed role
+    2 and fresh human approval are committed.
     """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")
@@ -5467,20 +5576,14 @@ def _require_em_authorization(args: argparse.Namespace,
         if full_authorization is None:
             raise HarnessStop(
                 "full is not authorized in Phase 8b: the reviewed full-execution "
-                f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} is bound (Issue #59) "
-                "and the 336-fit sweep has its own FullExecutionAuthorization "
-                "schema, validator and zero-EM preflight, but NO committed "
-                "FullExecutionAuthorization record exists. This branch is "
-                "fail-closed dead code while S3-F's record stands; it fires only "
-                "if that record is ever removed. The historical approval (Issue "
-                "#59 comment "
-                f"{HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID}) executed "
-                "0 real EM and is STALE: it was granted against the pre-fix "
-                f"baseline {HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA}, so "
-                "it can never be revived to authorize the revised baseline. A "
-                "FRESH INDEPENDENT_REVIEW_PASS plus HUMAN_FULL_APPROVAL against "
-                "the current baseline is a separate human gate. A smoke "
-                "authorization must never be reused for --full."
+                f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} belongs to the "
+                "interrupted Attempt 1 path. Issue #59 comment "
+                f"{FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} was consumed by "
+                "Attempt 1 and cannot authorize Attempt 2. Attempt 2 requires "
+                "this new execution path to be independently reviewed and merged, "
+                "its exact merge SHA to be rebound as role 2, and a fresh human "
+                "approval committed in a separate authorization-only change. "
+                "Historical or smoke authorization must never be reused for --full."
             )
         validate_full_execution_authorization(full_authorization, test_only=False)
         run_full_preflight()

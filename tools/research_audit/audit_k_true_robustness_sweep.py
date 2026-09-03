@@ -1738,10 +1738,16 @@ def _is_full_commit_sha(value: Any) -> bool:
 FULL_EXECUTION_ISSUE_NUMBER = 59
 FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER = 49
 FULL_PROTOCOL_VERSION = "phase8b-full-protocol-v1"
-FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v1"
-FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v1"
+FULL_AUTHORIZATION_VERSION = "phase8b-full-authorization-v2"
+FULL_ARTIFACT_VERSION = "phase8b-full-artifact-v2"
 EXPECTED_FULL_PROTOCOL_HASH = \
     "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
+EXPECTED_FULL_EXECUTION_ATTEMPT_ID = "phase8b-full-attempt-2"
+EXPECTED_PRIOR_ABORTED_ATTEMPT_ID = "phase8b-full-attempt-1"
+EXPECTED_PRIOR_ABORTED_ARTIFACT_DIR = (
+    "expfam/results/k_selection/k_true_robustness_full_20260902"
+)
+EXPECTED_FRESH_ATTEMPT_REASON = "operator_interrupt"
 
 EXPECTED_FULL_FITS_PER_ESTIMAND = FITS_PER_ESTIMAND          # 168
 EXPECTED_FULL_FITS = 2 * FITS_PER_ESTIMAND                   # 336
@@ -1850,11 +1856,35 @@ def expected_full_keys() -> set[tuple[str, int, int, int, int]]:
             for start in STARTS}
 
 
+def audit_full_attempt_identity(payload: Mapping[str, Any], auditor: Auditor,
+                                prefix: str) -> None:
+    """Independently require the fresh lineage and reject partial-result reuse."""
+
+    auditor.require(payload.get("execution_attempt_id") ==
+                    EXPECTED_FULL_EXECUTION_ATTEMPT_ID,
+                    f"{prefix}_attempt_id", str(payload.get("execution_attempt_id")))
+    auditor.require(payload.get("prior_aborted_attempt_id") ==
+                    EXPECTED_PRIOR_ABORTED_ATTEMPT_ID,
+                    f"{prefix}_prior_attempt_id",
+                    str(payload.get("prior_aborted_attempt_id")))
+    auditor.require(payload.get("prior_aborted_artifact_dir") ==
+                    EXPECTED_PRIOR_ABORTED_ARTIFACT_DIR,
+                    f"{prefix}_prior_artifact_dir",
+                    str(payload.get("prior_aborted_artifact_dir")))
+    auditor.require(payload.get("fresh_attempt_reason") ==
+                    EXPECTED_FRESH_ATTEMPT_REASON,
+                    f"{prefix}_fresh_reason", str(payload.get("fresh_attempt_reason")))
+    auditor.require(payload.get("partial_results_reused") is False,
+                    f"{prefix}_partial_reuse",
+                    "partial Attempt 1 results must never enter Attempt 2")
+
+
 def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> None:
     """The committed full authorization, re-checked against frozen constants."""
 
     auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
                     "full_auth_version", str(payload.get("artifact_version")))
+    audit_full_attempt_identity(payload, auditor, "full_auth")
     auditor.require(payload.get("authorization_version") == FULL_AUTHORIZATION_VERSION,
                     "full_auth_authorization_version",
                     str(payload.get("authorization_version")))
@@ -2224,6 +2254,7 @@ def audit_full_runinfo(payload: Mapping[str, Any], auditor: Auditor) -> None:
 
     auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
                     "full_runinfo_version", str(payload.get("artifact_version")))
+    audit_full_attempt_identity(payload, auditor, "full_runinfo")
     auditor.require(payload.get("protocol_hash") == EXPECTED_FULL_PROTOCOL_HASH,
                     "full_runinfo_protocol_hash", str(payload.get("protocol_hash")))
     _require_exact_int(payload, "execution_issue", FULL_EXECUTION_ISSUE_NUMBER,
@@ -2270,6 +2301,7 @@ def audit_full_summary(payload: Mapping[str, Any], scores: Mapping[str, Any],
 
     auditor.require(payload.get("artifact_version") == FULL_ARTIFACT_VERSION,
                     "full_summary_version", str(payload.get("artifact_version")))
+    audit_full_attempt_identity(payload, auditor, "full_summary")
     auditor.require(payload.get("protocol_hash") == EXPECTED_FULL_PROTOCOL_HASH,
                     "full_summary_protocol_hash", str(payload.get("protocol_hash")))
     _require_exact_int(payload, "expected_full_fits", EXPECTED_FULL_FITS,
