@@ -2869,21 +2869,22 @@ REVIEWED_FULL_EXECUTION_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
 # ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA`` and NOT against the
 # current ``REVIEWED_FULL_EXECUTION_MAIN_SHA``.  The ids and the scope are kept
 # as historical evidence and are never deleted, but that approval is STALE and
-# was never consumed: S3-D changed the execution code (the persisted full
+# authorized no execution: S3-D changed the execution code (the persisted full
 # manifest now carries global fit indices) after it was given, and real EM
 # executed under it is 0.  S3-E rebound role 2; this approval was NOT
 # transferred, and it authorizes NOTHING in this file.
 HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 
-# --- HUMAN AUTHORIZATION PROVENANCE (CONSUMED ATTEMPT 1, Issue #59 S3-F) ----
+# --- HUMAN AUTHORIZATION PROVENANCE (ATTEMPT 1-SPECIFIC, Issue #59 S3-F) ----
 # The explicit human approval for the original execution attempt.  It was
 # granted against the CURRENT reviewed baseline
 # ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (02ef35ad...) and the frozen protocol
-# hash 2d19c5fe...  Attempt 1 consumed this one-time approval before an operator
-# interrupt stopped fit 3.  It is retained only as historical provenance and
-# ``current_full_execution_authorization()`` does not return it.  It is a
-# DIFFERENT comment id from the earlier stale one above: the two must never be
-# conflated.  Its original scope remains recorded below.
+# hash 2d19c5fe...  It is BOUND TO ATTEMPT 1, whose formal classification is
+# ABORTED_BY_OPERATOR_INTERRUPT, and it is NOT TRANSFERABLE: it authorized that
+# attempt and no other, so it DOES NOT AUTHORIZE ATTEMPT 2.  It is retained as
+# historical provenance and ``current_full_execution_authorization()`` does not
+# return it.  It is a DIFFERENT comment id from the earlier stale one above: the
+# two must never be conflated.  Its original scope remains recorded below.
 # ``FULL_HUMAN_AUTHORIZATION_SCOPE`` and ``..._EXCLUSIONS`` below.
 #
 # The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
@@ -3069,9 +3070,11 @@ def current_full_execution_authorization() -> FullExecutionAuthorization | None:
     * S3-F recorded the FRESH explicit human approval given in Issue #59
       comment ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064)
       against role 2 02ef35ad... for Attempt 1.
-    * Attempt 1 was aborted by an accidental operator KeyboardInterrupt during
-      fit 3.  Its approval was consumed by that attempt and is never reusable.
-      Its partial rows are provenance only and have no scientific meaning.
+    * Attempt 1 was ABORTED_BY_OPERATOR_INTERRUPT: an accidental operator
+      KeyboardInterrupt during fit 3.  That approval is Attempt 1-specific --
+      bound to Attempt 1 and not transferable -- so it does not authorize
+      Attempt 2.  Its partial rows are provenance only and have no scientific
+      meaning.
     * Attempt 2 has a distinct immutable path and authorization schema.  It must
       start at fit_index 1 and execute 336 new fits; no Attempt 1 row is an input.
 
@@ -3847,10 +3850,14 @@ def _execute_real_full(authorization: Any, out_dir: Path | None, *,
     validate_full_execution_authorization(authorization, test_only=test_only)
     _require_full_commit_sha(run_code_sha, "run code SHA")
     run_full_preflight()
-    # BLOCKER-01: the working tree is evaluated EXACTLY ONCE, before this run
-    # creates its own artifact directory.  Re-reading git status afterwards
-    # would report the run's own untracked output as a dirty tree and make a
-    # correct execution unauditable.  The frozen value is what is recorded.
+    # BLOCKER-01 / HIGH-01: the execution tree is evaluated EXACTLY ONCE across
+    # the whole production full path -- here, and nowhere else.  Re-reading git
+    # status afterwards would report the run's own untracked output as a dirty
+    # tree and make a correct execution unauditable; reading it a second time
+    # anywhere earlier or later would mean the recorded provenance is not the
+    # value the run actually gated on.  This single frozen observation is what
+    # both runinfo fields record.  It happens before the artifact directory is
+    # reserved, before any adapter is constructed and before any real EM.
     observed_tree_clean_before_execution = fresh_full_execution_tree_is_clean()
     # Test-only fixture lineage must not depend on a developer's uncommitted
     # files; the production branch below always uses the real observation.
@@ -4682,7 +4689,7 @@ def _git_output(arguments: Sequence[str]) -> str:
 
 
 def historical_aborted_full_evidence_is_intact() -> bool:
-    """Verify the immutable Attempt 1 evidence without consuming any result.
+    """Verify the immutable Attempt 1 evidence without reading any result as input.
 
     This is execution provenance only.  Exact file-set and digest matching makes
     any edit, deletion, rename or added file fail closed.  The partial CSV is
@@ -5232,19 +5239,24 @@ def _require_execution_preconditions(run_code_sha: str, *,
     """Preconditions shared by every real execution.
 
     The tree rule is deliberately NOT shared.  The canary/smoke gate (Issue #55)
-    keeps its own unchanged plain clean-tree requirement; only the fresh
-    Attempt 2 full path (Issue #59) may tolerate the preserved Attempt 1
-    evidence, because that evidence is intentionally untracked and immutable.
-    Applying the Attempt 2 rule to canary/smoke would both couple two
-    deliberately separate authorizations and make the canary/smoke boundary
-    unsatisfiable wherever Attempt 1 does not exist.
+    keeps its own unchanged plain clean-tree requirement.  Applying the fresh
+    Attempt 2 rule to canary/smoke would both couple two deliberately separate
+    authorizations and make the canary/smoke boundary unsatisfiable wherever the
+    preserved Attempt 1 evidence does not exist.
+
+    HIGH-01: the fresh Attempt 2 tree observation is deliberately absent here.
+    ``fresh_full_execution_tree_is_clean()`` reads mutable git state, so the
+    production full path must evaluate it EXACTLY ONCE end-to-end; that single
+    observation lives in ``_execute_real_full`` and is frozen there before the
+    artifact directory is reserved, before any adapter exists and before any
+    real EM.  Evaluating it here as well would make the recorded provenance a
+    second, later reading of a tree the run itself is about to change.  What
+    stays here is the cheap fail-closed check that cannot drift: the fresh
+    Attempt 2 directory must not already exist.
     """
 
     _require_full_commit_sha(run_code_sha, "run code SHA")
     if fresh_full_attempt:
-        _require(fresh_full_execution_tree_is_clean(),
-                 "the execution tree is not clean except for the exact preserved "
-                 "Attempt 1 evidence; refusing to start a fresh real execution")
         _require(not FULL_ARTIFACT_DIR.exists(),
                  "the fresh Attempt 2 artifact directory already exists; refusing "
                  "to overwrite or resume")
@@ -5551,8 +5563,8 @@ def _require_em_authorization(args: argparse.Namespace,
     source and its own validator.  A smoke authorization can never be widened
     into a full-run authorization: full is resolved through
     ``current_full_execution_authorization()`` and nothing else.  The Attempt 1
-    approval is consumed and Attempt 2 remains closed until a new reviewed role
-    2 and fresh human approval are committed.
+    approval is bound to Attempt 1 and not transferable, so Attempt 2 remains
+    closed until a new reviewed role 2 and fresh human approval are committed.
     """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")
@@ -5577,9 +5589,10 @@ def _require_em_authorization(args: argparse.Namespace,
             raise HarnessStop(
                 "full is not authorized in Phase 8b: the reviewed full-execution "
                 f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} belongs to the "
-                "interrupted Attempt 1 path. Issue #59 comment "
-                f"{FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} was consumed by "
-                "Attempt 1 and cannot authorize Attempt 2. Attempt 2 requires "
+                "interrupted Attempt 1 path (ABORTED_BY_OPERATOR_INTERRUPT). "
+                f"Issue #59 comment {FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} "
+                "is bound to Attempt 1 and is not transferable, so it does not "
+                "authorize Attempt 2. Attempt 2 requires "
                 "this new execution path to be independently reviewed and merged, "
                 "its exact merge SHA to be rebound as role 2, and a fresh human "
                 "approval committed in a separate authorization-only change. "
