@@ -2711,13 +2711,17 @@ def _make_test_smoke_authorization(
 # Deliberately a SEPARATE gate from the smoke.  A ``SmokeExecutionAuthorization``
 # can never authorize ``--full``: the record type differs, the private authority
 # sentinel differs, and the validator checks both.  Two independent human gates
-# are therefore required before 336 real fits can run, and BOTH are absent here:
+# are required before 336 real fits can run, and as of S3-F BOTH are satisfied
+# for exactly ONE frozen attempt:
 #
-#   * ``current_expected_full_main_sha()``     -> None (no reviewed baseline yet)
-#   * ``current_full_execution_authorization()`` -> None (no committed record yet)
+#   * ``current_expected_full_main_sha()``
+#         -> "02ef35add45036975162b6a267f6428c3b380459"  (role 2, bound in S3-E)
+#   * ``current_full_execution_authorization()``
+#         -> the committed production record (fresh human approval, S3-F)
 #
-# S3-A implements the schema, the validator, the zero-EM preflight and the
-# independent audit contract.  It does NOT commit the record and executes 0 fits.
+# S3-A implemented the schema, the validator, the zero-EM preflight and the
+# independent audit contract.  S3-F commits the record and still executes 0
+# fits: an authorization is permission, not execution.
 
 _FULL_EXECUTION_AUTHORITY = object()
 _FULL_TEST_AUTHORITY = object()
@@ -2814,7 +2818,7 @@ def full_protocol_hash() -> str:
 #
 # HISTORICAL (S3-B/S3-C): the PRE-FIX reviewed path.  The S3-A merge commit was
 # the reviewed baseline when the human granted
-# ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` below.  Real full EM executed
+# ``HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` below.  Real full EM executed
 # under it: 0.  It is kept as evidence and is NEVER the current role 2 -- the
 # S3-D manifest fix changed the execution path after that review.
 HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA = (
@@ -2823,29 +2827,39 @@ HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA = (
 
 # CURRENT: the PR #63 merge commit on main -- the revised execution path
 # (global full-manifest fit indices 1..336) as independently reviewed and
-# human-merged.  Rebinding reviewed code provenance is NOT a scientific-protocol
-# change and NOT an approval: ``current_full_execution_authorization()`` still
-# returns None and a FRESH explicit human approval is required against this SHA.
+# human-merged.  Rebinding reviewed code provenance was NOT a scientific-protocol
+# change and did not itself grant approval; the separate S3-F record below now
+# carries the fresh explicit human approval against this unchanged SHA.
 REVIEWED_FULL_EXECUTION_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
 
 # --- HUMAN AUTHORIZATION PROVENANCE (HISTORICAL, Issue #59 S3-C) -----------
-# The human granted the 336-fit execution in this Issue comment against the
+# The human granted a 336-fit execution in this Issue comment against the
 # PRE-FIX execution path, i.e. against
 # ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA`` and NOT against the
 # current ``REVIEWED_FULL_EXECUTION_MAIN_SHA``.  The ids and the scope are kept
-# as historical evidence and are never deleted, but the record they authorized
-# is NO LONGER ACTIVE: S3-D changed the execution code (the persisted full
-# manifest now carries global fit indices), so that approval is STALE for the
-# code in this file.  Real EM executed under it: 0.  Rebinding role 2 in S3-E
-# does NOT transfer this approval to the revised baseline: a fresh explicit
-# human approval is required before
-# ``current_full_execution_authorization()`` may return a record again.
+# as historical evidence and are never deleted, but that approval is STALE and
+# was never consumed: S3-D changed the execution code (the persisted full
+# manifest now carries global fit indices) after it was given, and real EM
+# executed under it is 0.  S3-E rebound role 2; this approval was NOT
+# transferred, and it authorizes NOTHING in this file.
+HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
+
+# --- HUMAN AUTHORIZATION PROVENANCE (CURRENT, Issue #59 S3-F) --------------
+# The FRESH explicit human approval for the revised execution path.  It was
+# granted against the CURRENT reviewed baseline
+# ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (02ef35ad...) and the frozen protocol
+# hash 2d19c5fe...  It is the approval the committed record in
+# ``current_full_execution_authorization()`` represents, and it is deliberately
+# a DIFFERENT comment id from the historical one above: the two must never be
+# conflated.  One-time and scope-limited -- see
+# ``FULL_HUMAN_AUTHORIZATION_SCOPE`` and ``..._EXCLUSIONS`` below.
 #
 # The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
 # and no network call, environment variable, CLI flag or config file ever
 # participates in an authorization decision.
 FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
-FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
+FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5526348064
+FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA = REVIEWED_FULL_EXECUTION_MAIN_SHA
 # What the human authorized, in words, so a reviewer can compare it with the
 # record below without leaving the file.  ONE clean attempt at the frozen sweep.
 FULL_HUMAN_AUTHORIZATION_SCOPE = (
@@ -2884,9 +2898,9 @@ def current_expected_full_main_sha() -> str | None:
     ``current_expected_smoke_main_sha()``: approving the 8-fit smoke baseline
     must not silently approve a 336-fit sweep.
 
-    Binding this SHA does NOT authorize execution.  The 336-fit sweep still
-    needs a committed ``FullExecutionAuthorization`` carrying the two human
-    gates, and ``current_full_execution_authorization()`` returns None.
+    Binding this SHA did NOT itself authorize execution.  S3-F separately
+    commits ``current_full_execution_authorization()`` with both human gates;
+    that record is validated against this unchanged reviewed SHA.
     """
 
     return REVIEWED_FULL_EXECUTION_MAIN_SHA
@@ -2983,49 +2997,76 @@ def validate_full_execution_authorization(authorization: Any, *, test_only: bool
 
 
 def current_full_execution_authorization() -> FullExecutionAuthorization | None:
-    """No ACTIVE production authorization exists for this execution code.
+    """The ACTIVE production authorization for ONE frozen 336-fit execution.
 
-    History, kept deliberately explicit:
+    Provenance, kept deliberately explicit and never conflated:
 
-    * S3-B bound the reviewed full-execution baseline
-      ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (role 2).
-    * S3-C committed a real ``FullExecutionAuthorization`` for exactly 336 fits,
-      granted by the human in Issue #59 comment
-      ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID``
-      (``FULL_HUMAN_AUTHORIZATION_SCOPE``).
-    * That authorization was NEVER consumed: real full EM executed under it = 0,
-      and the production artifact directory was never created.
-    * S3-D then CHANGED the execution path -- the persisted full manifest now
-      carries global ``fit_index`` 1..336 instead of restarting at the A/B
-      boundary.
+    * role 1 (scientific baseline) is ``APPROVED_SCIENTIFIC_MAIN_SHA``.
+    * role 2 (reviewed full-execution baseline) is
+      ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` == 02ef35ad..., bound in S3-E and
+      NOT changed by this authorization.
+    * role 3 (``run_code_sha``) is derived at execution time from the actual
+      checked-out tree.  It is never hard-coded, and no post-binding main
+      checkpoint or PR merge SHA is role 2.
+
+    History:
+
+    * S3-C committed an authorization granted by the human in Issue #59 comment
+      ``HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` against the
+      PRE-FIX baseline ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA``.
+      Real full EM executed under it: 0.
+    * S3-D changed the execution path (global full-manifest ``fit_index``
+      1..336), so that approval went STALE and the record was withdrawn.
     * S3-E rebound role 2 to the reviewed merge commit of that fix.  Rebinding
-      reviewed code provenance is NOT an approval, so this still returns None.
+      reviewed code provenance is not an approval, so the gate stayed closed.
+    * S3-F (here) records the FRESH explicit human approval given in Issue #59
+      comment ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064)
+      against role 2 02ef35ad... and the frozen protocol hash 2d19c5fe...
+      The historical approval is NOT reused: it authorizes nothing here.
 
-    An approval is an approval of specific reviewed code, not of an intention.
-    Because the execution code changed after the approval was given, the S3-C
-    approval is STALE and must not remain executable, so production full
-    execution is intentionally CLOSED here and this returns ``None``.
+    The record below is a COMMITTED, reviewable literal.  Nothing in it is
+    derived from ``git rev-parse HEAD``, the current branch, the environment,
+    a CLI flag, a config file, an artifact file or the GitHub/Issue API -- each
+    of those would let the running code declare itself approved.  The validator
+    re-checks every field against the frozen protocol constants before a single
+    fit may run.
 
-    Reopening it is a separate, ordered human gate and cannot happen in this
-    commit:
-
-    1. this fix is independently reviewed and merged  -- DONE (PR #63);
-    2. its exact merge SHA is frozen as the revised reviewed full-execution
-       baseline (role 2)                               -- DONE (S3-E, this commit);
-    3. a FRESH explicit human approval is recorded against that baseline
-                                                       -- NOT DONE;
-    4. a separate authorization-only PR commits the new record
-                                                       -- NOT DONE.
-
-    Steps 3 and 4 are human gates and neither is satisfied by step 2: the
-    historical S3-C approval was granted against
-    ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA`` and is not transferable.
-
-    Nothing here is fabricated: no new approval is asserted, and the historical
-    provenance above is preserved rather than rewritten.
+    Committing it does NOT execute anything: real full EM under this approval is
+    still 0 and the production artifact directory is still absent.  The
+    authorization is ONE-TIME and SCOPE-LIMITED
+    (``FULL_HUMAN_AUTHORIZATION_SCOPE``); everything in
+    ``FULL_HUMAN_AUTHORIZATION_EXCLUSIONS`` -- a Phase 7e anchor rerun, a canary
+    or smoke rerun, a retry, a replacement fit, an alternate seed, a relaxed
+    tolerance, a partial rerun, a rerun after success or failure, or any 337th
+    fit -- remains UNAUTHORIZED and needs a new explicit human gate.
     """
 
-    return None
+    return FullExecutionAuthorization(
+        issue_number=FULL_EXECUTION_ISSUE_NUMBER,
+        protocol_origin_issue_number=FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        # role 2, the reviewed baseline this approval was granted against
+        approved_main_sha=REVIEWED_FULL_EXECUTION_MAIN_SHA,
+        protocol_hash=(
+            "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
+        ),
+        estimands=("A", "B"),
+        k_true_grid=(1, 2, 4, 5),
+        candidate_k=(1, 2, 3, 4, 5, 6, 7),
+        starts=(1, 2),
+        replicates=(1, 2, 3),
+        fits_per_estimand=168,
+        total_fit_count=336,
+        data_seed_base=51000,
+        model_seed_base=530000,
+        anchor_split_seed_base=42000,
+        mask_design="S_C",
+        random_design="CRN",
+        hierarchy="H3_A",
+        independent_review_pass=True,
+        human_full_approval=True,
+        authorization_version="phase8b-full-authorization-v1",
+        _authority=_FULL_EXECUTION_AUTHORITY,
+    )
 
 
 def _make_test_full_authorization(
@@ -5424,17 +5465,17 @@ def _require_em_authorization(args: argparse.Namespace,
                 f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} is bound (Issue #59) "
                 "and the 336-fit sweep has its own FullExecutionAuthorization "
                 "schema, validator and zero-EM preflight, but NO committed "
-                "FullExecutionAuthorization record exists. The earlier human "
-                "approval (Issue #59 comment "
-                f"{FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID}) executed 0 real EM "
-                "and is STALE: it was granted against the pre-fix baseline "
-                f"{HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA} and the "
-                "execution path changed afterwards, so it no longer applies to "
-                "this code and is NOT transferred to the revised baseline. The "
-                "revised reviewed baseline is bound, but a FRESH "
-                "INDEPENDENT_REVIEW_PASS plus HUMAN_FULL_APPROVAL against it "
-                "remain a separate human gate. A smoke authorization must never "
-                "be reused for --full."
+                "FullExecutionAuthorization record exists. This branch is "
+                "fail-closed dead code while S3-F's record stands; it fires only "
+                "if that record is ever removed. The historical approval (Issue "
+                "#59 comment "
+                f"{HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID}) executed "
+                "0 real EM and is STALE: it was granted against the pre-fix "
+                f"baseline {HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA}, so "
+                "it can never be revived to authorize the revised baseline. A "
+                "FRESH INDEPENDENT_REVIEW_PASS plus HUMAN_FULL_APPROVAL against "
+                "the current baseline is a separate human gate. A smoke "
+                "authorization must never be reused for --full."
             )
         validate_full_execution_authorization(full_authorization, test_only=False)
         run_full_preflight()
