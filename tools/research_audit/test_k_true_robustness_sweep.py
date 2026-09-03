@@ -7014,7 +7014,7 @@ def test_AUTHORIZATIONONLY_full_is_still_unauthorized(monkeypatch):
     # Issue #59: --full resolves through its OWN gate.  S3-B bound the reviewed
     # baseline; S3-D withdrew the stale S3-C record, so it is absent again.
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
     assert H.current_smoke_execution_authorization().smoke_fit_count == 6
     assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
 
@@ -7346,8 +7346,8 @@ def test_FULLGATE_the_full_authorization_record_is_absent():
     """S3-D withdrew the stale S3-C record; the reviewed baseline stays bound."""
 
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
-    assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
+    assert H.trusted_full_main_sha_for(test_only=False) == "02ef35add45036975162b6a267f6428c3b380459"
     # the smoke gate is present; that must not leak into the full gate
     assert H.current_smoke_execution_authorization() is not None
     assert H.current_expected_smoke_main_sha() is not None
@@ -7820,8 +7820,21 @@ def _run_full_fake(out_dir, recorder=None, run_code_sha="0" * 40):
     return recorder
 
 
-def _promote_full_fixture(source, destination):
-    """The same artifacts stamped as a real, complete execution."""
+def _promote_full_fixture(source, destination,
+                          reviewed_sha="02ef35add45036975162b6a267f6428c3b380459"):
+    """The same artifacts stamped as a real, complete execution.
+
+    The test-only lineage deliberately fabricates role 2 and role 3 so a
+    test-only record can never satisfy the production validator.  A REAL
+    artifact set, however, is produced against the committed reviewed
+    full-execution baseline, and the independent auditor holds that literal
+    (Issue #59 S3-E).  So the promotion stamps role 2 to the reviewed
+    baseline exactly as it stamps the git ancestry conclusions below: the
+    fixture is made to look like the real execution it stands in for.
+    Production trust boundaries are untouched -- nothing here changes which
+    SHA the runner trusts, and the test-only authorization still carries
+    "c" * 40.
+    """
 
     _shutil.copytree(source, destination)
     path = destination / "runinfo.json"
@@ -7834,14 +7847,25 @@ def _promote_full_fixture(source, destination):
                     "scientific_baseline_is_ancestor_of_reviewed_full": True,
                     "reviewed_full_baseline_is_ancestor_of_run_code": True})
     path.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    for name in ("authorization.json", "runinfo.json", "full_summary.json"):
+        target = destination / name
+        if not target.is_file():
+            continue
+        stamped = json.loads(target.read_text(encoding="utf-8"))
+        if "reviewed_full_execution_main_sha" in stamped:
+            stamped["reviewed_full_execution_main_sha"] = reviewed_sha
+            target.write_text(json.dumps(stamped, sort_keys=True, indent=2),
+                              encoding="utf-8")
     csv_path = destination / "full_fit_results.csv"
     lines = csv_path.read_text(encoding="utf-8").splitlines()
     header = lines[0].split(",")
     index = header.index("real_full_fits_executed")
+    reviewed_index = header.index("reviewed_full_execution_main_sha")
     fixed = [lines[0]]
     for line in lines[1:]:
         cells = line.split(",")
         cells[index] = "336"
+        cells[reviewed_index] = reviewed_sha
         fixed.append(",".join(cells))
     csv_path.write_text("\n".join(fixed) + "\n", encoding="utf-8")
     return destination
@@ -8402,7 +8426,9 @@ def _patch_full_csv_cell(directory, column, line_number, value):
 
 
 def test_FINDINGS_audit_rejects_a_baseline_equal_to_the_run_sha(tmp_path):
-    _run_full_fake(tmp_path / "run", run_code_sha="c" * 40)
+    # role 3 is set to the reviewed baseline the promotion stamps into role 2,
+    # so the two roles collapse and the audit must reject the artifact set
+    _run_full_fake(tmp_path / "run", run_code_sha="02ef35add45036975162b6a267f6428c3b380459")
     directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
     auditor = A.audit_full_run_dir(directory)
     assert any(f.check in ("full_baseline_not_run_sha", "full_auth_baseline_not_run_sha")
@@ -8531,8 +8557,8 @@ def test_ROLES_audit_holds_the_scientific_literal_independently():
 def test_ROLES_reviewed_full_sha_is_bound_but_unauthorized():
     """S3-B bound role 2; S3-D reclosed the gate, so role 2 stays unconsumed."""
 
-    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
-    assert H.trusted_full_main_sha_for(test_only=False) == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
+    assert H.trusted_full_main_sha_for(test_only=False) == "02ef35add45036975162b6a267f6428c3b380459"
     assert H.current_full_execution_authorization() is None
     body = _executable_body(H.current_expected_full_main_sha)
     assert body.strip() == "return REVIEWED_FULL_EXECUTION_MAIN_SHA"
@@ -8714,20 +8740,26 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() == "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()
 
 
 # ===========================================================================
-# Issue #59 Phase 8b S3-B: reviewed full-execution baseline binding ONLY
+# Issue #59 Phase 8b S3-E: REVISED reviewed full-execution baseline binding ONLY
 # ===========================================================================
 #
-# The reviewed S3-A merge SHA is now the trusted role-2 value.  Nothing else
-# changed: no production FullExecutionAuthorization record exists, neither
-# human gate is granted, and --full still stops before any adapter.
+# The reviewed PR #63 merge SHA is now the trusted role-2 value, replacing the
+# pre-fix S3-A merge SHA that S3-B had bound.  Nothing else changed: no
+# production FullExecutionAuthorization record exists, neither human gate is
+# granted, and --full still stops before any adapter.  Rebinding reviewed code
+# provenance is NOT an approval and NOT a scientific-protocol change.
 
-REVIEWED_FULL_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+REVIEWED_FULL_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
+# The superseded pre-fix baseline, kept as evidence.  The historical S3-C human
+# approval (Issue #59 comment 5511177444) was granted against THIS SHA and
+# executed 0 real full EM; it is never transferred to the revised baseline.
+HISTORICAL_REVIEWED_FULL_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
 SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
 
 
@@ -8960,14 +8992,20 @@ def test_AUTHZ_historical_provenance_is_preserved():
         HISTORICAL_S3C_AUTHORIZED_FIELDS["fits_per_estimand"]
 
 
-def test_AUTHZ_the_reviewed_baseline_binding_is_untouched():
-    """S3-D changes no SHA: rebinding role 2 is a later, separate stage."""
+def test_AUTHZ_the_stale_approval_is_not_transferred_to_the_new_baseline():
+    """S3-E rebinds role 2; the S3-C approval stays attached to the OLD SHA."""
 
-    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == \
-        HISTORICAL_S3C_AUTHORIZED_FIELDS["approved_main_sha"]
+    historical = HISTORICAL_S3C_AUTHORIZED_FIELDS["approved_main_sha"]
+    assert historical == HISTORICAL_REVIEWED_FULL_MAIN_SHA
+    assert H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA == historical
+    # the current role 2 is the revised baseline, NOT the one that was approved
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == REVIEWED_FULL_MAIN_SHA
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA != historical
     assert H.current_expected_full_main_sha() == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
     assert H.current_expected_full_main_sha() != H.APPROVED_SCIENTIFIC_MAIN_SHA
+    # rebinding did not reopen the gate
+    assert H.current_full_execution_authorization() is None
 
 
 def test_AUTHZ_cli_full_stops_before_any_adapter(monkeypatch):
@@ -9437,5 +9475,201 @@ def test_MANIFESTINDEX_zero_em_is_maintained(tmp_path, monkeypatch):
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert H.current_full_execution_authorization() is None
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_no_new_production_artifacts()
+
+
+# ===========================================================================
+# Issue #59 Phase 8b S3-E: the REVISED reviewed baseline is bound, gate closed
+# ===========================================================================
+#
+# PR #63 fixed the full manifest (global fit_index 1..336) and was independently
+# reviewed and human-merged.  S3-E binds that exact merge SHA as the CURRENT
+# role-2 reviewed full-execution baseline.  It grants nothing: no production
+# FullExecutionAuthorization is created, the historical S3-C approval is not
+# transferred, no real EM runs, and the frozen protocol hash is untouched.
+
+REVISED_REVIEWED_FULL_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
+HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID = 5511177444
+
+
+def test_S3E_current_role2_is_the_revised_reviewed_baseline():
+    """4/10: one committed literal, and every accessor returns exactly it."""
+
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.current_expected_full_main_sha() == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.trusted_full_main_sha_for(test_only=False) == REVISED_REVIEWED_FULL_MAIN_SHA
+    H._require_full_commit_sha(H.current_expected_full_main_sha(), "reviewed full SHA")
+    # the test-only lineage is untouched and can never stand in for production
+    assert H.trusted_full_main_sha_for(test_only=True) == H._FULL_TEST_EXPECTED_MAIN_SHA
+    assert H.trusted_full_main_sha_for(test_only=True) != REVISED_REVIEWED_FULL_MAIN_SHA
+
+
+def test_S3E_historical_role2_is_preserved_and_distinct():
+    """3: history is kept explicitly, never silently rewritten."""
+
+    assert (H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
+    assert (H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            != H.REVIEWED_FULL_EXECUTION_MAIN_SHA)
+    assert (H.current_expected_full_main_sha()
+            != H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA)
+    # the three roles stay separate: role 1 is unchanged by this rebinding
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == SCIENTIFIC_BASELINE_SHA
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA != H.APPROVED_SCIENTIFIC_MAIN_SHA
+    assert (H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            != H.APPROVED_SCIENTIFIC_MAIN_SHA)
+
+
+def test_S3E_the_revised_literal_is_committed_not_derived():
+    """4: role 2 is never read from HEAD, git, the env, the CLI or a config."""
+
+    tree = _ast.parse(_textwrap.dedent(
+        _inspect.getsource(H.current_expected_full_main_sha)))
+    calls = [getattr(n.func, "id", getattr(n.func, "attr", "?"))
+             for n in _ast.walk(tree) if isinstance(n, _ast.Call)]
+    assert calls == [], f"the trusted source must not call anything: {calls}"
+    names = {n.id for n in _ast.walk(tree) if isinstance(n, _ast.Name)}
+    assert names - {"str"} == {"REVIEWED_FULL_EXECUTION_MAIN_SHA"}
+    body = _executable_body(H.current_expected_full_main_sha)
+    for forbidden in ("os.", "environ", "getenv", "argv", "sys.", "subprocess", "git",
+                      "rev-parse", "current_run_code_sha", "Path", "open(", "json",
+                      "config", "branch", "HEAD"):
+        assert forbidden not in body, forbidden
+    module_source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert (f'REVIEWED_FULL_EXECUTION_MAIN_SHA = "{REVISED_REVIEWED_FULL_MAIN_SHA}"'
+            in module_source)
+
+
+def test_S3E_env_and_cli_cannot_rebind_role2(monkeypatch):
+    for name in ("REVIEWED_FULL_EXECUTION_MAIN_SHA", "PHASE8B_FULL_MAIN_SHA",
+                 "APPROVED_MAIN_SHA", "PHASE8B_FULL_AUTHORIZED"):
+        monkeypatch.setenv(name, "9" * 40)
+    monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full"])
+    assert H.current_expected_full_main_sha() == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.current_full_execution_authorization() is None
+
+
+def test_S3E_production_authorization_is_still_absent():
+    """5: binding a reviewed baseline is not an approval."""
+
+    assert H.current_full_execution_authorization() is None
+    body = _executable_body(H.current_full_execution_authorization)
+    assert body.strip() == "return None"
+    for forbidden in ("FullExecutionAuthorization(", "human_full_approval",
+                      "independent_review_pass", "_FULL_EXECUTION_AUTHORITY"):
+        assert forbidden not in body, forbidden
+
+
+def test_S3E_the_historical_approval_is_never_reused():
+    """5: comment 5511177444 must not map to an ACTIVE production record."""
+
+    assert (H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID
+            == HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID)
+    module_source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    # exactly one construction site remains, and it is the test-only factory
+    constructions = [line.strip() for line in module_source.splitlines()
+                     if "FullExecutionAuthorization(" in line
+                     and "type(" not in line
+                     and "is FullExecutionAuthorization" not in line]
+    assert len(constructions) == 1, constructions
+    assert ("_FULL_TEST_AUTHORITY"
+            in module_source.split("FullExecutionAuthorization(")[-1][:400])
+    # the production authority sentinel is never attached to a committed record
+    authority_uses = [line.strip() for line in module_source.splitlines()
+                      if "_FULL_EXECUTION_AUTHORITY" in line
+                      and not line.strip().startswith("#")]
+    assert authority_uses, "the sentinel must still exist"
+    for line in authority_uses:
+        assert ("_FULL_TEST_AUTHORITY if test_only else" in line
+                or line.startswith("_FULL_EXECUTION_AUTHORITY = object()")), line
+    doc = H.current_full_execution_authorization.__doc__
+    assert "STALE" in doc and "None" in doc
+
+
+@pytest.mark.parametrize("argv", [
+    ["--full", "--allow-em", "--confirm-k-true-sweep"],
+    ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
+])
+def test_S3E_full_still_stops_before_any_adapter(argv, monkeypatch, tmp_path):
+    """5/13: the CLI must stop before _run_production_full_execution."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(argv)
+    message = str(excinfo.value)
+    assert "not authorized" in message
+    assert "NO committed FullExecutionAuthorization record exists" in message
+    assert "STALE" in message
+    assert str(HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID) in message
+    assert HISTORICAL_REVIEWED_FULL_MAIN_SHA in message
+    assert reached == [], "the production full workflow is never reached"
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert not (tmp_path / "frozen_full").exists()
+    assert "em_runner" not in sys.modules
+
+
+def test_S3E_auditor_expects_the_revised_baseline_independently():
+    """6: the auditor holds its own literal and never imports the runner."""
+
+    assert (A.EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA
+            == REVISED_REVIEWED_FULL_MAIN_SHA)
+    assert (A.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA
+            == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
+    assert (A.EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA
+            != A.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA)
+    assert (A.EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA
+            != A.EXPECTED_SCIENTIFIC_BASELINE_SHA)
+    source = pathlib.Path(A.__file__).read_text(encoding="utf-8")
+    assert "import run_k_true_robustness_sweep" not in source
+    assert f'"{REVISED_REVIEWED_FULL_MAIN_SHA}"' in source
+
+
+def test_S3E_protocol_hash_is_unchanged_by_the_rebinding():
+    """7: rebinding reviewed code provenance is not a protocol change."""
+
+    assert (H.full_protocol_hash()
+            == "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9")
+    assert A.EXPECTED_FULL_PROTOCOL_HASH == H.full_protocol_hash()
+    # the reviewed baseline is provenance, never an input to the frozen protocol
+    flat = json.dumps(H.full_protocol_config(), sort_keys=True, default=str)
+    assert REVISED_REVIEWED_FULL_MAIN_SHA not in flat
+    assert HISTORICAL_REVIEWED_FULL_MAIN_SHA not in flat
+
+
+def test_S3E_full_manifest_global_indices_are_intact():
+    """8: the PR #63 HIGH fix is untouched by this rebinding."""
+
+    manifests = H.build_full_manifests()
+    flattened = H.flatten_full_manifests(manifests)
+    assert len(flattened) == 336
+    assert [row.fit_index for row in flattened] == list(range(1, 337))
+    assert len({row.fit_index for row in flattened}) == 336
+    assert [row.fit_index for row in manifests["A"]] == list(range(1, 169))
+    assert [row.fit_index for row in manifests["B"]] == list(range(169, 337))
+    assert all(row.k_true != H.ANCHOR_K_TRUE for row in flattened)
+    # the executor still binds the persisted index to the executed index
+    cell_body = _executable_body(H._run_full_cell)
+    assert "row.fit_index == fit_index" in cell_body
+
+
+def test_S3E_zero_em_state_is_unchanged(tmp_path, monkeypatch):
+    """12: the rebinding executes nothing."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    report = H.run_full_preflight()
+    assert report["em_fits_executed"] == 0
+    assert report["real_full_fits_executed"] == 0
+    assert report["expected_full_fits"] == 336
+    assert report["trusted_full_main_sha_present"] is True
+    assert report["full_execution_authorization_present"] is False
+    assert report["phase7e_rerun_fits"] == 0
+    assert report["artifact_directory_exists"] is False
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()

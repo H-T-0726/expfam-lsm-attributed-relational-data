@@ -1768,10 +1768,25 @@ FULL_AUDIT_REPORT_VERSION = "phase8b-full-audit-v1"
 FULL_AUDIT_REPORT_FILENAME = "audit_report.json"
 
 # HIGH-05: the frozen scientific baseline, restated INDEPENDENTLY here.  It is
-# role 1 and never varies; the reviewed full-execution SHA (role 2) is a future
-# merge commit whose literal is not known yet, so the audit only requires it to
-# be a single consistent value that is NOT role 1 and NOT role 3.
+# role 1 and never varies.
 EXPECTED_SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
+
+# Role 2, also restated INDEPENDENTLY here (Issue #59 S3-E).  This auditor never
+# imports the runner: if it read the runner's constant, an artifact set produced
+# by a mutated runner would audit itself as approved.  The literal below is the
+# reviewed PR #63 merge commit on main -- the revised execution path carrying
+# global full-manifest fit indices 1..336.
+EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
+    "02ef35add45036975162b6a267f6428c3b380459"
+)
+
+# The superseded PRE-FIX reviewed baseline (S3-B/S3-C).  Kept as evidence so a
+# stale artifact set naming it is recognised and REJECTED rather than silently
+# accepted; it is never the current expectation.  Real full EM executed under
+# the historical approval bound to it: 0.
+HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA = (
+    "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
+)
 
 FULL_SHA_ROLE_FIELDS = (
     "scientific_baseline_sha",
@@ -1895,6 +1910,15 @@ def audit_full_authorization(payload: Mapping[str, Any], auditor: Auditor) -> No
                     "full_auth_sha_role_collision",
                     "the reviewed full-execution baseline must not be the scientific "
                     "baseline")
+    auditor.require(reviewed == EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                    "full_auth_reviewed_baseline",
+                    f"reviewed_full_execution_main_sha: {reviewed!r} != "
+                    f"{EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA} "
+                    "(the independently expected revised reviewed baseline)")
+    auditor.require(reviewed != HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                    "full_auth_stale_baseline",
+                    "the authorization names the superseded pre-fix reviewed "
+                    "baseline: that approval executed 0 real EM and is STALE")
 
 
 def audit_full_manifest_global_index(rows: Sequence[dict[str, str]],
@@ -2125,7 +2149,7 @@ def audit_full_baseline_lineage(payloads: Mapping[str, Mapping[str, Any]],
     """HIGH-03 + HIGH-05: three commit-SHA roles, never interchangeable.
 
     role 1  ``scientific_baseline_sha``            EXACT frozen literal
-    role 2  ``reviewed_full_execution_main_sha``   exactly one value, != role 1
+    role 2  ``reviewed_full_execution_main_sha``   EXACT revised literal, != role 1
     role 3  ``run_code_sha``                       exactly one value, != role 2
 
     authorization.json, runinfo.json, full_summary.json and all 336 CSV rows
@@ -2160,6 +2184,12 @@ def audit_full_baseline_lineage(payloads: Mapping[str, Mapping[str, Any]],
                         "full_sha_role_collision",
                         "the reviewed full-execution SHA must not be the scientific "
                         "baseline: they are different roles")
+        auditor.require(value == EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                        "full_reviewed_baseline_sha",
+                        f"{value!r} != "
+                        f"{EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA}: the "
+                        "artifacts do not name the independently expected revised "
+                        "reviewed full-execution baseline")
     for value in run_code:
         auditor.require(value not in reviewed, "full_baseline_not_run_sha",
                         "the run-code SHA must not be the reviewed full-execution "
