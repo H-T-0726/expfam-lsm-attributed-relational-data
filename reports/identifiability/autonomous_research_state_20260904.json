@@ -2,14 +2,59 @@
   "baseline_sha": "7e335602999977060208ce37ac8cdff8fedfa66e",
   "branch": "research/true-k-clean-asymptotics-20260904",
   "started_at": "2026-09-04T14:57:14+09:00",
-  "phase": "PHASE_0_STARTUP",
+  "phase": "PHASE_9_PRODUCTION_RUNNING",
   "status": "IN_PROGRESS",
-  "completed": [],
-  "unresolved": [],
+  "completed": [
+    "PHASE 0 startup: baseline fixed, branch created, state files committed (2b6faa0)",
+    "PHASE 1 theory audit: true_k_identifiability_hardened_20260904.md + verify_identifiability_identities.py (a9b7f38)",
+    "PHASE 2 adversarial review: 2 independent reviewers, 3 BLOCKER + 15 HIGH accepted and corrected; review report + hardened theory (10f94de)",
+    "PHASE 3 generator spec: canonical_clean_generator_spec_20260904.md (bab1837)",
+    "PHASE 4 generator: expfam/src/experimental/data_generator_canonical.py (c673034)",
+    "PHASE 5 generator tests: 46 tests PASS, no EM (a9ff0eb)",
+    "PHASE 6 runtime benchmark: 4.68/7.24/9.98/16.63 s per fit at n=50/75/100/150; TIER A chosen on wall-clock alone",
+    "PHASE 7 protocol freeze: clean_true_k_experiment_protocol_20260904.md + runner, protocol hash 547880a1... (63e1202)",
+    "PHASE 11a independent auditor written before results existed (3bd59d9)"
+  ],
+  "unresolved": [
+    "U2 Bernoulli-Y identifiability",
+    "U5 non-nesting for Bernoulli-Y / Poisson-Y",
+    "U6 n->infinity consistency of every criterion (the teacher's point 5)",
+    "U7 finite-sample rank threshold; the estimated Gram is not PSD",
+    "U9 whether K* = K_TRUE holds for the clean construction, per family",
+    "U10 what the held-out plug-in score targets in population",
+    "U11 closedness of M_K and the pseudo-true K under misspecification",
+    "U12 whether the candidate set {K : P0 in M_K} can be non-contiguous"
+  ],
   "blockers": [],
-  "experiments": [],
-  "tests": [],
-  "commits": [],
-  "next_action": "PHASE 1: true-K / identifiability theory audit (no code change, no EM)",
-  "last_updated": "2026-09-04T14:57:14+09:00"
+  "experiments": [
+    {
+      "id": "clean_true_k_asymptotics_20260904",
+      "status": "RUNNING",
+      "tier": "A",
+      "expected_fits": 896,
+      "expected_cells": 64,
+      "protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+      "artifact_dir": "expfam/results/k_selection/clean_true_k_asymptotics_20260904",
+      "started_at": "2026-09-04T19:12+09:00",
+      "estimated_wall_clock_hours": 2.4,
+      "policy": "FAIL CLOSED; no retry, no resume, no seed rescue, no replacement"
+    }
+  ],
+  "tests": [
+    "expfam/src/experimental/test_data_generator_canonical.py: 46 passed",
+    "expfam/src/experimental (all): 86 passed",
+    "tools/research_audit/verify_identifiability_identities.py: 81 rows, 0 failures (41 independent / 40 by construction)"
+  ],
+  "commits": [
+    "2b6faa0 docs: start autonomous true-K identifiability research session",
+    "a9b7f38 docs: harden true-K identifiability theory",
+    "bab1837 docs: specify canonical clean generator",
+    "c673034 feat: add canonical clean synthetic generator",
+    "a9ff0eb test: validate canonical clean generator",
+    "10f94de docs: harden identifiability claims after adversarial review",
+    "63e1202 docs: freeze clean true-K experiment protocol",
+    "3bd59d9 audit: add independent auditor for the clean true-K sweep"
+  ],
+  "next_action": "When the production run finishes: run audit_clean_true_k_sweep.py --run-dir <artifact> --write-report, then PHASE 10 analysis, PHASE 12 results + teacher summary, then the final handoff.  If it FAILED: preserve failure.json, do NOT rerun, and hand off.",
+  "last_updated": "2026-09-04T19:25:00+09:00"
 }
