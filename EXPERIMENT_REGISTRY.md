@@ -423,3 +423,13 @@ S4 は構造診断であり **selected K を作らない**。
 | `reports/identifiability/true_k_identifiability_hardened_20260904.md`＋`true_k_identifiability_review_20260904.md`＋`tools/research_audit/verify_identifiability_identities.py` | true-K 定義と family 別識別可能性の理論監査。命題 P1（Poisson-X）・P2（Gaussian-Y 単一 dyad）・P3（Gaussian-Y 非入れ子）・P6（Poisson-Y モーメント存在）・P8（三角形が `w` の符号を識別）を証明し、独立敵対レビュー 2 名（BLOCKER 3・HIGH 12 採択）で改訂。数値検証 81 rows / failure 0（**独立 41 行 / 構成上 PASS 40 行**） | **なし** | KI-020, KI-021, `RESEARCH_MASTER.md` §17 |
 | `reports/identifiability/canonical_clean_generator_spec_20260904.md`＋`expfam/src/experimental/data_generator_canonical.py`＋`test_data_generator_canonical.py` | canonical clean generator の仕様・実装・テスト 46 件。historical generator は不変 | **なし**（generator と決定論的テストのみ） | KI-021 |
 | `tools/research_audit/audit_clean_true_k_sweep.py`＋`test_clean_true_k_sweep.py` | artifact-only 独立監査器と 32 件のテスト。15 種の単一欠陥変異（selected_k 改竄・fit 欠落・seed rescue・legacy lineage・historical generator policy・退化 F・retry/resume 宣言・failure marker・信号整合破壊・summary 水増し・protocol hash 相違・非有限値・必須ファイル欠落）をすべて検出することを確認 | **なし** | — |
+
+### clean true-K n-sweep の図（2026-09-05、EM なし）
+
+| 成果物 | 内容 | 生成 script | 元 artifact | EM fit | 注意 |
+|---|---|---|---|---|---|
+| `expfam/figures/clean_true_k_20260905/F8-1_selected_k_vs_n_ktrue5.png` | `K_TRUE=5` の selected K の n 依存（主要図）。S1・S2 を並置し replicate 点と平均線、真値 5 の水平線 | `tools/research_audit/plot_clean_true_k_figures.py` | `clean_true_k_asymptotics_20260904/selection_matrix.csv`, `fit_results.csv` | **なし** | **有限標本の記述であり一致性の主張ではない。** 一致は `K_TRUE` とのものであって `K*` とのものではない。lineage E・本文採用不可 |
+| 同 `F8-2_criterion_disagreement.png` | 64 セル × 3 基準の selected K ヒートマップ（白点＝真値一致） | 同上 | 同上 | **なし** | S1 vs S2 は 44/64 一致、S1 vs S3 は 2/64、S2 vs S3 は 0/64、三者一致 0/64。**どれが正しいかは決められない** |
+| 同 `F8-3_s3_overselection.png` | S3（plug-in conditional）が candidate K とともに単調改善し罰則が追いつかないこと | 同上 | `fit_results.csv` | **なし** | **S3 は本研究が定義した基準であり原論文 Eq.(26) ではない。** S3 の失敗を原論文 BIC の失敗と読まない |
+| 同 `F8-4_start_disagreement.png` | 2 初期値が別の K を選ぶセルの割合の n 依存 | 同上 | `fit_results.csv` | **なし** | criterion 由来か最適化由来かは**分離できていない** |
+| 同 `F8-5_gram_spectrum.png` | 推定 Poisson-X Gram の固有値スペクトル | 同上 | `gram_spectrum.csv` | **なし** | **全 64 セルで非 PSD、閾値なし階数は常に d=15。rank 閾値は設定していない（U7）。この図は selected K を作らない** |

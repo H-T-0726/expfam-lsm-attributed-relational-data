@@ -155,7 +155,7 @@ ledger にない主張を支える図は載せない。
 | 項目 | 内容 |
 |---|---|
 | 目的 | **本研究の主結果。** `n` を増やしたときの selected K の変化 |
-| 出所 | **未作成**（`selection_matrix.csv` から作図） |
+| 出所 | **既存** `expfam/figures/clean_true_k_20260905/F8-1_selected_k_vs_n_ktrue5.png`（生成: `tools/research_audit/plot_clean_true_k_figures.py`）。元データ（`selection_matrix.csv` から作図） |
 | 図案 | 横軸 `n`（50/75/100/150）、縦軸 selected K。replicate ごとの点＋平均線。真値 `K=5` に水平線。S1 と S2 を別系列 |
 | caption 案 | `K_TRUE = 5` における selected K。held-out 基準の真値一致は 2/8, 0/8, 4/8, 8/8、平均 selected K は 2.62, 3.00, 4.50, 5.00。**平均は単調に増加したが一致数は単調ではない**（n=75 で 0/8） |
 | 支える主張 | **QUALIFIED ONLY** |
@@ -177,7 +177,7 @@ ledger にない主張を支える図は載せない。
 | 項目 | 内容 |
 |---|---|
 | 目的 | 3 基準が同じ fit から違う K を選ぶことを示す |
-| 出所 | **未作成**（report §5 の表から作図） |
+| 出所 | **既存** `expfam/figures/clean_true_k_20260905/F8-2_criterion_disagreement.png`（生成: `tools/research_audit/plot_clean_true_k_figures.py`）。元データ（report §5 の表から作図） |
 | 図案 | 64 セル × 3 基準のヒートマップ（selected K を色で） |
 | caption 案 | 同一の fit 証拠から得た 3 基準の selected K。S1 と S2 は 64 中 44 セルで一致、S1 と S3 は 2 セル、S2 と S3 は 0 セル、三者一致は 0 セル |
 | 支える主張 | **criterion-dependent K selection**（**QUALIFIED ONLY**） |
@@ -189,7 +189,7 @@ ledger にない主張を支える図は載せない。
 | 項目 | 内容 |
 |---|---|
 | 目的 | `Z` を積分しない基準が候補上限に張り付くことを示す |
-| 出所 | **未作成**（`fit_results.csv` の `s3_plugin_conditional` から作図） |
+| 出所 | **既存** `expfam/figures/clean_true_k_20260905/F8-3_s3_overselection.png`（生成: `tools/research_audit/plot_clean_true_k_figures.py`）。元データ（`fit_results.csv` の `s3_plugin_conditional` から作図） |
 | 図案 | 横軸 candidate K、縦軸 S3 の値（cell 平均）。単調減少（＝より良く見える）であることを示す |
 | caption 案 | plug-in conditional 基準は候補 K の増加とともに単調に改善して見え、`p log n` の罰則が追いつかない。64 セル中 3 セルしか真値に一致せず、ほぼ全セルで候補上限 `K=7` を選んだ |
 | 支える主張 | Q1 型基準への警告（**QUALIFIED ONLY**） |
@@ -200,7 +200,7 @@ ledger にない主張を支える図は載せない。
 
 | 項目 | 内容 |
 |---|---|
-| 出所 | **未作成**（`fit_results.csv` から per-start argmax を計算） |
+| 出所 | **既存** `expfam/figures/clean_true_k_20260905/F8-4_start_disagreement.png`（生成: `tools/research_audit/plot_clean_true_k_figures.py`）。元データ（`fit_results.csv` から per-start argmax を計算） |
 | 図案 | 横軸 `n`、縦軸「2 つの初期値が別の K を選んだセルの割合」 |
 | caption 案 | S1 / `K_TRUE=5` において初期値が異なる K を選んだセル: `n=50` で 8/8、`n=150` で 1/8 |
 | 支える主張 | 不安定性の記述（**QUALIFIED ONLY**） |
@@ -211,7 +211,7 @@ ledger にない主張を支える図は載せない。
 
 | 項目 | 内容 |
 |---|---|
-| 出所 | **未作成**（`gram_spectrum.csv` から作図） |
+| 出所 | **既存** `expfam/figures/clean_true_k_20260905/F8-5_gram_spectrum.png`（生成: `tools/research_audit/plot_clean_true_k_figures.py`）。元データ（`gram_spectrum.csv` から作図） |
 | 図案 | 横軸 固有値番号 1..15、縦軸 固有値（cell 中央値）。`K_TRUE` ごとに系列を分け、`K_TRUE` の位置に縦線 |
 | caption 案 | 標本モーメントから推定した Poisson-X Gram 行列の固有値。**全 64 セルで最小固有値が負**（中央値 −1.80 〜 −0.52）であり、閾値なしの階数は常に `d = 15` |
 | 支える主張 | U7 の具体化（**ALLOWED**、事実の記述） |
@@ -265,18 +265,20 @@ ledger にない主張を支える図は載せない。
 
 ---
 
-## 作成が必要なもの（優先順）
+## 生成済み（2026-09-05）
+
+F8-1 〜 F8-5 は `tools/research_audit/plot_clean_true_k_figures.py` で生成し、
+`expfam/figures/clean_true_k_20260905/` に配置した。**EM は実行していない。**
+script は artifact から selected K を再導出し、`selection_matrix.csv` と不一致なら停止する。
+`EXPERIMENT_REGISTRY.md` に登録済み。
+
+## まだ作成が必要なもの（優先順）
 
 | 優先 | ID | 内容 | 元データ |
 |---|---|---|---|
-| **1** | **F8-1** | `K_TRUE=5` の n 依存（**主要図**） | `selection_matrix.csv` |
-| **2** | **F8-2** | 基準間の不一致ヒートマップ | `selection_matrix.csv` |
-| 3 | F8-3 | S3 の過大選択 | `fit_results.csv` |
-| 4 | F8-5 | Gram spectrum | `gram_spectrum.csv` |
-| 5 | F8-4 | 初期値不一致 | `fit_results.csv` |
-| 6 | F3-1 | モデル概要図（概念図） | — |
-| 7 | T3-1 / T4-1 | family 別の表 | 実装・理論監査 |
-| 8 | F5-1 | キュムラント確認図 | identity checker |
+| **1** | F3-1 | モデル概要図（概念図） | — |
+| 2 | T3-1 / T4-1 | family 別の表 | 実装・理論監査 |
+| 3 | F5-1 | キュムラント確認図 | identity checker |
 
 **F6-1・F7-1・F9-1・T9-1 は既存 artifact があるので、
 図の有無と生成 script の所在を `EXPERIMENT_REGISTRY.md` で確認してから判断する。**
