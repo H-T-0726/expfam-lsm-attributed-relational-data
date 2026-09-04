@@ -31,6 +31,7 @@ TOLERANCES = {
     "poisson_x_gram": 0.05,
     "bernoulli_x_mean": 0.01,
     "gaussian_y_recovery": 0.15,
+    "triangle": 0.05,
 }
 
 SEED = 20260904
@@ -42,11 +43,14 @@ def _rel_err(numeric: float, analytic: float) -> float:
 
 
 def _cumulants_from_sample(sample: np.ndarray, order: int) -> float:
-    """Cumulant of the given order from raw central moments (k-statistic free).
+    """Plug-in cumulant of the given order from raw central moments.
 
-    The variable checked here is symmetric with mean 0, so odd central moments
-    vanish in expectation and the standard central-moment-to-cumulant formulas
-    for a mean-zero variable apply.
+    These are plug-in (biased) estimates built from raw central moments, not
+    unbiased k-statistics; that is adequate for checking an algebraic identity
+    at large sample sizes but should not be read as an estimator claim.  The
+    sixth-order formula keeps the -10 m3^2 term: the population value is zero
+    for the symmetric variables checked here, but the REALISED sample third
+    moment is not, and a general helper must not bake in a population fact.
     """
 
     centred = sample - sample.mean()
@@ -58,7 +62,8 @@ def _cumulants_from_sample(sample: np.ndarray, order: int) -> float:
     if order == 4:
         return m4 - 3.0 * m2 ** 2
     if order == 6:
-        return m6 - 15.0 * m4 * m2 - 10.0 * 0.0 + 30.0 * m2 ** 3
+        m3 = float(np.mean(centred ** 3))
+        return m6 - 15.0 * m4 * m2 - 10.0 * m3 ** 2 + 30.0 * m2 ** 3
     raise ValueError(order)
 
 
@@ -167,11 +172,26 @@ def check_poisson_x_gram(k=3, d=6, n_draws=4_000_000) -> list[dict[str, Any]]:
         {"check": "poisson_x_gram_recovery", "K": k, "d": d,
          "analytic": 0.0, "numeric": rel, "rel_err": rel, "tol": tol,
          "pass": rel <= tol},
-        {"check": "poisson_x_rank", "K": k, "d": d,
+        # The TRUE Gram has rank K by construction, so checking it proves
+        # nothing.  What matters is the ESTIMATED Gram: report its unthresholded
+        # rank, its eigen-gap, and whether it even stayed inside the PSD cone.
+        {"check": "poisson_x_rank_true_by_construction", "K": k, "d": d,
          "analytic": float(k),
          "numeric": float(int(np.linalg.matrix_rank(gram_true, tol=1e-9))),
          "rel_err": 0.0, "tol": 0.0,
+         "note": "construction check only; carries no evidence about estimation",
          "pass": int(np.linalg.matrix_rank(gram_true, tol=1e-9)) == k},
+        {"check": "poisson_x_estimated_gram_is_not_psd", "K": k, "d": d,
+         "estimated_rank_unthresholded":
+             int(np.linalg.matrix_rank(gram_hat)),
+         "min_eigenvalue_estimated": float(np.min(eig_hat)),
+         "eigen_gap_ratio_k_over_k_plus_1":
+             (float(eig_hat[k - 1] / eig_hat[k]) if k < d and eig_hat[k] != 0.0
+              else None),
+         "note": ("the moment estimator is unconstrained, so the estimated Gram "
+                  "can leave the PSD cone and its rank is not well defined "
+                  "without a threshold (UNRESOLVED U7)"),
+         "pass": True},
         {"check": "poisson_x_eigen_true", "eigenvalues": [float(v) for v in eig_true],
          "pass": True},
         {"check": "poisson_x_eigen_estimated", "eigenvalues": [float(v) for v in eig_hat],
@@ -262,6 +282,52 @@ def check_poisson_y_factorial_moment_identifiability(
     }]
 
 
+def check_triangle_identifies_sign_of_w(k_values=(1, 3, 5), w=0.8,
+                                        n_draws=3_000_000) -> list[dict[str, Any]]:
+    """The sign of w IS identified once three nodes are observed.
+
+    Conditioning on z_j, z_k and using E[z_i z_i^T] = I,
+        E[S_ij S_ik S_jk] = E[(z_j^T z_k)^2] = kappa_2(S) = K,
+    so for Gaussian-Y the third joint central moment of a triangle is
+        E[(Y_ij-w0)(Y_ik-w0)(Y_jk-w0)] = w^3 K,
+    whose sign is the sign of w.  The single-dyad marginal only gives w^2,
+    because S is symmetric; that symmetry does not survive to the triangle.
+    """
+
+    out = []
+    rng = np.random.default_rng(SEED + 4)
+    for k in k_values:
+        zi = rng.standard_normal((n_draws, k))
+        zj = rng.standard_normal((n_draws, k))
+        zl = rng.standard_normal((n_draws, k))
+        s_ij = np.einsum("ab,ab->a", zi, zj)
+        s_il = np.einsum("ab,ab->a", zi, zl)
+        s_jl = np.einsum("ab,ab->a", zj, zl)
+        triple = s_ij * s_il * s_jl
+        numeric = float(np.mean(triple))
+        out.append({
+            "check": "triangle_third_moment_of_S", "K": k,
+            "analytic": float(k), "numeric": numeric,
+            "rel_err": _rel_err(numeric, float(k)),
+            "tol": TOLERANCES["triangle"],
+            "pass": _rel_err(numeric, float(k)) <= TOLERANCES["triangle"],
+        })
+        for signed in (w, -w):
+            observed = float(np.mean((signed ** 3) * triple))
+            analytic = (signed ** 3) * k
+            out.append({
+                "check": "triangle_identifies_sign_of_w", "K": k, "w": signed,
+                "analytic": analytic, "numeric": observed,
+                "rel_err": _rel_err(observed, analytic),
+                "tol": TOLERANCES["triangle"],
+                "sign_matches": bool(np.sign(observed) == np.sign(signed)),
+                "pass": bool(
+                    _rel_err(observed, analytic) <= TOLERANCES["triangle"]
+                    and np.sign(observed) == np.sign(signed)),
+            })
+    return out
+
+
 def check_km1_nesting_gaussian_y() -> list[dict[str, Any]]:
     """Gaussian-Y: can a (K+1)-model reproduce a K-model's dyad marginal?
 
@@ -295,6 +361,7 @@ CHECKS = {
     "bernoulli_x_first_moment": check_bernoulli_x_first_moment,
     "poisson_y_moment_existence": check_poisson_y_moment_existence,
     "poisson_y_factorial_identifiability": check_poisson_y_factorial_moment_identifiability,
+    "triangle_sign_of_w": check_triangle_identifies_sign_of_w,
     "km1_nesting_gaussian_y": check_km1_nesting_gaussian_y,
 }
 
@@ -312,7 +379,8 @@ def main(argv: list[str] | None = None) -> int:
     for name in selected:
         fn = CHECKS[name]
         if args.fast and name in ("s_mgf_cumulants", "gaussian_y_recovery",
-                                  "poisson_x_gram", "bernoulli_x_first_moment"):
+                                  "poisson_x_gram", "bernoulli_x_first_moment",
+                                  "triangle_sign_of_w"):
             results.extend(fn(n_draws=200_000))          # type: ignore[call-arg]
         else:
             results.extend(fn())
