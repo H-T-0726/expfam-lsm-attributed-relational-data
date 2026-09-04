@@ -974,4 +974,3 @@ K*  = min { K : P0 ∈ M_K }
 | U10 | held-out plug-in score の population target |
 | U11 | `M_K` の閉性、誤指定下の pseudo-true `K` |
 | U12 | 候補集合 `{K : P0 ∈ M_K}` の連結性 |
-
