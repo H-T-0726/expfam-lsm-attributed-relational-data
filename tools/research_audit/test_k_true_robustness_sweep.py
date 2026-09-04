@@ -463,14 +463,18 @@ def test_T23_full_requires_confirm_flag():
     assert "confirm-k-true-sweep" in str(excinfo.value)
 
 
-def test_T23b_full_is_closed_even_with_every_flag(monkeypatch):
-    """Attempt 2 has no fresh authorization and stops before production."""
+def test_T23b_full_reaches_only_the_guard_with_every_flag(monkeypatch):
+    """The Attempt 2 record clears the gate; the test guard stops production."""
 
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].total_fit_count == 336
+    assert reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    assert reached[0].execution_attempt_id == "phase8b-full-attempt-2"
 
 
 def test_T23c_smoke_and_canary_reach_only_the_guarded_workflow(monkeypatch):
@@ -2060,14 +2064,15 @@ def test_leakage_self_check_runs_no_em_in_a_fresh_process():
 # --- smoke authorization ---------------------------------------------------
 
 
-def test_S2_full_is_closed_and_smoke_reaches_only_its_guard(monkeypatch):
+def test_S2_full_and_smoke_reach_only_their_guards(monkeypatch):
     full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
+    assert "test guard" in str(excinfo.value)
     assert reached == [], "--full must never reach the SMOKE production workflow"
-    assert full_reached == []
+    assert len(full_reached) == 1
+    assert type(full_reached[0]) is H.FullExecutionAuthorization
 
     for command in (["--smoke", "--allow-em"], ["--canary", "--allow-em"]):
         with pytest.raises(HarnessStop):
@@ -2481,8 +2486,10 @@ def test_S2b_full_remains_closed_and_isolated(monkeypatch):
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split('_require(command in')[0]
     assert "current_smoke_execution_authorization" not in full_branch
@@ -3366,8 +3373,9 @@ def test_S2c_full_remains_isolated(monkeypatch):
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
@@ -7043,21 +7051,25 @@ def test_AUTHORIZATIONONLY_a_plain_object_is_rejected():
 # --- full remains isolated from smoke and guarded in tests -----------------
 
 
-def test_AUTHORIZATIONONLY_full_is_closed_and_never_uses_smoke(monkeypatch):
+def test_AUTHORIZATIONONLY_full_uses_only_its_active_guarded_record(monkeypatch):
     full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
+    assert "test guard" in str(excinfo.value)
     assert reached == [], "--full must not reach the SMOKE production workflow"
-    assert full_reached == []
+    assert len(full_reached) == 1
+    authorization = full_reached[0]
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.total_fit_count == 336
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
 
     executable = _executable_body(H._require_em_authorization)
     full_branch = executable.split("if command == 'full':")[1].split("_require(command in")[0]
     assert "current_smoke_execution_authorization" not in full_branch
     # Issue #59: --full resolves through its OWN gate, never the smoke gate.
-    assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
+    assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
+    assert H.current_expected_full_main_sha() == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
     assert H.current_smoke_execution_authorization().smoke_fit_count == 6
     assert H.EXPECTED_NEW_FITS == 336, "the full budget is a different, unauthorized number"
 
@@ -7333,8 +7345,9 @@ def test_AUTHORIZATIONTYPE_stage_still_executes_nothing(monkeypatch):
             H.main(command)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert full_reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(full_reached) == 1
+    assert type(full_reached[0]) is H.FullExecutionAuthorization
     assert [name for name, _auth in reached] == ["canary", "smoke"]
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     _assert_no_new_production_artifacts()
@@ -7384,13 +7397,15 @@ def _full_rejects(**changes):
 # --- the active gate remains separate from the smoke gate ------------------
 
 
-def test_FULLGATE_attempt2_authorization_is_closed_pending_fresh_approval():
-    """The Attempt 1-specific approval is not transferable to Attempt 2."""
+def test_FULLGATE_attempt2_authorization_record_is_active_and_bound():
+    """The fresh Attempt 2 approval is recorded against the reviewed baseline."""
 
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
-    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
-    assert H.trusted_full_main_sha_for(test_only=False) == "02ef35add45036975162b6a267f6428c3b380459"
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.is_test_only() is False
+    H.validate_full_execution_authorization(authorization, test_only=False)
+    assert H.current_expected_full_main_sha() == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
+    assert H.trusted_full_main_sha_for(test_only=False) == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
     # the smoke gate is present; that must not leak into the full gate
     assert H.current_smoke_execution_authorization() is not None
     assert H.current_expected_smoke_main_sha() is not None
@@ -7426,21 +7441,23 @@ def test_FULLGATE_sentinels_and_baselines_are_distinct():
     source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
     uses = [line.strip() for line in source.splitlines()
             if "_FULL_EXECUTION_AUTHORITY" in line]
-    # definition + validator selection; no committed production record
-    assert len(uses) == 2, uses
-    assert sum(line == "_authority=_FULL_EXECUTION_AUTHORITY," for line in uses) == 0
+    # definition + validator selection + the one committed production record
+    assert len(uses) == 3, uses
+    assert sum(line == "_authority=_FULL_EXECUTION_AUTHORITY," for line in uses) == 1
 
 
-def test_FULLGATE_cli_full_stops_at_closed_gate_and_never_reaches_a_fit(monkeypatch):
+def test_FULLGATE_cli_full_reaches_the_guard_and_never_reaches_a_fit(monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     full_reached = _block_full_production_execution(monkeypatch)
     reached = _block_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
+    assert "test guard" in str(excinfo.value)
     assert reached == [], "--full never touches the smoke workflow"
-    assert full_reached == []
+    assert len(full_reached) == 1
+    assert type(full_reached[0]) is H.FullExecutionAuthorization
+    assert full_reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     _assert_no_new_production_artifacts()
@@ -7467,7 +7484,9 @@ def test_FULLGATE_no_cli_or_env_can_fabricate_a_full_authorization(monkeypatch):
                       "--approve-full", "--full-fit-count"):
         assert forbidden not in options, forbidden
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    assert authorization.total_fit_count == 336
     body = _executable_body(H.current_full_execution_authorization)
     for forbidden in ("os.environ", "os.getenv", "sys.argv", "argparse"):
         assert forbidden not in body
@@ -7581,7 +7600,7 @@ def test_FULLGATE_preflight_is_zero_em_and_exact():
     assert report["mask_gate_failed"] == []
     assert report["hierarchy"] == "H3_A" and report["mask_design"] == "S_C"
     assert report["random_design"] == "CRN" and report["estimands"] == ["A", "B"]
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["trusted_full_main_sha_present"] is True
     assert report["phase7e_rerun_fits"] == 0
     assert "em_runner" not in sys.modules
@@ -7791,9 +7810,8 @@ def test_FULLGATE_stage_executes_zero_real_em(monkeypatch):
     H.run_full_preflight()
     H.build_full_manifests()
     H.check_full_anchor_agreement()
-    assert H.current_full_execution_authorization() is None
-    with pytest.raises(HarnessStop):
-        H.validate_full_execution_authorization(None, test_only=False)
+    H.validate_full_execution_authorization(
+        H.current_full_execution_authorization(), test_only=False)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
@@ -7870,7 +7888,7 @@ def _run_full_fake(out_dir, recorder=None, run_code_sha="0" * 40):
 
 
 def _promote_full_fixture(source, destination,
-                          reviewed_sha="02ef35add45036975162b6a267f6428c3b380459"):
+                          reviewed_sha="ddc9b0b4c38da995fedf43ceef12f17dfb4db353"):
     """The same artifacts stamped as a real, complete execution.
 
     The test-only lineage deliberately fabricates role 2 and role 3 so a
@@ -8482,7 +8500,7 @@ def _patch_full_csv_cell(directory, column, line_number, value):
 def test_FINDINGS_audit_rejects_a_baseline_equal_to_the_run_sha(tmp_path):
     # role 3 is set to the reviewed baseline the promotion stamps into role 2,
     # so the two roles collapse and the audit must reject the artifact set
-    _run_full_fake(tmp_path / "run", run_code_sha="02ef35add45036975162b6a267f6428c3b380459")
+    _run_full_fake(tmp_path / "run", run_code_sha="ddc9b0b4c38da995fedf43ceef12f17dfb4db353")
     directory = _promote_full_fixture(tmp_path / "run", tmp_path / "real")
     auditor = A.audit_full_run_dir(directory)
     assert any(f.check in ("full_baseline_not_run_sha", "full_auth_baseline_not_run_sha")
@@ -8520,14 +8538,16 @@ def test_FINDINGS_full_refuses_a_per_estimand_scope(estimand, monkeypatch):
     ["--full", "--allow-em", "--confirm-k-true-sweep"],
     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
 ])
-def test_FINDINGS_full_scope_ab_stops_at_closed_authorization_gate(argv, monkeypatch):
+def test_FINDINGS_full_scope_ab_reaches_the_authorization_gate(argv, monkeypatch):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(argv)
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert _AdapterTripwire.constructions == 0
 
 
@@ -8608,12 +8628,19 @@ def test_ROLES_audit_holds_the_scientific_literal_independently():
     assert "import run_k_true_robustness_sweep" not in source
 
 
-def test_ROLES_attempt1_role2_is_preserved_but_attempt2_is_not_authorized():
+def test_ROLES_reviewed_full_sha_is_bound_and_separately_authorized():
+    """Role 2 is the Attempt 2 baseline, and the record authorizes exactly it."""
 
-    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
-    assert H.trusted_full_main_sha_for(test_only=False) == "02ef35add45036975162b6a267f6428c3b380459"
+    assert H.current_expected_full_main_sha() == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
+    assert H.trusted_full_main_sha_for(test_only=False) == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.approved_main_sha == H.current_expected_full_main_sha()
+    # the superseded Attempt 1 baseline is preserved and is never role 2
+    assert (H.ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            == "02ef35add45036975162b6a267f6428c3b380459")
+    assert (H.ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            != H.current_expected_full_main_sha())
     body = _executable_body(H.current_expected_full_main_sha)
     assert body.strip() == "return REVIEWED_FULL_EXECUTION_MAIN_SHA"
 
@@ -8793,8 +8820,8 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
     A.audit_full_run_dir(directory)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert H.current_full_execution_authorization() is None
-    assert H.current_expected_full_main_sha() == "02ef35add45036975162b6a267f6428c3b380459"
+    assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
+    assert H.current_expected_full_main_sha() == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()
 
@@ -8808,10 +8835,14 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
 # FullExecutionAuthorization against that unchanged role 2.  Rebinding reviewed
 # code provenance was not itself an approval or scientific-protocol change.
 
-REVIEWED_FULL_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
+REVIEWED_FULL_MAIN_SHA = "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
+# The superseded ATTEMPT 1 baseline (PR #63 merge).  The Attempt 1 human approval
+# (Issue #59 comment 5526348064) was granted against THIS SHA; Attempt 1 was
+# ABORTED_BY_OPERATOR_INTERRUPT and that approval is not transferable to Attempt 2.
+ATTEMPT1_REVIEWED_FULL_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
 # The superseded pre-fix baseline, kept as evidence.  The historical S3-C human
 # approval (Issue #59 comment 5511177444) was granted against THIS SHA and
-# executed 0 real full EM; it is never transferred to the revised baseline.
+# executed 0 real full EM; it is never transferred to a later baseline.
 HISTORICAL_REVIEWED_FULL_MAIN_SHA = "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
 SCIENTIFIC_BASELINE_SHA = "68c78e1191889609dead05ea5a9fb11525ce92e2"
 
@@ -8832,21 +8863,27 @@ def test_BASELINE_roles_stay_separate():
     # role 1 is unchanged by this binding
     assert H.current_expected_smoke_main_sha() == scientific
     assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == scientific
-    # role 3 remains runtime-only; Attempt 2 has no active authorization.
-    assert H.current_full_execution_authorization() is None
+    # role 3 remains runtime-only; the authorization points to role 2.
+    authorization = H.current_full_execution_authorization()
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.approved_main_sha == reviewed
     assert H.current_expected_full_main_sha() == reviewed
 
 
-def test_BASELINE_attempt2_authorization_is_absent_despite_role2_binding():
-    assert H.current_full_execution_authorization() is None
+def test_BASELINE_attempt2_authorization_is_separate_from_role2_binding():
+    authorization = H.current_full_execution_authorization()
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.approved_main_sha == REVIEWED_FULL_MAIN_SHA
+    assert authorization.is_test_only() is False
     body = _executable_body(H.current_full_execution_authorization)
-    assert body.strip() == "return None"
-    # exactly the test-only factory; no production record
+    assert "FullExecutionAuthorization(" in body
+    assert "_authority=_FULL_EXECUTION_AUTHORITY" in body
+    # exactly one production record plus the test-only factory
     source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
     constructions = [line.strip() for line in source.splitlines()
                      if "FullExecutionAuthorization(" in line
                      and "type(" not in line and "is FullExecutionAuthorization" not in line]
-    assert len(constructions) == 1, constructions
+    assert len(constructions) == 2, constructions
     assert "_FULL_TEST_AUTHORITY" in source.split("FullExecutionAuthorization(")[-1][:400]
 
 
@@ -8854,15 +8891,18 @@ def test_BASELINE_attempt2_authorization_is_absent_despite_role2_binding():
     ["--full", "--allow-em", "--confirm-k-true-sweep"],
     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
 ])
-def test_BASELINE_full_stops_before_the_test_guard(argv, monkeypatch, tmp_path):
+def test_BASELINE_full_reaches_only_the_test_guard(argv, monkeypatch, tmp_path):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "frozen_full")
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(argv)
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].total_fit_count == 336
+    assert reached[0].approved_main_sha == REVIEWED_FULL_MAIN_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert not (tmp_path / "frozen_full").exists()
     assert "em_runner" not in sys.modules
@@ -8900,7 +8940,7 @@ def test_BASELINE_a_forged_record_still_fails_the_provenance_gate():
     with pytest.raises(HarnessStop) as excinfo:
         H.validate_full_execution_authorization(forged, test_only=False)
     assert "provenance is unauthorized" in str(excinfo.value)
-    assert H.current_full_execution_authorization() is None
+    assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
     assert forged.is_test_only() is True
 
 
@@ -8932,7 +8972,8 @@ def test_BASELINE_env_and_cli_cannot_change_it(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full"])
     assert H.current_expected_full_main_sha() == REVIEWED_FULL_MAIN_SHA
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    assert authorization.total_fit_count == 336
     options = {option for action in H._build_parser()._actions
                for option in action.option_strings}
     for forbidden in ("--full-main-sha", "--reviewed-full-sha", "--approve-full",
@@ -8947,7 +8988,7 @@ def test_BASELINE_zero_em_state_is_unchanged(tmp_path, monkeypatch):
     assert report["em_fits_executed"] == 0
     assert report["real_full_fits_executed"] == 0
     assert report["trusted_full_main_sha_present"] is True
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["manifest"]["total_fits"] == 336
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
@@ -8979,29 +9020,32 @@ HISTORICAL_S3C_AUTHORIZED_FIELDS = {
 }
 
 
-# --- the Attempt 1 approval is not transferable; Attempt 2 gate is closed --
+# --- the Attempt 1 approval is not transferable; the Attempt 2 gate is open -
 
 
-def test_AUTHZ_attempt2_production_authorization_is_absent():
-    """A fresh review and human approval are required for Attempt 2."""
+def test_AUTHZ_attempt2_production_authorization_is_active_and_valid():
+    """The fresh Attempt 2 record validates without executing the workflow."""
 
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.is_test_only() is False
+    H.validate_full_execution_authorization(authorization, test_only=False)
     body = _executable_body(H.current_full_execution_authorization)
-    assert body.strip() == "return None"
+    assert "FullExecutionAuthorization(" in body
+    assert "_authority=_FULL_EXECUTION_AUTHORITY" in body
 
 
-def test_AUTHZ_only_the_test_factory_exists():
-    """No production authority construction survives the interrupted attempt."""
+def test_AUTHZ_only_one_production_record_and_one_test_factory_exist():
+    """The Attempt 2 record is singular and separate from the test authority."""
 
     source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
     constructions = [line.strip() for line in source.splitlines()
                      if "FullExecutionAuthorization(" in line
                      and "type(" not in line and "is FullExecutionAuthorization" not in line]
-    assert len(constructions) == 1, constructions
+    assert len(constructions) == 2, constructions
     production_body = _executable_body(H.current_full_execution_authorization)
-    assert production_body.count("FullExecutionAuthorization(") == 0
-    assert "_FULL_EXECUTION_AUTHORITY" not in production_body
+    assert production_body.count("FullExecutionAuthorization(") == 1
+    assert "_FULL_EXECUTION_AUTHORITY" in production_body
     assert "_FULL_TEST_AUTHORITY" in source.split("FullExecutionAuthorization(")[-1][:400]
     factory = H._make_test_full_authorization()
     assert factory._authority is H._FULL_TEST_AUTHORITY
@@ -9016,7 +9060,14 @@ def test_AUTHZ_the_stale_approval_is_explained_not_deleted():
     for fragment in ("S3-C", "STALE", "fit_index", "Attempt 1", "Attempt 2", "merge",
                      "not transferable"):
         assert fragment in doc, fragment
-    assert "No ACTIVE" in doc
+    assert "ACTIVE production authorization" in doc
+    # all three approvals are cited and kept distinct in the same docstring
+    for constant in ("HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID",
+                     "FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID",
+                     "ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID"):
+        assert constant in doc, constant
+    assert str(H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID) in doc
+    assert str(H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID) in doc
 
 
 def test_AUTHZ_historical_provenance_is_preserved():
@@ -9053,7 +9104,11 @@ def test_AUTHZ_the_stale_approval_is_not_transferred_to_the_new_baseline():
     assert H.current_expected_full_main_sha() == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert H.APPROVED_SCIENTIFIC_MAIN_SHA == "68c78e1191889609dead05ea5a9fb11525ce92e2"
     assert H.current_expected_full_main_sha() != H.APPROVED_SCIENTIFIC_MAIN_SHA
-    assert H.current_full_execution_authorization() is None
+    # the ACTIVE record authorizes only the current role 2, never an older one
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    assert authorization.approved_main_sha != historical
+    assert authorization.approved_main_sha != ATTEMPT1_REVIEWED_FULL_MAIN_SHA
 
 
 def test_AUTHZ_cli_full_stops_before_any_adapter(monkeypatch):
@@ -9064,8 +9119,10 @@ def test_AUTHZ_cli_full_stops_before_any_adapter(monkeypatch):
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert not H.FULL_ARTIFACT_DIR.exists()
@@ -9080,7 +9137,8 @@ def test_AUTHZ_env_and_cli_cannot_reopen_the_gate(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full",
                                       "--full-fit-count", "672"])
     authorization = H.current_full_execution_authorization()
-    assert authorization is None
+    assert authorization.approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+    assert authorization.total_fit_count == 336
     options = {option for action in H._build_parser()._actions
                for option in action.option_strings}
     for forbidden in ("--approve-full", "--human-full-approved", "--full-fit-count",
@@ -9174,7 +9232,7 @@ def test_AUTHZ_this_pr_executes_zero_real_em(monkeypatch):
     report = H.run_full_preflight()
     assert report["em_fits_executed"] == 0
     assert report["real_full_fits_executed"] == 0
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["trusted_full_main_sha_present"] is True
     assert report["artifact_directory_exists"] is False
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
@@ -9541,7 +9599,7 @@ def test_MANIFESTINDEX_zero_em_is_maintained(tmp_path, monkeypatch):
     A.audit_full_run_dir(directory)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert H.current_full_execution_authorization() is None
+    assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
     assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()
 
@@ -9556,7 +9614,7 @@ def test_MANIFESTINDEX_zero_em_is_maintained(tmp_path, monkeypatch):
 # production FullExecutionAuthorization from fresh approval; the historical
 # S3-C approval is not transferred, no real EM runs, and the protocol is intact.
 
-REVISED_REVIEWED_FULL_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
+REVISED_REVIEWED_FULL_MAIN_SHA = "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
 HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID = 5511177444
 
 
@@ -9614,15 +9672,21 @@ def test_S3E_env_and_cli_cannot_rebind_role2(monkeypatch):
         monkeypatch.setenv(name, "9" * 40)
     monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full"])
     assert H.current_expected_full_main_sha() == REVISED_REVIEWED_FULL_MAIN_SHA
-    assert H.current_full_execution_authorization() is None
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert authorization.total_fit_count == 336
 
 
-def test_S3E_attempt1_role2_and_attempt2_authorization_are_separate():
-    """The Attempt 1-bound approval cannot follow role 2 into Attempt 2."""
+def test_S3E_role2_binding_and_attempt2_authorization_are_separate():
+    """Binding role 2 did not approve it; the separate Attempt 2 record does."""
 
-    assert H.current_full_execution_authorization() is None
+    authorization = H.current_full_execution_authorization()
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.approved_main_sha == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert authorization.is_test_only() is False
     body = _executable_body(H.current_full_execution_authorization)
-    assert body.strip() == "return None"
+    assert body.count("FullExecutionAuthorization(") == 1
+    assert "_FULL_EXECUTION_AUTHORITY" in body
 
 
 def test_S3E_the_historical_approval_is_never_reused():
@@ -9632,30 +9696,35 @@ def test_S3E_the_historical_approval_is_never_reused():
             == HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID)
     assert H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5526348064
     module_source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
-    # only the test-only factory remains
+    # exactly one production record and one test-only factory remain
     constructions = [line.strip() for line in module_source.splitlines()
                      if "FullExecutionAuthorization(" in line
                      and "type(" not in line
                      and "is FullExecutionAuthorization" not in line]
-    assert len(constructions) == 1, constructions
+    assert len(constructions) == 2, constructions
     assert ("_FULL_TEST_AUTHORITY"
             in module_source.split("FullExecutionAuthorization(")[-1][:400])
-    # the production authority sentinel is attached to no committed record
+    # the production authority sentinel is attached only to the Attempt 2 record
     authority_uses = [line.strip() for line in module_source.splitlines()
                       if "_FULL_EXECUTION_AUTHORITY" in line
                       and not line.strip().startswith("#")]
     assert authority_uses, "the sentinel must still exist"
     assert sum(line == "_authority=_FULL_EXECUTION_AUTHORITY,"
-               for line in authority_uses) == 0
+               for line in authority_uses) == 1
     doc = H.current_full_execution_authorization.__doc__
-    assert "STALE" in doc and "No ACTIVE" in doc
+    assert "STALE" in doc and "not transferable" in doc
+    # the ACTIVE record is bound to the Attempt 2 approval, never the S3-C one
+    authorization = H.current_full_execution_authorization()
+    assert (authorization.approved_main_sha
+            != H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA)
 
 
 @pytest.mark.parametrize("argv", [
     ["--full", "--allow-em", "--confirm-k-true-sweep"],
     ["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"],
 ])
-def test_S3E_full_stops_before_the_guard_and_any_adapter(argv, monkeypatch, tmp_path):
+def test_S3E_full_reaches_only_the_guard_before_any_adapter(argv, monkeypatch, tmp_path):
+    """The active Attempt 2 record reaches the guarded workflow and no adapter."""
 
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
@@ -9663,8 +9732,11 @@ def test_S3E_full_stops_before_the_guard_and_any_adapter(argv, monkeypatch, tmp_
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(argv)
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert type(reached[0]) is H.FullExecutionAuthorization
+    assert reached[0].approved_main_sha == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert reached[0].total_fit_count == 336
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert not (tmp_path / "frozen_full").exists()
     assert "em_runner" not in sys.modules
@@ -9724,7 +9796,7 @@ def test_S3E_zero_em_state_is_unchanged(tmp_path, monkeypatch):
     assert report["real_full_fits_executed"] == 0
     assert report["expected_full_fits"] == 336
     assert report["trusted_full_main_sha_present"] is True
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["phase7e_rerun_fits"] == 0
     assert report["artifact_directory_exists"] is False
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
@@ -9751,10 +9823,18 @@ def test_S3F_fresh_and_historical_approval_provenance_are_distinct():
             == HISTORICAL_S3C_HUMAN_APPROVAL_COMMENT_ID)
     assert (H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID
             != H.HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID)
-    assert H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA == ATTEMPT1_REVIEWED_FULL_MAIN_SHA
     assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == REVISED_REVIEWED_FULL_MAIN_SHA
     assert (H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA
             == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
+    # the Attempt 2 approval is a third, distinct provenance record
+    assert H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_NUMBER == 59
+    assert H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5529711820
+    assert (H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID
+            not in (H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID,
+                    H.HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID))
+    assert (H.ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA
+            == REVISED_REVIEWED_FULL_MAIN_SHA)
 
 
 def test_S3F_approval_sha_is_an_independent_exact_ast_literal():
@@ -9771,16 +9851,22 @@ def test_S3F_approval_sha_is_an_independent_exact_ast_literal():
     value = assignments[0].value
     assert isinstance(value, _ast.Constant)
     assert type(value.value) is str
-    assert value.value == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert value.value == ATTEMPT1_REVIEWED_FULL_MAIN_SHA
 
 
 def test_S3F_attempt1_approval_is_bound_to_attempt1_and_not_active():
     """Attempt 1 is ABORTED_BY_OPERATOR_INTERRUPT; its approval stays with it."""
 
-    assert H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA == REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA == ATTEMPT1_REVIEWED_FULL_MAIN_SHA
     assert H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5526348064
-    assert H.current_full_execution_authorization() is None
-    assert _executable_body(H.current_full_execution_authorization).strip() == "return None"
+    # role 2 has moved on, so the Attempt 1 approval no longer matches it
+    assert H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA != REVISED_REVIEWED_FULL_MAIN_SHA
+    assert H.current_expected_full_main_sha() == REVISED_REVIEWED_FULL_MAIN_SHA
+    # and the ACTIVE record is the Attempt 2 one, never the Attempt 1 approval
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha != H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA
+    assert (authorization.approved_main_sha
+            == H.ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA)
 
 
 def test_S3F_attempt2_test_authorization_has_every_exact_frozen_field():
@@ -9857,15 +9943,19 @@ def test_S3F_test_authority_cannot_validate_as_production():
     assert "provenance is unauthorized" in str(excinfo.value)
 
 
-def test_S3F_attempt2_cli_remains_closed_before_the_guard(monkeypatch, tmp_path):
+def test_S3F_attempt2_cli_reaches_only_the_explicit_guard(monkeypatch, tmp_path):
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
     monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", tmp_path / "production-forbidden")
     reached = _block_full_production_execution(monkeypatch)
     with pytest.raises(HarnessStop) as excinfo:
         H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
-    assert "not authorized" in str(excinfo.value)
-    assert reached == []
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    authorization = reached[0]
+    assert type(authorization) is H.FullExecutionAuthorization
+    assert authorization.total_fit_count == 336
+    assert authorization.approved_main_sha == REVISED_REVIEWED_FULL_MAIN_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert not (tmp_path / "production-forbidden").exists()
     assert "em_runner" not in sys.modules
@@ -9955,7 +10045,7 @@ def test_OPERATORINT_protocol_and_zero_em_preflight_are_unchanged(monkeypatch):
     assert report["protocol_hash"] == FROZEN_FULL_PROTOCOL_HASH
     assert report["execution_attempt_id"] == "phase8b-full-attempt-2"
     assert report["partial_results_reused"] is False
-    assert report["full_execution_authorization_present"] is False
+    assert report["full_execution_authorization_present"] is True
     assert report["artifact_directory_exists"] is False
     assert report["expected_full_fits"] == 336
     assert report["phase7e_rerun_fits"] == 0
@@ -10123,4 +10213,298 @@ def test_HIGH01_the_frozen_observation_is_what_runinfo_records(tmp_path, monkeyp
     assert runinfo["working_tree_clean"] is True
     assert runinfo["working_tree_clean_before_execution"] is True
     assert runinfo["working_tree_clean"] == runinfo["working_tree_clean_before_execution"]
+    _assert_no_new_production_artifacts()
+
+# ===========================================================================
+# Issue #59 Phase 8b: the FINAL Attempt 2 authorization binding (ZERO real EM)
+# ===========================================================================
+#
+# PR #66 added the fresh Attempt 2 lineage and was independently reviewed and
+# human-merged as ddc9b0b4...  That merge SHA is now role 2, and Issue #59
+# comment 5529711820 is the fresh human approval naming it.  These tests pin the
+# whole trust boundary: the exact literals, their independence from one another,
+# and every route that must stay closed.
+
+ATTEMPT2_ROLE2_SHA = "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
+ATTEMPT2_HUMAN_APPROVAL_COMMENT_ID = 5529711820
+
+
+def test_ATTEMPT2_role2_is_the_exact_reviewed_literal():
+    """A: role 2 is exactly the reviewed, human-merged PR #66 SHA."""
+
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA == ATTEMPT2_ROLE2_SHA
+    assert H.current_expected_full_main_sha() == ATTEMPT2_ROLE2_SHA
+    assert H.trusted_full_main_sha_for(test_only=False) == ATTEMPT2_ROLE2_SHA
+    H._require_full_commit_sha(H.current_expected_full_main_sha(), "reviewed full SHA")
+    # role 1 is untouched and must never collide with role 2
+    assert H.APPROVED_SCIENTIFIC_MAIN_SHA == SCIENTIFIC_BASELINE_SHA
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA != H.APPROVED_SCIENTIFIC_MAIN_SHA
+    # the two superseded baselines are preserved and are never role 2
+    assert H.ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA == ATTEMPT1_REVIEWED_FULL_MAIN_SHA
+    assert (H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA
+            == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
+    assert H.REVIEWED_FULL_EXECUTION_MAIN_SHA not in (
+        H.ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA,
+        H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA)
+
+
+def test_ATTEMPT2_fresh_approval_provenance_is_exact_and_distinct():
+    """B: the fresh approval is comment 5529711820, distinct from both others."""
+
+    assert H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_NUMBER == 59
+    assert (H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID
+            == ATTEMPT2_HUMAN_APPROVAL_COMMENT_ID)
+    assert H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5526348064
+    assert H.HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID == 5511177444
+    assert len({H.ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID,
+                H.FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID,
+                H.HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID}) == 3
+
+
+def test_ATTEMPT2_approval_sha_is_an_independent_ast_literal_not_an_alias():
+    """C: the approved SHA is a string literal, never an alias of role 2."""
+
+    import ast as _a
+
+    tree = _a.parse(pathlib.Path(H.__file__).read_text(encoding="utf-8"))
+    assignments = [node for node in tree.body
+                   if isinstance(node, _a.Assign)
+                   and any(isinstance(t, _a.Name)
+                           and t.id == "ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA"
+                           for t in node.targets)]
+    assert len(assignments) == 1, assignments
+    value = assignments[0].value
+    assert isinstance(value, _a.Constant), _a.dump(value)
+    assert type(value.value) is str
+    assert value.value == ATTEMPT2_ROLE2_SHA
+    # the protocol hash the human approved is likewise an independent literal
+    hash_assignments = [node for node in tree.body
+                        if isinstance(node, _a.Assign)
+                        and any(isinstance(t, _a.Name)
+                                and t.id == "ATTEMPT2_HUMAN_AUTHORIZATION_PROTOCOL_HASH"
+                                for t in node.targets)]
+    assert len(hash_assignments) == 1
+    assert isinstance(hash_assignments[0].value, _a.Constant)
+    assert hash_assignments[0].value.value == FROZEN_FULL_PROTOCOL_HASH
+    # and the record itself is built from those literals, not from live calls
+    body = _executable_body(H.current_full_execution_authorization)
+    assert "ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA" in body
+    assert "ATTEMPT2_HUMAN_AUTHORIZATION_PROTOCOL_HASH" in body
+    for forbidden in ("REVIEWED_FULL_EXECUTION_MAIN_SHA", "full_protocol_hash()",
+                      "os.environ", "os.getenv", "sys.argv", "argparse",
+                      "current_run_code_sha", "subprocess", "rev-parse"):
+        assert forbidden not in body, forbidden
+
+
+def test_ATTEMPT2_approval_sha_equals_role2_right_now():
+    """D: the pinned approval and the current role 2 agree today."""
+
+    assert (H.ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA
+            == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
+            == H.current_expected_full_main_sha()
+            == ATTEMPT2_ROLE2_SHA)
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == ATTEMPT2_ROLE2_SHA
+    assert authorization.protocol_hash == H.full_protocol_hash() == FROZEN_FULL_PROTOCOL_HASH
+    H.validate_full_execution_authorization(authorization, test_only=False)
+
+
+def test_ATTEMPT2_a_future_role2_rebind_makes_this_approval_stale(monkeypatch):
+    """E: moving role 2 without a new approval closes the gate."""
+
+    authorization = H.current_full_execution_authorization()
+    future_role2 = "f" * 40
+    monkeypatch.setattr(H, "REVIEWED_FULL_EXECUTION_MAIN_SHA", future_role2)
+    assert H.current_expected_full_main_sha() == future_role2
+    # the approval literal did NOT follow the rebind
+    assert H.ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA == ATTEMPT2_ROLE2_SHA
+    assert authorization.approved_main_sha != H.current_expected_full_main_sha()
+    with pytest.raises(HarnessStop, match="does not match the reviewed"):
+        H.validate_full_execution_authorization(authorization, test_only=False)
+    with pytest.raises(HarnessStop, match="does not match the reviewed"):
+        H.validate_full_execution_authorization(
+            H.current_full_execution_authorization(), test_only=False)
+
+
+def test_ATTEMPT2_a_changed_approval_sha_without_a_rebind_closes_validation():
+    """F: an approval naming anything but the current role 2 fails closed."""
+
+    for other in (ATTEMPT1_REVIEWED_FULL_MAIN_SHA, HISTORICAL_REVIEWED_FULL_MAIN_SHA,
+                  SCIENTIFIC_BASELINE_SHA, "a" * 40):
+        mutated = dataclasses.replace(H.current_full_execution_authorization(),
+                                      approved_main_sha=other)
+        with pytest.raises(HarnessStop, match="does not match the reviewed"):
+            H.validate_full_execution_authorization(mutated, test_only=False)
+
+
+def test_ATTEMPT2_neither_older_approval_can_authorize_it():
+    """G + H: the Attempt 1 and S3-C approvals both fail closed."""
+
+    for stale_sha in (H.FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA,
+                      H.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA):
+        assert stale_sha != H.current_expected_full_main_sha()
+        older = dataclasses.replace(
+            H._make_test_full_authorization(approved_main_sha=stale_sha),
+            _authority=H._FULL_EXECUTION_AUTHORITY)
+        with pytest.raises(HarnessStop):
+            H.validate_full_execution_authorization(older, test_only=False)
+    # an Attempt 1-SHAPED record is refused even when it names the current SHA
+    attempt1_shaped = dataclasses.replace(
+        H._make_test_full_authorization(approved_main_sha=ATTEMPT2_ROLE2_SHA),
+        authorization_version="phase8b-full-authorization-v1",
+        execution_attempt_id="phase8b-full-attempt-1",
+        partial_results_reused=True,
+        _authority=H._FULL_EXECUTION_AUTHORITY)
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(attempt1_shaped, test_only=False)
+
+
+def test_ATTEMPT2_smoke_authorization_can_never_authorize_full():
+    """I: the smoke record is a different type behind a different sentinel."""
+
+    smoke = H.current_smoke_execution_authorization()
+    assert smoke is not None
+    with pytest.raises(HarnessStop) as excinfo:
+        H.validate_full_execution_authorization(smoke, test_only=False)
+    assert "FullExecutionAuthorization" in str(excinfo.value)
+    with pytest.raises(HarnessStop):
+        H.validate_smoke_execution_authorization(
+            H.current_full_execution_authorization(), test_only=False)
+    assert H.current_expected_full_main_sha() != H.current_expected_smoke_main_sha()
+
+
+def test_ATTEMPT2_cli_env_and_config_cannot_replace_the_production_authority(monkeypatch):
+    """J: nothing outside the committed literal can grant or widen approval."""
+
+    for name in ("HUMAN_FULL_APPROVAL", "PHASE8B_HUMAN_FULL_APPROVAL",
+                 "INDEPENDENT_REVIEW_PASS", "PHASE8B_FULL_AUTHORIZED",
+                 "PHASE8B_FULL_FIT_COUNT", "REVIEWED_FULL_EXECUTION_MAIN_SHA",
+                 "ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA"):
+        monkeypatch.setenv(name, "9" * 40)
+    monkeypatch.setattr(sys, "argv", ["run", "--full", "--allow-em", "--approve-full",
+                                      "--full-fit-count", "672"])
+    authorization = H.current_full_execution_authorization()
+    assert authorization.approved_main_sha == ATTEMPT2_ROLE2_SHA
+    assert authorization.total_fit_count == 336
+    options = {option for action in H._build_parser()._actions
+               for option in action.option_strings}
+    for forbidden in ("--approve-full", "--human-full-approved", "--full-fit-count",
+                      "--authorize-full", "--full-main-sha", "--reviewed-full-sha",
+                      "--attempt-id", "--resume"):
+        assert forbidden not in options, forbidden
+    # a test-authority record can never validate as production
+    with pytest.raises(HarnessStop, match="provenance is unauthorized"):
+        H.validate_full_execution_authorization(
+            H._make_test_full_authorization(approved_main_sha=ATTEMPT2_ROLE2_SHA),
+            test_only=False)
+
+
+def test_ATTEMPT2_artifact_path_is_absent_and_attempt1_evidence_is_intact():
+    """K + L + M: fresh path absent, Attempt 1 exact, no partial reuse."""
+
+    assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_attempt2_20260904"
+    assert not H.FULL_ARTIFACT_DIR.exists()
+    assert H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR != H.FULL_ARTIFACT_DIR
+    if H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR.exists():
+        assert H.historical_aborted_full_evidence_is_intact() is True
+    assert H.FULL_PARTIAL_RESULTS_REUSED is False
+    authorization = H.current_full_execution_authorization()
+    assert authorization.partial_results_reused is False
+    assert authorization.execution_attempt_id == "phase8b-full-attempt-2"
+    assert authorization.prior_aborted_attempt_id == "phase8b-full-attempt-1"
+    assert authorization.fresh_attempt_reason == "operator_interrupt"
+    assert (authorization.prior_aborted_artifact_dir
+            == "expfam/results/k_selection/k_true_robustness_full_20260902")
+    # reusing partial results is refused even with the production sentinel
+    reusing = dataclasses.replace(authorization, partial_results_reused=True)
+    with pytest.raises(HarnessStop):
+        H.validate_full_execution_authorization(reusing, test_only=False)
+
+
+def test_ATTEMPT2_budget_is_exactly_336_new_fits_and_excludes_k_true_3(monkeypatch):
+    """N + O: the manifest is one fresh 336 plan and K_TRUE=3 gets no new fit."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    manifests = H.build_full_manifests()
+    flat = H.flatten_full_manifests(manifests)
+    assert [row.fit_index for row in flat] == list(range(1, 337))
+    assert [row.fit_index for row in manifests["A"]] == list(range(1, 169))
+    assert [row.fit_index for row in manifests["B"]] == list(range(169, 337))
+    assert {row.k_true for row in flat} == {1, 2, 4, 5}
+    assert H.ANCHOR_K_TRUE == 3
+    assert all(row.k_true != H.ANCHOR_K_TRUE for row in flat)
+
+    authorization = H.current_full_execution_authorization()
+    assert authorization.k_true_grid == (1, 2, 4, 5)
+    assert H.ANCHOR_K_TRUE not in authorization.k_true_grid
+    assert authorization.fits_per_estimand == 168
+    assert authorization.total_fit_count == 336
+
+    report = H.run_full_preflight()
+    assert report["manifest"]["global_fit_index_range"] == [1, 336]
+    assert report["manifest"]["fit_index_range_by_estimand"] == {"A": [1, 168],
+                                                                "B": [169, 336]}
+    assert report["phase7e_rerun_fits"] == 0
+    assert report["em_fits_executed"] == 0
+    assert report["real_full_fits_executed"] == 0
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    _assert_no_new_production_artifacts()
+
+
+def test_ATTEMPT2_auditor_expects_the_new_baseline_independently():
+    """The auditor restates ddc9b0b4 itself and still never imports the runner."""
+
+    assert A.EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA == ATTEMPT2_ROLE2_SHA
+    assert A.ATTEMPT1_REVIEWED_FULL_EXECUTION_BASELINE_SHA == ATTEMPT1_REVIEWED_FULL_MAIN_SHA
+    assert (A.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA
+            == HISTORICAL_REVIEWED_FULL_MAIN_SHA)
+    assert A.EXPECTED_SCIENTIFIC_BASELINE_SHA == SCIENTIFIC_BASELINE_SHA
+    assert len({A.EXPECTED_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                A.ATTEMPT1_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                A.HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_BASELINE_SHA,
+                A.EXPECTED_SCIENTIFIC_BASELINE_SHA}) == 4
+    source = pathlib.Path(A.__file__).read_text(encoding="utf-8")
+    assert "import run_k_true_robustness_sweep" not in source
+    assert f'"{ATTEMPT2_ROLE2_SHA}"' in source
+    assert A.EXPECTED_FULL_PROTOCOL_HASH == FROZEN_FULL_PROTOCOL_HASH
+
+
+def test_ATTEMPT2_protocol_hash_is_unchanged_by_this_authorization():
+    """Authorization/provenance only: the scientific protocol is untouched."""
+
+    assert H.full_protocol_hash() == FROZEN_FULL_PROTOCOL_HASH
+    assert H.ATTEMPT2_HUMAN_AUTHORIZATION_PROTOCOL_HASH == FROZEN_FULL_PROTOCOL_HASH
+    config = H.full_protocol_config()
+    assert config["estimands"] == ["A", "B"]
+    assert config["k_true_grid"] == [1, 2, 4, 5]
+    assert config["candidate_k"] == [1, 2, 3, 4, 5, 6, 7]
+    assert config["starts"] == [1, 2]
+    assert config["replicates"] == [1, 2, 3]
+    assert config["fits_per_estimand"] == 168 and config["total_fit_count"] == 336
+    assert config["hierarchy"] == "H3_A" and config["mask_design"] == "S_C"
+    assert config["random_design"] == "CRN" and config["anchor_k_true"] == 3
+    assert config["data_seed_base"] == 51000 and config["model_seed_base"] == 530000
+    assert config["anchor_split_seed_base"] == 42000
+    # no attempt-identity field leaks into the hashed protocol
+    for leaked in ("execution_attempt_id", "prior_aborted_attempt_id",
+                   "fresh_attempt_reason", "partial_results_reused",
+                   "authorization_version", "artifact_version"):
+        assert leaked not in config, leaked
+
+
+def test_ATTEMPT2_this_pr_executes_zero_real_em(monkeypatch):
+    """The binding is committed; nothing is executed by committing it."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    reached = _block_full_production_execution(monkeypatch)
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
+    assert "test guard" in str(excinfo.value)
+    assert len(reached) == 1
+    assert reached[0].approved_main_sha == ATTEMPT2_ROLE2_SHA
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    assert not H.FULL_ARTIFACT_DIR.exists()
     _assert_no_new_production_artifacts()

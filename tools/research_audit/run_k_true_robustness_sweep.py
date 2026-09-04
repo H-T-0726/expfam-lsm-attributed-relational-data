@@ -2856,12 +2856,25 @@ HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA = (
     "8b6b43c9f5f5750d19409bb9afd6cf4d87d0ea1f"
 )
 
-# CURRENT: the PR #63 merge commit on main -- the revised execution path
-# (global full-manifest fit indices 1..336) as independently reviewed and
-# human-merged.  Rebinding reviewed code provenance was NOT a scientific-protocol
-# change and did not itself grant approval; the separate S3-F record below now
-# carries the fresh explicit human approval against this unchanged SHA.
-REVIEWED_FULL_EXECUTION_MAIN_SHA = "02ef35add45036975162b6a267f6428c3b380459"
+# HISTORICAL (ATTEMPT 1): the PR #63 merge commit on main -- the execution path
+# that carried global full-manifest fit indices 1..336 and was the reviewed
+# baseline when the human granted the ATTEMPT 1 approval
+# ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064).  Attempt 1 ran
+# under it and was ABORTED_BY_OPERATOR_INTERRUPT after 3 attempted fits, 0 of
+# them scored.  It is kept as evidence and is NEVER the current role 2: PR #66
+# changed the execution path again (single fresh-tree observation, fresh
+# Attempt 2 lineage) after that review.
+ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA = (
+    "02ef35add45036975162b6a267f6428c3b380459"
+)
+
+# CURRENT (ATTEMPT 2): the PR #66 merge commit on main -- the fresh-attempt
+# lineage (distinct Attempt 2 artifact identity and path, exactly one execution
+# tree observation) as independently reviewed and human-merged.  Rebinding
+# reviewed code provenance is NOT a scientific-protocol change and does not
+# itself grant approval; the separate ATTEMPT 2 record below carries the fresh
+# explicit human approval against this exact SHA.
+REVIEWED_FULL_EXECUTION_MAIN_SHA = "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
 
 # --- HUMAN AUTHORIZATION PROVENANCE (HISTORICAL, Issue #59 S3-C) -----------
 # The human granted a 336-fit execution in this Issue comment against the
@@ -2877,14 +2890,18 @@ HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 
 # --- HUMAN AUTHORIZATION PROVENANCE (ATTEMPT 1-SPECIFIC, Issue #59 S3-F) ----
 # The explicit human approval for the original execution attempt.  It was
-# granted against the CURRENT reviewed baseline
-# ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` (02ef35ad...) and the frozen protocol
-# hash 2d19c5fe...  It is BOUND TO ATTEMPT 1, whose formal classification is
-# ABORTED_BY_OPERATOR_INTERRUPT, and it is NOT TRANSFERABLE: it authorized that
-# attempt and no other, so it DOES NOT AUTHORIZE ATTEMPT 2.  It is retained as
-# historical provenance and ``current_full_execution_authorization()`` does not
-# return it.  It is a DIFFERENT comment id from the earlier stale one above: the
-# two must never be conflated.  Its original scope remains recorded below.
+# granted against what was role 2 AT THAT TIME,
+# ``ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA`` (02ef35ad...), and the frozen
+# protocol hash 2d19c5fe...  It is BOUND TO ATTEMPT 1, whose formal
+# classification is ABORTED_BY_OPERATOR_INTERRUPT, and it is NOT TRANSFERABLE:
+# it authorized that attempt and no other, so it DOES NOT AUTHORIZE ATTEMPT 2.
+# Role 2 has since moved to the PR #66 merge commit, which makes this approval
+# automatically stale against the current baseline -- exactly the intended
+# behaviour of pinning it to an independent literal.  It is retained as
+# historical provenance and is never what
+# ``current_full_execution_authorization()`` returns.  It is a DIFFERENT comment
+# id from the earlier stale one above and from the Attempt 2 one below: the
+# three must never be conflated.  Its original scope remains recorded in
 # ``FULL_HUMAN_AUTHORIZATION_SCOPE`` and ``..._EXCLUSIONS`` below.
 #
 # The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
@@ -2892,9 +2909,11 @@ HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5511177444
 # participates in an authorization decision.
 FULL_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
 FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5526348064
-# The exact role-2 SHA named by human comment 5526348064.  This is deliberately
-# an independent literal rather than an alias: if role 2 is rebound later, this
-# approval remains pinned here and validation automatically makes it stale.
+# The exact role-2 SHA named by human comment 5526348064, as it stood for
+# Attempt 1.  This is deliberately an independent literal rather than an alias:
+# role 2 has now been rebound to the Attempt 2 baseline and this approval stayed
+# pinned here, so validating it against the current baseline fails closed.  That
+# is the mechanism, working as designed -- not a defect to "fix" by aliasing.
 FULL_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA = (
     "02ef35add45036975162b6a267f6428c3b380459"
 )
@@ -2922,23 +2941,80 @@ FULL_HUMAN_AUTHORIZATION_EXCLUSIONS = (
     "any_337th_fit",
 )
 
+# --- HUMAN AUTHORIZATION PROVENANCE (ATTEMPT 2, CURRENT, Issue #59) --------
+# The FRESH explicit human approval for the Attempt 2 execution, granted after
+# PR #66 was independently reviewed and human-merged.  It is a DIFFERENT comment
+# id from both the stale S3-C one and the Attempt 1-specific one above; none of
+# the three is ever substituted for another.
+#
+# Every value here is a COMMITTED, INDEPENDENT literal.  In particular
+# ``ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA`` is deliberately NOT written
+# as an alias of ``REVIEWED_FULL_EXECUTION_MAIN_SHA``: if role 2 is rebound
+# again, an alias would silently carry this approval onto code no human approved,
+# whereas an independent literal makes the approval go stale and the gate close.
+# The same reasoning applies to the protocol hash literal below.
+#
+# The ids remain committed PROVENANCE ONLY: nothing at runtime contacts GitHub,
+# and no network call, environment variable, CLI flag or config file ever
+# participates in an authorization decision.
+ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_NUMBER = 59
+ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID = 5529711820
+ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA = (
+    "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
+)
+# The frozen scientific protocol the human approved, restated as an independent
+# literal so a protocol drift makes this approval stale instead of following it.
+ATTEMPT2_HUMAN_AUTHORIZATION_PROTOCOL_HASH = (
+    "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9"
+)
+# What the human authorized, in words, so a reviewer can compare it with the
+# record below without leaving the file.  ONE clean attempt at the frozen sweep,
+# starting from a fresh global fit_index 1 with no Attempt 1 row as an input.
+ATTEMPT2_HUMAN_AUTHORIZATION_SCOPE = (
+    "exactly 336 NEW real EM fits (A=168 at global fit_index 1..168, B=168 at "
+    "169..336) over the frozen grid K_TRUE={1,2,4,5} x replicate={1,2,3} x "
+    "K={1..7} x start={1,2}; H1=A+B, H2=CRN, H3=H3-a, H4=S-c; all frozen seeds, "
+    "Phase 7e masks, held-out score rule and tie rule unchanged; the Phase 7e "
+    "K_TRUE=3 anchor stays READ-ONLY; Attempt 1 partial output reuse = false"
+)
+# Everything the Attempt 2 authorization does NOT cover.  Any of these needs a
+# NEW explicit human authorization; none of them is reachable by re-running.
+ATTEMPT2_HUMAN_AUTHORIZATION_EXCLUSIONS = (
+    "resume_attempt_1",
+    "retry_after_attempt_2_failure",
+    "partial_rerun",
+    "replacement_fit",
+    "alternate_seed",
+    "seed_rescue",
+    "relaxed_tolerance",
+    "phase7e_anchor_rerun",
+    "canary_rerun",
+    "smoke_rerun",
+    "k_true_3_new_fit",
+    "any_337th_fit",
+    "scientific_protocol_modification",
+)
+
 
 def current_expected_full_main_sha() -> str | None:
     """The trusted reviewed baseline for a real FULL execution.
 
-    Bound (Issue #59 S3-E) to the reviewed PR #63 merge commit on main: the
-    revised execution path.  The superseded pre-fix baseline is kept beside it
-    as ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA`` and is never
-    returned here.  It is a committed literal, never read from the CLI, the
+    Bound (Issue #59) to the reviewed PR #66 merge commit on main: the fresh
+    Attempt 2 execution path.  Both superseded baselines are kept beside it --
+    ``HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA`` (pre-fix) and
+    ``ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA`` (Attempt 1) -- and neither is
+    ever returned here.  It is a committed literal, never read from the CLI, the
     environment, a config file, the current branch or ``git rev-parse HEAD`` --
     each of those would let the running code declare itself approved.  It is
     deliberately NOT
     ``current_expected_smoke_main_sha()``: approving the 8-fit smoke baseline
     must not silently approve a 336-fit sweep.
 
-    Binding this SHA did NOT itself authorize execution.  S3-F separately
-    commits ``current_full_execution_authorization()`` with both human gates;
-    that record is validated against this unchanged reviewed SHA.
+    Binding this SHA did NOT itself authorize execution.  The separate Attempt 2
+    record in ``current_full_execution_authorization()`` carries both human
+    gates and is validated against this reviewed SHA; because that record pins
+    its own independent approval literal, a future rebind here closes the gate
+    rather than moving the approval.
     """
 
     return REVIEWED_FULL_EXECUTION_MAIN_SHA
@@ -3045,19 +3121,20 @@ def validate_full_execution_authorization(authorization: Any, *, test_only: bool
 
 
 def current_full_execution_authorization() -> FullExecutionAuthorization | None:
-    """No ACTIVE production authorization exists for fresh Attempt 2.
+    """The ACTIVE production authorization for ONE fresh Attempt 2 execution.
 
     Provenance, kept deliberately explicit and never conflated:
 
-    * role 1 (scientific baseline) is ``APPROVED_SCIENTIFIC_MAIN_SHA``.
+    * role 1 (scientific baseline) is ``APPROVED_SCIENTIFIC_MAIN_SHA``, frozen
+      and unchanged by this authorization.
     * role 2 (reviewed full-execution baseline) is
-      ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` == 02ef35ad..., bound in S3-E and
-      NOT changed by this authorization.
+      ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` == ddc9b0b4..., the PR #66 merge
+      commit: the independently reviewed and human-merged Attempt 2 path.
     * role 3 (``run_code_sha``) is derived at execution time from the actual
       checked-out tree.  It is never hard-coded, and no post-binding main
       checkpoint or PR merge SHA is role 2.
 
-    History:
+    History, kept because each step is why the next one was needed:
 
     * S3-C committed an authorization granted by the human in Issue #59 comment
       ``HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` against the
@@ -3067,25 +3144,76 @@ def current_full_execution_authorization() -> FullExecutionAuthorization | None:
       1..336), so that approval went STALE and the record was withdrawn.
     * S3-E rebound role 2 to the reviewed merge commit of that fix.  Rebinding
       reviewed code provenance is not an approval, so the gate stayed closed.
-    * S3-F recorded the FRESH explicit human approval given in Issue #59
-      comment ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064)
-      against role 2 02ef35ad... for Attempt 1.
+    * S3-F recorded the human approval
+      ``FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5526348064) against the
+      then-current role 2 ``ATTEMPT1_REVIEWED_FULL_EXECUTION_MAIN_SHA``
+      (02ef35ad...) for ATTEMPT 1.
     * Attempt 1 was ABORTED_BY_OPERATOR_INTERRUPT: an accidental operator
-      KeyboardInterrupt during fit 3.  That approval is Attempt 1-specific --
-      bound to Attempt 1 and not transferable -- so it does not authorize
-      Attempt 2.  Its partial rows are provenance only and have no scientific
-      meaning.
-    * Attempt 2 has a distinct immutable path and authorization schema.  It must
-      start at fit_index 1 and execute 336 new fits; no Attempt 1 row is an input.
+      KeyboardInterrupt during fit 3 (attempted=3, clean=2, scored=0).  That
+      approval is Attempt 1-specific -- bound to Attempt 1 and not transferable
+      -- so it does not authorize Attempt 2.  Its partial rows are provenance
+      only and have no scientific meaning, and it is pinned to a SHA that is no
+      longer role 2, so validating it now fails closed.
+    * PR #66 added the fresh Attempt 2 lineage (distinct immutable artifact path,
+      exactly one execution-tree observation) and was independently reviewed and
+      human-merged as ddc9b0b4..., which is now role 2.
+    * THIS record carries the FRESH explicit human approval given in Issue #59
+      comment ``ATTEMPT2_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID`` (5529711820)
+      against that exact SHA, for ONE Attempt 2 run of 336 NEW fits starting at
+      global fit_index 1.  No Attempt 1 row is an input.
 
-    A fresh Attempt 2 record may be committed only after this execution-path
-    change is independently reviewed, merged, bound as a new role 2, and a new
-    human approval explicitly targets that exact SHA.  Until then the gate is
-    intentionally closed here.  No CLI, environment, runtime state, historical
-    approval or smoke authorization can reopen it.
+    The record below is a COMMITTED, reviewable literal.  Nothing in it is
+    derived from ``git rev-parse HEAD``, the current branch, the environment, a
+    CLI flag, a config file, an artifact file or the GitHub/Issue API -- each of
+    those would let the running code declare itself approved.  Both the approved
+    SHA and the protocol hash are independent literals rather than aliases of
+    ``REVIEWED_FULL_EXECUTION_MAIN_SHA`` / ``full_protocol_hash()``, so a future
+    role-2 rebind or a protocol drift makes this approval STALE and closes the
+    gate instead of silently following the change.  The validator re-checks every
+    field against the frozen protocol constants before a single fit may run.
+
+    Committing it does NOT execute anything: real full EM under this approval is
+    still 0 and the Attempt 2 artifact directory is still absent.  The
+    authorization is ONE-TIME and SCOPE-LIMITED
+    (``ATTEMPT2_HUMAN_AUTHORIZATION_SCOPE``); everything in
+    ``ATTEMPT2_HUMAN_AUTHORIZATION_EXCLUSIONS`` -- resuming Attempt 1, a retry
+    after an Attempt 2 failure, a partial rerun, a replacement fit, an alternate
+    seed or seed rescue, a relaxed tolerance, a Phase 7e anchor rerun, a canary
+    or smoke rerun, a K_TRUE=3 new fit, any 337th fit, or any scientific-protocol
+    modification -- remains UNAUTHORIZED and needs a new explicit human gate.
     """
 
-    return None
+    return FullExecutionAuthorization(
+        issue_number=FULL_EXECUTION_ISSUE_NUMBER,
+        protocol_origin_issue_number=FULL_PROTOCOL_ORIGIN_ISSUE_NUMBER,
+        # exact role-2 SHA explicitly named by fresh human approval 5529711820
+        approved_main_sha=ATTEMPT2_HUMAN_AUTHORIZATION_APPROVED_MAIN_SHA,
+        protocol_hash=ATTEMPT2_HUMAN_AUTHORIZATION_PROTOCOL_HASH,
+        estimands=("A", "B"),
+        k_true_grid=(1, 2, 4, 5),
+        candidate_k=(1, 2, 3, 4, 5, 6, 7),
+        starts=(1, 2),
+        replicates=(1, 2, 3),
+        fits_per_estimand=168,
+        total_fit_count=336,
+        data_seed_base=51000,
+        model_seed_base=530000,
+        anchor_split_seed_base=42000,
+        mask_design="S_C",
+        random_design="CRN",
+        hierarchy="H3_A",
+        independent_review_pass=True,
+        human_full_approval=True,
+        authorization_version="phase8b-full-authorization-v2",
+        execution_attempt_id="phase8b-full-attempt-2",
+        prior_aborted_attempt_id="phase8b-full-attempt-1",
+        prior_aborted_artifact_dir=(
+            "expfam/results/k_selection/k_true_robustness_full_20260902"
+        ),
+        fresh_attempt_reason="operator_interrupt",
+        partial_results_reused=False,
+        _authority=_FULL_EXECUTION_AUTHORITY,
+    )
 
 
 def _make_test_full_authorization(
@@ -5563,8 +5691,8 @@ def _require_em_authorization(args: argparse.Namespace,
     source and its own validator.  A smoke authorization can never be widened
     into a full-run authorization: full is resolved through
     ``current_full_execution_authorization()`` and nothing else.  The Attempt 1
-    approval is bound to Attempt 1 and not transferable, so Attempt 2 remains
-    closed until a new reviewed role 2 and fresh human approval are committed.
+    approval remains bound to Attempt 1 and not transferable; what opens the gate
+    here is the SEPARATE Attempt 2 record, pinned to its own approval literal.
     """
 
     _require(bool(args.allow_em), f"{command} requires --allow-em")
@@ -5588,15 +5716,22 @@ def _require_em_authorization(args: argparse.Namespace,
         if full_authorization is None:
             raise HarnessStop(
                 "full is not authorized in Phase 8b: the reviewed full-execution "
-                f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} belongs to the "
-                "interrupted Attempt 1 path (ABORTED_BY_OPERATOR_INTERRUPT). "
-                f"Issue #59 comment {FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} "
-                "is bound to Attempt 1 and is not transferable, so it does not "
-                "authorize Attempt 2. Attempt 2 requires "
-                "this new execution path to be independently reviewed and merged, "
-                "its exact merge SHA to be rebound as role 2, and a fresh human "
-                "approval committed in a separate authorization-only change. "
-                "Historical or smoke authorization must never be reused for --full."
+                f"baseline {REVIEWED_FULL_EXECUTION_MAIN_SHA} is bound (Issue #59) "
+                "and the 336-fit sweep has its own FullExecutionAuthorization "
+                "schema, validator and zero-EM preflight, but NO committed "
+                "FullExecutionAuthorization record exists. This branch is "
+                "fail-closed dead code while the Attempt 2 record stands; it "
+                "fires only if that record is ever removed. Neither older "
+                "approval can stand in for it: Issue #59 comment "
+                f"{HISTORICAL_S3C_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} is STALE "
+                "(granted against the pre-fix baseline "
+                f"{HISTORICAL_S3C_REVIEWED_FULL_EXECUTION_MAIN_SHA}) and comment "
+                f"{FULL_HUMAN_AUTHORIZATION_ISSUE_COMMENT_ID} is Attempt "
+                "1-specific and not transferable (that attempt was "
+                "ABORTED_BY_OPERATOR_INTERRUPT). A FRESH INDEPENDENT_REVIEW_PASS "
+                "plus HUMAN_FULL_APPROVAL against the current baseline is a "
+                "separate human gate. A smoke authorization must never be reused "
+                "for --full."
             )
         validate_full_execution_authorization(full_authorization, test_only=False)
         run_full_preflight()
