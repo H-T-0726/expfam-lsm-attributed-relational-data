@@ -1,0 +1,15 @@
+{
+  "baseline_sha": "7e335602999977060208ce37ac8cdff8fedfa66e",
+  "branch": "research/true-k-clean-asymptotics-20260904",
+  "started_at": "2026-09-04T14:57:14+09:00",
+  "phase": "PHASE_0_STARTUP",
+  "status": "IN_PROGRESS",
+  "completed": [],
+  "unresolved": [],
+  "blockers": [],
+  "experiments": [],
+  "tests": [],
+  "commits": [],
+  "next_action": "PHASE 1: true-K / identifiability theory audit (no code change, no EM)",
+  "last_updated": "2026-09-04T14:57:14+09:00"
+}
