@@ -306,3 +306,74 @@ dispersion-aware count family を伴う設計を要する。**現時点でその
 
 本表は各項目の **現在の状態** を記録したものであり、実施計画ではない
 （研究上の TODO は GitHub Issue で管理する。root `CLAUDE.md` §8）。
+
+---
+
+## 2026-09-04 forward update（Phase 8b Attempt 2 の統合）
+
+### J. 新規 KI-019 — 2 つの K 選択基準が併存し、混同されやすい
+
+**重要度: 高**
+
+**事実:** 本リポジトリには**別物の K 選択基準が 2 つ**存在する。
+
+| 基準 | 何を使うか | どこで使われているか |
+|---|---|---|
+| **legacy Q ベース基準** | `Q_strict`（EM の Q 関数の MC 近似）。観測データの周辺尤度ではない | `expfam/src/utils_expfam.py` の `calc_bic_dual`、fixed 系列の `exp1` 系 K 選択、Wine / Cora 実データの「BIC 最小 k」 |
+| **frozen held-out 予測スコア** | held-out Bernoulli raw-eta plug-in mean log score（`y·eta − logaddexp(0,eta)` を held-out upper-triangle test pair 上で平均）、2 start の非加重平均、tie tolerance 1e-12、smallest-K tie rule | **Phase 7e**（`heldout_full_pilot_20260824/`）、**Phase 8b**（`k_true_robustness_full_attempt2_20260904/`） |
+
+**影響:** root `CLAUDE.md` §5 と KI-010 の「モデル選択基準を Schwarz BIC と呼ばない／
+Q-based complete-data criterion・ICL-type として扱う」という限定は、**前者（legacy 基準）
+にのみ適用される**。これを Phase 7e / 8b の結果に適用すると、**実際には使われていない基準を
+使ったと書く**ことになり、事実として誤った記述になる。**2026-09-04 に実際にこの誤記が
+生成された**（Phase 8b Attempt 2 の実行直後の口頭サマリで、held-out 予測スコアによる選択を
+`Q_strict` ベースの基準として説明した）。逆向きの誤り（legacy の `calc_bic_dual` の結果を
+「held-out 予測スコア」と呼ぶ）も同様に誤りである。
+
+**まだ主張してはいけないこと（追加）:**
+
+- 「Phase 7e / Phase 8b の K 選択は `Q_strict` / EM の Q 関数基準 / ICL-type
+  complete-data criterion / Schwarz BIC / marginal likelihood で行った」（**事実として誤り**）
+- 「`calc_bic_dual` による k 選択は held-out 予測スコアによる選択である」（**逆向きの誤り**）
+- 2 つの基準の結果を、基準名を明記せずに同じ表・図・文で並べること
+
+**運用ルール:** K 選択の数値を引用するときは、**必ずどちらの基準か**を明記する
+（KI-002 の lineage 明記と同じ運用）。判定方法は次のとおり。
+
+- artifact に `score_config_hash` / `heldout_mean_log_score` / `selection_matrix.csv` が
+  あれば **held-out 予測スコア**（Phase 7e / 8b）
+- artifact の列名が `BIC` で `calc_bic_dual` 由来であれば **legacy Q ベース基準**（KI-010）
+
+**関連ファイル:** `expfam/src/utils_expfam.py`,
+`tools/research_audit/run_heldout_k_selection_pilot.py`（`FrozenScoreConfig` /
+`select_k_from_two_starts`）, `tools/research_audit/run_k_true_robustness_sweep.py`,
+`RESEARCH_MASTER.md` §12.6 / §12.7 / §12.9,
+`reports/k_selection_theory/k_true_robustness_full_report_20260904.md` §2
+
+**KI-010 との関係:** KI-010 は**取り消さない**。KI-010 は legacy 基準についての記述として
+引き続き有効であり、KI-019 はその適用範囲を明示するものである。
+
+### K. Phase 8b Attempt 1 の位置づけ（記録）
+
+`expfam/results/k_selection/k_true_robustness_full_20260902/` は
+**ABORTED_BY_OPERATOR_INTERRUPT / provenance only / no scientific use** である
+（`status = FAILED`、`attempted_fit_count = 3`、`clean_fit_calls = 2`、`scored_rows = 0`、
+`retry_count = 0`、`replacement_fits_executed = 0`）。
+
+- この 2 clean fits を科学的主張の根拠にしない。
+- Attempt 2 は本結果を一切再利用していない（`partial_results_reused = False`）。
+- **artifact を削除・改変しない。**
+
+### L. 追加された「まだ主張してはいけないこと」（2026-09-04）
+
+上のリストに次を追加する（既存行は削除しない）。
+
+- 「Phase 7e / 8b の K 選択は `Q_strict` / ICL-type / Schwarz BIC / marginal likelihood で
+  行った」（KI-019）
+- 「Phase 8b は K-selection consistency / asymptotic consistency / universal K recovery を
+  示した」（各条件 3 replicate の有限標本記述値。RESEARCH_MASTER §12.9）
+- 「Phase 8b の `K_TRUE=3` について A と B が独立に 6 セル分の証拠を与える」
+  （同一 Phase 7e anchor 42 fits の READ-ONLY 共有参照）
+- 「Phase 8b の統合証拠は 420 fits である」（336 新規 + 42 anchor = **378**）
+- 「Phase 8b の `K_TRUE=5` での under-selection の原因を特定した」（原因は UNRESOLVED）
+- Attempt 1（`k_true_robustness_full_20260902/`）の部分結果を科学的根拠にすること

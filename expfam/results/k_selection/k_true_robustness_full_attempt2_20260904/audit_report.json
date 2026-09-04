@@ -1,0 +1,25 @@
+{
+  "audit_version": "phase8b-full-audit-v1",
+  "audited_files": [
+    "authorization.json",
+    "config_gate.csv",
+    "full_fit_results.csv",
+    "full_summary.json",
+    "leakage_gate.csv",
+    "manifest.csv",
+    "mask_provenance.csv",
+    "runinfo.json",
+    "selection_matrix.csv"
+  ],
+  "blocker_count": 0,
+  "execution_issue": 59,
+  "expected_full_fits": 336,
+  "expected_full_fits_per_estimand": 168,
+  "findings": [],
+  "high_count": 0,
+  "medium_count": 0,
+  "protocol_hash": "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+  "protocol_origin_issue": 49,
+  "run_dir": "expfam\\results\\k_selection\\k_true_robustness_full_attempt2_20260904",
+  "status": "PASS"
+}

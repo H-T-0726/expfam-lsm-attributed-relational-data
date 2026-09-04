@@ -1,0 +1,59 @@
+{
+  "anchor_split_seed_base": 42000,
+  "artifact_version": "phase8b-full-artifact-v1",
+  "authorization_version": "phase8b-full-authorization-v1",
+  "candidate_k": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "data_seed_base": 51000,
+  "estimands": [
+    "A",
+    "B"
+  ],
+  "execution_issue_number": 59,
+  "fits_per_estimand": 168,
+  "hierarchy": "H3_A",
+  "human_full_approval": true,
+  "independent_review_pass": true,
+  "k_true_grid": [
+    1,
+    2,
+    4,
+    5
+  ],
+  "mask_design": "S_C",
+  "model_seed_base": 530000,
+  "partial_failure_policy": [
+    "stop_immediately",
+    "no_replacement_fit",
+    "no_retry",
+    "no_seed_rescue",
+    "no_tolerance_change",
+    "preserve_partial_evidence",
+    "no_completed_summary",
+    "no_audit_pass",
+    "rerun_requires_a_new_human_gate"
+  ],
+  "protocol_hash": "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+  "protocol_origin_issue_number": 49,
+  "random_design": "CRN",
+  "replicates": [
+    1,
+    2,
+    3
+  ],
+  "reviewed_full_execution_main_sha": "02ef35add45036975162b6a267f6428c3b380459",
+  "run_code_sha": "1946953ffc7e7db586dda2933c9a25a6f0235d07",
+  "scientific_baseline_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "starts": [
+    1,
+    2
+  ],
+  "total_fit_count": 336
+}
