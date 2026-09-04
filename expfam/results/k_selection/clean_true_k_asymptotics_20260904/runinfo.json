@@ -1,0 +1,43 @@
+{
+  "artifact_directory": "D:\\tento\\kennkyu\\expfam\\results\\k_selection\\clean_true_k_asymptotics_20260904",
+  "artifact_files": [
+    "protocol.json",
+    "manifest.csv",
+    "generator_provenance.csv",
+    "fit_results.csv",
+    "selection_matrix.csv",
+    "gram_spectrum.csv",
+    "summary.json",
+    "runinfo.json"
+  ],
+  "artifact_version": "clean-true-k-artifact-v1",
+  "attempted_fit_count": 896,
+  "completed_at": 1788512902.4703667,
+  "completed_fit_count": 896,
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.13.14"
+  },
+  "expected_cells": 64,
+  "expected_fits": 896,
+  "experiment_id": "clean_true_k_asymptotics_20260904",
+  "family_x": "poisson",
+  "family_y": "bernoulli",
+  "generator_version": "canonical-clean-v1",
+  "nan_fits": 0,
+  "numerics_mode": "consistent",
+  "protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+  "protocol_version": "clean-true-k-protocol-v1",
+  "q_bic_failed_fits": 0,
+  "replacement_fits_executed": 0,
+  "resumed": false,
+  "retry_count": 0,
+  "run_code_sha": "63e1202258a71256a55732fc1832db13d7f7b2bd",
+  "seed_rescue_count": 0,
+  "started_at": 1788504079.3816602,
+  "tier": "A",
+  "tolerance_relaxations": 0,
+  "wall_clock_seconds": 8823.1,
+  "working_tree_clean_before_execution": true
+}

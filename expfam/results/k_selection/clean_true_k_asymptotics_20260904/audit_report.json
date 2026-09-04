@@ -1,0 +1,30 @@
+{
+  "audit_version": "clean-true-k-audit-v1",
+  "blocker_count": 0,
+  "expected_cells": 64,
+  "expected_fits": 896,
+  "expected_protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+  "findings": [
+    {
+      "check": "nan_fits",
+      "detail": "0 fits reported nan_occurred=True",
+      "severity": "LOW"
+    },
+    {
+      "check": "gram_psd_violations",
+      "detail": "64 of 64 cells have a negative minimum eigenvalue in the estimated Gram (expected; see U7)",
+      "severity": "LOW"
+    }
+  ],
+  "high_count": 0,
+  "low_count": 2,
+  "medium_count": 0,
+  "run_dir": "expfam\\results\\k_selection\\clean_true_k_asymptotics_20260904",
+  "stats": {
+    "cells": 64,
+    "fits": 896,
+    "nan_fits": 0,
+    "selection_rows": 192
+  },
+  "verdict": "PASS"
+}

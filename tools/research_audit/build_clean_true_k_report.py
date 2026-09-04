@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUN_DIR = (ROOT / "expfam" / "results" / "k_selection"
                    / "clean_true_k_asymptotics_20260904")
 DEFAULT_OUT = (ROOT / "reports" / "identifiability"
-               / "clean_true_k_results_20260904.md")
+               / "clean_true_k_results_20260905.md")
 
 K_TRUE_GRID = (1, 3, 5)
 N_GRID = (50, 75, 100, 150)
@@ -69,21 +69,38 @@ def recompute_selection(fits: list[dict[str, str]]) -> dict[tuple[str, int, int,
     for cell, rows in by_cell.items():
         for name in CRITERIA:
             means: dict[int, np.float64] = {}
+            per_start: dict[int, list[float]] = {}
             for k_est in CANDIDATE_K:
-                vals = [float(r[COLUMN[name]]) for r in rows
-                        if int(r["k_est"]) == k_est]
-                _require(len(vals) == len(STARTS),
-                         f"{name} {cell} K={k_est}: {len(vals)} starts")
+                pairs = sorted((int(r["start"]), float(r[COLUMN[name]]))
+                               for r in rows if int(r["k_est"]) == k_est)
+                _require(len(pairs) == len(STARTS),
+                         f"{name} {cell} K={k_est}: {len(pairs)} starts")
+                vals = [v for _s, v in pairs]
+                per_start[k_est] = vals
                 signed = vals if HIGHER_IS_BETTER[name] else [-v for v in vals]
                 means[k_est] = np.mean(np.asarray(signed, dtype=np.float64),
                                        dtype=np.float64)
             best = max(means.values())
             ties = sorted(k for k, v in means.items() if best - v <= TIE_TOLERANCE)
             runner_up = max(v for k, v in means.items() if k != min(ties))
+
+            # What each start would have chosen on its own.  Where the two
+            # disagree, the selection is sensitive to the EM starting point, not
+            # only to the criterion.
+            def start_pick(index: int) -> int:
+                signed_by_k = {k: (per_start[k][index] if HIGHER_IS_BETTER[name]
+                                   else -per_start[k][index])
+                               for k in CANDIDATE_K}
+                top = max(signed_by_k.values())
+                return min(k for k, v in signed_by_k.items() if v == top)
+
+            picks = [start_pick(i) for i in range(len(STARTS))]
             out[(name, *cell)] = {
                 "selected_k": min(ties), "ties": ties,
                 "margin": float(best - runner_up),
                 "means": {k: float(v) for k, v in means.items()},
+                "start_picks": picks,
+                "start_disagreement": len(set(picks)) > 1,
             }
     return out
 
@@ -121,6 +138,32 @@ def build(run_dir: Path) -> str:
         "`selection_matrix.csv` と一致することを確認したうえで出力している（不一致なら生成が中断する）。")
     add("")
     add("**このレポート生成では EM を 1 回も実行していない。**")
+    add("")
+
+    # ---- framing (fixed text; every number below comes from the artifacts)
+    add("## 0. 何を問うた実験か")
+    add("")
+    add("> **canonical clean generator による well-specified な有限標本設定で、`n` を増やしたとき、")
+    add("> 事前登録した各 K-selection criterion の selected-K パターンはどう変わるか。**")
+    add("")
+    add("**これは consistency theorem ではない。** 有限の `n` を 4 点動かした記述的観測であり、")
+    add("`n -> infinity` の一致性については何も示さない（理論監査 16b・U6）。")
+    add("")
+    add("### なぜ historical generator では不十分だったか")
+    add("")
+    add("一次コードを読んで確認した差分（`true_k_identifiability_hardened_20260904.md` 13、KI-021）:")
+    add("`Z` と Gaussian-X の事後 z-score、`F` の行正規化、Poisson の hard clip、未使用の `sigma_x_true`。")
+    add("**過去結果を無効化するものではない**が、「canonical model から well-specified に生成した」という")
+    add("強い読み方はできない。とくに Poisson-X の識別可能性命題は unclipped link と iid `N(0,I)` を")
+    add("前提とするため、historical generator ではその前提が成立しない。")
+    add("")
+    add("### なぜ X=Poisson / Y=Bernoulli を選んだか")
+    add("")
+    add("- **X=Poisson**: population で `FF^T` をモーメントから復元でき、`K = rank(FF^T)` を議論できる")
+    add("  唯一の family（理論監査 P1）。ただし確立したのは **X 周辺の最小次元**であり `K*` ではない。")
+    add("- **Y=Bernoulli**: Phase 7e / 8b との比較可能性のため。**同時に、識別可能性（U2）も")
+    add("  非入れ子性（U5）も未証明の family** であり、理論的にもっとも弱い場所である。")
+    add("  P2・P3（強い結果）は Gaussian-Y 限定であって、ここには適用できない。")
     add("")
 
     # ---- provenance
@@ -301,6 +344,140 @@ def build(run_dir: Path) -> str:
             add(f"| {k_true} | {n} | {np.median(mins):.4f} | {top} |")
     add("")
     add("**rank 閾値は設定していない。結果を見てから閾値を決めることを protocol が禁じている（L6）。**")
+    add("")
+
+    # ---- interpretation, computed from the same recomputation
+    def series(name, k_true, key):
+        out = []
+        for n in N_GRID:
+            keys = sorted(k for k in recomputed
+                          if k[0] == name and k[1] == k_true and k[2] == n)
+            sel = [recomputed[k]["selected_k"] for k in keys]
+            if key == "exact":
+                out.append(sum(1 for s in sel if s == k_true))
+            elif key == "mean":
+                out.append(round(float(np.mean(sel)), 2))
+            elif key == "total":
+                out.append(len(sel))
+        return out
+
+    add("## 8. 解釈（有限標本の記述的結果のみ）")
+    add("")
+    add("### 8.1 主要所見")
+    add("")
+    s1e, s1m = series("S1", 5, "exact"), series("S1", 5, "mean")
+    s2e, s2m = series("S2", 5, "exact"), series("S2", 5, "mean")
+    tot5 = series("S1", 5, "total")[0]
+    add(f"**(1) `K_TRUE = 5`（PRIMARY）:** テストした `n = 50, 75, 100, 150` の範囲で、")
+    add(f"S1 の真値一致は {s1e[0]}/{tot5} -> {s1e[1]}/{tot5} -> {s1e[2]}/{tot5} -> {s1e[3]}/{tot5}、")
+    add(f"平均 selected K は {s1m[0]} -> {s1m[1]} -> {s1m[2]} -> {s1m[3]} と推移した。")
+    add(f"S2 は真値一致 {s2e[0]}/{tot5} -> {s2e[1]}/{tot5} -> {s2e[2]}/{tot5} -> {s2e[3]}/{tot5}、")
+    add(f"平均 selected K は {s2m[0]} -> {s2m[1]} -> {s2m[2]} -> {s2m[3]}。")
+    add("")
+    add("**平均 selected K は S1・S2 とも単調に増加したが、真値一致数は単調ではない**")
+    add(f"（S1 は n=75 で {s1e[1]}/{tot5} といったん下がる）。**「n を増やすと K=5 に収束した」とは書かない。**")
+    add("誤りの向きは一貫して **under-selection** であり、over-selection はごく少数である。")
+    add("")
+    add("**(2) `K_TRUE = 1` の 4/4 は good recovery の証拠ではない。** S1・S2 とも全 `n` で 4/4 だが、")
+    add("この設定の支配的な誤り方は under-selection であり、`K = 1` は候補集合の**下端**である。")
+    add("さらに凍結 selector は同点時に最小 K を選ぶ。したがって `K_TRUE = 1` での一致は、")
+    add("**データからの識別ではなく手続き上の下限効果である可能性を排除できない**（理論監査 17.4）。")
+    add("")
+    s1e3 = series("S1", 3, "exact")
+    s2e3 = series("S2", 3, "exact")
+    add(f"**(3) `K_TRUE = 3`（control）:** S1 {s1e3[0]}/4 -> {s1e3[1]}/4 -> {s1e3[2]}/4 -> {s1e3[3]}/4、")
+    add(f"S2 {s2e3[0]}/4 -> {s2e3[1]}/4 -> {s2e3[2]}/4 -> {s2e3[3]}/4。")
+    add("`K_TRUE = 5` と同じく under-selection 優位で、`n` とともに一致が増える傾向は共通している。")
+    add("**`K_TRUE` が大きいほど、同じ `n` で真値一致に届きにくい**という記述的傾向が見える。")
+    add("")
+    s3_exact = sum(1 for k in recomputed
+                   if k[0] == "S3" and recomputed[k]["selected_k"] == k[1])
+    s3_total = sum(1 for k in recomputed if k[0] == "S3")
+    add(f"**(4) S3（plug-in conditional）は使えない。** 真値一致 {s3_exact}/{s3_total} で、")
+    add("ほぼ全セルで候補上限 `K = 7` を選ぶ。`ln p(Z)` を含めず `Z` を積分しないため、")
+    add("潜在次元を増やすほど代入した Z への当てはまりが良くなり、`p log n` の罰則が追いつかない。")
+    add("**これは Q1 型（conditional / plug-in）の基準に対する警告であって、原論文 Eq.(26) の評価ではない。**")
+    add("原論文の評価手続きは本文から特定不能であり（`paper_bic_reproduction_alignment_20260904.md`）、")
+    add("**S3 の失敗を原論文の基準の失敗と読んではならない。**")
+    add("")
+    dis50 = sum(1 for k in recomputed
+                if k[0] == "S1" and k[1] == 5 and k[2] == 50
+                and recomputed[k]["start_disagreement"])
+    dis150 = sum(1 for k in recomputed
+                 if k[0] == "S1" and k[1] == 5 and k[2] == 150
+                 and recomputed[k]["start_disagreement"])
+    add(f"**(5) start 間の不一致が不安定性の指標になっている。** S1 / `K_TRUE=5` では、")
+    add(f"2 つの初期値が別々の K を選ぶセルが `n=50` で {dis50}/{tot5}、`n=150` で {dis150}/{tot5} だった。")
+    add("**選択が不安定な領域と、最適化が初期値に依存する領域が一致している。**")
+    add("これは criterion だけの問題ではなく推定側の多峰性も効いていることを示唆するが、")
+    add("**どちらが主因かは本実験では分離できていない**（`[UNRESOLVED]`）。")
+    add("")
+    add("### 8.2 書いてよい表現 / 書いてはいけない表現")
+    add("")
+    add("**書いてよい:**")
+    add("")
+    add("> テストした有限の `n` の範囲（50-150）では、held-out 予測スコアと Q ベース基準の")
+    add("> いずれについても、`n` の増加にともなって平均 selected K が真値へ近づき、")
+    add("> under-selection が減少する傾向が観測された。ただし真値一致数は単調ではなく、")
+    add("> 各条件の反復は 4 または 8 のみである。")
+    add("")
+    add("**書いてはいけない:** 「`n` を増やすと `K_TRUE` に収束した」「K 選択の一致性を示した」")
+    add("「held-out なら真の K を選べる」「`K_TRUE=1` で完全に回復した」")
+    add("「S3 の失敗は原論文 BIC の失敗である」。")
+    add("")
+
+    add("## 9. 限界")
+    add("")
+    add("| # | 限界 |")
+    add("|---|---|")
+    add("| 1 | **有限標本の記述にすぎない。** `n` は 4 点、反復は 4 または 8。信頼区間・検定・検出力は一切計算していない |")
+    add("| 2 | **一致は `K_TRUE` との一致であり `K*` との一致ではない。** `K* < K_TRUE` の可能性は family ごとに未検証（U9） |")
+    add("| 3 | **`family_y = bernoulli` は識別可能性（U2）も非入れ子性（U5）も未証明の領域である。** 強い理論結果 P2・P3 は Gaussian-Y 限定 |")
+    add("| 4 | **S1 が population で何を選んでいるかは未解決（U10）。** plug-in raw-eta score は proper scoring rule ではない |")
+    add("| 5 | **`K_TRUE=1` の結果は下限効果と交絡している**（8.1 (2)） |")
+    add("| 6 | **有効標本数が未定義。** S2・S3 の罰則は `log n`（ノード数）を使うが、Y は `n(n-1)/2` dyad を供給する（16b） |")
+    add("| 7 | **S4 は K を返さない。** 推定 Gram は全 64 セルで PSD 錐の外にあり、閾値なし階数は常に `d=15` |")
+    add("| 8 | **lineage E（experimental prototype）。本文採用不可** |")
+    add("| 9 | **1 つの合成設定のみ。** `d=15`、Poisson-X / Bernoulli-Y、信号強度は 1 水準に固定 |")
+    add("")
+
+    add("## 10. この実験の claim ledger")
+    add("")
+    add("### ALLOWED（本実験の証拠で書けること）")
+    add("")
+    add("- clean generator の設計不変量が全 64 セルで厳密に成立したこと"
+        "（`rank(F)=K_TRUE`、正規化なし、clip なし、平均 `||f_l||^2 = 0.5`、`w^2 K = 3.0`）")
+    add(f"- 実行された fit 数がちょうど {len(fits)}、retry・replacement・seed rescue・"
+        "tolerance 緩和・resume がいずれも 0 であること")
+    add("- 独立 artifact 監査の verdict と finding 件数")
+    add("- 各 `(criterion, K_TRUE, n, replicate)` の selected K の**正確な値**")
+    add("")
+    add("### QUALIFIED ONLY（限定語なしに書いてはいけない）")
+    add("")
+    add("- 「`n` の増加とともに平均 selected K が真値へ近づいた」"
+        "-> **テストした有限範囲での記述、真値一致数は非単調、反復 4/8 のみ**を必ず併記")
+    add("- 「S1 と S2 は似た挙動を示した」-> **64 セル中の一致数を明記**")
+    add("- 「S3 は過大選択した」-> **本モジュールで定義した基準であり原論文の基準ではない**を必ず併記")
+    add("")
+    add("### NOT ALLOWED")
+    add("")
+    add("- K 選択の一致性 / 漸近一致性 / universal true-K recovery")
+    add("- 現行実装が standard Schwarz BIC として妥当であること")
+    add("- held-out 予測 = true-K recovery")
+    add("- Bernoulli 一般の識別可能性についての結論")
+    add("- 本合成設定を超える一般化")
+    add("")
+
+    add("## 11. 次に問うべきこと")
+    add("")
+    add("1. **`K_TRUE=1` の下限効果を切り分ける。** 候補集合の下端を広げるか tie rule を変えた感度解析"
+        "（**本実験の protocol では変更禁止なので、新しい事前登録が要る**）。")
+    add("2. **start 不一致が criterion 由来か最適化由来かを分離する。** start 数を増やすか、"
+        "同一の Z 推定を共有して criterion だけ比較する設計。")
+    add("3. **Bernoulli-Y の識別可能性（U2）。** 現状もっとも大きな理論的空白であり、"
+        "実験で実際に使っている family である。")
+    add("4. **有効標本数の定義（16b）。** ノード数か dyad 数かで罰則の意味が変わる。")
+    add("5. **`n -> infinity`（U6）。** モデルが特異なので通常の BIC 漸近論は使えない。枠組みの選択が要る。")
     add("")
 
     return "\n".join(lines) + "\n"
