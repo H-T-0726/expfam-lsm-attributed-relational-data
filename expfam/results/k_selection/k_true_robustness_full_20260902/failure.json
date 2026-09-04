@@ -1,0 +1,29 @@
+{
+  "artifact_version": "phase8b-full-artifact-v1",
+  "attempted_fit_count": 3,
+  "clean_fit_calls": 2,
+  "execution_issue": 59,
+  "expected_full_fits": 336,
+  "failed_fit_index": 3,
+  "failure_phase": "fit",
+  "phase": "8b",
+  "policy": [
+    "stop_immediately",
+    "no_replacement_fit",
+    "no_retry",
+    "no_seed_rescue",
+    "no_tolerance_change",
+    "preserve_partial_evidence",
+    "no_completed_summary",
+    "no_audit_pass",
+    "rerun_requires_a_new_human_gate"
+  ],
+  "protocol_hash": "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+  "protocol_origin_issue": 49,
+  "reason": "",
+  "replacement_fits_executed": 0,
+  "retry_count": 0,
+  "run_code_sha": "1946953ffc7e7db586dda2933c9a25a6f0235d07",
+  "scored_rows": 0,
+  "status": "FAILED"
+}

@@ -1,1 +1,7 @@
 expfam/results/k_selection/k_true_robustness_smoke_20260901/* -text
+# Issue #59: the Phase 8b Attempt 1 provenance set and the completed Attempt 2
+# evidence are verified by exact SHA-256 digests (run_k_true_robustness_sweep's
+# historical_aborted_full_evidence_is_intact and the Phase 8b test suite), so
+# their bytes must survive checkout unchanged on every platform.
+expfam/results/k_selection/k_true_robustness_full_20260902/* -text
+expfam/results/k_selection/k_true_robustness_full_attempt2_20260904/* -text

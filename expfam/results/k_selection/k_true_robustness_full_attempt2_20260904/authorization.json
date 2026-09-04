@@ -1,0 +1,64 @@
+{
+  "anchor_split_seed_base": 42000,
+  "artifact_version": "phase8b-full-artifact-v2",
+  "authorization_version": "phase8b-full-authorization-v2",
+  "candidate_k": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "data_seed_base": 51000,
+  "estimands": [
+    "A",
+    "B"
+  ],
+  "execution_attempt_id": "phase8b-full-attempt-2",
+  "execution_issue_number": 59,
+  "fits_per_estimand": 168,
+  "fresh_attempt_reason": "operator_interrupt",
+  "hierarchy": "H3_A",
+  "human_full_approval": true,
+  "independent_review_pass": true,
+  "k_true_grid": [
+    1,
+    2,
+    4,
+    5
+  ],
+  "mask_design": "S_C",
+  "model_seed_base": 530000,
+  "partial_failure_policy": [
+    "stop_immediately",
+    "no_replacement_fit",
+    "no_retry",
+    "no_seed_rescue",
+    "no_tolerance_change",
+    "preserve_partial_evidence",
+    "no_completed_summary",
+    "no_audit_pass",
+    "rerun_requires_a_new_human_gate"
+  ],
+  "partial_results_reused": false,
+  "prior_aborted_artifact_dir": "expfam/results/k_selection/k_true_robustness_full_20260902",
+  "prior_aborted_attempt_id": "phase8b-full-attempt-1",
+  "protocol_hash": "2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9",
+  "protocol_origin_issue_number": 49,
+  "random_design": "CRN",
+  "replicates": [
+    1,
+    2,
+    3
+  ],
+  "reviewed_full_execution_main_sha": "ddc9b0b4c38da995fedf43ceef12f17dfb4db353",
+  "run_code_sha": "ef85b4c921546129b8d4f7440f8a09a41aa652e5",
+  "scientific_baseline_sha": "68c78e1191889609dead05ea5a9fb11525ce92e2",
+  "starts": [
+    1,
+    2
+  ],
+  "total_fit_count": 336
+}

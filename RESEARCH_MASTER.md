@@ -592,6 +592,87 @@ repository evidence から確認できるのは:
 
 ---
 
+### 12.9 Issue #59 — Phase 8b K_TRUE robustness full sweep（Attempt 2、**実行済み**）
+
+Phase 7e で凍結した held-out K-selection protocol を、**generator の `K_TRUE` を {1,2,4,5} へ
+拡張**して exactly once 実行した本番 sweep。
+
+| 項目 | 値 |
+|---|---|
+| role 1: approved scientific baseline | `68c78e1191889609dead05ea5a9fb11525ce92e2` |
+| role 2: reviewed full-execution main | `ddc9b0b4c38da995fedf43ceef12f17dfb4db353` |
+| role 3: runtime RUN_CODE_SHA | `ef85b4c921546129b8d4f7440f8a09a41aa652e5` |
+| frozen protocol hash | `2d19c5fe6edadd0823925ed7dd051cb27837bccf51d5102e0bcee53271654eb9` |
+| human approval | Issue #59 comment `5529711820` |
+| execution attempt | `phase8b-full-attempt-2` |
+| lineage | E（`DualExpFamLSMConsistent`、experimental prototype、**本文採用不可**） |
+| 構成 | `family_x=poisson` / `family_y=bernoulli` / n=75 / d=15 / L=5 / num_iter=8 / `test_ratio=0.20` / `mask_design=S_C` / `random_design=CRN` / `hierarchy=H3_A` |
+| manifest | estimand {A,B} × `K_TRUE` {1,2,4,5} × replicate {1,2,3} × candidate K 1..7 × start {1,2} = **336 fits**（A 168 / B 168） |
+| estimand A（primary） | `w_true = 1.5`（`K_TRUE` によらず固定） |
+| estimand B（sensitivity） | `w_K = 1.5 · sqrt(3 / K_TRUE)`（`w_K^2 · K` を ensemble で一致） |
+| 選択基準 | **frozen Phase 7e held-out Bernoulli raw-eta plug-in mean log score**、2 start の非加重平均、tie tolerance 1e-12、smallest-K tie rule |
+| report | `reports/k_selection_theory/k_true_robustness_full_report_20260904.md`（artifact から自動生成） |
+
+**選択基準についての明示（KI-019）:** 本実験の K 選択に **`Q_strict` / EM の Q 関数基準 /
+ICL-type complete-data criterion / Schwarz BIC / marginal likelihood は一切使っていない。**
+§12.6 / KI-010 の「Q ベース基準を Schwarz BIC と呼ばない」という論点は `calc_bic_dual`
+（legacy 基準）に関するものであり、Phase 7e/8b の held-out 予測スコアとは**別物**である。
+両者を同一視した記述を書かない。
+
+**結果**（`selection_matrix.csv` の selected K。本統合時に per-fit 生スコアから frozen
+selector で再導出して一致を確認した）:
+
+| estimand | K_TRUE=1 | K_TRUE=2 | K_TRUE=3（anchor） | K_TRUE=4 | K_TRUE=5 | 新規グリッド真値一致 |
+|---|---|---|---|---|---|:---:|
+| A（primary） | 1, 1, 1 | 2, **3**, 2 | 3, 3, **5** | 4, 4, 4 | **4**, **4**, 5 | **9/12** |
+| B（sensitivity） | 1, 1, 1 | 2, **3**, 2 | 3, 3, **5** | 4, 4, 4 | **3**, **4**, 5 | **9/12** |
+
+- 新規グリッド `{1,2,4,5}` の合算は **18/24**。K_TRUE 別は 1: 6/6、2: 4/6、4: 6/6、5: 2/6。
+- **`K_TRUE=3` の行は Phase 7e artifact（`heldout_full_pilot_20260824/`）の READ-ONLY 参照**
+  であり、Attempt 2 では 1 fit も再実行していない（`phase7e_rerun_count = 0`）。
+  **A 行と B 行は同一の anchor 証拠を共有しており、6 個の独立実験ではない。**
+- A と B で選択が異なるのは **`K_TRUE=5` replicate 1 のみ**（A=4 / B=3）。
+- 全 24 セルで tie 候補は 1 個であり、tie rule は発動していない。
+
+**integrity:** 336/336 clean、`internal_retry` 0 / `warning_count` 0 / `q_failure` false /
+`nan_occurred` false / `finite_state` 全 True、`failure.json` 不在、retry 0 / replacement 0 /
+seed rescue 0 / tolerance 緩和 0 / canary rerun 0 / smoke rerun 0、`config_gate` 103 件 passed、
+`leakage_gate` 336 行すべて pre/post passed かつ `fit_boundary_status = clean`、
+`mask_provenance` 24 セル `anchor_match = True`。独立 artifact 監査（runner を import しない）
+verdict **PASS**、BLOCKER 0 / HIGH 0 / MEDIUM 0。
+
+**証拠の数え方:** 新規 **336** + Phase 7e anchor **42**（READ-ONLY 再利用）= **統合ユニーク 378**。
+**420 ではない。** A と B が同じ anchor 42 fits を参照するため、anchor を二重計上しない。
+
+**書いてよい表現:**
+> 凍結した held-out 予測スコアによる K 選択では、`K_TRUE=1` および `K_TRUE=4` では 3 反復
+> すべてで真値が選択され、`K_TRUE=2` では 2/3、`K_TRUE=5` では 1/3 で真値が選択された。
+> `K_TRUE=5` では候補集合に 5 より大きい K も含まれる一方、選択結果は低い K 側に寄る傾向が
+> 観測された。ただし各条件 3 反復のみであり、本結果は有限標本における記述的結果として解釈する。
+
+**書いてはいけない:** consistency / asymptotic consistency / universal K recovery /
+K-selection consistency / Schwarz BIC / BIC consistency / 理論保証 / 本合成設定を超える一般化 /
+「Phase 8b は Q_strict・ICL-type・BIC で K を選んだ」（事実として誤り）/
+「`K_TRUE=3` について A と B が独立に 6 セル分の証拠を与える」。
+
+`K_TRUE=5` の under-selection の**原因は未同定**である。report §8 の margin 表は選択の
+僅差さを記述するだけであり、原因を説明していない。A/B の 1 セル差から信号強度スケーリングの
+一般的効果を推論しない。
+
+### 12.9b Attempt 1（中断・provenance のみ）
+
+`expfam/results/k_selection/k_true_robustness_full_20260902/` は同一 protocol hash で開始した
+先行試行が operator interrupt により `fit_index = 3` で停止したものである。
+
+- `status = FAILED` / `attempted_fit_count = 3` / `clean_fit_calls = 2` / `scored_rows = 0`
+- `retry_count = 0` / `replacement_fits_executed = 0` / RUN_CODE_SHA `1946953ffc7e7db586dda2933c9a25a6f0235d07`
+- 位置づけ: **ABORTED_BY_OPERATOR_INTERRUPT / provenance only / no scientific use**
+
+**この 2 clean fits を科学的主張の根拠にしない。** Attempt 2 は本結果を一切再利用していない
+（`partial_results_reused = False`）。artifact は削除・改変しない。
+
+---
+
 ## 13. 修論 backbone（2026-08-31 時点）
 
 既存証拠から再確認したものであり、新しい主張を発明していない。
@@ -741,3 +822,35 @@ synthetic evidence と real-data evidence を**同一 claim の証拠として�
 **一次 CSV・条件（true / est family、`fix_w` / `fix_x`）・seed・model lineage を個別に確認する必要がある。**
 上の表は最悪比のみを並べたものであり、条件が一致していないため
 **差分を「0.5 除去の効果」として読んではならない。**
+
+---
+
+## 16. 2026-09-04 Claim Ledger 追記（Phase 8b Attempt 2）
+
+**§14 の 2026-08-31 ledger は当時の記録としてそのまま残す。** 本節はその後に確定した
+Phase 8b Attempt 2（§12.9）に対応する差分だけを追記する。分類の定義は §14 と同じ。
+
+### QUALIFIED ONLY（追加）
+
+| claim | 必須の限定 | evidence | lineage | evidence type |
+|---|---|---|---|---|
+| **Phase 8b の K_TRUE robustness**：「frozen held-out K-selection protocol を `K_TRUE ∈ {1,2,4,5}` へ拡張したところ、真値一致は A 9/12・B 9/12（K_TRUE 別に 1: 3/3、2: 2/3、4: 3/3、5: 1/3）であった」 | ①**各条件 3 replicate のみの記述値**であり一般性能ではない ②**consistency / asymptotic consistency ではない** ③**Schwarz BIC ではなく、`Q_strict`・ICL-type でもない**。held-out plug-in 予測スコアである（KI-019）④**本合成設定を超えて一般化しない** ⑤prototype（lineage E、本文採用不可）⑥A（primary）と B（sensitivity）を分けて報告する | `k_true_robustness_full_attempt2_20260904/selection_matrix.csv`, `full_summary.json`、§12.9、`reports/k_selection_theory/k_true_robustness_full_report_20260904.md` | **E** | synthetic |
+| **`K_TRUE=5` での低い K への偏り**：「`K_TRUE=5` では候補集合に 5 より大きい K も含まれる一方、選択結果は低い K 側に寄る傾向が観測された」 | ①**原因は未同定**（margin を記述しただけで説明していない）②A 1/3・B 1/3 の記述値 ③候補上限 7 の制約ではないことのみが言える | §12.9、同 report §8 | **E** | synthetic |
+
+### NOT ALLOWED（追加）
+
+| claim | 理由 |
+|---|---|
+| 「Phase 8b の K 選択は `Q_strict` / EM の Q 関数基準 / ICL-type complete-data criterion / Schwarz BIC / marginal likelihood で行った」 | **事実として誤り。** Phase 7e/8b は held-out Bernoulli raw-eta plug-in mean log score を使う（KI-019、§12.9） |
+| 「`K_TRUE=3` について A と B が独立に 6 セル分の証拠を与える」 | 両者は同一の Phase 7e anchor 42 fits を READ-ONLY 参照している（§12.9） |
+| 「Phase 8b の統合証拠は 420 fits である」 | 336 新規 + 42 anchor = **378**。anchor を A/B で二重計上しない（§12.9） |
+| 「Phase 8b は K-selection consistency を示した」 | 各条件 3 replicate の有限標本記述値。CI を伴う推定量ではない |
+| Attempt 1（`k_true_robustness_full_20260902/`）の 2 clean fits を科学的根拠にする | ABORTED_BY_OPERATOR_INTERRUPT / provenance only（§12.9b） |
+
+### UNRESOLVED（追加）
+
+| 項目 | 何が足りないか |
+|---|---|
+| `K_TRUE=5` での under-selection の原因 | held-out score の margin を記述しただけで、識別性・有効次元・推定分散のいずれが効いているかを分離していない（§12.9） |
+| A（`w` 固定）と B（`w_K` スケーリング）の差が 1 セルに留まった理由 | 12 セル中 1 セルの差から機構を推論できない。信号強度スケーリングの効果は未測定（§12.9） |
+| K 選択の n 依存性（Phase 8b でも未測定） | Phase 8b は n=75 の 1 点のみ。§14 UNRESOLVED の同項目は解消していない |

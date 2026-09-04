@@ -2761,21 +2761,17 @@ def test_S2b_no_smoke_artifact_is_created():
     different experiment; the check is that S2b adds or changes nothing.)
     """
 
-    # Issue #59: the interrupted Attempt 1 evidence is deliberately preserved as
-    # UNTRACKED local provenance, so the results tree can no longer be required
-    # to be empty.  Exactly those pinned files are allowed and nothing else, so
-    # any other added, changed or removed path under expfam/results still fails.
+    # Issue #59: the interrupted Attempt 1 evidence and the completed Attempt 2
+    # evidence are both preserved, and the archive commit made them TRACKED, so
+    # the results tree is clean again.  Any added, changed or removed path under
+    # expfam/results still fails here.
     status = subprocess.run(
         ["git", "status", "--porcelain=v1", "--untracked-files=all",
          "--", "expfam/results"],
         capture_output=True, text=True, cwd=ROOT)
     assert status.returncode == 0, status.stderr
     observed = set(status.stdout.splitlines())
-    expected = {
-        f"?? {H.HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH}/{name}"
-        for name, _digest in H.HISTORICAL_ABORTED_FULL_ARTIFACT_SHA256
-    } if H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR.exists() else set()
-    assert observed == expected, status.stdout
+    assert observed == set(), status.stdout
 
     assert not hasattr(H, "write_smoke_artifacts")
     assert not hasattr(H, "run_smoke_cli")
@@ -6783,29 +6779,143 @@ ARCHIVED_SMOKE_ARTIFACTS = frozenset({
 })
 
 
-def _assert_no_new_production_artifacts():
-    """The archived S2c evidence may exist; nothing new or modified may appear.
+# ---------------------------------------------------------------------------
+# Issue #59 POST-SUCCESS lifecycle
+#
+# The authorized Attempt 2 production run has COMPLETED (336 real EM fits,
+# independent audit PASS) and its artifacts are committed.  The lifecycle has
+# therefore moved from PRE-EXECUTION to POST-SUCCESS, and the two states must
+# be tested separately:
+#
+#   A. PRE-EXECUTION / hypothetical fresh path -- the gate that refuses to run
+#      into an existing directory.  These tests must NOT require the canonical
+#      artifacts to be absent; they rebind ``H.FULL_ARTIFACT_DIR`` onto a fresh
+#      ``tmp_path`` via ``_fresh_full_artifact_dir`` so the gate keeps its
+#      meaning without deleting real evidence.
+#   B. POST-SUCCESS canonical repository state -- the canonical directory now
+#      EXISTS, carries the complete artifact contract, and by existing makes a
+#      second production ``--full`` execution fail closed.
+#
+# Nothing here weakens ``require_new_full_artifact_dir`` and nothing here is
+# skipped or xfailed: the absence assertion is replaced by a STRICTLY STRONGER
+# immutability assertion over the archived bytes.
+# ---------------------------------------------------------------------------
 
-    PR #58 committed the 7 frozen artifacts, so asserting that the production
-    directory does not exist would now assert the opposite of the intended
-    invariant.  What must stay true is that no test creates, modifies or adds a
-    production artifact.
+# The completed Attempt 2 artifact contract, restated here independently of the
+# runner so a mutated ``FULL_ARTIFACT_FILES`` cannot certify itself.
+ATTEMPT2_ARCHIVED_ARTIFACTS = frozenset({
+    "authorization.json", "manifest.csv", "mask_provenance.csv", "config_gate.csv",
+    "leakage_gate.csv", "full_fit_results.csv", "selection_matrix.csv",
+    "full_summary.json", "runinfo.json", "audit_report.json",
+})
+
+# Exact bytes of the archived successful run.  Any edit, truncation, rename,
+# deletion or added file fails closed -- the same convention the runner already
+# uses for the Attempt 1 evidence.
+ATTEMPT2_ARCHIVED_SHA256 = (
+    ("audit_report.json",
+     "88f37ee1d02160c42ba36396c2d19149c1e7b9f0f33186a58bb042228181131c"),
+    ("authorization.json",
+     "6cdfa2ad4d8cf8ab092a27edde1c44103db689410495a424ef262ac01f29e7cb"),
+    ("config_gate.csv",
+     "8507b0071db10a0d27f8ed9a1e2c23ba3104db48f346652b12995cb8c74cb956"),
+    ("full_fit_results.csv",
+     "59beae9a46beb64d7b6d96b2d55ff822e1dea3d2cfdb185056b65bc379e398eb"),
+    ("full_summary.json",
+     "ec14625eaac6e618984a104a381032518ac37ba931609459605f91e8d9cc0119"),
+    ("leakage_gate.csv",
+     "0a47fccbc95523d8279092bb7ecd837f6833a625f919cdafc987bf951f2211af"),
+    ("manifest.csv",
+     "14c084e5588c7ea288ce7fb6e433b7645c727062ed9d265f29a76f4762c4f4d0"),
+    ("mask_provenance.csv",
+     "dd122535a6681db2d95558a47c9ee3e93963b223ef1f5acdf20256ff48b70036"),
+    ("runinfo.json",
+     "0f0a0d6fc5e58f1074d4d8b46a6ff1e9d403dea2a7bb6e57713c47fb6a4cadbe"),
+    ("selection_matrix.csv",
+     "7f1190d29e0e0f4e58511f9ed5b3e7711245625bdb6e1970102848a54fac4543"),
+)
+
+
+# The canonical location, resolved here and NOT through ``H.FULL_ARTIFACT_DIR``.
+# A PRE-EXECUTION test rebinds that module global onto a fresh tmp_path, and the
+# immutability check must keep pointing at the real archived evidence.
+ATTEMPT2_ARCHIVE_DIRNAME = "k_true_robustness_full_attempt2_20260904"
+ATTEMPT2_ARCHIVE_DIR = ROOT / "expfam" / "results" / "k_selection" / ATTEMPT2_ARCHIVE_DIRNAME
+
+
+def _attempt2_archive_snapshot():
+    """Name -> SHA-256 over every file in the canonical Attempt 2 directory."""
+
+    return {
+        path.name: _hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in ATTEMPT2_ARCHIVE_DIR.iterdir() if path.is_file()
+    }
+
+
+def _assert_attempt2_archive_is_intact():
+    """POST-SUCCESS: the completed run exists and is byte-for-byte unchanged."""
+
+    assert ATTEMPT2_ARCHIVE_DIR.is_dir(), "the completed Attempt 2 archive is missing"
+    snapshot = _attempt2_archive_snapshot()
+    assert set(snapshot) == ATTEMPT2_ARCHIVED_ARTIFACTS
+    assert set(snapshot) == set(H.FULL_ARTIFACT_FILES)
+    assert snapshot == dict(ATTEMPT2_ARCHIVED_SHA256)
+    assert not (ATTEMPT2_ARCHIVE_DIR / "failure.json").exists(), \
+        "failure.json must never appear beside a successful run"
+
+
+def _assert_completed_archive_blocks_production_full():
+    """Third ZERO-EM net: the completed Attempt 2 archive itself.
+
+    Unlike the two monkeypatch nets this is not a stand-in -- it is the REAL
+    production guard.  Once the authorized run has finished, the frozen path
+    exists, and the production wiring refuses to start, resume or overwrite it
+    before the artifact directory is reserved and long before an adapter can be
+    constructed.  Asserting the guard really is in the runner keeps this from
+    becoming a silent way to let a test reach a fit.
+    """
+
+    assert ATTEMPT2_ARCHIVE_DIR.is_dir()
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    assert "the fresh Attempt 2 artifact directory already exists" in source
+    assert "refusing to overwrite or resume" in source
+
+
+def _fresh_full_artifact_dir(monkeypatch, tmp_path):
+    """Rebind the frozen path onto a fresh, absent directory.
+
+    PRE-EXECUTION gates are still exercised exactly as written; the canonical
+    successful evidence is never deleted, renamed or moved to satisfy them.
+    """
+
+    fresh = tmp_path / "fresh_attempt2" / H.FULL_ARTIFACT_DIRNAME
+    assert not fresh.exists()
+    monkeypatch.setattr(H, "FULL_ARTIFACT_DIR", fresh)
+    return fresh
+
+
+def _assert_no_new_production_artifacts():
+    """No test may create, modify or remove a production artifact.
+
+    PR #58 committed the 7 frozen smoke artifacts and the Issue #59 archive
+    commit committed the Attempt 1 provenance set and the completed Attempt 2
+    evidence, so asserting that those directories do not exist would assert the
+    opposite of the intended invariant.  What must stay true is that the
+    archives are exactly as committed and that nothing new appears beside them.
     """
 
     if H.SMOKE_ARTIFACT_DIR.exists():
         assert {p.name for p in H.SMOKE_ARTIFACT_DIR.iterdir()} == ARCHIVED_SMOKE_ARTIFACTS
     if H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR.exists():
         assert H.historical_aborted_full_evidence_is_intact()
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_attempt2_archive_is_intact()
+    # Both archives are tracked and committed, so the results tree is clean: a
+    # test that added, changed or deleted anything under it shows up here.
     status = subprocess.run(["git", "status", "--porcelain=v1", "--untracked-files=all",
                              "--", "expfam/results"],
                             capture_output=True, text=True, cwd=ROOT)
     observed = set(status.stdout.splitlines())
-    expected = {
-        f"?? {H.HISTORICAL_ABORTED_FULL_ARTIFACT_RELATIVE_PATH}/{name}"
-        for name, _digest in H.HISTORICAL_ABORTED_FULL_ARTIFACT_SHA256
-    } if H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR.exists() else set()
-    assert status.returncode == 0 and observed == expected, status.stdout
+    assert status.returncode == 0 and observed == set(), status.stdout
 
 
 class _RealAdapterForbidden:
@@ -7607,7 +7717,10 @@ def test_FULLGATE_preflight_is_zero_em_and_exact():
     _assert_no_new_production_artifacts()
 
 
-def test_FULLGATE_preflight_cli_mode_is_zero_em(capsys):
+def test_FULLGATE_preflight_cli_mode_is_zero_em(capsys, monkeypatch, tmp_path):
+    """PRE-EXECUTION: on a fresh path the CLI preflight reports an absent dir."""
+
+    _fresh_full_artifact_dir(monkeypatch, tmp_path)
     assert H.main(["--full-preflight"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["mode"] == "full-preflight"
@@ -7814,15 +7927,18 @@ def test_FULLGATE_stage_executes_zero_real_em(monkeypatch):
         H.current_full_execution_authorization(), test_only=False)
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
-def test_FULLGATE_full_artifact_directory_is_frozen_and_absent():
-    assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_attempt2_20260904"
+def test_FULLGATE_full_artifact_directory_is_frozen_and_complete():
+    """POST-SUCCESS: the frozen path is unchanged and now holds a complete run."""
+
+    assert H.FULL_ARTIFACT_DIRNAME == ATTEMPT2_ARCHIVE_DIRNAME
     assert H.FULL_ARTIFACT_DIR == (
         ROOT / "expfam" / "results" / "k_selection" / H.FULL_ARTIFACT_DIRNAME)
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    assert H.FULL_ARTIFACT_DIR == ATTEMPT2_ARCHIVE_DIR
+    _assert_attempt2_archive_is_intact()
     assert H.FULL_ARTIFACT_DIR != H.SMOKE_ARTIFACT_DIR
     assert "audit_report.json" not in H.FULL_AUDIT_INPUT_FILES
     assert set(H.FULL_ARTIFACT_FILES) - set(H.FULL_AUDIT_INPUT_FILES) == {"audit_report.json"}
@@ -8822,7 +8938,7 @@ def test_ORDER_zero_em_maintained(tmp_path, monkeypatch):
     assert "em_runner" not in sys.modules
     assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
     assert H.current_expected_full_main_sha() == "ddc9b0b4c38da995fedf43ceef12f17dfb4db353"
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -8992,7 +9108,7 @@ def test_BASELINE_zero_em_state_is_unchanged(tmp_path, monkeypatch):
     assert report["manifest"]["total_fits"] == 336
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -9125,7 +9241,7 @@ def test_AUTHZ_cli_full_stops_before_any_adapter(monkeypatch):
     assert reached[0].approved_main_sha == H.REVIEWED_FULL_EXECUTION_MAIN_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -9226,9 +9342,12 @@ def test_AUTHZ_a_second_attempt_executes_no_replacement_fit(tmp_path):
 # --- this PR executes nothing ------------------------------------------------
 
 
-def test_AUTHZ_this_pr_executes_zero_real_em(monkeypatch):
+def test_AUTHZ_this_pr_executes_zero_real_em(monkeypatch, tmp_path):
+    """PRE-EXECUTION: on a fresh path the preflight still reports absent."""
+
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _fresh_full_artifact_dir(monkeypatch, tmp_path)
     report = H.run_full_preflight()
     assert report["em_fits_executed"] == 0
     assert report["real_full_fits_executed"] == 0
@@ -9237,7 +9356,7 @@ def test_AUTHZ_this_pr_executes_zero_real_em(monkeypatch):
     assert report["artifact_directory_exists"] is False
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -9251,15 +9370,20 @@ def test_AUTHZ_the_suite_never_invokes_the_production_full_command():
     * ``_block_full_artifact_reservation`` (HIGH-01) stops one step later, at the
       artifact-directory reservation, so the wiring can be measured.  That is
       still before any adapter can exist.
+    * ``_assert_completed_archive_blocks_production_full`` (Issue #59
+      POST-SUCCESS) is not a stand-in at all: the authorized run has finished,
+      so the REAL production guard refuses the rerun.  A test using it measures
+      that refusal.
 
-    Both nets are asserted below to really be nets, so widening the accepted set
-    cannot silently become a way to let a test reach a fit.
+    All three nets are asserted below to really be nets, so widening the
+    accepted set cannot silently become a way to let a test reach a fit.
     """
 
     source = pathlib.Path(__file__).read_text(encoding="utf-8")
     tree = _ast.parse(source)
     lines = source.splitlines()
-    nets = ("_block_full_production_execution(", "_block_full_artifact_reservation(")
+    nets = ("_block_full_production_execution(", "_block_full_artifact_reservation(",
+            "_assert_completed_archive_blocks_production_full(")
     offenders = []
     for node in tree.body:
         if isinstance(node, _ast.FunctionDef) and node.name.startswith("test_"):
@@ -9281,6 +9405,12 @@ def test_AUTHZ_the_suite_never_invokes_the_production_full_command():
     reservation_net = _executable_body(_block_full_artifact_reservation)
     assert 'monkeypatch.setattr(H, \'require_new_full_artifact_dir\'' in reservation_net
     assert "raise _ReservationBlocked" in reservation_net
+
+    # Issue #59 POST-SUCCESS: the third net is the real guard, not a stand-in.
+    archive_net = _executable_body(_assert_completed_archive_blocks_production_full)
+    assert "ATTEMPT2_ARCHIVE_DIR.is_dir()" in archive_net
+    assert "the fresh Attempt 2 artifact directory already exists" in archive_net
+    assert "refusing to overwrite or resume" in archive_net
     # the reservation boundary precedes adapter construction in the runner
     executor = _executable_body(H._execute_real_full)
     assert executor.index("require_new_full_artifact_dir(") < \
@@ -9600,7 +9730,7 @@ def test_MANIFESTINDEX_zero_em_is_maintained(tmp_path, monkeypatch):
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
     assert type(H.current_full_execution_authorization()) is H.FullExecutionAuthorization
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -9787,10 +9917,11 @@ def test_S3E_full_manifest_global_indices_are_intact():
 
 
 def test_S3E_zero_em_state_is_unchanged(tmp_path, monkeypatch):
-    """12: the rebinding executes nothing."""
+    """12: the rebinding executes nothing (PRE-EXECUTION fresh path)."""
 
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _fresh_full_artifact_dir(monkeypatch, tmp_path)
     report = H.run_full_preflight()
     assert report["em_fits_executed"] == 0
     assert report["real_full_fits_executed"] == 0
@@ -9801,7 +9932,7 @@ def test_S3E_zero_em_state_is_unchanged(tmp_path, monkeypatch):
     assert report["artifact_directory_exists"] is False
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
     _assert_no_new_production_artifacts()
 
 
@@ -9973,7 +10104,9 @@ def test_OPERATORINT_attempt_paths_and_identities_are_distinct_and_frozen():
         "k_true_robustness_full_20260902"
     assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_attempt2_20260904"
     assert H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR != H.FULL_ARTIFACT_DIR
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the two lineages stay distinct AND both are now archived.
+    _assert_attempt2_archive_is_intact()
+    assert H.historical_aborted_full_evidence_is_intact() is True
     assert H.FULL_FRESH_ATTEMPT_REASON == "operator_interrupt"
     assert H.FULL_PARTIAL_RESULTS_REUSED is False
 
@@ -10037,9 +10170,12 @@ def test_OPERATORINT_attempt2_manifest_is_a_fresh_exact_336():
     assert {row.k_true for row in flat} == {1, 2, 4, 5}
 
 
-def test_OPERATORINT_protocol_and_zero_em_preflight_are_unchanged(monkeypatch):
+def test_OPERATORINT_protocol_and_zero_em_preflight_are_unchanged(monkeypatch, tmp_path):
+    """PRE-EXECUTION: the frozen protocol and the absent-path report are unchanged."""
+
     _AdapterTripwire.reset()
     monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _fresh_full_artifact_dir(monkeypatch, tmp_path)
     report = H.run_full_preflight()
     assert H.full_protocol_hash() == FROZEN_FULL_PROTOCOL_HASH
     assert report["protocol_hash"] == FROZEN_FULL_PROTOCOL_HASH
@@ -10399,14 +10535,13 @@ def test_ATTEMPT2_cli_env_and_config_cannot_replace_the_production_authority(mon
             test_only=False)
 
 
-def test_ATTEMPT2_artifact_path_is_absent_and_attempt1_evidence_is_intact():
-    """K + L + M: fresh path absent, Attempt 1 exact, no partial reuse."""
+def test_ATTEMPT2_artifact_path_is_complete_and_attempt1_evidence_is_intact():
+    """K + L + M: Attempt 2 archive complete, Attempt 1 exact, no partial reuse."""
 
     assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_attempt2_20260904"
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    _assert_attempt2_archive_is_intact()
     assert H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR != H.FULL_ARTIFACT_DIR
-    if H.HISTORICAL_ABORTED_FULL_ARTIFACT_DIR.exists():
-        assert H.historical_aborted_full_evidence_is_intact() is True
+    assert H.historical_aborted_full_evidence_is_intact() is True
     assert H.FULL_PARTIAL_RESULTS_REUSED is False
     authorization = H.current_full_execution_authorization()
     assert authorization.partial_results_reused is False
@@ -10506,5 +10641,106 @@ def test_ATTEMPT2_this_pr_executes_zero_real_em(monkeypatch):
     assert reached[0].approved_main_sha == ATTEMPT2_ROLE2_SHA
     assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
     assert "em_runner" not in sys.modules
-    assert not H.FULL_ARTIFACT_DIR.exists()
+    # POST-SUCCESS: the archive exists; the helper asserts it is byte-unchanged.
+    _assert_no_new_production_artifacts()
+
+
+# ===========================================================================
+# Issue #59 POST-SUCCESS: the completed Attempt 2 archive is the rerun guard
+#
+# The authorized production run finished (336 real EM fits, independent audit
+# PASS).  From here the canonical directory EXISTS, and that existence is the
+# safety property: the same production full execution can no longer be started,
+# resumed or replaced.  These tests execute ZERO real EM -- the guard fires
+# before the artifact directory is reserved and long before
+# ``AuthorizedEMFitAdapter`` is constructed.
+# ===========================================================================
+
+
+def test_POSTSUCCESS_canonical_attempt2_archive_is_complete():
+    """The completed artifact contract is present, exact and unmodified."""
+
+    assert H.FULL_ARTIFACT_DIRNAME == "k_true_robustness_full_attempt2_20260904"
+    assert ATTEMPT2_ARCHIVE_DIR.is_dir()
+    names = {path.name for path in ATTEMPT2_ARCHIVE_DIR.iterdir() if path.is_file()}
+    for required in ("authorization.json", "manifest.csv", "mask_provenance.csv",
+                     "config_gate.csv", "leakage_gate.csv", "full_fit_results.csv",
+                     "selection_matrix.csv", "full_summary.json", "runinfo.json",
+                     "audit_report.json"):
+        assert required in names, required
+    assert names == ATTEMPT2_ARCHIVED_ARTIFACTS
+    assert "failure.json" not in names
+    assert not (ATTEMPT2_ARCHIVE_DIR / "failure.json").exists()
+    _assert_attempt2_archive_is_intact()
+
+
+def test_POSTSUCCESS_require_new_full_artifact_dir_refuses_the_completed_archive():
+    """The frozen guard is NOT weakened: the canonical path is now refused."""
+
+    before = _attempt2_archive_snapshot()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.require_new_full_artifact_dir()
+    message = str(excinfo.value)
+    assert "already exists" in message
+    assert "refusing to overwrite or resume" in message
+    assert _attempt2_archive_snapshot() == before
+
+
+def test_POSTSUCCESS_production_full_command_is_fail_closed_with_zero_adapters(
+        monkeypatch):
+    """A second production --full stops at the archive guard, before any adapter.
+
+    The production wiring checks that the fresh Attempt 2 directory does not
+    exist before it reserves anything, and ``_execute_real_full`` reserves the
+    directory before ``_resolve_fit_adapter`` runs.  The completed archive
+    therefore stops the rerun with zero adapter constructions, zero fits and
+    zero bytes written.  The tripwire would raise on construction if that
+    ordering ever regressed, so this test cannot start a real execution either
+    way.
+    """
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    _assert_completed_archive_blocks_production_full()
+    before = _attempt2_archive_snapshot()
+    with pytest.raises(HarnessStop) as excinfo:
+        H.main(["--full", "--allow-em", "--confirm-k-true-sweep", "--estimand", "AB"])
+    message = str(excinfo.value)
+    assert "already exists" in message and "refusing to overwrite or resume" in message
+    assert "Attempt 2 artifact directory" in message
+    # no adapter, no fit, no EM module, no resume path, no replacement
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
+    source = pathlib.Path(H.__file__).read_text(encoding="utf-8")
+    for forbidden in ("--resume", "resume_from", "allow_resume", "skip_completed"):
+        assert forbidden not in source, forbidden
+    # the archived evidence is untouched by the refused rerun
+    assert _attempt2_archive_snapshot() == before
+    _assert_no_new_production_artifacts()
+
+
+def test_POSTSUCCESS_preflight_reports_the_archive_but_a_fresh_path_does_not(
+        monkeypatch, tmp_path):
+    """Both lifecycle states are reported truthfully by the same preflight."""
+
+    _AdapterTripwire.reset()
+    monkeypatch.setattr(H, "AuthorizedEMFitAdapter", _AdapterTripwire)
+    canonical = H.run_full_preflight()
+    assert canonical["artifact_directory_exists"] is True
+    assert canonical["em_fits_executed"] == 0
+    assert canonical["real_full_fits_executed"] == 0
+    assert canonical["expected_full_fits"] == 336
+    assert canonical["phase7e_rerun_fits"] == 0
+    assert canonical["prior_aborted_attempt_evidence_intact"] is True
+
+    _fresh_full_artifact_dir(monkeypatch, tmp_path)
+    fresh = H.run_full_preflight()
+    assert fresh["artifact_directory_exists"] is False
+    assert fresh["em_fits_executed"] == 0
+    assert fresh["real_full_fits_executed"] == 0
+    assert fresh["protocol_hash"] == canonical["protocol_hash"]
+    assert fresh["manifest"] == canonical["manifest"]
+
+    assert _AdapterTripwire.constructions == 0 and _AdapterTripwire.fits == 0
+    assert "em_runner" not in sys.modules
     _assert_no_new_production_artifacts()

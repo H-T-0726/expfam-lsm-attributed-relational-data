@@ -1,0 +1,1 @@
+run_code_sha,scientific_baseline_sha,reviewed_full_execution_main_sha,protocol_hash,fit_index,estimand,role,K_TRUE,replicate,K,start,data_seed,split_seed,model_seed,mask_design,mask_group_id,anchor_mask_hash,anchor_train_mask_hash,heldout_mean_log_score,internal_retry,warning_count,q_failure,nan_occurred,finite_state,real_full_fits_executed

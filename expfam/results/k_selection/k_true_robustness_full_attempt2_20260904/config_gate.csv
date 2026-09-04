@@ -1,0 +1,104 @@
+gate,scope,passed,detail
+M2,common,True,mask_design equals the frozen MASK_DESIGN
+M0,K1/r1,True,validate_pair_masks passed with the expected test-pair count
+M3,K1/r1,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K1/r2,True,validate_pair_masks passed with the expected test-pair count
+M3,K1/r2,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K1/r3,True,validate_pair_masks passed with the expected test-pair count
+M3,K1/r3,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K2/r1,True,validate_pair_masks passed with the expected test-pair count
+M3,K2/r1,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K2/r2,True,validate_pair_masks passed with the expected test-pair count
+M3,K2/r2,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K2/r3,True,validate_pair_masks passed with the expected test-pair count
+M3,K2/r3,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K4/r1,True,validate_pair_masks passed with the expected test-pair count
+M3,K4/r1,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K4/r2,True,validate_pair_masks passed with the expected test-pair count
+M3,K4/r2,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K4/r3,True,validate_pair_masks passed with the expected test-pair count
+M3,K4/r3,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K5/r1,True,validate_pair_masks passed with the expected test-pair count
+M3,K5/r1,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K5/r2,True,validate_pair_masks passed with the expected test-pair count
+M3,K5/r2,True,split_mask_hash == stable_array_hash(test_mask)
+M0,K5/r3,True,validate_pair_masks passed with the expected test-pair count
+M3,K5/r3,True,split_mask_hash == stable_array_hash(test_mask)
+M1,A,True,all 7 required mask provenance fields are present
+MC1,A/K1/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K1/r1,True,anchor test/train hashes are stored on the row
+MC5,A/K1/r1,True,anchor_match is True
+MC1,A/K1/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K1/r2,True,anchor test/train hashes are stored on the row
+MC5,A/K1/r2,True,anchor_match is True
+MC1,A/K1/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K1/r3,True,anchor test/train hashes are stored on the row
+MC5,A/K1/r3,True,anchor_match is True
+MC1,A/K2/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K2/r1,True,anchor test/train hashes are stored on the row
+MC5,A/K2/r1,True,anchor_match is True
+MC1,A/K2/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K2/r2,True,anchor test/train hashes are stored on the row
+MC5,A/K2/r2,True,anchor_match is True
+MC1,A/K2/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K2/r3,True,anchor test/train hashes are stored on the row
+MC5,A/K2/r3,True,anchor_match is True
+MC1,A/K4/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K4/r1,True,anchor test/train hashes are stored on the row
+MC5,A/K4/r1,True,anchor_match is True
+MC1,A/K4/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K4/r2,True,anchor test/train hashes are stored on the row
+MC5,A/K4/r2,True,anchor_match is True
+MC1,A/K4/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K4/r3,True,anchor test/train hashes are stored on the row
+MC5,A/K4/r3,True,anchor_match is True
+MC1,A/K5/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K5/r1,True,anchor test/train hashes are stored on the row
+MC5,A/K5/r1,True,anchor_match is True
+MC1,A/K5/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K5/r2,True,anchor test/train hashes are stored on the row
+MC5,A/K5/r2,True,anchor_match is True
+MC1,A/K5/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,A/K5/r3,True,anchor test/train hashes are stored on the row
+MC5,A/K5/r3,True,anchor_match is True
+MC2,A,True,S_C: intentional_seed_reuse is True
+MC4,A,True,split seed is independent of RANDOM_DESIGN
+M1,B,True,all 7 required mask provenance fields are present
+MC1,B/K1/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K1/r1,True,anchor test/train hashes are stored on the row
+MC5,B/K1/r1,True,anchor_match is True
+MC1,B/K1/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K1/r2,True,anchor test/train hashes are stored on the row
+MC5,B/K1/r2,True,anchor_match is True
+MC1,B/K1/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K1/r3,True,anchor test/train hashes are stored on the row
+MC5,B/K1/r3,True,anchor_match is True
+MC1,B/K2/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K2/r1,True,anchor test/train hashes are stored on the row
+MC5,B/K2/r1,True,anchor_match is True
+MC1,B/K2/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K2/r2,True,anchor test/train hashes are stored on the row
+MC5,B/K2/r2,True,anchor_match is True
+MC1,B/K2/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K2/r3,True,anchor test/train hashes are stored on the row
+MC5,B/K2/r3,True,anchor_match is True
+MC1,B/K4/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K4/r1,True,anchor test/train hashes are stored on the row
+MC5,B/K4/r1,True,anchor_match is True
+MC1,B/K4/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K4/r2,True,anchor test/train hashes are stored on the row
+MC5,B/K4/r2,True,anchor_match is True
+MC1,B/K4/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K4/r3,True,anchor test/train hashes are stored on the row
+MC5,B/K4/r3,True,anchor_match is True
+MC1,B/K5/r1,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K5/r1,True,anchor test/train hashes are stored on the row
+MC5,B/K5/r1,True,anchor_match is True
+MC1,B/K5/r2,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K5/r2,True,anchor test/train hashes are stored on the row
+MC5,B/K5/r2,True,anchor_match is True
+MC1,B/K5/r3,True,S_C: BOTH test and train mask hashes match the Phase 7e anchor
+MC3,B/K5/r3,True,anchor test/train hashes are stored on the row
+MC5,B/K5/r3,True,anchor_match is True
+MC2,B,True,S_C: intentional_seed_reuse is True
+MC4,B,True,split seed is independent of RANDOM_DESIGN
