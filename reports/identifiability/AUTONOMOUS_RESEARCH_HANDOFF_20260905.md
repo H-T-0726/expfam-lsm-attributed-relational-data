@@ -49,7 +49,9 @@
 | L | `teacher_discussion_summary_20260905.md`（20 節＋30 秒/2 分/5 分説明） |
 | M | `teacher_expected_questions_20260905.md`（26 問） |
 | N | `thesis_storyline_20260905.md`（W1–W7 の弱点監査つき） |
+| O | `thesis_detailed_outline_20260905.md`（節・小節まで） |
 | P | 図 F8-1〜F8-5 を script 経由で生成し registry へ登録 |
+| S | 文書間の数値整合をテスト化（`test_clean_true_k_doc_consistency.py`、49 件）。**handoff の実不備を 1 件検出し文書側を修正** |
 | Q | `k_selection_theory_map_20260905.md` |
 | R | `real_application_interpretation_20260905.md` |
 | T | テスト・静的検証 |
@@ -188,8 +190,9 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 - `reports/thesis/thesis_figure_table_inventory_20260905.md`
 - `reports/thesis/real_application_interpretation_20260905.md`
 - `reports/identifiability/k_selection_theory_map_20260905.md`
+- `reports/thesis/thesis_detailed_outline_20260905.md`（節・小節まで、主張と限定を紐づけ）
 
-**未作成:** 詳細章立て（`thesis_detailed_outline_20260905.md`）。
+**未作成:** 概念図 F3-1、family 別の表 T3-1 / T4-1、キュムラント確認図 F5-1。
 
 ## 20. Tests
 
@@ -202,6 +205,7 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 | 監査再実行 | PASS |
 | `build_clean_true_k_report.py --check` | CURRENT |
 | `py_compile` | OK |
+| `test_clean_true_k_doc_consistency.py` | 49 passed（文書の数値が artifact と一致することを恒久的に検証） |
 
 **production コマンドを呼ぶテストはない。** skip / xfail / assert 削除も行っていない。
 
@@ -337,7 +341,8 @@ CONTROL K_TRUE=1/3 RESULT
 THEORETICAL CONSISTENCY PROVEN       = NO
 CANONICAL DOCS STATUS                = COMPLETE
 TEACHER PACKAGE STATUS               = COMPLETE
-THESIS INTEGRATION STATUS            = PARTIAL (detailed outline not written)
+THESIS INTEGRATION STATUS            = COMPLETE (storyline, detailed outline,
+                                       figure inventory, real-application notes)
 
 FINAL REVIEW: two reviewers were still running at session end; results NOT
               obtained.  A previous adversarial round accepted 3 BLOCKER and
