@@ -394,6 +394,22 @@ def build(run_dir: Path) -> str:
                 out.append(len(sel))
         return out
 
+    def direction(names, k_true):
+        """exact / under / over counts over the given criteria, from `recomputed`."""
+        sel = [recomputed[k]["selected_k"] for k in recomputed
+               if k[0] in names and k[1] == k_true]
+        return (len(sel),
+                sum(1 for s in sel if s == k_true),
+                sum(1 for s in sel if s < k_true),
+                sum(1 for s in sel if s > k_true))
+
+    def over_cells(names, k_true):
+        """Every over-selecting cell as (criterion, n, selected_k), sorted."""
+        return sorted((k[0], k[2], recomputed[k]["selected_k"])
+                      for k in recomputed
+                      if k[0] in names and k[1] == k_true
+                      and recomputed[k]["selected_k"] > k_true)
+
     add("## 8. 解釈（有限標本の記述的結果のみ）")
     add("")
     add("### 8.1 主要所見")
@@ -409,7 +425,27 @@ def build(run_dir: Path) -> str:
     add("")
     add("**平均 selected K は S1・S2 とも単調に増加したが、真値一致数は単調ではない**")
     add(f"（S1 は n=75 で {s1e[1]}/{tot5} といったん下がる）。**「n を増やすと K=5 に収束した」とは書かない。**")
-    add("誤りの向きは一貫して **under-selection** であり、over-selection はごく少数である。")
+    both = ("S1", "S2")
+    d_tot, _, d_under, d_over = direction(both, 5)
+    _, d1_exact, d1_under, d1_over = direction(("S1",), 5)
+    _, d2_exact, d2_under, d2_over = direction(("S2",), 5)
+    overs = over_cells(both, 5)
+    if d_over == 0:
+        over_txt = "**over-selection は 1 件も発生していない。**"
+    elif d_over == 1:
+        crit_o, n_o, k_o = overs[0]
+        over_txt = (f"**ただし over-selection は 0 ではない。**唯一の over-selection は "
+                    f"{crit_o} の `n={n_o}` で `K={k_o}` を選んだ 1 replicate である。")
+    else:
+        listed = "、".join(f"{c} の `n={n}` で `K={k}`" for c, n, k in overs)
+        over_txt = (f"**ただし over-selection は 0 ではない。**内訳は {listed} の "
+                    f"{d_over} 件である。")
+    add(f"誤りの向きは **under-selection が支配的**である。"
+        f"`K_TRUE = 5` の S1・S2 を合わせた {d_tot} セルのうち非一致は "
+        f"{d_under + d_over} 件で、その内訳は under-selection {d_under} 件・"
+        f"over-selection {d_over} 件"
+        f"（S1: exact {d1_exact} / under {d1_under} / over {d1_over}、"
+        f"S2: exact {d2_exact} / under {d2_under} / over {d2_over}）。{over_txt}")
     add("")
     ties_fired = sum(1 for k in recomputed if len(recomputed[k]["ties"]) > 1)
     min_margin = min(recomputed[k]["margin"] for k in recomputed)
@@ -534,7 +570,7 @@ def build(run_dir: Path) -> str:
     add("| 7 | **S4 は K を返さない。** 推定 Gram は全 64 セルで PSD 錐の外にあり、閾値なし階数は常に `d=15` |")
     add("| 8 | **lineage E（experimental prototype）。本文採用不可** |")
     add("| 9 | **1 つの合成設定のみ。** `d=15`、Poisson-X / Bernoulli-Y、信号強度は 1 水準に固定 |")
-    add("| 10 | **EM を全 K で `num_iter=8` / `L=5` の固定予算で打ち切っており、収束判定も収束診断も記録していない。** 候補 K が大きいほど自由パラメータが多く（`K=7` で 84、`K=1` で 15）、同一予算では相対的に未収束になりやすい。したがって **「誤りが一貫して under-selection」であることも `n` とともに改善することも、criterion の性質ではなく最適化予算の `K` 依存性で説明できる。本実験はこの 2 つを分離していない**（`[UNRESOLVED]`、敵対レビュー F-02） |")
+    add("| 10 | **EM を全 K で `num_iter=8` / `L=5` の固定予算で打ち切っており、収束判定も収束診断も記録していない。** 候補 K が大きいほど自由パラメータが多く（`K=7` で 84、`K=1` で 15）、同一予算では相対的に未収束になりやすい。したがって **「誤りが under-selection に偏る」ことも `n` とともに改善することも、criterion の性質ではなく最適化予算の `K` 依存性で説明できる。本実験はこの 2 つを分離していない**（`[UNRESOLVED]`、敵対レビュー F-02） |")
     add("| 11 | **信号整合は 1 次モーメント（Y 側は分散）のみ。** 分布形は `K_TRUE` に依存して変わる（§2、F-03） |")
     add("| 12 | **S2 の実効的な次元罰則は `p log n` ではない。** `Q_strict` に含まれる `ln p(Z)` 由来の **O(n)** 項が支配的である（F-04、§8.1(6)）。有効標本数の議論は S2 の挙動の主要因ではない |")
     add("| 13 | **`retry 0 / seed rescue 0` は sweep runner の宣言である。** 内部の `run_em_experimental` は NaN 検出時に最大 2 回、`seed + retry*1000`・`newton_alpha` 半減で再試行しうるが、`nan_count` が retry ごとにリセットされるため**その発動は artifact から検出できない**（`[UNRESOLVED]`、F-08） |")

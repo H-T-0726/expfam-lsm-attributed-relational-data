@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -408,3 +409,52 @@ def test_lineage_is_named_wherever_the_experiment_is_quoted():
                    ("本文採用不可", "lineage E", "experimental prototype")):
             offenders.append(path.name)
     assert not offenders, offenders
+
+
+# ------------------------------------------------- error direction (K_TRUE=5)
+
+def _direction(selection: dict, names: tuple[str, ...], k_true: int) -> tuple[int, int, int, int]:
+    """(total, exact, under, over) over the given criteria, from the RAW values."""
+    sel = [selection[k] for k in selection if k[0] in names and k[1] == k_true]
+    return (len(sel),
+            sum(1 for s in sel if s == k_true),
+            sum(1 for s in sel if s < k_true),
+            sum(1 for s in sel if s > k_true))
+
+
+def test_ktrue5_error_direction_counts_match_the_artifact(selection):
+    """The report's under/over split for S1+S2 at K_TRUE=5 must be the artifact's.
+
+    The counts and the offending cell are recomputed here; the report computes
+    them independently in build_clean_true_k_report.py.  Neither side may
+    hard-code them.
+    """
+
+    total, _, under, over = _direction(selection, ("S1", "S2"), 5)
+    text = _text(RESULTS)
+    assert f"{total} セル" in text
+    assert f"under-selection {under} 件" in text
+    assert f"over-selection {over} 件" in text
+
+    per_criterion = {name: _direction(selection, (name,), 5) for name in ("S1", "S2")}
+    for name, (_, exact, u, o) in per_criterion.items():
+        assert f"{name}: exact {exact} / under {u} / over {o}" in text
+
+    # An over-selecting cell must be named, not averaged into "a few".
+    overs = sorted((k[0], k[2], selection[k]) for k in selection
+                   if k[0] in ("S1", "S2") and k[1] == 5 and selection[k] > 5)
+    assert len(overs) == over
+    for crit, n, k_sel in overs:
+        assert f"{crit} の `n={n}` で `K={k_sel}`" in text
+
+
+def test_results_report_does_not_claim_uniform_under_selection(selection):
+    """`over > 0`, so an unhedged "consistently under-selection" is false.
+
+    This is the exact overclaim human review caught: the sentence conceded
+    "over-selection is a tiny minority" while still saying "consistently".
+    """
+
+    _, _, _, over = _direction(selection, ("S1", "S2"), 5)
+    assert over > 0, "no over-selection in the artifact; this test needs revisiting"
+    assert not re.search("一貫して[^。]{0,24}under-selection", _text(RESULTS))
