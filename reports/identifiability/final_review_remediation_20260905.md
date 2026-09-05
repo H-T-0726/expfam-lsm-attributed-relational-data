@@ -8,6 +8,10 @@
 finding はすべて documentation / test / auditor の問題であり、
 **896 fits・artifact・独立監査・独立再計算のいずれにも影響しない。**
 
+**実装系列の明記（root `CLAUDE.md` §3 / KI-002）:** 本レポートが引用する実験数値は
+**lineage E**（objective-consistent **experimental prototype**、**本文採用不可**）の
+clean true-K n-sweep によるものである。
+
 本レポートは AI が生成したレビューの記録であり、`KNOWN_ISSUES.md` KI-007 の対象である。
 **採択した指摘はすべて本監査が独立に再検証してから反映した。**
 
