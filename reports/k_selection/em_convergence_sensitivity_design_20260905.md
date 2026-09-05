@@ -423,7 +423,23 @@ seed を変えない、tolerance を緩めない、protocol を変えない。
 3. `tools/research_audit/audit_em_convergence_sensitivity.py` — 独立監査。
    protocol hash 再計算、checkpoint 8 と archive の完全一致、fit 数・checkpoint 数の
    密度検査、runtime 会計、`attempts_used` 検査。
-4. テスト。`test_em_budget_nesting.py` は**本フェーズで作成済み・5 件 pass**。
+4. テスト。`test_em_budget_nesting.py` は**本フェーズで作成済み・6 件 pass**。
+
+### 12.1 テストプロセスに関する制約（設計中に実測で判明）
+
+Phase 8b のテストは `assert "em_runner" not in sys.modules` という
+**プロセス全体のトリップワイヤ**を持つ（`test_k_true_robustness_sweep.py`
+`test_S2b_real_adapter_is_never_reached_by_the_test_suite`）。研究監査スイート全体が
+実 EM runner を一度も import しないことを保証するための防御であり、正しい。
+
+本フェーズで最初に書いた nesting テストは `em_runner` を直接 import していたため、
+**スイート全体を走らせると Phase 8b の 64 件が連鎖失敗した**（単体では 1194 件 pass）。
+ガードを弱めるのではなく、こちらを**子プロセス化**して解決した
+（`tools/research_audit/_em_budget_probe.py` を `subprocess` で起動し JSON を受け取る）。
+
+**これは新 runner とその sweep runner にもそのまま効く制約である。**
+`run_em_convergence_sensitivity.py` のテストは、実 runner をテストプロセスへ
+import してはならない。設計に織り込む。
 
 **この順序で、production はステップ 3 の gate 通過と人間の認可の後。**
 
@@ -458,9 +474,11 @@ Reviewer A（科学設計・統計）と Reviewer B（再現性・実装・leaka
 | B-7 | MEDIUM | `mstep_q_diagnostic` を有効にすると推定が変わるのではないか | 実測で bit-identical を確認（N2、5 tests pass）。ただし **`q_before/q_after` は同一 E-step 上の比較であり、反復間の Q 列は単調目的ではない**ことを §3-B に明記 | **解消** |
 | B-8 | MEDIUM | replicate 間引きが cherry-picking になる | **間引かない**（全 8 replicate、全 7 K、全 2 start）。規則が要らないのが最も安全 | **解消** |
 | B-9 | LOW | DRAFT protocol に hash が無い | **意図的**。hash を置けば freeze に見える。freeze は別 commit（§6 freeze rule、JSON の `status_note`） | **解消** |
+| B-11 | **HIGH** | **新しいテストが Phase 8b の安全トリップワイヤを壊した。**`em_runner` をテストプロセスに import したため、スイート全体で 64 件が連鎖失敗した（設計中に実測。単体実行では露見しない） | ガードは弱めず、測定を**子プロセス**へ移した（§12.1）。制約として新 runner の実装計画にも明記 | **解消** |
 | B-10 | LOW | runtime 投影が線形仮定 | 末尾の Q/BIC/S3 は反復数に比例しないので**線形は過大評価＝保守側**。script の docstring と §7 に明記。abort 閾値は投影の 2 倍 | **解消** |
 
 **結果: BLOCKER 0 / HIGH 0。**
+（B-11 は設計中に自分のテストが引き起こした実害であり、スイート全体を走らせなければ見えなかった。単体実行だけで済ませないこと。）
 未解決として受理したのは A-3 / B-6（`L=5` の MC 床と収束量の K 依存性）で、
 いずれも**本設計が解決しないと明示した限界**であり、選択には使わない量に限定されている。
 
