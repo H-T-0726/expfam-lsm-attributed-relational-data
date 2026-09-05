@@ -115,6 +115,12 @@ def build(run_dir: Path) -> str:
     audit = (_read_json(run_dir / "audit_report.json")
              if (run_dir / "audit_report.json").exists() else None)
 
+    max_by_k = {k: float(np.mean([float(r["x_max"]) for r in provenance
+                                  if int(r["K_TRUE"]) == k]))
+                for k in K_TRUE_GRID}
+    abs_by_k = {k: max(float(r["x_max"]) for r in provenance
+                       if int(r["K_TRUE"]) == k)
+                for k in K_TRUE_GRID}
     recomputed = recompute_selection(fits)
     for row in selection:
         key = (row["criterion"], int(row["K_TRUE"]), int(row["n"]),
@@ -169,6 +175,10 @@ def build(run_dir: Path) -> str:
     # ---- provenance
     add("## 1. Provenance")
     add("")
+    add("> **`experiment_id` に含まれる \"asymptotics\" は命名上の名残であり、"
+        "本実験は漸近的主張を一切含まない**（§0）。artifact は凍結済みのため改名しない。"
+        "（敵対レビュー F-11）")
+    add("")
     def field(key: str) -> Any:
         """Display-only accessor.  Every SCIENTIFIC number comes from the CSVs."""
         return runinfo.get(key, "（未記録）")
@@ -220,7 +230,21 @@ def build(run_dir: Path) -> str:
                 f"{rows[0]['n_test_pairs']} |")
     add("")
     add("`rank(F) = K_TRUE` は全 64 セルで成立（`generator_provenance.csv`）。"
-        "**平均 ‖f_l‖² と w²K が K_TRUE によらず一定**であることが、信号強度の交絡を避ける設計であることを示す。")
+        "平均 ‖f_l‖² と w²K は `K_TRUE` によらず**厳密に**一定である。")
+    add("")
+    add("**ただし整合しているのは 1 次モーメント（Y 側は分散）だけで、"
+        "信号の分布形は `K_TRUE` に依存して系統的に変わる**（敵対レビュー F-03）。")
+    add("")
+    add("- `F = Q·diag(f_scale)` なので `‖f_l‖² ∝ Beta(K/2, (d−K)/2)`。"
+        "列間のばらつきは `K` が小さいほど大きい。実測でも X の最大値は "
+        f"`K_TRUE=1` で平均 {max_by_k[1]:.1f}（最大 {abs_by_k[1]:.0f}）に対し "
+        f"`K_TRUE=5` では平均 {max_by_k[5]:.1f}（最大 {abs_by_k[5]:.0f}）。")
+    add("- Y 側線形予測子の**超過尖度は `κ_4/κ_2² = 6/K`**（理論監査 §9.2）であり、"
+        "`K_TRUE=1` で 6.0、`K_TRUE=3` で 2.0、`K_TRUE=5` で 1.2。")
+    add("")
+    add("**したがって「信号強度の交絡を完全に消した」とは書けない**（`[UNRESOLVED]`）。"
+        "とくに `K_TRUE=1` のセルは候補集合の下端であること（§8.1(2)）に加えて、"
+        "**より裾の重い有利な信号実現を受け取っている**。")
     add("")
 
     # ---- results per criterion
@@ -277,7 +301,16 @@ def build(run_dir: Path) -> str:
         picks = {name: recomputed[(name, *cell)]["selected_k"] for name in CRITERIA}
         if len(set(picks.values())) > 1:
             disagree.append((cell, picks))
-    add(f"64 セル中 **{len(disagree)} セル**で criterion 間の選択が一致しなかった。")
+    same_pairs = {}
+    for a in CRITERIA:
+        for b in CRITERIA:
+            if a < b:
+                same_pairs[f"{a} vs {b}"] = sum(
+                    1 for cell in cells
+                    if recomputed[(a, *cell)]["selected_k"]
+                    == recomputed[(b, *cell)]["selected_k"])
+    add(f"64 セル中 **{len(disagree)} セル**で**三者一致が成立しなかった**"
+        f"（S1 と S2 は {same_pairs['S1 vs S2']}/64 で一致している）。")
     add("")
     if disagree:
         add("| K_TRUE | n | replicate | S1 | S2 | S3 |")
@@ -378,10 +411,21 @@ def build(run_dir: Path) -> str:
     add(f"（S1 は n=75 で {s1e[1]}/{tot5} といったん下がる）。**「n を増やすと K=5 に収束した」とは書かない。**")
     add("誤りの向きは一貫して **under-selection** であり、over-selection はごく少数である。")
     add("")
+    ties_fired = sum(1 for k in recomputed if len(recomputed[k]["ties"]) > 1)
+    min_margin = min(recomputed[k]["margin"] for k in recomputed)
     add("**(2) `K_TRUE = 1` の 4/4 は good recovery の証拠ではない。** S1・S2 とも全 `n` で 4/4 だが、")
     add("この設定の支配的な誤り方は under-selection であり、`K = 1` は候補集合の**下端**である。")
-    add("さらに凍結 selector は同点時に最小 K を選ぶ。したがって `K_TRUE = 1` での一致は、")
-    add("**データからの識別ではなく手続き上の下限効果である可能性を排除できない**（理論監査 17.4）。")
+    add("したがって `K_TRUE = 1` での一致は、"
+        "**データからの識別ではなく手続き上の下限効果である可能性を排除できない**（理論監査 17.4）。")
+    add("")
+    add(f"**ただし tie rule は根拠にならない**（敵対レビュー F-07）。同点は 192 回の選択のうち "
+        f"{ties_fired} 回しか発生しておらず、最小マージンは {min_margin:.2e} で "
+        "tie tolerance `1e-12` の遥か上である。"
+        "下限効果の根拠は **候補集合の下端であること**と **under-selection 優位であること**の 2 点に限られる。")
+    add("")
+    add("**さらに第 3 の交絡がある**（§2、敵対レビュー F-03）: 信号整合は 1 次モーメントのみで、"
+        "`K_TRUE=1` のセルは列間ばらつきが大きく Y 側の超過尖度も 6/K = 6.0 と最大である。"
+        "**`K_TRUE=1` の結果を成功例として引用してはならない。**")
     add("")
     s1e3 = series("S1", 3, "exact")
     s2e3 = series("S2", 3, "exact")
@@ -406,12 +450,57 @@ def build(run_dir: Path) -> str:
     dis150 = sum(1 for k in recomputed
                  if k[0] == "S1" and k[1] == 5 and k[2] == 150
                  and recomputed[k]["start_disagreement"])
-    add(f"**(5) start 間の不一致が不安定性の指標になっている。** S1 / `K_TRUE=5` では、")
-    add(f"2 つの初期値が別々の K を選ぶセルが `n=50` で {dis50}/{tot5}、`n=150` で {dis150}/{tot5} だった。")
-    add("**選択が不安定な領域と、最適化が初期値に依存する領域が一致している。**")
-    add("これは criterion だけの問題ではなく推定側の多峰性も効いていることを示唆するが、")
-    add("**どちらが主因かは本実験では分離できていない**（`[UNRESOLVED]`）。")
+    disagree_series = []
+    for n in N_GRID:
+        keys = sorted(k for k in recomputed
+                      if k[0] == "S1" and k[1] == 5 and k[2] == n)
+        disagree_series.append(sum(1 for k in keys
+                                   if recomputed[k]["start_disagreement"]))
+    add("**(5) start 間の不一致。** S1 / `K_TRUE=5` で 2 つの初期値が別々の K を選んだセルは")
+    add(f"`n=50,75,100,150` の順に {disagree_series[0]}/{tot5}, {disagree_series[1]}/{tot5}, "
+        f"{disagree_series[2]}/{tot5}, {disagree_series[3]}/{tot5} だった。")
     add("")
+    add("**初版はこれを「選択が不安定な領域と初期値依存の領域が一致している」と書いたが、"
+        "それは両端だけの話であり撤回する**（敵対レビュー F-06）。")
+    add(f"実際 `n=75` は真値一致が最悪（{s1e[1]}/{tot5}）なのに不一致は {disagree_series[1]}/{tot5} で、")
+    add(f"`n=100`（一致 {s1e[2]}/{tot5}・不一致 {disagree_series[2]}/{tot5}）より小さい。**2 つの系列は対応していない。**")
+    add("初期値依存が存在すること自体は事実だが、"
+        "**criterion 由来か最適化由来かは本実験では分離できていない**（`[UNRESOLVED]`）。")
+    add("")
+    q_steps: dict[int, list[float]] = {n: [] for n in N_GRID}
+    p_steps: dict[int, list[float]] = {n: [] for n in N_GRID}
+    indexed: dict[tuple, dict[int, dict[str, str]]] = {}
+    for row in fits:
+        indexed.setdefault((int(row["k_true"]), int(row["n"]),
+                            int(row["replicate"]), int(row["start"])),
+                           {})[int(row["k_est"])] = row
+    for key, per_k in indexed.items():
+        n = key[1]
+        for k in range(1, max(CANDIDATE_K)):
+            q_steps[n].append(-2.0 * (float(per_k[k + 1]["q_strict"])
+                                      - float(per_k[k]["q_strict"])))
+            p_steps[n].append((int(per_k[k + 1]["num_params"])
+                               - int(per_k[k]["num_params"])) * float(np.log(n)))
+    add("**(6) S2 の実効的な罰則は `p log n` ではない**（敵対レビュー F-04）。")
+    add("`Q_strict` は完全データ同時密度なので `ln p(Z)` を含み、潜在次元を 1 増やすたびに")
+    add("`O(n)` のコストが発生する。実測（潜在次元 +1 あたりの中央値）:")
+    add("")
+    add("| n | `−2ΔQ_strict` | `Δp·log n` | 比 |")
+    add("|---:|---:|---:|---:|")
+    for n in N_GRID:
+        a = float(np.median(q_steps[n]))
+        b = float(np.median(p_steps[n]))
+        add(f"| {n} | {a:.1f} | {b:.1f} | {a / b:.2f} |")
+    add("")
+    decreasing = sum(1 for n in N_GRID for v in q_steps[n] if v > 0)
+    total_steps = sum(len(v) for v in q_steps.values())
+    add(f"`Q_strict` は {decreasing}/{total_steps} の段で `K` の増加とともに**減少**する。")
+    add("すなわち **S2 の次元罰則の主要因は `ln p(Z)` 由来の `O(n)` 項**であり、")
+    add("`p log n` は `n=150` でも全体の 2 割程度にすぎない。")
+    add("これは **S2 が BIC 型からさらに遠い**ことを意味し、`n=50` での強い under-selection")
+    add(f"（平均 selected K {s2m[0]}）の機構でもある。")
+    add("")
+
     add("### 8.2 書いてよい表現 / 書いてはいけない表現")
     add("")
     add("**書いてよい:**")
@@ -423,7 +512,9 @@ def build(run_dir: Path) -> str:
     add("")
     add("**書いてはいけない:** 「`n` を増やすと `K_TRUE` に収束した」「K 選択の一致性を示した」")
     add("「held-out なら真の K を選べる」「`K_TRUE=1` で完全に回復した」")
-    add("「S3 の失敗は原論文 BIC の失敗である」。")
+    add("「S3 の失敗は原論文 BIC の失敗である」")
+    add("**「under-selection は criterion の性質である」**（固定 EM 予算の `K` 依存性と分離できていない、§9-10）")
+    add("**「信号強度の交絡を完全に消した」**（整合は 1 次モーメントのみ、§2）。")
     add("")
 
     add("## 9. 限界")
@@ -439,6 +530,10 @@ def build(run_dir: Path) -> str:
     add("| 7 | **S4 は K を返さない。** 推定 Gram は全 64 セルで PSD 錐の外にあり、閾値なし階数は常に `d=15` |")
     add("| 8 | **lineage E（experimental prototype）。本文採用不可** |")
     add("| 9 | **1 つの合成設定のみ。** `d=15`、Poisson-X / Bernoulli-Y、信号強度は 1 水準に固定 |")
+    add("| 10 | **EM を全 K で `num_iter=8` / `L=5` の固定予算で打ち切っており、収束判定も収束診断も記録していない。** 候補 K が大きいほど自由パラメータが多く（`K=7` で 84、`K=1` で 15）、同一予算では相対的に未収束になりやすい。したがって **「誤りが一貫して under-selection」であることも `n` とともに改善することも、criterion の性質ではなく最適化予算の `K` 依存性で説明できる。本実験はこの 2 つを分離していない**（`[UNRESOLVED]`、敵対レビュー F-02） |")
+    add("| 11 | **信号整合は 1 次モーメント（Y 側は分散）のみ。** 分布形は `K_TRUE` に依存して変わる（§2、F-03） |")
+    add("| 12 | **S2 の実効的な次元罰則は `p log n` ではない。** `Q_strict` に含まれる `ln p(Z)` 由来の **O(n)** 項が支配的である（F-04、§8.1(6)）。有効標本数の議論は S2 の挙動の主要因ではない |")
+    add("| 13 | **`retry 0 / seed rescue 0` は sweep runner の宣言である。** 内部の `run_em_experimental` は NaN 検出時に最大 2 回、`seed + retry*1000`・`newton_alpha` 半減で再試行しうるが、`nan_count` が retry ごとにリセットされるため**その発動は artifact から検出できない**（`[UNRESOLVED]`、F-08） |")
     add("")
 
     add("## 10. この実験の claim ledger")
