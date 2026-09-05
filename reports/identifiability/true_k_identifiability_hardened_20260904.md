@@ -39,7 +39,7 @@
 
 **新しく証明できた主要命題は 3 つ**（§14）:
 
-- **P1**: canonical Poisson-X では、population moment から `FF^T` を復元でき、`d ≥ K` かつ `rank(F)=K` なら `K` は population identifiable。
+- **P1**: canonical Poisson-X では、population moment から `FF^T` を復元でき、`d ≥ K` かつ `rank(F)=K` なら **`X` 周辺の最小潜在次元** `K^rank = rank(FF^T)` が population identifiable。**これは `K*`（joint observational minimal dimension）の識別可能性ではない。`K^rank ≤ K*` であり等号は自明でないため、P1 を `K*` の主張として引用してはいけない**（§2.4）。
 - **P2**: canonical Gaussian-Y では、**単一 dyad の周辺分布だけ**から `(K, w², σ_y²)` が決まる（`w ≠ 0` のとき）。
 - **P3**: その帰結として **Gaussian-Y では `M_K ⊄ M_{K+1}`**（`w ≠ 0`）。すなわち K の族は入れ子でない。
 - **P8**（敵対レビューで新たに得られた）: **`w` の符号は三角形（`n ≥ 3`）から識別できる。**`E[S_ij S_ik S_jk] = K` より Gaussian-Y の三角形 3 次同時中心モーメントは `w³K` であり、その符号が `w` の符号を決める。

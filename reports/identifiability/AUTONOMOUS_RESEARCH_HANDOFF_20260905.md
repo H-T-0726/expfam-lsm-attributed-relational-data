@@ -342,7 +342,9 @@ PRIMARY K_TRUE=5 RESULT
                  mean selected K 2.62 -> 3.00 -> 4.50 -> 5.00
   Q-based  (S2): exact 0/8, 0/8, 1/8, 7/8; mean 1.75 -> 3.25 -> 3.62 -> 4.88
   the MEAN rose monotonically; the EXACT COUNT did not (S1 dips to 0/8 at n=75)
-  every error was under-selection
+  under-selection DOMINATES but is not universal: of the 42 non-exact
+  cells across S1+S2 at K_TRUE=5, 41 were under-selection and 1 was
+  over-selection (S1, n=100, one replicate selected K=6)
 
 CONTROL K_TRUE=1/3 RESULT
   K_TRUE=3: S1 1/4,1/4,3/4,4/4 ; S2 2/4,3/4,4/4,4/4 -- same direction as K_TRUE=5

@@ -27,7 +27,7 @@ clean true-K n-sweep によるものである。
 **両者とも「production evidence の完全性は保たれている」と結論した。**
 問題は **その完全性について、および結果について語った内容**にあった。
 
-**対応後: BLOCKER 0 / HIGH 0。** MEDIUM・LOW も全件対応済み（未対応 0）。
+**対応後: BLOCKER 0 / HIGH 0。** MEDIUM・LOW は**修正済みまたは理由付き disposition 済み**（未 disposition 0）。**全件が修正済みという意味ではない。**§3 の 3 件がその内訳で、F-14（LOW）は理由付きで**修正していない**、B12 は記録のみ、F-08 は `[UNRESOLVED]` として記録した。
 
 ---
 
