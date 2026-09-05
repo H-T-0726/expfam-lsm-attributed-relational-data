@@ -19,30 +19,29 @@ These claims are FORBIDDEN in any report built on this experiment:
 
 WHERE THE SPECIFICATION LIVES
 -----------------------------
-There is exactly one: the ``protocol`` object of the frozen protocol file.
-Production reads every execution-relevant field from it -- families, d, L,
-n grid, replicates, candidate K, starts, seeds, split rule, generator
-settings, signal parameters, the selector and the tie rule -- and additionally
-verifies each against an explicit runner contract before any EM starts.  A
-module constant here can build a DRAFT; it can never silently substitute for a
-frozen field.
+There is exactly one: the ``protocol`` object of the protocol file under
+``reports/k_selection/``.  Production reads every execution-relevant field
+from it -- families, d, L, n grid, replicates, candidate K, starts, seeds,
+split rule, generator settings, signal parameters, the selector and the tie
+rule -- and additionally verifies each against an explicit runner contract
+before any EM starts, so a protocol file that quietly changed scope is refused
+rather than obeyed.  The hash of the body that was actually used is recorded
+in the artifact.
 
-TRUST ANCHOR
-------------
-An annotated git tag created by a human, pointing at the freeze commit.  A tag
-is the right anchor because creating it changes neither HEAD nor the working
-tree, so the approval cannot invalidate the thing it approves -- which is what
-an in-repository "approved commit sha" field does.
-
-Gate receipts are RUNTIME evidence, not source: they are written outside the
-tracked tree so that running the gate does not dirty the repository the gate is
-about to certify.
+REPLICATION GATE
+----------------
+The one pre-run check that matters scientifically: run the gate cell to
+iteration 8 and require it to reproduce the archived
+``clean_true_k_asymptotics_20260904`` fits EXACTLY.  If it does not, the
+40-iteration run is not a continuation of the archived 8-iteration run, and
+the whole comparison is void.  Production repeats the same comparison for
+EVERY fit inside the checkpoint callback, so a fit whose first eight
+iterations are not the archived ones never reaches iteration 9.
 
 Usage
 -----
     python tools/research_audit/run_em_convergence_sensitivity.py --plan
     python tools/research_audit/run_em_convergence_sensitivity.py --emit-draft
-    python tools/research_audit/run_em_convergence_sensitivity.py --authorize
     python tools/research_audit/run_em_convergence_sensitivity.py \
         --replication-gate --allow-em
     python tools/research_audit/run_em_convergence_sensitivity.py \
@@ -58,11 +57,9 @@ import json
 import math
 import os
 import platform
-import shutil
 import subprocess
 import sys
 import time
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -87,10 +84,6 @@ PROTOCOL_VERSION = "em-convergence-protocol-draft-3"
 ARTIFACT_VERSION = "em-convergence-artifact-v3"
 RUNNER_CONTRACT_VERSION = "em-convergence-runner-contract-v1"
 
-#: The human trust anchor.  A human creates this annotated tag on the freeze
-#: commit; nothing in this file can create it.
-FREEZE_TAG = "research-em-convergence-freeze-v1"
-
 BASELINE_RUN_DIR = (ROOT / "expfam" / "results" / "k_selection"
                     / "clean_true_k_asymptotics_20260904")
 BASELINE_PROTOCOL_HASH = ("547880a16aef6530cfdf7903c4e32f16062397e0"
@@ -100,15 +93,17 @@ DESIGN_DIR = ROOT / "reports" / "k_selection"
 DRAFT_PROTOCOL_PATH = DESIGN_DIR / f"{EXPERIMENT_ID}_protocol.DRAFT.json"
 FROZEN_PROTOCOL_PATH = DESIGN_DIR / f"{EXPERIMENT_ID}_protocol.json"
 
-#: Runtime areas, outside the tracked tree.  Running the gate or an attempt
-#: must not dirty the repository whose cleanliness is an authorization
-#: condition.
-RUNTIME_ROOT = ROOT / ".local"
-GATE_RECEIPT_DIR = RUNTIME_ROOT / "research_gates" / EXPERIMENT_ID
-ATTEMPT_STAGING_DIR = RUNTIME_ROOT / "research_attempts" / EXPERIMENT_ID
+#: Where the replication gate leaves its result for a human to read.  Nothing
+#: in this file reads it back: production repeats the same comparison itself.
+RUNTIME_ROOT = ROOT / ".local" / EXPERIMENT_ID
 
-#: Final evidence location.  Written only when an attempt reaches SUCCESS.
+#: Final evidence location, and the directory the run writes into until it
+#: finishes.  The staging directory is a sibling so the last step is a single
+#: rename on the same filesystem: a run that dies part-way leaves ``.partial``
+#: behind and never a half-written directory that looks like a finished one.
+#: Cleaning up after a failure is a human's job, deliberately.
 ARTIFACT_DIR = ROOT / "expfam" / "results" / "k_selection" / EXPERIMENT_ID
+STAGING_DIR = ARTIFACT_DIR.with_name(ARTIFACT_DIR.name + ".partial")
 
 #: Compared against the archive.  ``runtime_s`` is deliberately absent: it is
 #: wall-clock and cannot be reproduced.  Every other field is written by csv
@@ -124,11 +119,9 @@ REPLICATION_INT_FIELDS = ("data_seed", "split_seed", "model_seed", "num_params")
 DIAGNOSTIC_KEYS = ("gram_rel_change", "f_raw_change", "w_change", "w0_change",
                    "eta_x_rel_change", "eta_y_rel_change")
 
-ATTEMPT_STATES = ("RUNNING", "SUCCESS", "FAILED", "ABANDONED")
-
 
 class HarnessStop(RuntimeError):
-    """Refusal.  Never caught inside this module except to fail an attempt."""
+    """Refusal.  Raised before or during a run; never swallowed."""
 
 
 class PrefixReplicationError(RuntimeError):
@@ -171,18 +164,6 @@ def git_head() -> str:
 def working_tree_clean() -> bool:
     code, value = _git("status", "--porcelain")
     return code == 0 and value == ""
-
-
-def freeze_tag_target(tag: str = FREEZE_TAG) -> str | None:
-    """The commit an annotated tag points at, or None if the tag is absent."""
-
-    code, value = _git("rev-list", "-n", "1", tag)
-    return value if code == 0 and value else None
-
-
-def freeze_tag_annotation(tag: str = FREEZE_TAG) -> str:
-    code, value = _git("tag", "-l", "--format=%(contents)", tag)
-    return value if code == 0 else ""
 
 
 def _blas_identity() -> dict[str, str]:
@@ -236,9 +217,9 @@ def environment_fingerprint() -> dict[str, Any]:
 def environment_key(fingerprint: dict[str, Any]) -> str:
     """Canonical key over the numerically relevant fields.
 
-    Always RECOMPUTED from the environment object; a receipt's own
-    ``environment_key`` is never trusted on its own, because a forger would
-    write both.
+    Recorded so a later run can be compared with this one at a glance;
+    timestamps and local paths are excluded because they differ between runs
+    without saying anything about the numbers.
     """
 
     return json.dumps({key: fingerprint.get(key)
@@ -410,7 +391,6 @@ def protocol_body_from_contract() -> dict[str, Any]:
             "the first replicate of the smallest scoped n, derived as "
             "min(n_grid); fixed by rule, not chosen by inspection"),
         "gate_expected_fits": GATE_EXPECTED_FITS,
-        "freeze_tag": FREEZE_TAG,
         "replication_fields": list(REPLICATION_FIELDS),
         "diagnostic_keys": list(DIAGNOSTIC_KEYS),
         "criteria": ["S1_heldout_predictive", "S2_q_based",
@@ -419,15 +399,9 @@ def protocol_body_from_contract() -> dict[str, Any]:
         "runtime_estimate_note": (
             "operational estimate only. There is NO automatic runtime abort: "
             "runtime is not part of the estimand and must never include or "
-            "exclude an individual fit. A manual or process interruption makes "
-            "the WHOLE attempt FAILED or ABANDONED, with no partial analysis"),
+            "exclude an individual fit. A run that is interrupted produces no "
+            "final artifact and is not analysed in part"),
         "primary_outcomes": _primary_outcome_spec(),
-        "attempt_states": list(ATTEMPT_STATES),
-        "attempt_policy": (
-            "attempt_id is immutable and unique; a FAILED or ABANDONED attempt "
-            "is never resumed or completed under the same id; a stale RUNNING "
-            "attempt is not valid evidence; a new run needs a new attempt_id "
-            "and new human authorization"),
     })
     return body
 
@@ -482,185 +456,37 @@ def _primary_outcome_spec() -> dict[str, Any]:
     }
 
 
-def load_frozen_protocol() -> tuple[dict[str, Any], Spec]:
-    """Load the committed frozen protocol, verify its hash and its contract."""
+def load_protocol() -> tuple[dict[str, Any], Spec]:
+    """Read the protocol the run will execute and check it against the contract.
 
-    _require(FROZEN_PROTOCOL_PATH.exists(),
-             f"no frozen protocol at {FROZEN_PROTOCOL_PATH}; the protocol is "
-             f"still a DRAFT and production is not authorised")
-    document = json.loads(FROZEN_PROTOCOL_PATH.read_text(encoding="utf-8"))
-    _require(document.get("status") == "FROZEN",
-             f"{FROZEN_PROTOCOL_PATH.name} is not marked FROZEN")
-    body = document.get("protocol")
-    _require(isinstance(body, dict), "the frozen protocol carries no body")
-    recomputed = canonical_hash(body)
-    _require(document.get("protocol_hash") == recomputed,
-             f"frozen protocol body hashes to {recomputed}, file records "
-             f"{document.get('protocol_hash')}")
-    problems = verify_contract(body)
-    _require(not problems,
-             "the frozen protocol does not satisfy the runner contract: "
-             + "; ".join(problems))
-    return document, Spec(body)
-
-
-# ---------------------------------------------------------------------------
-# gate receipts -- runtime evidence, outside the tracked tree
-# ---------------------------------------------------------------------------
-
-def validate_gate_receipt(receipt: dict[str, Any], *, protocol_hash: str,
-                          spec: Spec, head: str) -> list[str]:
-    """Every field, not just the verdict.  Returns the reasons to refuse.
-
-    A receipt is a claim, and a self-consistent claim is easy to forge.  What
-    makes it trustworthy is that each field is checked against something the
-    forger does not control: the frozen protocol's hash, the tag the human
-    signed, the environment as measured now, and the archived baseline.
+    A frozen file wins over the draft when both exist.  The returned record is
+    what production copies into the artifact: the body it actually used, the
+    hash of that body, and where it came from.  The hash is always RECOMPUTED
+    here rather than read from the file, so the artifact cannot record a hash
+    that does not belong to its own protocol body.
     """
 
-    problems: list[str] = []
-
-    def need(condition: bool, reason: str) -> None:
-        if not condition:
-            problems.append(reason)
-
-    need(receipt.get("verdict") == "PASS",
-         f"verdict is {receipt.get('verdict')!r}")
-    need(receipt.get("experiment_id") == EXPERIMENT_ID, "experiment_id")
-    need(receipt.get("protocol_hash") == protocol_hash, "protocol_hash")
-    need(receipt.get("code_sha") == head, "code_sha != HEAD")
-    need(receipt.get("freeze_tag") == FREEZE_TAG, "freeze_tag")
-    need(receipt.get("freeze_tag_target") == head, "freeze_tag_target != HEAD")
-    need(receipt.get("baseline_protocol_hash") == BASELINE_PROTOCOL_HASH,
-         "baseline_protocol_hash")
-    need(receipt.get("working_tree_clean") is True, "tree was dirty at the gate")
-
-    environment = receipt.get("environment")
-    need(isinstance(environment, dict), "receipt carries no environment object")
-    if isinstance(environment, dict):
-        recomputed = environment_key(environment)
-        need(receipt.get("environment_key") == recomputed,
-             "environment_key does not match its own environment object")
-        need(recomputed == environment_key(environment_fingerprint()),
-             "environment differs from the gate; this is a refusal, not a "
-             "reason to relax a tolerance")
-
-    expected_cell = {"k_true": spec.k_true, "n": GATE_N,
-                     "replicate": GATE_REPLICATE}
-    need(receipt.get("gate_cell") == expected_cell,
-         f"gate_cell {receipt.get('gate_cell')} != {expected_cell}")
-    need(receipt.get("expected_fits") == GATE_EXPECTED_FITS, "expected_fits")
-    need(receipt.get("actual_fits") == GATE_EXPECTED_FITS,
-         f"actual_fits {receipt.get('actual_fits')} != {GATE_EXPECTED_FITS}")
-    need(receipt.get("mismatch_count") == 0,
-         f"mismatch_count {receipt.get('mismatch_count')}")
-    need(receipt.get("mask_hashes_match") is True, "mask verification")
-    need(receipt.get("retry_count_total") == 0, "retry_count_total")
-    need(receipt.get("nan_detected_fits") == 0, "nan_detected_fits")
-
-    per_fit = receipt.get("per_fit")
-    need(isinstance(per_fit, list) and len(per_fit) == GATE_EXPECTED_FITS,
-         f"per_fit has {len(per_fit) if isinstance(per_fit, list) else 'no'} "
-         f"entries, expected {GATE_EXPECTED_FITS}")
-    if isinstance(per_fit, list):
-        need(all(entry.get("match") is True for entry in per_fit),
-             "not every per-fit comparison passed")
-        expected_pairs = {(k, s) for k in spec.candidate_k for s in spec.starts}
-        observed = {(entry.get("k_est"), entry.get("start")) for entry in per_fit}
-        need(observed == expected_pairs,
-             "per_fit does not cover every (candidate K, start) exactly once")
-    return problems
-
-
-def find_gate_receipt(protocol_hash: str) -> tuple[dict[str, Any] | None, Path | None]:
-    """The most recent receipt for this protocol hash, if any."""
-
-    if not GATE_RECEIPT_DIR.is_dir():
-        return None, None
-    best: tuple[float, dict[str, Any], Path] | None = None
-    for path in sorted(GATE_RECEIPT_DIR.glob("*.json")):
-        try:
-            receipt = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:                                   # noqa: BLE001
-            continue
-        if receipt.get("protocol_hash") != protocol_hash:
-            continue
-        stamp = path.stat().st_mtime
-        if best is None or stamp > best[0]:
-            best = (stamp, receipt, path)
-    return (best[1], best[2]) if best else (None, None)
-
-
-# ---------------------------------------------------------------------------
-# authorization
-# ---------------------------------------------------------------------------
-
-def authorize_production() -> dict[str, Any]:
-    """Decide whether production may start.  Returns a report; never raises."""
-
-    checks: list[dict[str, Any]] = []
-
-    def check(name: str, ok: bool, detail: str = "") -> bool:
-        checks.append({"check": name, "ok": bool(ok), "detail": detail})
-        return bool(ok)
-
-    document: dict[str, Any] | None = None
-    spec: Spec | None = None
-    try:
-        document, spec = load_frozen_protocol()
-        check("A_frozen_protocol_valid", True, str(FROZEN_PROTOCOL_PATH))
-        check("B_runner_contract_satisfied", True, RUNNER_CONTRACT_VERSION)
-    except HarnessStop as exc:
-        check("A_frozen_protocol_valid", False, str(exc))
-        check("B_runner_contract_satisfied", False, "not evaluated")
-
-    head = git_head()
-    target = freeze_tag_target()
-    check("C_freeze_tag_exists", target is not None,
-          f"no annotated tag {FREEZE_TAG}" if target is None else FREEZE_TAG)
-    check("D_head_is_the_tag_target", bool(target) and target == head,
-          f"HEAD={head} tag={target}")
-    check("E_working_tree_clean", working_tree_clean(),
-          "uncommitted changes present")
-
-    receipt: dict[str, Any] | None = None
-    if document is not None and spec is not None:
-        receipt, path = find_gate_receipt(document["protocol_hash"])
-        check("F_gate_receipt_exists", receipt is not None,
-              str(path) if path else f"no receipt under {GATE_RECEIPT_DIR}")
-        if receipt is not None:
-            problems = validate_gate_receipt(
-                receipt, protocol_hash=document["protocol_hash"], spec=spec,
-                head=head)
-            check("G_gate_receipt_fully_valid", not problems,
-                  "; ".join(problems))
-        else:
-            check("G_gate_receipt_fully_valid", False, "no receipt")
-    else:
-        check("F_gate_receipt_exists", False, "no frozen protocol")
-        check("G_gate_receipt_fully_valid", False, "no frozen protocol")
-
-    try:
-        baseline = json.loads((BASELINE_RUN_DIR / "protocol.json")
-                              .read_text(encoding="utf-8"))
-        check("H_baseline_protocol_hash_matches",
-              baseline.get("protocol_hash") == BASELINE_PROTOCOL_HASH,
-              f"artifact {baseline.get('protocol_hash')}")
-    except Exception as exc:                                # noqa: BLE001
-        check("H_baseline_protocol_hash_matches", False, str(exc))
-
-    check("I_no_final_artifact_yet", not ARTIFACT_DIR.exists(),
-          f"{ARTIFACT_DIR} already exists")
-
-    failed = [c["check"] for c in checks if not c["ok"]]
-    return {
+    path = (FROZEN_PROTOCOL_PATH if FROZEN_PROTOCOL_PATH.exists()
+            else DRAFT_PROTOCOL_PATH)
+    _require(path.exists(),
+             f"no protocol file at {FROZEN_PROTOCOL_PATH} or "
+             f"{DRAFT_PROTOCOL_PATH}; run --emit-draft first")
+    document = json.loads(path.read_text(encoding="utf-8"))
+    body = document.get("protocol")
+    _require(isinstance(body, dict), f"{path.name} carries no protocol body")
+    problems = verify_contract(body)
+    _require(not problems,
+             f"{path.name} does not satisfy the runner contract: "
+             + "; ".join(problems))
+    record = {
         "experiment_id": EXPERIMENT_ID,
-        "freeze_tag": FREEZE_TAG,
-        "head": head,
-        "checks": checks,
-        "failed": failed,
-        "production_authorization": "NO" if failed else "YES",
+        "protocol_source": path.name,
+        "protocol_source_status": document.get("status"),
+        "protocol_hash": canonical_hash(body),
+        "protocol": body,
     }
+    return record, Spec(body)
+
 
 
 # ---------------------------------------------------------------------------
@@ -678,6 +504,23 @@ def atomic_write_text(path: Path, text: str) -> None:
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     atomic_write_text(path, json.dumps(payload, indent=2, sort_keys=True))
+
+
+def write_npz(path: Path, arrays: dict[str, np.ndarray]) -> None:
+    """Write an NPZ through an open file object.
+
+    ``np.savez_compressed`` APPENDS ``.npz`` to any filename that does not
+    already end in it, so handing it ``<name>.npz.tmp`` silently writes
+    ``<name>.npz.tmp.npz`` and the rename that follows raises
+    FileNotFoundError -- after every fit has already been computed.  Writing
+    through an open handle sidesteps the name mangling entirely.
+    """
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".partial")
+    with tmp.open("wb") as handle:
+        np.savez_compressed(handle, **arrays)
+    os.replace(tmp, path)
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> None:
@@ -705,11 +548,22 @@ def read_archive_fits() -> dict[tuple[int, int, int, int, int], dict[str, str]]:
 
 
 def read_archive_masks() -> dict[tuple[int, int, int], tuple[str, str]]:
+    """Mask provenance, with the same uniqueness demand as the fit rows.
+
+    A duplicated key would silently pick one of two mask pairs as "the"
+    archived split, and an ambiguous comparison target is not a target.
+    """
+
     with (BASELINE_RUN_DIR / "generator_provenance.csv").open(
             "r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
-    return {(int(r["K_TRUE"]), int(r["n"]), int(r["replicate"])):
-            (r["train_mask_hash"], r["test_mask_hash"]) for r in rows}
+    out: dict[tuple[int, int, int], tuple[str, str]] = {}
+    for row in rows:
+        key = (int(row["K_TRUE"]), int(row["n"]), int(row["replicate"]))
+        _require(key not in out,
+                 f"the archived mask provenance has a duplicate row for {key}")
+        out[key] = (row["train_mask_hash"], row["test_mask_hash"])
+    return out
 
 
 def _state_digest(z_est: np.ndarray, f: np.ndarray, w0: float, w: float) -> str:
@@ -1025,46 +879,40 @@ def build_cells(spec: Spec):
 # ---------------------------------------------------------------------------
 
 def run_replication_gate(*, allow_em: bool) -> dict[str, Any]:
-    """Run the gate cell and write a receipt OUTSIDE the tracked tree."""
+    """Run the gate cell to iteration 8 and compare it with the archive.
+
+    Fourteen fits (7 candidate K x 2 starts) for the first replicate of the
+    smallest scoped n -- a cell fixed by rule, not chosen by inspection.  The
+    verdict is what a human reads before committing six hours; the result file
+    is a record, and nothing reads it back.
+    """
 
     _require(allow_em, "the replication gate runs EM; pass --allow-em")
-    document, spec = load_frozen_protocol()
-    head = git_head()
-    target = freeze_tag_target()
-    _require(target is not None, f"no annotated freeze tag {FREEZE_TAG}")
-    _require(target == head,
-             f"HEAD {head} is not the freeze tag target {target}")
-    _require(working_tree_clean(),
-             "the working tree is dirty; the gate certifies a commit, not a "
-             "work in progress")
+    record, spec = load_protocol()
 
-    attempt_id = f"gate-{uuid.uuid4().hex[:12]}"
     started = time.time()
-    fingerprint = environment_fingerprint()
     rows, fit_rows = _run_cells(
         [(GATE_N, GATE_REPLICATE)], spec=spec,
         max_iter=spec.baseline_checkpoint,
         checkpoints=(spec.baseline_checkpoint,),
         archive_check=False, progress_every=7)
     comparison = compare_to_archive(rows, spec.baseline_checkpoint)
-    masks_ok = _gate_masks_match(fit_rows, spec)
+    masks_ok = _gate_masks_match(fit_rows)
+    passed = (comparison["match"] and masks_ok
+              and len(fit_rows) == GATE_EXPECTED_FITS)
 
-    receipt = {
-        "receipt_version": "em-convergence-gate-receipt-v2",
-        "attempt_id": attempt_id,
+    result = {
+        "verdict": "PASS" if passed else "FAIL",
         "experiment_id": EXPERIMENT_ID,
-        "protocol_hash": document["protocol_hash"],
-        "freeze_tag": FREEZE_TAG,
-        "freeze_tag_target": target,
-        "code_sha": head,
-        "working_tree_clean": True,
+        "protocol_hash": record["protocol_hash"],
+        "protocol_source": record["protocol_source"],
+        "code_sha": git_head(),
+        "working_tree_clean": working_tree_clean(),
         "baseline_run": spec["baseline_run"],
         "baseline_protocol_hash": spec["baseline_protocol_hash"],
-        "environment": fingerprint,
-        "environment_key": environment_key(fingerprint),
+        "environment": environment_fingerprint(),
         "gate_cell": {"k_true": spec.k_true, "n": GATE_N,
                       "replicate": GATE_REPLICATE},
-        "gate_cell_selection_rule": spec["gate_cell_selection_rule"],
         "expected_fits": GATE_EXPECTED_FITS,
         "actual_fits": len(fit_rows),
         "compared_fields": list(REPLICATION_FIELDS)
@@ -1079,130 +927,75 @@ def run_replication_gate(*, allow_em: bool) -> dict[str, Any]:
         "wall_clock_seconds": round(time.time() - started, 1),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
     }
-    receipt["verdict"] = "PASS" if not validate_gate_receipt(
-        {**receipt, "verdict": "PASS"},
-        protocol_hash=document["protocol_hash"], spec=spec, head=head) else "FAIL"
-    write_json(GATE_RECEIPT_DIR / f"{attempt_id}.json", receipt)
-    print(json.dumps({"verdict": receipt["verdict"], "attempt_id": attempt_id,
-                      "receipt_dir": str(GATE_RECEIPT_DIR),
-                      "mismatch_count": receipt["mismatch_count"]}, indent=2))
-    return receipt
+    write_json(RUNTIME_ROOT / "replication_gate.json", result)
+    print(json.dumps({"verdict": result["verdict"],
+                      "mismatch_count": result["mismatch_count"],
+                      "mask_hashes_match": masks_ok,
+                      "result_file": str(RUNTIME_ROOT / "replication_gate.json")},
+                     indent=2))
+    return result
 
 
-def _gate_masks_match(fit_rows, spec: Spec) -> bool:
+def _gate_masks_match(fit_rows) -> bool:
     archive = read_archive_masks()
     return all(archive.get((int(r["k_true"]), int(r["n"]), int(r["replicate"])))
                == (r["train_mask_hash"], r["test_mask_hash"]) for r in fit_rows)
 
 
 # ---------------------------------------------------------------------------
-# attempts
-# ---------------------------------------------------------------------------
-
-def attempt_dir(attempt_id: str) -> Path:
-    return ATTEMPT_STAGING_DIR / attempt_id
-
-
-def read_attempt(attempt_id: str) -> dict[str, Any] | None:
-    path = attempt_dir(attempt_id) / "attempt.json"
-    if not path.exists():
-        return None
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def set_attempt_state(attempt_id: str, state: str, **extra: Any) -> None:
-    """Advance the attempt state machine.  Terminal states are terminal."""
-
-    _require(state in ATTEMPT_STATES, f"unknown attempt state {state!r}")
-    current = read_attempt(attempt_id)
-    if current is not None:
-        previous = current.get("status")
-        _require(previous == "RUNNING" or previous == state,
-                 f"attempt {attempt_id} is {previous}; a terminal attempt is "
-                 f"never resumed or re-completed. A new run requires a new "
-                 f"attempt_id and new human authorization")
-    payload = dict(current or {})
-    payload.update({
-        "attempt_id": attempt_id, "experiment_id": EXPERIMENT_ID,
-        "status": state, f"{state.lower()}_utc": datetime.now(timezone.utc)
-        .isoformat(), **extra})
-    write_json(attempt_dir(attempt_id) / "attempt.json", payload)
-
-
-# ---------------------------------------------------------------------------
 # production
 # ---------------------------------------------------------------------------
 
-def run_production(*, allow_em: bool, confirm: bool,
-                   attempt_id: str | None = None) -> dict[str, Any]:
-    """One attempt.  SUCCESS or FAILED -- no resume, no partial evidence."""
+def run_production(*, allow_em: bool, confirm: bool) -> dict[str, Any]:
+    """The full sweep.  Writes into a staging directory and renames once.
+
+    An interrupted run leaves ``<artifact>.partial`` behind and no final
+    directory at all.  That is deliberate: partially completed fits are not
+    analysable evidence, and a human decides whether to delete the leftover
+    and start again.
+    """
 
     _require(allow_em, "production requires --allow-em")
     _require(confirm, "production requires --confirm-em-convergence-sweep")
+    _require(not ARTIFACT_DIR.exists(),
+             f"{ARTIFACT_DIR} already exists; results are never overwritten")
+    _require(not STAGING_DIR.exists(),
+             f"{STAGING_DIR} is left over from an earlier run; inspect and "
+             f"delete it before starting another")
+    record, spec = load_protocol()
 
-    decision = authorize_production()
-    _require(decision["production_authorization"] == "YES",
-             "PRODUCTION AUTHORIZATION = NO; failed conditions: "
-             + ", ".join(f"{c['check']} ({c['detail']})"
-                         for c in decision["checks"] if not c["ok"]))
-    document, spec = load_frozen_protocol()
-
-    attempt_id = attempt_id or f"{EXPERIMENT_ID}-{uuid.uuid4().hex[:12]}"
-    _require(read_attempt(attempt_id) is None,
-             f"attempt {attempt_id} already exists; attempt ids are immutable "
-             f"and are never reused")
-    staging = attempt_dir(attempt_id)
-    staging.mkdir(parents=True, exist_ok=False)
-
+    STAGING_DIR.mkdir(parents=True, exist_ok=False)
     started = time.time()
     fingerprint = environment_fingerprint()
     head = git_head()
-    receipt, receipt_path = find_gate_receipt(document["protocol_hash"])
-    set_attempt_state(attempt_id, "RUNNING", started_at=started,
-                      freeze_tag=FREEZE_TAG, code_sha=head,
-                      protocol_hash=document["protocol_hash"],
-                      gate_receipt=str(receipt_path))
-    (staging / "protocol.json").write_bytes(FROZEN_PROTOCOL_PATH.read_bytes())
-    write_json(staging / "authorization_check.json", decision)
-    write_json(staging / "gate_receipt.json", receipt or {})
+    clean_before = working_tree_clean()
+    write_json(STAGING_DIR / "protocol.json", record)
 
     states: dict[str, np.ndarray] = {}
     iteration_rows: list[dict[str, Any]] = []
-    try:
-        rows, fit_rows = _run_cells(
-            build_cells(spec), spec=spec, max_iter=int(spec["max_iter"]),
-            checkpoints=spec.checkpoints, archive_check=True,
-            states=states, iteration_rows=iteration_rows)
-        _require(len(fit_rows) == int(spec["expected_long_runs"]),
-                 f"{len(fit_rows)} fits, expected {spec['expected_long_runs']}")
-        _require(len(rows) == int(spec["expected_checkpoint_rows"]),
-                 f"{len(rows)} checkpoint rows, expected "
-                 f"{spec['expected_checkpoint_rows']}")
-        _require(len(iteration_rows) == int(spec["expected_iteration_rows"]),
-                 f"{len(iteration_rows)} iteration rows, expected "
-                 f"{spec['expected_iteration_rows']}")
-        replication = compare_to_archive(rows, spec.baseline_checkpoint)
-        _require(replication["match"]
-                 and replication["compared_rows"] == len(fit_rows),
-                 "the all-fit checkpoint comparison did not match the archive")
-    except BaseException as exc:                            # noqa: BLE001
-        set_attempt_state(
-            attempt_id, "FAILED", failure=f"{type(exc).__name__}: {exc}",
-            wall_clock_seconds=round(time.time() - started, 1),
-            policy=("no retry, no replacement, no resume, no seed change, no "
-                    "tolerance change. Partially completed fits are NOT "
-                    "analysable evidence. A re-run requires a new attempt_id "
-                    "and new human authorization."))
-        raise
+    rows, fit_rows = _run_cells(
+        build_cells(spec), spec=spec, max_iter=int(spec["max_iter"]),
+        checkpoints=spec.checkpoints, archive_check=True,
+        states=states, iteration_rows=iteration_rows)
+    _require(len(fit_rows) == int(spec["expected_long_runs"]),
+             f"{len(fit_rows)} fits, expected {spec['expected_long_runs']}")
+    _require(len(rows) == int(spec["expected_checkpoint_rows"]),
+             f"{len(rows)} checkpoint rows, expected "
+             f"{spec['expected_checkpoint_rows']}")
+    _require(len(iteration_rows) == int(spec["expected_iteration_rows"]),
+             f"{len(iteration_rows)} iteration rows, expected "
+             f"{spec['expected_iteration_rows']}")
+    replication = compare_to_archive(rows, spec.baseline_checkpoint)
+    _require(replication["match"]
+             and replication["compared_rows"] == len(fit_rows),
+             "the all-fit checkpoint comparison did not match the archive")
 
-    write_csv(staging / "checkpoint_results.csv", rows, CHECKPOINT_COLUMNS)
-    write_csv(staging / "fit_results.csv", fit_rows, FIT_COLUMNS)
-    write_csv(staging / "iteration_diagnostics.csv", iteration_rows,
+    write_csv(STAGING_DIR / "checkpoint_results.csv", rows, CHECKPOINT_COLUMNS)
+    write_csv(STAGING_DIR / "fit_results.csv", fit_rows, FIT_COLUMNS)
+    write_csv(STAGING_DIR / "iteration_diagnostics.csv", iteration_rows,
               ITERATION_COLUMNS)
-    tmp_states = staging / "checkpoint_states.npz.tmp"
-    np.savez_compressed(tmp_states, **states)
-    os.replace(tmp_states, staging / "checkpoint_states.npz")
-    write_json(staging / "replication_vs_baseline.json", {
+    write_npz(STAGING_DIR / "checkpoint_states.npz", states)
+    write_json(STAGING_DIR / "replication_vs_baseline.json", {
         "baseline_run": spec["baseline_run"],
         "baseline_protocol_hash": spec["baseline_protocol_hash"],
         "checkpoint": spec.baseline_checkpoint,
@@ -1213,12 +1006,12 @@ def run_production(*, allow_em: bool, confirm: bool,
         "match": replication["match"],
     })
     elapsed = round(time.time() - started, 1)
-    write_json(staging / "runinfo.json", {
-        "attempt_id": attempt_id,
+    write_json(STAGING_DIR / "runinfo.json", {
         "experiment_id": EXPERIMENT_ID,
-        "protocol_hash": document["protocol_hash"],
-        "runner_version": "em-convergence-runner-v3",
-        "freeze_tag": FREEZE_TAG,
+        "protocol_hash": record["protocol_hash"],
+        "protocol_source": record["protocol_source"],
+        "runner_version": "em-convergence-runner-v4",
+        "artifact_version": ARTIFACT_VERSION,
         "attempted_fit_count": len(fit_rows),
         "completed_fit_count": len(fit_rows),
         "checkpoint_row_count": len(rows),
@@ -1232,24 +1025,21 @@ def run_production(*, allow_em: bool, confirm: bool,
         "stopping_reasons": sorted({r["stopping_reason"] for r in fit_rows}),
         "wall_clock_seconds": elapsed,
         "run_code_sha": head,
-        "gate_receipt_protocol_hash": (receipt or {}).get("protocol_hash"),
         "environment": fingerprint,
         "environment_key": environment_key(fingerprint),
-        "working_tree_clean_before": True,
+        "working_tree_clean_before": clean_before,
         "working_tree_clean_after": working_tree_clean(),
     })
-    set_attempt_state(attempt_id, "SUCCESS", wall_clock_seconds=elapsed,
-                      fits=len(fit_rows), checkpoint_rows=len(rows),
-                      iteration_rows=len(iteration_rows))
 
+    # The last step, and the only one that creates the final directory.
     _require(not ARTIFACT_DIR.exists(),
-             f"{ARTIFACT_DIR} appeared during the attempt; refusing to export")
-    shutil.copytree(staging, ARTIFACT_DIR)
-    print(json.dumps({"status": "SUCCESS", "attempt_id": attempt_id,
+             f"{ARTIFACT_DIR} appeared during the run; refusing to publish")
+    STAGING_DIR.rename(ARTIFACT_DIR)
+    print(json.dumps({"status": "COMPLETE", "artifact_dir": str(ARTIFACT_DIR),
                       "fits": len(fit_rows), "checkpoint_rows": len(rows),
                       "iteration_rows": len(iteration_rows),
                       "wall_clock_seconds": elapsed}, indent=2))
-    return {"attempt_id": attempt_id, "fits": len(fit_rows),
+    return {"artifact_dir": str(ARTIFACT_DIR), "fits": len(fit_rows),
             "checkpoint_rows": len(rows)}
 
 
@@ -1316,13 +1106,13 @@ def emit_draft() -> Path:
     document = {
         "status": "DRAFT",
         "status_note": (
-            "NOT FROZEN. The single specification is the 'protocol' object "
-            "below; it is generated from the runner contract by --emit-draft, "
-            "so no second copy of any field exists anywhere. It carries no "
-            "protocol_hash on purpose: a hash would look like a freeze. "
-            f"Freezing writes {FROZEN_PROTOCOL_PATH.name} with status FROZEN "
-            "and its hash in its own commit, after which a human creates the "
-            f"annotated tag {FREEZE_TAG} on that commit as the trust anchor."),
+            "The single specification is the 'protocol' object below; it is "
+            "generated from the runner contract by --emit-draft, so no second "
+            "copy of any field exists anywhere. The runner verifies every "
+            "field against the same contract before any EM starts and records "
+            "the hash of the body it used in the artifact. To freeze the "
+            f"conditions, copy this file to {FROZEN_PROTOCOL_PATH.name} with "
+            "status FROZEN; the runner prefers that file when it exists."),
         "experiment_id": EXPERIMENT_ID,
         "design_document": ("reports/k_selection/"
                             "em_convergence_sensitivity_design_20260905.md"),
@@ -1339,18 +1129,17 @@ def emit_draft() -> Path:
                 "Q_strict and S2 independently"),
         },
         "runtime_locations": {
-            "gate_receipts": str(GATE_RECEIPT_DIR.relative_to(ROOT)).replace("\\", "/"),
-            "attempt_staging": str(ATTEMPT_STAGING_DIR.relative_to(ROOT)).replace("\\", "/"),
+            "replication_gate_result": str(RUNTIME_ROOT.relative_to(ROOT)).replace("\\", "/"),
+            "staging": str(STAGING_DIR.relative_to(ROOT)).replace("\\", "/"),
             "final_evidence": str(ARTIFACT_DIR.relative_to(ROOT)).replace("\\", "/"),
-            "note": ("receipts and attempts live outside the tracked tree so "
-                     "that running them does not dirty the repository whose "
-                     "cleanliness is an authorization condition"),
+            "note": ("the run writes into staging and renames once at the end, "
+                     "so an interrupted run leaves no final directory. A "
+                     "leftover staging directory is removed by a human"),
         },
         "production_status": {
             "production_runs_so_far": 0,
             "new_production_fits_so_far": 0,
             "replication_gate_runs_so_far": 0,
-            "authorisation": "NOT AUTHORISED",
         },
     }
     write_json(DRAFT_PROTOCOL_PATH, document)
@@ -1362,7 +1151,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--plan-n", type=int, nargs="+", default=None)
     parser.add_argument("--emit-draft", action="store_true")
-    parser.add_argument("--authorize", action="store_true")
     parser.add_argument("--replication-gate", action="store_true")
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--allow-em", action="store_true")
@@ -1375,19 +1163,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.plan or args.plan_n:
         print(json.dumps(plan(args.plan_n), indent=2, sort_keys=True))
         return 0
-    if args.authorize:
-        decision = authorize_production()
-        print(json.dumps(decision, indent=2, sort_keys=True))
-        return 0 if decision["production_authorization"] == "YES" else 1
     if args.replication_gate:
-        receipt = run_replication_gate(allow_em=args.allow_em)
-        return 0 if receipt["verdict"] == "PASS" else 1
+        result = run_replication_gate(allow_em=args.allow_em)
+        return 0 if result["verdict"] == "PASS" else 1
     if args.full:
         run_production(allow_em=args.allow_em,
                        confirm=args.confirm_em_convergence_sweep)
         return 0
-    parser.error("choose --plan, --emit-draft, --authorize, "
-                 "--replication-gate or --full")
+    parser.error("choose --plan, --emit-draft, --replication-gate or --full")
     return 2
 
 

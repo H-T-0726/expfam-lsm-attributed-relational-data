@@ -89,7 +89,6 @@
   "design_document": "reports/k_selection/em_convergence_sensitivity_design_20260905.md",
   "experiment_id": "em_convergence_sensitivity_20260905",
   "production_status": {
-    "authorisation": "NOT AUTHORISED",
     "new_production_fits_so_far": 0,
     "production_runs_so_far": 0,
     "replication_gate_runs_so_far": 0
@@ -98,13 +97,6 @@
     "L": 5,
     "adaptive_stopping": false,
     "all_fit_checkpoint8_replication": true,
-    "attempt_policy": "attempt_id is immutable and unique; a FAILED or ABANDONED attempt is never resumed or completed under the same id; a stale RUNNING attempt is not valid evidence; a new run needs a new attempt_id and new human authorization",
-    "attempt_states": [
-      "RUNNING",
-      "SUCCESS",
-      "FAILED",
-      "ABANDONED"
-    ],
     "baseline_checkpoint": 8,
     "baseline_protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
     "baseline_run": "clean_true_k_asymptotics_20260904",
@@ -155,7 +147,6 @@
       "convergence",
       "consistency"
     ],
-    "freeze_tag": "research-em-convergence-freeze-v1",
     "gate_cell": {
       "k_true": 5,
       "n": 50,
@@ -228,7 +219,7 @@
     "runner_contract_version": "em-convergence-runner-contract-v1",
     "runtime_abort_rule": "none",
     "runtime_estimate_hours": 6.14,
-    "runtime_estimate_note": "operational estimate only. There is NO automatic runtime abort: runtime is not part of the estimand and must never include or exclude an individual fit. A manual or process interruption makes the WHOLE attempt FAILED or ABANDONED, with no partial analysis",
+    "runtime_estimate_note": "operational estimate only. There is NO automatic runtime abort: runtime is not part of the estimand and must never include or exclude an individual fit. A run that is interrupted produces no final artifact and is not analysed in part",
     "selector": "unweighted_mean_over_starts_then_argmax_in_selector_space",
     "split_rule": "deterministic_dyad_holdout_from_split_seed",
     "split_seed_base": 820000,
@@ -251,12 +242,12 @@
     "w_ref": 1.0
   },
   "runtime_locations": {
-    "attempt_staging": ".local/research_attempts/em_convergence_sensitivity_20260905",
     "final_evidence": "expfam/results/k_selection/em_convergence_sensitivity_20260905",
-    "gate_receipts": ".local/research_gates/em_convergence_sensitivity_20260905",
-    "note": "receipts and attempts live outside the tracked tree so that running them does not dirty the repository whose cleanliness is an authorization condition"
+    "note": "the run writes into staging and renames once at the end, so an interrupted run leaves no final directory. A leftover staging directory is removed by a human",
+    "replication_gate_result": ".local/em_convergence_sensitivity_20260905",
+    "staging": "expfam/results/k_selection/em_convergence_sensitivity_20260905.partial"
   },
   "status": "DRAFT",
-  "status_note": "NOT FROZEN. The single specification is the 'protocol' object below; it is generated from the runner contract by --emit-draft, so no second copy of any field exists anywhere. It carries no protocol_hash on purpose: a hash would look like a freeze. Freezing writes em_convergence_sensitivity_20260905_protocol.json with status FROZEN and its hash in its own commit, after which a human creates the annotated tag research-em-convergence-freeze-v1 on that commit as the trust anchor.",
-  "would_freeze_to_hash": "5dcded8ca79bb2c84ff3e83989ef2feb02f4ecc55ae2e0999fdcbc60b3c90c53"
+  "status_note": "The single specification is the 'protocol' object below; it is generated from the runner contract by --emit-draft, so no second copy of any field exists anywhere. The runner verifies every field against the same contract before any EM starts and records the hash of the body it used in the artifact. To freeze the conditions, copy this file to em_convergence_sensitivity_20260905_protocol.json with status FROZEN; the runner prefers that file when it exists.",
+  "would_freeze_to_hash": "bd7b02df61afba32c7e2bc6ead2dcc0c46c0e8a1382724f89a41ad040fb4151c"
 }

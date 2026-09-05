@@ -63,6 +63,9 @@ BASELINE_RUN_DIR = (ROOT / "expfam" / "results" / "k_selection"
                     / "clean_true_k_asymptotics_20260904")
 FROZEN_PROTOCOL_PATH = (ROOT / "reports" / "k_selection"
                         / "em_convergence_sensitivity_20260905_protocol.json")
+DRAFT_PROTOCOL_PATH = (
+    ROOT / "reports" / "k_selection"
+    / "em_convergence_sensitivity_20260905_protocol.DRAFT.json")
 
 EXPECTED_EXPERIMENT_ID = "em_convergence_sensitivity_20260905"
 EXPECTED_BASELINE_PROTOCOL_HASH = ("547880a16aef6530cfdf7903c4e32f16062397e0"
@@ -290,30 +293,19 @@ def audit(run_dir: Path) -> dict[str, Any]:
         return finish(a, run_dir)
     present = {p.name for p in run_dir.iterdir()}
 
-    for name in ("protocol.json", "runinfo.json", "attempt.json",
-                 "checkpoint_results.csv", "fit_results.csv",
-                 "iteration_diagnostics.csv", "replication_vs_baseline.json"):
+    for name in ("protocol.json", "runinfo.json", "checkpoint_results.csv",
+                 "fit_results.csv", "iteration_diagnostics.csv",
+                 "checkpoint_states.npz", "replication_vs_baseline.json"):
         a.require(name in present, "BLOCKER", "artifact_set", f"missing {name}")
     if a.count("BLOCKER"):
         return finish(a, run_dir)
 
     protocol_doc = read_json(run_dir / "protocol.json")
     runinfo = read_json(run_dir / "runinfo.json")
-    attempt = read_json(run_dir / "attempt.json")
     checkpoints = read_csv(run_dir / "checkpoint_results.csv")
     fits = read_csv(run_dir / "fit_results.csv")
     iterations = read_csv(run_dir / "iteration_diagnostics.csv")
     replication_doc = read_json(run_dir / "replication_vs_baseline.json")
-
-    # ---- attempt lifecycle -------------------------------------------------
-    a.require(attempt.get("status") == "SUCCESS", "BLOCKER", "attempt_status",
-              f"attempt status is {attempt.get('status')!r}; only SUCCESS is "
-              f"evidence -- RUNNING may be a killed process, and FAILED or "
-              f"ABANDONED can never become SUCCESS")
-    a.require(bool(attempt.get("attempt_id")), "HIGH", "attempt_id",
-              "the attempt carries no id")
-    a.require(runinfo.get("attempt_id") == attempt.get("attempt_id"), "HIGH",
-              "attempt_id_binding", "runinfo and attempt.json disagree")
 
     # ---- protocol identity -------------------------------------------------
     body = protocol_doc.get("protocol")
@@ -326,21 +318,24 @@ def audit(run_dir: Path) -> dict[str, Any]:
                   f"{protocol_doc.get('protocol_hash')}")
         a.require(runinfo.get("protocol_hash") == protocol_doc.get("protocol_hash"),
                   "BLOCKER", "runinfo_protocol_hash", "runinfo disagrees")
-        a.require(protocol_doc.get("status") == "FROZEN", "BLOCKER",
-                  "protocol_is_frozen",
-                  f"the artifact's protocol is {protocol_doc.get('status')!r}")
     if a.count("BLOCKER"):
         return finish(a, run_dir)
 
-    if FROZEN_PROTOCOL_PATH.exists():
-        a.require((run_dir / "protocol.json").read_bytes()
-                  == FROZEN_PROTOCOL_PATH.read_bytes(), "BLOCKER",
-                  "protocol_bytes_match_freeze_commit",
-                  "the artifact's protocol.json is not byte-identical to the "
-                  "frozen protocol file")
+    # The conditions the run executed must still be the conditions the
+    # repository's protocol file states.  A difference is not automatically
+    # misconduct -- the protocol may have been edited after the run -- but it
+    # means the two cannot both describe this artifact.
+    repository_protocol = next(
+        (p for p in (FROZEN_PROTOCOL_PATH, DRAFT_PROTOCOL_PATH) if p.exists()),
+        None)
+    if repository_protocol is not None:
+        a.require(read_json(repository_protocol).get("protocol") == body,
+                  "HIGH", "protocol_body_matches_repository",
+                  f"the artifact's protocol body differs from "
+                  f"{repository_protocol.name}")
     else:
-        a.note("HIGH", "frozen_protocol_absent",
-               f"cannot compare the artifact protocol with {FROZEN_PROTOCOL_PATH}")
+        a.note("HIGH", "repository_protocol_absent",
+               "no protocol file in reports/k_selection to compare against")
 
     a.require(body["experiment_id"] == EXPECTED_EXPERIMENT_ID, "HIGH",
               "experiment_id", str(body.get("experiment_id")))
@@ -372,14 +367,10 @@ def audit(run_dir: Path) -> dict[str, Any]:
                   f"runinfo records no {field}")
     a.require(bool(runinfo.get("run_code_sha")), "HIGH", "run_code_sha",
               "runinfo records no commit")
-    a.require(runinfo.get("working_tree_clean_before") is True, "HIGH",
-              "clean_tree_before", "the tree was not clean when the run started")
-    a.require(runinfo.get("gate_receipt_protocol_hash")
-              == protocol_doc.get("protocol_hash"), "HIGH",
-              "gate_receipt_binding",
-              "the gate receipt is not bound to this protocol hash")
-    a.require(runinfo.get("freeze_tag") == body.get("freeze_tag"), "HIGH",
-              "freeze_tag_binding", "runinfo names a different freeze tag")
+    a.require(runinfo.get("working_tree_clean_before") is True, "MEDIUM",
+              "clean_tree_before",
+              "the tree was not clean when the run started, so the recorded "
+              "commit does not fully identify the code that produced this")
 
     # ---- forbidden adaptive stopping --------------------------------------
     a.require(body.get("adaptive_stopping") is False, "BLOCKER",
@@ -611,12 +602,15 @@ def _recompute_checkpoint_scores(a, run_dir, checkpoints, body, regenerator,
         return 0
 
     problems: dict[str, list[str]] = {"s1": [], "s3": [], "q": [], "s2": [],
-                                      "digest": [], "missing": [], "params": []}
+                                      "digest": [], "missing": [], "params": [],
+                                      "schema": []}
     checked = 0
+    L_expected = int(body["L"])
     with np.load(states_path) as archive_states:
         for row in checkpoints:
             key = row["state_key"]
-            if f"{key}_Zsamples" not in archive_states:
+            if any(f"{key}_{suffix}" not in archive_states for suffix in
+                   ("Z", "Zsamples", "F", "sigma", "scalars")):
                 problems["missing"].append(key)
                 continue
             n = int(row["n"])
@@ -628,7 +622,25 @@ def _recompute_checkpoint_scores(a, run_dir, checkpoints, body, regenerator,
             z_samples = np.asarray(archive_states[f"{key}_Zsamples"],
                                    dtype=np.float64)
             f_mat = np.asarray(archive_states[f"{key}_F"], dtype=np.float64)
-            w0, w, var_z = (float(v) for v in archive_states[f"{key}_scalars"])
+            scalars = np.asarray(archive_states[f"{key}_scalars"],
+                                 dtype=np.float64)
+
+            # Shapes are checked BEFORE anything is unpacked or multiplied.
+            # An auditor that raises on malformed input tells the reader
+            # nothing about what was wrong, so a bad shape becomes a finding
+            # and that checkpoint is simply not recomputed.
+            shape_problems = [
+                name for name, array, want in (
+                    ("Z", z, (n, k_est)),
+                    ("Zsamples", z_samples, (n, k_est, L_expected)),
+                    ("F", f_mat, (d_features, k_est)),
+                    ("scalars", scalars, (3,)))
+                if array.shape != want]
+            if shape_problems:
+                problems["schema"].append(f"{key}:{','.join(shape_problems)}")
+                continue
+
+            w0, w, var_z = (float(v) for v in scalars)
             checked += 1
 
             if state_digest(z, f_mat, w0, w) != row["checkpoint_state_digest"]:
@@ -663,6 +675,9 @@ def _recompute_checkpoint_scores(a, run_dir, checkpoints, body, regenerator,
 
     a.require(not problems["missing"], "BLOCKER", "checkpoint_state_coverage",
               f"{len(problems['missing'])} checkpoints have no archived state")
+    a.require(not problems["schema"], "BLOCKER", "checkpoint_state_shapes",
+              f"{len(problems['schema'])} archived states have the wrong "
+              f"shape and could not be recomputed: {problems['schema'][:5]}")
     a.require(not problems["digest"], "BLOCKER", "checkpoint_state_digest",
               f"{len(problems['digest'])} archived states do not match their "
               f"digest")

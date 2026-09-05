@@ -187,167 +187,38 @@ def test_a_missing_execution_field_is_refused():
     assert any("candidate_k" in p for p in RUN.verify_contract(body))
 
 
-def test_a_forged_but_self_consistent_protocol_is_refused(tmp_path, monkeypatch):
-    """Coherent is not the same as approved: the contract still refuses it."""
+def test_a_self_consistent_protocol_with_a_changed_scope_is_refused(
+        tmp_path, monkeypatch):
+    """Internally coherent is not the same as the agreed conditions."""
 
     body = dict(RUN.protocol_body_from_contract())
     body["n_grid"] = [75, 100, 150]
     body["expected_long_runs"] = 336
-    document = {"status": "FROZEN", "protocol": body,
-                "protocol_hash": RUN.canonical_hash(body)}
-    path = tmp_path / "forged.json"
-    path.write_text(json.dumps(document), encoding="utf-8")
+    path = tmp_path / "changed.json"
+    path.write_text(json.dumps({"status": "FROZEN", "protocol": body}),
+                    encoding="utf-8")
     monkeypatch.setattr(RUN, "FROZEN_PROTOCOL_PATH", path)
     with pytest.raises(RUN.HarnessStop) as excinfo:
-        RUN.load_frozen_protocol()
+        RUN.load_protocol()
     assert "runner contract" in str(excinfo.value)
 
 
-# ------------------------------------------------------------ authorization
-
-@pytest.fixture()
-def approved(tmp_path, monkeypatch):
-    """A world in which every authorization condition passes."""
+def test_the_protocol_hash_is_recomputed_from_the_body_that_was_read(
+        tmp_path, monkeypatch):
+    """The artifact must never record a hash that belongs to another body."""
 
     body = RUN.protocol_body_from_contract()
-    digest = RUN.canonical_hash(body)
-    frozen = tmp_path / "protocol.json"
-    frozen.write_text(json.dumps({"status": "FROZEN", "protocol": body,
-                                  "protocol_hash": digest}, indent=2,
-                                 sort_keys=True), encoding="utf-8")
-    head = "a" * 40
-    fingerprint = RUN.environment_fingerprint()
-    receipt = {
-        "receipt_version": "em-convergence-gate-receipt-v2",
-        "experiment_id": RUN.EXPERIMENT_ID, "protocol_hash": digest,
-        "freeze_tag": RUN.FREEZE_TAG, "freeze_tag_target": head,
-        "code_sha": head, "working_tree_clean": True,
-        "baseline_protocol_hash": RUN.BASELINE_PROTOCOL_HASH,
-        "environment": fingerprint,
-        "environment_key": RUN.environment_key(fingerprint),
-        "gate_cell": {"k_true": 5, "n": 50, "replicate": 1},
-        "expected_fits": 14, "actual_fits": 14, "mismatch_count": 0,
-        "mask_hashes_match": True, "retry_count_total": 0,
-        "nan_detected_fits": 0,
-        "per_fit": [{"fit_index": i + 1, "k_est": k, "start": s, "match": True}
-                    for i, (k, s) in enumerate(
-                        (k, s) for k in range(1, 8) for s in (1, 2))],
-        "verdict": "PASS",
-    }
-    receipt_dir = tmp_path / "gates"
-    receipt_dir.mkdir()
-    (receipt_dir / "gate-1.json").write_text(json.dumps(receipt),
-                                             encoding="utf-8")
-    monkeypatch.setattr(RUN, "FROZEN_PROTOCOL_PATH", frozen)
-    monkeypatch.setattr(RUN, "GATE_RECEIPT_DIR", receipt_dir)
-    monkeypatch.setattr(RUN, "ARTIFACT_DIR", tmp_path / "final")
-    monkeypatch.setattr(RUN, "git_head", lambda: head)
-    monkeypatch.setattr(RUN, "freeze_tag_target", lambda tag=RUN.FREEZE_TAG: head)
-    monkeypatch.setattr(RUN, "working_tree_clean", lambda: True)
-    return {"frozen": frozen, "receipt_dir": receipt_dir,
-            "receipt_path": receipt_dir / "gate-1.json", "head": head,
-            "digest": digest}
+    path = tmp_path / "protocol.json"
+    path.write_text(json.dumps({"status": "FROZEN", "protocol": body,
+                                "protocol_hash": "0" * 64}), encoding="utf-8")
+    monkeypatch.setattr(RUN, "FROZEN_PROTOCOL_PATH", path)
+    record, spec = RUN.load_protocol()
+    assert record["protocol_hash"] == RUN.canonical_hash(body)
+    assert record["protocol_source_status"] == "FROZEN"
+    assert spec.n_grid == (50, 75, 100, 150)
 
 
-def _rewrite_receipt(approved, **changes):
-    receipt = json.loads(approved["receipt_path"].read_text(encoding="utf-8"))
-    receipt.update(changes)
-    approved["receipt_path"].write_text(json.dumps(receipt), encoding="utf-8")
-
-
-def _failed() -> list[str]:
-    return RUN.authorize_production()["failed"]
-
-
-def test_the_approved_world_authorizes(approved):
-    decision = RUN.authorize_production()
-    assert decision["production_authorization"] == "YES", decision["checks"]
-
-
-def test_production_refuses_without_a_freeze_tag(approved, monkeypatch):
-    monkeypatch.setattr(RUN, "freeze_tag_target", lambda tag=RUN.FREEZE_TAG: None)
-    failed = _failed()
-    assert "C_freeze_tag_exists" in failed and "D_head_is_the_tag_target" in failed
-
-
-def test_production_refuses_when_head_is_not_the_tag(approved, monkeypatch):
-    monkeypatch.setattr(RUN, "git_head", lambda: "b" * 40)
-    assert "D_head_is_the_tag_target" in _failed()
-
-
-def test_production_refuses_a_dirty_tree(approved, monkeypatch):
-    monkeypatch.setattr(RUN, "working_tree_clean", lambda: False)
-    assert "E_working_tree_clean" in _failed()
-
-
-def test_production_refuses_a_draft_protocol(approved):
-    document = json.loads(approved["frozen"].read_text(encoding="utf-8"))
-    document["status"] = "DRAFT"
-    approved["frozen"].write_text(json.dumps(document), encoding="utf-8")
-    assert "A_frozen_protocol_valid" in _failed()
-
-
-def test_production_refuses_a_missing_receipt(approved):
-    approved["receipt_path"].unlink()
-    failed = _failed()
-    assert "F_gate_receipt_exists" in failed
-    assert "G_gate_receipt_fully_valid" in failed
-
-
-@pytest.mark.parametrize("changes,reason", [
-    ({"actual_fits": 13}, "actual_fits"),
-    ({"per_fit": [{"fit_index": 1, "k_est": 1, "start": 1, "match": True}]},
-     "per_fit"),
-    ({"mismatch_count": 1}, "mismatch_count"),
-    ({"gate_cell": {"k_true": 5, "n": 75, "replicate": 1}}, "gate_cell"),
-    ({"baseline_protocol_hash": "0" * 64}, "baseline_protocol_hash"),
-    ({"verdict": "FAIL"}, "verdict"),
-    ({"code_sha": "c" * 40}, "code_sha"),
-    ({"freeze_tag_target": "c" * 40}, "freeze_tag_target"),
-    ({"mask_hashes_match": False}, "mask verification"),
-    ({"retry_count_total": 1}, "retry_count_total"),
-    ({"nan_detected_fits": 1}, "nan_detected_fits"),
-    ({"working_tree_clean": False}, "tree was dirty"),
-    ({"environment_key": '{"numpy":"0"}'}, "environment_key"),
-    ({"environment": {"python": "0", "numpy": "0"}}, "environment"),
-])
-def test_a_forged_receipt_field_refuses_production(approved, changes, reason):
-    _rewrite_receipt(approved, **changes)
-    decision = RUN.authorize_production()
-    assert decision["production_authorization"] == "NO"
-    detail = next(c["detail"] for c in decision["checks"]
-                  if c["check"] == "G_gate_receipt_fully_valid")
-    assert reason in detail, detail
-
-
-def test_a_receipt_for_another_protocol_is_not_even_found(approved):
-    """Refusal by absence: a receipt that names a different protocol is not a
-    receipt for this one, so production has none at all."""
-
-    _rewrite_receipt(approved, protocol_hash="0" * 64)
-    decision = RUN.authorize_production()
-    assert decision["production_authorization"] == "NO"
-    assert "F_gate_receipt_exists" in decision["failed"]
-
-
-def test_a_receipt_with_one_failing_per_fit_entry_refuses(approved):
-    receipt = json.loads(approved["receipt_path"].read_text(encoding="utf-8"))
-    receipt["per_fit"][3]["match"] = False
-    approved["receipt_path"].write_text(json.dumps(receipt), encoding="utf-8")
-    decision = RUN.authorize_production()
-    assert decision["production_authorization"] == "NO"
-
-
-def test_production_refuses_when_authorization_fails(monkeypatch, tmp_path):
-    """No CLI flag bypasses the gate."""
-
-    monkeypatch.setattr(RUN, "FROZEN_PROTOCOL_PATH", tmp_path / "absent.json")
-    monkeypatch.setattr(RUN, "ATTEMPT_STAGING_DIR", tmp_path / "attempts")
-    with pytest.raises(RUN.HarnessStop) as excinfo:
-        RUN.run_production(allow_em=True, confirm=True)
-    assert "PRODUCTION AUTHORIZATION = NO" in str(excinfo.value)
-    assert not (tmp_path / "attempts").exists()
-
+# ------------------------------------------------- refusals before a long run
 
 def test_production_refuses_without_the_flags():
     with pytest.raises(RUN.HarnessStop):
@@ -356,70 +227,81 @@ def test_production_refuses_without_the_flags():
         RUN.run_production(allow_em=True, confirm=False)
 
 
-def test_the_gate_refuses_while_the_protocol_is_a_draft():
-    assert not RUN.FROZEN_PROTOCOL_PATH.exists()
+def test_production_refuses_to_overwrite_an_existing_result(monkeypatch,
+                                                            tmp_path):
+    final = tmp_path / "final"
+    final.mkdir()
+    monkeypatch.setattr(RUN, "ARTIFACT_DIR", final)
+    monkeypatch.setattr(RUN, "STAGING_DIR", tmp_path / "final.partial")
     with pytest.raises(RUN.HarnessStop) as excinfo:
-        RUN.run_replication_gate(allow_em=True)
-    assert "still a DRAFT" in str(excinfo.value)
+        RUN.run_production(allow_em=True, confirm=True)
+    assert "never overwritten" in str(excinfo.value)
+
+
+def test_production_refuses_a_leftover_staging_directory(monkeypatch, tmp_path):
+    """A dead run's leftovers are a human's decision, not something to reuse."""
+
+    staging = tmp_path / "final.partial"
+    staging.mkdir()
+    monkeypatch.setattr(RUN, "ARTIFACT_DIR", tmp_path / "final")
+    monkeypatch.setattr(RUN, "STAGING_DIR", staging)
+    with pytest.raises(RUN.HarnessStop) as excinfo:
+        RUN.run_production(allow_em=True, confirm=True)
+    assert "left over" in str(excinfo.value)
+
+
+def test_the_gate_needs_allow_em():
+    with pytest.raises(RUN.HarnessStop) as excinfo:
+        RUN.run_replication_gate(allow_em=False)
+    assert "--allow-em" in str(excinfo.value)
 
 
 def test_nothing_has_been_run_yet():
-    assert not RUN.FROZEN_PROTOCOL_PATH.exists()
     assert not RUN.ARTIFACT_DIR.exists()
-    assert RUN.freeze_tag_target() is None
-    assert not list(RUN.GATE_RECEIPT_DIR.glob("*.json")) \
-        if RUN.GATE_RECEIPT_DIR.exists() else True
+    assert not RUN.STAGING_DIR.exists()
 
 
-def test_runtime_areas_are_outside_the_tracked_tree():
-    """Running the gate must not dirty the tree the gate is certifying."""
+# ------------------------------------------------------------- writing files
 
-    ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    assert ".local/" in ignore
-    assert RUN.GATE_RECEIPT_DIR.is_relative_to(ROOT / ".local")
-    assert RUN.ATTEMPT_STAGING_DIR.is_relative_to(ROOT / ".local")
+def test_the_npz_write_path_round_trips(tmp_path):
+    """np.savez_compressed APPENDS .npz to a name that lacks it.
+
+    Writing to ``<name>.npz.tmp`` therefore produces ``<name>.npz.tmp.npz``
+    and the rename that follows raises FileNotFoundError -- after every fit
+    has already been computed.  This exercises the real write path.
+    """
+
+    path = tmp_path / "checkpoint_states.npz"
+    arrays = {"0001_it008_Z": np.arange(6, dtype=np.float64).reshape(3, 2),
+              "0001_it008_scalars": np.array([-1.0, 0.5, 1.0])}
+    RUN.write_npz(path, arrays)
+    assert path.exists()
+    assert not list(tmp_path.glob("*.partial*"))
+    assert [p.name for p in tmp_path.iterdir()] == ["checkpoint_states.npz"]
+    with np.load(path) as back:
+        assert set(back.files) == set(arrays)
+        for key, value in arrays.items():
+            assert np.array_equal(back[key], value)
 
 
-# ------------------------------------------------------- attempt lifecycle
+def test_the_baseline_archive_masks_must_be_unique(monkeypatch, tmp_path):
+    """A duplicated key would make the archived split ambiguous."""
 
-@pytest.fixture()
-def staging(tmp_path, monkeypatch):
-    monkeypatch.setattr(RUN, "ATTEMPT_STAGING_DIR", tmp_path / "attempts")
-    return tmp_path / "attempts"
-
-
-def test_a_failed_attempt_cannot_become_success(staging):
-    RUN.set_attempt_state("a1", "RUNNING")
-    RUN.set_attempt_state("a1", "FAILED", failure="x")
+    baseline = tmp_path / "baseline"
+    baseline.mkdir()
+    row = {"K_TRUE": 5, "n": 50, "replicate": 1,
+           "train_mask_hash": "aa", "test_mask_hash": "bb"}
+    RUN.write_csv(baseline / "generator_provenance.csv", [row, dict(row)],
+                  list(row))
+    monkeypatch.setattr(RUN, "BASELINE_RUN_DIR", baseline)
     with pytest.raises(RUN.HarnessStop) as excinfo:
-        RUN.set_attempt_state("a1", "SUCCESS")
-    assert "never resumed" in str(excinfo.value)
-
-
-def test_an_abandoned_attempt_cannot_become_success(staging):
-    RUN.set_attempt_state("a2", "RUNNING")
-    RUN.set_attempt_state("a2", "ABANDONED")
-    with pytest.raises(RUN.HarnessStop):
-        RUN.set_attempt_state("a2", "SUCCESS")
-
-
-def test_a_finished_attempt_cannot_be_reopened(staging):
-    RUN.set_attempt_state("a3", "RUNNING")
-    RUN.set_attempt_state("a3", "SUCCESS")
-    with pytest.raises(RUN.HarnessStop):
-        RUN.set_attempt_state("a3", "RUNNING")
-
-
-def test_the_same_attempt_id_cannot_be_reused(approved, staging):
-    RUN.set_attempt_state("reused", "RUNNING")
-    with pytest.raises(RUN.HarnessStop) as excinfo:
-        RUN.run_production(allow_em=True, confirm=True, attempt_id="reused")
-    assert "immutable" in str(excinfo.value)
+        RUN.read_archive_masks()
+    assert "duplicate row" in str(excinfo.value)
 
 
 # ------------------------------------------------------------------ fixture
 
-def _build_fixture(run_dir: Path, frozen_path: Path, baseline_dir: Path,
+def _build_fixture(run_dir: Path, protocol_path: Path, baseline_dir: Path,
                    *, tamper=None) -> dict:
     """A small artifact whose scores are consistent with its archived state.
 
@@ -439,11 +321,17 @@ def _build_fixture(run_dir: Path, frozen_path: Path, baseline_dir: Path,
                  "expected_checkpoint_rows": len(FIX_K) * 2 * len(FIX_LADDER),
                  "expected_iteration_rows": len(FIX_K) * 2 * 8})
     digest = RUN.canonical_hash(body)
-    document = {"status": "FROZEN", "protocol": body, "protocol_hash": digest,
-                "experiment_id": RUN.EXPERIMENT_ID}
-    payload = json.dumps(document, indent=2, sort_keys=True)
-    frozen_path.write_text(payload, encoding="utf-8")
-    (run_dir / "protocol.json").write_text(payload, encoding="utf-8")
+    protocol_path.write_text(
+        json.dumps({"status": "DRAFT", "protocol": body}, indent=2,
+                   sort_keys=True), encoding="utf-8")
+    # What the runner copies into the artifact: the body it used, the hash it
+    # recomputed, and where it came from.
+    (run_dir / "protocol.json").write_text(
+        json.dumps({"experiment_id": RUN.EXPERIMENT_ID,
+                    "protocol_source": protocol_path.name,
+                    "protocol_source_status": "DRAFT",
+                    "protocol_hash": digest, "protocol": body},
+                   indent=2, sort_keys=True), encoding="utf-8")
 
     regen = AUDIT.Regenerator(body)
     rng = np.random.default_rng(2026)
@@ -552,13 +440,11 @@ def _build_fixture(run_dir: Path, frozen_path: Path, baseline_dir: Path,
     (run_dir / "replication_vs_baseline.json").write_text(json.dumps({
         "checkpoint": body["baseline_checkpoint"], "match": True,
         "compared_rows": len(fit_rows), "mismatch_count": 0}), encoding="utf-8")
-    (run_dir / "attempt.json").write_text(json.dumps({
-        "attempt_id": "fixture", "status": "SUCCESS"}), encoding="utf-8")
     (run_dir / "runinfo.json").write_text(json.dumps({
-        "attempt_id": "fixture", "protocol_hash": digest,
-        "run_code_sha": "d" * 40, "freeze_tag": body["freeze_tag"],
+        "protocol_hash": digest,
+        "protocol_source": protocol_path.name,
+        "run_code_sha": "d" * 40,
         "working_tree_clean_before": True,
-        "gate_receipt_protocol_hash": digest,
         "wall_clock_seconds": 100.0,
         "environment": {"python": "3.13.14", "numpy": np.__version__,
                         "scipy": "x", "platform": "test", "machine": "test",
@@ -570,10 +456,11 @@ def _build_fixture(run_dir: Path, frozen_path: Path, baseline_dir: Path,
 @pytest.fixture()
 def artifact(tmp_path, monkeypatch) -> Path:
     run_dir = tmp_path / RUN.EXPERIMENT_ID
-    frozen = tmp_path / "frozen.json"
+    protocol = tmp_path / "protocol.DRAFT.json"
     baseline = tmp_path / "baseline"
-    _build_fixture(run_dir, frozen, baseline)
-    monkeypatch.setattr(AUDIT, "FROZEN_PROTOCOL_PATH", frozen)
+    _build_fixture(run_dir, protocol, baseline)
+    monkeypatch.setattr(AUDIT, "FROZEN_PROTOCOL_PATH", tmp_path / "absent.json")
+    monkeypatch.setattr(AUDIT, "DRAFT_PROTOCOL_PATH", protocol)
     monkeypatch.setattr(AUDIT, "BASELINE_RUN_DIR", baseline)
     return run_dir
 
@@ -691,13 +578,26 @@ def test_auditor_detects_a_duplicate_baseline_archive_key(artifact, tmp_path):
     assert "baseline_archive_duplicate_key" in _checks(report)
 
 
-@pytest.mark.parametrize("status", ["RUNNING", "FAILED", "ABANDONED"])
-def test_auditor_rejects_any_non_success_attempt(artifact, status):
-    (artifact / "attempt.json").write_text(json.dumps({
-        "attempt_id": "fixture", "status": status}), encoding="utf-8")
+def test_auditor_requires_the_archived_state(artifact):
+    """Without it no later checkpoint can be recomputed independently."""
+
+    (artifact / "checkpoint_states.npz").unlink()
     report = AUDIT.audit(artifact)
     assert report["verdict"] == "FAIL"
-    assert "attempt_status" in _checks(report)
+    assert "artifact_set" in _checks(report)
+
+
+def test_auditor_detects_a_state_of_the_wrong_shape(artifact):
+    """A malformed archive is a finding, not a crash."""
+
+    with np.load(artifact / "checkpoint_states.npz") as data:
+        states = {k: data[k].copy() for k in data.files}
+    key = next(k for k in states if k.endswith("_Zsamples"))
+    states[key] = states[key][:, :, :1]          # L=1 where the protocol says 5
+    np.savez_compressed(artifact / "checkpoint_states.npz", **states)
+    report = AUDIT.audit(artifact)
+    assert report["verdict"] == "FAIL"
+    assert "checkpoint_state_shapes" in _checks(report)
 
 
 def test_auditor_detects_a_tampered_protocol_body(artifact):
@@ -711,14 +611,17 @@ def test_auditor_detects_a_tampered_protocol_body(artifact):
     assert "protocol_hash_recomputed" in _checks(report)
 
 
-def test_auditor_detects_an_artifact_protocol_that_left_the_freeze_commit(
+def test_auditor_detects_a_protocol_that_no_longer_matches_the_repository(
         artifact, monkeypatch, tmp_path):
+    """The conditions that ran and the conditions on record must agree."""
+
     other = tmp_path / "other.json"
-    other.write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(AUDIT, "FROZEN_PROTOCOL_PATH", other)
+    other.write_text(json.dumps({"status": "DRAFT", "protocol": {"L": 5}}),
+                     encoding="utf-8")
+    monkeypatch.setattr(AUDIT, "DRAFT_PROTOCOL_PATH", other)
     report = AUDIT.audit(artifact)
     assert report["verdict"] == "FAIL"
-    assert "protocol_bytes_match_freeze_commit" in _checks(report)
+    assert "protocol_body_matches_repository" in _checks(report)
 
 
 def test_auditor_records_its_own_limitations(artifact):

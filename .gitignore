@@ -51,7 +51,8 @@ CLAUDE.local.md
 # pytest
 .pytest_cache/
 
-# Runtime research areas: gate receipts and attempt staging.  These are
-# runtime evidence, not source, and must not dirty the tree whose cleanliness
-# is a production authorization condition.
+# Runtime research areas: results a script leaves for a human to read, and
+# the staging directory a long run writes into until it finishes.  Neither is
+# source, and a leftover staging directory is deleted by hand.
 .local/
+expfam/results/k_selection/*.partial/
