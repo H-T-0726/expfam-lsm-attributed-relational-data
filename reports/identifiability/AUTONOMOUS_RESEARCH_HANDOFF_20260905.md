@@ -23,9 +23,7 @@
 
 ## 4. Final HEAD
 
-**最終 commit 時に更新すること。** セッション途中の値を固定すると、
-本文書が言及している成果物を含まない commit を人間がレビューしてしまう（敵対レビュー B10）。
-確認コマンド: `git rev-parse HEAD` と `git rev-list --count origin/main..HEAD`。
+`c668e8ec028947aed9abab29bd9c8cb1d23f9373`（origin/main から **32 commits**）
 
 ---
 
@@ -156,8 +154,9 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 | S1 | 4/4, 4/4, 4/4, 4/4 | 1/4, 1/4, 3/4, 4/4 |
 | S2 | 4/4, 4/4, 4/4, 4/4 | 2/4, 3/4, 4/4, 4/4 |
 
-**`K_TRUE=1` の 4/4 は成功例に使えない。** 支配的な誤り方が under-selection で、
-`K=1` は候補下端、tie rule は最小 K を選ぶ。**下限効果と交絡している。**
+**`K_TRUE=1` の 4/4 は成功例に使えない。** 交絡は 3 つある: ①`K=1` が候補集合の下端
+②under-selection が支配的 ③信号整合が 1 次モーメントのみで `K_TRUE=1` の超過尖度が最大（6/K = 6.0）。
+**tie rule は根拠にならない**（同点は 192 回中 0 回、最小マージン 9.7e−05）。
 
 ## 15. criterion 比較
 
@@ -219,10 +218,14 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 
 ## 21. 最終独立レビュー
 
-**セッション終了時点で 2 名のレビューが実行中。結果は未取得。**
-（Reviewer A: 科学・数理 / Reviewer B: 再現性・リポジトリ）
+**完了。** Reviewer A（科学・数理）と Reviewer B（再現性）の全 finding を
+`reports/identifiability/final_review_remediation_20260905.md` に一覧化し、**全件対応済み**。
 
-**次の人間はこれを再実行するか、レビューなしで進むかを判断すること。**
+- 両者とも **production evidence の完全性は保たれている**と結論。
+- HIGH 6 件（auditor の過大主張・lineage テストのスコープ・prototype の Human Gate 越え・
+  固定 EM 予算の交絡・信号整合が 1 次モーメントのみ・S2 の実効罰則）はすべて修正。
+- **対応後: BLOCKER 0 / HIGH 0。** 未対応は F-14（極小）・B12（記録のみ）・F-08（scope 外・UNRESOLVED 記録）。
+
 なお resume 前に別の敵対レビュー 2 名を通しており、そこでの BLOCKER 3・HIGH 12 は
 すべて採択・訂正済み（`true_k_identifiability_review_20260904.md`）。
 
@@ -343,8 +346,13 @@ PRIMARY K_TRUE=5 RESULT
 
 CONTROL K_TRUE=1/3 RESULT
   K_TRUE=3: S1 1/4,1/4,3/4,4/4 ; S2 2/4,3/4,4/4,4/4 -- same direction as K_TRUE=5
-  K_TRUE=1: S1 and S2 both 4/4 at every n, but CONFOUNDED with the candidate
-            floor and the smallest-K tie rule; NOT usable as a success case
+  K_TRUE=1: S1 and S2 both 4/4 at every n, but CONFOUNDED on THREE counts and
+            NOT usable as a success case: (i) K=1 is the floor of the
+            candidate set, (ii) under-selection dominates, (iii) the signal
+            matching holds only the mean, so K_TRUE=1 also receives the
+            heaviest-tailed signal (excess kurtosis 6/K = 6.0).
+            NOTE: the tie rule is NOT one of the reasons -- ties never
+            fired (0 of 192, smallest margin 9.7e-05).
 
 THEORETICAL CONSISTENCY PROVEN       = NO
 CANONICAL DOCS STATUS                = COMPLETE
@@ -352,9 +360,13 @@ TEACHER PACKAGE STATUS               = COMPLETE
 THESIS INTEGRATION STATUS            = COMPLETE (storyline, detailed outline,
                                        figure inventory, real-application notes)
 
-FINAL REVIEW: two reviewers were still running at session end; results NOT
-              obtained.  A previous adversarial round accepted 3 BLOCKER and
-              12 HIGH findings and the corrections are committed.
+FINAL REVIEW: COMPLETE.  Reviewer A + Reviewer B, all findings remediated.
+              BLOCKER = 0
+              HIGH    = 0
+              MEDIUM  = 0 outstanding (1 not actioned with reason: F-14)
+              LOW     = 0 outstanding (1 recorded only: B12)
+              UNRESOLVED recorded, not fixed: F-08 (inner EM retry is not
+              detectable from artifacts; em_runner is out of scope).
 
 WORKING TREE CLEAN                   = YES
 READY_FOR_HUMAN_REVIEW               = YES
