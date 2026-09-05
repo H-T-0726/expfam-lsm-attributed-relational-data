@@ -672,6 +672,14 @@ def run_production(*, allow_em: bool, confirm: bool) -> dict[str, Any]:
         "attempted_fit_count": attempted,
         "completed_fit_count": len(fit_rows),
         "expected_cells": expected_cell_count(),
+        # POLICY DECLARATIONS, not tallies.  The runner has no retry, no
+        # replacement and no resume path at all -- the sole except clause writes
+        # failure.json and re-raises -- so these can never be non-zero and must
+        # not be cited as independent evidence.  What actually supports "no
+        # hidden attempt" is: (i) no such code path exists, (ii) fit_index is
+        # dense 1..896 with exactly 14 fits per cell, and (iii) the per-fit
+        # runtimes sum to within seconds of the wall clock.
+        "counter_semantics": "policy_declared_zero (see runinfo notes)",
         "retry_count": 0,
         "replacement_fits_executed": 0,
         "seed_rescue_count": 0,

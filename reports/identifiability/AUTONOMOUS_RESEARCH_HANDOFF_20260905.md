@@ -23,7 +23,9 @@
 
 ## 4. Final HEAD
 
-`4f359e3f76a711bc5fe9a813f83b76d3cc5d91fa`（origin/main から **22 commits**）
+**最終 commit 時に更新すること。** セッション途中の値を固定すると、
+本文書が言及している成果物を含まない commit を人間がレビューしてしまう（敵対レビュー B10）。
+確認コマンド: `git rev-parse HEAD` と `git rev-list --count origin/main..HEAD`。
 
 ---
 
@@ -99,6 +101,12 @@
 | tolerance 緩和 | **0** |
 | resumed | **False** |
 
+> **⚠ 上表のうち retry / replacement / seed rescue / tolerance 緩和 / resumed は
+> runner の policy 宣言（リテラル）であって計数ではない**（敵対レビュー B6）。
+> 「隠れた試行がない」ことを実際に支えるのは、①runner に該当経路が存在しないこと
+> ②`fit_index` が 1..896 で密・各セル 14 fits ちょうど
+> ③per-fit runtime の総和 8821.7 s が wall clock 8823.1 s に収まること、の 3 点である。
+
 ## 10. true-K 理論
 
 `K* = min{K : P0 ∈ M_K}`（M-closed 前提）。
@@ -139,7 +147,7 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 平均 selected K: S1 `2.62 → 3.00 → 4.50 → 5.00`、S2 `1.75 → 3.25 → 3.62 → 4.88`。
 
 **平均は単調増加したが真値一致数は単調でない**（S1 は n=75 で 0/8）。
-**誤りの向きは一貫して under-selection。**
+**誤りの向きは S1・S2 でほぼ一貫して under-selection**（S1 に over 2 件、S2 は over 0）。**S3 は逆に over-selection 61/64。**
 
 ## 14. control（`K_TRUE=1, 3`）
 
@@ -165,7 +173,7 @@ Poisson-Y は `|w|<1/2` を既定で強制。テスト 46 件。
 
 推定 Poisson-X Gram は**全 64 セルで非 PSD**（最小固有値の中央値 −1.80 〜 −0.52）、
 閾値なし階数は常に `d = 15` で `K` を返さない。
-真の `K` での固有値ギャップ比は `n` とともに増加（`K_TRUE=5` で 1.79 → 2.30）するが、
+真の `K` での固有値ギャップ比の中央値は `K_TRUE=5` で 1.79 → 1.64 → 2.13 → 2.30 と**単調ではない**（`K_TRUE=1` も非単調、`K_TRUE=3` のみ単調）。いずれにせよ
 **事前に固定できる閾値がないため selected K を作らない**（U7）。
 
 ## 17. 更新した canonical docs

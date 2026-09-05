@@ -873,7 +873,7 @@ Phase 8b Attempt 2（§12.9）に対応する差分だけを追記する。分�
 | 凍結プロトコル | `reports/identifiability/clean_true_k_experiment_protocol_20260904.md` |
 | 実験結果 | `reports/identifiability/clean_true_k_results_20260905.md` |
 | 先生向け説明 | `reports/identifiability/teacher_discussion_summary_20260905.md` |
-| 数値検証 | `tools/research_audit/verify_identifiability_identities.py`（81 rows / failure 0） |
+| 数値検証 | `tools/research_audit/verify_identifiability_identities.py`（**81 rows / failure 0。うち独立に反証可能な数値確認は 41 行、残り 40 行は構成上必ず PASS する算術整合行。P3・P6 に独立数値証拠なし**。理論監査 §19） |
 
 ### 17.2 「真の K」の定義（指摘 2）
 
@@ -904,6 +904,9 @@ K*  = min { K : P0 ∈ M_K }
 | **P3** | canonical Gaussian-Y で `{P ∈ M_K : w≠0}` は `M_{K+1}` と交わらない（族は入れ子でない） | `w ≠ 0`。**`M_K` と `M_{K+1}` 自体は `w=0` 切片で交わる** |
 | **P6** | canonical Poisson-Y で `E[Y^r] < ∞ ⟺ \|w\| < 1/r`（平均 `\|w\|<1`、分散 `\|w\|<1/2`） | unclipped link。**KI-020** |
 | **P8** | canonical Gaussian-Y で `E[(Y_ij−w0)(Y_ik−w0)(Y_jk−w0)] = w³K` により **`w` の符号が三角形（`n≥3`）から識別される** | `w ≠ 0`, `n ≥ 3` |
+| **P4** | `O(K)` 回転・符号反転・座標置換は観測分布を変えない。`N(0,I)` prior がスケールを固定する | — |
+| **P5** | canonical Gaussian-X で `Σ` 既知なら **X 周辺の**最小潜在次元 `= rank(Cov(X) − Σ)` | `rank(F)=K`（generic） |
+| **P7** | Bernoulli-X および `w0=0` の Bernoulli-Y では一次モーメントが `K` の情報を持たない（常に 1/2） | `Z` が 0 対称 |
 
 **反例:** Bernoulli-X `d=1` では `E[X_l]=1/2` が `K, f_1` によらず成り立ち、
 **X 周辺からは** `K` を識別できない。**joint の反例ではない**（`w≠0` の Gaussian-Y なら P2 で識別される）。
@@ -932,7 +935,7 @@ K*  = min { K : P0 ∈ M_K }
 | 構成 | X=Poisson / Y=Bernoulli / d=15 / L=5 / num_iter=8 / test_ratio=0.20 |
 | grid | `K_TRUE ∈ {1,3,5}`（反復 4/4/8）× `n ∈ {50,75,100,150}` × candidate K 1..7 × start {1,2} |
 | **fits** | **896**（expected=actual=unique、重複 0・欠番 0） |
-| integrity | retry 0 / replacement 0 / seed rescue 0 / tolerance 緩和 0 / resume False / NaN 0 / 非有限 0 |
+| integrity | retry 0 / replacement 0 / seed rescue 0 / tolerance 緩和 0 / resume False / NaN 0 / 非有限 0。**ただし前 5 者は runner の policy 宣言（リテラル）であって計数ではない**（敵対レビュー B6）。「隠れた試行がない」ことを実際に支えるのは ①runner に retry / replacement / resume の経路が存在しないこと ②`fit_index` が 1..896 で密、各セル 14 fits ちょうどであること ③per-fit runtime の総和 8821.7 s が wall clock 8823.1 s に収まること、の 3 点である |
 | 独立監査 | **PASS**（BLOCKER 0 / HIGH 0 / MEDIUM 0 / LOW 2） |
 
 **結果（真値一致数、`K_TRUE` との一致であって `K*` との一致ではない）:**
@@ -948,18 +951,23 @@ K*  = min { K : P0 ∈ M_K }
 **重要な限定:**
 
 - **平均 selected K は単調増加したが、真値一致数は単調ではない**（S1 は n=75 でいったん 0/8 に下がる）。
-- 誤りの向きは一貫して **under-selection**。
+- 誤りの向きは **S1・S2 でほぼ一貫して under-selection**（S1 に over 2 件、S2 は over 0 件）。**S3 は逆に over-selection が 61/64** であり、「一貫して under-selection」を全 criterion に適用してはならない（敵対レビュー B4）。
 - **`K_TRUE=1` の 4/4 は good recovery の証拠ではない。** 支配的な誤り方が under-selection であり、
   `K=1` は候補集合の下端で、凍結 selector は同点時に最小 K を選ぶ。**下限効果と交絡している。**
 - **S3 は 3/64 でほぼ全セルが候補上限 `K=7`。** `ln p(Z)` を含めず `Z` を積分しない基準は、
   潜在次元を増やすほど代入した `Ẑ` への当てはまりが良くなり罰則が追いつかない。
   **これは Q1 型基準への警告であって、原論文 Eq.(26) の評価ではない**（評価手続きは特定不能）。
 - criterion 一致: S1 vs S2 **44/64**、S1 vs S3 2/64、S2 vs S3 0/64、三者一致 0/64。
-- **start 不一致**（2 つの初期値が別の K を選ぶ）は S1/`K_TRUE=5` で `n=50` 8/8 → `n=150` 1/8。
+- **start 不一致**（2 つの初期値が別の K を選ぶ）は S1/`K_TRUE=5` で `n=50,75,100,150` の順に 8/8, 4/8, 5/8, 1/8。
+  **本診断は protocol §11 の事前登録に含まれない post-hoc 診断である**（敵対レビュー B9）。
+  **また「選択が不安定な領域と初期値依存の領域が一致する」という初版の読みは撤回する**: `n=75` は真値一致が最悪（0/8）なのに不一致は 4/8 で、`n=100`（一致 4/8・不一致 5/8）より小さい（F-06）。
   選択が不安定な領域と最適化が初期値依存の領域が一致するが、**主因は分離できていない**。
+- **`family_y = bernoulli` は識別可能性（U2）も非入れ子性（U5）も未証明の領域である。
+  強い理論結果 P2・P3 は Gaussian-Y 限定であり、本実験を正当化しない**
+  （`reports/thesis/thesis_storyline_20260905.md` W1、敵対レビュー F-13）。
 - **S4（Poisson-X Gram spectrum）は K を返さない。** 推定 Gram は全 64 セルで PSD 錐の外
   （最小固有値の中央値 −1.80〜−0.52）、閾値なし階数は常に `d=15`。
-  真の `K` での固有値ギャップ比の中央値は `n` とともに増加（K=5: 1.79→2.30）するが、
+  真の `K` での固有値ギャップ比の中央値は `K_TRUE=5` で 1.79 → 1.64 → 2.13 → 2.30 と**単調ではない**（`n=75` で一度下がる。`K_TRUE=1` も 8.88 → 8.00 → 8.96 → 12.90 で非単調、`K_TRUE=3` のみ単調。敵対レビュー B5）。いずれにせよ
   **事前に固定できる閾値がないため selected K を作らない**（U7）。
 
 ### 17.6 未解決（指摘 5 を含む）
@@ -974,3 +982,81 @@ K*  = min { K : P0 ∈ M_K }
 | U10 | held-out plug-in score の population target |
 | U11 | `M_K` の閉性、誤指定下の pseudo-true `K` |
 | U12 | 候補集合 `{K : P0 ∈ M_K}` の連結性 |
+
+---
+
+## 18. 2026-09-05 Claim Ledger 追記（clean true-K n-sweep / identifiability）
+
+**§14 の 2026-08-31 ledger と §16 の Phase 8b 追記はそのまま残す。**
+本節はその後に確定した §17 のフェーズに対応する差分だけを、§14 と同じ表形式で追記する。
+分類の定義は §14 と同じ。
+
+**この節は敵対レビュー B7 を受けて追加した。** 従来は §17.5 の散文だけで、
+`verify-research-claim` が辿る canonical な ledger 行が存在しなかった。
+
+### ALLOWED
+
+| claim | evidence | lineage | evidence type |
+|---|---|---|---|
+| canonical Dual-ExpFam model は明示条件下（finite `n,d,K`・finite parameters・Gaussian 分散 > 0）で proper probability model として定義できる | `true_k_identifiability_hardened_20260904.md` §3 | — | theory |
+| canonical Poisson-Y のモーメント有限性は `E[Y^r] < ∞ ⟺ \|w\| < 1/r` であり、historical 既定値 `w = 0.5` は**分散発散の境界そのもの**である | 同 §11（命題 P6）、KI-020 | — | theory |
+| 「真の K」は `K* = min{K : P0 ∈ M_K}` と定義でき、`K^rank ≤ K* ≤ K_TRUE` でどの等号も自明でない | 同 §2・§2.4 | — | theory |
+| canonical Poisson-X では、明示条件下で **X 周辺の最小潜在次元**が `rank(FF^T)` に一致する | 同 §7（命題 P1） | — | theory |
+| canonical Gaussian-Y では `w ≠ 0` のとき `(w0, w², K, σ_y²)` が**単一 dyad 周辺**から決まり、`w` の符号は**三角形**（`n≥3`）から決まる | 同 §9（命題 P2・P8） | — | theory |
+| canonical Gaussian-Y では `{P ∈ M_K : w≠0}` は `M_{K+1}` と交わらない | 同 §12（命題 P3） | — | theory |
+| historical synthetic generator は canonical model の literal generator ではない（G1–G5） | 同 §13、KI-021 | 全系列共通 | code audit |
+| 現行 `calc_bic_dual` は観測データ周辺尤度（Q3）を使っておらず **Schwarz BIC ではない** | KI-010・KI-019、`paper_bic_reproduction_alignment_20260904.md` | B/C/E | code audit |
+| clean true-K n-sweep で **896 fits** が実行され、retry・replacement・seed rescue・tolerance 緩和・resume がいずれも 0 であること | `clean_true_k_asymptotics_20260904/`、独立監査 PASS | **E** | operational |
+| 各 `(criterion, K_TRUE, n, replicate)` の selected K の**正確な値** | `selection_matrix.csv`（生値から再導出済み） | **E** | synthetic |
+
+### QUALIFIED ONLY（必須の限定なしに書いてはいけない）
+
+| claim | 必須の限定 | evidence | lineage | evidence type |
+|---|---|---|---|---|
+| **clean 設定での K 選択の n 依存**: 「`n` を 50→150 と増やすと、held-out スコアと Q ベース基準のいずれでも平均 selected K が真値へ近づいた（`K_TRUE=5` で S1 2.62→5.00、S2 1.75→4.88）」 | ①**有限 4 点の記述であり一致性ではない**（U6）②**真値一致数は単調でない**（S1 は `n=75` で 0/8）③反復は 4 または 8 のみで CI・検定・検出力は未計算 ④**一致は `K_TRUE` との一致であって `K*` とのものではない**（U9）⑤**`family_y=bernoulli` は識別可能性 U2・非入れ子性 U5 が未証明の領域**であり、P2・P3 は Gaussian-Y 限定で本実験を正当化しない ⑥**固定 EM 予算（`num_iter=8`）の `K` 依存性という代替説明を分離できていない** ⑦prototype（lineage E、**本文採用不可**） | `clean_true_k_results_20260905.md` §3・§4・§8、§17.5 | **E** | synthetic |
+| 「誤りの向きは under-selection である」 | **S1・S2 に限る**（S1 に over 2 件）。**S3 は逆に over-selection 61/64** | 同 §3 | **E** | synthetic |
+| 「`K_TRUE=1` では全 `n` で 4/4」 | **成功例として引用してはならない。** ①候補集合の下端 ②under-selection 優位 ③信号整合が 1 次モーメントのみで `K_TRUE=1` の超過尖度が最大（6/K = 6.0）という 3 つの交絡がある。**tie rule は根拠にならない**（同点は 192 回中 0 回） | 同 §8.1(2) | **E** | synthetic |
+| 「`Z` を積分しない plug-in conditional 基準は強く過大選択する（3/64）」 | **S3 は本研究が定義した基準であり原論文 Eq.(26) ではない。** 原論文の評価手続きは本文から特定不能なので、**S3 の失敗を原論文の基準の失敗と読んではならない** | 同 §8.1(4) | **E** | synthetic |
+| 「基準によって選ばれる K が違う（S1 vs S2 は 64 中 44 一致、三者一致 0）」 | **どれが「正しい」かは決められない**（`K*` を確定できていないため） | 同 §5 | **E** | synthetic |
+| 「推定 Poisson-X Gram は有限標本で K を返さない」 | 全 64 セルで非 PSD、閾値なし階数は常に `d=15`。**rank 閾値は設定していない**（結果を見てからの閾値決定は protocol が禁止）。固有値ギャップ比は**単調ではない** | 同 §7、`gram_spectrum.csv` | **E** | synthetic |
+| 「start 間の不一致が観測された（S1/`K_TRUE=5` で 8/8, 4/8, 5/8, 1/8）」 | **protocol §11 の事前登録に含まれない post-hoc 診断**。**「選択の不安定さと一致する」とは言えない**（`n=75` と `n=100` で逆転）。criterion 由来か最適化由来かは**分離できていない** | 同 §8.1(5) | **E** | synthetic |
+
+### NOT ALLOWED（書いてはいけない）
+
+| claim | 理由 |
+|---|---|
+| K 選択の consistency / asymptotic consistency / universal true-K recovery | 有限 4 点の記述のみ。U6 は未解決 |
+| 「`n` を増やせば `K_TRUE` に収束する」 | 同上。真値一致数は単調ですらない |
+| 現行実装が standard Schwarz BIC として妥当であること | `Q_strict` は Q3 ではない（KI-010・KI-019） |
+| 「BIC は非入れ子だから使えない」 | **理由が誤り。** 非入れ子が壊すのは LRT の χ² 近似と Wilks（§17.4） |
+| held-out 予測 = true-K recovery | U10 未解決。選択と識別は別概念 |
+| 「held-out score は `K*` を推定している」**および**「していない」 | どちらも未証明（U10） |
+| Bernoulli 一般の識別可能性についての結論 | U1・U2 未解決。反例は `d=1` かつ X 周辺のみ |
+| 「Poisson-X なら常に K が識別可能」 | unclipped link・`rank(F)=K`（generic）が要る。確立したのは `K^rank` |
+| 「S3 の失敗は原論文 BIC の失敗である」 | S3 は本研究の定義。原論文の評価手続きは特定不能 |
+| 「`K_TRUE=1` で完全に回復した」 | 3 つの交絡がある |
+| 「信号強度の交絡を完全に消した」 | 整合は 1 次モーメント（Y 側は分散）のみ。分布形は `K_TRUE` 依存 |
+| 「under-selection は criterion の性質である」 | 固定 EM 予算の `K` 依存性と分離できていない |
+| 「実データにおいて `K*` を推定している」 | M-closed が成立しない |
+| 「historical generator のせいで過去結果は無効」 | 過去結果は当該生成器上の観測として有効 |
+| clean true-K n-sweep の結果を**修論本文の根拠として無条件に使う** | lineage E prototype、`EXPERIMENT_REGISTRY.md` は `原稿採用 ✗`。**昇格は Human Gate**（root `CLAUDE.md` §6） |
+
+### UNRESOLVED
+
+| 項目 | 何が足りないか |
+|---|---|
+| U1 | Bernoulli-X（`d>1`）の識別可能性。pairwise モーメント写像の単射性 |
+| **U2** | **Bernoulli-Y の識別可能性。実験で使っている family** |
+| U3 | Gaussian-X（Σ 未知）の十分条件 |
+| U4 | Poisson-Y の識別可能性（`R(w²)` の単調性が未証明） |
+| U5 | Bernoulli-Y / Poisson-Y の非入れ子性 |
+| **U6** | **`n→∞` の一致性。モデルが特異で RLCT 未知、有効標本数も未定義** |
+| U7 | 有限標本の rank 閾値。推定 Gram は非 PSD |
+| U9 | clean construction で `K* = K_TRUE` か（family ごと） |
+| U10 | held-out plug-in score の population target |
+| U11 | `M_K` の閉性、誤指定下の pseudo-true `K` |
+| U12 | `{K : P0 ∈ M_K}` の連結性 |
+| — | 固定 EM 予算（`num_iter=8`）の `K` 依存性と criterion の性質の分離 |
+| — | `K_TRUE=1` の下限効果の切り分け（**新しい事前登録が要る**） |
+| — | start 不一致が criterion 由来か最適化由来か |
+| — | X の寄与を分離した測定（今回は X 信号を 1 水準に固定） |

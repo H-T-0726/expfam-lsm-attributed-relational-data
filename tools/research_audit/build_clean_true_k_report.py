@@ -456,7 +456,11 @@ def build(run_dir: Path) -> str:
                       if k[0] == "S1" and k[1] == 5 and k[2] == n)
         disagree_series.append(sum(1 for k in keys
                                    if recomputed[k]["start_disagreement"]))
-    add("**(5) start 間の不一致。** S1 / `K_TRUE=5` で 2 つの初期値が別々の K を選んだセルは")
+    add("**(5) start 間の不一致（post-hoc 診断）。** "
+        "**本診断は protocol 11 の事前登録に含まれない**（敵対レビュー B9）。"
+        "凍結 artifact から計算した記述量にすぎず、selected K には一切影響しない。")
+    add("")
+    add("S1 / `K_TRUE=5` で 2 つの初期値が別々の K を選んだセルは")
     add(f"`n=50,75,100,150` の順に {disagree_series[0]}/{tot5}, {disagree_series[1]}/{tot5}, "
         f"{disagree_series[2]}/{tot5}, {disagree_series[3]}/{tot5} だった。")
     add("")
