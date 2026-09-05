@@ -209,6 +209,11 @@ f_l · f_m = log( E[X_l X_m] / (E[X_l] E[X_m]) )
 
 ## 12. clean setting で何を実験したか
 
+> **実装系列の明記（root `CLAUDE.md` §3 / KI-002）:** 本実験は **lineage E**
+> （`DualExpFamLSMConsistent`、objective-consistent **experimental prototype**）で実行した。
+> **本文採用不可**であり、以下の数値を修士論文本文の根拠として使うには
+> 人間による正式手法への昇格判断（Human Gate）が要る。
+
 **事前登録（プロトコル凍結）してから実行しました。** 結果を見てから設定を変えていません。
 
 | 項目 | 値 |

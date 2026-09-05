@@ -343,9 +343,68 @@ def test_known_issues_registers_the_new_findings():
     assert "canonical-clean-v1" in text
 
 
-def test_lineage_is_named_wherever_the_experiment_is_quoted():
-    """CLAUDE.md section 3 / KI-002: numbers must carry their lineage."""
+# Numbers that only this experiment produces.  A document containing one of
+# these is quoting the clean true-K sweep and must name its lineage.
+EXPERIMENT_FINGERPRINTS = (
+    "39/64", "37/64", "3/64", "44/64", "2.62", "4.88", "896",
+    "2/8 | **0/8**",
+)
+# NOTE: the generator name "canonical-clean-v1" is deliberately NOT a
+# fingerprint.  The pre-registration spec names the generator but predates
+# and quotes no result, so requiring a lineage label there would be noise.
 
-    for path in (RESULTS, HANDOFF, REGISTRY, RESEARCH_MASTER):
+# Every markdown document this session added or touched, discovered from disk
+# rather than hand-listed.  An earlier version of this test iterated over a
+# hand-picked tuple that happened to exclude the two documents which violated
+# the rule -- a test written to pass.  Scope is now derived, so a new document
+# cannot be omitted by forgetting to add it.
+def _session_documents() -> list[Path]:
+    roots = (REPORTS / "identifiability", REPORTS / "thesis")
+    found = [p for root in roots if root.is_dir()
+             for p in sorted(root.glob("*.md"))]
+    return found + [RESEARCH_MASTER, REGISTRY]
+
+
+def _quotes_the_experiment(path: Path) -> bool:
+    text = _text(path)
+    return any(mark in text for mark in EXPERIMENT_FINGERPRINTS)
+
+
+def test_the_lineage_check_covers_every_document_that_quotes_the_experiment():
+    """B2: the scope of the lineage rule must be derived, never hand-picked.
+
+    This test exists because the previous version of the lineage test iterated
+    over four hand-listed documents, and the documents it omitted were exactly
+    the ones violating the rule.
+    """
+
+    quoting = [p for p in _session_documents() if _quotes_the_experiment(p)]
+    # The 2026-09-04 teacher draft predates the results and must not be forced
+    # to carry them; everything else that quotes the numbers is in scope.
+    quoting = [p for p in quoting
+               if p.name != "teacher_discussion_summary_20260904.md"]
+    assert len(quoting) >= 8, [p.name for p in quoting]
+    for path in (RESULTS, HANDOFF, REGISTRY, RESEARCH_MASTER, TEACHER,
+                 QUESTIONS, STORYLINE, OUTLINE, INVENTORY, REAL_APP):
+        if _quotes_the_experiment(path):
+            assert path in quoting, path.name
+
+
+def test_lineage_is_named_wherever_the_experiment_is_quoted():
+    """CLAUDE.md section 3 / KI-002: numbers must carry their lineage.
+
+    Scope is DISCOVERED (every session markdown that quotes an experiment
+    fingerprint), not hand-listed.
+    """
+
+    offenders = []
+    for path in _session_documents():
+        if path.name == "teacher_discussion_summary_20260904.md":
+            continue                       # pre-results draft, superseded
+        if not _quotes_the_experiment(path):
+            continue
         text = _text(path)
-        assert "本文採用不可" in text, path.name
+        if not any(marker in text for marker in
+                   ("本文採用不可", "lineage E", "experimental prototype")):
+            offenders.append(path.name)
+    assert not offenders, offenders

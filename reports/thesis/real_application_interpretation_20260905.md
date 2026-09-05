@@ -106,6 +106,10 @@
 
 ### 4.3 今回の実験が実応用に与える具体的な警告
 
+> **実装系列の明記（root `CLAUDE.md` §3 / KI-002）:** 以下の根拠となる数値は **lineage E**
+> （objective-consistent **experimental prototype**、**本文採用不可**）の clean true-K n-sweep
+> によるものである。§3 で引用した per-column の結果は別系列（lineage E+F）であり、混在させない。
+
 | # | 警告 | 根拠 |
 |---|---|---|
 | **W-a** | **`n` が小さいと K を過小に選ぶ。** 誤りの向きは一貫して under-selection だった | `K_TRUE=5` で `n=50` の平均 selected K は 2.62（真値 5） |

@@ -118,6 +118,9 @@ identity checker 81 rows 0 failures / 監査再実行 PASS / py_compile OK。
 
 ### 主要結果（`K_TRUE` との一致であって `K*` との一致ではない）
 
+**実装系列: lineage E（objective-consistent **experimental prototype**、本文採用不可）。**
+root `CLAUDE.md` §3 / KI-002 に従い、数値を引用する箇所には必ず系列を明記する。
+
 | criterion | K_TRUE=1 | K_TRUE=3 | K_TRUE=5 (n=50→150) | 合計 |
 |---|---|---|---|---|
 | S1 held-out | 4/4 ×4 | 1/4, 1/4, 3/4, 4/4 | 2/8, 0/8, 4/8, **8/8** | 39/64 |
