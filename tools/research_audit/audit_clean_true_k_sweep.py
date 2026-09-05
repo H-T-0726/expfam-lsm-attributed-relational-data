@@ -1,9 +1,24 @@
 """Artifact-only independent auditor for the clean true-K n-sweep.
 
 This module does NOT import the runner.  Every structural constant it checks is
-restated here as an independent literal, so an artifact set produced by a
-mutated runner cannot certify itself.  It runs no EM, writes nothing except its
-own report, and never modifies an input artifact.
+restated here as an independent literal.  It runs no EM, writes nothing except
+its own report, and never modifies an input artifact.
+
+WHAT THIS AUDITOR DOES AND DOES NOT CERTIFY
+-------------------------------------------
+It certifies **internal consistency and structural conformance** of an artifact
+set: that the lattice is complete, that the seeds and masks follow the restated
+rules, that the frozen protocol body hashes to the expected digest, and that
+the recorded selection is what the raw per-fit values imply under the frozen
+selector.
+
+It does **not** certify the authenticity of the fitted values themselves.  A
+sufficiently careful forgery that keeps every internal relation intact is not
+detectable from artifacts alone.  Earlier versions of this docstring claimed
+that "an artifact set produced by a mutated runner cannot certify itself"; an
+adversarial review demonstrated six mutations that passed, so that claim is
+withdrawn.  The checks below were strengthened in response, but the guarantee
+remains structural, not evidentiary.
 
 Findings are classified BLOCKER / HIGH / MEDIUM / LOW.  A BLOCKER or HIGH means
 the results must NOT be promoted to a canonical conclusion.
@@ -13,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 from dataclasses import dataclass, field
@@ -41,6 +57,10 @@ EXPECTED_CELLS = sum(EXPECTED_REPLICATES[k] for k in EXPECTED_K_TRUE_GRID) * len
 EXPECTED_FITS = EXPECTED_CELLS * len(EXPECTED_CANDIDATE_K) * len(EXPECTED_STARTS)
 EXPECTED_CRITERIA = ("S1", "S2", "S3")
 TIE_TOLERANCE = np.float64(1e-12)
+# S1 is a score (higher is better); S2 and S3 are penalised deviances, which the
+# runner negates before selection.  Both the artifact and this auditor work in
+# that selector space, so no sign flip is applied when comparing mean_scores.
+HIGHER_IS_BETTER_SIGN = {"S1": 1, "S2": -1, "S3": -1}
 
 REQUIRED_FILES = (
     "protocol.json", "manifest.csv", "generator_provenance.csv",
@@ -59,6 +79,40 @@ def split_seed(k_true: int, n: int, replicate: int) -> int:
 
 def model_seed(k_true: int, n: int, replicate: int, k_est: int, start: int) -> int:
     return 830000 + k_true * 100000 + n * 1000 + replicate * 100 + k_est * 10 + start
+
+
+EXPECTED_TEST_RATIO = 0.20
+
+
+def rebuild_masks(n: int, seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """Independently restated mask construction -- the runner is NOT imported.
+
+    Checking only that the recorded mask hashes are distinct lets fabricated
+    hashes through, so the masks are rebuilt from the split seed and re-hashed.
+    """
+
+    rng = np.random.default_rng(seed)
+    upper = np.triu_indices(n, 1)
+    n_pairs = int(upper[0].size)
+    n_test = int(round(EXPECTED_TEST_RATIO * n_pairs))
+    chosen = rng.permutation(n_pairs)[:n_test]
+    flat = np.zeros(n_pairs, dtype=bool)
+    flat[chosen] = True
+    test = np.zeros((n, n), dtype=bool)
+    test[upper] = flat
+    test = test | test.T
+    train = np.ones((n, n), dtype=bool)
+    np.fill_diagonal(train, False)
+    train = train & ~test
+    return train, test
+
+
+def stable_hash(array: np.ndarray) -> str:
+    """Independently restated hash of a mask array."""
+
+    contiguous = np.ascontiguousarray(array)
+    return hashlib.sha256(contiguous.tobytes()
+                          + str(contiguous.shape).encode()).hexdigest()
 
 
 @dataclass
@@ -110,12 +164,34 @@ def audit(run_dir: Path) -> dict[str, Any]:
     # ---- protocol identity ----------------------------------------------
     a.require(protocol.get("protocol_hash") == EXPECTED_PROTOCOL_HASH, "BLOCKER",
               "protocol_hash", f"got {protocol.get('protocol_hash')}")
+
+    # Comparing the recorded digest to a literal proves nothing about the frozen
+    # body it is supposed to summarise.  Recompute it, so that mutating any
+    # protocol field -- L, num_iter, test_ratio, a seed base, w0_true, the tie
+    # tolerance -- is caught even though none of those has its own check.
+    frozen_body = protocol.get("protocol")
+    if a.require(isinstance(frozen_body, dict), "BLOCKER", "protocol_body",
+                 "protocol.json has no frozen protocol body"):
+        payload = json.dumps(frozen_body, sort_keys=True, separators=(",", ":"))
+        recomputed_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        a.require(recomputed_hash == EXPECTED_PROTOCOL_HASH, "BLOCKER",
+                  "protocol_hash_recomputed",
+                  f"the frozen protocol body hashes to {recomputed_hash}, "
+                  f"not {EXPECTED_PROTOCOL_HASH}")
     a.require(runinfo.get("protocol_hash") == EXPECTED_PROTOCOL_HASH, "BLOCKER",
               "runinfo_protocol_hash", f"got {runinfo.get('protocol_hash')}")
     a.require(summary.get("protocol_hash") == EXPECTED_PROTOCOL_HASH, "HIGH",
               "summary_protocol_hash", f"got {summary.get('protocol_hash')}")
     a.require(protocol.get("experiment_id") == EXPECTED_EXPERIMENT_ID, "HIGH",
               "experiment_id", f"got {protocol.get('experiment_id')}")
+
+    run_sha = str(protocol.get("run_code_sha", ""))
+    a.require(len(run_sha) == 40 and all(c in "0123456789abcdef" for c in run_sha),
+              "HIGH", "run_code_sha_format",
+              f"run_code_sha is not a 40-hex commit: {run_sha!r}")
+    a.require(protocol.get("working_tree_clean_before_execution") is True,
+              "HIGH", "working_tree_clean_before_execution",
+              f"got {protocol.get('working_tree_clean_before_execution')!r}")
 
     frozen = protocol.get("protocol", {})
     a.require(frozen.get("generator_version") == EXPECTED_GENERATOR_VERSION, "BLOCKER",
@@ -223,12 +299,29 @@ def audit(run_dir: Path) -> dict[str, Any]:
     a.require(len(set(hashes.values())) == len(hashes), "MEDIUM", "mask_distinct",
               "two cells share a test mask hash")
 
+    # Distinctness alone accepts fabricated hashes.  Rebuild every mask from its
+    # recorded split seed and re-hash it.
+    mask_bad = []
+    for row in provenance:
+        k_true, n, rep = int(row["K_TRUE"]), int(row["n"]), int(row["replicate"])
+        expected_seed = split_seed(k_true, n, rep)
+        if int(row["split_seed"]) != expected_seed:
+            mask_bad.append(((k_true, n, rep), "split_seed off the rule"))
+            continue
+        train, test = rebuild_masks(n, expected_seed)
+        if stable_hash(train) != row["train_mask_hash"]:
+            mask_bad.append(((k_true, n, rep), "train_mask_hash mismatch"))
+        elif stable_hash(test) != row["test_mask_hash"]:
+            mask_bad.append(((k_true, n, rep), "test_mask_hash mismatch"))
+    a.require(not mask_bad, "BLOCKER", "mask_hash_recomputation",
+              f"{len(mask_bad)} cells carry a mask hash that does not match the "
+              f"mask rebuilt from the split seed: {mask_bad[:5]}")
+
     # ---- generator provenance -------------------------------------------
     for row in provenance:
-        if not a.require(int(row["F_rank"]) == int(row["K_TRUE"]), "BLOCKER",
-                         "generator_rank",
-                         f"F_rank {row['F_rank']} != K_TRUE {row['K_TRUE']}"):
-            break
+        a.require(int(row["F_rank"]) == int(row["K_TRUE"]), "BLOCKER",
+                  "generator_rank",
+                  f"F_rank {row['F_rank']} != K_TRUE {row['K_TRUE']}")
         if not a.require(row["normalization_policy"] == "none", "BLOCKER",
                          "generator_normalization",
                          f"got {row['normalization_policy']}"):
@@ -252,16 +345,58 @@ def audit(run_dir: Path) -> dict[str, Any]:
 
     # ---- numerical health -----------------------------------------------
     nan_fits = [r["fit_index"] for r in fits if r["nan_occurred"] != "False"]
-    a.add("LOW", "nan_fits", f"{len(nan_fits)} fits reported nan_occurred=True")
+    # This was an unconditional LOW note, so 896/896 NaN fits still audited PASS.
+    a.require(not nan_fits, "HIGH", "nan_fits",
+              f"{len(nan_fits)} fits reported nan_occurred=True: {nan_fits[:8]}")
+    a.require(int(runinfo.get("nan_fits", -1)) == len(nan_fits), "HIGH",
+              "nan_fits_agreement",
+              f"runinfo says {runinfo.get('nan_fits')}, the CSV has {len(nan_fits)}")
     qbic_failed = [r["fit_index"] for r in fits if r["q_bic_failed"] != "False"]
     a.require(not qbic_failed, "HIGH", "q_bic_failed",
               f"{len(qbic_failed)} fits failed Q/BIC computation: {qbic_failed[:8]}")
+    # S2 = -2 Q_strict + p log n by construction.  Without this, q_strict is an
+    # unconstrained column that a forgery could set freely.
+    identity_bad = []
+    for r in fits:
+        expected = (-2.0 * float(r["q_strict"])
+                    + int(r["num_params"]) * math.log(int(r["n"])))
+        if abs(expected - float(r["s2_q_based"])) > 1e-6 * max(1.0, abs(expected)):
+            identity_bad.append(int(r["fit_index"]))
+    a.require(not identity_bad, "BLOCKER", "s2_identity",
+              f"{len(identity_bad)} fits violate s2 = -2*q_strict + p*log n: "
+              f"{identity_bad[:8]}")
+
+    # num_params must follow the rotation-corrected count kd - k(k-1)/2.
+    param_bad = [int(r["fit_index"]) for r in fits
+                 if int(r["num_params"])
+                 != EXPECTED_D * int(r["k_est"])
+                 - int(r["k_est"]) * (int(r["k_est"]) - 1) // 2]
+    a.require(not param_bad, "HIGH", "num_params_rule",
+              f"{len(param_bad)} fits have num_params off kd - k(k-1)/2: "
+              f"{param_bad[:8]}")
+
     nonfinite = [r["fit_index"] for r in fits
                  if not all(math.isfinite(float(r[c])) for c in
                             ("heldout_mean_log_score", "q_strict", "s2_q_based",
                              "s3_plugin_conditional"))]
     a.require(not nonfinite, "BLOCKER", "criterion_finite",
               f"{len(nonfinite)} fits carry a non-finite criterion: {nonfinite[:8]}")
+
+    # ---- wall clock vs the sum of per-fit runtimes -----------------------
+    # A discarded or retried fit inside the run window would show up as a gap
+    # between the wall clock and the sum of the recorded per-fit runtimes.
+    try:
+        runtime_sum = sum(float(r["runtime_s"]) for r in fits)
+        wall = float(runinfo.get("wall_clock_seconds", 0.0))
+    except (KeyError, TypeError, ValueError):
+        a.add("MEDIUM", "runtime_accounting", "runtime_s or wall clock missing")
+    else:
+        slack = wall - runtime_sum
+        a.require(slack >= -1.0, "HIGH", "runtime_exceeds_wall_clock",
+                  f"fits sum to {runtime_sum:.1f}s inside a {wall:.1f}s window")
+        a.require(slack <= 0.05 * wall, "MEDIUM", "runtime_unaccounted",
+                  f"{slack:.1f}s of the {wall:.1f}s window is not accounted for "
+                  f"by the {len(fits)} recorded fits ({runtime_sum:.1f}s)")
 
     # ---- no retries / replacements --------------------------------------
     for key in ("retry_count", "replacement_fits_executed", "seed_rescue_count",
@@ -273,6 +408,7 @@ def audit(run_dir: Path) -> dict[str, Any]:
 
     # ---- INDEPENDENT recomputation of the selection ----------------------
     recomputed: dict[tuple[str, int, int, int], int] = {}
+    recomputed_means: dict[tuple[str, int, int, int], dict[int, float]] = {}
     by_cell: dict[tuple[int, int, int], list[dict[str, str]]] = {}
     for r in fits:
         by_cell.setdefault(
@@ -299,6 +435,10 @@ def audit(run_dir: Path) -> dict[str, Any]:
             best = max(means.values())
             ties = sorted(k for k, v in means.items() if best - v <= TIE_TOLERANCE)
             recomputed[(name, *cell)] = min(ties)
+            # The artifact stores SELECTOR-SPACE means (S2/S3 already negated,
+            # so that "larger is better" holds uniformly).  Compare in the same
+            # space; un-flipping here would manufacture a false BLOCKER.
+            recomputed_means[(name, *cell)] = {k: float(v) for k, v in means.items()}
 
     disagreements = []
     for row in selection:
@@ -312,6 +452,33 @@ def audit(run_dir: Path) -> dict[str, Any]:
     a.require(not disagreements, "BLOCKER", "selection_recomputation",
               f"{len(disagreements)} rows disagree with the independent "
               f"recomputation: {disagreements[:5]}")
+
+    # selected_k was checked; the stored mean_scores and best_mean were not, and
+    # those are the columns a downstream report could quote.
+    score_bad = []
+    for row in selection:
+        key = (row["criterion"], int(row["K_TRUE"]), int(row["n"]),
+               int(row["replicate"]))
+        if key not in recomputed_means:
+            continue
+        try:
+            stored = {int(k): float(v)
+                      for k, v in json.loads(row["mean_scores"]).items()}
+        except (ValueError, TypeError):
+            score_bad.append((key, "unparseable mean_scores"))
+            continue
+        mine = recomputed_means[key]
+        if set(stored) != set(mine):
+            score_bad.append((key, "candidate set differs"))
+            continue
+        if any(abs(stored[k] - mine[k]) > 1e-9 for k in mine):
+            score_bad.append((key, "mean_scores differ"))
+            continue
+        if abs(float(row["best_mean"]) - max(mine.values())) > 1e-9:
+            score_bad.append((key, "best_mean differs"))
+    a.require(not score_bad, "BLOCKER", "selection_mean_scores",
+              f"{len(score_bad)} rows carry mean_scores or best_mean that do not "
+              f"match the raw values: {score_bad[:5]}")
 
     a.require({r["criterion"] for r in selection} == set(EXPECTED_CRITERIA), "HIGH",
               "criteria_present",

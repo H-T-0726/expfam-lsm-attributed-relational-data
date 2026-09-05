@@ -224,16 +224,20 @@ def build_valid_fixture(root: Path) -> Path:
         k_true, n, rep = row["K_TRUE"], row["n"], row["replicate"]
         k_est, start = row["K"], row["start"]
         s1 = -0.5 - 0.02 * abs(k_est - k_true) + rng.normal(0, 0.001)
-        s2 = 1000.0 + 30.0 * k_est + rng.normal(0, 1)
+        # A real run satisfies s2 = -2 q_strict + p log n exactly, and the
+        # auditor now checks that identity, so the fixture must honour it.
+        num_params = 15 * k_est - k_est * (k_est - 1) // 2
+        q_strict = -(500.0 + 5.0 * k_est) + rng.normal(0, 0.5)
+        s2 = -2.0 * q_strict + num_params * float(np.log(n))
         s3 = 900.0 + 25.0 * k_est + rng.normal(0, 1)
         fits.append({
             "fit_index": row["fit_index"], "k_true": k_true, "n": n,
             "replicate": rep, "k_est": k_est, "start": start,
             "data_seed": row["data_seed"], "split_seed": row["split_seed"],
             "model_seed": row["model_seed"],
-            "heldout_mean_log_score": s1, "q_strict": -500.0,
+            "heldout_mean_log_score": s1, "q_strict": q_strict,
             "s2_q_based": s2, "s3_plugin_conditional": s3,
-            "num_params": 15 * k_est, "nan_occurred": False, "nan_count": 0,
+            "num_params": num_params, "nan_occurred": False, "nan_count": 0,
             "q_bic_failed": False, "failure_reason": "", "runtime_s": 1.0,
         })
         bucket = cell_scores.setdefault((k_true, n, rep),
@@ -258,8 +262,14 @@ def build_valid_fixture(root: Path) -> Path:
             "normalization_policy": "none",
             "x_mean": 1.3, "x_max": 30.0, "y_density": 0.33,
             "n_train_pairs": pairs - n_test, "n_test_pairs": n_test,
-            "train_mask_hash": f"tr{cell.k_true}-{cell.n}-{cell.replicate}",
-            "test_mask_hash": f"te{cell.k_true}-{cell.n}-{cell.replicate}",
+            # Real hashes: the auditor now rebuilds every mask from its split
+            # seed and re-hashes it, so a placeholder would (correctly) fail.
+            "train_mask_hash": R.stable_hash(
+                R.build_masks(cell.n,
+                              R.split_seed(cell.k_true, cell.n, cell.replicate))[0]),
+            "test_mask_hash": R.stable_hash(
+                R.build_masks(cell.n,
+                              R.split_seed(cell.k_true, cell.n, cell.replicate))[1]),
         })
         gram.append({
             "K_TRUE": cell.k_true, "n": cell.n, "replicate": cell.replicate,
@@ -294,6 +304,10 @@ def build_valid_fixture(root: Path) -> Path:
         "attempted_fit_count": 896, "completed_fit_count": 896,
         "retry_count": 0, "replacement_fits_executed": 0,
         "seed_rescue_count": 0, "tolerance_relaxations": 0, "resumed": False,
+        # The auditor now cross-checks these against the CSV and against the
+        # sum of the per-fit runtimes, so the fixture must carry them.
+        "nan_fits": 0, "q_bic_failed_fits": 0,
+        "wall_clock_seconds": float(len(fits)) * 1.0 + 5.0,
     })
     return root
 
@@ -408,7 +422,67 @@ def _mutate_missing_file(target: Path) -> None:
     (target / "gram_spectrum.csv").unlink()
 
 
+def _mutate_protocol_body(target: Path) -> None:
+    payload = json.loads((target / "protocol.json").read_text(encoding="utf-8"))
+    payload["protocol"]["num_iter"] = 1
+    payload["protocol"]["L"] = 500
+    payload["protocol"]["test_ratio"] = 0.9
+    (target / "protocol.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _mutate_run_code_sha(target: Path) -> None:
+    payload = json.loads((target / "protocol.json").read_text(encoding="utf-8"))
+    payload["run_code_sha"] = "deadbeef"
+    (target / "protocol.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _mutate_dirty_tree(target: Path) -> None:
+    payload = json.loads((target / "protocol.json").read_text(encoding="utf-8"))
+    payload["working_tree_clean_before_execution"] = False
+    (target / "protocol.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _mutate_all_nan(target: Path) -> None:
+    rows = _read_csv(target / "fit_results.csv")
+    for row in rows:
+        row["nan_occurred"] = "True"
+    _write_csv(target / "fit_results.csv", rows)
+
+
+def _mutate_mask_hashes(target: Path) -> None:
+    rows = _read_csv(target / "generator_provenance.csv")
+    for index, row in enumerate(rows):
+        row["train_mask_hash"] = f"fabricated-train-{index}"
+        row["test_mask_hash"] = f"fabricated-test-{index}"
+    _write_csv(target / "generator_provenance.csv", rows)
+
+
+def _mutate_mean_scores(target: Path) -> None:
+    rows = _read_csv(target / "selection_matrix.csv")
+    for row in rows:
+        row["mean_scores"] = json.dumps({str(k): 0.0 for k in range(1, 8)})
+        row["best_mean"] = "0.0"
+    _write_csv(target / "selection_matrix.csv", rows)
+
+
+def _mutate_q_strict(target: Path) -> None:
+    rows = _read_csv(target / "fit_results.csv")
+    for row in rows:
+        row["q_strict"] = str(float(row["q_strict"]) * 3.0)
+    _write_csv(target / "fit_results.csv", rows)
+
+
 ATTACKS = {
+    # Reviewer B demonstrated six mutations the auditor originally passed.
+    # Each is pinned here so the gap cannot silently reopen.
+    "protocol_body_mutated": (_mutate_protocol_body, "protocol_hash_recomputed"),
+    "run_code_sha_mutated": (_mutate_run_code_sha, "run_code_sha_format"),
+    "dirty_tree_declared": (_mutate_dirty_tree,
+                            "working_tree_clean_before_execution"),
+    "every_fit_reports_nan": (_mutate_all_nan, "nan_fits"),
+    "fabricated_mask_hashes": (_mutate_mask_hashes, "mask_hash_recomputation"),
+    "fabricated_mean_scores": (_mutate_mean_scores, "selection_mean_scores"),
+    "q_strict_tripled": (_mutate_q_strict, "s2_identity"),
     "tampered_selected_k": (_mutate_selection, "selection_recomputation"),
     "dropped_one_fit": (_mutate_drop_fit, "fit_row_count"),
     "seed_rescue": (_mutate_seed, "seed_rule"),
