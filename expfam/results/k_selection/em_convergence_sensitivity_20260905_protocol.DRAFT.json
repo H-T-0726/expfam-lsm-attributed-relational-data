@@ -1,11 +1,10 @@
 {
   "status": "DRAFT",
-  "status_note": "NOT FROZEN. This file is a preregistration DRAFT written before any fit of this experiment exists. It carries no protocol_hash on purpose: a hash here would look like a freeze. Freezing is a separate, later commit that (i) renames this to em_convergence_sensitivity_20260905_protocol.json, (ii) adds protocol_hash, and (iii) happens only after the replication gate passes and after a human authorises production under CLAUDE.md section 6.",
+  "status_note": "NOT FROZEN. Preregistration DRAFT. The runner, the auditor and the tests now exist (implementation phase), but no fit of this experiment has been run: no production, no replication gate, no pilot. This file carries no protocol_hash on purpose -- a hash here would look like a freeze. The runner computes its own hash from its frozen body at run time; freezing is a separate, later commit that records that hash, and it happens only after a human authorises production under CLAUDE.md section 6.",
   "experiment_id": "em_convergence_sensitivity_20260905",
   "protocol_version": "draft-1",
   "written_at": "2026-09-05",
   "design_document": "reports/k_selection/em_convergence_sensitivity_design_20260905.md",
-
   "research_question": "Does relaxing the fixed 8-iteration optimization budget materially change the selected-K pattern under the otherwise frozen clean-generator protocol?",
   "what_this_is_not": [
     "not a proof or a test of K-selection consistency",
@@ -13,7 +12,6 @@
     "not a proposal of a new selection criterion",
     "not tuning aimed at making K=5 win"
   ],
-
   "baseline": {
     "run_dir": "expfam/results/k_selection/clean_true_k_asymptotics_20260904",
     "protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
@@ -21,7 +19,6 @@
     "fits": 896,
     "role": "paired control arm; NOT re-run, NOT modified, NOT regenerated"
   },
-
   "held_fixed_from_baseline": {
     "generator_version": "canonical-clean-v1",
     "family_x": "poisson",
@@ -29,12 +26,27 @@
     "d": 15,
     "L": 5,
     "test_ratio": 0.2,
-    "candidate_k": [1, 2, 3, 4, 5, 6, 7],
-    "starts": [1, 2],
+    "candidate_k": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "starts": [
+      1,
+      2
+    ],
     "tie_tolerance": 1e-12,
     "tie_rule": "smallest K among ties",
     "selection_aggregation": "unweighted mean over the two starts",
-    "criteria": ["S1_heldout_predictive", "S2_q_based", "S3_plugin_conditional"],
+    "criteria": [
+      "S1_heldout_predictive",
+      "S2_q_based",
+      "S3_plugin_conditional"
+    ],
     "numerics_mode": "consistent",
     "lineage": "E (DualExpFamLSMConsistent, experimental prototype)",
     "data_seed_formula": "DATA_SEED_BASE + k_true*10000 + n*10 + replicate",
@@ -42,16 +54,31 @@
     "model_seed_formula": "MODEL_SEED_BASE + k_true*100000 + n*1000 + replicate*100 + k_est*10 + start",
     "seed_bases_source": "read from the baseline protocol.json, never retyped"
   },
-
   "the_only_thing_that_changes": "the optimization budget: num_iter 8 -> a single run of 40 iterations per fit, with the criteria evaluated at preregistered checkpoints",
-
   "scope": {
-    "k_true": [5],
-    "n": [75, 100, 150],
+    "k_true": [
+      5
+    ],
+    "n": [
+      75,
+      100,
+      150
+    ],
     "replicates_per_cell": 8,
     "replicate_selection": "ALL 8 replicates of every scoped cell; no subsetting, so no cherry-picking rule is needed",
-    "candidate_k": [1, 2, 3, 4, 5, 6, 7],
-    "starts": [1, 2],
+    "candidate_k": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "starts": [
+      1,
+      2
+    ],
     "em_runs": 336,
     "checkpoint_evaluations": 2016,
     "excluded": {
@@ -60,32 +87,58 @@
       "k_true_3": "only 4 replicates per cell; the budget contrast would rest on half the sample of K_TRUE=5"
     },
     "scope_is_result_informed": true,
-    "scope_is_result_informed_note": "The choice of K_TRUE=5 and of these three n IS informed by the baseline result. This is unavoidable -- the question is about that observed under-selection -- but it means this experiment is a targeted follow-up, not an independent test. The rule is fixed here, before any new data exists, and no outcome may change it."
+    "scope_is_result_informed_note": "The choice of K_TRUE=5 and of these three n IS informed by the baseline result. This is unavoidable -- the question is about that observed under-selection -- but it means this experiment is a targeted follow-up, not an independent test. The rule is fixed here, before any new data exists, and no outcome may change it.",
+    "alternative_under_review": {
+      "n": [
+        50,
+        75,
+        100,
+        150
+      ],
+      "em_runs": 448,
+      "checkpoint_evaluations": 2688,
+      "projected_hours": 6.14,
+      "status": "recommended, awaiting human decision at protocol freeze"
+    }
   },
-
   "optimization_budget": {
     "design": "single_long_run_with_checkpoints",
     "max_iterations": 40,
-    "checkpoints": [8, 12, 16, 24, 32, 40],
+    "checkpoints": [
+      8,
+      12,
+      16,
+      24,
+      32,
+      40
+    ],
     "baseline_checkpoint": 8,
     "rationale": "One run of 40 iterations costs 40 iterations; running 8/12/16/24/32/40 separately costs 132. The prefix property that makes the two equivalent is asserted in tools/research_audit/test_em_budget_nesting.py (N1) and is verified against the archive by the replication gate.",
     "adaptive_stopping": false,
-    "adaptive_stopping_note": "There is NO adaptive stopping rule. Every candidate K receives exactly the same number of iterations, so a stopping rule cannot favour or disfavour any K. Convergence is measured and reported, never used to stop, and never used to select K."
+    "adaptive_stopping_note": "There is NO adaptive stopping rule. Every candidate K receives exactly the same number of iterations, so a stopping rule cannot favour or disfavour any K. Convergence is measured and reported, never used to stop, and never used to select K.",
+    "primary_comparison": "checkpoint 8 versus checkpoint 40",
+    "intermediate_checkpoints_are_secondary": "12/16/24/32 describe the trajectory only. 40 is a BUDGET: it is never called converged, in the artifact, in the report or in any claim."
   },
-
   "convergence_diagnostics": {
     "used_for_stopping": false,
     "used_for_selection": false,
-    "purpose": "descriptive only",
-    "param_rel_change": "max( ||dF||_F / (||F||_F + 1e-12), |dw| / (|w| + 1e-12), |dw0| / (|w0| + 1e-12) ) between consecutive iterations",
-    "budget_stable_at_tau": "max param_rel_change over the last 4 iterations before the checkpoint < tau",
-    "tau_ladder": [0.01, 0.001, 0.0001],
-    "tau_ladder_note": "ALL THREE are reported. No single tau is designated 'the' convergence threshold, because choosing one after seeing the results is exactly the move this preregistration exists to prevent.",
-    "monte_carlo_floor_caveat": "L=5 latent draws are redrawn every iteration, so param_rel_change does not decay to zero even at a fixed point. Any tau is therefore a statement about the size of the Monte-Carlo jitter as much as about convergence, and the jitter may itself depend on K. This is an accepted, declared limitation of this design, not something it resolves.",
-    "q_trajectory": "recorded via the existing mstep_q_diagnostic hook (q_before / q_after around each M-step, on the same Z_samples)",
-    "q_trajectory_caveat": "q_before/q_after share one E-step's draws, so the within-iteration difference is a valid M-step monotonicity check, but the sequence ACROSS iterations is not a monotone objective and must not be read as one."
+    "purpose": "descriptive budget-stability only; not a formal convergence proof",
+    "primary_diagnostic": "gram_rel_change",
+    "gram_rel_change": "||F_t F_t^T - F_{t-1} F_{t-1}^T||_F / (1 + ||F_{t-1} F_{t-1}^T||_F). The latent space is identified only up to an orthogonal transform, so F itself can move a long way between iterations without the fitted distribution moving at all. F F^T is invariant to that rotation and therefore measures the part of the change that is real.",
+    "f_raw_change": "||F_t - F_{t-1}||_F / (1 + ||F_{t-1}||_F). Recorded, but MUST NOT be used on its own to call a fit stable: it counts rotation as movement.",
+    "w_change": "|w_t - w_{t-1}| / (1 + |w_{t-1}|)",
+    "w0_change": "|w0_t - w0_{t-1}| / (1 + |w0_{t-1}|)",
+    "denominator_choice": "mixed absolute-relative, 1 + |x| rather than |x| + eps: a pure relative change explodes when a parameter passes near zero, which for w and w0 is an ordinary event, not a signal.",
+    "stored_as_separate_columns": true,
+    "budget_stable_at_tau": "max gram_rel_change over the last 4 iterations before the checkpoint < tau",
+    "tau_ladder": [
+      0.01,
+      0.001,
+      0.0001
+    ],
+    "tau_ladder_note": "ALL THREE are reported. No single tau is designated the convergence threshold, because choosing one after seeing the results is exactly what this preregistration prevents.",
+    "monte_carlo_floor_caveat": "L=5 latent draws are redrawn every iteration, so none of these decays to zero at a fixed point. Every one of them is therefore a statement about the size of the Monte-Carlo jitter as much as about convergence, and the jitter may itself depend on K. This design does not resolve that; it declares it."
   },
-
   "primary_outcomes": [
     {
       "id": "P1",
@@ -110,7 +163,6 @@
     "cumulative runtime by checkpoint, candidate K and n",
     "S2 and S3 versions of P1 and P2"
   ],
-
   "interpretation_matrix": {
     "declared_before_any_new_fit": true,
     "A": {
@@ -135,7 +187,6 @@
     },
     "meta": "All four are scientific results. K=5 failing to win more often is NOT a failed experiment, and no outcome may trigger a protocol change, a re-run, a seed change or an added arm."
   },
-
   "pilot": {
     "name": "replication gate",
     "purpose": "prove that the new instrumented runner reproduces the archived baseline exactly at checkpoint 8, so that the paired comparison is a comparison of budgets and not of code paths",
@@ -145,46 +196,83 @@
     "estimated_runtime_s": 103,
     "pass_condition": "for all 14 fits, heldout_mean_log_score, q_strict, s2_q_based, s3_plugin_conditional and num_params are EXACTLY equal (bit-identical float repr) to the corresponding rows of the archived fit_results.csv, and train/test mask hashes match mask provenance",
     "on_fail": "BLOCKER. Production is not authorised. Do not adjust tolerances, do not switch to approximate comparison, do not proceed with an unpaired design.",
-    "freeze_rule": "The protocol is hashed and frozen BEFORE the pilot runs. The pilot may only return PASS or FAIL; it may not change any protocol field. If a field would have to change, the protocol is re-frozen as a new version and the pilot is re-run in full."
+    "freeze_rule": "The protocol is hashed and frozen BEFORE the pilot runs. The pilot may only return PASS or FAIL; it may not change any protocol field. If a field would have to change, the protocol is re-frozen as a new version and the pilot is re-run in full.",
+    "restrictions": "the gate is used ONLY for runtime confirmation, replication and instrumentation correctness. Its selected K and its recovery counts must not be looked at, and may not change max_iter, the checkpoints, the candidate K set, the replicates, n or the stopping rule. If runtime exceeds the pre-set abort threshold, the run stops and goes back to human review; it does NOT shrink itself."
   },
-
   "runtime_estimate": {
     "baseline_scope_seconds_at_8_iterations": 3886.7,
     "projection_method": "linear in iteration count; conservative because each fit also pays a fixed end-of-run cost that does not scale",
     "projected_hours_at_40_iterations": 5.4,
     "checkpoint_overhead_note": "six checkpoint evaluations per fit instead of one final evaluation; each costs one Q_strict, one held-out score and one S3 pass, all deterministic. Budget an additional allowance rather than assuming it is free.",
-    "abort_threshold": "if elapsed time exceeds 2x the projection, stop and write failure.json; do not resume"
+    "abort_threshold": "if elapsed time exceeds 2x the projection, stop and write failure.json; do not resume",
+    "n50_addition": {
+      "additional_fits": 112,
+      "additional_checkpoint_rows": 672,
+      "additional_hours": 0.74,
+      "three_point_hours": 5.4,
+      "four_point_hours": 6.14,
+      "note": "computed from the archive alone by run_em_convergence_sensitivity.py --plan-n. Adding n=50 costs +0.74 h (+14%) and removes the result-informed-n criticism, because {50,75,100,150} is then the baseline's whole n grid rather than a subset chosen after seeing which n under-selected.",
+      "recommendation": "adopt n = {50,75,100,150}. NOT changed here: scope is a human decision at freeze."
+    }
   },
-
   "artifact_requirements": {
     "per_checkpoint_row": [
-      "fit_index", "k_true", "n", "replicate", "k_est", "start",
-      "data_seed", "split_seed", "model_seed",
+      "fit_index",
+      "k_true",
+      "n",
+      "replicate",
+      "k_est",
+      "start",
+      "data_seed",
+      "split_seed",
+      "model_seed",
       "checkpoint_iteration",
-      "heldout_mean_log_score", "q_strict", "s2_q_based", "s3_plugin_conditional",
+      "heldout_mean_log_score",
+      "q_strict",
+      "s2_q_based",
+      "s3_plugin_conditional",
       "num_params",
-      "param_rel_change", "budget_stable_1e-2", "budget_stable_1e-3", "budget_stable_1e-4",
-      "q_before", "q_after", "q_diff", "mstep_decreased",
+      "gram_rel_change",
+      "f_raw_change",
+      "w_change",
+      "w0_change",
+      "max_gram_rel_change_last4",
+      "max_f_raw_change_last4",
+      "max_w_change_last4",
+      "max_w0_change_last4",
+      "budget_stable_gram_0.01",
+      "budget_stable_gram_0.001",
+      "budget_stable_gram_0.0001",
+      "w0_hat",
+      "w_hat",
       "cumulative_runtime_s",
-      "nan_iterations_so_far", "attempt_index"
+      "nan_iterations_so_far",
+      "attempt_index",
+      "checkpoint_state_digest"
     ],
     "per_fit_row": [
-      "attempts_used", "retry_events", "stopping_reason", "actual_iterations",
-      "nan_occurred", "nan_count_total_across_attempts",
-      "numerical_warnings", "train_mask_hash", "test_mask_hash",
-      "generator_version", "run_code_sha", "working_tree_clean"
+      "max_iter",
+      "actual_iterations",
+      "stopping_reason",
+      "retry_count",
+      "retry_seed",
+      "nan_detected",
+      "attempts_used",
+      "retry_events",
+      "runtime_s",
+      "train_mask_hash",
+      "test_mask_hash"
     ],
     "f08_resolution": {
       "problem": "em_runner resets nan_count at the top of every retry and breaks on the first clean attempt, so an internal NaN restart is invisible in the returned counters",
-      "fix": "the new runner owns its own iteration loop and appends {attempt, iteration, kind} to retry_events for every NaN event and every restart, and reports attempts_used; a value greater than 1 is a PAIRING FAILURE for that fit, recorded as such and never silently absorbed",
-      "status_in_this_draft": "planned, not implemented"
+      "fix": "the instrumented runner owns its iteration loop and records retry_event, retry_count, retry_seed, nan_detected, stopping_reason and actual_iterations. In production on_nan=fail: a NaN latent sample raises RetryDetected instead of restarting, and the sweep turns that into a fit failure. A restart re-seeds with seed+1000, so its first iterations are no longer the ones the archived baseline took and the pairing for that fit is void -- treating it as a failure is the honest handling, not an inconvenience.",
+      "status_in_this_draft": "IMPLEMENTED"
     },
     "not_recorded_and_why": {
       "gradient_norm": "the E-step Newton solve does not return its gradient; exposing it would change the model classes, which are shared with the historical lineage",
       "held_out_score_per_iteration": "recorded only at checkpoints, deliberately -- a per-iteration held-out trace invites using it as a stopping signal, which would be leakage"
     }
   },
-
   "prohibitions": [
     "no re-run of the archived 896-fit baseline",
     "no modification, regeneration or deletion of any archived artifact",
@@ -192,7 +280,6 @@
     "no protocol or criterion change after any fit of this experiment exists",
     "no promotion of lineage E results to manuscript evidence (Human Gate)"
   ],
-
   "claim_boundary": {
     "lineage": "E (experimental prototype); EXPERIMENT_REGISTRY records 原稿採用 ✗",
     "agreement_is_with": "K_TRUE, not K*",
@@ -204,10 +291,65 @@
       "that L=5 Monte-Carlo error is negligible"
     ]
   },
-
   "production_status": {
     "production_runs_so_far": 0,
     "new_production_fits_so_far": 0,
-    "authorisation": "NOT AUTHORISED. Production requires a human decision under CLAUDE.md section 6 after this draft is reviewed and frozen."
+    "replication_gate_runs_so_far": 0,
+    "authorisation": "NOT AUTHORISED. Production requires a human decision under CLAUDE.md section 6 after this draft is reviewed, the n scope is settled and the protocol is frozen."
+  },
+  "implementation": {
+    "runner": "tools/research_audit/run_em_convergence_sensitivity.py",
+    "instrumented_em": "expfam/src/experimental/em_runner_instrumented.py",
+    "auditor": "tools/research_audit/audit_em_convergence_sensitivity.py",
+    "tests": [
+      "tools/research_audit/test_em_convergence_sensitivity.py",
+      "tools/research_audit/test_em_budget_nesting.py",
+      "tools/research_audit/_em_budget_probe.py (child process; the Phase 8b suite forbids importing an EM runner into the test process)"
+    ],
+    "em_runner_unchanged": true,
+    "em_runner_unchanged_note": "expfam/src/experimental/em_runner.py is byte-unchanged. The instrumented loop is a separate module that mirrors it line for line; equivalence is measured (probe I1), not assumed, and is re-proved on the real cells by the replication gate."
+  },
+  "replication_gate": {
+    "purpose": "prove the new code path reproduces the archived baseline exactly at checkpoint 8, so the paired comparison compares budgets and not implementations",
+    "cell": {
+      "k_true": 5,
+      "n": 75,
+      "replicate": 1
+    },
+    "cell_selection_rule": "the first replicate of the smallest scoped n. Fixed by rule, written down before the gate was ever run, and derived in code as min(N_GRID) so it cannot be quietly re-picked.",
+    "fits": 14,
+    "max_iterations": 8,
+    "compared_fields": [
+      "data_seed",
+      "split_seed",
+      "model_seed",
+      "num_params",
+      "heldout_mean_log_score (S1)",
+      "q_strict",
+      "s2_q_based (S2)",
+      "s3_plugin_conditional (S3)",
+      "train_mask_hash",
+      "test_mask_hash"
+    ],
+    "selection_inputs_covered": "S1, S2 and S3 raw values plus num_params are exactly the inputs the frozen selector consumes, so agreement on them means selected K is reproduced by construction.",
+    "agreement_rule": "EXACT equality on every compared field",
+    "agreement_rule_justification": "csv writes Python floats with repr, which round-trips through float() without loss, so bit-identical comparison is technically achievable for every compared field. No tolerance is defined, because a tolerance here would only be a place for a real discrepancy to hide. runtime_s is excluded: it is wall-clock and is not reproducible.",
+    "excluded_fields": [
+      "runtime_s"
+    ],
+    "on_fail": "PRODUCTION AUTHORIZATION = NO. Stop. Do not loosen the comparison, do not switch to a tolerance, do not fall back to an unpaired design.",
+    "post_production_recheck": "the auditor re-compares checkpoint 8 of ALL fits in the final scope against the archive, so the guarantee is re-established over the whole run and not only over the gate cell (audit check replication_vs_baseline, BLOCKER on any mismatch).",
+    "status": "IMPLEMENTED, NOT RUN"
+  },
+  "checkpoint_invariance": {
+    "claim": "checkpoint evaluation consumes no randomness, mutates no optimiser state, and does not change the trajectory of a long run",
+    "is_a_production_gate": true,
+    "evidence": [
+      "I3: a 40-iteration run evaluated at six checkpoints ends bit-identically to one evaluated only at iteration 40",
+      "I2: checkpoint 8 of a 40-iteration run equals the whole of an 8-iteration run",
+      "I1: the instrumented runner reproduces em_runner exactly at the baseline budget",
+      "the criterion functions take no rng and are deterministic (verified by reading them)"
+    ],
+    "tests": "tools/research_audit/test_em_budget_nesting.py (I1/I2/I3, child process)"
   }
 }

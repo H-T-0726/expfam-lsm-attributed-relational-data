@@ -103,6 +103,59 @@ def test_the_runner_exposes_no_per_iteration_record_by_default(probe):
     assert probe["per_iteration_keys"] == ["mstep_q_history"]
 
 
+# ------------------------------------------------- the instrumented runner
+
+def test_i1_instrumented_runner_reproduces_em_runner_at_the_baseline_budget(probe):
+    """The property the replication gate will demand of the real cells.
+
+    If the instrumented loop and em_runner disagree here, then any difference
+    between checkpoint 8 and checkpoint 40 in production would confound "longer
+    budget" with "different code path", and the paired design collapses.
+    """
+
+    assert probe["instrumented_matches_em_runner"]
+
+
+def test_i2_checkpoint_eight_of_a_long_run_equals_a_short_run(probe):
+    """Checkpoints ARE the budget ladder, not an approximation of it."""
+
+    assert probe["checkpoint8_of_long_equals_short_run"]
+    assert probe["ladder_observed"] == [8, 12, 16, 24, 32, 40]
+
+
+def test_i3_checkpoint_evaluation_perturbs_nothing(probe):
+    """Evaluating at six checkpoints ends where evaluating only at 40 ends.
+
+    Consequence: checkpoint evaluation consumes no randomness and mutates no
+    optimiser state.  This is a production gate, not a nicety -- if it failed,
+    the ladder itself would be changing the thing it measures.
+    """
+
+    assert probe["checkpoints_do_not_perturb_the_run"]
+
+
+def test_the_instrumented_runner_has_no_adaptive_stopping(probe):
+    assert probe["stopping_reason"] == "fixed_budget"
+    assert probe["actual_iterations"] == 40
+    assert probe["retry_count"] == 0 and probe["nan_detected"] is False
+
+
+def test_the_instrumented_runner_records_rotation_invariant_diagnostics(probe):
+    """Raw parameter change alone must not be the only stability measure.
+
+    The latent space is identified only up to an orthogonal transform, so F can
+    move without the fitted distribution moving; F F^T cannot.  Both are
+    recorded, per criterion and per window.
+    """
+
+    assert probe["diagnostic_keys_present"] == [
+        "f_raw_change", "gram_rel_change",
+        "max_f_raw_change_last4", "max_gram_rel_change_last4",
+        "max_w0_change_last4", "max_w_change_last4",
+        "w0_change", "w_change",
+    ]
+
+
 def test_nan_retry_is_invisible_in_the_returned_counters():
     """F-08, restated as a test so the new runner cannot inherit it silently.
 

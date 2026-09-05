@@ -1,6 +1,8 @@
 # EM 収束感度実験 — 設計・事前登録ドラフト（2026-09-05）
 
-**status: DESIGN / PREREGISTRATION ONLY。production 実験は実行していない。**
+**status: IMPLEMENTATION PHASE。protocol は DRAFT のまま、production 実験・replication gate・pilot はいずれも実行していない。**
+
+runner・auditor・test は実装済み（§16）。**fit は 0 件。**
 
 | | |
 |---|---|
@@ -504,3 +506,184 @@ Reviewer A（科学設計・統計）と Reviewer B（再現性・実装・leaka
 
 **§3 の検証に使った EM は、`n=24` の決定論的ユニットテスト 1 種類のみ**
 （`test_em_budget_nesting.py`）。production fit ではなく、artifact も書かない。
+
+
+---
+
+## 16. 実装フェーズ（2026-09-05、設計レビュー承認後）
+
+設計レビューで承認された内容を実装した。**protocol は DRAFT のままで、
+production も replication gate も pilot も実行していない（fit 0 件）。**
+
+### 16.1 成果物
+
+| 種別 | ファイル |
+|---|---|
+| instrumented EM | `expfam/src/experimental/em_runner_instrumented.py` |
+| sweep runner | `tools/research_audit/run_em_convergence_sensitivity.py` |
+| independent auditor | `tools/research_audit/audit_em_convergence_sensitivity.py` |
+| tests | `tools/research_audit/test_em_convergence_sensitivity.py`（30 件）、`test_em_budget_nesting.py`（11 件）、`_em_budget_probe.py`（子プロセス） |
+
+**`expfam/src/experimental/em_runner.py` は byte 単位で不変。** 既存の共有実装は
+書き換えず、反復ループを持つ別モジュールを新設した（レビュー §4 の指示どおり
+experimental wrapper / instrumentation path を優先）。
+
+### 16.2 Primary comparison の確定
+
+**checkpoint 8 対 checkpoint 40 が primary。** 12/16/24/32 は trajectory を記述する
+secondary diagnostic であり、**40 反復を「converged」とは呼ばない**。
+protocol JSON の `intermediate_checkpoints_are_secondary` に明記した。
+
+### 16.3 収束診断の hardening（レビュー §2）
+
+raw parameter change だけを唯一の指標にしない。**潜在空間は直交変換までしか
+決まらない**ので、`F` 自体は分布が動かなくても大きく動きうる。回転不変な
+Gram 変化を主指標にした。
+
+| 列 | 定義 | 役割 |
+|---|---|---|
+| `gram_rel_change` | `‖F_tF_tᵀ − F_{t−1}F_{t−1}ᵀ‖_F / (1 + ‖F_{t−1}F_{t−1}ᵀ‖_F)` | **主指標。**回転不変 |
+| `f_raw_change` | `‖F_t − F_{t−1}‖_F / (1 + ‖F_{t−1}‖_F)` | 保存はする。**単独で「収束」と認定しない**（回転を変化として数える） |
+| `w_change` | `\|Δw\| / (1 + \|w_{t−1}\|)` | mixed absolute-relative |
+| `w0_change` | `\|Δw0\| / (1 + \|w0_{t−1}\|)` | 同上 |
+
+**分母を `1 + |x|` にした理由**: 純粋な相対変化は パラメータ が 0 近傍を通過すると
+発散する。`w` と `w0` にとってそれは異常ではなく日常なので、mixed
+absolute-relative scaling で有界にした。閾値ではなくスケーリングの選択であり、
+結果を見る前に固定してある。
+
+4 つとも**個別の列**として artifact に保存し、直近 4 反復の最大値も
+`max_*_last4` として保存する。budget-stable 判定は `gram_rel_change` で行い、
+τ ∈ {1e-2, 1e-3, 1e-4} を**全部**列として持つ。
+
+**すべて descriptive budget-stability diagnostics であり、formal convergence proof
+ではない。** `L=5` を毎反復引き直すので、どれも固定点で 0 に収束しない。
+auditor はこれを LOW finding として毎回明示的に記録する。
+
+### 16.4 Replication gate（レビュー §3）
+
+| 項目 | 内容 |
+|---|---|
+| セル選択規則 | **最小の scoped `n` の replicate 1**。コード上 `GATE_N = min(N_GRID)` として導出され、結果を見て選び直せない |
+| 対象 | `K_TRUE=5, n=75, replicate=1`、7 K × 2 start = **14 fits**、`max_iter=8` |
+| 比較フィールド | `data_seed` / `split_seed` / `model_seed` / `num_params` / `heldout_mean_log_score`(S1) / `q_strict` / `s2_q_based`(S2) / `s3_plugin_conditional`(S3) / `train_mask_hash` / `test_mask_hash` |
+| selected-K 再計算に必要な値 | S1・S2・S3 の raw 値と `num_params` は**凍結セレクタの入力そのもの**。ここが一致すれば selected K は構成上再現される |
+| 一致規則 | **全フィールド完全一致（tolerance なし）** |
+| 一致規則の根拠 | csv は Python float を repr で書き、`float()` で無損失に往復する。つまり bit-identical 比較が**技術的に可能**である。可能なのに tolerance を置けば、それは実際の食い違いが隠れる場所にしかならない |
+| 除外 | `runtime_s` のみ（wall-clock で再現不能） |
+| 不合格時 | **PRODUCTION AUTHORIZATION = NO** で停止。比較を緩めない、tolerance に切り替えない、非 paired 設計に逃げない |
+| production 後 | auditor が**最終 scope の全 fit** について checkpoint 8 を旧 artifact と再照合（`replication_vs_baseline`、不一致は BLOCKER） |
+
+テストで、archive の値を 1 ulp ずらしただけで gate が落ちることを確認済み
+（`test_gate_comparison_detects_a_mutated_value`）。
+
+### 16.5 NaN / internal retry（レビュー §4）
+
+新 runner は production で `on_nan="fail"`。NaN 潜在サンプルを検出したら
+**restart せずに `RetryDetected` を送出**し、sweep がそれを fit failure として
+扱う。restart は `seed+1000` で再シードするので、その run の先頭反復はもはや
+baseline が辿ったものではなく、当該 fit の pairing は無効になる。**隠さず
+失敗として扱うのが正しい扱い**であって、不都合だから消すのではない。
+
+artifact には `retry_event` / `retry_count` / `retry_seed` / `stopping_reason` /
+`nan_detected` / `attempts_used` / `actual_iterations` を記録する。**F-08 は
+この runner では解決済み。**
+
+### 16.6 Checkpoint invariance（レビュー §5、production gate）
+
+子プロセス probe で実測し、テストに固定した。
+
+| ID | 主張 | 結果 |
+|---|---|---|
+| **I1** | instrumented runner は baseline 予算で `em_runner` を**完全再現**（`Q_strict`・BIC・`num_params`・`Z`・`F`・`w`・`w0`） | ✅ |
+| **I2** | 40 反復 run の checkpoint 8 は 8 反復 run 全体と一致 | ✅ |
+| **I3** | checkpoint を 6 個入れた 40 反復 run は、40 だけで評価した run と**同じ終点** | ✅ |
+
+I3 が「RNG を消費しない・optimizer/model state を書き換えない・trajectory を
+変えない」の実測的な証明である。criteria 評価関数がいずれも `rng` を受け取らない
+決定論的関数であることもコードで確認済み。**これは production gate であり、
+落ちたら production しない。**
+
+### 16.7 独立 auditor（レビュー §9）
+
+`audit_em_convergence_sensitivity.py` は **runner を import しない**。
+seed 式・mask 構成・S2 恒等式・セレクタ・期待件数をすべて protocol body から
+独立に再記述しており、runner のバグが自分自身を承認できないようにしてある
+（テストで import が無いことを検査）。
+
+検査項目: 期待 fit / checkpoint 件数、`fit_index` の密性と重複、checkpoint ladder の
+一致、seed 式の再計算、mask hash の再構成、非有限値、`s2 = −2·q_strict + p·log n`、
+`num_params` が K のみの関数であること、retry / NaN メタデータの整合、
+**checkpoint 8 と旧 artifact の完全一致**、raw 値からの selected K 独立再計算、
+runtime 会計、protocol hash の再計算、**adaptive stopping が存在しないこと**
+（`stopping_reason` が全件 `fixed_budget`、`actual_iterations == max_iter`）。
+
+### 16.8 テスト（レビュー §10）
+
+| 要求 | テスト | 結果 |
+|---|---|---|
+| 8 vs 40 prefix nesting | `test_n1_...`, `test_i2_...` | ✅ |
+| checkpoint evaluation RNG invariance | `test_i3_...` | ✅ |
+| checkpoint state nonmutation | `test_i3_...`, `test_i1_...` | ✅ |
+| replication gate detects mutation | `test_gate_comparison_detects_a_mutated_value` | ✅ |
+| auditor detects missing/duplicate checkpoint | `test_auditor_detects_a_missing_checkpoint` / `..._a_duplicate_checkpoint` | ✅ |
+| auditor detects altered score | `test_auditor_detects_an_altered_score` | ✅ |
+| auditor detects retry metadata mismatch | `test_auditor_detects_retry_metadata_mismatch` | ✅ |
+| em_runner safety tripwire remains green | `test_no_em_runner_enters_this_process`, `test_the_runner_imports_em_lazily` | ✅ |
+
+加えて auditor の改竄検出を 8 種（S2 恒等式・隠れた NaN・adaptive stopping・
+短い run・偽装 seed・偽装 mask hash・改竄 protocol body・不可能な runtime 会計）
+固定した。auditor の fixture は **checkpoint 8 に archive の実値**を使うので、
+replication チェックが正しい理由で通る。
+
+### 16.9 `n=50` を足した場合の追加 runtime（レビュー §6）
+
+**既存 runtime artifact のみ**から算出（`run_em_convergence_sensitivity.py --plan-n`）。
+
+| scope | fits | checkpoint rows | 投影時間 |
+|---|---:|---:|---:|
+| `n = {75, 100, 150}`（現案） | 336 | 2016 | **5.40 h** |
+| `n = {50, 75, 100, 150}` | 448 | 2688 | **6.14 h** |
+| **差分（n=50 の追加分）** | **+112** | **+672** | **+0.74 h（+14%）** |
+
+**推奨: `n = {50, 75, 100, 150}` を採用する。** +0.74 h で
+「result-informed n selection」批判が実質的に消える — 4 点にすれば baseline の
+`n` グリッド**全体**になり、「どの `n` が under-selection したかを見てから
+部分集合を選んだ」ではなくなるからである。A-1 は限界の宣言でしか対処できて
+いなかったが、これは**設計で消せる**。
+
+**ただし scope は勝手に変更しない。**DRAFT は `{75,100,150}` のままで、
+4 点案を `scope.alternative_under_review` に併記した。**protocol freeze 前の
+human decision とする。**
+
+### 16.10 pilot 規則（レビュー §7）
+
+gate は **runtime 確認・replication 確認・instrumentation correctness のみ**に使う。
+**gate の selected K や K recovery を見て `max_iter` / checkpoints / candidate K /
+replicate / `n` / stopping rule を変更してはならない。** runtime が事前 abort
+閾値を超えた場合は**自動縮小せず human review へ戻す**。
+
+### 16.11 実装フェーズの敵対レビュー（第 2 巡）
+
+| ID | severity | 指摘 | 対応 | 状態 |
+|---|---|---|---|---|
+| C-1 | **BLOCKER** | 新 runner が baseline と数値的に一致する保証がない | probe I1 で `em_runner` との**完全一致**を実測し、テストに固定。実セルでは replication gate が再証明する | **解消** |
+| C-2 | **HIGH** | checkpoint 評価が trajectory を変えていないか | I3 で 6 checkpoint 版と 1 checkpoint 版の**終点一致**を実測 | **解消** |
+| C-3 | **HIGH** | 既存 `em_runner` を改造すれば全歴史結果の意味が変わる | **byte 不変**。別モジュールで mirror | **解消** |
+| C-4 | **HIGH** | auditor が runner を import すれば自己承認になる | import 禁止をテストで強制。seed 式・mask・セレクタを独立再記述 | **解消** |
+| C-5 | MEDIUM | `f_raw_change` だけを見ると回転を収束の失敗と誤読する | `gram_rel_change` を主指標にし、`f_raw_change` 単独使用を禁止と明記 | **解消** |
+| C-6 | MEDIUM | `n` scope が result-informed のまま | §16.9 で 4 点案の追加コストを提示し**推奨**。決定は human gate | **提示済み・決定待ち** |
+| C-7 | MEDIUM | `checkpoint_state_digest` は改竄検出に足りるか | 足りない。**state が一致したことの補助**であって改竄防止ではないと明記。実際の防御は checkpoint 8 の archive 照合 | **限界として受理** |
+| C-8 | LOW | `L=5` の MC 床は依然未解決 | A-3 / B-6 と同じ。解決しないと宣言済み | **限界として受理** |
+
+**結果: BLOCKER 0 / HIGH 0。**
+
+### 16.12 このフェーズでも実行していないこと
+
+- production 実験、新規 production fit、**replication gate の実行**、pilot の実行
+- protocol の freeze（DRAFT のまま。`protocol_hash` を JSON に置いていないのも意図的）
+- 既存 artifact の変更・再生成・削除
+- push / PR / merge / Issue 操作
+
+**実行した EM は `n=24` の決定論的 probe（子プロセス）1 種類のみ。**
+production fit ではなく、artifact も書かない。
