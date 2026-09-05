@@ -1,5 +1,8 @@
 # EM 収束感度実験 — 設計・事前登録ドラフト（2026-09-05）
 
+> **現行の科学的設計は `em_convergence_sensitivity_CURRENT.md` にまとめてある。**
+> この文書は設計時点の検討記録であり、以降更新しない。
+
 **status: REMEDIATION ROUND 2（Codex 第 2 次レビュー NO-GO への対応後）。protocol は DRAFT のまま、production・replication gate・freeze・pilot はいずれも実行していない。fit は 0 件。**
 
 > **仕様の正本はこの文書ではない。**
