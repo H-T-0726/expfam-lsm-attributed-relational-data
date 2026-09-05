@@ -1,0 +1,544 @@
+{
+  "criteria": {
+    "S1": {
+      "by_cell": {
+        "K1/n100": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n150": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n50": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n75": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K3/n100": {
+          "exact": 3,
+          "mean_selected_k": 2.75,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            2,
+            3,
+            3
+          ],
+          "under": 1
+        },
+        "K3/n150": {
+          "exact": 4,
+          "mean_selected_k": 3.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "under": 0
+        },
+        "K3/n50": {
+          "exact": 1,
+          "mean_selected_k": 2.25,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            2,
+            2,
+            2,
+            3
+          ],
+          "under": 3
+        },
+        "K3/n75": {
+          "exact": 1,
+          "mean_selected_k": 2.75,
+          "over": 1,
+          "replicates": 4,
+          "selected_k": [
+            4,
+            2,
+            2,
+            3
+          ],
+          "under": 2
+        },
+        "K5/n100": {
+          "exact": 4,
+          "mean_selected_k": 4.5,
+          "over": 1,
+          "replicates": 8,
+          "selected_k": [
+            4,
+            6,
+            5,
+            5,
+            3,
+            3,
+            5,
+            5
+          ],
+          "under": 3
+        },
+        "K5/n150": {
+          "exact": 8,
+          "mean_selected_k": 5.0,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "under": 0
+        },
+        "K5/n50": {
+          "exact": 2,
+          "mean_selected_k": 2.625,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            2,
+            1,
+            1,
+            3,
+            2,
+            5,
+            2,
+            5
+          ],
+          "under": 6
+        },
+        "K5/n75": {
+          "exact": 0,
+          "mean_selected_k": 3.0,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            4,
+            4,
+            4,
+            3,
+            3,
+            3,
+            1,
+            2
+          ],
+          "under": 8
+        }
+      },
+      "total_cells": 64,
+      "total_exact": 39
+    },
+    "S2": {
+      "by_cell": {
+        "K1/n100": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n150": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n50": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K1/n75": {
+          "exact": 4,
+          "mean_selected_k": 1.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "under": 0
+        },
+        "K3/n100": {
+          "exact": 4,
+          "mean_selected_k": 3.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "under": 0
+        },
+        "K3/n150": {
+          "exact": 4,
+          "mean_selected_k": 3.0,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "under": 0
+        },
+        "K3/n50": {
+          "exact": 2,
+          "mean_selected_k": 2.5,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            2,
+            3,
+            2
+          ],
+          "under": 2
+        },
+        "K3/n75": {
+          "exact": 3,
+          "mean_selected_k": 2.75,
+          "over": 0,
+          "replicates": 4,
+          "selected_k": [
+            3,
+            2,
+            3,
+            3
+          ],
+          "under": 1
+        },
+        "K5/n100": {
+          "exact": 1,
+          "mean_selected_k": 3.625,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            4,
+            3,
+            4,
+            4,
+            4,
+            3,
+            2,
+            5
+          ],
+          "under": 7
+        },
+        "K5/n150": {
+          "exact": 7,
+          "mean_selected_k": 4.875,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            5,
+            5,
+            5,
+            4,
+            5,
+            5,
+            5,
+            5
+          ],
+          "under": 1
+        },
+        "K5/n50": {
+          "exact": 0,
+          "mean_selected_k": 1.75,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            2,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "under": 8
+        },
+        "K5/n75": {
+          "exact": 0,
+          "mean_selected_k": 3.25,
+          "over": 0,
+          "replicates": 8,
+          "selected_k": [
+            2,
+            4,
+            4,
+            3,
+            4,
+            4,
+            2,
+            3
+          ],
+          "under": 8
+        }
+      },
+      "total_cells": 64,
+      "total_exact": 37
+    },
+    "S3": {
+      "by_cell": {
+        "K1/n100": {
+          "exact": 0,
+          "mean_selected_k": 6.0,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            7,
+            4,
+            7,
+            6
+          ],
+          "under": 0
+        },
+        "K1/n150": {
+          "exact": 0,
+          "mean_selected_k": 6.75,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            7,
+            7,
+            7,
+            6
+          ],
+          "under": 0
+        },
+        "K1/n50": {
+          "exact": 0,
+          "mean_selected_k": 3.75,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            4,
+            3,
+            5,
+            3
+          ],
+          "under": 0
+        },
+        "K1/n75": {
+          "exact": 0,
+          "mean_selected_k": 6.25,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            7,
+            5,
+            6,
+            7
+          ],
+          "under": 0
+        },
+        "K3/n100": {
+          "exact": 0,
+          "mean_selected_k": 7.0,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "under": 0
+        },
+        "K3/n150": {
+          "exact": 0,
+          "mean_selected_k": 7.0,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "under": 0
+        },
+        "K3/n50": {
+          "exact": 0,
+          "mean_selected_k": 6.0,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            4,
+            7,
+            6,
+            7
+          ],
+          "under": 0
+        },
+        "K3/n75": {
+          "exact": 0,
+          "mean_selected_k": 6.25,
+          "over": 4,
+          "replicates": 4,
+          "selected_k": [
+            5,
+            6,
+            7,
+            7
+          ],
+          "under": 0
+        },
+        "K5/n100": {
+          "exact": 0,
+          "mean_selected_k": 6.875,
+          "over": 8,
+          "replicates": 8,
+          "selected_k": [
+            6,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7
+          ],
+          "under": 0
+        },
+        "K5/n150": {
+          "exact": 0,
+          "mean_selected_k": 7.0,
+          "over": 8,
+          "replicates": 8,
+          "selected_k": [
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7
+          ],
+          "under": 0
+        },
+        "K5/n50": {
+          "exact": 3,
+          "mean_selected_k": 5.875,
+          "over": 5,
+          "replicates": 8,
+          "selected_k": [
+            6,
+            5,
+            6,
+            7,
+            6,
+            5,
+            7,
+            5
+          ],
+          "under": 0
+        },
+        "K5/n75": {
+          "exact": 0,
+          "mean_selected_k": 6.875,
+          "over": 8,
+          "replicates": 8,
+          "selected_k": [
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            6,
+            7
+          ],
+          "under": 0
+        }
+      },
+      "total_cells": 64,
+      "total_exact": 3
+    }
+  },
+  "experiment_id": "clean_true_k_asymptotics_20260904",
+  "k_recovery_is_not_an_audit_gate": true,
+  "note": "S1 is the frozen held-out plug-in predictive score; S2 is the legacy Q-based criterion (NOT Schwarz BIC); S3 is a plug-in conditional criterion defined in this module and is NOT the source paper's Eq.(26). S4 is a structural diagnostic that selects no K.",
+  "protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+  "tier": "A",
+  "total_fits": 896
+}

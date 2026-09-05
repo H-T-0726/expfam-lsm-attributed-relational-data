@@ -377,3 +377,139 @@ Q-based complete-data criterion・ICL-type として扱う」という限定は�
 - 「Phase 8b の統合証拠は 420 fits である」（336 新規 + 42 anchor = **378**）
 - 「Phase 8b の `K_TRUE=5` での under-selection の原因を特定した」（原因は UNRESOLVED）
 - Attempt 1（`k_true_robustness_full_20260902/`）の部分結果を科学的根拠にすること
+
+---
+
+## 2026-09-04 forward update（true-K identifiability 監査の統合）
+
+根拠: `reports/identifiability/true_k_identifiability_hardened_20260904.md`
+（独立敵対レビュー済み: `true_k_identifiability_review_20260904.md`）。
+数値確認: `tools/research_audit/verify_identifiability_identities.py`。
+
+### M. 新規 KI-020 — canonical Poisson-Y はモーメントが存在しない領域を持ち、historical default `w=0.5` はその境界にある
+
+**重要度: 高**
+
+**事実（`[DERIVED]`、`[CONFIRMED_IN_REPOSITORY]`）:** canonical（clip なし）Poisson-Y
+
+```
+lambda_ij = exp(w0 + w z_i^T z_j),   Y_ij | Z ~ Poisson(lambda_ij)
+```
+
+について `E[lambda^r] = exp(r w0) (1 − r² w²)^{−K/2}` であり、
+
+```
+E[Y^r] < infinity   <=>   |w| < 1/r
+```
+
+すなわち **平均が有限なのは `|w| < 1`、分散が有限なのは `|w| < 1/2`**。
+
+`expfam/src/data_generator_expfam.py` の `_Y_DEFAULTS["poisson"]` は `w0=0.0, w=0.5` であり、
+これは **`|2w| = 1` ちょうど、分散発散の境界そのもの**である。
+
+**影響:**
+
+- `w = 0.5` の canonical Poisson-Y では **population の分散が存在しない**。
+  標本分散は `n` を増やしても収束せず、二乗誤差・相関・CLT 的な議論の前提が成立しない。
+- **properness の問題ではない。** 分布は proper でサンプルも a.s. 有限である。
+  発散するのは population のモーメントであって実現値ではない。
+
+**誤って書いてはいけないこと（敵対レビューで訂正した誤り）:**
+
+- 「clip があるから historical Poisson-Y のデータが有限である」— **誤り**。
+  実現値は clip の有無によらず a.s. 有限。加えて `w0=0, w=0.5` では `P(η > 10)` が
+  10⁻⁷ オーダーで **clip はほぼ発動しない**。
+- 「historical Poisson-Y のデータは分散無限の分布からのサンプルである」— **これも言えない**。
+  historical generator は `Z` を列 z-score しているので `‖z_j‖² ~ χ²_K` が成立せず（KI-021 G1）、
+  上の公式自体が historical データの分布には適用できない。**KI-020 は canonical model についての主張である。**
+
+**運用ルール:** canonical Poisson-Y を使う新規実験では **`|w| < 1/2` を generator gate として強制する**。
+`expfam/src/experimental/data_generator_canonical.py` は既定でこれを強制し、
+`allow_infinite_variance=True` を明示したときだけ通す。
+
+**関連ファイル:** `expfam/src/data_generator_expfam.py`（`_Y_DEFAULTS`）,
+`expfam/src/experimental/data_generator_canonical.py`,
+`reports/identifiability/true_k_identifiability_hardened_20260904.md` §11
+
+### N. 新規 KI-021 — historical synthetic generator は canonical model の literal generator ではない
+
+**重要度: 高**
+
+**事実（`[CONFIRMED_IN_REPOSITORY]`、`expfam/src/data_generator_expfam.py` を直接読んで確認）:**
+
+| ID | 箇所 | 実装 | canonical model との差 |
+|---|---|---|---|
+| G1 | L.122-123 / L.282-283 | `Z = normalize_zscore(Z, axis=0)` | **`Z` は iid `N(0,I_K)` ではない**。列標本平均 0・標本 SD 1 に強制されるため行間に依存が入る。`‖z_j‖² ~ χ²_K` も成立しない |
+| G2 | L.127-129 / L.288-290 | `F[i,:] = F[i,:]/‖F[i,:]‖ · sqrt(1−σ_ii)` | **`F` は自由パラメータでない**。全行が `‖f_l‖² = 1 − uniq`（既定 0.9）に固定 |
+| G3 | L.132-133 / L.297-298 | `X = Z @ F.T + noise; X = normalize_zscore(X, axis=0)` | **Gaussian-X は `N(Fz, Σ)` ではない**。返り値の `F`・`sigma` と最終的な `X` が literal に対応しない |
+| G4 | L.80 / L.304 / L.319 | `np.clip(eta, -20, 10)` | Poisson の hard clip。`λ ≤ e^10` に silent に切られる |
+| G5 | L.233 | `sigma_x_true: float = 0.1` | **宣言されているが一度も使われない**。Gaussian-X の雑音共分散は `uniq` から作られる |
+| G6 | Bernoulli 各所 | `np.clip(eta, -500, 500)` | **数値的に無害**。`sigmoid(±500)` は倍精度で既に飽和しておりモデルを変えない。G4 と同列に扱わない |
+| G7 | Gaussian-Y | `rng.normal(0.0, sigma_y_true, ...)` | numpy の第 2 引数は標準偏差。`CLAUDE.md` の規約と整合。**問題なし** |
+
+**影響:**
+
+- **historical の数値結果を無効化するものではない。** それらは「当該 generator が生成したデータ上での観測」として有効である。
+- 言えなくなるのは **「canonical model から well-specified に生成したデータで検証した」という強い読み方**だけである。
+  G1・G3 により、推定器が仮定するモデルと生成過程が一致していない（mild misspecification）。
+- とくに **Poisson-X の識別可能性（`FF^T` のモーメント復元）は G1・G4 の下では前提が崩れる**。
+  Phase 7e / Phase 8b はいずれも `family_x=poisson` で `generate_dual_data` を使っているため、
+  **当該実験の well-specification はこの識別可能性命題によって保証されない。**
+- **G5 は API の不整合**である。`sigma_x_true` を明示指定した過去の呼び出しがあれば、
+  その意図と実際の生成条件が食い違っている。網羅確認は未実施（`[UNRESOLVED]`）。
+
+**運用ルール:**
+
+- **historical generator は変更しない。** forward-only の別モジュール
+  `expfam/src/experimental/data_generator_canonical.py`（`generator_version = canonical-clean-v1`）を使う。
+- historical generator 由来の結果と canonical clean generator 由来の結果を
+  **同じ表・図に混在させない**（KI-002 と同じ運用）。
+- 生成器を明記して引用する。判定方法: artifact の `generator_version` が
+  `canonical-clean-v1` なら clean、記録がなければ historical。
+
+**関連ファイル:** `expfam/src/data_generator_expfam.py`,
+`expfam/src/experimental/data_generator_canonical.py`,
+`reports/identifiability/canonical_clean_generator_spec_20260904.md`,
+`reports/identifiability/true_k_identifiability_hardened_20260904.md` §13
+
+### O. KI-010 / KI-019 の forward update — BIC が使えない理由は「非入れ子」ではない
+
+**KI-010 も KI-019 も取り消さない。** 次を追記する。
+
+Gaussian-Y（`w ≠ 0`）については `M_K ⊄ M_{K+1}`（モデル族が入れ子でない）ことを証明した。
+**しかし非入れ子が無効にするのは尤度比検定の χ² 近似と Wilks の定理であって、
+Schwarz BIC の導出ではない**（BIC はモデルごとの Laplace 近似であり、
+非入れ子モデルの比較に使うのは標準的である）。
+
+**Schwarz BIC がこのモデルで正当化されない実際の理由は次の 3 つである** `[DERIVED]`:
+
+1. **潜在変数モデルが特異である。** `O(K)` 回転不変性により Fisher 情報が退化し、
+   `rank(F) < K` や `w = 0` の縮退集合上でも退化する。
+   特異モデルでは `(p/2) log n` の罰則が RLCT に置き換わるが、**本モデルの RLCT は未知**
+   （`RESEARCH_MASTER.md` §14 U5）。
+2. **境界パラメータ**（`Σ_X ⪰ 0`、`σ_y² ≥ 0`、因子分析の `Ψ ⪰ 0`）。
+3. **有効標本数が未定義。** ノード数 `n` / dyad 数 `n(n−1)/2` / X 要素数 `nd` の 3 通りがあり、
+   `calc_bic_dual` は `log n` に**ノード数**を使う。さらに潜在変数 `Z ∈ R^{n×K}` は
+   `n` とともに増える incidental parameter であり、`Q_strict` は `Z` を完全データとして扱う一方
+   罰則 `p̂` は `Z` を数えない。
+
+**追加で記録する実装事実** `[CONFIRMED_IN_REPOSITORY]`（`expfam/src/utils_expfam.py`）:
+`num_params = kd − k(k−1)/2 + [d if X gaussian] + [1 if Y gaussian]`。
+`−k(k−1)/2` は `O(K)` 軌道の次元を既に引いている。
+**`w0` と `w` は数えられていない**（NOLTA 2024 の慣行）。
+Gaussian-Y では `K` の情報をもっぱら `w` が運ぶことが判明したため、
+この扱いは K 選択の文脈では検討に値する。ただし `K` に依存しない定数なので**順位には影響しない**
+（`RESEARCH_MASTER.md` §12.6 の既存判断と整合）。**「誤り」とは断定しない。**
+
+### P. 追加された「まだ主張してはいけないこと」（2026-09-04、identifiability 監査）
+
+- 「Poisson-X なら常に K が識別可能」（unclipped link・`rank(F)=K` の generic 条件が要る。KI-021）
+- 「Bernoulli では K は識別できない」（反例は `d=1` **かつ X 周辺のみ**。joint の反例ではない）
+- 「`w` の符号は識別されない」（単一 dyad 限定。**三角形からは識別される**）
+- 「`M_K` と `M_{K+1}` は互いに素」（`w=0` 切片で交わる）
+- 「BIC は非入れ子だから使えない」（**理由が誤り**。上記 O）
+- 「clip があるから historical Poisson-Y のデータが有限である」（KI-020）
+- 「held-out score は `K*` を推定している」**および**「していない」（どちらも未証明）
+- 「人工データの `K_TRUE` が真の潜在次元 `K*` である」（`K* ≤ K_TRUE` で等号は自明でない）
+- 「実データにおいて `K*` を推定している」（M-closed 仮定が成立しない）
+- 「K 選択の一致性を証明した」「n を増やせば必ず `K_TRUE` に収束する」（未解決のまま）
