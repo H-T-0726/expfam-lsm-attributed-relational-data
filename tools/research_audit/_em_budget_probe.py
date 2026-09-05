@@ -22,6 +22,7 @@ disk and no production fit is performed.
 from __future__ import annotations
 
 import json
+import math
 import pathlib
 import sys
 
@@ -114,6 +115,8 @@ def main() -> int:
     }
     report.update(_instrumented_probes(dataset, train, short_plain))
     report.update(_production_callback_probes(dataset, train))
+    report.update(_prefix_abort_probe(dataset, train))
+    report.update(_auditor_agreement_probe(dataset, train))
     json.dump(report, sys.stdout)
     return 0
 
@@ -183,6 +186,15 @@ def _instrumented_probes(dataset, train, reference) -> dict:
     }
 
 
+def _tiny_spec(RUN, **overrides):
+    body = dict(RUN.protocol_body_from_contract())
+    body.update({"n_grid": [N], "replicates": 1, "candidate_k": [K_EST],
+                 "max_iter": 40, "checkpoints": list(LADDER),
+                 "baseline_checkpoint": 8, "primary_checkpoint": 40})
+    body.update(overrides)
+    return RUN.Spec(body)
+
+
 def _production_callback_probes(dataset, train) -> dict:
     """H-02: exercise the ACTUAL production callback, not a stand-in.
 
@@ -193,11 +205,12 @@ def _production_callback_probes(dataset, train) -> dict:
         state.
     P2  A callback that tries to write into the state it is handed FAILS.  The
         arrays are read-only copies, so a scoring bug cannot silently perturb
-        the estimation path; the guarantee is structural, not a convention.
+        the estimation path.
     """
 
     import run_em_convergence_sensitivity as RUN
 
+    spec = _tiny_spec(RUN)
     n = dataset.X.shape[0]
     test = np.triu(~train, 1) & ~np.eye(n, dtype=bool)
     rows, cols = np.where(test)
@@ -210,7 +223,8 @@ def _production_callback_probes(dataset, train) -> dict:
         collected, states = [], {}
         callback = RUN.make_checkpoint_callback(
             identity=identity, dataset=dataset, y_test=y_test,
-            test_rows=rows, test_cols=cols, collected=collected, states=states)
+            test_rows=rows, test_cols=cols, collected=collected, spec=spec,
+            states=states)
         result = _instrumented(dataset, train, 40, checkpoints,
                                on_checkpoint=callback)
         return result, collected, states
@@ -233,7 +247,6 @@ def _production_callback_probes(dataset, train) -> dict:
                    and end_l["w"] == end_t["w"] and end_l["w0"] == end_t["w0"]
                    and end_l["q_strict"] == end_t["q_strict"])
 
-    # P2: a mutating callback must be refused by the array itself.
     def mutating(record):
         record["Z_est"][0, 0] = 1.0e9
 
@@ -247,9 +260,129 @@ def _production_callback_probes(dataset, train) -> dict:
         "production_callback_scores_match": bool(scores_match),
         "production_callback_state_match": bool(state_match),
         "production_callback_rows": len(ladder_rows),
-        "production_callback_states": len(ladder_states),
+        "production_callback_state_keys": sorted(
+            {k.split("_it")[-1][3:] or k for k in ladder_states})[:1] and
+        len(ladder_states),
         "callback_mutation_is_refused": bool(mutation_refused),
         "production_callback_columns": sorted(l40.keys()),
+    }
+
+
+def _prefix_abort_probe(dataset, train) -> dict:
+    """B2-03: a baseline-checkpoint mismatch must stop the loop, not be logged.
+
+    The callback is given an archive whose row for this fit is deliberately
+    wrong.  It must raise from INSIDE the checkpoint, so the EM loop unwinds
+    and iteration 9 is never entered -- which is what makes the check worth
+    having: catching it after iteration 40 would waste the whole run.
+    """
+
+    import run_em_convergence_sensitivity as RUN
+
+    spec = _tiny_spec(RUN)
+    n = dataset.X.shape[0]
+    test = np.triu(~train, 1) & ~np.eye(n, dtype=bool)
+    rows, cols = np.where(test)
+    y_test = dataset.Y[rows, cols]
+    identity = {"fit_index": 1, "k_true": K_TRUE, "n": n, "replicate": 1,
+                "k_est": K_EST, "start": 1, "data_seed": 0, "split_seed": 0,
+                "model_seed": SEED, "train_mask_hash": "x", "test_mask_hash": "y"}
+
+    # An archive row that is right in every field except one.
+    truthful, _ = [], None
+    collected_truth = []
+    honest = RUN.make_checkpoint_callback(
+        identity=identity, dataset=dataset, y_test=y_test, test_rows=rows,
+        test_cols=cols, collected=collected_truth, spec=spec)
+    _instrumented(dataset, train, 8, (8,), on_checkpoint=honest)
+    truth = collected_truth[-1]
+    del truthful
+
+    key = (K_TRUE, n, 1, K_EST, 1)
+    archive = {key: {field: repr(truth[field]) if isinstance(truth[field], float)
+                     else str(truth[field])
+                     for field in RUN.REPLICATION_FIELDS}}
+    archive[key]["q_strict"] = repr(float(truth["q_strict"]) + 1.0)
+
+    seen: list[int] = []
+    collected: list = []
+    callback = RUN.make_checkpoint_callback(
+        identity=identity, dataset=dataset, y_test=y_test, test_rows=rows,
+        test_cols=cols, collected=collected, spec=spec, archive=archive)
+    raised = None
+    try:
+        _instrumented(dataset, train, 40, LADDER, on_checkpoint=callback,
+                      on_iteration=seen.append)
+    except RUN.PrefixReplicationError as exc:
+        raised = exc
+
+    return {
+        "prefix_mismatch_raised": raised is not None,
+        "prefix_mismatch_is_dedicated_error": type(raised).__name__
+        if raised else None,
+        "prefix_max_iteration_entered": max(seen) if seen else None,
+        "prefix_iteration_nine_entered": 9 in seen,
+        "prefix_rows_kept": len(collected),
+        "prefix_problem_fields": [p.split(":")[0] for p in raised.problems]
+        if raised else [],
+    }
+
+
+def _auditor_agreement_probe(dataset, train) -> dict:
+    """The auditor's restated likelihoods must reproduce the runner's numbers.
+
+    Without this the auditor's "independent recomputation" would be an
+    independent computation of something else.
+    """
+
+    import run_em_convergence_sensitivity as RUN
+    import audit_em_convergence_sensitivity as AUDIT
+
+    body = dict(RUN.protocol_body_from_contract())
+    body.update({"n_grid": [N], "replicates": 1, "candidate_k": [2, 3],
+                 "max_iter": 8, "checkpoints": [4, 8],
+                 "baseline_checkpoint": 4, "primary_checkpoint": 8})
+    spec = RUN.Spec(body)
+    states, iteration_rows = {}, []
+    rows, fit_rows = RUN._run_cells(
+        RUN.build_cells(spec), spec=spec, max_iter=8, checkpoints=(4, 8),
+        archive_check=False, states=states, iteration_rows=iteration_rows,
+        progress_every=10_000)
+
+    regen = AUDIT.Regenerator(body)
+    worst = {"s1": 0.0, "q": 0.0, "s2": 0.0, "s3": 0.0}
+    for row in rows:
+        key = row["state_key"]
+        n, rep, k_est = int(row["n"]), int(row["replicate"]), int(row["k_est"])
+        ds, tr, _t, ri, ci, y_test = regen.get(n, rep)
+        z = np.asarray(states[f"{key}_Z"], dtype=np.float64)
+        zs = np.asarray(states[f"{key}_Zsamples"], dtype=np.float64)
+        f = np.asarray(states[f"{key}_F"], dtype=np.float64)
+        w0, w, var_z = (float(v) for v in states[f"{key}_scalars"])
+        params = AUDIT.num_params(k_est, int(body["d"]))
+        eta = w0 + w * (z @ z.T)
+        got = {
+            "s1": AUDIT.heldout_mean_log_score(y_test, eta[ri, ci]),
+            "q": AUDIT.q_strict(ds.X, ds.Y, zs, f, var_z, w0, w, tr),
+            "s3": AUDIT.s3_plugin_conditional(ds.X, ds.Y, z, f, w0, w, params,
+                                              n, tr),
+        }
+        got["s2"] = -2.0 * got["q"] + params * math.log(n)
+        want = {"s1": float(row["heldout_mean_log_score"]),
+                "q": float(row["q_strict"]),
+                "s2": float(row["s2_q_based"]),
+                "s3": float(row["s3_plugin_conditional"])}
+        for name in worst:
+            worst[name] = max(worst[name],
+                              abs(got[name] - want[name])
+                              / max(abs(want[name]), 1e-12))
+    return {
+        "auditor_agreement_worst_relative": worst,
+        "auditor_agreement_within_tolerance": all(
+            v <= AUDIT.RECOMPUTE_RTOL for v in worst.values()),
+        "auditor_agreement_checkpoints": len(rows),
+        "auditor_agreement_iteration_rows": len(iteration_rows),
+        "auditor_agreement_fits": len(fit_rows),
     }
 
 

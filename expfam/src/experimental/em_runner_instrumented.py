@@ -57,7 +57,7 @@ if str(_HERE) not in sys.path:
 from em_runner import build_model                              # noqa: E402
 from eval_utils import calc_Q_dual_strict_exp, calc_bic_exp    # noqa: E402
 
-RUNNER_VERSION = "em-instrumented-v2"
+RUNNER_VERSION = "em-instrumented-v3"
 
 #: Denominators use ``1 + |x|`` rather than ``|x| + eps``.  A pure relative
 #: change explodes when the parameter passes near zero, which for ``w`` and
@@ -178,6 +178,7 @@ def run_em_instrumented(
     stability_window: int = 4,
     on_nan: str = "fail",
     on_checkpoint: Callable[[dict[str, Any]], None] | None = None,
+    on_iteration: Callable[[int], None] | None = None,
 ) -> dict[str, Any]:
     """Run one MCEM fit, evaluating Q and BIC at each requested checkpoint.
 
@@ -259,6 +260,11 @@ def run_em_instrumented(
         eta_x_prev, eta_y_prev = _predictors(Z, F, w0, w, dyad_rows, dyad_cols)
 
         for iteration in range(1, int(max_iter) + 1):
+            # Announced BEFORE any work, so a test can prove which iterations
+            # were entered -- in particular that a checkpoint callback which
+            # raises stops the loop before the next one begins.
+            if on_iteration is not None:
+                on_iteration(iteration)
             f_before, w_before, w0_before = F.copy(), w, w0
 
             # ---- E-step (identical draw order to em_runner) ---------------
@@ -319,7 +325,10 @@ def run_em_instrumented(
                 record: dict[str, Any] = {
                     "iteration": iteration,
                     "Z_est": _read_only(Z_samples[:, :, -1]),
-                    "Z_samples": Z_samples,
+                    # The FULL Monte-Carlo draw the Q above was computed from.
+                    # Read-only, and archived, because without it no auditor
+                    # can recompute Q at this checkpoint (finding H2-01).
+                    "Z_samples": _read_only(Z_samples),
                     "F": _read_only(F), "sigma": _read_only(sigma),
                     "var_z": var_z, "w0": w0, "w": w, "model": model,
                     "q_strict": q_strict, "bic": float(bic),
@@ -340,6 +349,7 @@ def run_em_instrumented(
     return {
         "runner_version": RUNNER_VERSION,
         "checkpoint_records": checkpoint_records,
+        "iteration_diagnostics": step_diagnostics,
         "step_diagnostics": step_diagnostics,
         "actual_iterations": int(max_iter),
         "stopping_reason": "fixed_budget",

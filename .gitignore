@@ -50,3 +50,8 @@ CLAUDE.local.md
 
 # pytest
 .pytest_cache/
+
+# Runtime research areas: gate receipts and attempt staging.  These are
+# runtime evidence, not source, and must not dirty the tree whose cleanliness
+# is a production authorization condition.
+.local/

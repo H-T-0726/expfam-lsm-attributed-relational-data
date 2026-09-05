@@ -177,7 +177,8 @@ def test_h02_the_production_callback_does_not_change_the_run(probe):
     assert probe["production_callback_state_match"]
     assert probe["production_callback_scores_match"]
     assert probe["production_callback_rows"] == 6
-    assert probe["production_callback_states"] == 18   # Z, F, wpair per checkpoint
+    # Z, Z_samples, F, sigma and the scalar triple for each of six checkpoints
+    assert probe["production_callback_state_keys"] == 30
 
 
 def test_a_callback_that_writes_into_the_state_is_refused(probe):
@@ -195,6 +196,52 @@ def test_the_production_callback_emits_the_frozen_schema(probe):
     import run_em_convergence_sensitivity as RUN         # noqa: PLC0415
 
     assert probe["production_callback_columns"] == sorted(RUN.CHECKPOINT_COLUMNS)
+
+
+# ------------------------------- checkpoint 8 must stop before iteration 9
+
+def test_b2_03_a_baseline_mismatch_raises_before_iteration_nine(probe):
+    """Finding B2-03: the archive comparison happened after iteration 40.
+
+    Checking a prefix property at the end is not a prefix check -- it spends
+    the whole budget before noticing.  The comparison now runs inside the
+    checkpoint callback, so a fit whose first eight iterations are not the
+    archived ones unwinds immediately.
+    """
+
+    assert probe["prefix_mismatch_raised"]
+    assert probe["prefix_mismatch_is_dedicated_error"] == "PrefixReplicationError"
+    assert probe["prefix_max_iteration_entered"] == 8
+    assert probe["prefix_iteration_nine_entered"] is False
+
+
+def test_a_mismatched_fit_contributes_no_rows(probe):
+    """Nothing from a fit that failed the prefix check is kept.
+
+    Keeping its earlier checkpoints would be selecting the agreeing part of a
+    disagreeing run.
+    """
+
+    assert probe["prefix_rows_kept"] == 0
+    assert probe["prefix_problem_fields"] == ["q_strict"]
+
+
+# ------------------------------ the auditor recomputes the runner's numbers
+
+def test_the_auditor_reproduces_the_runner_s_scores(probe):
+    """The auditor restates S1, Q_strict, S2 and S3 rather than importing them.
+
+    Restating them is only worth something if the restatement is right, so the
+    two are compared on real fits: an independent computation of the wrong
+    quantity would be worse than no check at all.
+    """
+
+    assert probe["auditor_agreement_within_tolerance"]
+    worst = probe["auditor_agreement_worst_relative"]
+    assert set(worst) == {"s1", "q", "s2", "s3"}
+    assert max(worst.values()) == 0.0
+    assert probe["auditor_agreement_checkpoints"] == 8
+    assert probe["auditor_agreement_iteration_rows"] == 32
 
 
 def test_nan_retry_is_invisible_in_the_returned_counters():

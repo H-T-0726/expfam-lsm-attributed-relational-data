@@ -1,13 +1,22 @@
 # EM 収束感度実験 — 設計・事前登録ドラフト（2026-09-05）
 
-**status: REMEDIATION PHASE（Codex 独立レビュー NO-GO への対応後）。protocol は DRAFT のまま、production 実験・replication gate・pilot はいずれも実行していない。**
+**status: REMEDIATION ROUND 2（Codex 第 2 次レビュー NO-GO への対応後）。protocol は DRAFT のまま、production・replication gate・freeze・pilot はいずれも実行していない。fit は 0 件。**
+
+> **仕様の正本はこの文書ではない。**
+> 実験仕様の単一の source of truth は
+> `reports/k_selection/em_convergence_sensitivity_20260905_protocol.DRAFT.json`
+> の **`protocol` オブジェクトだけ**であり、それは runner の contract から
+> `--emit-draft` で生成される。**§1〜§16 は各ラウンド時点の設計記録**であって、
+> 当時の scope（3 点 `n`、336 runs、2016 rows、5.40 h）や当時の estimand の言い回しを
+> 含む。**それらは現行値ではない。**現行値は §18 と DRAFT protocol を見ること。
+> 歴史的記録は書き換えず、前へ向かって上書きする（`.claude/rules/historical-records.md`）。
 
 runner・auditor・test は実装済み（§16）。**fit は 0 件。**
 
 | | |
 |---|---|
 | experiment_id | `em_convergence_sensitivity_20260905` |
-| machine-readable draft | `expfam/results/k_selection/em_convergence_sensitivity_20260905_protocol.DRAFT.json` |
+| machine-readable draft（**仕様の正本**） | `reports/k_selection/em_convergence_sensitivity_20260905_protocol.DRAFT.json` |
 | baseline（対照） | `expfam/results/k_selection/clean_true_k_asymptotics_20260904/`（896 fits、`num_iter=8`） |
 | lineage | **E（`DualExpFamLSMConsistent`、experimental prototype）。本文採用不可** |
 | PRODUCTION RUNS THIS PHASE | **0** |
@@ -837,6 +846,95 @@ review へ戻す（digest だけ残す代替は、**later S1/S3 の独立再計�
 - production 実験、新規 production fit、pilot
 - protocol の freeze
 - 既存 artifact の変更・再生成・削除
+- push / PR / merge / Issue 操作
+
+**実行した EM は `n=24` の決定論 probe（子プロセス）のみ。**
+
+
+---
+
+## 18. Codex 第 2 次レビュー（NO-GO）への対応 — remediation round 2
+
+**7 件すべてを一次コードで再確認し、REJECT は 0 件、全件 ACCEPT した。**
+以下は finding ごとの確認結果と対応。**現行の scope と estimand はこの節が正本の要約であり、
+機械可読な正本は DRAFT protocol の `protocol` オブジェクトである。**
+
+### 18.0 現行仕様（単一の source of truth からの要約）
+
+| 項目 | 値 |
+|---|---|
+| `K_TRUE` | 5 |
+| `n` | **50, 75, 100, 150** |
+| replicates | 8 |
+| candidate K | 1..7 |
+| starts | 2 |
+| `L` | 5 |
+| `max_iter` | 40 |
+| checkpoints | 8, 12, 16, 24, 32, 40 |
+| **EXPECTED LONG RUNS** | **448** |
+| **EXPECTED CHECKPOINT ROWS** | **2688** |
+| **EXPECTED ITERATION ROWS** | **17920** |
+| gate cell | `n = min(n_grid) = 50`, replicate 1, K=1..7, start 1,2 = **14 fits** |
+| runtime | **約 6.14 h（operational estimate のみ。自動 abort なし）** |
+| 状態保存 | 52.05 MB 非圧縮（`Z`, `Z_samples`, `F`, `sigma`, scalars） |
+
+**Estimand（唯一の許容表現）**
+
+> Under identical data, masks, initialization and first-eight-iteration RNG
+> prefix, how does continuing the same `L=5` stochastic MCEM procedure from
+> iteration 8 to 40 change selected K?
+
+**禁止**: deterministic optimization effect / 8 iterations caused under-selection /
+criterion exonerated / convergence / consistency。
+
+### 18.1 BLOCKER
+
+| ID | 判定 | 一次確認 | 修正 | 検証 |
+|---|---|---|---|---|
+| **B2-01** protocol の source of truth が 1 つでない | **ACCEPT** | DRAFT を機械的に調べたところ、`protocol.n_grid = [50,75,100,150]` の**隣に** legacy な `scope.n = [75,100,150]` と `scope.em_runs = 336` が残っていた。`emit_draft` が既存文書へ `update()` していたため。legacy top-level キーは **21 個** | `emit_draft` を**全面置換**方式へ変更。DRAFT の top-level キーを 9 個に固定し、実験仕様は `protocol` のみ。runner は `RUNNER_CONTRACT` から body を生成し、production は**凍結ファイルから全 execution field を読む**（option A）**うえで** contract と突き合わせて 1 つでも違えば拒否（option B も併用） | `test_the_draft_holds_exactly_one_specification`、execution field 31 個の mutation test |
+| **B2-02** authorization / receipt chain が偽造可能かつ自己矛盾 | **ACCEPT** | `approved_run_code_sha` は**自分自身を含む commit** と一致せねばならず原理的に成立しない。gate receipt は tracked file で、commit すれば HEAD が動いて条件 C が壊れる | **trust anchor を human 作成の annotated git tag** に変更（tag 作成は HEAD も working tree も動かさない）。receipt は **`.local/research_gates/`（gitignore 済み）へ**。production は verdict だけでなく **receipt の全フィールド**を検証し、`environment_key` は receipt の environment オブジェクトから**再計算**して比較する | `test_the_approved_world_authorizes` ＋ 偽造 15 パターンの refusal test |
+| **B2-03** 全 fit の checkpoint-8 照合が iteration 40 の後 | **ACCEPT** | `_run_cells` は `run_em_instrumented` の**戻り値**を照合していた。prefix の性質を最後に確かめるのは prefix check ではない | 照合を**callback の中**へ移動し、不一致で `PrefixReplicationError` を送出。EM ループは巻き戻り、**iteration 9 に入らない** | 子プロセス probe で `prefix_max_iteration_entered = 8`、`prefix_iteration_nine_entered = False`、`prefix_rows_kept = 0` を実測 |
+| **B2-04** attempt / failure lifecycle が不完全 | **ACCEPT** | `ABANDONED` が無く、staging も無く、書き込みは非 atomic、停止した RUNNING の扱いが未定義 | attempt 専用 staging `.local/research_attempts/<exp>/<attempt_id>/`、状態機械 RUNNING → SUCCESS / FAILED / ABANDONED（**終端からの遷移は拒否**）、`os.replace` による atomic write、SUCCESS のときだけ最終 artifact へ export | 遷移テスト 4 件、auditor は SUCCESS 以外を BLOCKER |
+
+### 18.2 HIGH
+
+| ID | 判定 | 一次確認 | 修正 | 検証 |
+|---|---|---|---|---|
+| **H2-01** checkpoint state 不足 / later score を独立再計算していない | **ACCEPT** | NPZ は `Z, F, w0, w` のみで、**Q の計算に使った L 個の潜在サンプルが無い**ため Q は原理的に再計算不能だった | `Z_samples`（n×K×L）と `sigma`・`var_z` を追加保存（**52.05 MB 非圧縮**）。auditor は Poisson-X / Bernoulli-Y の対数尤度・`Q_strict`・S2 恒等式・S1・S3 を**すべて自前に書き直し**、再生成したデータと保存 state から**全 checkpoint を再計算**する | 実 fit との突き合わせで **S1・Q・S2・S3 の最大相対差 0.0**。later score の改竄 4 種が **audit FAILURE** |
+| **H2-02** start disagreement が誤り / P2 未実装 | **ACCEPT** | 旧実装は `v[0] != v[1]`（**生スコアが違うか**）で、ほぼ常に真。P2 は仕様だけで実装が無かった | start ごとに**独立に selector を回して選ばれた K を比較**する定義へ修正。P2 を実装し、`audit_p2_replicate.csv`（224 行）と `audit_p2_summary.csv`（28 行）を出力 | スコアが違っても同じ K を選ぶ fixture で **FALSE**、違う K を選ぶ fixture で **TRUE**。P2 は手計算値との**厳密一致**を検証 |
+| **H2-03** DRAFT / design に legacy scope・claim が残存 | **ACCEPT** | 上記 B2-01 のほか、design §§5-16 に 336 / 2016 / 5.40 h / gate `n=75` が残っていた | DRAFT は全面置換で legacy 0。design 冒頭に**「§1〜§16 は各ラウンド時点の設計記録であり現行値ではない」** banner を追加し、現行値は本節に集約。新規ファイル群には stale 用語・数値が存在しないことをテストで強制 | `test_current_files_carry_no_stale_scope_or_claim`（5 ファイル）、`test_the_draft_states_the_allowed_estimand_verbatim` |
+
+### 18.3 runtime 規則（レビュー §6）
+
+**自動 2× abort を科学 protocol から削除した。** runtime は estimand の一部ではなく、
+**個々の K fit を含めたり除いたりする根拠に絶対にしない**。
+`runtime_abort_rule = "none"` を protocol に明記し、auditor も検査する。
+6.14 h は **operational estimate のみ**。手動・プロセス中断が起きた場合は
+**attempt 全体が FAILED / ABANDONED** になり、部分的な科学解析はしない。
+
+### 18.4 callback immutability の限定（レビュー §14）
+
+callback には依然として live な `model` オブジェクトが渡る（S3 の評価に必要）。
+配列（`Z_est` / `Z_samples` / `F` / `sigma`）は **read-only コピー**なので書き込みは
+`ValueError` になり、これは実測済み。ただし **`model` 経由の変更まで構造的に
+封じてはいない**ので、immutability は **qualified** として記載する。
+実際の担保は「production と同じ callback を使った trajectory 一致テスト」である。
+
+### 18.5 対応後の残件
+
+**BLOCKER 0 / HIGH 0 / MEDIUM 0 / LOW 3。**
+
+| LOW | 内容 |
+|---|---|
+| 1 | `L=5` の MC 床。診断はすべて descriptive で、固定点でも 0 に収束しない |
+| 2 | auditor は `data_generator_canonical` を import する。**生成器自身の欠陥は捕まえられない**（他はすべて自前実装）。ただし最強の数値検査である archive との checkpoint-8 完全一致は生成器の正しさに依存しない |
+| 3 | `checkpoint_state_digest` は改竄防止ではない。state を編集すれば digest も再計算できる。実際の防御は archive 照合と auditor の再計算 |
+
+### 18.6 このラウンドでも実行していないこと
+
+- freeze commit / freeze tag の作成
+- replication gate の実行（frozen protocol も tag も無いので構造的に不可能）
+- production、新規 production fit
 - push / PR / merge / Issue 操作
 
 **実行した EM は `n=24` の決定論 probe（子プロセス）のみ。**
