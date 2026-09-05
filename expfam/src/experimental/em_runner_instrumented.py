@@ -12,14 +12,27 @@ that it can
     and breaks on the first clean attempt, so an internal restart is
     indistinguishable from a run that never had one -- finding F-08).
 
-The loop below is a deliberate line-for-line mirror of ``em_runner`` lines
-137-301: same retry schedule, same generator seeding, same informed
-initialisation, same E-step / M-step order, same end-of-run Q and BIC block.
-That is what makes checkpoint 8 of a 40-iteration run comparable to an
-archived 8-iteration fit, and it is verified rather than asserted -- the
-replication gate in ``tools/research_audit/run_em_convergence_sensitivity.py``
-requires bit-identical agreement with the archive before production is
-authorised.
+WHAT THE EQUIVALENCE CLAIM IS
+-----------------------------
+This is a **clean-path mirror for the frozen Poisson-X / Bernoulli-Y
+configuration**, not a line-for-line reimplementation of ``em_runner`` in
+general.  Precisely:
+
+  * On a run in which no NaN latent sample ever occurs, with
+    ``family_x='poisson'``, ``family_y='bernoulli'`` and
+    ``numerics_mode='consistent'``, the sequence of operations, the RNG
+    consumption and the end-of-run Q/BIC block match ``em_runner``.  That is
+    measured, not asserted (probe I1), and re-proved on the real cells by the
+    replication gate and by the all-fit checkpoint-8 comparison.
+  * The NaN / retry / exception paths are NOT the same.  ``em_runner``
+    restarts the whole run up to twice with ``seed + attempt*1000``; production
+    here raises :class:`RetryDetected` on the first NaN instead.  A restart
+    re-seeds, so its iterations are no longer the ones the archived baseline
+    took and that fit's pairing is void.  Consequently the scientific evidence
+    from this experiment covers the clean path only, and a NaN is an attempt
+    failure rather than a result.
+  * Families other than the frozen configuration are out of scope of the
+    equivalence claim entirely.
 
 Nothing here decides anything.  There is no adaptive stopping: every fit runs
 the full budget, so the iteration count cannot depend on K, on the data, or on
@@ -44,7 +57,7 @@ if str(_HERE) not in sys.path:
 from em_runner import build_model                              # noqa: E402
 from eval_utils import calc_Q_dual_strict_exp, calc_bic_exp    # noqa: E402
 
-RUNNER_VERSION = "em-instrumented-v1"
+RUNNER_VERSION = "em-instrumented-v2"
 
 #: Denominators use ``1 + |x|`` rather than ``|x| + eps``.  A pure relative
 #: change explodes when the parameter passes near zero, which for ``w`` and
@@ -52,6 +65,13 @@ RUNNER_VERSION = "em-instrumented-v1"
 #: keeps the diagnostic bounded there while staying scale-aware for large
 #: values.  Fixed here, before any result exists.
 _MIXED_OFFSET = 1.0
+
+#: Every per-iteration diagnostic.  Parameter-space movement (``f_raw``) is
+#: kept for comparison but is NOT sufficient on its own; ``gram`` is rotation
+#: invariant, and the two ``eta`` measures are what the likelihood actually
+#: sees.
+DIAGNOSTIC_KEYS = ("gram_rel_change", "f_raw_change", "w_change", "w0_change",
+                   "eta_x_rel_change", "eta_y_rel_change")
 
 
 class RetryDetected(RuntimeError):
@@ -75,19 +95,48 @@ def _frobenius(a: np.ndarray) -> float:
     return float(np.linalg.norm(np.asarray(a, dtype=np.float64)))
 
 
-def _step_diagnostics(f_now: np.ndarray, f_prev: np.ndarray,
-                      w_now: float, w_prev: float,
-                      w0_now: float, w0_prev: float) -> dict[str, float]:
+def _read_only(a: np.ndarray) -> np.ndarray:
+    """A copy the callback cannot write through.
+
+    The callback receives state the loop is still using.  Handing it a
+    writeable alias would let a scoring bug silently perturb the estimation
+    path, which is the one thing the checkpoint design must not permit.
+    """
+
+    out = np.array(a, dtype=np.float64, copy=True)
+    out.flags.writeable = False
+    return out
+
+
+def _predictors(z: np.ndarray, f: np.ndarray, w0: float, w: float,
+                dyad_rows: np.ndarray, dyad_cols: np.ndarray
+                ) -> tuple[np.ndarray, np.ndarray]:
+    """The two natural parameters the likelihood is actually a function of.
+
+    ``F`` and ``Z`` are identified only up to an orthogonal transform, and even
+    ``F F^T`` says nothing about where the latent positions went.  ``eta_X`` and
+    ``eta_Y`` are invariant to that rotation by construction and are what both
+    the objective and the held-out score consume, so movement in them is the
+    movement that matters.  ``eta_Y`` is evaluated on a FIXED dyad index set so
+    that the diagnostic is comparable across iterations and across budgets.
+    """
+
+    eta_x = z @ f.T
+    inner = np.einsum("ij,ij->i", z[dyad_rows], z[dyad_cols])
+    eta_y = w0 + w * inner
+    return eta_x, eta_y
+
+
+def _step_diagnostics(f_now, f_prev, w_now, w_prev, w0_now, w0_prev,
+                      eta_x_now, eta_x_prev, eta_y_now, eta_y_prev
+                      ) -> dict[str, float]:
     """Budget-stability diagnostics for one iteration.
 
-    ``gram_rel_change`` is the one to read first.  The latent space is only
-    identified up to an orthogonal transform, so ``F`` itself can move a long
-    way between iterations without the fitted distribution moving at all;
-    ``F F^T`` is invariant to that rotation and therefore measures the part of
-    the change that is real.  ``f_raw_change`` is kept beside it because it is
-    what a naive parameter-change rule would look at, and the gap between the
-    two is itself informative -- but it must NOT be used alone to call a fit
-    stable.
+    Read ``eta_x_rel_change`` and ``eta_y_rel_change`` first: they measure the
+    predictors.  ``gram_rel_change`` is next, being invariant to the rotation
+    that ``f_raw_change`` mistakes for movement.  ``f_raw_change`` is recorded
+    only so the gap between it and the invariant measures is visible; it must
+    NOT be used alone to call a fit stable.
     """
 
     gram_now = f_now @ f_now.T
@@ -99,21 +148,19 @@ def _step_diagnostics(f_now: np.ndarray, f_prev: np.ndarray,
                          / (_MIXED_OFFSET + _frobenius(f_prev))),
         "w_change": abs(w_now - w_prev) / (_MIXED_OFFSET + abs(w_prev)),
         "w0_change": abs(w0_now - w0_prev) / (_MIXED_OFFSET + abs(w0_prev)),
+        "eta_x_rel_change": (_frobenius(eta_x_now - eta_x_prev)
+                             / (_MIXED_OFFSET + _frobenius(eta_x_prev))),
+        "eta_y_rel_change": (_frobenius(eta_y_now - eta_y_prev)
+                             / (_MIXED_OFFSET + _frobenius(eta_y_prev))),
     }
 
 
-def _aggregate(diags: Sequence[dict[str, float]], window: int,
-               keys: Sequence[str]) -> dict[str, float]:
-    """Worst value of each diagnostic over the last ``window`` iterations."""
-
+def _aggregate(diags: Sequence[dict[str, float]], window: int) -> dict[str, float]:
     recent = list(diags)[-window:]
     if not recent:
-        return {f"max_{k}_last{window}": float("nan") for k in keys}
+        return {f"max_{k}_last{window}": float("nan") for k in DIAGNOSTIC_KEYS}
     return {f"max_{k}_last{window}": max(float(d[k]) for d in recent)
-            for k in keys}
-
-
-DIAGNOSTIC_KEYS = ("gram_rel_change", "f_raw_change", "w_change", "w0_change")
+            for k in DIAGNOSTIC_KEYS}
 
 
 def run_em_instrumented(
@@ -134,30 +181,17 @@ def run_em_instrumented(
 ) -> dict[str, Any]:
     """Run one MCEM fit, evaluating Q and BIC at each requested checkpoint.
 
-    Parameters that differ from ``em_runner.run_em_experimental``
-    ------------------------------------------------------------
-    checkpoints
-        Iteration numbers at which to evaluate.  Must be sorted, unique, at
-        least 1, and at most ``max_iter``.  ``max_iter`` itself does not have
-        to be a checkpoint, but in this experiment it always is.
-    on_checkpoint
-        Called with the live model state at each checkpoint, BEFORE the next
-        E-step overwrites it.  The sweep computes the held-out score and S3
-        inside this callback so that every criterion sees exactly the state an
-        equivalent short run would have ended on.  The callback must not
-        consume randomness and must not mutate the arrays it is given; the
-        checkpoint-invariance tests enforce that this holds for the sweep's
-        callback.
-    on_nan
-        ``'fail'`` (production) raises :class:`RetryDetected` instead of
-        restarting.  ``'legacy_retry'`` reproduces ``em_runner``'s behaviour
-        -- reset to the previous latent draw, and restart the whole run with
-        ``seed + attempt*1000`` if the attempt ends dirty -- and exists only so
-        that tests can exercise the path that the archived baseline used.
+    ``on_checkpoint`` is called with the live model state at each checkpoint,
+    BEFORE the next E-step overwrites it.  The sweep computes the held-out
+    score and S3 inside this callback so every criterion sees exactly the state
+    an equivalent short run would have ended on.  ``Z_est``, ``F``, ``sigma``
+    and the predictor arrays handed to it are read-only copies, so a callback
+    cannot write through into the estimation path.
 
-    Returns a dict with the final state plus ``checkpoint_records``,
-    ``retry_events``, ``retry_count``, ``retry_seed``, ``nan_detected``,
-    ``stopping_reason`` and ``actual_iterations``.
+    ``on_nan='fail'`` (production) raises :class:`RetryDetected` instead of
+    restarting.  ``'legacy_retry'`` reproduces ``em_runner``'s restart
+    behaviour and exists only so tests can exercise the path the archived
+    baseline used.
     """
 
     if on_nan not in ("fail", "legacy_retry"):
@@ -174,6 +208,13 @@ def run_em_instrumented(
 
     retry_events: list[dict[str, Any]] = []
     nan_detected = False
+
+    # Fixed dyad index set for the eta_Y diagnostic: the TRAIN dyads, in a
+    # deterministic order.  Train only -- no test dyad enters any recorded
+    # diagnostic, so the diagnostics cannot carry held-out information even in
+    # principle.
+    train_arr = np.asarray(train_mask, dtype=bool)
+    dyad_rows, dyad_cols = np.where(np.triu(train_arr, 1))
 
     for retry in range(max_retries + 1):
         # ---- mirror of em_runner: schedule, generator, informed init -------
@@ -215,6 +256,7 @@ def run_em_instrumented(
         step_diagnostics: list[dict[str, float]] = []
         checkpoint_records: list[dict[str, Any]] = []
         attempt_dirty = False
+        eta_x_prev, eta_y_prev = _predictors(Z, F, w0, w, dyad_rows, dyad_cols)
 
         for iteration in range(1, int(max_iter) + 1):
             f_before, w_before, w0_before = F.copy(), w, w0
@@ -254,14 +296,17 @@ def run_em_instrumented(
             if family_y == "gaussian":
                 model.calc_sigma_y(Y, Z_samples, w0, w)
 
-            step_diagnostics.append(
-                _step_diagnostics(F, f_before, w, w_before, w0, w0_before))
+            eta_x_now, eta_y_now = _predictors(Z, F, w0, w, dyad_rows, dyad_cols)
+            step_diagnostics.append(_step_diagnostics(
+                F, f_before, w, w_before, w0, w0_before,
+                eta_x_now, eta_x_prev, eta_y_now, eta_y_prev))
+            eta_x_prev, eta_y_prev = eta_x_now, eta_y_now
 
             # ---- checkpoint ------------------------------------------------
             if iteration in checkpoints:
                 # em_runner performs this same update before its final Q/BIC
                 # block; the next E-step overwrites it, so the estimation path
-                # is unchanged (measured, not assumed: test N2).
+                # is unchanged (measured, not assumed: probes N2 and I3).
                 model.params.update({"F": F, "sigma": sigma, "w0": w0, "w": w})
                 q_strict = float(calc_Q_dual_strict_exp(
                     X, Y, Z_samples, F, sigma, var_z, w0, w, model))
@@ -273,10 +318,10 @@ def run_em_instrumented(
                                          n_gaussian_x_cols=n_gauss_cols)
                 record: dict[str, Any] = {
                     "iteration": iteration,
-                    "Z_est": Z_samples[:, :, -1].copy(),
+                    "Z_est": _read_only(Z_samples[:, :, -1]),
                     "Z_samples": Z_samples,
-                    "F": F, "sigma": sigma, "var_z": var_z,
-                    "w0": w0, "w": w, "model": model,
+                    "F": _read_only(F), "sigma": _read_only(sigma),
+                    "var_z": var_z, "w0": w0, "w": w, "model": model,
                     "q_strict": q_strict, "bic": float(bic),
                     "num_params": int(npar),
                     "cumulative_runtime_s": round(time.perf_counter() - t0, 3),
@@ -284,8 +329,7 @@ def run_em_instrumented(
                     "attempt_index": retry,
                 }
                 record.update(step_diagnostics[-1])
-                record.update(_aggregate(step_diagnostics, stability_window,
-                                         DIAGNOSTIC_KEYS))
+                record.update(_aggregate(step_diagnostics, stability_window))
                 checkpoint_records.append(record)
                 if on_checkpoint is not None:
                     on_checkpoint(record)
@@ -308,4 +352,5 @@ def run_em_instrumented(
         "runtime_s": round(time.perf_counter() - t0, 3),
         "numerics_mode": numerics_mode,
         "on_nan": on_nan,
+        "dyad_count": int(dyad_rows.size),
     }

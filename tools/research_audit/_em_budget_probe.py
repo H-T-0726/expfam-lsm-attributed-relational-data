@@ -30,6 +30,7 @@ import numpy as np
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 EXPERIMENTAL = ROOT / "expfam" / "src" / "experimental"
 sys.path.insert(0, str(EXPERIMENTAL))
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
 import em_runner                                             # noqa: E402
 from em_runner_instrumented import run_em_instrumented         # noqa: E402
@@ -112,6 +113,7 @@ def main() -> int:
         "q_strict_long": long_diag["Q_strict"],
     }
     report.update(_instrumented_probes(dataset, train, short_plain))
+    report.update(_production_callback_probes(dataset, train))
     json.dump(report, sys.stdout)
     return 0
 
@@ -178,6 +180,76 @@ def _instrumented_probes(dataset, train, reference) -> dict:
         "diagnostic_keys_present": sorted(
             k for k in l40
             if k.endswith("_change") or k.startswith("max_")),
+    }
+
+
+def _production_callback_probes(dataset, train) -> dict:
+    """H-02: exercise the ACTUAL production callback, not a stand-in.
+
+    P1  A long run scored at every checkpoint by the production callback ends
+        bit-identically to one scored only at the terminal iteration: same RNG
+        endpoint, same Z, F, w, w0, Q and same terminal scores.  Intermediate
+        scoring therefore consumes no randomness and mutates no optimiser
+        state.
+    P2  A callback that tries to write into the state it is handed FAILS.  The
+        arrays are read-only copies, so a scoring bug cannot silently perturb
+        the estimation path; the guarantee is structural, not a convention.
+    """
+
+    import run_em_convergence_sensitivity as RUN
+
+    n = dataset.X.shape[0]
+    test = np.triu(~train, 1) & ~np.eye(n, dtype=bool)
+    rows, cols = np.where(test)
+    y_test = dataset.Y[rows, cols]
+    identity = {"fit_index": 1, "k_true": K_TRUE, "n": n, "replicate": 1,
+                "k_est": K_EST, "start": 1, "data_seed": 0, "split_seed": 0,
+                "model_seed": SEED, "train_mask_hash": "x", "test_mask_hash": "y"}
+
+    def scored(checkpoints):
+        collected, states = [], {}
+        callback = RUN.make_checkpoint_callback(
+            identity=identity, dataset=dataset, y_test=y_test,
+            test_rows=rows, test_cols=cols, collected=collected, states=states)
+        result = _instrumented(dataset, train, 40, checkpoints,
+                               on_checkpoint=callback)
+        return result, collected, states
+
+    laddered, ladder_rows, ladder_states = scored(LADDER)
+    terminal, terminal_rows, _ = scored((40,))
+
+    l40 = next(r for r in ladder_rows if r["checkpoint_iteration"] == 40)
+    t40 = terminal_rows[-1]
+    end_l = laddered["checkpoint_records"][-1]
+    end_t = terminal["checkpoint_records"][-1]
+
+    scores_match = all(
+        l40[field] == t40[field]
+        for field in ("heldout_mean_log_score", "q_strict", "s2_q_based",
+                      "s3_plugin_conditional", "num_params", "w0_hat", "w_hat",
+                      "checkpoint_state_digest"))
+    state_match = (np.array_equal(end_l["Z_est"], end_t["Z_est"])
+                   and np.array_equal(end_l["F"], end_t["F"])
+                   and end_l["w"] == end_t["w"] and end_l["w0"] == end_t["w0"]
+                   and end_l["q_strict"] == end_t["q_strict"])
+
+    # P2: a mutating callback must be refused by the array itself.
+    def mutating(record):
+        record["Z_est"][0, 0] = 1.0e9
+
+    try:
+        _instrumented(dataset, train, 8, (8,), on_checkpoint=mutating)
+        mutation_refused = False
+    except ValueError:
+        mutation_refused = True
+
+    return {
+        "production_callback_scores_match": bool(scores_match),
+        "production_callback_state_match": bool(state_match),
+        "production_callback_rows": len(ladder_rows),
+        "production_callback_states": len(ladder_states),
+        "callback_mutation_is_refused": bool(mutation_refused),
+        "production_callback_columns": sorted(l40.keys()),
     }
 
 

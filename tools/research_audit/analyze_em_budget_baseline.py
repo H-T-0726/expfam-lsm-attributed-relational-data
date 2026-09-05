@@ -42,7 +42,9 @@ BASELINE_NUM_ITER = 8
 # The proposed experiment's scope.  Kept here only so the runtime projection
 # and the protocol JSON cannot silently disagree; the authority is the JSON.
 PROPOSED_K_TRUE = 5
-PROPOSED_N = (75, 100, 150)
+# Settled by human decision on 2026-09-05: the baseline's WHOLE n grid,
+# so the scope is not a subset chosen after seeing which n under-selected.
+PROPOSED_N = (50, 75, 100, 150)
 PROPOSED_MAX_ITER = 40
 
 
@@ -80,11 +82,13 @@ def runtime_table(fits: list[dict[str, str]]) -> dict:
 def runtime_projection(fits: list[dict[str, str]]) -> dict:
     """Linear-in-iterations projection for the proposed scope.
 
-    The projection assumes runtime is proportional to the iteration count.
-    That is an APPROXIMATION: each fit also pays a fixed end-of-run cost for
-    Q_strict / BIC / S3, which does not scale with iterations, so a linear
-    projection OVER-estimates.  It is used deliberately as the conservative
-    direction for a runtime budget.
+    Linear in the iteration count.  It is an ESTIMATE, not a bound, because it
+    ignores two effects that push in opposite directions: it counts the
+    archive's fixed end-of-run Q/BIC/S3 cost as if it scaled with iterations
+    (over-estimate), while the new run pays that cost once per checkpoint --
+    six times per fit -- instead of once (under-estimate).  The operational
+    guard is the 2x abort threshold, which is a SAFETY STOP and not a
+    scientific inclusion criterion (finding M-02).
     """
 
     scoped = [r for r in fits
@@ -204,7 +208,7 @@ def render(report: dict) -> str:
         f"at num_iter={BASELINE_NUM_ITER}")
     for m, h in pr["projection_hours"].items():
         mark = "  <- proposed" if m == PROPOSED_MAX_ITER else ""
-        add(f"    num_iter={m:<3d} -> {h:5.2f} h (linear, conservative){mark}")
+        add(f"    num_iter={m:<3d} -> {h:5.2f} h (linear estimate){mark}")
     add("")
     ss = report["score_shape_k_true_5"]
     add(f"-- K_TRUE={PROPOSED_K_TRUE}: mean S1 held-out score by candidate K "

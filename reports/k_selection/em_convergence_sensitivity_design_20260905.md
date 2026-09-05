@@ -1,6 +1,6 @@
 # EM 収束感度実験 — 設計・事前登録ドラフト（2026-09-05）
 
-**status: IMPLEMENTATION PHASE。protocol は DRAFT のまま、production 実験・replication gate・pilot はいずれも実行していない。**
+**status: REMEDIATION PHASE（Codex 独立レビュー NO-GO への対応後）。protocol は DRAFT のまま、production 実験・replication gate・pilot はいずれも実行していない。**
 
 runner・auditor・test は実装済み（§16）。**fit は 0 件。**
 
@@ -362,14 +362,20 @@ held-out 1 回・S3 1 回、いずれも決定論的）。
 
 ## 9. 新しい artifact 要件
 
-**checkpoint 行**（fit × checkpoint = 2016 行）:
+> **この節は 2026-09-05 の設計時点の列案である。実装された正本のスキーマは
+> §17.4（M-04）で述べたとおり `--emit-draft` が生成する DRAFT protocol の
+> `artifact_schema` であり、テストが `CHECKPOINT_COLUMNS` / `FIT_COLUMNS` との
+> 完全一致を強制する。当時の案には `q_before/q_after/q_diff/mstep_decreased`
+> が含まれていたが、これらは保存しないと決めたので実装には無い。**
+
+**checkpoint 行**（当時の案、fit × checkpoint = 2016 行）:
 `fit_index, k_true, n, replicate, k_est, start, data_seed, split_seed, model_seed,
 checkpoint_iteration, heldout_mean_log_score, q_strict, s2_q_based,
 s3_plugin_conditional, num_params, param_rel_change, budget_stable_1e-2/1e-3/1e-4,
 q_before, q_after, q_diff, mstep_decreased, cumulative_runtime_s,
 nan_iterations_so_far, attempt_index`
 
-**fit 行**（336 行）:
+**fit 行**（当時の案、336 行）:
 `attempts_used, retry_events, stopping_reason, actual_iterations, nan_occurred,
 nan_count_total_across_attempts, numerical_warnings, train_mask_hash,
 test_mask_hash, generator_version, run_code_sha, working_tree_clean`
@@ -687,3 +693,150 @@ replicate / `n` / stopping rule を変更してはならない。** runtime が�
 
 **実行した EM は `n=24` の決定論的 probe（子プロセス）1 種類のみ。**
 production fit ではなく、artifact も書かない。
+
+
+---
+
+## 17. Codex 独立レビュー（NO-GO）への対応 — remediation phase
+
+**EXECUTIVE VERDICT = NO-GO。** 科学設計は QUALIFIED で成立しているが、
+production governance・auditor completeness・claim boundary に欠陥があるという判定。
+
+**12 件すべてを一次コードで独立に再確認し、REJECT は 0 件、全件 ACCEPT した。**
+以下は finding ごとの確認結果と対応。
+
+### 17.1 BLOCKER
+
+| ID | 判定 | 一次確認 | 修正 | 検証 |
+|---|---|---|---|---|
+| **B-01** scope mismatch | **ACCEPT** | DRAFT は `n={75,100,150}`、`alternative_under_review` に 4 点案が併記され、**scope の単一の source of truth が存在しなかった**。`analyze_em_budget_baseline.py` の `PROPOSED_N` も 3 点で独立に持たれていた | human decision に従い **4 点へ統一**。runner・DRAFT・design doc・runtime 分析・tests・auditor 期待値がすべて `n={50,75,100,150}` / **448 runs** / **2688 rows**。DRAFT は `--emit-draft` で runner の定数から**生成**するので二重定義が消えた | `test_scope_is_the_four_point_grid_everywhere`、`test_the_draft_on_disk_matches_the_runner_constants` |
+| **B-02** production が freeze/gate/SHA/clean-tree を強制しない | **ACCEPT** | `run_production` は `allow_em` / `confirm` / ディレクトリ非存在の 3 つしか要求せず、**protocol を定数から再生成**し、clean tree を*記録するだけ*で要求せず、gate receipt も approved SHA も見ていなかった | `authorize_production()` を新設。**A–J の 10 条件**を全部満たさない限り fit を 1 件も開始しない。CLI フラグでは迂回できない | `test_the_approved_world_authorizes` ＋ 条件ごとの refusal テスト 11 件 |
+| **B-03** failure policy が fail-closed でない | **ACCEPT** | 件数検査の `_require` が `try` の**外**にあり、失敗時に `failure.json` が書かれず artifact が中途半端に残った。checkpoint-8 照合は**記録するだけ**で、不一致でも COMPLETE artifact ができた | `attempt_id` と `attempt.json`（RUNNING → SUCCESS / FAILED）を導入。件数検査・全 fit 照合を `try` の**内側**へ移動。**最初の不一致で attempt 全体を FAIL**、残りの fit を続行せず COMPLETE artifact を作らない。**部分成功 fit は解析対象にしない**と明記 | `test_auditor_refuses_a_failed_attempt` / `..._an_interrupted_attempt` |
+
+### 17.2 HIGH
+
+| ID | 判定 | 一次確認 | 修正 | 検証 |
+|---|---|---|---|---|
+| **H-01** stochastic MC draws との交絡 | **ACCEPT** | 追加反復は毎回 `L=5` を引き直す。「optimization budget の効果」は分離できない | **estimand を狭くした**（§17.3）。禁止 claim を protocol body に列挙 | `test_the_estimand_is_narrow_and_names_its_forbidden_claims` |
+| **H-02** production callback が invariance test に入っていない | **ACCEPT** | probe I3 は `on_checkpoint=None`。**実際の scoring は一度も検査されていなかった** | callback を module-level factory `make_checkpoint_callback` に切り出し、probe が**production と同じ関数**で 40 反復 × 6 checkpoint と terminal-only を比較 | RNG 終点・`Z`・`F`・`w`・`w0`・`Q`・終端スコア・state digest がすべて一致 |
+| **H-03** latent/predictor movement を見ていない | **ACCEPT** | 診断は `F` / `w` / `w0` のみ。`F Fᵀ` は回転不変だが**潜在位置がどこへ行ったかは言わない** | `eta_x_rel_change`（`Z Fᵀ`）と `eta_y_rel_change`（固定 **train** dyad 上の `w0 + w zᵢᵀzⱼ`）を追加。**test dyad は 1 つも使わない**ので診断に held-out 情報が原理的に入らない | `test_the_instrumented_runner_records_rotation_invariant_diagnostics` |
+| **H-04** checkpoint identity と fit identity が bind されていない | **ACCEPT** | auditor は `fit_index` の集合一致と ladder しか見ておらず、**identity 列を入れ替えても通った** | 各 checkpoint 行の 10 個の identity 列を**その fit 行と完全一致**で照合 | `test_auditor_detects_a_swapped_checkpoint_identity` / `..._seed` |
+| **H-05** convergence 列 / later S1,S3 の検証不足 | **ACCEPT** | auditor が一度も参照しない列が **checkpoint 15 個 ＋ `retry_seed`** あった（機械的に列挙して確認） | 診断の有限性・非負性・窓最大値の代数・budget_stable フラグ・state digest・`retry_seed` を検証。**checkpoint state（Z,F,w0,w）を NPZ に保存**し digest と突き合わせ。later S1/S3 は artifact だけからは再計算できないので、**その限界を LOW finding として毎回出力**する | 該当 mutation test 8 件 |
+| **H-06** primary outcome aggregation が未固定 | **ACCEPT** | P2 の「平均」の取り方（start 平均が先か replicate 平均が先か）が未定義だった | P1/P2 を protocol body に**式で凍結**。P2 は `delta(n,r,K) = 0.5·Σ_start [S1(40) − S1(8)]`、全 8 replicate を提示、**記述のみ・検定なし・p 値なし**。Spearman は diagnostic 限定、7 点を独立標本としない | `test_primary_outcomes_are_frozen_with_their_aggregation_order` |
+| **H-07** 14-fit gate が global equivalence の証明にならない | **ACCEPT** | その通り。1 セルの一致は 448 fit の一致を含意しない | production は**全 448 fit** について checkpoint 8 到達時点で archive と照合し、1 項目でも不一致なら即 attempt FAIL。auditor も**全 fit**を再照合（`replication_coverage` が `compared == len(fits)` を要求） | `test_replication_comparison_is_exact` ほか |
+
+### 17.3 Scientific estimand（レビュー §2）
+
+**Primary estimand を狭くした。**
+
+> Under the same data, masks, initialization, and first-eight-iteration RNG
+> prefix, how does continuing the same `L=5` stochastic MCEM procedure from
+> iteration 8 to iteration 40 change the selected-K pattern?
+
+「同一データ・mask・初期値・最初の 8 反復の RNG prefix を固定した上で、
+同じ `L=5` stochastic MCEM を 8 反復から 40 反復まで継続すると、
+selected K がどのように変化するか」。
+
+**禁止 claim（protocol body の `forbidden_claims` に列挙）**
+
+- pure optimization effect
+- 8 iteration caused the under-selection
+- criterion was exonerated
+- deterministic convergence
+- consistency
+
+**H-01 は設計上の残存交絡として明示**：追加反復は毎回 `L=5` を引き直すので、
+**追加の最適化と追加の MC 変動は本設計では分離できない**（`residual_confound`）。
+`materially changes` は materiality threshold を事前定義できないので**削除し、
+単に changes とした**。
+
+### 17.4 MEDIUM
+
+| ID | 判定 | 対応 |
+|---|---|---|
+| **M-01** clean-path equivalence のみ | **ACCEPT** | 「line-for-line mirror」という過大表現を撤回。正確に **clean-path mirror for the frozen Poisson-X / Bernoulli-Y configuration** とし、**NaN / retry / exception path は historical runner と同一ではない**こと、production は最初の NaN で fail するので**科学的証拠は clean path のみ**であることを module docstring に明記 |
+| **M-02** runtime projection | **ACCEPT** | 「線形は保守側」は誤り。**逆向きの 2 効果**（archive の固定終端コストを反復比例と数える＝過大、新 run は終端コストを fit あたり 6 回払う＝過小）を明記し、**bound ではなく estimate** と書き直した。2× 閾値は **operational safety stop であって scientific inclusion criterion ではない**と明記 |
+| **M-03** environment provenance 不足 | **ACCEPT** | `environment_fingerprint()` を新設（Python / NumPy / SciPy / platform / machine / processor / BLAS / thread env vars）。gate receipt と production runinfo の両方に記録。**environment mismatch は refusal であって tolerance へ逃げる理由ではない**。等価判定は `python/numpy/scipy/machine` に限定（OS ビルド番号や shell 変数まで一致要求すると無意味な refusal が増えるため） |
+| **M-04** design/protocol/schema drift | **ACCEPT** | design §9 は保存していない `q_before/q_after/q_diff/mstep_decreased` を列挙していた（**文書にあって実装にない**）。DRAFT を runner 定数から `--emit-draft` で**生成**する方式に変え、`artifact_schema` に実際の列を持たせ、テストで `CHECKPOINT_COLUMNS` / `FIT_COLUMNS` と**完全一致**を要求。以後 drift はテストが落ちる |
+
+### 17.5 Production authorization（レビュー §3）
+
+`authorize_production()` は 10 条件を個別に判定し、1 つでも欠ければ
+`production_authorization = NO` を返して exit 1。**CLI フラグでは迂回できない。**
+
+| | 条件 |
+|---|---|
+| A | immutable frozen protocol file が存在する |
+| B | body-only canonical JSON の SHA256 が記録値と一致する |
+| C0 | authorization record が同じ protocol hash に紐づいている |
+| C | 現在の HEAD == approved `run_code_sha` |
+| D | working tree clean |
+| E | gate receipt が存在する |
+| F | receipt の verdict == PASS |
+| G | receipt の protocol_hash == frozen protocol_hash |
+| H | receipt の code_sha == approved SHA |
+| I | receipt の environment fingerprint が一致する |
+| J | baseline artifact の protocol hash が期待値と一致する |
+
+現時点の実行結果は **`production_authorization = NO`**（A・B・C0・C・D・E・F・G・H・I が未成立、J のみ成立）。
+
+### 17.6 Gate receipt（レビュー §4）
+
+`reports/k_selection/em_convergence_sensitivity_20260905_gate_receipt.json` を
+機械可読で書く設計にした（**まだ実行していないので存在しない**）。
+`receipt_version` / `experiment_id` / `protocol_hash` / `code_sha` /
+`baseline_protocol_hash` / `environment` / `environment_key` / `gate_cell` /
+`expected_fits=14` / `actual_fits` / `compared_fields` / `per_fit` /
+`mismatch_count` / `mismatches` / `verdict` / `timestamp_utc` /
+`retry_count_total` / `nan_detected_fits`。**production はこれを必須入力にする。**
+
+### 17.7 Attempt lifecycle（レビュー §6）
+
+`attempt_id` を導入。attempt は **SUCCESS か FAILED の 2 値**。
+attempt failure の条件: replication mismatch / checkpoint-8 mismatch / NaN /
+internal retry の発生 / 非有限スコア / checkpoint 欠落 / protocol・hash 不一致 /
+dirty tree / SHA 不一致 / 中断 / runtime hard guard。
+
+**FAILED attempt を resume して同じ attempt として完成させない。**
+再実行するなら **new attempt_id ＋ new human authorization**。
+auditor は `attempt.json` の status が `SUCCESS` でなければ **BLOCKER**。
+
+### 17.8 Checkpoint state archival（レビュー §9）
+
+checkpoint ごとに `Z` / `F` / `w0` / `w` を `checkpoint_states.npz`
+（`savez_compressed`）へ保存し、CSV には identity ＋ `state_key` ＋
+`checkpoint_state_digest` を置く。auditor は state を読んで digest と
+パラメータを再計算する。
+
+**容量見積もり（archive のみから算出）: 1,169,280 floats = 8.92 MB 非圧縮**
+（`--plan` の `archived_state_megabytes_uncompressed`）。圧縮後はこれ以下。
+既存 artifact 合計 1.36 MB に対して大きいが、**later checkpoint を独立検証
+可能にする唯一の手段**なので採用を推奨する。過大と判断される場合は human
+review へ戻す（digest だけ残す代替は、**later S1/S3 の独立再計算を放棄する**
+ことを意味する）。
+
+**残る限界**: S1 と S3 は state だけからは再計算できない（データ行列が要る。
+再生成は可能だが artifact には含まれない）。auditor はこれを **LOW finding
+として毎回明示**する。
+
+### 17.9 未解決として残すもの
+
+| 項目 | 理由 |
+|---|---|
+| `L=5` の MC 床 | 本設計は解決しない。診断はすべて descriptive |
+| later checkpoint の S1 / S3 の完全独立再計算 | データ行列が artifact に無い。state・digest・S2 恒等式・診断代数までは検証する |
+| `checkpoint_state_digest` の改竄耐性 | digest は「同じ state に到達した」ことの証拠であって改竄防止ではない（state を編集すれば digest も再計算できる）。実際の防御は archive との checkpoint-8 照合 |
+
+### 17.10 対応後の残件
+
+**BLOCKER 0 / HIGH 0 / MEDIUM 0 / LOW 3**（LOW はいずれも上表の宣言済み限界）。
+
+### 17.11 このフェーズでも実行していないこと
+
+- **replication gate の実行**（frozen protocol が無いので構造的に不可能。テストで確認済み）
+- production 実験、新規 production fit、pilot
+- protocol の freeze
+- 既存 artifact の変更・再生成・削除
+- push / PR / merge / Issue 操作
+
+**実行した EM は `n=24` の決定論 probe（子プロセス）のみ。**

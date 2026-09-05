@@ -144,16 +144,57 @@ def test_the_instrumented_runner_records_rotation_invariant_diagnostics(probe):
     """Raw parameter change alone must not be the only stability measure.
 
     The latent space is identified only up to an orthogonal transform, so F can
-    move without the fitted distribution moving; F F^T cannot.  Both are
-    recorded, per criterion and per window.
+    move without the fitted distribution moving; F F^T cannot.  Neither says
+    where the latent positions went, so the two predictors the likelihood is
+    actually a function of -- eta_X = Z F^T and eta_Y on a fixed TRAIN dyad set
+    -- are recorded as well (finding H-03).  All six are stored per checkpoint
+    and per window.
     """
 
     assert probe["diagnostic_keys_present"] == [
+        "eta_x_rel_change", "eta_y_rel_change",
         "f_raw_change", "gram_rel_change",
+        "max_eta_x_rel_change_last4", "max_eta_y_rel_change_last4",
         "max_f_raw_change_last4", "max_gram_rel_change_last4",
         "max_w0_change_last4", "max_w_change_last4",
         "w0_change", "w_change",
     ]
+
+
+# ------------------------------------------- the ACTUAL production callback
+
+def test_h02_the_production_callback_does_not_change_the_run(probe):
+    """Finding H-02: the invariance evidence must exercise the real callback.
+
+    The earlier probe ran with ``on_checkpoint=None``, so it showed only that
+    the checkpoint MACHINERY was inert -- not that the scoring the sweep
+    actually performs is.  This one builds the callback with
+    ``run_em_convergence_sensitivity.make_checkpoint_callback`` (the same
+    factory production uses) and requires a 40-iteration run scored at all six
+    checkpoints to end exactly where one scored only at iteration 40 ends.
+    """
+
+    assert probe["production_callback_state_match"]
+    assert probe["production_callback_scores_match"]
+    assert probe["production_callback_rows"] == 6
+    assert probe["production_callback_states"] == 18   # Z, F, wpair per checkpoint
+
+
+def test_a_callback_that_writes_into_the_state_is_refused(probe):
+    """Structural, not conventional: the arrays handed out are read-only.
+
+    A scoring bug therefore cannot perturb the estimation path even by
+    accident, which is what makes the checkpoint design safe rather than
+    merely tested.
+    """
+
+    assert probe["callback_mutation_is_refused"]
+
+
+def test_the_production_callback_emits_the_frozen_schema(probe):
+    import run_em_convergence_sensitivity as RUN         # noqa: PLC0415
+
+    assert probe["production_callback_columns"] == sorted(RUN.CHECKPOINT_COLUMNS)
 
 
 def test_nan_retry_is_invisible_in_the_returned_counters():
