@@ -1,0 +1,488 @@
+# EM 収束感度実験 — 設計・事前登録ドラフト（2026-09-05）
+
+**status: DESIGN / PREREGISTRATION ONLY。production 実験は実行していない。**
+
+| | |
+|---|---|
+| experiment_id | `em_convergence_sensitivity_20260905` |
+| machine-readable draft | `expfam/results/k_selection/em_convergence_sensitivity_20260905_protocol.DRAFT.json` |
+| baseline（対照） | `expfam/results/k_selection/clean_true_k_asymptotics_20260904/`（896 fits、`num_iter=8`） |
+| lineage | **E（`DualExpFamLSMConsistent`、experimental prototype）。本文採用不可** |
+| PRODUCTION RUNS THIS PHASE | **0** |
+| NEW PRODUCTION FITS THIS PHASE | **0** |
+
+本書の数値は `tools/research_audit/analyze_em_budget_baseline.py`（読み取り専用）が
+既存 artifact から生成する。手で書いた数値ではない。
+
+---
+
+## 1. Research question
+
+> **Does relaxing the fixed 8-iteration optimization budget materially change the
+> selected-K pattern under the otherwise frozen clean-generator protocol?**
+
+「固定 8 iteration という最適化予算を緩和したとき、それ以外の条件を固定したまま
+selected K がどの程度変化するか」。
+
+**これは次のいずれでもない。**
+
+- K-selection consistency の証明でも検定でもない
+- true-K identifiability 理論の追加証明ではない
+- 新しい criterion の提案ではない
+- `K=5` を選ばせるための tuning ではない
+
+`K=5` の一致数が増えなかったとしても、それは**失敗ではなく結果**である（§8 Case B/C/D）。
+
+---
+
+## 2. Motivation — 何が未解決なのか
+
+clean true-K experiment の限界 10（敵対レビュー F-02）が、そのまま本実験の動機である。
+
+> EM を全 K で `num_iter=8` / `L=5` の固定予算で打ち切っており、収束判定も収束診断も
+> 記録していない。候補 K が大きいほど自由パラメータが多く、同一予算では相対的に
+> 未収束になりやすい。したがって「誤りが under-selection に偏る」ことも
+> 「`n` とともに改善する」ことも、criterion の性質ではなく最適化予算の `K` 依存性で
+> 説明できる。**本実験はこの 2 つを分離していない。**
+
+自由パラメータ数は artifact から直接読める（一次証拠）。
+
+| candidate K | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `num_params` | 15 | 29 | 42 | 54 | 65 | 75 | 84 |
+
+`K=7` は `K=1` の **5.6 倍**のパラメータを、**同じ 8 反復**で当てにいっている。
+
+### 2.1 交絡が実際に効きうる形（既存 artifact の形状）
+
+`K_TRUE=5` の候補 K 別平均スコア（`analyze_em_budget_baseline.py` 出力）。
+
+S1 held-out mean log score（**高いほど良い**）:
+
+| | K=1 | K=2 | K=3 | K=4 | K=5 | K=6 | K=7 | argmax |
+|---|---:|---:|---:|---:|---:|---:|---:|:--:|
+| n=50 | −0.61729 | −0.61472 | −0.61775 | −0.63622 | −0.62441 | −0.66292 | −0.67090 | K=2 |
+| n=75 | −0.61626 | −0.60182 | −0.59355 | −0.59444 | −0.60239 | −0.62812 | −0.64562 | K=3 |
+| n=100 | −0.61265 | −0.58625 | −0.57703 | −0.56363 | −0.56083 | −0.57985 | −0.60273 | K=5 |
+| n=150 | −0.61406 | −0.58614 | −0.56768 | −0.55078 | −0.54326 | −0.55685 | −0.57057 | K=5 |
+
+`Q_strict`（高いほど良い）も同型で、argmax は n=50→K=3、n=75→K=4、n=100→K=5、n=150→K=5。
+
+**曲線は必ずずピークの右側で落ちる。** その落ち方が
+
+- (i) criterion が複雑さを正しく罰している（＝ criterion の有限標本特性）のか
+- (ii) 高 K の当てはめが 8 反復では終わっていない（＝ optimization underfitting）のか
+
+を、**既存 artifact は区別できない**（§3-A）。本実験はここだけを狙う。
+
+### 2.2 既存の関連事実（再確認済み、一次証拠）
+
+- 896 fits で `nan_occurred` **0 行**、`q_bic_failed` **0 行**
+- 総 runtime **8821.7 s**、`n` に強く依存（平均 4.81 / 7.47 / 10.14 / 16.96 s）
+- 候補 K 依存は弱い（8.63 → 10.45 s）。**K を増やしても計算時間はほぼ増えない**
+  ＝ 8 反復という予算が K に対して等しく「浅い」ことの傍証
+
+---
+
+## 3. 設計上の質問への回答（コードと artifact から）
+
+### A. `num_iter=8` で収束しているかを、現在の artifact だけから判定できるか
+
+**判定できない。** `fit_results.csv` の列は
+
+```
+fit_index, k_true, n, replicate, k_est, start, data_seed, split_seed, model_seed,
+heldout_mean_log_score, q_strict, s2_q_based, s3_plugin_conditional, num_params,
+nan_occurred, nan_count, q_bic_failed, failure_reason, runtime_s
+```
+
+で、**per-iteration の量が 1 つもない**（`analyze_em_budget_baseline.py` の
+`per_iteration_columns` は `NONE`）。`summary.json` / `runinfo.json` にもない。
+
+production sweep は `run_em_experimental(..., compute_strict_Q=True)` を
+`mstep_q_diagnostic` **なし**で呼んでいる（`run_clean_true_k_sweep.py` L547-552）。
+したがって記録されているのは最終反復の値だけで、**軌跡の傾きが分からない**。
+
+**欠けている diagnostic（本実験で新設が必要なもの）**
+
+| 欲しい量 | 現在 | 備考 |
+|---|---|---|
+| 反復ごとの objective / Q | ✗（`mstep_q_diagnostic` を有効にすれば取れるが未使用） | §3-B |
+| パラメータ変化ノルム | ✗ | 新規 instrumentation |
+| held-out スコアの軌跡 | ✗ | checkpoint でのみ取る（§3-E の leakage 回避） |
+| 収束フラグ / 停止理由 / 実反復数 | ✗ | 新規 |
+| 反復ごとの runtime | ✗ | 新規 |
+| 内部 retry の発生 | ✗（**構造的に不可能**） | F-08、§3-B |
+
+**「8 反復で収束していた／していなかった」は、現時点でどちらも主張できない。**
+
+### B. 現在の EM 実装から反復ごとに取れる情報
+
+`expfam/src/experimental/em_runner.py` を読んで分類した。
+
+**すでにコード上取れるもの**
+
+- `mstep_q_history`（`mstep_q_diagnostic=True` のとき）:
+  各反復の `{iteration, q_before, q_after, q_diff, decreased}`。
+  **同一 `Z_samples`・同一 `train_mask`** で M-step 前後の strict Q を計算する。
+  - **推定経路を一切変えない**ことを実測で確認した
+    （`test_em_budget_nesting.py::test_n2_...`、`Z_est`/`F`/`w`/`w0`/`Q_strict` が bit-identical）。
+  - **ただし反復をまたいだ Q 列は単調目的関数ではない**。E-step ごとに MC サンプルが
+    変わるため。docstring 自身がそう明記している。M-step 単調性の検査にのみ使える。
+- `verbose=True` の `w0` / `w`（stdout のみ、artifact 化されていない）
+- 実行後の集約値: `Q_strict`, `bic`, `num_params`, `nan_occurred`, `nan_count`,
+  `runtime_s`, `q_bic_failed`, `failure_reason`
+
+**新規 instrumentation が必要なもの**
+
+- パラメータ変化ノルム（`F`, `w`, `w0` の反復間差分）
+- gradient norm — **取れない**。E-step の Newton solve
+  (`reproduction/src/model.py::calc_eta_newton`) は勾配を返さない。返すように変えると
+  歴史的 lineage と共有しているモデルクラスを変更することになるため、**本実験では採用しない**。
+- `Z` の変化量、反復ごとの held-out スコア、反復ごとの runtime、収束フラグ、停止理由
+- **内部 retry の可視化（F-08）**
+
+**F-08 を一次コードで再確認した。** `em_runner.py` L155-163, L205, L281-283:
+
+```python
+for retry in range(max_retries + 1):
+    newton_alpha = 0.5 / (2 ** retry)
+    rng = np.random.default_rng(seed + retry * 1000)
+    ...
+    nan_count = 0                      # ← retry ごとにリセット
+    ...
+    nan_occurred = nan_count > 0
+    if not nan_occurred:
+        break                          # ← 最初に成功した attempt で抜ける
+```
+
+retry 0 で NaN が出て retry 1 が clean だった場合、返るのは `nan_count=0`,
+`nan_occurred=False` で、**一度も NaN が出なかった run と区別できない**。
+これは `test_em_budget_nesting.py::test_nan_retry_is_invisible_in_the_returned_counters`
+としてテストに固定した。**新 runner はこれを継承してはならない**（§9）。
+
+### C. `max_iter` を増やすだけで公平な比較になるか
+
+**RNG 軌跡の観点では、なる。ただし無条件ではない。**
+
+構造の確認（`em_runner.py`）: `rng = np.random.default_rng(seed + retry*1000)` は
+**反復ループの外で 1 度だけ**生成され、以後 `calc_eta_newton(..., rng=rng)` が
+逐次消費する。ループ内に `num_iter` に依存する分岐は存在しない。したがって
+反復 `t` の時点の RNG 状態は反復 `1..t−1` にしか依存しない。
+
+**仮定せずに実測した**（`test_em_budget_nesting.py::test_n1_...`、n=24 の小規模決定論テスト）:
+
+- `num_iter=8` と `num_iter=16` を同一 seed で実行し、最初の 8 反復の
+  `q_before` / `q_after` が **bit-identical** であることを確認
+- 同一呼び出しの再現性（N3）も確認
+
+**ただし成立条件が 1 つある。** NaN ガードは run 全体を `seed+1000` で**やり直す**。
+長い run は NaN を踏む反復が多い分だけ restart 確率が高く、restart した run の
+先頭 8 反復は baseline のそれでは**ない**。よって
+
+> **nesting は「NaN restart が起きなかった run」についてのみ成立する。**
+
+これは設計上の必須要件になる（§9 で `attempts_used > 1` を pairing failure として記録）。
+baseline 896 fits では `nan_occurred` が 0 行なので、baseline 側は clean である。
+
+### D. 「8 / 20 / 50 を別々に回す」 vs 「1 回の long run を checkpoint 評価」
+
+**結果を見る前に、checkpoint 方式を選択する。**
+
+| 観点 | 別々に回す | long run + checkpoint | 判定 |
+|---|---|---|---|
+| 計算量 | 8+12+16+24+32+40 = **132 反復/fit** | **40 反復/fit** | checkpoint（3.3×） |
+| RNG trajectory | §3-C により一致するが、**一致は前提**になる | 同一ストリームなので**構造的に一致**。ずれようがない | checkpoint |
+| 比較公平性 | 予算間で prefix が同じ「はず」 | prefix が同じ**である** | checkpoint |
+| 実装侵襲性 | 既存 runner をそのまま呼べる（低） | 反復ループを持つ新モジュールが要る（中） | 別々に回す |
+| 再現性 | fit ごとに 6 本の run。NaN restart が予算ごとに独立に起きうる | fit ごとに 1 本。restart は 1 回検出すれば全 checkpoint に効く | checkpoint |
+
+**checkpoint 方式を採る。**唯一の弱点である「実装侵襲性」＝ baseline と別のコード経路に
+なることは、§6 の **replication gate**（checkpoint 8 が archive と bit-identical で
+あることを要求する）で潰す。逆に言えば、この gate を通らない限り production は認可しない。
+
+criteria の評価（`calc_Q_dual_strict_exp` / held-out score / `s3_plugin_conditional`）は
+いずれも **rng を受け取らず決定論的**であることをコードで確認済み。したがって
+checkpoint 評価を挟んでも RNG ストリームは乱れない。
+
+### E. adaptive convergence stopping を使うか、使うなら何で定義するか
+
+**使わない。** 本実験の停止規則は「事前登録した固定反復数 40」であり、
+adaptive stopping は**存在しない**。理由は 2 つある。
+
+1. **stopping rule が K に有利／不利になる余地を、設計から消すため。**
+   全候補 K が厳密に同じ反復数を受け取るなら、「停止規則が高 K を優遇した」という
+   批判は成立しない。adaptive にした瞬間、収束量の K 依存性がそのまま
+   予算の K 依存性に化ける — それは今まさに切り分けようとしている交絡である。
+2. **data leakage を構造的に排除するため。** held-out スコアを停止にも選択にも使えば
+   leakage になる。停止規則が無ければ、その経路自体が存在しない。
+
+収束は**測るが、止めるためには使わない**。事前に定義できる量だけを使う。
+
+- `param_rel_change` = `max( ‖ΔF‖_F/(‖F‖_F+1e-12), |Δw|/(|w|+1e-12), |Δw0|/(|w0|+1e-12) )`
+  — スケール不変で、実装から直接取れる。`1e-12` は float64 の相対精度から決めた定数で、
+  結果を見て決めたものではない。
+- 「τ で budget-stable」= checkpoint 直前 4 反復の `param_rel_change` の最大値 < τ。
+  **τ ∈ {1e-2, 1e-3, 1e-4} を全部報告する。**「これが収束閾値だ」と 1 つを選ぶことはしない
+  （結果を見てから選ぶのを防ぐ唯一の方法は、選ばないこと）。
+
+**採用しない候補と理由**
+
+- Q の反復間差分 — E-step ごとに MC サンプルが変わるので単調列ではない（§3-B）。
+  収束判定には使えない。
+- gradient norm — 実装が返さない（§3-B）。
+- held-out スコアの停滞 — leakage。
+
+**declared limitation:** `L=5` は毎反復サンプルし直すため `param_rel_change` は
+0 に収束しない。どんな τ も「MC ジッタの大きさ」を同時に測っており、しかもその
+ジッタ自体が K に依存しうる。**本設計はこれを解決しない。** τ を 3 つ報告するのは、
+この事実を隠さないためでもある。
+
+---
+
+## 4. 変えるもの／固定するもの
+
+**変えるのは optimization budget だけ。**
+
+固定（baseline から継承、`protocol.json` の値を読み出して使い、再入力しない）:
+`canonical-clean-v1` generator / `family_x=poisson` / `family_y=bernoulli` /
+`K_TRUE` / `n` / `d=15` / signal scale / `w` scaling / candidate K=1..7 /
+train-test mask / data seed / split seed / model seed / starts=2 / `L=5` /
+S1・S2・S3 の定義 / tie tolerance `1e-12` / 最小 K の tie rule /
+2 start 非加重平均の集約 / パラメータ化 / `numerics_mode="consistent"`。
+
+seed 式は baseline runner のものをそのまま使う:
+
+```
+data_seed  = DATA_SEED_BASE  + k_true*10000  + n*10   + replicate
+split_seed = SPLIT_SEED_BASE + k_true*10000  + n*10   + replicate
+model_seed = MODEL_SEED_BASE + k_true*100000 + n*1000 + replicate*100 + k_est*10 + start
+```
+
+**artifact から再現できない要素は無い**（seed base は `protocol.json` に、
+mask は `build_masks(n, split_seed)` で決定論的に再構成でき、mask hash が
+`manifest.csv` に記録されている）。推測に頼る箇所はない。
+
+---
+
+## 5. Scope — なぜこれが最小か
+
+**336 EM runs**（= 3 n × 8 replicate × 7 candidate K × 2 start）。
+baseline の 896 fits を 40 反復で全部やり直せば 3.3 倍以上になるが、そうしない。
+
+| 軸 | 採用 | 事前登録した理由 |
+|---|---|---|
+| `K_TRUE` | **5 のみ** | 交絡が問題になっているのは `K_TRUE=5` の under-selection。`K_TRUE=1` は 3 重に交絡していて識別に使えず、`K_TRUE=3` は replicate が 4 しかない |
+| `n` | **75, 100, 150** | under-selection 最強（S1 0/8）→ 遷移域（4/8）→ ほぼ回復（8/8）を 1 本で貫く 3 点 |
+| `n=50` | **除外** | baseline の S1 一致は 2/8 で、**n=75 の 0/8 より弱い**。最極端ではないので、4 点目を足しても対比が増えない |
+| replicate | **全 8**（間引かない） | 間引かないので cherry-picking 規則が要らない。これが最も安全 |
+| candidate K | **1..7 全部** | 削れば「都合の悪い K を落とした」になる。削らない |
+| start | **2 とも** | start 不一致を予算の関数として見るため |
+
+**scope が result-informed であることを明示する。** `K_TRUE=5` とこの 3 つの `n` を
+選んだのは baseline の結果を見たからである。これは避けられない（問いがその結果に
+ついてのものだから）が、その代わりに本実験は**独立検証ではなく targeted follow-up**
+であり、規則は新しいデータが 1 つも存在しない今この時点で固定され、どんな結果でも
+変更しない。
+
+---
+
+## 6. Primary comparison と pairing
+
+**baseline arm**: archive の `num_iter=8` の結果。**再実行しない。**
+**relaxed arm**: 同一データ・同一 mask・同一初期化で 40 反復の 1 本 run、
+checkpoint `{8, 12, 16, 24, 32, 40}` で評価。
+
+### Replication gate（pilot、production 前の必須関門）
+
+| | |
+|---|---|
+| 目的 | 新 runner が baseline を checkpoint 8 で**完全再現**することの証明。これが通れば、以後の差は「予算の差」であって「コード経路の差」ではない |
+| 範囲 | `K_TRUE=5`, `n=75`, replicate 1, 全 7 K × 2 start = **14 fits**、`max_iter=8` |
+| 所要 | 約 **103 秒**（7.36 s/fit × 14） |
+| 合格条件 | 14 行すべてで `heldout_mean_log_score` / `q_strict` / `s2_q_based` / `s3_plugin_conditional` / `num_params` が archive と**完全一致**。mask hash も一致 |
+| 不合格時 | **BLOCKER。production 不認可。** 許容誤差を緩めない、近似比較に切り替えない、非 paired 設計に逃げない |
+| freeze rule | protocol は pilot の**前**に hash して凍結する。pilot は PASS / FAIL しか返せず、protocol の項目を変更できない。変更が必要になったら新 version として凍結し直し、pilot を最初からやり直す |
+
+### Primary outcomes
+
+- **P1 — selected K の変化。** 各 (criterion, n, replicate) の selected K を
+  checkpoint ごとに算出。selector は凍結のまま。checkpoint 8 と 40 を replicate 内で対応づけ。
+- **P2 — 候補 K ごとの追加反復による score gain。**
+  `Δ_K = mean S1 score(K, 40) − mean S1 score(K, 8)`。
+  **`Δ_K` が K とともに増えるか**が、2 つの説明を最も直接分ける量である。
+  表全体と、各 `n` での K と `Δ_K` の Spearman 相関を報告する。
+  **7 点しかないので記述統計であり、検定も p 値の閾値も置かない。**
+
+### Secondary outcomes
+
+exact / under / over 件数（over は個別に名指し）、winning margin、start 不一致、
+候補 K・`n` 別の budget-stable 率、`Q_strict` と S2 の軌跡、
+checkpoint ごとの累積 runtime、S2 / S3 版の P1・P2。
+
+---
+
+## 7. Runtime 見積もりと pilot
+
+`analyze_em_budget_baseline.py` による（既存 artifact のみ）。
+
+baseline の当該 scope（336 fits）は 8 反復で **3886.7 s**。反復数に線形と仮定した投影
+（末尾の Q/BIC/S3 計算は反復数に比例しないので、**線形仮定は過大評価側**＝保守的）:
+
+| `max_iter` | 16 | 24 | 32 | **40** | 50 |
+|---|---:|---:|---:|---:|---:|
+| 投影時間 | 2.16 h | 3.24 h | 4.32 h | **5.40 h** | 6.75 h |
+
+**40 を採る。** baseline の 5 倍の予算で、`K=7`（84 パラメータ）に対しても
+`K=1`（15 パラメータ）の 8 反復相当より十分深い。50 との差 1.35 h に見合う
+追加情報は無いと事前に判断した。
+
+checkpoint 6 回分の評価コストは別途上乗せとして見込む（各回 `Q_strict` 1 回・
+held-out 1 回・S3 1 回、いずれも決定論的）。
+
+**abort 規則**: 実測が投影の 2 倍を超えたら停止して `failure.json` を書く。resume しない。
+
+---
+
+## 8. Interpretation matrix（結果を見る前に確定）
+
+| Case | パターン | 読み方 | 禁止 |
+|---|---|---|---|
+| **A** | `Δ_K` が K とともに増え、selected K が `K_TRUE` 側へ動く | **fixed-budget optimization confounding の証拠。**過去の under-selection を criterion 固有と解釈してはならない | 「criterion は正しかった」と書かない。言えるのは「8 反復の結果は予算律速だった」だけ |
+| **B** | objective / 収束診断は改善するが selected K はほぼ不変 | under-selection は 8 反復打ち切りだけでは説明しにくい | **criterion 原因と断定しない。**`L`・MC 床・初期化は依然として未制御 |
+| **C** | 高 K も 8 反復時点ですでに budget-stable | F-02 の optimization explanation はこの設定では弱まる | `K_TRUE=5` とこの 3 つの `n` を超えて一般化しない |
+| **D** | 長い最適化で selected K が不安定化 / over-selection 増加 | optimization と criterion の相互作用。**相互作用として報告する** | どの方向にも「改善」という語を使わない |
+
+**4 つとも科学的結果である。** `K=5` が増えなかったから失敗、とはしない。
+どの結果も protocol 変更・再実行・seed 変更・arm 追加の理由にならない。
+
+---
+
+## 9. 新しい artifact 要件
+
+**checkpoint 行**（fit × checkpoint = 2016 行）:
+`fit_index, k_true, n, replicate, k_est, start, data_seed, split_seed, model_seed,
+checkpoint_iteration, heldout_mean_log_score, q_strict, s2_q_based,
+s3_plugin_conditional, num_params, param_rel_change, budget_stable_1e-2/1e-3/1e-4,
+q_before, q_after, q_diff, mstep_decreased, cumulative_runtime_s,
+nan_iterations_so_far, attempt_index`
+
+**fit 行**（336 行）:
+`attempts_used, retry_events, stopping_reason, actual_iterations, nan_occurred,
+nan_count_total_across_attempts, numerical_warnings, train_mask_hash,
+test_mask_hash, generator_version, run_code_sha, working_tree_clean`
+
+### F-08 の解決（本実験で初めて可能になる）
+
+新 runner は反復ループを自分で持つので、NaN 事象と restart を
+`retry_events = [{attempt, iteration, kind}, ...]` として全部記録できる。
+`attempts_used > 1` の fit は **pairing failure** として明示的に記録し、
+黙って吸収しない（§3-C の nesting 条件が破れているため）。
+
+**取らないもの（理由つき）**
+
+- gradient norm — E-step が返さない。返させるには歴史的 lineage と共有している
+  モデルクラスの変更が要るので、**本実験では取らない**
+- 反復ごとの held-out スコア — checkpoint でのみ取る。毎反復の held-out トレースは
+  停止シグナルへの転用を誘発し、leakage になる
+
+---
+
+## 10. Failure policy
+
+以下のいずれかで**即停止**、`failure.json` を書いて終了。retry しない、resume しない、
+seed を変えない、tolerance を緩めない、protocol を変えない。
+
+- replication gate 不合格
+- 非有限の criterion 値
+- `attempts_used > 1`（NaN restart）が発生 — 当該 fit を pairing failure として記録
+- 実行時間が投影の 2 倍超
+- artifact ディレクトリが既に存在
+
+---
+
+## 11. Claim boundary
+
+- lineage **E（prototype）**、`EXPERIMENT_REGISTRY` は `原稿採用 ✗`。
+  **manuscript evidence への昇格は Human Gate**（root `CLAUDE.md` §6）
+- 一致は **`K_TRUE`** との一致であって `K*` とのものではない
+- 1 つの合成設定、`K_TRUE=5`、3 つの `n`、Poisson-X / Bernoulli-Y、信号 1 水準
+- **確立しないもの**: 任意の criterion の consistency、Bernoulli-Y の識別可能性（U2）・
+  非入れ子性（U5）、40 反復の到達点が MLE であること、`L=5` の MC 誤差が無視できること
+
+---
+
+## 12. 実装計画（まだ実装しない）
+
+1. `expfam/src/experimental/em_runner_instrumented.py` — 反復ループを所有し、
+   checkpoint 評価フックと `retry_events` を持つ新モジュール。
+   **`em_runner.py` は変更しない**（歴史的 lineage）。
+2. `tools/research_audit/run_em_convergence_sensitivity.py` — sweep runner。
+   `--replication-gate` で pilot、`--full` で production（`--allow-em` と確認フラグ必須、
+   artifact ディレクトリ存在時は fail-closed）。
+3. `tools/research_audit/audit_em_convergence_sensitivity.py` — 独立監査。
+   protocol hash 再計算、checkpoint 8 と archive の完全一致、fit 数・checkpoint 数の
+   密度検査、runtime 会計、`attempts_used` 検査。
+4. テスト。`test_em_budget_nesting.py` は**本フェーズで作成済み・5 件 pass**。
+
+**この順序で、production はステップ 3 の gate 通過と人間の認可の後。**
+
+---
+
+## 13. 独立敵対レビュー（設計フェーズ）
+
+Reviewer A（科学設計・統計）と Reviewer B（再現性・実装・leakage）の 2 名視点。
+**BLOCKER 0 / HIGH 0 を満たすまで freeze 候補にしない。**
+
+### Reviewer A — 科学設計・統計
+
+| ID | severity | 指摘 | 対応 | 状態 |
+|---|---|---|---|---|
+| A-1 | **HIGH** | **scope が result-informed。**`K_TRUE=5` と 3 つの `n` は baseline を見て選ばれており、これを黙っていれば事前登録の体裁だけの後付けになる | §5 に「result-informed である」ことを**明示**し、targeted follow-up であって独立検証ではないと限定。protocol JSON にも `scope_is_result_informed: true` を置いた | **解消** |
+| A-2 | **HIGH** | **`Δ_K` の単調性を「検定」と書けば誤り。**K は 7 点、replicate 8、相関の有意性を主張できない | P2 を**記述統計**と明記。Spearman は要約統計として報告し、p 値の閾値を置かないと事前登録 | **解消** |
+| A-3 | MEDIUM | **`L=5` 固定が新しい交絡になる。**反復を増やしても MC 誤差は減らない。「40 反復で収束」は「MC ジッタの中に入った」に過ぎないかもしれない | §3-E と protocol の `monte_carlo_floor_caveat` に declared limitation として記載。τ を 3 つ報告。**解決はしない**と明言。L 感度は将来の別実験 | **限界として受理** |
+| A-4 | MEDIUM | Case A を「criterion は正しかった」と読む誘惑がある | §8 の Case A に禁止文を明記 | **解消** |
+| A-5 | MEDIUM | `max_iter=40` の根拠が弱い。40 で収束していなければ Case C と Case B が区別できない | 40 は「baseline の 5 倍」という事前根拠で選択。**40 でも budget-stable にならない fit があれば、それ自体を結果として報告する**（Case B/C の判別不能を隠さない）と §8 に含意。protocol の `tau_ladder` で可視化される | **解消** |
+| A-6 | LOW | n=50 除外の理由は「弱いから」でよいのか | S1 一致 2/8 > n=75 の 0/8 という**一次証拠**に基づく。事前登録済み | **解消** |
+
+### Reviewer B — 再現性・実装・leakage
+
+| ID | severity | 指摘 | 対応 | 状態 |
+|---|---|---|---|---|
+| B-1 | **BLOCKER** | **新 runner は baseline と別のコード経路。**checkpoint 8 が baseline と一致する保証がなく、「予算の差」と「実装の差」が交絡する | §6 の **replication gate** を production の必須前提条件にした。14 fits で完全一致を要求し、不合格なら production 不認可 | **解消** |
+| B-2 | **HIGH** | **nesting を仮定していないか。**「同じ seed なら prefix は同じ」は検証なしでは仮定 | `test_em_budget_nesting.py::test_n1_...` で `num_iter=8` と `16` の最初の 8 反復が **bit-identical** であることを実測（5 tests pass）。さらに**成立条件（NaN restart が無いこと）**を §3-C に明記 | **解消** |
+| B-3 | **HIGH** | **NaN restart が pairing を静かに壊す。**長い run ほど restart 確率が高く、restart 後の prefix は baseline のものではない | `attempts_used > 1` を **pairing failure** として artifact に記録し、§10 で failure policy に含めた。F-08 の可視化（`retry_events`）を新 runner の要件にした | **解消** |
+| B-4 | **HIGH** | **held-out スコアが停止と選択の両方に使われれば leakage** | **停止規則を置かない**設計にした（§3-E）。leakage 経路が構造的に存在しない。反復ごとの held-out トレースも取らない（§9） | **解消** |
+| B-5 | MEDIUM | **stopping rule が K に有利／不利にならないか** | 停止規則が無く、全 K が厳密に同じ反復数を受け取る。収束量は測るが止めるのに使わない | **解消** |
+| B-6 | MEDIUM | **収束基準自体が K 依存ではないか** | `param_rel_change` は相対量なのでスケールには不変だが、**MC ジッタの K 依存性までは消せない**。A-3 と同じ限界として declared。選択には一切使わないので、少なくとも結果を歪めない | **限界として受理** |
+| B-7 | MEDIUM | `mstep_q_diagnostic` を有効にすると推定が変わるのではないか | 実測で bit-identical を確認（N2、5 tests pass）。ただし **`q_before/q_after` は同一 E-step 上の比較であり、反復間の Q 列は単調目的ではない**ことを §3-B に明記 | **解消** |
+| B-8 | MEDIUM | replicate 間引きが cherry-picking になる | **間引かない**（全 8 replicate、全 7 K、全 2 start）。規則が要らないのが最も安全 | **解消** |
+| B-9 | LOW | DRAFT protocol に hash が無い | **意図的**。hash を置けば freeze に見える。freeze は別 commit（§6 freeze rule、JSON の `status_note`） | **解消** |
+| B-10 | LOW | runtime 投影が線形仮定 | 末尾の Q/BIC/S3 は反復数に比例しないので**線形は過大評価＝保守側**。script の docstring と §7 に明記。abort 閾値は投影の 2 倍 | **解消** |
+
+**結果: BLOCKER 0 / HIGH 0。**
+未解決として受理したのは A-3 / B-6（`L=5` の MC 床と収束量の K 依存性）で、
+いずれも**本設計が解決しないと明示した限界**であり、選択には使わない量に限定されている。
+
+---
+
+## 14. この設計が「最小」である理由
+
+- baseline 896 fits のうち、**交絡が問題になる 336 fits 相当だけ**を対象にした
+- 予算の梯子を**別々の run にせず 1 本の run の checkpoint**にして、計算量を 3.3 分の 1 にした
+- **新しい criterion も新しい generator も新しい family も導入しない**
+- 変えるのは `num_iter` **1 つだけ**
+- replicate も候補 K も start も**削っていない**ので、選択規則を作る必要がない
+
+---
+
+## 15. この段階で実行していないこと
+
+- production 実験、新規 EM fit、pilot の実行（`replication gate` も**まだ走らせていない**）
+- 既存 artifact の変更・再生成・削除
+- protocol の freeze（本書と JSON は **DRAFT**）
+- 新 runner / 新 auditor の実装
+- push / PR / merge / Issue 操作
+
+**§3 の検証に使った EM は、`n=24` の決定論的ユニットテスト 1 種類のみ**
+（`test_em_budget_nesting.py`）。production fit ではなく、artifact も書かない。

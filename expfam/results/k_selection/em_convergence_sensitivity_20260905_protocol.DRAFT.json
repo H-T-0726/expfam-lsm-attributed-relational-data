@@ -1,0 +1,213 @@
+{
+  "status": "DRAFT",
+  "status_note": "NOT FROZEN. This file is a preregistration DRAFT written before any fit of this experiment exists. It carries no protocol_hash on purpose: a hash here would look like a freeze. Freezing is a separate, later commit that (i) renames this to em_convergence_sensitivity_20260905_protocol.json, (ii) adds protocol_hash, and (iii) happens only after the replication gate passes and after a human authorises production under CLAUDE.md section 6.",
+  "experiment_id": "em_convergence_sensitivity_20260905",
+  "protocol_version": "draft-1",
+  "written_at": "2026-09-05",
+  "design_document": "reports/k_selection/em_convergence_sensitivity_design_20260905.md",
+
+  "research_question": "Does relaxing the fixed 8-iteration optimization budget materially change the selected-K pattern under the otherwise frozen clean-generator protocol?",
+  "what_this_is_not": [
+    "not a proof or a test of K-selection consistency",
+    "not additional evidence for the true-K identifiability theory",
+    "not a proposal of a new selection criterion",
+    "not tuning aimed at making K=5 win"
+  ],
+
+  "baseline": {
+    "run_dir": "expfam/results/k_selection/clean_true_k_asymptotics_20260904",
+    "protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+    "num_iter": 8,
+    "fits": 896,
+    "role": "paired control arm; NOT re-run, NOT modified, NOT regenerated"
+  },
+
+  "held_fixed_from_baseline": {
+    "generator_version": "canonical-clean-v1",
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "d": 15,
+    "L": 5,
+    "test_ratio": 0.2,
+    "candidate_k": [1, 2, 3, 4, 5, 6, 7],
+    "starts": [1, 2],
+    "tie_tolerance": 1e-12,
+    "tie_rule": "smallest K among ties",
+    "selection_aggregation": "unweighted mean over the two starts",
+    "criteria": ["S1_heldout_predictive", "S2_q_based", "S3_plugin_conditional"],
+    "numerics_mode": "consistent",
+    "lineage": "E (DualExpFamLSMConsistent, experimental prototype)",
+    "data_seed_formula": "DATA_SEED_BASE + k_true*10000 + n*10 + replicate",
+    "split_seed_formula": "SPLIT_SEED_BASE + k_true*10000 + n*10 + replicate",
+    "model_seed_formula": "MODEL_SEED_BASE + k_true*100000 + n*1000 + replicate*100 + k_est*10 + start",
+    "seed_bases_source": "read from the baseline protocol.json, never retyped"
+  },
+
+  "the_only_thing_that_changes": "the optimization budget: num_iter 8 -> a single run of 40 iterations per fit, with the criteria evaluated at preregistered checkpoints",
+
+  "scope": {
+    "k_true": [5],
+    "n": [75, 100, 150],
+    "replicates_per_cell": 8,
+    "replicate_selection": "ALL 8 replicates of every scoped cell; no subsetting, so no cherry-picking rule is needed",
+    "candidate_k": [1, 2, 3, 4, 5, 6, 7],
+    "starts": [1, 2],
+    "em_runs": 336,
+    "checkpoint_evaluations": 2016,
+    "excluded": {
+      "n_50": "n=75 already shows the strongest under-selection in the baseline (S1 exact 0/8 versus 2/8 at n=50), so n=50 is not the extreme case and adds a fourth point without adding a contrast. Recorded here BEFORE any new fit exists.",
+      "k_true_1": "confounded three ways in the baseline (floor of the candidate set, under-selection dominance, heaviest-tailed signal); it cannot discriminate between the two explanations",
+      "k_true_3": "only 4 replicates per cell; the budget contrast would rest on half the sample of K_TRUE=5"
+    },
+    "scope_is_result_informed": true,
+    "scope_is_result_informed_note": "The choice of K_TRUE=5 and of these three n IS informed by the baseline result. This is unavoidable -- the question is about that observed under-selection -- but it means this experiment is a targeted follow-up, not an independent test. The rule is fixed here, before any new data exists, and no outcome may change it."
+  },
+
+  "optimization_budget": {
+    "design": "single_long_run_with_checkpoints",
+    "max_iterations": 40,
+    "checkpoints": [8, 12, 16, 24, 32, 40],
+    "baseline_checkpoint": 8,
+    "rationale": "One run of 40 iterations costs 40 iterations; running 8/12/16/24/32/40 separately costs 132. The prefix property that makes the two equivalent is asserted in tools/research_audit/test_em_budget_nesting.py (N1) and is verified against the archive by the replication gate.",
+    "adaptive_stopping": false,
+    "adaptive_stopping_note": "There is NO adaptive stopping rule. Every candidate K receives exactly the same number of iterations, so a stopping rule cannot favour or disfavour any K. Convergence is measured and reported, never used to stop, and never used to select K."
+  },
+
+  "convergence_diagnostics": {
+    "used_for_stopping": false,
+    "used_for_selection": false,
+    "purpose": "descriptive only",
+    "param_rel_change": "max( ||dF||_F / (||F||_F + 1e-12), |dw| / (|w| + 1e-12), |dw0| / (|w0| + 1e-12) ) between consecutive iterations",
+    "budget_stable_at_tau": "max param_rel_change over the last 4 iterations before the checkpoint < tau",
+    "tau_ladder": [0.01, 0.001, 0.0001],
+    "tau_ladder_note": "ALL THREE are reported. No single tau is designated 'the' convergence threshold, because choosing one after seeing the results is exactly the move this preregistration exists to prevent.",
+    "monte_carlo_floor_caveat": "L=5 latent draws are redrawn every iteration, so param_rel_change does not decay to zero even at a fixed point. Any tau is therefore a statement about the size of the Monte-Carlo jitter as much as about convergence, and the jitter may itself depend on K. This is an accepted, declared limitation of this design, not something it resolves.",
+    "q_trajectory": "recorded via the existing mstep_q_diagnostic hook (q_before / q_after around each M-step, on the same Z_samples)",
+    "q_trajectory_caveat": "q_before/q_after share one E-step's draws, so the within-iteration difference is a valid M-step monotonicity check, but the sequence ACROSS iterations is not a monotone objective and must not be read as one."
+  },
+
+  "primary_outcomes": [
+    {
+      "id": "P1",
+      "name": "selected K by budget",
+      "definition": "selected K per (criterion, n, replicate) at each checkpoint, with the frozen selector unchanged",
+      "comparison": "checkpoint 8 versus checkpoint 40, paired within replicate"
+    },
+    {
+      "id": "P2",
+      "name": "per-candidate-K score gain from extra iterations",
+      "definition": "delta_K = mean S1 held-out score at checkpoint 40 minus at checkpoint 8, for each candidate K",
+      "comparison": "is delta_K increasing in K? Reported as the full table plus the Spearman correlation between K and delta_K within each n. Descriptive only: 7 points, no inferential claim, no p-value threshold.",
+      "note": "This is the outcome that most directly separates the two explanations."
+    }
+  ],
+  "secondary_outcomes": [
+    "exact / under / over counts by budget, with over-selection cells named individually",
+    "winning margin (best minus runner-up in selector space) by budget",
+    "start disagreement by budget",
+    "budget_stable_at_tau rates by candidate K and by n",
+    "Q_strict and S2 trajectories by candidate K",
+    "cumulative runtime by checkpoint, candidate K and n",
+    "S2 and S3 versions of P1 and P2"
+  ],
+
+  "interpretation_matrix": {
+    "declared_before_any_new_fit": true,
+    "A": {
+      "pattern": "delta_K increases with K and selected K moves toward K_TRUE at longer budgets",
+      "reading": "evidence for fixed-budget optimization confounding; the baseline under-selection may NOT be attributed to the criteria",
+      "forbidden": "must not be reported as 'the criteria work after all' -- it says the 8-iteration result was budget-limited, nothing about consistency"
+    },
+    "B": {
+      "pattern": "objective and convergence diagnostics improve but selected K is essentially unchanged",
+      "reading": "under-selection is not explained by the 8-iteration truncation alone",
+      "forbidden": "must NOT be reported as proof that the cause is the criterion; L, the MC floor and the initialisation remain uncontrolled"
+    },
+    "C": {
+      "pattern": "high-K fits are already budget-stable at iteration 8",
+      "reading": "the F-02 optimization explanation is weakened for this setting",
+      "forbidden": "must not be generalised beyond K_TRUE=5 and these three n"
+    },
+    "D": {
+      "pattern": "longer optimization destabilises selection or increases over-selection",
+      "reading": "optimization and criterion interact; report as an interaction, not as degradation",
+      "forbidden": "the word 'improvement' must not be used in any direction"
+    },
+    "meta": "All four are scientific results. K=5 failing to win more often is NOT a failed experiment, and no outcome may trigger a protocol change, a re-run, a seed change or an added arm."
+  },
+
+  "pilot": {
+    "name": "replication gate",
+    "purpose": "prove that the new instrumented runner reproduces the archived baseline exactly at checkpoint 8, so that the paired comparison is a comparison of budgets and not of code paths",
+    "scope": "K_TRUE=5, n=75, replicate 1, all 7 candidate K, both starts",
+    "fits": 14,
+    "max_iterations": 8,
+    "estimated_runtime_s": 103,
+    "pass_condition": "for all 14 fits, heldout_mean_log_score, q_strict, s2_q_based, s3_plugin_conditional and num_params are EXACTLY equal (bit-identical float repr) to the corresponding rows of the archived fit_results.csv, and train/test mask hashes match mask provenance",
+    "on_fail": "BLOCKER. Production is not authorised. Do not adjust tolerances, do not switch to approximate comparison, do not proceed with an unpaired design.",
+    "freeze_rule": "The protocol is hashed and frozen BEFORE the pilot runs. The pilot may only return PASS or FAIL; it may not change any protocol field. If a field would have to change, the protocol is re-frozen as a new version and the pilot is re-run in full."
+  },
+
+  "runtime_estimate": {
+    "baseline_scope_seconds_at_8_iterations": 3886.7,
+    "projection_method": "linear in iteration count; conservative because each fit also pays a fixed end-of-run cost that does not scale",
+    "projected_hours_at_40_iterations": 5.4,
+    "checkpoint_overhead_note": "six checkpoint evaluations per fit instead of one final evaluation; each costs one Q_strict, one held-out score and one S3 pass, all deterministic. Budget an additional allowance rather than assuming it is free.",
+    "abort_threshold": "if elapsed time exceeds 2x the projection, stop and write failure.json; do not resume"
+  },
+
+  "artifact_requirements": {
+    "per_checkpoint_row": [
+      "fit_index", "k_true", "n", "replicate", "k_est", "start",
+      "data_seed", "split_seed", "model_seed",
+      "checkpoint_iteration",
+      "heldout_mean_log_score", "q_strict", "s2_q_based", "s3_plugin_conditional",
+      "num_params",
+      "param_rel_change", "budget_stable_1e-2", "budget_stable_1e-3", "budget_stable_1e-4",
+      "q_before", "q_after", "q_diff", "mstep_decreased",
+      "cumulative_runtime_s",
+      "nan_iterations_so_far", "attempt_index"
+    ],
+    "per_fit_row": [
+      "attempts_used", "retry_events", "stopping_reason", "actual_iterations",
+      "nan_occurred", "nan_count_total_across_attempts",
+      "numerical_warnings", "train_mask_hash", "test_mask_hash",
+      "generator_version", "run_code_sha", "working_tree_clean"
+    ],
+    "f08_resolution": {
+      "problem": "em_runner resets nan_count at the top of every retry and breaks on the first clean attempt, so an internal NaN restart is invisible in the returned counters",
+      "fix": "the new runner owns its own iteration loop and appends {attempt, iteration, kind} to retry_events for every NaN event and every restart, and reports attempts_used; a value greater than 1 is a PAIRING FAILURE for that fit, recorded as such and never silently absorbed",
+      "status_in_this_draft": "planned, not implemented"
+    },
+    "not_recorded_and_why": {
+      "gradient_norm": "the E-step Newton solve does not return its gradient; exposing it would change the model classes, which are shared with the historical lineage",
+      "held_out_score_per_iteration": "recorded only at checkpoints, deliberately -- a per-iteration held-out trace invites using it as a stopping signal, which would be leakage"
+    }
+  },
+
+  "prohibitions": [
+    "no re-run of the archived 896-fit baseline",
+    "no modification, regeneration or deletion of any archived artifact",
+    "no retry, replacement, resume, seed rescue or tolerance relaxation",
+    "no protocol or criterion change after any fit of this experiment exists",
+    "no promotion of lineage E results to manuscript evidence (Human Gate)"
+  ],
+
+  "claim_boundary": {
+    "lineage": "E (experimental prototype); EXPERIMENT_REGISTRY records 原稿採用 ✗",
+    "agreement_is_with": "K_TRUE, not K*",
+    "scope": "one synthetic setting, K_TRUE=5, three n, Poisson-X / Bernoulli-Y, one signal level",
+    "does_not_establish": [
+      "consistency of any criterion",
+      "identifiability for Bernoulli-Y (U2) or non-nesting for Bernoulli-Y (U5)",
+      "that the fixed point reached at 40 iterations is the MLE",
+      "that L=5 Monte-Carlo error is negligible"
+    ]
+  },
+
+  "production_status": {
+    "production_runs_so_far": 0,
+    "new_production_fits_so_far": 0,
+    "authorisation": "NOT AUTHORISED. Production requires a human decision under CLAUDE.md section 6 after this draft is reviewed and frozen."
+  }
+}
