@@ -104,7 +104,7 @@ historical generator が生成したデータの分布についての主張で�
 
 | 記号 | 定義 | 本研究での状態 |
 |---|---|---|
-| `K_GEN` (= `K_TRUE`) | 人工データ生成時に人間が指定した潜在次元。`Z` を何列作ったかという**手続き上の数** | 定義のみ。**推定対象ではない** |
+| `K_GEN` (= `K_TRUE`) | 人工データ生成時に人間が指定した潜在次元。`Z` を何列作ったかという**手続き上の数** | **一般には統計的 estimand とは限らない**（同じ観測分布がより少ない次元で表現できる場合がある）。ただし `K_GEN = K*` が minimality / identifiability 条件から保証される人工データ設定では、**`K_GEN` recovery を `K*` recovery として評価できる**（§3.1） |
 | **`K*`** | `min{ K : P0 ∈ M_K }`。`M_K = { p_{theta,K}(X,Y) : theta ∈ Theta_K }`、`p_{theta,K}(X,Y) = ∫ p(Z) p(X\|Z) p(Y\|Z) dZ` | **定義を確定**（M-closed 前提）。**推定対象の候補** |
 | `K^rank` | population Gram `FF^T` の階数。**X 周辺しか見ない** | **P1・P5 が確立するのはこちら** |
 | `K_PRED` | 有限標本で予測性能を最大化する次元（held-out score で選ばれる K） | 手続きとしては定義済み。**population target は `[UNRESOLVED]`（U10）** |
@@ -113,22 +113,60 @@ historical generator が生成したデータの分布についての主張で�
 
 ### 3.1 `K_GEN = K*` と言える条件
 
-`[UNRESOLVED]`（U9）
+**一般には `[UNRESOLVED]`（U9）だが、family と前提を限れば `[DERIVED]` で言える。** 以下で分ける。
 
 `K* ≤ K_GEN` は自明（generator の構成が `M_{K_GEN}` の元を作るため）。
 **逆向き（`K* ≥ K_GEN`、すなわち等号）は family ごとに証明が要る。**
 
 現時点で言えるのは:
 
-- **Gaussian-Y かつ `w ≠ 0`:** P2 により単一 dyad の周辺分布から `K` が決まるので、**`K* = K_GEN`** `[PROVED]`（条件付き）。
-- **Poisson-X かつ `rank(F) = K_GEN`（generic）かつ unclipped link:** P1 により `K^rank = K_GEN`。
-  `K^rank ≤ K*` なので **`K* ≥ K_GEN` が従い、`K* = K_GEN`** `[PROVED]`（条件付き）。
+- **Gaussian-Y かつ `w ≠ 0`:** P2 により単一 dyad の周辺分布から `K` が決まるので **`K* = K_GEN`**。
+  P2 が `[PROVED]`、そこから `K* = K_GEN` を読む一歩は `[DERIVED]`。
+- **Poisson-X:** sandwich 論法で `K* = K_GEN` が従う。**前提が多いので §3.1.1 に分けて書く。**
 - **Bernoulli-Y・Bernoulli-X・Poisson-Y:** `[UNRESOLVED]`。
 
-**重要:** 現在の主要実験（clean true-K sweep、EM continuation）は **X=Poisson / Y=Bernoulli** である。
-X 側の P1 が効くので `K* = K_GEN` は**条件付きで言える**が、これは `rank(F)=K` と unclipped link を要求する。
-`canonical-clean-v1` はこの 2 条件を満たすよう設計されている（`rank(F)=K_TRUE` を全 64 セルで確認済み）。
-**Y 側（Bernoulli-Y）は依然として未解決である。**
+#### 3.1.1 Poisson-X の sandwich 論法 — 前提と証拠区分
+
+**P1 は `K^rank` についての命題であって、それ単独では `K*` を決めない。**
+`K* = K_GEN` を出すには、P1 に加えて 2 つの不等式と 5 つの前提が要る。**この区別が §5.2 の限定と矛盾しない理由でもある。**
+
+論理は 3 段:
+
+```
+(a) population moments から FF^T が identifiable                       ... P1  [PROVED]
+(b) rank(F) = K_GEN                              ⟹  K^rank = K_GEN    ... [DERIVED]
+(c) K^rank ≤ K* ≤ K_GEN                          ⟹  K* = K_GEN        ... [DERIVED]（sandwich）
+```
+
+**(c) の左側 `K^rank ≤ K*` が成り立つ理由**（これを明示しないと sandwich は使えない）:
+`K*` の定義より、`P0` を `K*` 列で表現する parameter `F'`（`d × K*`）が存在する。
+その表現の X 周辺も同じ model class の canonical Poisson-X なので、(a) が `F'` にも適用でき
+`F'F'^T` は X 周辺分布から一意に決まる。両表現は同じ `P0` を与えるので `F'F'^T = FF^T`、
+したがって `K^rank = rank(FF^T) = rank(F'F'^T) ≤ K*`。
+
+**右側 `K* ≤ K_GEN`** は generator が `M_{K_GEN}` の元を作ることから自明。
+
+**省略できない前提（5 つ）:**
+
+| # | 前提 | 破れるとどうなるか |
+|---|---|---|
+| 1 | **候補モデル族が、どの `K` でも同じ canonical Poisson-X（unclipped link）である** | (a) を `F'` に適用できず `K^rank ≤ K*` が言えない。**sandwich が崩れる** |
+| 2 | **M-closed**（`P0 ∈ ⋃_K M_K`） | `K*` がそもそも定義されない |
+| 3 | **`rank(F) = K_GEN`（generic）かつ `d ≥ K_GEN`** | (b) が崩れ、`K^rank < K_GEN` になる |
+| 4 | **population moment**（有限標本ではない） | (a) が有限標本の推定 Gram には適用されない（§5.6） |
+| 5 | **候補パラメータ空間全体でモーメントが有限** | (a) のモーメント写像が定義されない。Poisson-X はこれを満たす |
+
+**証拠区分:** (a) は `[PROVED]`（P1）。**(b)(c) と結論 `K* = K_GEN` は `[DERIVED]`** であって、
+新しい定理ではない。**前提 1–5 のどれか 1 つでも保証できない設定では、結論も使えない。**
+
+**現在の主要実験（clean true-K sweep、EM continuation）は X=Poisson / Y=Bernoulli である。**
+`canonical-clean-v1` は前提 1・3・4・5 を満たすよう設計されている
+（unclipped link、`rank(F)=K_TRUE` を全 64 セルで確認済み）。
+前提 2（M-closed）は人工データなので構成上成立する。
+したがって **これらの実験設定に限れば `K* = K_GEN` と読んでよく、`K_GEN` recovery を
+`K*` recovery として評価できる**（§3 の `K_GEN` 行）。
+**ただしこれは X 側から得た結論であり、Y 側（Bernoulli-Y）の識別可能性は依然として未解決である。**
+実データでは前提 2 が一般に成立せず、`K*` は存在しないこともある。
 
 ### 3.2 `K_PRED = K*` と言える保証
 
@@ -136,10 +174,15 @@ X 側の P1 が効くので `K* = K_GEN` は**条件付きで言える**が、�
 
 **保証はない。** 理由:
 
-1. 厳密に proper な scoring rule であれば、M-closed 下で population 最適が真の分布に一致しうる。
-   しかし現行 **S1 は推定した `ẑ` を代入した plug-in raw-eta score であって proper scoring rule ではない**。
+1. **scoring rule 自体は proper である。** S1 が使う Bernoulli log score
+   `y·eta − logaddexp(0, eta)` は proper scoring rule であり、そこは問題ではない。
+   **問題は何に対して適用しているかである。** S1 は posterior predictive
+   `p(y_new | X, Y_obs)` を積分した予測分布ではなく、**推定した `ẑ, ŵ0, ŵ` を代入した
+   plug-in predictor** を評価している。したがって S1 は
+   **「plug-in predictor に適用した proper Bernoulli log score」**であり、
+   その population limit が何を最小化するかは別に決めなければならない。
 2. 有限標本では bias–variance trade-off が別に効く。予測に最適な K が `K*` より小さくなることは
-   一般の統計モデルで普通に起きる。
+   一般の統計モデルで普通に起きる。plug-in であることはこの効果を強める方向に働きうる。
 3. **選択（selection）≠ 識別（identification）。** 「held-out で `K_GEN` が選ばれた」は
    「`K_GEN` が識別された」を意味しない。
 
@@ -159,7 +202,11 @@ clean sweep で `K_TRUE=1` が全 `n` で 4/4 だったのは、この**下限�
 | **properness** | `p(Z, X, Y)` が全確率 1 の確率測度である | finite `n, d, K`、finite parameters、Gaussian 分散 > 0、canonical link |
 | **finite moments** | `E[Y^r] < ∞` など | family 依存。**Poisson-Y では追加条件が要る** |
 
-**判定: [PROVED]（条件付き）— 有限パラメータの下で、6 つの family 組合せすべてで joint は proper である。**
+**判定: [PROVED]（条件付き）— 有限パラメータの下で、9 つの X/Y family 組合せすべてで joint は proper である。**
+
+**数え方を分ける。** 条件付き分布の種類は **X 側 3 + Y 側 3 = 6 種類**だが、
+モデルとして成立するかを問うべき単位は **X 側 3 × Y 側 3 = 9 通りの組合せ**である。
+以下の議論は 6 種類の条件付き分布それぞれの properness から、9 通りすべての joint の properness を導く。
 
 理由は 2 段階で、どちらも初等的である:
 
@@ -305,8 +352,15 @@ f_l^T f_m = log { E[X_l X_m] / ( E[X_l] E[X_m] ) }                              
 4. **population moment.** 有限標本の推定 Gram には適用されない（§5.6）。
 5. **候補パラメータ空間全体でモーメントが有限**であること（Poisson-X は満たす）。
 
-**限定（省略不可）:** P1 が確立するのは **`K^rank`** であって `K*` ではない。
-`K^rank ≤ K*` は成り立つが、**等号は自明ではない**。
+**限定（省略不可）:** **P1 が単独で確立するのは `K^rank`（X 周辺の最小次元）であって `K*` ではない。**
+`K*` は joint `p(X,Y)` の最小次元であり、P1 は X 周辺しか見ていないからである。
+
+**§3.1.1 と矛盾しない。** そこで `K* = K_GEN` を導いたのは、P1 に
+①候補族がどの `K` でも同じ canonical Poisson-X であること ②M-closed ③`rank(F)=K_GEN` かつ `d ≥ K_GEN`
+という前提を追加して sandwich `K^rank ≤ K* ≤ K_GEN` を閉じたからである。
+**P1 が与えるのは sandwich の左端だけで、結論そのものではない。**
+前提が保証されない設定では `K^rank ≤ K*` の不等号が残るだけで、等号は言えない。
+
 「Poisson-X なら常に K が識別可能」とは**書かない**。
 
 ### 5.3 Gaussian-X — **[PROVED] P5（Σ 既知）／[UNRESOLVED] U3（Σ 未知）**
@@ -446,7 +500,7 @@ R(w^2) = ( 2 b_1 − b_2 ) / ( 3 b_1 − b_3 )
 | MATLAB `calcdescmetric_ver4.m` | `ln p(X\|Z)+ln p(Y\|Z)+ln p(Z)` の平均 | **Q2 の MC 平均** | あり | あり | Q 関数を計算していることは確認済み。paper Exp.2 に実際に代入されたかは `[UNRESOLVED]` |
 | Python 再現 `experiment_paper_2.py` | 1 個の `Z` に対する `ln p(Z)+ln p(X\|Z)+ln p(Y\|Z)` | **Q2 plug-in** | あり | **なし** | コメント上は Eq.(26) 再現だが当てはまり項は Eq.(16) と一致しない |
 | historical `calc_bic_dual` | `Q_strict` | **Q2 の MC 近似** | あり | あり | **legacy Q ベース基準。Schwarz BIC と呼ばない** |
-| 本研究 **S1** | held-out plug-in raw-eta mean log score | **尤度ではない** | — | — | predictive criterion。population target は `[UNRESOLVED]`（U10） |
+| 本研究 **S1** | held-out dyad 上の Bernoulli log score（**proper**）を **plug-in predictor**（推定した `ẑ, ŵ0, ŵ`）に適用 | **尤度ではない** | — | — | predictive criterion。posterior predictive を積分していない。population limit は `[UNRESOLVED]`（U10） |
 | 本研究 **S2** | `−2 Q_strict + p log n` | **Q2** | あり | あり | Q ベース基準（`calc_bic_dual` と同型） |
 | 本研究 **S3** | `Ẑ` を代入、`p(Z)` なし、積分なし | **Q1** | なし | なし | **本研究が定義した基準。原論文 Eq.(26) ではない** |
 | standard Schwarz BIC | — | **Q3** | `Z` を積分 | — | 上記のいずれとも別 |
@@ -502,17 +556,42 @@ R(w^2) = ( 2 b_1 − b_2 ) / ( 3 b_1 − b_3 )
 Schwarz BIC の導出はモデルごとの Laplace 近似であり、非入れ子モデルの比較に BIC を使うのは標準的である。
 **非入れ子性（P3）が無効にするのは尤度比検定の χ² 近似と Wilks の定理**であって、BIC の導出ではない。
 
-**BIC がこのモデルで正当化されない実際の理由は 3 つ。** `[DERIVED]`
+### 7.2.1 潜在変数 `Z` の扱い — Q2 と Q3 を分ける
 
-| # | 理由 | 詳細 |
+**「`Z` が `n` とともに増えるから standard BIC には incidental parameter 問題がある」と一括りにしない。**
+`Z` の位置づけは基準の型によって違う。`[DERIVED]`
+
+| | `Z` の扱い | 帰結 |
 |---|---|---|
-| **1** | **モデルが特異（singular）** | `O(K)` 不変性により Fisher 情報が `K(K−1)/2` 次元の軌道方向に退化する。加えて `rank(F) < K`・`w = 0` の縮退集合上でも退化する。特異モデルでは `(p/2) log n` が **RLCT（実対数閾値）**に置き換わるが、**本モデルの RLCT は未知** |
-| **2** | **境界パラメータ** | `Sigma_X ⪰ 0`、`sigma_y^2 ≥ 0`、因子分析の `Psi ⪰ 0`。`K` の比較はしばしば境界上で起きる |
-| **3** | **有効標本数が未定義** | ノード数 `n` / dyad 数 `n(n−1)/2` / X 要素数 `nd` の 3 通りがあり、オーダーが違う。`calc_bic_dual` は `log n` に**ノード数**を使うが、Y チャネルが供給する情報は `n(n−1)/2` dyad 分である |
+| **Q2（現行 `calc_bic_dual` / S2）** | `ln p(Z, X, Y \| theta)` を当てはまり項に使うので、量そのものが **`nK` 次元の潜在状態に依存する**（実装では推定した `Z` の MC 平均） | **standard Schwarz BIC の通常の導出とは前提が異なる。** 当てはまり項が `n` とともに次元の増える状態に依存する一方、罰則 `p̂` は構造パラメータだけを数え `Z` を数えない |
+| **Q3（standard marginal likelihood）** | `ln p(X,Y \| theta) = ln ∫ p(Z,X,Y\|theta) dZ` では **`Z` は積分される潜在変数**であって、`nK` 個の通常パラメータとして数えるわけではない | Q3 に対しては「`Z` を `nK` 個のパラメータとして数える」という批判は当たらない。**Q3 で standard BIC が未証明である理由は別にある（§7.2.2）** |
 
-**さらに 4 つ目:** 潜在変数 `Z ∈ R^{n×K}` は `nK` 個の座標を持ち **`n` とともに増える**。
-これは古典的 iid 設定ではなく **incidental parameter / Neyman–Scott 型**の状況である。
-`Q_strict` は `Z` を完全データとして扱う一方、罰則 `p̂` は構造パラメータだけを数え `Z` を数えない。
+**したがって incidental parameter の論点は Q2 側の問題であって、Q3 に自動的には移らない。**
+
+### 7.2.2 Q3 に対して standard BIC consistency が未証明である理由
+
+**「非入れ子だから BIC が使えない」とは断定しない。** 非入れ子モデルの比較に BIC を使うこと自体は
+不可能ではなく、標準的ですらある（Schwarz の導出はモデルごとの Laplace 近似である）。
+**非入れ子性（P3）が無効にするのは尤度比検定の χ² 近似と Wilks の定理**であって、BIC の導出ではない。
+
+**Q3（standard marginal likelihood）に対して standard BIC consistency が未証明なのは、
+以下がいずれも未整理だからである。** `[DERIVED]`
+
+| # | 未整理の論点 | 内容 |
+|---|---|---|
+| **1** | **rotational non-identifiability / singularity** | `O(K)` 不変性によりパラメータ写像は単射でなく、Fisher 情報が `K(K−1)/2` 次元の軌道方向に退化する。特異モデルでは `(p/2) log n` が **RLCT（実対数閾値）**に置き換わるが、**本モデルの RLCT は未知** |
+| **2** | **boundary / redundant dimensions** | `Sigma_X ⪰ 0`、`sigma_y^2 ≥ 0`、因子分析の `Psi ⪰ 0`。加えて `rank(F) < K`・`w = 0` の縮退集合では余分な潜在次元が観測分布に影響しない。`K` の比較はしばしばこれらの上で起きる |
+| **3** | **relational dependence** | `Y_ij` と `Y_ik` は `z_i` を共有するので独立でない。`O(n²)` 個の dyad があっても iid 標本ではなく、周辺尤度の漸近展開に必要な独立性が成立しない |
+| **4** | **effective sample size** | ノード数 `n` / dyad 数 `n(n−1)/2` / X 要素数 `nd` の 3 通りがあり、オーダーが違う。`calc_bic_dual` は `log n` に**ノード数**を使うが、Y チャネルが供給する情報は `n(n−1)/2` dyad 分である |
+| **5** | **asymptotic regime** | 何が無限大に行くのかが未確定（§8）。Y が dense か sparse か、`d` を固定するかで結論が変わりうる |
+| **6** | **model relation across `K`** | `M_K` と `M_{K+1}` の関係（入れ子性・閉性・候補集合の連結性）が family ごとに未整理。Gaussian-Y の P3 以外は未解決 |
+| **7** | **exponential-family-specific regularity** | Laplace 近似に必要な正則性条件が、family（Gaussian / Bernoulli / Poisson）ごとに確認されていない。Poisson-Y ではモーメントの有限性自体に `\|w\| < 1/r` が要る（§4.2） |
+
+**実装事実 `[CONFIRMED_IN_REPOSITORY]`:**
+`num_params = kd − k(k−1)/2 + [d if X gaussian] + [1 if Y gaussian]`。
+`−k(k−1)/2` は `O(K)` 軌道の次元を既に引いている。**`w0` と `w` は数えられていない**（原論文の慣行）。
+Gaussian-Y では `K` の情報をもっぱら `w` が運ぶことが P2 から判明したので検討に値するが、
+**`K` に依存しない定数なので順位には影響しない。「誤り」とは断定しない。**
 
 **実装事実 `[CONFIRMED_IN_REPOSITORY]`:**
 `num_params = kd − k(k−1)/2 + [d if X gaussian] + [1 if Y gaussian]`。
@@ -530,15 +609,17 @@ Gaussian-Y では `K` の情報をもっぱら `w` が運ぶことが P2 から�
 |---|---|
 | C1 | M-closed（実データでは一般に成立しない。その場合 `K*` は存在しない） |
 | C2 | Bernoulli-Y の identifiability（U2）— **実験で使っている family** |
-| C3 | 本モデルの RLCT（特異モデルなので `p/2` は使えない） |
-| C4 | 有効標本数の定義（`n` / `n(n−1)/2` / `nd`） |
-| C5 | incidental parameter `Z` の扱い |
-| C6 | dyad の従属性の下での漸近論 |
-| C7 | 境界パラメータでの Laplace 近似 |
-| C8 | `M_K` の閉性（U11）。`P0 ∉ M_{K+1}` は `P0 ∉ closure(M_{K+1})` を含意しない |
+| C3 | rotational non-identifiability / singularity。本モデルの RLCT（特異モデルなので `p/2` は使えない） |
+| C4 | boundary / redundant dimensions での Laplace 近似 |
+| C5 | relational dependence（dyad が `z_i` を共有する）の下での漸近論 |
+| C6 | 有効標本数の定義（`n` / `n(n−1)/2` / `nd`） |
+| C7 | 漸近レジームの選択（§8） |
+| C8 | `K` をまたぐモデル間の関係。`M_K` の閉性（U11）、候補集合の連結性（U12）。`P0 ∉ M_{K+1}` は `P0 ∉ closure(M_{K+1})` を含意しない |
+| C9 | 指数型分布族固有の regularity（family ごとの正則性条件） |
 
-**そもそも現行の S2 / `calc_bic_dual` は Q3 を使っていないので、
-上の条件がすべて満たされたとしても Schwarz の議論は適用できない。**
+**加えて、現行の S2 / `calc_bic_dual` はそもそも Q3 を使っていない。**
+上の C1–C9 がすべて解決したとしても、それは Q3 に基づく基準についての結論であって、
+**Q2 を使う現行基準がそれで正当化されるわけではない。**
 
 ---
 
@@ -548,7 +629,7 @@ Gaussian-Y では `K` の情報をもっぱら `w` が運ぶことが P2 から�
 
 | レジーム | 内容 | 状態 |
 |---|---|---|
-| **A** | `n → ∞`、`d` fixed、`K` fixed | 最も標準的だが、`Z ∈ R^{n×K}` が `n` とともに増える incidental parameter 問題が残る |
+| **A** | `n → ∞`、`d` fixed、`K` fixed | 最も標準的。ただし Q2 型の基準では `Z ∈ R^{n×K}` が `n` とともに増える incidental parameter 問題が残る（Q3 では `Z` は積分されるのでこの論点は移らない。§7.2.1） |
 | **B** | `n → ∞`、Y dense（全 `n(n−1)/2` dyad を観測） | Y の情報量は `O(n^2)`。X の情報量は `O(nd)`。**2 チャネルのオーダーが違う** |
 | **C** | `n → ∞`、Y sparse（観測 dyad が `o(n^2)`） | 疎性の速度をどう置くかで結論が変わる。ネットワーク統計の標準的な難所 |
 | **D** | `d` も増える | 高次元因子分析の領域。`d/n → gamma` などの設定が必要 |
@@ -599,7 +680,9 @@ dyad を train/test に分割し、train で推定した `ẑ` を使って test
 `[UNRESOLVED]`（U10、§3.2 と同じ）
 
 **`K_PRED = K*` の保証はない。**
-S1 は proper scoring rule ではなく、有限標本では bias–variance trade-off が別に効く。
+S1 は proper な Bernoulli log score だが、それを **posterior predictive ではなく plug-in predictor**
+に適用している。この手続きで有限標本に選ばれる `K_PRED` が `K*` と一致する条件も、その population limit も
+決まっていない。有限標本では bias–variance trade-off も別に効く。
 **「held-out なら真の K を選べる」とは書かない。**
 
 ### 9.4 既存の関連証拠 `[EMPIRICAL]`
@@ -673,12 +756,12 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 
 | 先生の指摘 | 現時点で答えられること | 条件付きで言えること | 未解決 |
 |---|---|---|---|
-| **1. 真の K / BIC** | 「K」には `K_GEN`・`K*`・`K^rank`・`K_PRED` の 4 つがあり、`K^rank ≤ K* ≤ K_GEN`。現行 `calc_bic_dual`・S2 は **Q2 ベースで Schwarz BIC ではない**。原論文 Eq.(26) は **Q1 型**で Q3 ではない。Q1 型は構造的に over-selection する（S3 で 61/64） | BIC が正当化されない理由は**非入れ子性ではなく**、①モデルの特異性 ②境界パラメータ ③有効標本数未定義 の 3 つ | Schwarz BIC の前提のうち C1–C8 が未確認。本モデルの **RLCT が未知**。有効標本数の定義も未定 |
-| **2. 生成モデル成立性** | **[PROVED]** 有限パラメータの下で 6 family 組合せすべてで joint は proper。各条件付き分布が proper かつ Fubini で正規化可能 | Poisson-Y は **`\|w\| < 1/r` で `E[Y^r] < ∞`**（分散は `\|w\| < 1/2`）。properness とモーメント有限性は別問題 | モーメント有限でも identifiability は従わない（モーメント問題） |
-| **3. 真のモデルをどう当てるか** | 異なる `K` が同じ `p(X,Y)` を作るなら**データが無限でも区別不能**。まず識別可能性を確認しなければならない。**[PROVED]** Poisson-X（P1）、Gaussian-X Σ 既知（P5）、Gaussian-Y（P2・P8）、Gaussian-Y の非入れ子性（P3） | P1 は unclipped link・`rank(F)=K`・`d ≥ K`・population moment を要求し、確立するのは **`K^rank`** であって `K*` ではない | **Bernoulli-Y（U2）が未解決 — 実験で実際に使っている family。** Bernoulli-X `d>1`（U1）、Gaussian-X Σ 未知（U3）、Poisson-Y（U4）も未解決 |
+| **1. 真の K / BIC** | 「K」には `K_GEN`・`K*`・`K^rank`・`K_PRED` の 4 つがあり、`K^rank ≤ K* ≤ K_GEN`。現行 `calc_bic_dual`・S2 は **Q2 ベースで Schwarz BIC ではない**。原論文 Eq.(26) は **Q1 型**で Q3 ではない。Q1 型は構造的に over-selection する（S3 で 61/64） | BIC が正当化されない理由は**非入れ子性ではない**（非入れ子比較に BIC を使うこと自体は不可能ではない）。Q2 と Q3 で `Z` の扱いが違うことをまず分ける（§7.2.1） | Q3 に対する standard BIC consistency は、rotational non-identifiability / singularity・boundary / redundant dimensions・relational dependence・有効標本数・漸近レジーム・`K` をまたぐモデル間の関係・指数型分布族固有の regularity（C1–C9）が**未整理**のため未証明。本モデルの **RLCT が未知** |
+| **2. 生成モデル成立性** | **[PROVED]** 有限パラメータの下で **9 通り（X 側 3 × Y 側 3）**の family 組合せすべてで joint は proper。各条件付き分布が proper かつ Fubini で正規化可能 | Poisson-Y は **`\|w\| < 1/r` で `E[Y^r] < ∞`**（分散は `\|w\| < 1/2`）。properness とモーメント有限性は別問題 | モーメント有限でも identifiability は従わない（モーメント問題） |
+| **3. 真のモデルをどう当てるか** | 異なる `K` が同じ `p(X,Y)` を作るなら**データが無限でも区別不能**。まず識別可能性を確認しなければならない。**[PROVED]** Poisson-X（P1）、Gaussian-X Σ 既知（P5）、Gaussian-Y（P2・P8）、Gaussian-Y の非入れ子性（P3） | P1 が単独で確立するのは **`K^rank`**（X 周辺）であって `K*` ではない。**候補族がどの `K` でも同じ canonical Poisson-X・M-closed・`rank(F)=K_GEN`・`d ≥ K_GEN`・population moment を仮定すれば** sandwich `K^rank ≤ K* ≤ K_GEN` が閉じて `K* = K_GEN`（§3.1.1、この一歩は `[DERIVED]`） | **Bernoulli-Y（U2）が未解決 — 実験で実際に使っている family。** Bernoulli-X `d>1`（U1）、Gaussian-X Σ 未知（U3）、Poisson-Y（U4）も未解決 |
 | **4. 理論から考える** | 3 つの尤度（Q1/Q2/Q3）の区別、4 つの K の区別、6 つの identifiability の意味、properness と moment の分離、identifiability と estimability の分離 — これらはすべて固定した | 実験結果は「有限標本での観察」としてのみ使う。理論の証明には使わない | `M_K` の閉性（U11）、誤指定下の pseudo-true `K`（`K°`）、候補集合の連結性（U12） |
-| **5. sparse / missing Y** | sparse（0 が多い）と missing（未観測）は**別**。missing なら observed から `Z` を推定して未観測 dyad を予測でき、現行 held-out S1 はこの設定に近い | 人工データでは sparse-Y で複数属性同時利用が RMSE_Z を改善（prototype）。実データ MovieLens では平均は正だが split 間変動に埋もれる | **予測に最適な `K_PRED` が `K*` と一致する保証はない（U10）。** S1 は proper scoring rule ではない |
-| **6. n → ∞** | どのレジーム（A: n→∞ / B: dense / C: sparse / D: d も増加）を採るかを**まず決めなければならない**。Y は `O(n^2)` ペアあるが `z_i` を共有するので **iid ではない** | — | **どの基準についても一致性は証明していない（U6）。** 有効標本数の定義、incidental parameter `Z` の扱い、dyad の従属性下での漸近論がいずれも未確定 |
+| **5. sparse / missing Y** | sparse（0 が多い）と missing（未観測）は**別**。missing なら observed から `Z` を推定して未観測 dyad を予測でき、現行 held-out S1 はこの設定に近い | 人工データでは sparse-Y で複数属性同時利用が RMSE_Z を改善（prototype）。実データ MovieLens では平均は正だが split 間変動に埋もれる | **予測に最適な `K_PRED` が `K*` と一致する保証はない（U10）。** S1 は proper な Bernoulli log score を **plug-in predictor** に適用したものであり、その population limit と `K_PRED = K*` の条件が未決 |
+| **6. n → ∞** | どのレジーム（A: n→∞ / B: dense / C: sparse / D: d も増加）を採るかを**まず決めなければならない**。Y は `O(n^2)` ペアあるが `z_i` を共有するので **iid ではない** | — | **どの基準についても一致性は証明していない（U6）。** 有効標本数の定義、relational dependence 下の漸近論、Q2 型基準での incidental parameter `Z` の扱いがいずれも未確定 |
 
 ### 11.2 Claim Ledger
 
@@ -686,9 +769,9 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 
 | # | 主張 | 条件 |
 |---|---|---|
-| 1 | 有限パラメータの下で canonical joint `p(Z,X,Y)` は proper。6 family 組合せすべて | finite `n,d,K`、finite parameters、Gaussian 分散 > 0、canonical link |
+| 1 | 有限パラメータの下で canonical joint `p(Z,X,Y)` は proper。**9 通り（X 側 3 × Y 側 3）**の family 組合せすべて。条件付き分布の種類は X 側 3 + Y 側 3 = 6 種類 | finite `n,d,K`、finite parameters、Gaussian 分散 > 0、canonical link |
 | 2 | **P4** `O(K)` 回転・符号反転・座標置換は観測分布を変えない。`N(0,I)` prior がスケールを固定する | — |
-| 3 | **P1** Poisson-X で `‖f_l‖²=2 log E[X_l]`、`f_l·f_m = log(E[X_lX_m]/(E[X_l]E[X_m]))` により `FF^T` が population moment から復元でき、**X 周辺の最小潜在次元 = `rank(FF^T)`** | unclipped exp link、`rank(F)=K`（generic）、`d ≥ K`、population。**`K^rank` の主張であって `K*` ではない** |
+| 3 | **P1** Poisson-X で `‖f_l‖²=2 log E[X_l]`、`f_l·f_m = log(E[X_lX_m]/(E[X_l]E[X_m]))` により `FF^T` が population moment から復元でき、**X 周辺の最小潜在次元 = `rank(FF^T)`** | unclipped exp link、`rank(F)=K`（generic）、`d ≥ K`、population。**これは `K^rank` の主張であって `K*` ではない。** `K* = K_GEN` を出すには前提を追加した sandwich が要り、その一歩は `[DERIVED]`（§3.1.1、DERIVED 表 2–3） |
 | 4 | **P5** Gaussian-X で `Σ` 既知なら **X 周辺の**最小潜在次元 = `rank(Cov(X) − Σ)` | `rank(F)=K`（generic） |
 | 5 | **P2** Gaussian-Y で `M_S(t)=(1−t²)^{−K/2}` → `κ₂=K, κ₄=6K, κ₆=120K` → 単一 dyad から `(w0, w², K, σ_y²)` が決まる | `w ≠ 0`。**`w` の符号は決まらない** |
 | 6 | **P8** Gaussian-Y で `E[(Y_ij−w0)(Y_ik−w0)(Y_jk−w0)] = w³K` により `w` の符号が三角形から識別される | `w ≠ 0`、`n ≥ 3` |
@@ -701,16 +784,18 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 
 | # | 主張 |
 |---|---|
-| 1 | `K^rank ≤ K* ≤ K_GEN` で、どの不等号も等号とは限らない |
-| 2 | Poisson-X + `rank(F)=K` + unclipped の下では `K* = K_GEN`（P1 と `K^rank ≤ K*` から） |
-| 3 | Gaussian-Y + `w≠0` の下では `K* = K_GEN`（P2 から） |
-| 4 | 現行 `calc_bic_dual` / S2 は Q2 を使っており Q3 を使っていない。**Schwarz BIC ではない** |
-| 5 | 原論文 Eq.(26) の当てはまり項 Eq.(16) は Q1 型であり Q3 ではない |
-| 6 | BIC が正当化されない理由は非入れ子性ではなく、①特異性 ②境界 ③有効標本数未定義 |
-| 7 | Q1 型基準は潜在次元とともに当てはまりが単調改善するので over-selection しやすい |
-| 8 | Y は `O(n²)` ペアあるが `z_i` を共有するので iid ではない |
-| 9 | properness は identifiability を含意しない。finite moments も identifiability を含意しない |
-| 10 | historical generator は canonical model と 4 点で乖離する（Z の z-score、F 行正規化、X の z-score、η clipping） |
+| 1 | `K^rank ≤ K* ≤ K_GEN`。一般にはどの不等号も等号とは限らない |
+| 2 | `K^rank ≤ K*` は、候補族がどの `K` でも同じ canonical Poisson-X であれば P1 から従う（`K*` 表現の `F'` にも P1 が適用でき `F'F'^T = FF^T`） |
+| 3 | **Poisson-X の sandwich（§3.1.1）:** 前提 1–5（同一 model class・M-closed・`rank(F)=K_GEN` かつ `d ≥ K_GEN`・population moment・モーメント有限）の下で `K* = K_GEN`。**P1 は sandwich の左端を与えるだけで、この結論自体は `[DERIVED]`** |
+| 4 | Gaussian-Y + `w≠0` の下では `K* = K_GEN`（P2 から読む一歩） |
+| 5 | 現行 `calc_bic_dual` / S2 は Q2 を使っており Q3 を使っていない。**Schwarz BIC ではない** |
+| 6 | 原論文 Eq.(26) の当てはまり項 Eq.(16) は Q1 型であり Q3 ではない |
+| 7 | **Q2 と Q3 では `Z` の扱いが違う。** Q2 は `nK` 次元の潜在状態に依存する量を当てはまり項に使い、Schwarz の通常の導出とは前提が異なる。Q3 では `Z` は積分される潜在変数であって `nK` 個の通常パラメータとして数えるわけではない |
+| 8 | current model で standard BIC consistency が未証明なのは、rotational non-identifiability / singularity・boundary / redundant dimensions・relational dependence・有効標本数・漸近レジーム・`K` をまたぐモデル間の関係・指数型分布族固有の regularity が**未整理**だから。**非入れ子性が理由ではない** |
+| 9 | Q1 型基準は潜在次元とともに当てはまりが単調改善するので over-selection しやすい |
+| 10 | Y は `O(n²)` ペアあるが `z_i` を共有するので iid ではない |
+| 11 | properness は identifiability を含意しない。finite moments も identifiability を含意しない |
+| 12 | historical generator は canonical model と 4 点で乖離する（Z の z-score、F 行正規化、X の z-score、η clipping） |
 
 #### [EMPIRICAL]
 
@@ -737,7 +822,7 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 | **U6** | **どの基準についても `n→∞` の一致性。漸近レジーム自体が未確定** |
 | U7 | 有限標本の rank 閾値（推定 Gram は PSD ですらない） |
 | U9 | clean construction で `K* = K_GEN` か（family ごと。Bernoulli-Y で未解決） |
-| **U10** | **held-out plug-in score（S1）の population target。`K_PRED = K*` の保証なし** |
+| **U10** | **S1 の population limit と `K_PRED = K*` の条件。** S1 が使う Bernoulli log score 自体は proper だが、posterior predictive ではなく **plug-in predictor** に適用しているため、この手続きが population で何を最小化するかが未決 |
 | U11 | `M_K` の閉性、誤指定下の pseudo-true `K`（`K°`） |
 | U12 | 候補集合 `{K : P0 ∈ M_K}` の連結性 |
 | — | 本モデルの **RLCT**（特異モデルなので `p/2` は使えない） |
@@ -766,18 +851,18 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 > 「真の潜在次元 K」には少なくとも 4 つの意味があり、混同していました。
 > 生成時に指定した `K_GEN`、観測分布を表現できる最小次元 `K*`、X 側の Gram の階数 `K^rank`、
 > 予測が最良になる `K_PRED` です。関係は `K^rank ≤ K* ≤ K_GEN` で、等号は自明ではありません。
-> **生成モデルとしての成立性（properness）は 6 つの family 組合せすべてで証明できました。**
+> **生成モデルとしての成立性（properness）は 9 通り（X 側 3 × Y 側 3）の family 組合せすべてで証明できました。**
 > **識別可能性は Poisson-X と Gaussian-Y では証明できましたが、
 > 実験で実際に使っている Bernoulli-Y では未解決です。**
-> また、これまで「BIC」と呼んでいたものは観測データの周辺尤度を使っておらず、
-> **Schwarz BIC ではありません。**
+> また、これまで「BIC」と呼んでいたものは観測データの周辺尤度（Q3）を使っておらず、
+> **Schwarz BIC ではありません。** Q3 に対する一致性も、前提が未整理のため未証明です。
 > `n → ∞` の一致性は、どの漸近レジームを採るかすら決まっていないので、証明していません。
 
 ### B. 2 分説明
 
 > **まずモデルが生成モデルとして成立するかを確認しました。**
 > 有限パラメータなら各条件付き分布は proper で、`Z` を積分しても全質量 1 になるので、
-> Gaussian / Bernoulli / Poisson の X 側 3 通り × Y 側 3 通りすべてで joint は proper です。
+> Gaussian / Bernoulli / Poisson の **X 側 3 通り × Y 側 3 通り = 9 組合せ**すべてで joint は proper です。
 > ただし **properness とモーメントの有限性は別問題**で、Poisson-Y では `E[Y^r] < ∞` に `|w| < 1/r` が要ります。
 > 分散が有限なのは `|w| < 1/2` のときだけで、**古い generator の既定値 `w = 0.5` はちょうどその境界**でした。
 >
@@ -792,9 +877,13 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 > **BIC については、混同を 3 つに整理しました。**
 > `Z` を代入するだけの Q1、`p(Z)` を掛けるが積分しない Q2、`Z` を積分する Q3 です。
 > **Schwarz BIC が近似するのは Q3 だけ**ですが、現行実装も原論文の式も Q3 ではありません。
-> さらにこのモデルは `O(K)` 回転で観測分布が変わらない**特異モデル**なので、
-> 罰則 `(p/2) log n` の理論的根拠がそもそも成り立たず、代わりに必要な RLCT は未知です。
-> 有効標本数もノード数 `n` か dyad 数 `n(n−1)/2` か決まっていません。
+> ここで Q2 と Q3 は `Z` の扱いが違います。Q2 は `nK` 次元の潜在状態に依存する量を使うので
+> 通常の Schwarz の導出とは前提が異なりますが、Q3 では `Z` は積分される潜在変数であって
+> `nK` 個のパラメータとして数えるわけではありません。
+> **それでも Q3 に対して一致性が未証明なのは、** 回転不定性による特異性、境界・冗長次元、
+> dyad が `z_i` を共有する依存構造、有効標本数の定義、漸近レジーム、`K` をまたぐモデル間の関係、
+> 指数型分布族固有の正則性が、いずれも未整理だからです。
+> **「非入れ子だから BIC が使えない」という説明は誤りです。**
 >
 > **実験は有限標本の観察としてのみ使っています。**
 > 古い条件でも `n` を小さくすると `K=5` の選択は 5/5 から 1/5 に落ちました。
@@ -825,7 +914,8 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 **どれを先に分離すべきでしょうか。** 私は ① と ④ が最も直接効くと見ていますが、これは推測です。
 
 **Q4. 基準をどう位置づけますか。**
-現行の Q ベース基準は Schwarz BIC ではなく、このモデルは特異なので標準的な BIC 理論が適用できません。
+現行の Q ベース基準（Q2）は Schwarz BIC（Q3）ではなく、Q3 に対しても特異性・境界・依存構造・
+有効標本数などが未整理のため標準的な BIC 理論をそのまま適用できません。
 (a) 特異モデルの理論（RLCT / sBIC / WBIC）へ踏み込むか、
 (b) 予測基準（held-out）に一本化して「BIC の代替」として位置づけるか、
 (c) 既存基準の限界を明示するにとどめるか。
@@ -834,7 +924,7 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 **Q5. `n → ∞` をどこまで議論すべきですか。**
 一致性を論じるには漸近レジーム（Y が dense か sparse か、`d` を固定するか）と
 有効標本数の定義（`n` か `n(n−1)/2` か）をまず決める必要があり、
-潜在変数 `Z` が `n` とともに増える incidental parameter 問題も残ります。
+Q2 型の基準では潜在変数 `Z` が `n` とともに増える incidental parameter 問題も残ります（Q3 では `Z` は積分されます）。
 **修論では「レジームを固定して問題を定式化するところまで」で十分でしょうか、
 それとも一致性の証明まで求められますか。**
 
@@ -844,4 +934,5 @@ trial 数・criterion・signal 構成・generator・training mask がすべて�
 
 | 日付 | 内容 |
 |---|---|
+| 2026-09-06 (rev.2) | Human review 反映: ①family 組合せを 9 通り（条件付き分布は 6 種類）に訂正 ②`K_GEN` を「推定対象ではない」から「一般には statistical estimand とは限らないが、`K_GEN = K*` が保証される設定では `K*` recovery として評価できる」に緩和 ③Poisson-X の `K^rank` と `K*` の関係を sandwich として明示し、前提 5 つと PROVED/DERIVED の境界を分離（§3.1.1） ④S1 を「proper scoring rule ではない」から「proper な Bernoulli log score を plug-in predictor に適用したもの」に訂正 ⑤Q2 と Q3 で `Z` の扱いが違うことを分離し、Q3 に対する未証明理由を 7 論点に整理（§7.2.1・§7.2.2）。**新しい証明・新しい実験は行っていない。** |
 | 2026-09-06 | 初版。新規実験なし。既存の一次資料（`true_k_identifiability_hardened_20260904.md`、`k_selection_theory_map_20260905.md`、`paper_bic_reproduction_alignment_20260904.md`、`RESEARCH_MASTER.md` §17-18、`KNOWN_ISSUES.md`）を先生の 6 指摘の形に再構成し、2026-09-06 の EM continuation 実験と historical bridge 実験を有限標本の観察として追加した |
