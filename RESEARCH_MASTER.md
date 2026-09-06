@@ -873,6 +873,7 @@ Phase 8b Attempt 2（§12.9）に対応する差分だけを追記する。分�
 | 凍結プロトコル | `reports/identifiability/clean_true_k_experiment_protocol_20260904.md` |
 | 実験結果 | `reports/identifiability/clean_true_k_results_20260905.md` |
 | 先生向け説明 | `reports/identifiability/teacher_discussion_summary_20260905.md` |
+| **理論整理（2026-09-06、先生の指摘 A–F への到達点を一枚に統合）** | `reports/k_selection_theory/true_k_identifiability_and_selection_theory_20260906.md` |
 | 数値検証 | `tools/research_audit/verify_identifiability_identities.py`（**81 rows / failure 0。うち独立に反証可能な数値確認は 41 行、残り 40 行は構成上必ず PASS する算術整合行。P3・P6 に独立数値証拠なし**。理論監査 §19） |
 
 ### 17.2 「真の K」の定義（指摘 2）
