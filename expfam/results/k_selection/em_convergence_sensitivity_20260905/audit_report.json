@@ -1,0 +1,140 @@
+{
+  "audit_version": "em-convergence-audit-v3",
+  "blocker_count": 0,
+  "findings": [
+    {
+      "check": "diagnostics_are_descriptive",
+      "detail": "the six change columns are budget-stability diagnostics under a fixed L Monte-Carlo draw. They are not a convergence proof, none is used for stopping or selection, and none decays to zero",
+      "severity": "LOW"
+    },
+    {
+      "check": "generator_is_imported",
+      "detail": "the auditor regenerates data with the frozen data_generator_canonical module rather than a second implementation, so a defect in the generator itself would not be caught here",
+      "severity": "LOW"
+    },
+    {
+      "check": "estimand_is_narrow",
+      "detail": "the contrast is 'continuing the same stochastic MCEM procedure', not an optimization effect: further iterations redraw L latent samples, so the two are not separable by this design",
+      "severity": "LOW"
+    }
+  ],
+  "high_count": 0,
+  "low_count": 3,
+  "medium_count": 0,
+  "p2_replicate_rows": 224,
+  "p2_summary_rows": 28,
+  "recomputed_checkpoints": 2688,
+  "recomputed_selections": 576,
+  "run_dir": "D:\\tento\\kennkyu\\expfam\\results\\k_selection\\em_convergence_sensitivity_20260905",
+  "selection_summary": {
+    "S1@12": {
+      "exact": 8,
+      "over": 2,
+      "start_disagreement": 26,
+      "under": 22
+    },
+    "S1@16": {
+      "exact": 12,
+      "over": 2,
+      "start_disagreement": 25,
+      "under": 18
+    },
+    "S1@24": {
+      "exact": 14,
+      "over": 1,
+      "start_disagreement": 15,
+      "under": 17
+    },
+    "S1@32": {
+      "exact": 13,
+      "over": 0,
+      "start_disagreement": 18,
+      "under": 19
+    },
+    "S1@40": {
+      "exact": 16,
+      "over": 2,
+      "start_disagreement": 19,
+      "under": 14
+    },
+    "S1@8": {
+      "exact": 14,
+      "over": 1,
+      "start_disagreement": 18,
+      "under": 17
+    },
+    "S2@12": {
+      "exact": 7,
+      "over": 0,
+      "start_disagreement": 6,
+      "under": 25
+    },
+    "S2@16": {
+      "exact": 8,
+      "over": 0,
+      "start_disagreement": 5,
+      "under": 24
+    },
+    "S2@24": {
+      "exact": 8,
+      "over": 0,
+      "start_disagreement": 5,
+      "under": 24
+    },
+    "S2@32": {
+      "exact": 7,
+      "over": 0,
+      "start_disagreement": 5,
+      "under": 25
+    },
+    "S2@40": {
+      "exact": 8,
+      "over": 0,
+      "start_disagreement": 8,
+      "under": 24
+    },
+    "S2@8": {
+      "exact": 8,
+      "over": 0,
+      "start_disagreement": 4,
+      "under": 24
+    },
+    "S3@12": {
+      "exact": 1,
+      "over": 31,
+      "start_disagreement": 11,
+      "under": 0
+    },
+    "S3@16": {
+      "exact": 1,
+      "over": 31,
+      "start_disagreement": 20,
+      "under": 0
+    },
+    "S3@24": {
+      "exact": 3,
+      "over": 29,
+      "start_disagreement": 10,
+      "under": 0
+    },
+    "S3@32": {
+      "exact": 2,
+      "over": 30,
+      "start_disagreement": 15,
+      "under": 0
+    },
+    "S3@40": {
+      "exact": 2,
+      "over": 30,
+      "start_disagreement": 17,
+      "under": 0
+    },
+    "S3@8": {
+      "exact": 3,
+      "over": 29,
+      "start_disagreement": 17,
+      "under": 0
+    }
+  },
+  "verdict": "PASS"
+}
