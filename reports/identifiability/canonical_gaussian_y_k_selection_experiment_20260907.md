@@ -12,7 +12,8 @@
 ## 1. Executive summary
 
 理論的に `K_0 = K_GEN` が保証された canonical Gaussian-Y 生成条件で、現行 Q-based criterion が
-何を選ぶかを**改変・後付け調整なしに**評価した。**450 fits、失敗 0、final integrity audit 18/18 PASS。**
+何を選ぶかを**改変・後付け調整なしに**評価した。**630 fits（core 450 + signal-sensitivity 180）、
+失敗 0、final integrity audit 18/18 PASS。**
 
 **結果は CASE A（高率回収）である。**
 
@@ -23,12 +24,15 @@
 | 3 | 150 | 10 | 10 | **1.00** |
 | 3 | 300 | 10 | 10 | **1.00** |
 | 5 | 150 | 10 | 10 | **1.00** |
-| **合計** | | **50** | **50** | **1.00** |
+| 3（`w=0.25`） | 150 | 10 | 10 | **1.00** |
+| 3（`w=1.00`） | 150 | 10 | 10 | **1.00** |
+| **合計** | | **70** | **70** | **1.00** |
 
-同点は 1 件も発生していない（`ties.csv` は空）。`k = K_0` での推定値は `w_hat = 0.4967`（真値 0.5）、
-`sigma_y_hat = 0.1002`（真値 0.1）。
+同点は 1 件も発生していない（`ties.csv` は空）。`k = K_0` での推定値は core で `w_hat = 0.4967`（真値 0.5）、
+`sigma_y_hat = 0.1002`（真値 0.1）。signal-sensitivity arm でも `w_hat = 0.2525 / 1.0093`
+（真値 0.25 / 1.00）と真値へ収束した。
 
-**しかし本実験の価値は「50/50 当たった」ことではない。** 重要なのは **なぜ当たったか**である。
+**しかし本実験の価値は「70/70 当たった」ことではない。** 重要なのは **なぜ当たったか**である。
 
 > **中心的所見:** 現行 Q-based criterion が `K_0` を選ぶのは、明示的パラメータ罰則 `p_hat log n` の
 > はたらきでは**ない**。選択を決めているのは、`Q_strict` が `E[log p(Z)]` を含むことと
@@ -39,15 +43,21 @@
 > P_Z(K) = -2 E[log p(Z)] = n K (log 2*pi + 1)      <- データを一切含まない
 > ```
 >
-> この恒等式は 450 fits すべてで残差 `4.5e-13` 以下で成立する。
-> `P_Z` を外す counterfactual では **50/50 すべてが選択を変え、47/50 が候補上限 `K = 9` を選ぶ**。
+> この恒等式は 630 fits すべてで残差 `4.5e-13` 以下で成立する。
+> `P_Z` を外す counterfactual では **70/70 すべてが選択を変え、67/70 が候補上限 `K = 9` を選ぶ**。
+> `Δ P_Z = 425.68` は `w` を 4 倍動かしても**完全に同一の値**であり、隠れ罰則が信号強度に依存しないことが
+> 実測で確認された（§14.3）。
 
 副次的に、事前に立てた予測が **外れた**ことも記録する。私は「fit gain は dyad 数 `O(n^2)` に比例するので
 `n` を上げると隠れ罰則 `O(n)` を追い越して過大選択に向かう」と予測したが、実測は
 fit gain が `n^0.76`、隠れ罰則が厳密に `n^1.0` で、**罰則のほうが速く伸びた**。
 margin は `n` とともに `118.6 -> 317.5 -> 634.5` と広がった。予測は棄却された。
 
-**時間制約により optional signal-sensitivity arm（`w in {0.25, 1.0}`）は実行していない**（§14）。
+**optional signal-sensitivity arm（`w in {0.25, 1.0}`）も凍結設定のまま実行済み**（§14）。
+そこでも予測は棄却された。私は「弱い信号なら margin が広がる」と予測したが、実測は逆で、
+**真の信号が弱いほど余分な次元が稼ぐ見かけの当てはまりが大きく、margin はむしろ狭まった**
+（`w=0.25`: 309.1 < `w=0.5`: 317.5 < `w=1.0`: 337.5）。ただし効果量は小さく（±4.5%）、
+この設定では `n` のほうが margin をはるかに強く支配する。
 
 ---
 
@@ -108,7 +118,7 @@ finite-sample recovery・criterion の妥当性・selection consistency のい�
 
 joint が等しければ単一 dyad の周辺も等しい。canonical joint では `X ⊥ Y | Z` であり、
 `Y_ij` の周辺は `F`・`family_x`・`d` を一切含まず §4 の dyad model そのものになる。
-したがって `w = 0.5 != 0` の本設定では `{K : p_* in M_K} = {K_GEN}` は単元集合であり、
+したがって `w in {0.25, 0.5, 1.0}`（いずれも `!= 0`）の本設定では `{K : p_* in M_K} = {K_GEN}` は単元集合であり、
 
 ```
 K_0 = K_GEN        （理論的 ground truth）
@@ -155,7 +165,9 @@ Y[i<j] = eta_y[i<j] + rng.normal(0, sigma_y, n_pairs)
 Y = Y + Y.T ; fill_diagonal(Y, 0)                    # no normalisation
 ```
 
-`w0 = 0.0`, `w = 0.5`, `sigma_y = 0.1`（**すべて結果を見る前に凍結し、一度も変更していない**）。
+`w0 = 0.0`, `sigma_y = 0.1`、core arm は `w = 0.5`、signal-sensitivity arm は `w in {0.25, 1.0}`
+（**すべて結果を見る前に凍結し、一度も変更していない**。sensitivity arm の値も core 実行前から
+ランナー内 `SENS_W_LIST` に固定されていた）。
 
 `F` の行正規化は canonical model からの逸脱ではない。`F` は `Theta_K` の自由パラメータであり、
 特定の値を選んでいるだけである（正対角を左から掛けるので `rank(F)` は保存される）。
@@ -234,9 +246,9 @@ FULL は枠の 94% を消費し安全余裕がなく optional arm も不可能�
 
 ---
 
-## 11. Primary recovery results
+## 11. Primary recovery results（core arm, `w = 0.5`）
 
-`aggregate_recovery.csv` / `selection_by_trial.csv`
+`aggregate_recovery.csv` / `selection_by_trial.csv`。信号強度 arm は §14。
 
 | `K_0` | `n` | trials | `K_hat=K_0` | rate | mean gap to 2nd best |
 |---|---|---|---|---|---|
@@ -246,7 +258,7 @@ FULL は枠の 94% を消費し安全余裕がなく optional arm も不可能�
 | 3 | 300 | 10 | 10 | 1.00 | 634.5 |
 | 5 | 150 | 10 | 10 | 1.00 | 309.3 |
 
-- 全 450 fits 成功、`nan_occurred` 0、internal retry は全件 0。
+- core 450 fits すべて成功、`nan_occurred` 0、internal retry は全件 0。
 - **同点 0 件**（`ties.csv` は空）。tie rule（最小 K）は一度も発動していない。
 - `k = K_0` での推定: `w_hat = 0.4967`（真 0.5）、`sigma_y_hat = 0.1002`（真 0.1）。
 
@@ -256,7 +268,7 @@ FULL は枠の 94% を消費し安全余裕がなく optional arm も不可能�
 
 ## 12. `K_0`-by-`K_hat` confusion
 
-`confusion_matrix.csv`（core arm, `w=0.5`、全 `n` を合算）
+`confusion_matrix.csv`（**core arm のみ**, `w=0.5`、全 `n` を合算。signal-sensitivity arm は §14.1）
 
 | `K_0` \ `K_hat` | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -285,17 +297,98 @@ consistency も収束も主張しない（§20）。
 
 ## 14. Signal sensitivity
 
-**未実施。** `[NOT EXECUTED]`
+**実行済み（2026-09-07 追加実行）。** `[EXECUTED]`
 
-仕様 §15 は optional arm の実行条件として「core 終了後 report 作成前に **60 分以上の余裕**があり、
-core integrity が完全 PASS していること」を課している。
-full grid は 06:48 JST に完了したが、監視タスクの遅延により**観測したのは 09:02 JST** であり、
-5 時間枠の残りは約 48 分で 60 分要件を下回った。
-**時間のみを根拠に不実施と判断した。結果は一切参照していない。**
+当初は時間要件（仕様 §15 の「60 分以上の余裕」）を満たさず未実施だったが、
+その後 **凍結された設定・seed policy・estimator initialization を一切変更せずに** 実行した。
+`w_true in {0.25, 1.0}`、`K_0 = 3`、`n = 150`、各 10 trial、candidate `K = 1..9` = **180 fits**。
+baseline `w = 0.5` は core から再利用し、**再実行していない**。
+結果は `fit_results_sensitivity.csv` に core とは別ファイルで保存した。
 
-arm はランナー内に完全に仕様化・seed 固定済みで（`--sensitivity`、`w in {0.25, 1.0}`、
-`K_0=3`, `n=150`, 10 trials, `K=1..9`, 180 fits, 所要見積り約 34 分）、
-**設定を一切変えずにそのまま実行できる。** これが次の 1 手である（§21）。
+**core 不変性の検証（追加実行が既存結果を汚していないこと）:**
+
+| 検査 | 結果 |
+|---|---|
+| `fit_results_pilot.csv` SHA256 | **不変** |
+| `fit_results_full.csv` SHA256 | **不変** |
+| core 5 セルの `recovery_count` / `recovery_rate` / `selected_k_mean` | **不変** |
+| core 5 セルの `total_delta_C_Q` | **不変**（差 < 1e-9） |
+
+**integrity: final audit 18/18 PASS**（630 fits = core 450 + sensitivity 180、失敗 0、非有限 0、
+再構成残差 `5.821e-11 <= 1e-8`、同点 0、seed collision 0）。
+
+### 14.1 Recovery（`K_0 = 3`, `n = 150`）
+
+| `w_true` | trials | `K_hat = K_0` | rate | selection counts | mean gap to 2nd best |
+|---|---|---|---|---|---|
+| **0.25** | 10 | 10 | **1.00** | `{3: 10}` | 309.1 |
+| 0.50（core 再利用） | 10 | 10 | **1.00** | `{3: 10}` | 317.5 |
+| **1.00** | 10 | 10 | **1.00** | `{3: 10}` | 337.5 |
+| **合計** | **30** | **30** | **1.00** | | |
+
+同点 0 件。`w` を 4 倍（0.25 → 1.0）動かしても選択は `K_0 = 3` で一定だった。
+
+### 14.2 パラメータ回収（`k = K_0 = 3`）
+
+| `w_true` | `w_hat` | `sigma_y_hat`（真 0.1） |
+|---|---|---|
+| 0.25 | **0.2525** | 0.1003 |
+| 0.50 | 0.4890 | 0.1002 |
+| 1.00 | **1.0093** | 0.0999 |
+
+**これは §20 の限定条件 5 に直接答える。** estimator の初期化器は `family_y = gaussian` のとき
+`w` を常に `0.5` に置く（`w_true` を知らない）。`w_true = 0.25` と `1.0` では
+**初期値が真値と一致していない**にもかかわらず、`w_hat` は真値へ収束し recovery も 10/10 だった。
+したがって core で懸念した「初期値と真値の一致が回収を助けていた」という交絡は、
+**少なくとも `w` が 2〜4 倍ずれる範囲では回収を説明しない**。
+ただし初期値は依然として真値の 2〜4 倍以内にあり、**より遠い初期値は検証していない**。
+
+### 14.3 機構（`K_0 -> K_0 + 1` の限界収支）
+
+`penalty_vs_fitgain_by_n.csv`
+
+| `w_true` | `Δ D_K` | `Δ P_Z` | `Δ P_theta` | `Δ C_Q` | implicit/explicit |
+|---|---|---|---|---|---|
+| **0.25** | **−176.71** | 425.68 | 60.13 | **+309.10** | 7.08× |
+| 0.50 | −168.33 | 425.68 | 60.13 | +317.48 | 7.08× |
+| **1.00** | **−148.33** | 425.68 | 60.13 | **+337.48** | 7.08× |
+
+**観察 4 — 隠れ罰則は `w` に完全に依存しない。** `Δ P_Z = 425.68` は 3 条件で**同一の値**である。
+これは §15 の恒等式 `P_Z(K) = nK(log 2*pi + 1)` が `w` を含まないことの直接確認になっている。
+`Δ P_theta` も同一（`p_hat` は `w` に依存しない）。**`w` が動かすのは `D_K` だけである。**
+
+**観察 5 — 事前予測が再び棄却された。** `[PREDICTION REJECTED]`
+
+実行前に私は「`w = 0.25` では fit gain が縮んで margin が広がり、`w = 1.0` では
+fit gain が伸びて margin が縮む」と予測した。実測は**逆向き**である。
+
+```
+w = 0.25 :  余分な次元の fit gain = 176.7（最大）  ->  margin 309.1（最小）
+w = 1.00 :  余分な次元の fit gain = 148.3（最小）  ->  margin 337.5（最大）
+```
+
+すなわち **真の信号が強いほど、`K_0 + 1` 次元目が稼ぐ見かけの当てはまりは小さくなる。**
+解釈としては「真の信号が強いと `K_0` 次元モデルが `Y` をすでによく説明しており、
+余分な次元が吸収できる残差が少ない」という向きが自然だが、
+**本実験の設計ではこの因果を切り分けていない**（`[UNRESOLVED]`）。
+
+**観察 6 — 効果量は小さい。** `w` を 4 倍動かしても margin は `309.1 -> 337.5`（変動幅 ±4.5%）にとどまる。
+一方 `n` を 2 倍にすると margin は `317.5 -> 634.5`（2 倍）動く（§16）。
+**この設定では `n` のほうが `w` よりはるかに強く選択余裕を支配している。**
+
+### 14.4 Direct-prior counterfactual（診断のみ）
+
+| `w_true` | 選択が変わった | 反事実の `K_hat` |
+|---|---|---|
+| 0.25 | **10 / 10** | `{9: 10}` |
+| 0.50 | **10 / 10** | `{9: 10}` |
+| 1.00 | **10 / 10** | `{9: 10}` |
+
+**`w` の値によらず、`P_Z` を外すと全件が候補上限 `K = 9` に張り付く。**
+core（n=50 で一部 7・8）より均一である。
+§17 の結論は信号強度に対して頑健であることが確認された。
+
+図: `signal_sensitivity_K0_3.png`
 
 ---
 
@@ -435,32 +528,44 @@ P_Z      :  425.7 -> 851.4                     = 2.00 倍  =  n^1.00
 
 ## 19. What is established
 
-1. canonical Gaussian-Y・`w=0.5`・`n in {50,150,300}`・`K_0 in {1,3,5}` の**明示した有限標本設定**において、
-   現行 Q-based criterion は候補 `K=1..9` から `K_0` を **50/50 trial** で選択した。同点 0。
+1. canonical Gaussian-Y の**明示した有限標本設定**（`K_0 in {1,3,5}`・`n in {50,150,300}`・
+   `w in {0.25,0.5,1.0}`）において、現行 Q-based criterion は候補 `K=1..9` から `K_0` を
+   **70/70 trial** で選択した。同点 0。
 2. 現行 criterion は `C_Q(K) = D_K + P_Z(K) + P_theta(K)` と**厳密に**分解される（残差 `<= 5.8e-11`）。
 3. `P_Z(K) = nK(log 2*pi + 1)` は **決定論的**であり（残差 `<= 4.5e-13`）、データ情報を持たない。
    これは `Q_strict` が `E[log p(Z)]` を含むことと `scale_Z` の相互作用の帰結である。
 4. `P_Z` の 1 次元あたり傾きは `P_theta` の **3.0〜12.4 倍**であり、実効罰則の階数は
    `O(nK)` であって `O(p log n)` ではない。
-5. `P_Z` を除く反事実では **50/50 が選択を変え、47/50 が候補上限 `K=9`** を選ぶ。
+5. `P_Z` を除く反事実では **70/70 が選択を変え、67/70 が候補上限 `K=9`** を選ぶ。
+   `w` を 4 倍動かしても反事実は 30/30 すべて `K=9` であり、この診断は信号強度に頑健である。
 6. `n` を 50→300 に増やすと、fit gain は `n^0.76`、`P_Z` は `n^1.00` で伸び、
    **margin は広がった**（118.6 → 317.5 → 634.5）。
-7. `k = K_0` において `w_hat = 0.4967`（真 0.5）、`sigma_y_hat = 0.1002`（真 0.1）。
-8. integrity: **450 fits / 失敗 0 / 非有限 0 / retry 0 / theory gate 10/10 / final audit 18/18 PASS。**
+7. `k = K_0` において `w_hat` は `0.2525 / 0.4890 / 1.0093`（真 `0.25 / 0.50 / 1.00`）、
+   `sigma_y_hat` は全条件で `0.0999-0.1003`（真 0.1）。
+8. **隠れ罰則 `P_Z` は `w` に完全に依存しない。** `Δ P_Z = 425.68` は 3 つの `w` で同一の値であり、
+   `w` が動かすのは `D_K` のみである（§14.3）。
+9. signal-sensitivity arm の追加実行は core 結果を一切変更していない
+   （`fit_results_pilot.csv` / `fit_results_full.csv` の SHA256、core 5 セルの集計値・機構値がすべて不変）。
+10. integrity: **630 fits / 失敗 0 / 非有限 0 / retry 0 / theory gate 10/10 / final audit 18/18 PASS。**
 
 ---
 
 ## 20. What is not established
 
 1. **model-selection consistency ではない。** `n` は 3 点のみ。`n -> infinity` の主張は一切していない（既存 U6）。
-2. **一般的な true-K recovery ではない。** 検証したのは `K_0 in {1,3,5}`、`w = 0.5`、`sigma_y = 0.1`、
-   `d = 15`、Bernoulli-X / Gaussian-Y の 1 点だけである。
+2. **一般的な true-K recovery ではない。** 検証したのは `K_0 in {1,3,5}`、`n in {50,150,300}`、
+   `w in {0.25,0.5,1.0}`、`sigma_y = 0.1` 固定、`d = 15` 固定、Bernoulli-X / Gaussian-Y のみである。
+   `sigma_y` と `d` は一切動かしていない。
 3. **Schwarz BIC の妥当性を示すものではない**（KI-010）。むしろ §16 は実効罰則が Schwarz 型と
    異なる階数を持つことを示している。
 4. **他 family へ移送できない。** Bernoulli-Y（U2）・Poisson-Y（U4）では `K_0` の識別可能性自体が未解決。
-5. **`w` の初期値が真値と一致している**（§8）。この一致が finite-sample の容易さに
-   どれだけ寄与したかは**切り分けていない**。signal-sensitivity arm（未実施）が最初の検証になる。
-6. **fit gain が `n^2` にならない理由は未同定**（§16 観察 3）。
+5. **初期値と真値の一致による交絡は部分的に解消された。** signal-sensitivity arm では
+   初期化器の `w = 0.5` が真値（0.25 / 1.0）と一致しないにもかかわらず recovery は 10/10 で、
+   `w_hat` も真値へ収束した（§14.2）。ただし初期値は依然として真値の 2〜4 倍以内にあり、
+   **より遠い初期値・より広い `w` 範囲は検証していない**。`w -> 0` の極限（定理の前提が壊れる境界）も未検証。
+6. **fit gain の挙動は 2 度とも予測を外した。** `n` 依存（`n^0.76`、§16 観察 3）も
+   `w` 依存（信号が強いほど余分な次元の gain が小さい、§14.3 観察 5）も**理由は未同定**である。
+   過剰次元での `w_hat` 収縮・`L=5` の MC 近似・`num_iter=8` の有限反復が候補だが切り分けていない。
 7. **信頼区間・検定・検出力・bootstrap は一切計算していない。** 各セル 10 trial の記述値である。
 8. `P_Z` を罰則として正当化も否定もしていない。§17 は診断であり criterion 提案ではない。
 9. **prototype ではないが本文採用可否は未判断。** 昇格は Human Gate。
@@ -477,10 +582,11 @@ P_Z      :  425.7 -> 851.4                     = 2.00 倍  =  n^1.00
    **`-2E[log p(Z)]` という `O(nK)` の隠れ罰則**に依存していることが分かった（§16・§17）。
    この項の理論的地位（complete-data 基準として正しいのか、`scale_Z` への依存は許容されるのか）を
    修論で正面から扱うべきか、それとも「現行基準の記述」に留めるべきか。
-4. 次に実行すべきは (a) 未実施の signal-sensitivity arm（`w in {0.25,1.0}`、34 分）か、
-   (b) `n` をさらに広げた sweep か、(c) 他 family への拡張か。
+4. signal-sensitivity arm は実行済みで、`w` を 4 倍動かしても選択は変わらなかった（70/70）。
+   次に実行すべきは (a) `sigma_y` 掃引（今回 0.1 固定、Y の SNR を直接動かす唯一の未検証軸）か、
+   (b) `n` をさらに広げた sweep か、(c) `d` 掃引か、(d) 他 family への拡張か。
 5. historical fixed の `30/30` は今後どう記述すべきか。
-   本実験の `50/50` と**同じ表に並べない**方針でよいか（§18）。
+   本実験の `70/70` と**同じ表に並べない**方針でよいか（§18）。
 
 ---
 
@@ -491,7 +597,8 @@ P_Z      :  425.7 -> 851.4                     = 2.00 倍  =  n^1.00
 runtime decision / sensitivity 不実施理由 / 全 CSV の SHA256 を記録）
 
 **環境:** Python 3.13.14 / numpy 2.3.5 / scipy 1.16.3 / pandas 2.3.3 / matplotlib 3.10.7
-Windows 11, Intel64 Family 6 Model 158。総計算時間 **1.82 h**（450 fits）。
+Windows 11, Intel64 Family 6 Model 158。総計算時間 **約 2.4 h**（630 fits: core 450 = 1.82 h、
+signal-sensitivity 180 = 34.5 min、median 11.65 s/fit）。
 
 **コマンド:**
 
@@ -504,11 +611,16 @@ python tools/research_audit/run_canonical_gaussian_y_k_selection.py --full --fal
 python tools/research_audit/run_canonical_gaussian_y_k_selection.py --merge
 python tools/research_audit/audit_canonical_gaussian_y_k_selection.py --mode final
 python tools/research_audit/build_canonical_gaussian_y_k_report.py
-# 未実行（時間要件未達）: --sensitivity
+# --- signal-sensitivity arm（設定・seed・初期化を一切変更せず追加実行）---
+python tools/research_audit/run_canonical_gaussian_y_k_selection.py --sensitivity
+python tools/research_audit/run_canonical_gaussian_y_k_selection.py --merge
+python tools/research_audit/audit_canonical_gaussian_y_k_selection.py --mode final
+python tools/research_audit/build_canonical_gaussian_y_k_report.py
 ```
 
 **成果物（`expfam/results/canonical_gaussian_y_k_selection_20260907/`）:**
-`fit_results.csv`（450 行）, `fit_results_pilot.csv`, `fit_results_full.csv`,
+`fit_results.csv`（630 行）, `fit_results_pilot.csv`, `fit_results_full.csv`,
+`fit_results_sensitivity.csv`（180 行、core とは別ファイル）,
 `selection_by_trial.csv`, `ties.csv`(空), `generator_diagnostics.csv`,
 `aggregate_recovery.csv`, `confusion_matrix.csv`, `aggregate_score_by_k.csv`,
 `penalty_vs_fitgain_by_n.csv`, `diagnostic_counterfactual_selection.csv`,
@@ -517,5 +629,4 @@ python tools/research_audit/build_canonical_gaussian_y_k_report.py
 
 **図（`figures/canonical_gaussian_y_k_selection_20260907/`）:**
 `recovery_rate_by_K0.png`, `selected_K_distribution.png`, `score_curve_K0_3_n150.png`,
-`score_decomposition_K0_3_n150.png`, `sample_size_recovery_K0_3.png`
-（`signal_sensitivity_K0_3.png` は arm 未実施のため無し）
+`score_decomposition_K0_3_n150.png`, `sample_size_recovery_K0_3.png`, `signal_sensitivity_K0_3.png`

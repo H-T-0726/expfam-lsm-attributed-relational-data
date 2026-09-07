@@ -79,27 +79,61 @@
     "reason": "FULL grid would consume ~94 percent of the remaining experiment window with no safety margin and would exclude the optional signal-sensitivity arm. Decision is runtime-only; no selection result was inspected."
   },
   "sensitivity_arm": {
-    "executed": false,
-    "reason": "Spec section 15 requires >=60 min of spare time after the core arm and a fully PASSing core integrity audit. The full grid finished at 06:48 JST but was only observed at 09:02 JST; only ~48 min of the 5-hour window remained, below the 60-min requirement. Decision is time-based only; no result was consulted. The arm is fully specified and seeded in the runner (--sensitivity) and can be executed unchanged."
+    "executed": true,
+    "executed_at_jst": "2026-09-07 (after core commit 632e1a95)",
+    "settings_changed": "NONE - frozen SENS_W_LIST / SENS_K0 / SENS_N / SENS_TRIALS / seed policy / estimator initialization all unchanged since the pre-core commit",
+    "w_true": [
+      0.25,
+      1.0
+    ],
+    "K_0": 3,
+    "n": 150,
+    "trials": 10,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "fits": 180,
+    "wall_clock_min": 34.5,
+    "median_s_per_fit": 11.65,
+    "baseline_w_0.5": "reused from core, NOT re-run",
+    "separate_csv": "fit_results_sensitivity.csv",
+    "core_invariance_verified": {
+      "fit_results_pilot_sha256": "unchanged",
+      "fit_results_full_sha256": "unchanged",
+      "core_aggregate_values": "unchanged",
+      "core_mechanism_values": "unchanged (diff < 1e-9)"
+    },
+    "result": "recovery 30/30; selection counts {3:10} for every w; direct-prior counterfactual 30/30 changed, all to K=9",
+    "prediction_rejected": "predicted margin would widen at w=0.25 and narrow at w=1.0; observed the opposite (309.10 / 317.48 / 337.48 for w=0.25/0.5/1.0)"
   },
   "result_file_sha256": {
-    "aggregate_recovery.csv": "5279bbe378f1015b996854ce4d6dacc8c9d987a82cad252232d56da38651cdff",
-    "aggregate_score_by_k.csv": "8ee494f98c5d9d058675dc5e08fa8ce94204ab83c64d201a3b1ca981697b854a",
-    "audit_results_final.csv": "0a95617c67637b7425ecc0933e61c370340b63a090b566a06f1fa218b2a13fac",
+    "aggregate_recovery.csv": "f2a6bea0a88dff910bfb8f3cd7175ad2bc9bfe37b5d2b145d7407df7dc72ecd8",
+    "aggregate_score_by_k.csv": "fd593e9df0104d0075b433562fde8688bb4cc09de7f79f38bf422291f4c76d0c",
+    "audit_results_final.csv": "177f3217d67f3a7edc2135f8ce959a3eea3ff5f2770866e4f8b81d6b5a5c2e6a",
     "audit_results_pilot.csv": "b3be3ed688fbc44d9497aa07a5d4921dfe828c511b2dfaaa862ef5ac6504a694",
     "confusion_matrix.csv": "a7be0a19d31470ea7bcb4a7d451b7ad976dabec286ab821d88e959c27fea4d35",
-    "diagnostic_counterfactual_selection.csv": "326a4f7595ef971f91524be6fd8f7e5530e550dd7fe3aa535abf82dc76d26e76",
-    "fit_results.csv": "a359fb9fbb0e481cf758f9882a0318ba24c47cff7e71d6584f2863ca85431f11",
+    "diagnostic_counterfactual_selection.csv": "7ca89b17ba5a4a653c563733abe36016798eb16f9027a8ef893e2a96eea028fa",
+    "fit_results.csv": "1f75a6c22183045b66aa223c4803241405b8a74b52cc1363ac231a06bf0dcd40",
     "fit_results_full.csv": "0ce0a0207d690d06eb1cdd25eb85fab3dbe519574f9359624e66c3644cf17e15",
     "fit_results_pilot.csv": "7c1b5be571bbcbc5cc339c91d991de4b9b0f8080b299c938b19b19c0c1b85699",
-    "generator_diagnostics.csv": "08f8cc39630ec77ba9d8bd190fa2acce45e35b7c44fe7f6b1b5a804321c9ab2b",
+    "fit_results_sensitivity.csv": "4acd1c90124de144023f59c050eee5cdd47c67a21b3923b27ee8a5f3fecc0be4",
+    "generator_diagnostics.csv": "025b9de4281b63f9e6cc7e8b19c0b9c32e934e572b242a23a4a73a36212b6e79",
     "generator_diagnostics_full.csv": "f690f03b7a5c8b89d4cac0fe9ddc811642f487e39705d2e7a8ffd1f0ae3e6ae2",
     "generator_diagnostics_pilot.csv": "87ce9029e2397551a47774b67b08ad70e5c5afefd3f24a06579665649f2d1ea9",
+    "generator_diagnostics_sensitivity.csv": "5364ae24728e2f552080a59a932507cb6a7c636e07547940c5065b3782b5dd3b",
     "historical_vs_canonical_descriptive.csv": "d343d62f1d143fe88fb60d5c4db229ee2ec04417fa165eb66e5337ead4a7ad77",
-    "penalty_vs_fitgain_by_n.csv": "a6ae6283eb33587a7a57de2f0a7a9bb3b8862b07e39dbacdcf4ad56a74916e0e",
-    "selection_by_trial.csv": "89e3165cc22fd9f2e390025bd702333867fed92fa8dcf7284a9537180085770d",
+    "penalty_vs_fitgain_by_n.csv": "cd6102e07da96cfad1c2733455932a1038f8e94a959f5ed42dca9405397ea65e",
+    "selection_by_trial.csv": "86e773fb86454f173aae25a5001f7d937db945c64c81e75d334658cc0831dc77",
     "theory_gate.csv": "e47289aafc6df967bca7e3ddb70e601d18fd2cb3b354e3a69833018150004db0",
     "ties.csv": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
   },
-  "final_audit": "18/18 PASS"
+  "final_audit": "18/18 PASS (630 fits)"
 }

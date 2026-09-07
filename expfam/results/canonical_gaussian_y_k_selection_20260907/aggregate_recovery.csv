@@ -1,6 +1,8 @@
 K_0,n,w,num_trials,num_complete_trials,recovery_count,recovery_rate,selected_k_mean,selected_k_median,selected_k_mode,mean_score_gap_when_correct,mean_score_gap_when_wrong,selection_counts_k1,selection_counts_k2,selection_counts_k3,selection_counts_k4,selection_counts_k5,selection_counts_k6,selection_counts_k7,selection_counts_k8,selection_counts_k9
 1,150,0.5,10,10,10,1.0,1.0,1.0,1,344.30157139771984,,10,0,0,0,0,0,0,0,0
 3,50,0.5,10,10,10,1.0,3.0,3.0,3,118.60322138233055,,0,0,10,0,0,0,0,0,0
+3,150,0.25,10,10,10,1.0,3.0,3.0,3,309.0962102314763,,0,0,10,0,0,0,0,0,0
 3,150,0.5,10,10,10,1.0,3.0,3.0,3,317.48273721465523,,0,0,10,0,0,0,0,0,0
+3,150,1.0,10,10,10,1.0,3.0,3.0,3,337.4756116631041,,0,0,10,0,0,0,0,0,0
 3,300,0.5,10,10,10,1.0,3.0,3.0,3,634.5407738797628,,0,0,10,0,0,0,0,0,0
 5,150,0.5,10,10,10,1.0,5.0,5.0,5,309.27384781162107,,0,0,0,0,10,0,0,0,0
