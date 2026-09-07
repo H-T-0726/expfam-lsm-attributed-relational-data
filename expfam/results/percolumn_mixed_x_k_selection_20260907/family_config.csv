@@ -1,0 +1,8 @@
+config_id,kind,n_bernoulli,n_gaussian,n_poisson,n_families,family_x_list
+H-B,homogeneous,15,0,0,1,bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli
+H-G,homogeneous,0,15,0,1,gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian
+H-P,homogeneous,0,0,15,1,poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson
+M-BG,mixed,8,7,0,2,bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian
+M-BP,mixed,8,0,7,2,bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|poisson|poisson|poisson|poisson|poisson|poisson|poisson
+M-GP,mixed,0,8,7,2,gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|gaussian|poisson|poisson|poisson|poisson|poisson|poisson|poisson
+M-BGP,mixed,5,5,5,3,bernoulli|bernoulli|bernoulli|bernoulli|bernoulli|gaussian|gaussian|gaussian|gaussian|gaussian|poisson|poisson|poisson|poisson|poisson

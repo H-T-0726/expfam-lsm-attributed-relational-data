@@ -1,0 +1,15 @@
+check,status,category,detail
+initial Z identical,PASS,must-agree,max|diff|=0.000e+00
+initial F identical,PASS,must-agree,max|diff|=0.000e+00
+var_z identical,PASS,must-agree,1.0 vs 1.0
+A'_X (Bernoulli mean),PASS,must-agree,"max|diff|=0.000e+00 over eta in [-8,8]"
+A''_X (Bernoulli curvature),PASS,must-agree,max|diff|=0.000e+00
+A''_X far tail (eta=30),INFO,may-differ,legacy-single=1.000e-08 vs consistent-percolumn=9.348e-14 (floors differ; KI-015 region)
+KI-015 legacy per-column tail,INFO,known-issue,"legacy per-column A''(30)=1.000e-08 (floored, objective-inconsistent); consistent=9.348e-14. Experiment will use the CONSISTENT class."
+num_params agree for all K,PASS,must-agree,"k*d-k(k-1)/2+0+1 in both paths, K=1..9"
+latent samples Z identical,PASS,must-agree,max over K of max|Z_single - Z_percolumn| = 0.000e+00
+estimated F identical,PASS,must-agree,max|F_single - F_percolumn| = 0.000e+00
+w0 / w / sigma_y identical,PASS,must-agree,max|dw0|=0.000e+00 max|dw|=0.000e+00 max|dsy|=0.000e+00
+Q offset is the known Gaussian-Y 2pi constant,PASS,may-differ,Q_exp - Q_dual = -10269.1381 (expected -10269.1381); spread over K = 1.819e-12
+criterion offset is constant in K,PASS,may-differ,"C_exp - C_dual = 20538.2762, spread over K = 7.276e-12 -> argmin over K is unaffected"
+selected K identical,PASS,must-agree,single-family selects K=3; per-column selects K=3

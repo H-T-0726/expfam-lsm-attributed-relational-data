@@ -1,0 +1,11 @@
+gate_id,gate_name,status,evidence
+C1,paired_Z_F_Y_across_configs,PASS,distinct hashes Z=1 F=1 Y=1 over 7 configs (must all be 1)
+C2,X_actually_varies_across_configs,PASS,7 distinct X hashes over 7 configs
+C3,family_lists_have_length_d,PASS,all configs sum to d=15
+C4,gaussian_y_w_nonzero,PASS,"family_y=gaussian, w=0.5 != 0 -> single-dyad Y marginal identifies K, so K_0 = K_GEN = 3 independent of X composition"
+C5,no_generator_postprocessing,PASS,forbidden tokens: []
+C6,poisson_eta_safe,PASS,"max generator eta over 10 trials = 3.565 (consistent numerics raise above log(finfo.max)=709.78); entries outside the legacy clip window [-20,10] = 0"
+C7,candidate_contains_truth,PASS,"candidate K = [1, 2, 3, 4, 5, 6, 7, 8, 9] contains K_GEN = 3"
+C8,objective_consistent_numerics_used,PASS,DualExpFamLSMPerColumnConsistent.numerics_mode == 'consistent' (KI-015 requires this for new per-column experiments)
+C9,seed_policy_no_collision,PASS,10 unique data seeds for 10 trials; data_seed is SHARED across configs by design (paired)
+C10,criterion_is_percolumn_aware,PASS,"eval_utils.calc_Q_dual_strict_exp + calc_bic_exp(family_x='mixed', n_gaussian_x_cols=<count>); utils_expfam.calc_bic_dual is NOT used because it cannot count per-column Gaussian dispersions"

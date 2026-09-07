@@ -1,0 +1,24 @@
+gate_id,gate_name,status,detail
+A0,fit_results_present,PASS,630 rows
+A1,row_count_matches_frozen_grid,PASS,630 vs expected 7x10x9 = 630
+A2,failures_recorded_not_deleted,PASS,0 failed fits recorded (never removed)
+A3,no_nan_inf_criterion,PASS,0 non-finite of 630
+A4,no_poisson_overflow,PASS,0 FloatingPointError events (consistent numerics raise instead of clipping)
+A5,paired_Z_and_Y_shared_across_configs,PASS,0 trials where Z or Y hash differs across family configs
+A6,X_differs_across_configs,PASS,0 trials where two configs share an X hash
+A7,same_dataset_across_candidate_k,PASS,"0 (config,trial) cells with inconsistent dataset hash"
+A8,criterion_algebra_reconstruction,PASS,max |independent - stored| = 2.910e-11 (tol 1e-08)
+A9,runner_self_reconstruction,PASS,max stored residual = 1.819e-11
+A10,decomposition_sums_to_criterion,PASS,max |D_K + P_Z + P_theta - C_Q| = 1.819e-11
+A11,parameter_count_independent,PASS,0 rows disagree with k*d-k(k-1)/2+n_gaussian_cols+1
+A12,latent_prior_is_deterministic_nK,PASS,"max |P_Z - n*K*(log2pi+1)| = 9.095e-13 (scale_Z fixes mean(Z^2)=1, so P_Z carries no data)"
+A13,every_candidate_k_present,PASS,0 incomplete cells
+A14,no_duplicate_keys,PASS,0 duplicates
+A15,all_configs_present,PASS,"['H-B', 'H-G', 'H-P', 'M-BG', 'M-BGP', 'M-BP', 'M-GP']"
+A16,frozen_settings_constant,PASS,L=[5] num_iter=[8] w=[0.5] sigma_y=[0.1] numerics=['consistent']
+A17,family_column_counts_sum_to_d,PASS,all rows sum to d=15
+A18,seed_policy_respected,PASS,model_seed==data_seed+50: True; data_seed shared across configs within a trial: True
+A19,selection_flag_reproducible,PASS,0 cells where stored flag disagrees with recomputation
+A20,no_generator_postprocessing,PASS,forbidden tokens: []
+A21,config_gate_all_pass,PASS,10/10 PASS
+A22,percolumn_parity_audit_no_blocker,PASS,12 PASS / 0 FAIL / 2 INFO

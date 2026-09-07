@@ -1,0 +1,142 @@
+{
+  "experiment_id": "percolumn_mixed_x_k_selection_20260907",
+  "generator_id": "percolumn-x-canonical-gaussian-y-v1",
+  "branch": "experiment/per-column-mixed-x-k-selection-20260907",
+  "head_sha": "bf078870d7e63be5583cb82d19fcd9f893ed7186",
+  "base_commit": "bf07887 (canonical Gaussian-Y experiment tip)",
+  "git_status_porcelain": "?? expfam/results/percolumn_mixed_x_k_selection_20260907/\n?? expfam/src/experimental/data_generator_percolumn_gaussian_y.py\n?? tools/research_audit/audit_percolumn_parity.py\n?? tools/research_audit/run_percolumn_mixed_x_k_selection.py",
+  "timestamp_jst": "2026-09-07T12:51:46.090645+09:00",
+  "python": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7"
+  },
+  "frozen_settings": {
+    "K_GEN": 3,
+    "n": 150,
+    "d": 15,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "trials": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "L": 5,
+    "num_iter": 8,
+    "family_y": "gaussian",
+    "w0_true": 0.0,
+    "w_true": 0.5,
+    "sigma_y_true": 0.1,
+    "var_f": 5.0,
+    "uniq": 0.1,
+    "family_configs": {
+      "H-B": [
+        [
+          "bernoulli",
+          15
+        ]
+      ],
+      "H-G": [
+        [
+          "gaussian",
+          15
+        ]
+      ],
+      "H-P": [
+        [
+          "poisson",
+          15
+        ]
+      ],
+      "M-BG": [
+        [
+          "bernoulli",
+          8
+        ],
+        [
+          "gaussian",
+          7
+        ]
+      ],
+      "M-BP": [
+        [
+          "bernoulli",
+          8
+        ],
+        [
+          "poisson",
+          7
+        ]
+      ],
+      "M-GP": [
+        [
+          "gaussian",
+          8
+        ],
+        [
+          "poisson",
+          7
+        ]
+      ],
+      "M-BGP": [
+        [
+          "bernoulli",
+          5
+        ],
+        [
+          "gaussian",
+          5
+        ],
+        [
+          "poisson",
+          5
+        ]
+      ]
+    },
+    "init_F_scale": 0.2,
+    "init_F_scale_note": "applied to EVERY config including all-Gaussian, so that initialisation does not covary with the family composition under comparison; the core runner applied it only for discrete X",
+    "init_w_gaussian_y": 0.5,
+    "max_retries": 2,
+    "newton_alpha_base": 0.5,
+    "newton_max_iter": 10,
+    "adam_max_iter": 50,
+    "tie_rule": "smallest_k_among_ties",
+    "recon_tolerance": 1e-08
+  },
+  "seed_policy": {
+    "data": "data_seed = 800000 + trial  (SHARED across family configs)",
+    "model": "model_seed = data_seed + 50 (independent of k_est and config)",
+    "x_stream": "X drawn from default_rng(data_seed + 500000), a separate stream so that changing the family composition cannot perturb Z, F or Y"
+  },
+  "estimator": {
+    "class": "DualExpFamLSMPerColumnConsistent",
+    "module": "expfam/src/experimental/model_dual_expfam_consistent.py",
+    "numerics_mode": "consistent",
+    "lineage_note": "per-column prototype (fixed -> masked -> percolumn) with objective-consistent numerics. PROTOTYPE, not a manuscript method (root CLAUDE.md section 3). KI-015 requires numerics_mode='consistent' for new per-column experiments.",
+    "criterion_fn": "eval_utils.calc_Q_dual_strict_exp + calc_bic_exp; Q-based complete-data criterion, NOT a Schwarz BIC (KI-010)"
+  },
+  "comparability": {
+    "vs_canonical_core": "NOT numerically comparable. The core used calc_bic_dual, which omits the Gaussian-Y -0.5*ln(2pi) per-pair constant that calc_Q_dual_strict_exp includes. The parity audit measured the offset at +20538.2762 on the criterion, constant in K, so argmin is unaffected but absolute scores must never be merged.",
+    "parity_audit": "tools/research_audit/audit_percolumn_parity.py"
+  }
+}

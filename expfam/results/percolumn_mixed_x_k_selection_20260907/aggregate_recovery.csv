@@ -1,0 +1,8 @@
+config_id,kind,n_bernoulli,n_gaussian,n_poisson,num_trials,num_complete_trials,recovery_count,recovery_rate,selected_k_mean,selected_k_median,selected_k_mode,mean_gap_when_correct,mean_gap_when_wrong,mean_w_hat_at_K0,mean_sigma_y_hat_at_K0,selection_counts_k1,selection_counts_k2,selection_counts_k3,selection_counts_k4,selection_counts_k5,selection_counts_k6,selection_counts_k7,selection_counts_k8,selection_counts_k9
+H-B,homogeneous,15,0,0,10,10,10,1.0,3.0,3.0,3,319.97825466542344,,0.50832741529353,0.10017020911960162,0,0,10,0,0,0,0,0,0
+H-G,homogeneous,0,15,0,10,10,10,1.0,3.0,3.0,3,314.90956717545635,,0.5084627749508437,0.10017811762927158,0,0,10,0,0,0,0,0,0
+H-P,homogeneous,0,0,15,10,10,10,1.0,3.0,3.0,3,316.03496839034324,,0.5084033554259244,0.10016895208850692,0,0,10,0,0,0,0,0,0
+M-BG,mixed,8,7,0,10,10,10,1.0,3.0,3.0,3,321.8243042710539,,0.5085600102833446,0.1001741661090569,0,0,10,0,0,0,0,0,0
+M-BP,mixed,8,0,7,10,10,10,1.0,3.0,3.0,3,320.936093206682,,0.508340810922837,0.10017238920311419,0,0,10,0,0,0,0,0,0
+M-GP,mixed,0,8,7,10,10,10,1.0,3.0,3.0,3,319.1595064946643,,0.5084272796181414,0.10017007811336683,0,0,10,0,0,0,0,0,0
+M-BGP,mixed,5,5,5,10,10,10,1.0,3.0,3.0,3,326.6297135294053,,0.5083161797040288,0.10017246236417117,0,0,10,0,0,0,0,0,0
