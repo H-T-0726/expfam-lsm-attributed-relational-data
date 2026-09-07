@@ -1,0 +1,105 @@
+{
+  "experiment_id": "canonical_gaussian_y_k_selection_20260907",
+  "generator_id": "canonical-gaussian-y-k-v1",
+  "branch": "experiment/canonical-gaussian-y-k-recovery-20260907",
+  "head_sha": "dd7ca14189ed87651316bf61e4da81f8d6a6c4c8",
+  "git_status_porcelain": "?? expfam/results/canonical_gaussian_y_k_selection_20260907/\n?? expfam/src/experimental/data_generator_canonical_gaussian_y_k.py\n?? tools/research_audit/run_canonical_gaussian_y_k_selection.py\n?? tools/research_audit/test_canonical_gaussian_y_generator.py",
+  "timestamp_jst": "2026-09-07T04:54:58.989372+09:00",
+  "python": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "packages": {
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7"
+  },
+  "frozen_settings": {
+    "family_x": "bernoulli",
+    "family_y": "gaussian",
+    "d": 15,
+    "L": 5,
+    "num_iter": 8,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "w0_true": 0.0,
+    "w_true_primary": 0.5,
+    "sigma_y_true": 0.1,
+    "var_f": 5.0,
+    "uniq": 0.1,
+    "max_retries": 2,
+    "newton_alpha_base": 0.5,
+    "newton_max_iter": 10,
+    "adam_max_iter": 50,
+    "init_w_gaussian_y": 0.5,
+    "init_F_scale_discrete_x": 0.2,
+    "tie_rule": "smallest_k_among_ties",
+    "recon_tolerance": 1e-08
+  },
+  "seed_policy": {
+    "core": "data_seed = 900000 + K_GEN*10000 + n*10 + trial",
+    "sensitivity": "data_seed = 960000 + wcode*1000 + trial (wcode: 0.25->1, 1.0->2)",
+    "model": "model_seed = data_seed + 50 (independent of k_est)"
+  },
+  "seed_collision_check": {
+    "n_cells": 110,
+    "n_unique_seeds": 110,
+    "collisions": []
+  },
+  "estimator": {
+    "class": "DualExpFamLSMFixed",
+    "module": "expfam/src/model_dual_expfam_fixed.py",
+    "lineage": "fixed (Y-side 0.5 removed)",
+    "criterion_fn": "calc_bic_dual (Q-based complete-data criterion; NOT Schwarz BIC, KI-010)"
+  },
+  "runtime_decision": {
+    "decided_on": "measured per-fit runtime ONLY, before any selection result was computed",
+    "fallback_cells_frozen_in_source_before_pilot": true,
+    "measured_median_s_per_fit_n150_pilot": 11.44,
+    "timing_probe_seed_outside_experiment_space": 1999999,
+    "timing_probe_s_per_fit": {
+      "n50_k1": 2.88,
+      "n50_k9": 3.5,
+      "n300_k1": 22.16,
+      "n300_k9": 59.56
+    },
+    "estimate_full_grid_remaining_min": 231,
+    "estimate_fallback_remaining_min": 108,
+    "experiment_window_remaining_min_at_decision": 245,
+    "decision": "CORE_FALLBACK",
+    "reason": "FULL grid would consume ~94 percent of the remaining experiment window with no safety margin and would exclude the optional signal-sensitivity arm. Decision is runtime-only; no selection result was inspected."
+  },
+  "sensitivity_arm": {
+    "executed": false,
+    "reason": "Spec section 15 requires >=60 min of spare time after the core arm and a fully PASSing core integrity audit. The full grid finished at 06:48 JST but was only observed at 09:02 JST; only ~48 min of the 5-hour window remained, below the 60-min requirement. Decision is time-based only; no result was consulted. The arm is fully specified and seeded in the runner (--sensitivity) and can be executed unchanged."
+  },
+  "result_file_sha256": {
+    "aggregate_recovery.csv": "5279bbe378f1015b996854ce4d6dacc8c9d987a82cad252232d56da38651cdff",
+    "aggregate_score_by_k.csv": "8ee494f98c5d9d058675dc5e08fa8ce94204ab83c64d201a3b1ca981697b854a",
+    "audit_results_final.csv": "0a95617c67637b7425ecc0933e61c370340b63a090b566a06f1fa218b2a13fac",
+    "audit_results_pilot.csv": "b3be3ed688fbc44d9497aa07a5d4921dfe828c511b2dfaaa862ef5ac6504a694",
+    "confusion_matrix.csv": "a7be0a19d31470ea7bcb4a7d451b7ad976dabec286ab821d88e959c27fea4d35",
+    "diagnostic_counterfactual_selection.csv": "326a4f7595ef971f91524be6fd8f7e5530e550dd7fe3aa535abf82dc76d26e76",
+    "fit_results.csv": "a359fb9fbb0e481cf758f9882a0318ba24c47cff7e71d6584f2863ca85431f11",
+    "fit_results_full.csv": "0ce0a0207d690d06eb1cdd25eb85fab3dbe519574f9359624e66c3644cf17e15",
+    "fit_results_pilot.csv": "7c1b5be571bbcbc5cc339c91d991de4b9b0f8080b299c938b19b19c0c1b85699",
+    "generator_diagnostics.csv": "08f8cc39630ec77ba9d8bd190fa2acce45e35b7c44fe7f6b1b5a804321c9ab2b",
+    "generator_diagnostics_full.csv": "f690f03b7a5c8b89d4cac0fe9ddc811642f487e39705d2e7a8ffd1f0ae3e6ae2",
+    "generator_diagnostics_pilot.csv": "87ce9029e2397551a47774b67b08ad70e5c5afefd3f24a06579665649f2d1ea9",
+    "historical_vs_canonical_descriptive.csv": "d343d62f1d143fe88fb60d5c4db229ee2ec04417fa165eb66e5337ead4a7ad77",
+    "penalty_vs_fitgain_by_n.csv": "a6ae6283eb33587a7a57de2f0a7a9bb3b8862b07e39dbacdcf4ad56a74916e0e",
+    "selection_by_trial.csv": "89e3165cc22fd9f2e390025bd702333867fed92fa8dcf7284a9537180085770d",
+    "theory_gate.csv": "e47289aafc6df967bca7e3ddb70e601d18fd2cb3b354e3a69833018150004db0",
+    "ties.csv": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+  },
+  "final_audit": "18/18 PASS"
+}

@@ -1,0 +1,11 @@
+gate_id,gate_name,status,evidence
+G1,canonical_z_iid_gaussian,PASS,"generator Z is bit-identical to default_rng(seed).normal(0,1,(n,K))"
+G2,no_generator_z_postprocessing,PASS,no standardization/whitening/scaling token appears in the generator body
+G3,gaussian_y_additive_noise,PASS,sigma_y=0 yields Y == w0 + w z_i^T z_j exactly (additive Gaussian noise)
+G4,scalar_w_nonzero,PASS,w is a python scalar and w=0.5 != 0
+G5,no_y_postprocessing,PASS,no sample normalization of Y after generation
+G6,same_dataset_across_candidate_k,PASS,generator takes no candidate-K argument; runner generates once per trial and asserts hash equality across k_est at run time
+G7,K_GEN_not_changed_by_candidate,PASS,candidate K is passed only to DualExpFamLSMFixed(k=k_est); generator k is fixed per trial
+G8,model_prior_var_fixed,PASS,estimator params['var_z'] == 1.0 (no M-step exists for var_z)
+G9,candidate_contains_truth,PASS,"candidate K = [1, 2, 3, 4, 5, 6, 7, 8, 9] contains every K_GEN used"
+G10,historical_generator_not_used,PASS,generator source references neither data_generator_expfam nor generate_dual_data

@@ -1,0 +1,19 @@
+gate_id,gate_name,status,detail
+P0,fit_results_present,PASS,fit_results.csv: 450 rows
+P1,all_fits_terminated_or_recorded,PASS,"450 rows present; 0 recorded as failed (failures are recorded, not deleted)"
+P2,no_nan_inf_criterion,PASS,0 non-finite criterion among 450 successful fits
+P3,same_dataset_across_candidate_k,PASS,"0 (config,trial) groups with inconsistent dataset hash"
+P4,theory_gate_all_pass,PASS,10/10 PASS
+P5a,criterion_algebra_reconstruction,PASS,max |independent - stored| = 5.821e-11 (tol 1e-08)
+P5b,runner_self_reconstruction,PASS,max stored residual = 5.821e-11 (tol 1e-08)
+P5c,parameter_count_independent,PASS,0 rows disagree with independently computed p_hat
+P5d,decomposition_sums_to_criterion,PASS,max |D_K + P_Z + P_theta - C_Q| = 5.821e-11
+P6a,row_count_matches_grid,PASS,450 rows vs expected 50 datasets x 9 K = 450
+P6b,every_candidate_k_present,PASS,0 groups with a missing/extra candidate K
+P6c,no_duplicate_keys,PASS,"0 duplicate (config,trial,k_est)"
+P7,no_z_standardization_in_generator,PASS,forbidden tokens in generator body: []
+P8,frozen_settings_constant,PASS,L=[5] num_iter=[8] d=[15] w0=[0.0] sigma_y=[0.1]
+P9,seed_policy_respected,PASS,model_seed==data_seed+50: True; max distinct model_seed per dataset: 1
+P10,no_seed_collision,PASS,0 data_seed values shared by >1 cell
+P11,selection_flag_reproducible,PASS,0 groups where the stored selected_k_flag disagrees with recomputation
+P12,trial_completeness_recorded,PASS,"0 of 50 datasets have >=1 failed candidate fit (recorded, not removed)"
