@@ -23,7 +23,11 @@ if str(_HERE) not in sys.path:
 
 from family_selection import (  # noqa: E402
     ADAM_MAX_ITER,
+    CANDIDATE_GRAD_INF_TOL,
     CANDIDATE_PRIORITY,
+    OPTIMIZER_ADAM,
+    OPTIMIZER_BFGS,
+    PHASE9C_CANDIDATE_OPTIMIZER,
     CandidateRecord,
     SelectorStop,
     column_log_likelihood,
@@ -222,7 +226,9 @@ def test_each_candidate_optimises_its_own_loading(fixed_samples):
     x = np.array([0.0, 1.0] * (N // 2))
     gate, = support_gate(x[:, None])
     init = np.full(K, 0.05)
-    records = score_column_candidates(x, fixed_samples, gate, loading_init=init)
+    records = score_column_candidates(x, fixed_samples, gate,
+                                      loading_init=init,
+                                      optimizer=OPTIMIZER_ADAM)
     assert [r.family for r in records] == ["bernoulli", "poisson"]
     bernoulli, poisson = records
     assert not np.allclose(bernoulli.loading, poisson.loading)
@@ -249,8 +255,10 @@ def test_scoring_is_reproducible_for_identical_inputs(fixed_samples):
     x = np.array([0.0, 1.0] * (N // 2))
     gate, = support_gate(x[:, None])
     init = np.full(K, 0.05)
-    first = score_column_candidates(x, fixed_samples, gate, loading_init=init)
-    second = score_column_candidates(x, fixed_samples, gate, loading_init=init)
+    first = score_column_candidates(x, fixed_samples, gate, loading_init=init,
+                                    optimizer=OPTIMIZER_ADAM)
+    second = score_column_candidates(x, fixed_samples, gate, loading_init=init,
+                                     optimizer=OPTIMIZER_ADAM)
     for left, right in zip(first, second):
         assert left.score == right.score
         assert np.array_equal(left.loading, right.loading)
@@ -300,8 +308,67 @@ def test_gaussian_candidate_profiles_its_variance(fixed_samples):
     gate, = support_gate(x[:, None])
     assert gate.candidates == ("gaussian",)
     record, = score_column_candidates(x, fixed_samples, gate,
-                                      loading_init=np.zeros(K))
+                                      loading_init=np.zeros(K),
+                                      optimizer=OPTIMIZER_ADAM)
     assert record.sigma_sq is not None and record.sigma_sq > 0.0
+
+
+def test_phase9c_selects_bfgs_by_explicit_configuration():
+    """The migration is a named choice, not a redefinition of Adam."""
+
+    assert PHASE9C_CANDIDATE_OPTIMIZER == OPTIMIZER_BFGS
+    # Adam stays reachable by name for reproducing the smoke and B1/B1R.
+    assert OPTIMIZER_ADAM == "adam"
+
+
+def test_score_column_candidates_requires_an_explicit_optimizer(fixed_samples):
+    x = np.array([0.0, 1.0] * (N // 2))
+    gate, = support_gate(x[:, None])
+    with pytest.raises(TypeError):
+        score_column_candidates(x, fixed_samples, gate,
+                                loading_init=np.zeros(K))
+    with pytest.raises(SelectorStop, match="unknown optimizer"):
+        score_column_candidates(x, fixed_samples, gate,
+                                loading_init=np.zeros(K),
+                                optimizer="newton")
+
+
+def test_the_bfgs_route_reaches_the_gradient_criterion(fixed_samples):
+    """What the Adam route could not do on these problems, per Gate 74-B1R."""
+
+    x = np.array([0.0, 1.0] * (N // 2))
+    gate, = support_gate(x[:, None])
+    init = np.full(K, 0.05)
+    bfgs = score_column_candidates(x, fixed_samples, gate, loading_init=init,
+                                   optimizer=OPTIMIZER_BFGS)
+    adam = score_column_candidates(x, fixed_samples, gate, loading_init=init,
+                                   optimizer=OPTIMIZER_ADAM)
+    for record in bfgs:
+        assert record.optimizer == OPTIMIZER_BFGS
+        assert record.converged is True
+        assert record.gradient_inf <= CANDIDATE_GRAD_INF_TOL
+        assert record.provenance["fallback_solvers"] == []
+        assert record.provenance["retries"] == 0
+    # The BFGS route finds a strictly better point for each candidate.
+    for left, right in zip(bfgs, adam):
+        assert left.family == right.family
+        assert left.score >= right.score
+        assert left.gradient_inf < right.gradient_inf
+
+
+def test_the_adam_route_keeps_its_own_convergence_rule(fixed_samples):
+    """Adam must not silently inherit the new gradient criterion."""
+
+    x = np.array([0.0, 1.0] * (N // 2))
+    gate, = support_gate(x[:, None])
+    records = score_column_candidates(x, fixed_samples, gate,
+                                      loading_init=np.full(K, 0.05),
+                                      optimizer=OPTIMIZER_ADAM)
+    for record in records:
+        assert record.optimizer == OPTIMIZER_ADAM
+        assert record.provenance["convergence_rule"] == \
+            "step infinity norm below tol"
+        assert record.provenance["max_iter"] == ADAM_MAX_ITER
 
 
 # --------------------------------------------------------------------------
@@ -332,7 +399,8 @@ def test_candidate_convergence_is_reported(fixed_samples):
     assert converged_loose is True
 
     gate, = support_gate(x[:, None])
-    records = score_column_candidates(x, fixed_samples, gate, loading_init=init)
+    records = score_column_candidates(x, fixed_samples, gate, loading_init=init,
+                                      optimizer=OPTIMIZER_ADAM)
     for record in records:
         assert isinstance(record.converged, bool)
         assert record.as_row()["optimiser_converged"] == record.converged

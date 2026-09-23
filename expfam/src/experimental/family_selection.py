@@ -53,6 +53,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
+from scipy.optimize import minimize
 from scipy.special import gammaln
 
 _HERE = Path(__file__).parent
@@ -80,8 +81,37 @@ VALID_FAMILIES = ("gaussian", "bernoulli", "poisson")
 # rather than left to dict or sort order.
 CANDIDATE_PRIORITY = ("bernoulli", "poisson", "gaussian")
 
+# The candidate optimiser Phase 9C uses, by explicit configuration.
+#
+# Gate 74-B1R measured the 50-step Adam against an independently certified
+# optimum on deterministic problems: it stopped up to 0.126 per observation
+# short, with a gradient infinity norm up to 5.4 where the criterion asks for
+# 1e-4. That is an optimiser genuinely far from the optimum, not an accurate
+# one wearing a strict flag, so a human approved migrating the Phase 9C
+# candidate path to the analytic-gradient BFGS configuration B1R certified.
+#
+# The Adam route below is NOT removed or redefined. Gate 74-B smoke and the
+# B1/B1R diagnostics were produced by it and must stay reproducible, so it
+# remains reachable by asking for it by name.
+OPTIMIZER_ADAM = "adam"
+OPTIMIZER_BFGS = "bfgs"
+VALID_OPTIMIZERS = (OPTIMIZER_ADAM, OPTIMIZER_BFGS)
+
+PHASE9C_CANDIDATE_OPTIMIZER = OPTIMIZER_BFGS
+
+# Frozen BFGS configuration (Issue #74 Gate 74-B2 approval).
+BFGS_METHOD = "BFGS"
+BFGS_MAXITER = 2000
+BFGS_GTOL = 1e-10
+
+# A BFGS candidate counts as converged only on the gradient it actually
+# reached. SciPy's success flag is recorded as provenance but does not decide
+# this: B1 showed a solver can report success at a point whose gradient is
+# orders of magnitude above the criterion.
+CANDIDATE_GRAD_INF_TOL = 1e-8
+
 # Existing Adam convention (model_dual_expfam_percolumn._calc_F_adam_weighted).
-# Reused verbatim so the candidate optimiser introduces no new tuning knob.
+# Reused verbatim so the legacy candidate route introduces no new tuning knob.
 ADAM_MAX_ITER = 50
 ADAM_LR = 0.01
 ADAM_BETA1 = 0.9
@@ -446,6 +476,129 @@ def optimise_column_loading(
     return loading, sigma_sq, used_iter, converged
 
 
+def optimise_column_loading_bfgs(
+    x_column: np.ndarray,
+    Z_samples: np.ndarray,
+    family: str,
+    *,
+    loading_init: np.ndarray,
+    maxiter: int = BFGS_MAXITER,
+    gtol: float = BFGS_GTOL,
+) -> tuple[np.ndarray, float | None, int, bool, dict[str, Any]]:
+    """Optimise ``f_l`` for ONE candidate family with analytic-gradient BFGS.
+
+    The objective is the negative of the production strict complete score and
+    the Jacobian is the negative of the production analytic gradient -- the
+    same pair Gate 74-B1 validated against an independently written objective
+    and a central difference.  Nothing is differenced numerically here.
+
+    Convergence is decided on the gradient actually reached, not on SciPy
+    ``success``: Gate 74-B1 recorded a solver reporting success at a point
+    whose gradient was two orders of magnitude above the criterion, so the flag
+    is provenance rather than a verdict.
+
+    There is no fallback solver, no retry from another initialisation and no
+    reseeding.  A candidate that does not reach the criterion is reported as
+    not converged, and the pilot gate is what acts on that.
+    """
+
+    _require(family in VALID_FAMILIES, f"unknown family {family!r}")
+    x = np.asarray(x_column, dtype=np.float64)
+    start = np.array(loading_init, dtype=np.float64).copy()
+    _require(start.shape == (Z_samples.shape[1],),
+             f"loading shape {start.shape} != {(Z_samples.shape[1],)}")
+    _require(bool(np.all(np.isfinite(start))), "loading_init is not finite")
+
+    def _profiled_variance(loading: np.ndarray) -> float | None:
+        if family != "gaussian":
+            return None
+        residual = x[:, None] - _column_eta(Z_samples, loading)
+        return _checked_variance(float(np.mean(residual ** 2)),
+                                 source="optimise_column_loading_bfgs")
+
+    def negative(loading: np.ndarray) -> float:
+        loading = np.asarray(loading, dtype=np.float64)
+        return -column_log_likelihood(x, Z_samples, loading, family,
+                                      sigma_sq=_profiled_variance(loading))
+
+    def negative_jac(loading: np.ndarray) -> np.ndarray:
+        loading = np.asarray(loading, dtype=np.float64)
+        return -_column_gradient(x, Z_samples, loading, family,
+                                 _profiled_variance(loading))
+
+    result = minimize(negative, start, method=BFGS_METHOD, jac=negative_jac,
+                      options={"maxiter": maxiter, "gtol": gtol})
+    loading = np.asarray(result.x, dtype=np.float64)
+    _require(bool(np.all(np.isfinite(loading))),
+             f"BFGS produced a non-finite loading for {family!r}")
+    sigma_sq = _profiled_variance(loading)
+    gradient_inf = float(np.max(np.abs(
+        _column_gradient(x, Z_samples, loading, family, sigma_sq))))
+    converged = bool(math.isfinite(gradient_inf)
+                     and gradient_inf <= CANDIDATE_GRAD_INF_TOL)
+    provenance = {
+        "optimizer": OPTIMIZER_BFGS,
+        "method": BFGS_METHOD,
+        "maxiter": int(maxiter),
+        "gtol": float(gtol),
+        "convergence_grad_inf_tol": CANDIDATE_GRAD_INF_TOL,
+        "gradient_inf": gradient_inf,
+        "scipy_success": bool(result.success),
+        "scipy_status": int(result.status),
+        "scipy_message": str(result.message),
+        "scipy_nit": int(result.nit),
+        "scipy_njev": int(getattr(result, "njev", -1)),
+        "fallback_solvers": [],
+        "retries": 0,
+    }
+    return loading, sigma_sq, int(result.nit), converged, provenance
+
+
+def optimise_candidate_loading(
+    x_column: np.ndarray,
+    Z_samples: np.ndarray,
+    family: str,
+    *,
+    loading_init: np.ndarray,
+    optimizer: str,
+) -> tuple[np.ndarray, float | None, int, bool, dict[str, Any]]:
+    """Route a candidate optimisation to the named optimiser.
+
+    ``optimizer`` has no default on purpose.  Phase 9C uses BFGS by explicit
+    configuration and the historical Adam route stays reachable by name; a
+    default here would let a call site drift between them silently.
+    """
+
+    _require(optimizer in VALID_OPTIMIZERS,
+             f"unknown optimizer {optimizer!r}; choose from {VALID_OPTIMIZERS}")
+    if optimizer == OPTIMIZER_BFGS:
+        return optimise_column_loading_bfgs(
+            x_column, Z_samples, family, loading_init=loading_init)
+
+    loading, sigma_sq, n_iter, converged = optimise_column_loading(
+        x_column, Z_samples, family, loading_init=loading_init)
+    # The Adam route keeps its own step-based convergence rule unchanged. The
+    # gradient norm is recorded alongside so both routes report the same
+    # diagnostic, without redefining what Adam means by converged.
+    gradient_inf = float(np.max(np.abs(
+        _column_gradient(x_column, Z_samples, loading, family, sigma_sq))))
+    provenance = {
+        "optimizer": OPTIMIZER_ADAM,
+        "method": "adam",
+        "max_iter": ADAM_MAX_ITER,
+        "lr": ADAM_LR,
+        "beta1": ADAM_BETA1,
+        "beta2": ADAM_BETA2,
+        "eps": ADAM_EPS,
+        "tol": ADAM_TOL,
+        "convergence_rule": "step infinity norm below tol",
+        "gradient_inf": gradient_inf,
+        "fallback_solvers": [],
+        "retries": 0,
+    }
+    return loading, sigma_sq, n_iter, converged, provenance
+
+
 @dataclass
 class CandidateRecord:
     """One (column, candidate) evaluation."""
@@ -457,6 +610,9 @@ class CandidateRecord:
     sigma_sq: float | None
     n_iter: int
     converged: bool = True
+    optimizer: str = OPTIMIZER_ADAM
+    gradient_inf: float = float("nan")
+    provenance: dict[str, Any] = field(default_factory=dict)
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -465,8 +621,11 @@ class CandidateRecord:
             "score": self.score,
             "neg2_score": -2.0 * self.score,
             "sigma_sq": "" if self.sigma_sq is None else self.sigma_sq,
+            "optimizer": self.optimizer,
             "optimiser_iterations": self.n_iter,
             "optimiser_converged": self.converged,
+            "optimiser_gradient_inf": self.gradient_inf,
+            "scipy_success": self.provenance.get("scipy_success", ""),
             "loading_norm": float(np.linalg.norm(self.loading)),
         }
 
@@ -477,19 +636,28 @@ def score_column_candidates(
     gate: ColumnGate,
     *,
     loading_init: np.ndarray,
+    optimizer: str,
 ) -> list[CandidateRecord]:
-    """Optimise and score every candidate of one column, under equal budget."""
+    """Optimise and score every candidate of one column, under equal effort.
+
+    ``optimizer`` is required rather than defaulted: which optimiser produced a
+    candidate score is part of what the score means, and Gate 74-B1R showed the
+    two routes land in very different places.
+    """
 
     records: list[CandidateRecord] = []
     for family in gate.candidates:
-        loading, sigma_sq, n_iter, converged = optimise_column_loading(
-            x_column, Z_samples, family, loading_init=loading_init)
+        loading, sigma_sq, n_iter, converged, provenance = (
+            optimise_candidate_loading(x_column, Z_samples, family,
+                                       loading_init=loading_init,
+                                       optimizer=optimizer))
         score = column_log_likelihood(
             x_column, Z_samples, loading, family, sigma_sq=sigma_sq)
         records.append(CandidateRecord(
             column=gate.column, family=family, score=score,
             loading=loading, sigma_sq=sigma_sq, n_iter=n_iter,
-            converged=converged))
+            converged=converged, optimizer=optimizer,
+            gradient_inf=provenance["gradient_inf"], provenance=provenance))
     return records
 
 
@@ -539,11 +707,18 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
     assignment, which is what an A-type update means here.
     """
 
-    def __init__(self, *, gates: Sequence[ColumnGate], **kwargs: Any) -> None:
+    def __init__(self, *, gates: Sequence[ColumnGate],
+                 candidate_optimizer: str = PHASE9C_CANDIDATE_OPTIMIZER,
+                 **kwargs: Any) -> None:
         super().__init__(**kwargs)
         _require(len(gates) == self.d,
                  f"need one gate per column: {len(gates)} gates, d={self.d}")
+        _require(candidate_optimizer in VALID_OPTIMIZERS,
+                 f"unknown candidate_optimizer {candidate_optimizer!r}")
         self.gates = list(gates)
+        # Named here rather than inherited from a default deeper down, so the
+        # artifact can say which optimiser produced every candidate score.
+        self.candidate_optimizer = candidate_optimizer
         self.family_update_enabled = True
         self.selection_trace: list[dict[str, Any]] = []
         self.last_candidate_records: list[CandidateRecord] = []
@@ -577,13 +752,15 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
                 continue
             column_records = score_column_candidates(
                 X[:, gate.column], Z_samples, gate,
-                loading_init=loadings[gate.column, :])
+                loading_init=loadings[gate.column, :],
+                optimizer=self.candidate_optimizer)
             chosen, margin = select_from_records(column_records)
             records.extend(column_records)
             assignment[gate.column] = chosen
             self.selection_trace.append({
                 "iteration": self._iteration,
                 "column": gate.column,
+                "candidate_optimizer": self.candidate_optimizer,
                 "previous_family": self.family_x_list[gate.column],
                 "selected_family": chosen,
                 "margin_neg2": margin,
@@ -693,6 +870,7 @@ def run_family_exploration(
     seed: int = 42,
     newton_alpha: float = 0.5,
     verbose: bool = False,
+    candidate_optimizer: str = PHASE9C_CANDIDATE_OPTIMIZER,
 ) -> ExplorationResult:
     """Exploration MCEM with an A-type family update inside each M-step.
 
@@ -714,7 +892,8 @@ def run_family_exploration(
     rng = np.random.default_rng(seed)
     model = FamilySelectingPerColumnLSM(
         gates=gates, n=n, d=d, k=k, L=L,
-        family_x_list=list(initial_families), family_y=family_y)
+        family_x_list=list(initial_families), family_y=family_y,
+        candidate_optimizer=candidate_optimizer)
     model.initialize_params(true_params=None, seed=seed)
 
     # Informed init, Y side (mirrors em_runner.run_em_experimental).
@@ -797,6 +976,17 @@ def run_family_exploration(
         metadata={
             "selector_version": SELECTOR_VERSION,
             "numerics_mode": "consistent",
+            "candidate_optimizer": candidate_optimizer,
+            "candidate_optimizer_settings": (
+                {"method": BFGS_METHOD, "maxiter": BFGS_MAXITER,
+                 "gtol": BFGS_GTOL,
+                 "convergence_grad_inf_tol": CANDIDATE_GRAD_INF_TOL}
+                if candidate_optimizer == OPTIMIZER_BFGS else
+                {"max_iter": ADAM_MAX_ITER, "lr": ADAM_LR,
+                 "beta1": ADAM_BETA1, "beta2": ADAM_BETA2,
+                 "eps": ADAM_EPS, "tol": ADAM_TOL,
+                 "convergence_rule": "step infinity norm below tol"}),
+            "historical_adam_preserved": True,
             "newton_alpha": float(newton_alpha),
             "L": int(L),
             "num_iter": int(num_iter),
@@ -826,6 +1016,7 @@ def run_hybrid_family_selection(
     refit_seed: int = 43,
     verbose: bool = False,
     execution_hook: Any = None,
+    candidate_optimizer: str = PHASE9C_CANDIDATE_OPTIMIZER,
 ) -> dict[str, Any]:
     """Scheme C: A-type exploration, then a fresh fixed-assignment refit.
 
@@ -860,7 +1051,8 @@ def run_hybrid_family_selection(
     _notify("exploration", "STARTED", search_seed)
     exploration = run_family_exploration(
         X, Y, k=k, gates=gates, initial_families=start, family_y=family_y,
-        L=L, num_iter=exploration_num_iter, seed=search_seed, verbose=verbose)
+        L=L, num_iter=exploration_num_iter, seed=search_seed, verbose=verbose,
+        candidate_optimizer=candidate_optimizer)
     _notify("exploration", "SUCCESS", search_seed)
 
     # failure_policy='fail_fast' is required here, not optional. The legacy
@@ -896,6 +1088,7 @@ def run_hybrid_family_selection(
         "refit": refit,
         "n_gaussian_x_cols": n_gaussian,
         "ambiguous_start": ambiguous_start,
+        "candidate_optimizer": candidate_optimizer,
         "search_seed": int(search_seed),
         "refit_seed": int(refit_seed),
         "integrity": {
@@ -924,7 +1117,17 @@ __all__ = [
     "initial_assignment",
     "column_log_likelihood",
     "optimise_column_loading",
+    "optimise_column_loading_bfgs",
+    "optimise_candidate_loading",
     "score_column_candidates",
+    "OPTIMIZER_ADAM",
+    "OPTIMIZER_BFGS",
+    "VALID_OPTIMIZERS",
+    "PHASE9C_CANDIDATE_OPTIMIZER",
+    "BFGS_METHOD",
+    "BFGS_MAXITER",
+    "BFGS_GTOL",
+    "CANDIDATE_GRAD_INF_TOL",
     "select_from_records",
     "run_family_exploration",
     "run_hybrid_family_selection",
