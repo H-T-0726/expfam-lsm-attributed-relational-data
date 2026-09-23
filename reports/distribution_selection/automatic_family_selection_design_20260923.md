@@ -26,8 +26,12 @@
    「位置（平均水準）の適合」に強く汚染される（§5）。
    人工データ（モデルから生成）では問題にならないが、実データでは支配的な交絡になりうる。
 4. 方式は **C（hybrid）を推奨候補**とする（§7）。採用は Human Gate。
-5. #74 の最小 pilot は **K 固定・人工データ・support gate 内の同一測度比較**に限定すれば、
-   追加の理論決定なしに実行できる（§8）。
+5. #74 は **K 固定・matched generator・support gate 内の同一測度比較**に限定した
+   **feasibility pilot** とする（§8.2）。現行 3 family ＋厳密 gate では score が非自明に働くのは
+   **0/1 列の Bernoulli vs Poisson だけ**であり、自動分布選択一般の実証にはならない。
+   実行前に **HG-1（方式）と HG-3（penalty 方針）を Human が freeze する必要がある**（§12）。
+6. `Σ_l log|M_l|` は `M_l` 固定なら assignment に関して定数であり、
+   **selector penalty として機能しない**（§6.4.1）。離散 search cost は未解決のまま残る。
 
 ---
 
@@ -261,9 +265,13 @@ Issue #28 §9.3 の通り、intercept 欠如 / raw scale / Poisson 曲率 / X �
 
 **設計上の対応（2 択。採用は Human Gate）:**
 
-- **(a) 最小 pilot を人工データに限定する**（推奨）。データを現行モデル
-  （intercept なし、`η = f_l^T z_i`）から literal に生成すれば真値がモデル内にあり、
-  交絡は発生しない。#74 の最小 pilot はこれで足りる。
+- **(a) 最小 pilot を matched generator に限定する**（推奨）。データを現行モデル
+  （intercept なし、`η = f_l^T z_i`）から literal に生成すれば、
+  **intercept omission による model misspecification は生じない**（真値がモデル内にある）。
+  #74 の最小 pilot はこれで足りる。
+  **ただし「交絡が消える」のではない。** family score が位置適合を含むこと自体は
+  matched generator でも残り、列の経験平均が family の既定水準から離れているほど
+  誤選択しやすいという性質はそのまま効く。§8.5 でこれを観測対象にする。
 - **(b) 列ごとの intercept `b_l` を導入する**（`η_il = b_l + f_l^T z_i`）。
   これは **生成モデルの変更**であり root `CLAUDE.md` §6 の Human Gate。
   `θ` と `p_K`（`+d`）も変わり、過去の全結果と非互換になる。**本 Issue では設計しない。**
@@ -302,30 +310,58 @@ p_{K,c}   = k·d − k(k−1)/2  +  Σ_l 1{c_l = gaussian}  +  1{family_y = gaus
 - `utils_expfam.calc_bic_dual` / `calc_Q_dual_strict` は `mixed` を知らないので
   **使用不可**（`model_dual_expfam_percolumn.py` L.22–26 に明記）。
 
-### 6.3 K 選択との二重計上について
+### 6.3 二重計上について（**限定つき**）
 
-**二重計上は起きない。** 理由:
+**現在 `p_{K,c}` が数えている連続パラメータブロックの間では、重複計上は起きない。** 理由:
 
 1. `P_Z(K)` は `c` に依存しない（`Q_Z` は `F` にも `c` にも依存しない）。
 2. `P_θ` の family 依存部分 `Σ_l 1{c_l = gaussian}` は `K` に依存しない。
 3. `F` ブロック `k·d − k(k−1)/2` は `K` と `d` だけの関数で、`c` に依存しない。
 
 つまり `P_θ(K, c) = [K の関数] + [c の関数] + const` と加法的に分離しており、
-K penalty と family penalty が同じ自由度を二度数えることはない。
+**連続パラメータの自由度**を二度数えることはない。
 
-### 6.4 **数えられていない自由度**（重要・UNRESOLVED）
+**この主張はここまでである。** `c` を data から選んだこと自体の
+**離散的な search cost（model multiplicity）は `p_{K,c}` にまったく入っていない**（§6.4）。
+したがって「K penalty と family penalty の二重計上は起きない」を、
+「選択手続き全体として罰則が適切である」という意味に読まないこと。
+離散 search cost は **UNRESOLVED のまま残る**。
+
+### 6.4 **数えられていない離散自由度**（重要・UNRESOLVED）
 
 `p_{K,c}` は **`c` を data から選んだこと自体のコストを含んでいない。**
-`Π_l |M_l|` 通りの assignment から 1 つを選んでおきながら罰則が 0 では、
-より柔軟な family に系統的に偏りうる。候補は
+`Π_l |M_l|` 通りの assignment から 1 つを選んでおきながら離散的な罰則が 0 である。
 
-- (i) MDL 的な選択コスト `Σ_l log|M_l|` を `C_Q` に加える
+#### 6.4.1 `Σ_l log|M_l|` は selector penalty として機能しない（訂正）
+
+素朴な候補として「MDL 的な選択コスト `Σ_l log|M_l|` を `C_Q` に加える」が考えられるが、
+**これは assignment `c` の選択結果を変えない。**
+各列の候補集合 `M_l` が `c` に依存せず固定である限り `Σ_l log|M_l|` は `c` に関する定数であり、
+
+```
+argmin_c [ C_Q(K, c) + Σ_l log|M_l| ]  =  argmin_c C_Q(K, c)
+```
+
+が厳密に成立する。したがってこの項は
+「より柔軟な family への偏り」を補正しない。
+
+この項が意味を持ちうるのは、**「family を自動選択する model class 全体」と
+「family を事前固定した model class」を比べる model prior / code length** としてであり、
+**assignment 間の selector penalty としてではない。** 両者を混同しない。
+
+#### 6.4.2 残る選択肢
+
+離散 search の multiplicity を本当に補正したいなら、次のいずれかを**別途設計**する必要がある。
+
+- (i) 明示的な model prior（`c` に依存する項）を置いた extended criterion
 - (ii) family 選択を held-out データで行い、`C_Q` は selection に使わない
-- (iii) 罰則なしを採用し、bias の存在を limitation として明記する
+- (iii) 補正を置かず、raw criterion で選択し bias の可能性を limitation として明記する
 
-いずれも**理論決定であり Human Gate**（§11 HG-3）。
-本設計では決めない。#74 の最小 pilot は **(iii) 罰則なし + (i) を診断として併記**する形で
-両方を観測できる（§8.4）。
+いずれも**理論決定であり Human Gate**（§11 HG-3）。本設計では決めない。
+
+**#74 の feasibility pilot では新しい penalty を発明しない。** (iii) の raw criterion で選択し、
+選択が僅差だったか大差だったかを **score margin** として記録する（§8.4）。
+margin の分布が分かってから補正の要否を議論するのが順序として正しい。
 
 ---
 
@@ -355,7 +391,8 @@ family 配置 `c` を固定した完全な MCEM を複数回走らせ、最終 `
 
 A を inner engine として candidate assignment `ĉ` を得たのち、
 **`ĉ` を固定して標準の MCEM をもう一度最初から走らせ、その fit の `C_Q` を報告値とする。**
-`ĉ` が変わらなくなるまで（通常 1–2 周）繰り返す。
+`ĉ` が変わらなくなるまで繰り返す。**何周で安定するかは未実験であり、本文書は周回数を見積もらない。**
+反復上限と停止規則は #74 で観測してから決める。
 
 ### 比較表
 
@@ -364,7 +401,7 @@ A を inner engine として candidate assignment `ĉ` を得たのち、
 | current MCEM との整合性 | 高。`q_t` 固定下で `Q_Z`, `Q_Y` が厳密に消え、M-step の列分解をそのまま使う | 高。各 fit は現行 `run_em_dual` 契約そのまま | 高。最終 fit が現行契約の通常 fit になる |
 | 数理の明確さ | 中。coordinate ascent（ECM 型）としては明確だが、`q_t` が `c` に依存するため大域的性質は言えない | **最高**。各候補が独立した通常の推定。比較は最終 criterion のみ | 中〜高。探索段階と報告段階を分離でき、報告値の由来が明確 |
 | 実装の難易度 | 中。per-column の `ψ_lm` 最適化ループと選択ロジックが新規。model class 自体は per-column 版で足りる | 低（単純）だが**配置の列挙が必要** | 中。A ＋ 再 fit の配線 |
-| 計算量 | `O(T · d · |M| · 列 M-step)`。**full fit は 1 回**。列ごとの最適化は `Z` 固定なので安価 | **`|M|^d` 通りの配置を全探索すると爆発**。`d = 15`, `|M| = 2` で 32768 fit。greedy / coordinate に落とすと実質 C になる | `≈ (1〜2) × C_fit` ＋ A の探索コスト |
+| 計算量 | `O(T · d · |M| · 列 M-step)`。**full fit は 1 回**。列ごとの最適化は `Z` 固定なので安価 | **`|M|^d` 通りの配置を全探索すると爆発**。`d = 15`, `|M| = 2` で 32768 fit。greedy / coordinate に落とすと実質 C になる | A の探索コスト ＋ 固定 `ĉ` での再 fit。**再 fit 回数は未測定**（§7 方式 C） |
 | Monte Carlo noise への強さ | **弱い**。`Δ_l` が小さい列で反復ごとに assignment が振動しうる。`q_t` が incumbent family の下で作られるため path dependence（早期固定）も起きる | **強い**。各候補が独立に収束した後で比較する。MC noise は各 fit 内に閉じる | 中。A の振動は残るが、最終報告値は固定 `ĉ` での通常 fit なので再現性が高い |
 | 修士研究としての実現可能性 | 高（計算は軽い）が、振動・path dependence の診断と安定化規則が余分に要る | **`d` が小さい場合のみ**。本 repository の実データ規模の `d` では非現実的 | **高**。既存の実験 harness・registry 規約にそのまま載る |
 | provenance 適合性 | 低〜中。報告する `C_Q` が探索経路に条件づいた量になる | 高 | **高**。最終 artifact が「固定 family での通常 fit」なので既存の runinfo / registry 形式で記録できる |
@@ -380,7 +417,8 @@ A を inner engine として candidate assignment `ĉ` を得たのち、
    本 repository の provenance 規約（結果は承認済み script から、系列を混ぜない）と相性が悪い。
 3. C は探索（A）と報告（固定 `ĉ` での通常 fit）を分離するので、
    最終数値が既存の `run_em_dual` / `calc_bic_exp` 経路そのままになり、監査可能性が高い。
-4. 計算量は full fit ざっと 2 回分で、修士研究の規模に収まる。
+4. 計算量は A の探索コスト＋固定 `ĉ` での再 fit であり、修士研究の規模に収まる見込み。
+   **ただし必要な再 fit 回数は未測定**なので、総コストは #74 で実測する。
 
 **ただし C は EM 全体の単調性を保証しない**（再 fit で目的関数が下がりうる）。
 その場合の扱い（`ĉ` を採るか、`C_Q` が小さい方を採るか）は決めていない。UNRESOLVED（§10 U4）。
@@ -405,13 +443,49 @@ per-column 指定に対応していない（`data_generator_canonical.py` L.246�
 これは #74 の実装事項であり、**#73 では書かない**。既存生成器を書き換えるのではなく
 forward-only の追加とすること（KI-015 の legacy 保存方針と同じ）。
 
-### 8.2 #74 で調べる「ただ 1 つのこと」
+### 8.2 #74 の位置づけ — **feasibility pilot であって、自動分布選択一般の実証ではない**
 
-> **K を真値に固定した状態で、真の family assignment を列ごとに回収できるか。**
+#74 で調べるのは 1 つだけである。
+
+> **K を真値に固定した状態で、family-selection machinery が真の family assignment を
+> 列ごとに回収できるか。**
 
 K 選択は行わない。実データは使わない。held-out も使わない。
 
-### 8.3 手順（案）
+#### claim boundary（**これを守らないと過剰主張になる**）
+
+§3.2 の厳密 support gate を適用すると、列は次の 3 種に分かれる。
+
+| 列の観測 | 決まり方 | score が働くか |
+|---|---|---|
+| 非整数 or 負値を含む | **gate だけで Gaussian に確定** | 働かない |
+| 2 以上を含む非負整数 | **gate だけで Poisson に確定**（現行候補集合では） | 働かない |
+| 0/1 のみ | `{bernoulli, poisson}` が残る | **ここだけ score が働く** |
+
+したがって **現行の実装済み 3 family ＋ 厳密 support gate の下では、
+candidate score による非自明な family 選択が起きるのは 0/1 列の Bernoulli vs Poisson だけ**である。
+
+**#74 で書いてよいこと:**
+
+- 「support gate ＋ candidate score という machinery が、matched generator 上で
+  意図どおり動作し、gate 決定列と score 決定列を分離して集計できた」
+- 「0/1 列における Bernoulli vs Poisson の score 選択が、どの程度・どの margin で真値を回収したか」
+
+**#74 で書いてはいけないこと:**
+
+- 「属性確率分布の自動選択を実証した」「自動分布選択一般が機能する」
+- 「family 自動選択が人手指定より優れる」
+- gate だけで決まった列を含めた「family recovery rate」を提案手法の性能として提示すること
+- 実データでも同様に動く、という含意
+
+**一般的な自動分布選択を主張したいなら、同一 support 内に追加候補が最低 1 つ必要**である
+（例: counting measure 上の Poisson vs 別の count family）。これは新規実装を伴い Human Gate（HG-4）。
+**#74 で scope を広げない。**
+
+### 8.3 手順（案。**HG-1 で方式が確定してから確定する**）
+
+以下は推奨候補 C を前提に書いた**案**であり、方式の採用は HG-1 として未了である。
+HG-1 の結論によって手順 3–4 は変わる。
 
 1. 既知の `c_true ∈ {gaussian, bernoulli, poisson}^d` で人工データを生成（現行モデルから literal に）。
 2. 各列に **決定的 support gate**（§3.2）を適用し `M_l` を得る。
@@ -426,9 +500,9 @@ K 選択は行わない。実データは使わない。held-out も使わない
 | 量 | 目的 |
 |---|---|
 | 列ごとの `ĉ_l` と `c_true,l` の混同行列 | **主要指標**。「exact recovery rate」は gate 決定列を除いた列だけで計算する |
-| 各列・各候補の `Q_l(m)` と penalty 込みの差 `Δ_l` | 誤選択が僅差か大差かの診断 |
+| 各列・各候補の `Q_l(m)` と penalty 込みの差 `Δ_l`（生値） | 補正の要否を後から議論できるよう raw のまま保存する |
 | 反復ごとの `c^(t)` の履歴 | 振動 / path dependence の有無（§7 の A のリスク） |
-| MDL 的選択コスト `Σ_l log|M_l|` を加えた場合の `ĉ` | §6.4 の (i) vs (iii) を同一 run で観測 |
+| **score margin** `min_{m ≠ ĉ_l} [ −2Q_l(m) − (−2Q_l(ĉ_l)) ]`（penalty 込み） | **新しい penalty を発明せず**、選択が僅差か大差かを raw criterion のまま診断する（§6.4.2） |
 | seed をまたいだ `ĉ` の一致率 | MC noise への感度 |
 
 ### 8.5 予想される失敗モードを**あらかじめ指標にする**
@@ -436,13 +510,16 @@ K 選択は行わない。実データは使わない。held-out も使わない
 - **0/1 値しか取らない Poisson 列**は support gate 上 Bernoulli としても admissible であり、
   原理的に区別しにくい。これは bug ではなく識別性の問題。
   `c_true = poisson` かつ `max_i x_il ≤ 1` の列は**別カテゴリとして集計する**。
-- 平均水準が family の既定水準（§5）から遠い列は、intercept がないため誤選択しやすい。
+  §8.2 の通り、score が働くのはまさにこのケースなので、**pilot の主戦場はここである**。
+- 列の経験平均が family の既定水準（§5）から遠いほど誤選択しやすい。
+  これは matched generator でも残る性質である（§5(a)）。
   各列の経験平均を記録し、誤選択との関係を**観測する**（原因と断定しない — KI-018）。
 
 ### 8.6 freeze しない項目（Human が決める）
 
 `n` / `d` / `K_true` / `c_true` の構成比 / `f_scale` / `sigma_x_var` / `w_0^Y` / `w^Y` /
-`family_y` / `L` / `num_iter` / replicate 数 / seed 集合 / penalty 方式（§6.4）。
+`family_y` / `L` / `num_iter` / replicate 数 / seed 集合。
+加えて **HG-1（方式 A/B/C）と HG-3（penalty 方針）は実行前に Human が freeze すること**（§12）。
 **本文書はこれらを決定しない。** `prepare-experiment` の pre-flight を通してから実行すること。
 
 ---
@@ -455,7 +532,8 @@ K 選択は行わない。実データは使わない。held-out も使わない
 C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 ```
 
-で `P_Z` は `c` 非依存、`P_θ` は `K` 部分と `c` 部分に加法分離する（§6.3）。
+で `P_Z` は `c` 非依存、`P_θ` は `K` 部分と `c` 部分に加法分離する（§6.3。
+**連続パラメータブロック間の話であり、離散 search cost を含まない**）。
 したがって #75 の joint search は形式的には
 
 ```
@@ -479,8 +557,8 @@ C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 | U2 | 実装済み 3 family に厳密 support gate をかけると、Level 1 の実質的選択肢が「0/1 列の Bernoulli vs Poisson」だけになる（§3.2）。意味のある選択肢を増やすには X 側 NB 等の新規実装が要る |
 | U3 | 方式 A の反復が何に収束するか未証明（§2.4）。`q_t` が `c` に依存するため、固定 `q_t` 下の coordinate ascent としてしか述べられない |
 | U4 | 方式 C の再 fit で目的関数が悪化した場合の扱いが未定（§7） |
-| U5 | family 選択の自由度に対する penalty が未決定（§6.4）。罰則 0 のまま使うと柔軟な family に偏りうる |
-| U6 | X 列 intercept がないため family 比較が位置適合と交絡する（§5）。人工データでは回避できるが実データでは残る。**原因の断定はしない**（KI-018） |
+| U5 | family assignment の**離散 search cost** が `p_{K,c}` に入っていない（§6.4）。素朴な `Σ_l log|M_l|` は `c` に関する定数なので selector penalty として機能しない（§6.4.1）。有効な補正（model prior / extended criterion / held-out）は未設計 |
+| U6 | X 列 intercept がないため family score が位置適合を含む（§5）。matched generator では intercept omission による model misspecification は生じないが、**位置適合の寄与自体は matched generator でも残る**。**原因の断定はしない**（KI-018） |
 | U7 | `Q_X` を family score に再利用する際、Gaussian-X の `Σ_X` が `F` より 1 M-step 古い（#72 report（PR #76）§5-3）。family 比較は score の差を直接使うため、このラグの影響が K 比較より直接的に効く可能性がある。**未測定** |
 | U8 | per-column 混在の人工データ生成経路が存在しない（§8.1）。#74 で forward-only に追加する必要がある |
 | U9 | lineage E（experimental / consistent）は **本文採用不可**。family 自動選択を修論本文の提案手法にするには、どの系列で正式化するかの決定が要る |
@@ -493,7 +571,7 @@ C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 |---|---|
 | HG-1 | 方式 A / B / C のどれを正式採用するか（本文書の推奨候補は C。**未採用**） |
 | HG-2 | #74 の実験条件の freeze（§8.6 の全項目） |
-| HG-3 | family 選択自由度に対する penalty 方式（§6.4 の (i)/(ii)/(iii)） |
+| HG-3 | family 選択の離散 search cost をどう扱うか（§6.4.2 の (i) model prior / (ii) held-out / (iii) 補正なし＋limitation 明記）。**#74 は (iii) ＋ score margin 診断で足りる**が、その承認は必要 |
 | HG-4 | 候補集合を X 側 NB 等へ拡張するか（新規実装を伴う。§3.2 / U2） |
 | HG-5 | X 列 intercept `b_l` を導入するか（**生成モデルの変更**。root `CLAUDE.md` §6） |
 | HG-6 | cross-measure / representation 選択（raw count vs log 変換）を研究範囲に含めるか（§3.3 / U1） |
@@ -503,22 +581,34 @@ C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 
 ## 12. Decision
 
-## `READY_FOR_MINIMAL_PROTOTYPE`
+## `READY_FOR_MINIMAL_PROTOTYPE`（**実行前提つき**）
 
-根拠:
+この decision が意味するのは「**設計として最小 prototype を書き下せる状態にある**」ことであり、
+「**今すぐ #74 を実行してよい**」ことではない。両者を混同しない。
+
+### 設計として揃ったもの
 
 - family 比較を continuous-Z MCEM 上で well-posed に定義する式が得られた（§2.3）。
   `Q_Z` と `Q_Y` が比較から厳密に消えるという代数的事実に立脚しており、追加仮定を要しない。
 - 比較してよい範囲（support gate）と、比較に必要な完全な log probability / density の
   項が特定できた（§3, §4）。必要な strict 版・consistent numerics は **既に repository に存在する**。
 - parameter count の接続先が確定した（`calc_bic_exp(family_x='mixed', n_gaussian_x_cols=…)`、§6.2）。
-  K penalty との二重計上がないことも確認した（§6.3）。
-- #74 の最小 pilot は「K 固定・人工データ・support gate 内の同一測度比較」に限定すれば、
-  **HG-1〜HG-7 のどれも決めずに実行できる**（§8）。未解決の理論項目（U1, U5, U6）は
-  いずれも pilot の外側、または pilot の観測対象として扱える。
+  連続パラメータブロック間で重複計上がないことも確認した（§6.3。**離散 search cost は未解決**）。
+- #74 が何を調べ、何を主張してはいけないかの claim boundary が確定した（§8.2）。
+
+### **実行前に Human が freeze しなければならないもの（precondition）**
+
+| 前提 | 内容 | なぜ pilot を止めるか |
+|---|---|---|
+| **HG-1** | 方式 A / B / C の採用 | §8.3 の手順 3–4 が方式に依存する。未決のまま実装すると推奨候補 C を既成事実化してしまう |
+| **HG-3** | penalty 方針 | §6.4.2 の (i)/(ii)/(iii) のどれを取るかで選択規則が変わる。**pilot 自体は (iii) raw criterion ＋ score margin 診断で足りる**（§8.4）が、それでよいという承認は必要 |
+| **HG-2** | 実験条件の freeze | §8.6。`prepare-experiment` の pre-flight を通すこと |
+
+HG-4〜HG-7 は #74 の実行を止めない（それぞれ候補集合の拡張・モデル変更・研究範囲・正式化系列の話であり、
+feasibility pilot の外側にある）。ただし **HG-4 が未決である以上、#74 の結果から
+「自動分布選択一般」を主張することはできない**（§8.2 の claim boundary）。
 
 **この decision は「設計が正式採用された」という意味ではない。**
-方式の採用（HG-1）と条件の freeze（HG-2）は Human Gate として未了であり、
 **#74 は自動開始しない。**
 
 ---
@@ -545,12 +635,16 @@ C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 - [ ] 「per-column / family 自動選択が一般に優れる」と書いていないか（KI-016 H 項）。
 - [ ] 方式 C を「採用した」と書いていないか（推奨候補まで。HG-1）。
 - [ ] 実験条件を freeze していないか（§8.6）。
+- [ ] 「#74 で自動分布選択一般を実証できる」と読めないか（§8.2 の claim boundary）。
+- [ ] `Σ_l log|M_l|` を selector penalty として扱っていないか（§6.4.1）。
+- [ ] 「二重計上は起きない」を無限定に書いていないか（§6.3 は連続パラメータブロック間に限定）。
+- [ ] 方式 C の周回数など、未実験の量を見積もっていないか（§7）。
 - [ ] lineage E（experimental / consistent）を本文採用可のように書いていないか（root `CLAUDE.md` §3、U9）。
 - [ ] 異なる系列の数値を並べていないか（KI-002。本文書は数値比較を一切していない）。
 
 ### #72 側（PR #76）と合わせて見るとき
 
-- [ ] `C_Q(K, c)` の `P_Z` が `c` 非依存、`P_θ` が `K` 部分と `c` 部分に加法分離すること（§6.3）。二重計上がないことの根拠。
+- [ ] `C_Q(K, c)` の `P_Z` が `c` 非依存、`P_θ` が `K` 部分と `c` 部分に加法分離すること（§6.3）。**連続パラメータブロック間で**重複計上がないことの根拠であり、離散 search cost を含む主張ではない。
 - [ ] `Q_X` を family score に使うとき、Gaussian-X の `Σ_X` が `F` より 1 M-step 古い件（U7）が未測定のまま残っていること。
 
 ---
