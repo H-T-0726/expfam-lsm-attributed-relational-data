@@ -126,6 +126,28 @@ C_current(K) = −2 Q_strict + p_K ln n
   依然として主張できない（KI-010 / RM §12.6）。`C_Q` という記法に変えても
   criterion の位置づけは変わらない。
 
+### 4.1 session validation（pure-function 再照合）
+
+§4 の主張は式の読み取りだけに依らず、**実関数を直接呼ぶ算術照合**でも確認した。
+EM 反復・推定・データ生成・artifact 書き出しは一切行っていない。
+
+手順（再現するには以下をそのまま行えばよい。**照合スクリプトは commit していない**ので、
+下の数値は repository artifact ではなく session validation の記録である）:
+
+1. `DualExpFamLSM` を `n=24, d=6, k=3, L=5` で構築し、`model.scale_Z` に通した乱数 `Z_samples`、
+   乱数 `F`、乱数対角 `sigma`、対称化した `Y` を与える。
+2. `calc_Q_dual_strict` と `calc_bic_dual` の戻り値を、§2 の定義に従って
+   `Q_Z` / `Q_X` / `Q_Y` を別々に集計して再合成した `D_K + P_Z + P_θ` と比較する。
+3. `(family_x, family_y) = (gaussian, bernoulli) / (poisson, poisson) /
+   (bernoulli, gaussian) / (gaussian, gaussian)` の 4 組で実行する。
+
+結果: 4 組すべてで残差は **`|ΔC| ≤ 5e-13`**（`C_current` の絶対値は `1.2e3`–`2.5e3` 程度）。
+§4 の「代数的には厳密、数値的には加算順序による丸め差の範囲で一致」という記述と整合する。
+
+`P_Z` についても同様に `scale_Z` 後の `_lnpZ` を直接評価し、
+`P_Z/(nK) = 2.8378770664…= 1 + ln 2π` が `(n,k,L)` を変えても厳密に成り立つことを確認した
+（残差 `≤ 3e-14`）。§2.1 の導出と一致する。
+
 ---
 
 ## 5. Phase 9 で候補 K を自動比較するために接続できるか
@@ -229,7 +251,7 @@ family 自動選択後の parameter count 配線（§6）は #75 の作業であ
 | 項目 | 結果 |
 |---|---|
 | 新規 EM fit | 0 |
-| simulation | 0 |
+| simulation | 0（§4.1 は pure-function の算術照合であり、推定もデータ生成も行っていない） |
 | scientific code 変更 | 0 行 |
 | results / artifacts 変更 | 0 件 |
 | 追加ファイル | 本 report 1 件のみ |
