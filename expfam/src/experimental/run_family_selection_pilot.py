@@ -290,6 +290,31 @@ def generator_provenance_rows(protocol: Protocol, replicate: Replicate,
 
 
 # --------------------------------------------------------------------------
+# secondary diagnostic: Z recovery
+# --------------------------------------------------------------------------
+
+def procrustes_rmse_z(Z_est: np.ndarray, Z_true: np.ndarray) -> float:
+    """RMSE between the estimated and true Z after the optimal rotation.
+
+    The model identifies Z only up to an orthogonal transform, so a raw RMSE
+    would measure the arbitrary basis as much as the recovery.  Computed here
+    rather than imported from ``utils_expfam`` so that the runner's import
+    graph stays inside the experimental lineage.
+
+    This is a SECONDARY diagnostic.  #74 is about whether the family-selection
+    machinery runs and what it picks; Z recovery is context, not the estimand.
+    """
+
+    Z_est = np.asarray(Z_est, dtype=np.float64)
+    Z_true = np.asarray(Z_true, dtype=np.float64)
+    width = min(Z_est.shape[1], Z_true.shape[1])
+    rotation_u, _, rotation_vt = np.linalg.svd(
+        Z_est[:, :width].T @ Z_true[:, :width])
+    aligned = Z_est[:, :width] @ (rotation_u @ rotation_vt)
+    return float(np.sqrt(np.mean((aligned - Z_true[:, :width]) ** 2)))
+
+
+# --------------------------------------------------------------------------
 # one (replicate, start) run
 # --------------------------------------------------------------------------
 
@@ -311,6 +336,12 @@ def run_one(protocol: Protocol, replicate: Replicate, dataset,
     )
     result["replicate"] = replicate.label
     result["start_label"] = start_label
+    # Secondary diagnostic. run_em_experimental does not compute an RMSE (it
+    # is not given the truth), so it is computed here against the generator's
+    # Z rather than left as an empty column that looks measured.
+    estimated_z = result["refit"].get("Z_est")
+    result["rmse_Z"] = ("" if estimated_z is None
+                        else procrustes_rmse_z(estimated_z, dataset.Z))
     return result
 
 
@@ -389,9 +420,9 @@ def fit_result_row(protocol: Protocol, result: dict[str, Any]
         "Q_strict": refit.get("Q_strict"),
         "bic": refit.get("bic"),
         "num_params": refit.get("num_params"),
-        "rmse_Z": refit.get("rmse_Z", ""),
-        "w0_est": refit.get("w0", refit.get("w0_est", "")),
-        "w_est": refit.get("w", refit.get("w_est", "")),
+        "rmse_Z": result.get("rmse_Z", ""),
+        "w0_est": refit.get("w0", ""),
+        "w_est": refit.get("w", ""),
         "runtime_s": refit.get("runtime_s"),
         "failure_policy": integrity["failure_policy"],
         "retry_count": integrity["retry_count"],

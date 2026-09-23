@@ -302,7 +302,9 @@ def _fake_hybrid(protocol, dataset, ambiguous_start, search_seed, refit_seed,
         "exploration_metadata": {"selector_version": "test"},
         "refit": {"Q_strict": -123.5, "bic": 300.25, "num_params": 21,
                   "nan_occurred": False, "q_bic_failed": False,
-                  "runtime_s": 0.1, "rmse_Z": 0.4, "w0": -1.0, "w": 0.9,
+                  "runtime_s": 0.1, "w0": -1.0, "w": 0.9,
+                  "Z_est": np.asarray(dataset.Z) if hasattr(dataset, "Z")
+                  else np.zeros((dataset.X.shape[0], protocol.k_true)),
                   "failure_policy": "fail_fast", "retry_count": 0,
                   "replacement_count": 0, "seed_rescue_count": 0},
         "n_gaussian_x_cols": sum(1 for f in selected if f == "gaussian"),
@@ -332,6 +334,7 @@ def stub_hybrid(monkeypatch):
 
             dataset = _D()
             dataset.X = X
+            dataset.Z = np.zeros((X.shape[0], protocol.k_true))
             return _fake_hybrid(protocol, dataset, ambiguous_start,
                                 search_seed, refit_seed, **options)
 
@@ -385,6 +388,32 @@ def test_gate_decided_columns_never_appear_in_family_scores(tmp_path,
                  for r in gates if r["decided_by"] == "gate"}
     assert scored & gate_only == set()
     assert scored
+
+
+def test_procrustes_rmse_is_invariant_to_the_arbitrary_rotation():
+    """Z is identified only up to an orthogonal transform."""
+
+    rng = np.random.default_rng(11)
+    Z_true = rng.standard_normal((30, 3))
+    rotation, _ = np.linalg.qr(rng.standard_normal((3, 3)))
+    assert runner.procrustes_rmse_z(Z_true, Z_true) == pytest.approx(0.0,
+                                                                    abs=1e-12)
+    assert runner.procrustes_rmse_z(Z_true @ rotation, Z_true) == pytest.approx(
+        0.0, abs=1e-10)
+    assert runner.procrustes_rmse_z(Z_true + 1.0, Z_true) > 0.0
+
+
+def test_fit_results_carry_a_real_rmse_not_an_empty_column(tmp_path,
+                                                           stub_hybrid):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+    with (out / "fit_results.csv").open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        assert row["rmse_Z"] != ""
+        assert math.isfinite(float(row["rmse_Z"]))
+        assert row["w0_est"] != "" and row["w_est"] != ""
 
 
 # --------------------------------------------------------------------------
