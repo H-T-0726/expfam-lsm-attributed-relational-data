@@ -1,0 +1,245 @@
+{
+  "validator_version": "candidate-optimizer-validation-v1",
+  "gate": "74-B1",
+  "uses_rng": false,
+  "uses_smoke_artifacts": false,
+  "em_executions": 0,
+  "base_vectors": [
+    [
+      1.0,
+      0.2,
+      -0.1
+    ],
+    [
+      -0.6,
+      1.0,
+      0.3
+    ],
+    [
+      0.4,
+      -0.7,
+      1.0
+    ],
+    [
+      -1.0,
+      -0.2,
+      0.5
+    ],
+    [
+      0.3,
+      0.8,
+      -0.9
+    ],
+    [
+      -0.5,
+      0.4,
+      -0.8
+    ]
+  ],
+  "group_repeats": 4,
+  "sample_scales": [
+    0.96,
+    0.98,
+    1.0,
+    1.02,
+    1.04
+  ],
+  "n": 24,
+  "k": 3,
+  "L": 5,
+  "z_samples_sha256": "bb44ccbe96afaa1deddaea0137701c177e3158edef7af9dc0111f57caabe1a63",
+  "cases": {
+    "case_A_balanced_nonseparable": [
+      [
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ]
+    ],
+    "case_B_sparse_nonseparable": [
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "case_columns": {
+    "case_A_balanced_nonseparable": [
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "case_B_sparse_nonseparable": [
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "case_column_sha256": {
+    "case_A_balanced_nonseparable": "388dd028982d5aa7de5711b0314a536bfd08cbe95ecbb863052fc039f41d3e1c",
+    "case_B_sparse_nonseparable": "44f19ec86df0364632c09c75ec3297e37ea94cb30b35e82f665120f57eb03e4c"
+  },
+  "case_ones_count": {
+    "case_A_balanced_nonseparable": 12,
+    "case_B_sparse_nonseparable": 8
+  },
+  "initialisations": {
+    "init_zero": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "init_pos": [
+      0.6,
+      -0.4,
+      0.3
+    ],
+    "init_neg": [
+      -0.6,
+      0.4,
+      -0.3
+    ]
+  },
+  "families": [
+    "bernoulli",
+    "poisson"
+  ],
+  "adam": {
+    "max_iter": 50,
+    "lr": 0.01,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "eps": 1e-08,
+    "tol": 1e-06
+  },
+  "reference_solver": {
+    "library": "scipy.optimize.minimize",
+    "method": "BFGS",
+    "jac": null,
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "fallback_solvers": []
+  },
+  "thresholds": {
+    "objective_match_tol": 1e-10,
+    "fd_step": 1e-06,
+    "gradient_match_tol": 1e-05,
+    "reference_grad_inf_tol": 1e-08,
+    "reference_score_agree_tol": 1e-08,
+    "reference_loading_agree_tol": 1e-05,
+    "adam_gap_per_obs_tol": 1e-06,
+    "adam_grad_inf_tol": 0.0001
+  },
+  "expected_adam_runs": 12,
+  "git_sha": "9c82c0d218c01f1f8f79c25933a50c68eb9b5c96",
+  "git_dirty": false,
+  "python_version": "3.13.14",
+  "numpy_version": "2.3.5",
+  "scipy_version": "1.16.3",
+  "note": "Diagnostic certification thresholds for Gate 74-B1 only. They are not manuscript claims and do not reclassify the Gate 74-B smoke."
+}

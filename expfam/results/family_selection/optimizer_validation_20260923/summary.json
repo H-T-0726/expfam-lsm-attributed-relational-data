@@ -1,0 +1,56 @@
+{
+  "validator_version": "candidate-optimizer-validation-v1",
+  "gate": "74-B1",
+  "status": "REFERENCE_NOT_CERTIFIED",
+  "adam_verdict": "HUMAN_OPTIMIZER_DECISION_REQUIRED",
+  "em_executions": 0,
+  "started_utc": "2026-09-23T13:19:48.915203+00:00",
+  "finished_utc": "2026-09-23T13:19:49.091003+00:00",
+  "objective_checks": {
+    "total": 12,
+    "passed": 12,
+    "max_abs_difference": 0.0,
+    "tolerance": 1e-10
+  },
+  "gradient_checks": {
+    "total": 12,
+    "passed": 12,
+    "max_abs_difference": 2.3841039420435806e-09,
+    "tolerance": 1e-05
+  },
+  "reference_certification": {
+    "problems": 4,
+    "certified": 0,
+    "failures": [
+      "case_A_balanced_nonseparable/bernoulli: analytic gradient inf norm above 1e-08",
+      "case_A_balanced_nonseparable/poisson: analytic gradient inf norm above 1e-08",
+      "case_B_sparse_nonseparable/bernoulli: analytic gradient inf norm above 1e-08",
+      "case_B_sparse_nonseparable/poisson: analytic gradient inf norm above 1e-08"
+    ],
+    "max_analytic_grad_inf": 4.785613036517589e-07,
+    "max_score_spread": 2.1316282072803006e-14,
+    "max_loading_spread": 2.555073608245806e-07,
+    "max_scipy_jac_inf": 7.152557373046875e-07,
+    "observation": "Recorded for the human, not acted on here: the reference solver differentiates numerically (jac=None), so its forward-difference gradient resolves to multiples of roughly 1.2e-7. Both the production analytic gradient and SciPy's own reported jacobian at the returned point are compared against the frozen 1e-8 criterion; where they exceed it, that is what the artifact says. The solver settings and the criterion were frozen before this ran and are not adjusted now."
+  },
+  "adam_summary": {
+    "runs": 0,
+    "converged_flag_true": 0,
+    "hit_budget": 0,
+    "max_objective_gap_per_observation": null,
+    "max_adam_grad_inf": null,
+    "max_loading_inf_distance_to_ref": null,
+    "failures": []
+  },
+  "family_ordering": {
+    "rows": 0,
+    "agreements": 0,
+    "reference_winner_by_case": {}
+  },
+  "interpretation": {
+    "b1_asks": "how close the frozen 50-step Adam gets to an independently certified optimum, and whether the family ordering is stable",
+    "b1_does_not_ask": "which family is correct; the ordering is recorded, not sought",
+    "no_production_change": "this run changes no production optimiser setting and does not reclassify the Gate 74-B smoke",
+    "smoke_artifacts_used_as_input": false
+  }
+}
