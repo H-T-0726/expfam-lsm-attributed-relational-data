@@ -39,7 +39,9 @@ for a candidate score: outside the clip interval the legacy score disagrees
 with its own objective (KI-015), and a family comparison reads score
 DIFFERENCES directly, so a clipped value is not a usable log-likelihood.
 Non-finite scores and non-finite gradients are fail-fast; a candidate is never
-rescued by retrying with another seed.
+rescued by retrying with another seed.  A degenerate Gaussian column variance
+is rejected rather than floored, and a degenerate observed Y density stops the
+exploration rather than being clipped to a usable-looking value.
 """
 
 from __future__ import annotations
@@ -87,8 +89,13 @@ ADAM_BETA2 = 0.999
 ADAM_EPS = 1e-8
 ADAM_TOL = 1e-6
 
-# Floor for a profiled Gaussian column variance, matching the model classes.
-SIGMA_SQ_FLOOR = 1e-8
+# Smallest Gaussian column variance this module will score.  It is a REJECTION
+# threshold, not a clamp: flooring a degenerate variance would hand back a
+# large finite log-density for a column the model cannot actually describe,
+# which is the silent repair this module exists to avoid.  The model classes
+# clamp at the same magnitude; the selector refuses instead, because a family
+# comparison reads score differences directly.
+SIGMA_SQ_MIN = 1e-8
 
 
 class SelectorStop(RuntimeError):
@@ -103,6 +110,26 @@ class SelectorStop(RuntimeError):
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise SelectorStop(message)
+
+
+def _checked_variance(sigma_sq: float, *, source: str) -> float:
+    """Accept a Gaussian column variance, or stop.
+
+    A non-positive, non-finite or degenerate variance means the column cannot
+    be described by this family at these parameters.  Clamping it would return
+    an arbitrary finite score for that column and let the comparison proceed on
+    a number nothing produced.
+    """
+
+    value = float(sigma_sq)
+    _require(math.isfinite(value),
+             f"{source}: Gaussian column variance is not finite ({value})")
+    _require(value >= SIGMA_SQ_MIN,
+             f"{source}: Gaussian column variance {value} is below the "
+             f"minimum this module will score ({SIGMA_SQ_MIN}); the column is "
+             f"degenerate at these parameters and the selector refuses to "
+             f"substitute a floor")
+    return value
 
 
 # --------------------------------------------------------------------------
@@ -258,7 +285,7 @@ def column_log_likelihood(
         residual = x[:, None] - eta
         if sigma_sq is None:
             sigma_sq = float(np.mean(residual ** 2))
-        sigma_sq = max(float(sigma_sq), SIGMA_SQ_FLOOR)
+        sigma_sq = _checked_variance(sigma_sq, source="column_log_likelihood")
         total = float(np.sum(
             -0.5 * residual ** 2 / sigma_sq
             - 0.5 * math.log(sigma_sq)
@@ -291,9 +318,10 @@ def _column_gradient(
     elif family == "poisson":
         residual = x[:, None] - poisson_mean(eta)
     else:                                                    # gaussian
-        variance = max(float(sigma_sq if sigma_sq is not None
-                             else np.mean((x[:, None] - eta) ** 2)),
-                       SIGMA_SQ_FLOOR)
+        variance = _checked_variance(
+            sigma_sq if sigma_sq is not None
+            else float(np.mean((x[:, None] - eta) ** 2)),
+            source="_column_gradient")
         residual = (x[:, None] - eta) / variance
     # (1/L) sum_s Z_s^T residual_s
     gradient = np.einsum("nl,nkl->k", residual, Z_samples) / eta.shape[1]
@@ -355,7 +383,8 @@ def optimise_column_loading(
         if family == "gaussian":
             residual = np.asarray(x_column, dtype=np.float64)[:, None] - \
                 _column_eta(Z_samples, loading)
-            sigma_sq = max(float(np.mean(residual ** 2)), SIGMA_SQ_FLOOR)
+            sigma_sq = _checked_variance(float(np.mean(residual ** 2)),
+                                         source="optimise_column_loading")
         gradient = _column_gradient(x_column, Z_samples, loading, family, sigma_sq)
 
         # Same sign convention as _calc_F_adam_weighted: ascend the
@@ -377,7 +406,8 @@ def optimise_column_loading(
     if family == "gaussian":
         residual = np.asarray(x_column, dtype=np.float64)[:, None] - \
             _column_eta(Z_samples, loading)
-        sigma_sq = max(float(np.mean(residual ** 2)), SIGMA_SQ_FLOOR)
+        sigma_sq = _checked_variance(float(np.mean(residual ** 2)),
+                                     source="optimise_column_loading")
     return loading, sigma_sq, used_iter, converged
 
 
@@ -439,6 +469,12 @@ def select_from_records(records: Sequence[CandidateRecord]) -> tuple[str, float]
     """
 
     _require(len(records) >= 1, "no candidate records to select from")
+    for record in records:
+        # score_column_candidates cannot produce these, but this function is
+        # public and a non-finite score must never reach a selection.
+        _require(math.isfinite(record.score),
+                 f"column {record.column}: candidate {record.family!r} has a "
+                 f"non-finite score ({record.score})")
     best = max(
         records,
         key=lambda record: (record.score,
@@ -597,7 +633,17 @@ def run_family_exploration(
     obs_upper = np.triu(model.train_mask, k=1)
     y_obs = Y[obs_upper]
     if family_y == "bernoulli":
-        density = float(np.clip(y_obs.mean(), 1e-6, 1 - 1e-6))
+        observed_density = float(y_obs.mean())
+        # em_runner clips this density so that a degenerate graph still yields
+        # a finite w0.  Here a graph with no edges, or with every edge present,
+        # carries no relational signal at all, so continuing would produce a
+        # meaningless exploration fit from an arbitrary w0.  Stop instead; the
+        # clip below then never actually binds on a usable dataset.
+        _require(0.0 < observed_density < 1.0,
+                 f"observed Y density is {observed_density}; a graph with no "
+                 f"edges or with every edge present carries no relational "
+                 f"signal, and the pilot refuses to substitute a clipped w0")
+        density = float(np.clip(observed_density, 1e-6, 1 - 1e-6))
         model.params["w0"] = np.log(density / (1 - density))
         model.params["w"] = 0.5
     elif family_y == "poisson":

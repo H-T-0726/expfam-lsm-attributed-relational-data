@@ -256,6 +256,45 @@ def test_scoring_is_reproducible_for_identical_inputs(fixed_samples):
         assert np.array_equal(left.loading, right.loading)
 
 
+def test_degenerate_gaussian_variance_is_rejected_not_floored(fixed_samples):
+    """A variance below the minimum stops the selector instead of being clamped.
+
+    Flooring would hand back a large finite log-density for a column the model
+    cannot describe, and a family comparison reads score differences directly.
+    """
+
+    x = np.linspace(-1.0, 1.0, N)
+    loading = np.full(K, 0.2)
+    for bad in (0.0, -1.0, 1e-12):
+        with pytest.raises(SelectorStop, match="below the minimum"):
+            column_log_likelihood(x, fixed_samples, loading, "gaussian",
+                                  sigma_sq=bad)
+    with pytest.raises(SelectorStop, match="not finite"):
+        column_log_likelihood(x, fixed_samples, loading, "gaussian",
+                              sigma_sq=float("nan"))
+
+
+def test_a_column_explained_exactly_is_rejected(fixed_samples):
+    """Zero residual variance is degenerate, not a licence to score huge."""
+
+    loading = np.full(K, 0.3)
+    exact = np.einsum("nkl,k->nl", fixed_samples, loading)[:, 0]
+    # Build a column whose residual against sample 0 is identically zero by
+    # collapsing the sample block to that one draw.
+    collapsed = np.repeat(fixed_samples[:, :, :1], L, axis=2)
+    with pytest.raises(SelectorStop, match="below the minimum"):
+        column_log_likelihood(exact, collapsed, loading, "gaussian")
+
+
+def test_non_finite_candidate_scores_never_reach_a_selection():
+    records = [_record("bernoulli", -10.0), _record("poisson", float("nan"))]
+    with pytest.raises(SelectorStop, match="non-finite score"):
+        select_from_records(records)
+    records = [_record("bernoulli", float("inf")), _record("poisson", -1.0)]
+    with pytest.raises(SelectorStop, match="non-finite score"):
+        select_from_records(records)
+
+
 def test_gaussian_candidate_profiles_its_variance(fixed_samples):
     x = np.linspace(-2.0, 2.0, N)
     gate, = support_gate(x[:, None])
@@ -477,3 +516,33 @@ def test_selecting_model_requires_one_gate_per_column(mixed_columns):
             n=mixed_columns.shape[0], d=mixed_columns.shape[1], k=K, L=L,
             family_x_list=["bernoulli", "poisson", "gaussian"],
             family_y="bernoulli")
+
+
+def test_degenerate_y_density_stops_before_any_e_step(mixed_columns):
+    """A graph with no edges carries no relational signal, so exploration stops.
+
+    The guard sits after parameter initialisation and before the first E-step,
+    so this exercises ``run_family_exploration`` without running any EM: the
+    autouse fixture would turn an E-step into a loud failure, and it is never
+    reached.
+    """
+
+    from family_selection import run_family_exploration
+
+    gates = support_gate(mixed_columns)
+    start = initial_assignment(gates, "bernoulli")
+    empty_graph = np.zeros((mixed_columns.shape[0], mixed_columns.shape[0]))
+
+    with pytest.raises(SelectorStop, match="no relational signal"):
+        run_family_exploration(
+            mixed_columns, empty_graph, k=K, gates=gates,
+            initial_families=start, family_y="bernoulli", L=L,
+            num_iter=1, seed=1)
+
+    complete_graph = np.ones_like(empty_graph)
+    np.fill_diagonal(complete_graph, 0.0)
+    with pytest.raises(SelectorStop, match="no relational signal"):
+        run_family_exploration(
+            mixed_columns, complete_graph, k=K, gates=gates,
+            initial_families=start, family_y="bernoulli", L=L,
+            num_iter=1, seed=1)
