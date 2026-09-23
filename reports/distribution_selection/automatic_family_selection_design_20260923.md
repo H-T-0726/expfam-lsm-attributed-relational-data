@@ -184,7 +184,7 @@ Level 1 に真の選択肢が残るのは「0/1 列の Bernoulli vs Poisson」�
 
 これは KI-018 の構造とそのまま一致する。Issue #33 の
 `mixed_train_raw_poisson − mixed_train_log` は **representation の比較**であり、
-`−0.100274` / 29-30 splits 悪化という結果は held-out 予測スコアで得られている。
+`−0.100274` / **29/30 splits で悪化**という結果は held-out 予測スコアで得られている。
 **「intercept 欠如が原因」「curvature が原因」とは書かない**（KI-018）。
 本設計もこの representation 問題を解決しない。
 
@@ -366,7 +366,7 @@ A を inner engine として candidate assignment `ĉ` を得たのち、
 | 実装の難易度 | 中。per-column の `ψ_lm` 最適化ループと選択ロジックが新規。model class 自体は per-column 版で足りる | 低（単純）だが**配置の列挙が必要** | 中。A ＋ 再 fit の配線 |
 | 計算量 | `O(T · d · |M| · 列 M-step)`。**full fit は 1 回**。列ごとの最適化は `Z` 固定なので安価 | **`|M|^d` 通りの配置を全探索すると爆発**。`d = 15`, `|M| = 2` で 32768 fit。greedy / coordinate に落とすと実質 C になる | `≈ (1〜2) × C_fit` ＋ A の探索コスト |
 | Monte Carlo noise への強さ | **弱い**。`Δ_l` が小さい列で反復ごとに assignment が振動しうる。`q_t` が incumbent family の下で作られるため path dependence（早期固定）も起きる | **強い**。各候補が独立に収束した後で比較する。MC noise は各 fit 内に閉じる | 中。A の振動は残るが、最終報告値は固定 `ĉ` での通常 fit なので再現性が高い |
-| 修士研究としての実現可能性 | 高（計算は軽い）が、振動・path dependence の診断と安定化規則が余分に要る | **`d` が小さい場合のみ**。実データの `d`（Wine 13、Cora 数百）では非現実的 | **高**。既存の実験 harness・registry 規約にそのまま載る |
+| 修士研究としての実現可能性 | 高（計算は軽い）が、振動・path dependence の診断と安定化規則が余分に要る | **`d` が小さい場合のみ**。本 repository の実データ規模の `d` では非現実的 | **高**。既存の実験 harness・registry 規約にそのまま載る |
 | provenance 適合性 | 低〜中。報告する `C_Q` が探索経路に条件づいた量になる | 高 | **高**。最終 artifact が「固定 family での通常 fit」なので既存の runinfo / registry 形式で記録できる |
 
 ### 推奨候補（**採用しない。Human Gate**）
@@ -523,7 +523,39 @@ C_Q(K, c) = D_{K,c} + P_Z(K) + P_θ(K, c)
 
 ---
 
-## 13. Validation
+## 13. Codex / 次セッション向け review checklist
+
+本設計を独立に検証する場合、次の順で確認すれば足りる。**過去 Issue の網羅読みは不要。**
+
+### 一次証拠の再照合（コードを読むだけ）
+
+- [ ] `Q_Z` と `Q_Y` が `c_l` に依存しないこと（`utils_expfam._lnpZ`、`model_expfam.calc_log_likelihood_Y` に `family_x` が現れないこと）。§2.3 の根拠。
+- [ ] `calc_log_likelihood_X` が列ごとの和で書かれていること（`model_dual_expfam.py` L.307–334、per-column 版 L.215–237）。§2.2 の根拠。
+- [ ] Poisson-X の `−log(x!)` が `calc_log_likelihood_X` にはなく `calc_Q_dual_strict` / `calc_Q_dual_strict_exp` にあること。§4 の根拠。
+- [ ] Gaussian-X の `−½ log 2π` が**実装には入っており** docstring と食い違っていること（L.303 vs L.321–323）。
+- [ ] `calc_bic_exp` が `family_x='mixed'` で Gaussian 列数だけ数えること（`eval_utils.py` L.247–250）。§6.2 の根拠。
+- [ ] `objective_consistent_numerics` の `poisson_log_likelihood` が `−log(x!)` を**含まない**こと（L.83–95）。strict 補正との二重計上がないことの確認。
+- [ ] `model_dual_expfam_nb.py` の NB が **Y 側のみ**で、`family_x` は親へ素通しであること（L.63–69）。§3.2 の根拠。
+- [ ] `data_generator_canonical.generate_canonical_data` の `family_x` が**スカラー**であること（L.246–262）。§8.1 の gap。
+
+### 主張の過剰さチェック
+
+- [ ] 「EM 全体が単調に改善する」と書いていないか（§2.4 は固定 `q_t` 下の coordinate ascent までに限定）。
+- [ ] 「intercept 欠如が family 誤選択の原因」と書いていないか（KI-018。§5 は構造的交絡の指摘までに限定）。
+- [ ] 「per-column / family 自動選択が一般に優れる」と書いていないか（KI-016 H 項）。
+- [ ] 方式 C を「採用した」と書いていないか（推奨候補まで。HG-1）。
+- [ ] 実験条件を freeze していないか（§8.6）。
+- [ ] lineage E（experimental / consistent）を本文採用可のように書いていないか（root `CLAUDE.md` §3、U9）。
+- [ ] 異なる系列の数値を並べていないか（KI-002。本文書は数値比較を一切していない）。
+
+### #72 側（PR #76）と合わせて見るとき
+
+- [ ] `C_Q(K, c)` の `P_Z` が `c` 非依存、`P_θ` が `K` 部分と `c` 部分に加法分離すること（§6.3）。二重計上がないことの根拠。
+- [ ] `Q_X` を family score に使うとき、Gaussian-X の `Σ_X` が `F` より 1 M-step 古い件（U7）が未測定のまま残っていること。
+
+---
+
+## 14. Validation
 
 | 項目 | 結果 |
 |---|---|
