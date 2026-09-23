@@ -59,7 +59,7 @@ _HERE = Path(__file__).parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
-from em_runner import run_em_experimental                     # noqa: E402
+from em_runner import EMFailFast, run_em_experimental         # noqa: E402
 from model_dual_expfam_consistent import (                    # noqa: E402
     DualExpFamLSMPerColumnConsistent,
 )
@@ -576,6 +576,59 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
 
 
 # --------------------------------------------------------------------------
+# execution-integrity gate: did the candidate scores get optimised at all?
+# --------------------------------------------------------------------------
+
+PILOT_GATE_PASS = "READY_FOR_PILOT"
+PILOT_GATE_BLOCKED = "BLOCKED_FOR_PILOT"
+
+
+def pilot_convergence_gate(
+    selection_trace: Sequence[dict[str, Any]],
+    candidate_rows: Sequence[dict[str, Any]] = (),
+) -> dict[str, Any]:
+    """Block the pilot if any ambiguous column's candidates failed to converge.
+
+    This is NOT an accuracy threshold.  A margin whose loser stopped before
+    reaching its own optimum is not a comparison of two fitted families, it is
+    a comparison of one fitted family against an unfinished one -- so the
+    frozen score was never actually evaluated.  That is an execution-integrity
+    condition, and it is checked before the pilot rather than argued about
+    afterwards.
+
+    When this blocks, the response is to stop and hand the finding to a human.
+    Raising the optimiser budget, changing the seed or the initialisation, or
+    rerunning would all be tuning the protocol against an observed result.
+    """
+
+    offending = [
+        {
+            "iteration": row.get("iteration"),
+            "column": row.get("column"),
+            "selected_family": row.get("selected_family"),
+            "margin_neg2": row.get("margin_neg2"),
+        }
+        for row in selection_trace
+        if row.get("all_candidates_converged") is False
+    ]
+    non_converged_rows = [row for row in candidate_rows
+                          if row.get("optimiser_converged") is False]
+    blocked = bool(offending) or bool(non_converged_rows)
+    return {
+        "status": PILOT_GATE_BLOCKED if blocked else PILOT_GATE_PASS,
+        "non_converged_selection_rows": offending,
+        "non_converged_candidate_count": len(non_converged_rows),
+        "checked_selection_rows": len(selection_trace),
+        "remedy_forbidden": [
+            "raise the optimiser budget",
+            "change the seed or the initialisation",
+            "change the optimiser",
+            "rerun",
+        ],
+    }
+
+
+# --------------------------------------------------------------------------
 # A4b. the hybrid driver: exploration, then a fresh fixed-family refit
 # --------------------------------------------------------------------------
 
@@ -756,11 +809,23 @@ def run_hybrid_family_selection(
         X, Y, k=k, gates=gates, initial_families=start, family_y=family_y,
         L=L, num_iter=exploration_num_iter, seed=search_seed, verbose=verbose)
 
+    # failure_policy='fail_fast' is required here, not optional. The legacy
+    # policy repairs a non-finite E-step by substituting Z_prev and then
+    # retries on a DIFFERENT seed, so a repaired refit would report as clean
+    # and the pilot's "retry = replacement = seed rescue = 0" condition would
+    # be unverifiable from the artifact.
     refit = run_em_experimental(
         X, Y, family_x="mixed", family_y=family_y, k=k, L=L,
         num_iter=refit_num_iter, seed=refit_seed,
         family_x_list=exploration.selected_assignment,
-        compute_strict_Q=True, numerics_mode="consistent", verbose=verbose)
+        compute_strict_Q=True, numerics_mode="consistent",
+        failure_policy="fail_fast", verbose=verbose)
+    _require(refit.get("failure_policy") == "fail_fast",
+             "the reported refit did not run under failure_policy='fail_fast'")
+    for counter in ("retry_count", "replacement_count", "seed_rescue_count"):
+        _require(int(refit.get(counter, -1)) == 0,
+                 f"refit reported {counter}={refit.get(counter)}; the pilot "
+                 f"requires it to be 0")
 
     n_gaussian = sum(1 for f in exploration.selected_assignment if f == "gaussian")
     return {
@@ -777,6 +842,17 @@ def run_hybrid_family_selection(
         "ambiguous_start": ambiguous_start,
         "search_seed": int(search_seed),
         "refit_seed": int(refit_seed),
+        "integrity": {
+            "failure_policy": refit.get("failure_policy"),
+            "retry_count": int(refit.get("retry_count", 0)),
+            "replacement_count": int(refit.get("replacement_count", 0)),
+            "seed_rescue_count": int(refit.get("seed_rescue_count", 0)),
+            "exploration_retry_count": 0,
+            "exploration_replacement_count": 0,
+            "exploration_seed_rescue_count": 0,
+        },
+        "convergence_gate": pilot_convergence_gate(
+            exploration.selection_trace, exploration.final_candidate_rows),
     }
 
 
@@ -796,4 +872,8 @@ __all__ = [
     "select_from_records",
     "run_family_exploration",
     "run_hybrid_family_selection",
+    "pilot_convergence_gate",
+    "PILOT_GATE_PASS",
+    "PILOT_GATE_BLOCKED",
+    "EMFailFast",
 ]

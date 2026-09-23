@@ -1,0 +1,518 @@
+"""Artifact-only auditor for the Phase 9C family-selection runs (Issue #74).
+
+This module deliberately does NOT import the runner, the selector, the model
+classes or the generator.  It reads a finished run directory and checks it
+against its OWN literal copy of the frozen Issue #74 conditions.  The
+duplication is the point: an auditor that imports the runner's constants can
+only confirm that the runner agrees with itself, and would pass unchanged if
+someone edited those constants after seeing a result.
+
+What it checks
+--------------
+* every required artifact is present
+* ``protocol.json`` matches the frozen conditions field by field -- n, d, K,
+  the family pattern, L, both num_iter values, every seed, and both starts
+* the number of EM executions is exactly what the protocol implies
+* every table has exactly the rows it should: no missing pair, no duplicate
+* every numeric cell is finite
+* ``retry_count``, ``replacement_count`` and ``seed_rescue_count`` are 0 and
+  the refit ran under ``failure_policy='fail_fast'``
+* the candidate-convergence gate is recorded, and its verdict is reported
+* the claim-boundary fields are present in ``summary.json``
+
+It writes ``audit_report.json`` into the run directory and exits non-zero when
+the verdict is FAIL.  A FAIL is a finding to hand to a human, not something to
+fix by rerunning.
+
+Usage::
+
+    python audit_family_selection_pilot.py --run-dir <directory>
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+from pathlib import Path
+from typing import Any, Iterable, Sequence
+
+AUDITOR_VERSION = "family-selection-pilot-auditor-v1"
+
+REQUIRED_ARTIFACTS = (
+    "protocol.json",
+    "runinfo.json",
+    "generator_provenance.csv",
+    "support_gate.csv",
+    "family_scores.csv",
+    "selection_trace.csv",
+    "fit_results.csv",
+    "summary.json",
+)
+
+# --------------------------------------------------------------------------
+# The frozen expectations, transcribed independently from Issue #74 sections
+# C1 and C2.  Do not replace these with an import.
+# --------------------------------------------------------------------------
+
+EXPECTED: dict[str, dict[str, Any]] = {
+    "smoke": {
+        "n": 40,
+        "d": 6,
+        "k_true": 3,
+        "k_fit": 3,
+        "family_x_list": ["gaussian", "gaussian", "bernoulli",
+                          "bernoulli", "poisson", "poisson"],
+        "family_y": "bernoulli",
+        "sigma_x_var": 1.0,
+        "w0": -1.0,
+        "w": 1.0,
+        "f_scale": 1.0,                      # f_scale_for_row_norm(0.5, 6, 3)
+        "L": 5,
+        "refit_num_iter": 8,
+        "exploration_num_iter": 8,
+        "replicates": [
+            {"label": "rep1", "data_seed": 941001,
+             "search_seed": 942001, "refit_seed": 943001},
+        ],
+        "expected_em_executions": 4,
+    },
+    "pilot": {
+        "n": 75,
+        "d": 12,
+        "k_true": 3,
+        "k_fit": 3,
+        "family_x_list": ["gaussian"] * 3 + ["bernoulli"] * 6 + ["poisson"] * 3,
+        "family_y": "bernoulli",
+        "sigma_x_var": 1.0,
+        "w0": -1.0,
+        "w": 1.0,
+        "f_scale": math.sqrt(2.0),           # f_scale_for_row_norm(0.5, 12, 3)
+        "L": 5,
+        "refit_num_iter": 8,
+        "exploration_num_iter": 8,
+        "replicates": [
+            {"label": "rep1", "data_seed": 951001,
+             "search_seed": 952001, "refit_seed": 953001},
+            {"label": "rep2", "data_seed": 951002,
+             "search_seed": 952002, "refit_seed": 953002},
+            {"label": "rep3", "data_seed": 951003,
+             "search_seed": 952003, "refit_seed": 953003},
+        ],
+        "expected_em_executions": 12,
+    },
+}
+
+EXPECTED_STARTS = [
+    {"label": "start_B", "ambiguous_start": "bernoulli"},
+    {"label": "start_P", "ambiguous_start": "poisson"},
+]
+
+# Total across both stages. Issue #74 caps the whole task at 16.
+MAX_TOTAL_EM_EXECUTIONS = 16
+
+REQUIRED_CLAIM_BOUNDARY_KEYS = (
+    "score_decides_only", "gate_decides", "do_not_report", "lineage")
+
+
+class Finding(dict):
+    """One audit finding. A dict so it serialises without ceremony."""
+
+    def __init__(self, severity: str, check: str, message: str) -> None:
+        super().__init__(severity=severity, check=check, message=message)
+
+
+def _read_json(path: Path) -> Any:
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _read_csv(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _as_float(value: str) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _truthy(value: str) -> bool:
+    return str(value).strip().lower() in {"true", "1", "yes"}
+
+
+def _check_protocol(protocol: dict[str, Any], expected: dict[str, Any],
+                    findings: list[Finding]) -> None:
+    scalar_fields = ("n", "d", "k_true", "k_fit", "family_y", "L",
+                     "refit_num_iter", "exploration_num_iter")
+    for field in scalar_fields:
+        actual = protocol.get(field)
+        if actual != expected[field]:
+            findings.append(Finding(
+                "BLOCKER", "protocol",
+                f"{field}: artifact has {actual!r}, frozen protocol requires "
+                f"{expected[field]!r}"))
+
+    for field in ("sigma_x_var", "w0", "w", "f_scale"):
+        actual = protocol.get(field)
+        if actual is None or not math.isclose(float(actual), expected[field],
+                                              rel_tol=1e-12, abs_tol=1e-12):
+            findings.append(Finding(
+                "BLOCKER", "protocol",
+                f"{field}: artifact has {actual!r}, frozen protocol requires "
+                f"{expected[field]!r}"))
+
+    if list(protocol.get("family_x_list", [])) != expected["family_x_list"]:
+        findings.append(Finding(
+            "BLOCKER", "protocol",
+            f"family_x_list: artifact has {protocol.get('family_x_list')!r}, "
+            f"frozen protocol requires {expected['family_x_list']!r}"))
+
+    actual_reps = protocol.get("replicates", [])
+    if len(actual_reps) != len(expected["replicates"]):
+        findings.append(Finding(
+            "BLOCKER", "protocol",
+            f"replicate count: artifact has {len(actual_reps)}, frozen "
+            f"protocol requires {len(expected['replicates'])}"))
+    else:
+        for actual, wanted in zip(actual_reps, expected["replicates"]):
+            for key in ("label", "data_seed", "search_seed", "refit_seed"):
+                if actual.get(key) != wanted[key]:
+                    findings.append(Finding(
+                        "BLOCKER", "protocol",
+                        f"replicate {wanted['label']} {key}: artifact has "
+                        f"{actual.get(key)!r}, frozen protocol requires "
+                        f"{wanted[key]!r}"))
+
+    if protocol.get("starts") != EXPECTED_STARTS:
+        findings.append(Finding(
+            "BLOCKER", "protocol",
+            f"starts: artifact has {protocol.get('starts')!r}, frozen "
+            f"protocol requires {EXPECTED_STARTS!r}"))
+
+    if protocol.get("expected_em_executions") != expected["expected_em_executions"]:
+        findings.append(Finding(
+            "BLOCKER", "protocol",
+            f"expected_em_executions: artifact has "
+            f"{protocol.get('expected_em_executions')!r}, frozen protocol "
+            f"requires {expected['expected_em_executions']!r}"))
+
+
+def _check_runinfo(runinfo: dict[str, Any], expected: dict[str, Any],
+                   findings: list[Finding]) -> None:
+    executions = runinfo.get("em_executions")
+    if executions != expected["expected_em_executions"]:
+        findings.append(Finding(
+            "BLOCKER", "runinfo",
+            f"em_executions: recorded {executions!r}, protocol implies "
+            f"{expected['expected_em_executions']!r}"))
+    if isinstance(executions, int) and executions > MAX_TOTAL_EM_EXECUTIONS:
+        findings.append(Finding(
+            "BLOCKER", "runinfo",
+            f"em_executions {executions} exceeds the task cap of "
+            f"{MAX_TOTAL_EM_EXECUTIONS}"))
+    if runinfo.get("failure_policy") != "fail_fast":
+        findings.append(Finding(
+            "BLOCKER", "runinfo",
+            f"failure_policy: recorded {runinfo.get('failure_policy')!r}, "
+            f"the protocol requires 'fail_fast'"))
+    if runinfo.get("numerics_mode") != "consistent":
+        findings.append(Finding(
+            "BLOCKER", "runinfo",
+            f"numerics_mode: recorded {runinfo.get('numerics_mode')!r}, "
+            f"the protocol requires 'consistent'"))
+    for field in ("git_sha", "python_version", "started_utc", "finished_utc"):
+        if not runinfo.get(field):
+            findings.append(Finding(
+                "HIGH", "runinfo", f"{field} is missing or empty"))
+    if runinfo.get("git_dirty"):
+        findings.append(Finding(
+            "HIGH", "runinfo",
+            "the working tree was dirty at run time; the recorded git_sha "
+            "does not fully describe the code that ran"))
+
+
+def _expected_pairs(expected: dict[str, Any]) -> list[tuple[str, str]]:
+    return [(rep["label"], start["label"])
+            for rep in expected["replicates"] for start in EXPECTED_STARTS]
+
+
+def _check_coverage(rows: Sequence[dict[str, str]], keys: Sequence[str],
+                    wanted: Iterable[tuple], table: str,
+                    findings: list[Finding]) -> None:
+    seen: dict[tuple, int] = {}
+    for row in rows:
+        key = tuple(row.get(k, "") for k in keys)
+        seen[key] = seen.get(key, 0) + 1
+    wanted_set = set(wanted)
+    missing = sorted(wanted_set - set(seen))
+    if missing:
+        findings.append(Finding(
+            "BLOCKER", table, f"missing rows for {missing}"))
+    duplicates = sorted(key for key, count in seen.items() if count > 1)
+    if duplicates:
+        findings.append(Finding(
+            "BLOCKER", table, f"duplicate rows for {duplicates}"))
+    unexpected = sorted(set(seen) - wanted_set)
+    if unexpected:
+        findings.append(Finding(
+            "HIGH", table, f"unexpected rows for {unexpected}"))
+
+
+def _check_finite(rows: Sequence[dict[str, str]], table: str,
+                  columns: Sequence[str], findings: list[Finding]) -> None:
+    for index, row in enumerate(rows):
+        for column in columns:
+            value = _as_float(row.get(column, ""))
+            if value is None:
+                continue
+            if not math.isfinite(value):
+                findings.append(Finding(
+                    "BLOCKER", table,
+                    f"row {index}: {column} is not finite ({row.get(column)!r})"))
+
+
+def _check_gate_columns(gate_rows: Sequence[dict[str, str]],
+                        expected: dict[str, Any],
+                        findings: list[Finding]) -> set[tuple[str, str, str]]:
+    """Verify the gate verdicts and return the score-decided (rep, start, col)."""
+
+    ambiguous: set[tuple[str, str, str]] = set()
+    for row in gate_rows:
+        decided_by = row.get("decided_by", "")
+        candidates = row.get("candidates", "").split("|")
+        true_family = row.get("family_x_true", "")
+        if decided_by not in ("gate", "score"):
+            findings.append(Finding(
+                "BLOCKER", "support_gate",
+                f"column {row.get('column')!r}: decided_by is "
+                f"{decided_by!r}, expected 'gate' or 'score'"))
+            continue
+        if decided_by == "score":
+            ambiguous.add((row.get("replicate", ""), row.get("start_label", ""),
+                           row.get("column", "")))
+            if candidates != ["bernoulli", "poisson"]:
+                findings.append(Finding(
+                    "BLOCKER", "support_gate",
+                    f"column {row.get('column')!r}: a score-decided column "
+                    f"must offer exactly bernoulli|poisson, got "
+                    f"{row.get('candidates')!r}"))
+        else:
+            if len(candidates) != 1:
+                findings.append(Finding(
+                    "BLOCKER", "support_gate",
+                    f"column {row.get('column')!r}: a gate-decided column "
+                    f"must offer exactly one candidate, got "
+                    f"{row.get('candidates')!r}"))
+            # A Gaussian truth can never be gated to a discrete family.
+            if true_family == "gaussian" and candidates != ["gaussian"]:
+                findings.append(Finding(
+                    "BLOCKER", "support_gate",
+                    f"column {row.get('column')!r}: a truly Gaussian column "
+                    f"was gated to {candidates!r}"))
+    return ambiguous
+
+
+def _check_fits(fit_rows: Sequence[dict[str, str]], findings: list[Finding]
+                ) -> None:
+    for row in fit_rows:
+        label = f"{row.get('replicate')}/{row.get('start_label')}"
+        if row.get("failure_policy") != "fail_fast":
+            findings.append(Finding(
+                "BLOCKER", "fit_results",
+                f"{label}: failure_policy is {row.get('failure_policy')!r}, "
+                f"the protocol requires 'fail_fast'"))
+        for counter in ("retry_count", "replacement_count", "seed_rescue_count"):
+            value = _as_float(row.get(counter, ""))
+            if value is None or value != 0.0:
+                findings.append(Finding(
+                    "BLOCKER", "fit_results",
+                    f"{label}: {counter} is {row.get(counter)!r}, the "
+                    f"protocol requires 0"))
+        if _truthy(row.get("nan_occurred", "")):
+            findings.append(Finding(
+                "BLOCKER", "fit_results",
+                f"{label}: nan_occurred is true; under fail-fast the run "
+                f"should have raised instead of finishing"))
+        if _truthy(row.get("q_bic_failed", "")):
+            findings.append(Finding(
+                "HIGH", "fit_results",
+                f"{label}: the Q/BIC computation failed"))
+
+
+def audit(run_dir: Path) -> dict[str, Any]:
+    """Audit a finished run directory and return the report."""
+
+    findings: list[Finding] = []
+
+    missing = [name for name in REQUIRED_ARTIFACTS
+               if not (run_dir / name).is_file()]
+    if missing:
+        findings.append(Finding(
+            "BLOCKER", "artifacts", f"missing required artifacts: {missing}"))
+        return _finish(run_dir, None, findings)
+
+    protocol = _read_json(run_dir / "protocol.json")
+    runinfo = _read_json(run_dir / "runinfo.json")
+    summary = _read_json(run_dir / "summary.json")
+
+    stage = protocol.get("stage")
+    if stage not in EXPECTED:
+        findings.append(Finding(
+            "BLOCKER", "protocol",
+            f"stage is {stage!r}; this auditor knows {sorted(EXPECTED)}"))
+        return _finish(run_dir, stage, findings)
+    expected = EXPECTED[stage]
+
+    _check_protocol(protocol, expected, findings)
+    _check_runinfo(runinfo, expected, findings)
+
+    provenance = _read_csv(run_dir / "generator_provenance.csv")
+    gate_rows = _read_csv(run_dir / "support_gate.csv")
+    score_rows = _read_csv(run_dir / "family_scores.csv")
+    trace_rows = _read_csv(run_dir / "selection_trace.csv")
+    fit_rows = _read_csv(run_dir / "fit_results.csv")
+
+    replicate_labels = [rep["label"] for rep in expected["replicates"]]
+    pairs = _expected_pairs(expected)
+
+    _check_coverage(
+        provenance, ("replicate", "column"),
+        [(label, str(column)) for label in replicate_labels
+         for column in range(expected["d"])],
+        "generator_provenance", findings)
+    _check_coverage(
+        gate_rows, ("replicate", "start_label", "column"),
+        [(rep, start, str(column)) for rep, start in pairs
+         for column in range(expected["d"])],
+        "support_gate", findings)
+    _check_coverage(
+        fit_rows, ("replicate", "start_label"), pairs, "fit_results", findings)
+
+    ambiguous = _check_gate_columns(gate_rows, expected, findings)
+
+    # Every score row must belong to a score-decided column, and every
+    # score-decided column must have been scored on both candidates.
+    score_keys = {(row.get("replicate", ""), row.get("start_label", ""),
+                   row.get("column", "")) for row in score_rows}
+    for key in sorted(score_keys - ambiguous):
+        findings.append(Finding(
+            "BLOCKER", "family_scores",
+            f"{key}: a score row exists for a column the gate decided; "
+            f"gate-decided columns must never be scored"))
+    for key in sorted(ambiguous - score_keys):
+        findings.append(Finding(
+            "BLOCKER", "family_scores",
+            f"{key}: a score-decided column has no candidate scores"))
+    per_column_candidates: dict[tuple, set[str]] = {}
+    for row in score_rows:
+        key = (row.get("replicate", ""), row.get("start_label", ""),
+               row.get("column", ""))
+        per_column_candidates.setdefault(key, set()).add(
+            row.get("candidate_family", ""))
+    for key, families in sorted(per_column_candidates.items()):
+        if families != {"bernoulli", "poisson"}:
+            findings.append(Finding(
+                "BLOCKER", "family_scores",
+                f"{key}: scored candidates are {sorted(families)}, expected "
+                f"bernoulli and poisson"))
+
+    for key in sorted({(row.get("replicate", ""), row.get("start_label", ""),
+                        row.get("column", "")) for row in trace_rows} - ambiguous):
+        findings.append(Finding(
+            "BLOCKER", "selection_trace",
+            f"{key}: a trace row exists for a column the gate decided"))
+    for row in trace_rows:
+        iteration = _as_float(row.get("iteration", ""))
+        if iteration is None or not (1 <= iteration <= expected["exploration_num_iter"]):
+            findings.append(Finding(
+                "BLOCKER", "selection_trace",
+                f"iteration {row.get('iteration')!r} is outside "
+                f"1..{expected['exploration_num_iter']}"))
+
+    _check_finite(score_rows, "family_scores",
+                  ("score", "neg2_score", "loading_norm"), findings)
+    _check_finite(trace_rows, "selection_trace",
+                  ("margin_neg2", "score_bernoulli", "score_poisson"), findings)
+    _check_finite(fit_rows, "fit_results", ("Q_strict", "bic"), findings)
+    _check_fits(fit_rows, findings)
+
+    # Candidate-convergence gate: an execution-integrity condition, not an
+    # accuracy threshold.  Recomputed here from the artifact rather than
+    # trusted from summary.json.
+    non_converged = [row for row in score_rows
+                     if row.get("optimiser_converged", "") != ""
+                     and not _truthy(row.get("optimiser_converged", ""))]
+    recomputed_gate = "BLOCKED_FOR_PILOT" if non_converged else "READY_FOR_PILOT"
+    reported_gate = (summary.get("convergence_gate", {}) or {}).get("status")
+    if reported_gate != recomputed_gate:
+        findings.append(Finding(
+            "BLOCKER", "convergence_gate",
+            f"summary.json reports {reported_gate!r} but the artifact rows "
+            f"imply {recomputed_gate!r}"))
+
+    claim_boundary = summary.get("claim_boundary", {}) or {}
+    for key in REQUIRED_CLAIM_BOUNDARY_KEYS:
+        if key not in claim_boundary:
+            findings.append(Finding(
+                "HIGH", "summary",
+                f"claim_boundary is missing {key!r}"))
+
+    report = _finish(run_dir, stage, findings)
+    report["convergence_gate"] = recomputed_gate
+    report["non_converged_candidate_rows"] = len(non_converged)
+    report["score_decided_columns"] = len(ambiguous)
+    report["gate_decided_columns"] = len(gate_rows) - len(ambiguous)
+    _write_report(run_dir, report)
+    return report
+
+
+def _finish(run_dir: Path, stage: str | None,
+            findings: Sequence[Finding]) -> dict[str, Any]:
+    blockers = [f for f in findings if f["severity"] == "BLOCKER"]
+    report = {
+        "auditor_version": AUDITOR_VERSION,
+        "run_dir": str(run_dir),
+        "stage": stage,
+        "verdict": "FAIL" if blockers else "PASS",
+        "blocker_count": len(blockers),
+        "finding_count": len(findings),
+        "findings": list(findings),
+        "note": "A FAIL is a finding to hand to a human. Do not rerun, "
+                "reseed, or widen the optimiser budget in response to it.",
+    }
+    if stage is None or blockers:
+        _write_report(run_dir, report)
+    return report
+
+
+def _write_report(run_dir: Path, report: dict[str, Any]) -> None:
+    if not run_dir.is_dir():
+        return
+    with (run_dir / "audit_report.json").open("w", encoding="utf-8") as handle:
+        json.dump(report, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Audit an Issue #74 family-selection run from its artifacts.")
+    parser.add_argument("--run-dir", required=True, type=Path)
+    args = parser.parse_args(argv)
+
+    report = audit(args.run_dir)
+    print(f"verdict={report['verdict']} blockers={report['blocker_count']} "
+          f"findings={report['finding_count']} "
+          f"gate={report.get('convergence_gate', 'n/a')}")
+    for finding in report["findings"]:
+        print(f"  [{finding['severity']}] {finding['check']}: {finding['message']}")
+    return 0 if report["verdict"] == "PASS" else 1
+
+
+if __name__ == "__main__":                                  # pragma: no cover
+    raise SystemExit(main())

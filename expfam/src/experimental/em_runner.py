@@ -34,6 +34,18 @@ from eval_utils import calc_Q_dual_strict_exp, calc_bic_exp   # noqa: E402
 from diagnostics import poisson_clip_diagnostics, validate_xy  # noqa: E402
 
 
+class EMFailFast(RuntimeError):
+    """Raised by ``failure_policy='fail_fast'`` on the first non-finite E-step.
+
+    The legacy policy repairs such an E-step by substituting the previous Z and
+    then, if the attempt still ends dirty, retrying with a halved Newton step
+    AND A DIFFERENT SEED.  That is the right behaviour for the experiments that
+    already depend on it, but a protocol whose integrity condition is
+    "retry = 0, replacement = 0, seed rescue = 0" cannot use it: a repaired run
+    reports as clean.  Opting in to fail-fast makes the failure the result.
+    """
+
+
 def build_model(n, d, k, L, family_x, family_y, nb_r=None,
                 sigma_y=1.0, train_mask=None, family_x_list=None,
                 numerics_mode="legacy"):
@@ -95,6 +107,7 @@ def run_em_experimental(
     mstep_q_diagnostic: bool = False,
     compute_clip_diagnostic: bool = False,
     numerics_mode: str = "legacy",
+    failure_policy: str = "legacy",
 ) -> dict:
     """
     MCEM 実行（NaN ガード + 最大 2 回リトライ、リトライ毎に newton_alpha 半減）。
@@ -116,6 +129,15 @@ def run_em_experimental(
         False のとき診断関数・診断用行列積を実行しない。
         consistent mode は hard clip を使わないため、clip 率を 0 と偽装せず
         status='not_applicable' を返す。
+    failure_policy : 'legacy'（既定）または 'fail_fast'。**既定は従来どおりで、
+        推定アルゴリズム・乱数生成順序・数値結果を一切変更しない。**
+        'fail_fast' は forward-only の明示 opt-in で、次を保証する:
+        最初の非有限 E-step で ``EMFailFast`` を送出する／``Z_prev`` への
+        置換を行わない／retry しない／retry 用の seed を生成しない。
+        返り値の ``retry_count`` / ``replacement_count`` /
+        ``seed_rescue_count`` はこのとき構造的に 0 になる。
+        retry・置換・seed 変更が 0 であること自体を integrity 条件に持つ
+        protocol（Issue #74 の family-selection pilot など）はこれを使う。
     numerics_mode : 'legacy'（既定）または 'consistent'。consistent は
         新規の明示 opt-in で、Bernoulli/Poisson の objective・score・curvature
         を canonical な同一目的関数に揃える。NB は明示的に reject する。
@@ -135,7 +157,14 @@ def run_em_experimental(
                           のリスト。無効時は空リスト（新キー）
     """
     n, d = X.shape
-    max_retries = 2
+    if failure_policy not in ("legacy", "fail_fast"):
+        raise ValueError(
+            "failure_policy must be 'legacy' or 'fail_fast', "
+            f"got {failure_policy!r}")
+    fail_fast = failure_policy == "fail_fast"
+    max_retries = 0 if fail_fast else 2
+    replacement_total = 0
+    retry_count = 0
     t0 = time.perf_counter()
 
     if numerics_mode not in ("legacy", "consistent"):
@@ -153,6 +182,7 @@ def run_em_experimental(
     mstep_q_history = []
 
     for retry in range(max_retries + 1):
+        retry_count = retry
         newton_alpha = 0.5 / (2 ** retry)
 
         rng = np.random.default_rng(seed + retry * 1000)
@@ -217,7 +247,14 @@ def run_em_experimental(
                 Z = Z_new.copy()
 
             if np.any(np.isnan(Z_samples)) or np.any(np.isinf(Z_samples)):
+                if fail_fast:
+                    raise EMFailFast(
+                        f"non-finite E-step at iteration {iteration} "
+                        f"(seed={seed}, k={k}, L={L}); failure_policy="
+                        f"'fail_fast' does not substitute Z_prev, does not "
+                        f"retry and does not change the seed")
                 nan_count += 1
+                replacement_total += 1
                 if verbose:
                     print(f"  [NaN iter={iteration} retry={retry}] Resetting.")
                 Z_samples = np.stack([Z_prev] * L, axis=2)
@@ -342,6 +379,13 @@ def run_em_experimental(
         "model": model,
         "Q_strict": Q_strict, "bic": bic, "num_params": npar,
         "nan_occurred": nan_occurred, "nan_count": nan_count,
+        # Execution-integrity counters (new keys; legacy behaviour unchanged).
+        # seed_rescue_count is the number of attempts that ran on a seed other
+        # than the requested one: the legacy retry uses seed + retry * 1000.
+        "failure_policy": failure_policy,
+        "retry_count": int(retry_count),
+        "replacement_count": int(replacement_total),
+        "seed_rescue_count": int(retry_count),
         "runtime_s": round(time.perf_counter() - t0, 2),
         # ── 新キー（診断・可視化のみ） ──────────────────────────────
         "failure_reason": failure_reason,

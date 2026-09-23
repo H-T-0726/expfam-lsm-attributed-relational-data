@@ -394,8 +394,18 @@ UNTOUCHED_EXPERIMENTAL = (
     "expfam/src/experimental/model_dual_expfam_consistent.py",
     "expfam/src/experimental/objective_consistent_numerics.py",
     "expfam/src/experimental/eval_utils.py",
-    "expfam/src/experimental/em_runner.py",
     "expfam/src/experimental/data_generator_canonical.py",
+)
+
+# The single existing file this branch is allowed to touch, and only in one
+# way: adding the forward-only failure_policy opt-in whose default leaves
+# every existing behaviour unchanged.  A human authorised exactly this in the
+# PR #78 review ("default behavior を変えない forward-only opt-in に限り許可").
+# The allowance is pinned to one path so that any other edit to an existing
+# file still fails this test, and the default is pinned separately by
+# test_failure_policy_defaults_to_legacy in the harness test module.
+AUTHORISED_MODIFICATIONS = (
+    "expfam/src/experimental/em_runner.py",
 )
 
 
@@ -422,6 +432,36 @@ def test_standard_lineage_and_reused_modules_are_unchanged():
     offending = [path for path in changed
                  if path in STANDARD_LINEAGE or path in UNTOUCHED_EXPERIMENTAL]
     assert offending == [], f"this branch must not modify {offending}"
+
+
+def test_only_the_authorised_existing_file_is_modified():
+    """Every other change on this branch must be a NEW file.
+
+    Without this, the em_runner allowance would quietly widen into "existing
+    experimental files may be edited".
+    """
+
+    repo_root = _HERE.parents[2]
+    try:
+        merge_base = subprocess.run(
+            ["git", "merge-base", "HEAD", "origin/main"],
+            cwd=repo_root, capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        diff = subprocess.run(
+            ["git", "diff", "--name-status", "--diff-filter=MDR",
+             merge_base, "HEAD"],
+            cwd=repo_root, capture_output=True, text=True, check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("git is unavailable or origin/main is not fetched here")
+
+    touched = [line.split("	", 1)[1].strip()
+               for line in diff.splitlines() if "	" in line]
+    unexpected = [path for path in touched
+                  if path not in AUTHORISED_MODIFICATIONS]
+    assert unexpected == [], (
+        f"these existing files were modified without authorisation: "
+        f"{unexpected}")
 
 
 # --------------------------------------------------------------------------
