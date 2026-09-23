@@ -57,8 +57,7 @@ _HERE = Path(__file__).parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
-from em_runner import build_model, run_em_experimental        # noqa: E402
-from eval_utils import calc_bic_exp, calc_Q_dual_strict_exp   # noqa: E402
+from em_runner import run_em_experimental                     # noqa: E402
 from model_dual_expfam_consistent import (                    # noqa: E402
     DualExpFamLSMPerColumnConsistent,
 )
@@ -535,7 +534,6 @@ class ExplorationResult:
     final_candidate_rows: list[dict[str, Any]]
     margins: dict[int, float]
     iterations: int
-    nonfinite_events: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -630,9 +628,11 @@ def run_family_exploration(
             print(f"  [exploration iter={iteration}] "
                   f"assignment={model.family_x_list}")
 
+    last_iteration = max((row["iteration"] for row in model.selection_trace),
+                         default=0)
     margins = {row["column"]: row["margin_neg2"]
                for row in model.selection_trace
-               if row["iteration"] == model._iteration}
+               if row["iteration"] == last_iteration}
 
     return ExplorationResult(
         selected_assignment=list(model.family_x_list),
@@ -652,6 +652,9 @@ def run_family_exploration(
                      "beta1": ADAM_BETA1, "beta2": ADAM_BETA2,
                      "eps": ADAM_EPS, "tol": ADAM_TOL},
             "tie_rule": list(CANDIDATE_PRIORITY),
+            # There is no retry path to count: a non-finite E-step raises.
+            "retry_policy": "fail_fast_no_retry",
+            "last_selection_iteration": int(last_iteration),
         },
     )
 
@@ -728,7 +731,4 @@ __all__ = [
     "select_from_records",
     "run_family_exploration",
     "run_hybrid_family_selection",
-    "build_model",
-    "calc_bic_exp",
-    "calc_Q_dual_strict_exp",
 ]
