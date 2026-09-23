@@ -342,6 +342,7 @@ def optimise_column_loading(
     beta2: float = ADAM_BETA2,
     eps: float = ADAM_EPS,
     tol: float = ADAM_TOL,
+    diagnostics: dict[str, Any] | None = None,
 ) -> tuple[np.ndarray, float | None, int, bool]:
     """Optimise ``f_l`` for ONE candidate family on FIXED posterior samples.
 
@@ -362,6 +363,14 @@ def optimise_column_loading(
     count the candidates that used the whole budget, and a margin backed by a
     non-converged challenger should not be read as a confident decision.
 
+    ``diagnostics`` is an optional dict filled in with per-step quantities --
+    gradient and step infinity norms, and the objective before and after each
+    step.  It is a RECORDING channel only: nothing it captures feeds back into
+    the update, and with it omitted (the default) not a single extra floating
+    point operation enters the numerical path.  A test pins that the returned
+    values are bitwise identical with and without it.  It exists so that the
+    optimiser can be diagnosed without the diagnosis changing what it does.
+
     Returns ``(loading, sigma_sq, n_iter, converged)``; ``sigma_sq`` is the
     profiled Gaussian variance, and ``None`` for the other families.
     """
@@ -376,6 +385,10 @@ def optimise_column_loading(
     second_moment = np.zeros_like(loading)
     used_iter = 0
     converged = False
+    steps: list[dict[str, float]] | None = None
+    if diagnostics is not None:
+        steps = []
+        diagnostics["steps"] = steps
 
     for step in range(1, max_iter + 1):
         used_iter = step
@@ -398,6 +411,19 @@ def optimise_column_loading(
         _require(bool(np.all(np.isfinite(proposal))),
                  f"candidate optimiser produced a non-finite loading for {family!r}")
         converged = bool(np.max(np.abs(proposal - loading)) < tol)
+        if steps is not None:
+            objective_before = column_log_likelihood(
+                x_column, Z_samples, loading, family, sigma_sq=sigma_sq)
+            objective_after = column_log_likelihood(
+                x_column, Z_samples, proposal, family, sigma_sq=sigma_sq)
+            steps.append({
+                "step": step,
+                "gradient_inf": float(np.max(np.abs(gradient))),
+                "step_inf": float(np.max(np.abs(proposal - loading))),
+                "objective_before": objective_before,
+                "objective_after": objective_after,
+                "objective_change": objective_after - objective_before,
+            })
         loading = proposal
         if converged:
             break
@@ -408,6 +434,15 @@ def optimise_column_loading(
             _column_eta(Z_samples, loading)
         sigma_sq = _checked_variance(float(np.mean(residual ** 2)),
                                      source="optimise_column_loading")
+    if diagnostics is not None:
+        diagnostics["final_gradient_inf"] = float(np.max(np.abs(
+            _column_gradient(x_column, Z_samples, loading, family, sigma_sq))))
+        diagnostics["final_step_inf"] = (steps[-1]["step_inf"] if steps
+                                         else float("nan"))
+        diagnostics["last_objective_change"] = (steps[-1]["objective_change"]
+                                                if steps else float("nan"))
+        diagnostics["n_iter"] = used_iter
+        diagnostics["converged"] = converged
     return loading, sigma_sq, used_iter, converged
 
 

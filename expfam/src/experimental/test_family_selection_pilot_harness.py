@@ -1040,3 +1040,80 @@ def test_worktree_state_is_captured_before_the_run_writes_anything(
 
     report = auditor.audit(out)
     assert report["progress_eligible"] is True
+
+
+# --------------------------------------------------------------------------
+# 10. the composite pilot gate
+# --------------------------------------------------------------------------
+
+def test_audit_pass_plus_blocked_convergence_is_not_pilot_eligible(
+        tmp_path, stub_hybrid, approved):
+    """A clean artifact set does not mean the frozen score was optimised.
+
+    The artifact audit and the convergence gate answer different questions,
+    and the next EM stage needs both. Automation reads
+    pilot_progress_eligible, not progress_eligible.
+    """
+
+    stub_hybrid(converged=False)
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    report = auditor.audit(out)
+    assert report["verdict"] == "PASS"
+    assert report["progress_eligible"] is True
+    assert report["convergence_gate"] == PILOT_GATE_BLOCKED
+    assert report["pilot_progress_eligible"] is False
+    assert auditor.main(["--run-dir", str(out)]) == 1
+
+
+def test_audit_pass_plus_ready_convergence_is_pilot_eligible(
+        tmp_path, stub_hybrid, approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    report = auditor.audit(out)
+    assert report["verdict"] == "PASS"
+    assert report["progress_eligible"] is True
+    assert report["convergence_gate"] == PILOT_GATE_PASS
+    assert report["pilot_progress_eligible"] is True
+    assert auditor.main(["--run-dir", str(out)]) == 0
+
+
+def test_a_high_finding_also_blocks_the_composite_gate(tmp_path, stub_hybrid,
+                                                       approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    path = out / "runinfo.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["git_dirty"] = True
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = auditor.audit(out)
+    assert report["high_count"] >= 1
+    assert report["progress_eligible"] is False
+    assert report["pilot_progress_eligible"] is False
+
+
+def test_a_failed_run_is_not_pilot_eligible(tmp_path, stub_hybrid, approved):
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    report = auditor.audit(out)
+    assert report["run_status"] == "FAILED"
+    assert report["pilot_progress_eligible"] is False
+
+
+def test_the_composite_rule_is_stated_in_the_report(tmp_path, stub_hybrid,
+                                                    approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+    report = auditor.audit(out)
+    assert report["pilot_progression_rule"] == (
+        "progress_eligible and convergence_gate == READY_FOR_PILOT")

@@ -622,6 +622,14 @@ def audit(run_dir: Path) -> dict[str, Any]:
 
     report = _finish(run_dir, stage, findings, run_status=run_status)
     report["convergence_gate"] = recomputed_gate
+    # The composite gate. An artifact audit says the run is clean evidence;
+    # the convergence gate says the frozen score was actually optimised.  The
+    # next EM stage needs BOTH, and automation must read this field rather
+    # than progress_eligible, which answers only the first question.
+    report["pilot_progress_eligible"] = bool(
+        report["progress_eligible"] and recomputed_gate == "READY_FOR_PILOT")
+    report["pilot_progression_rule"] = ("progress_eligible and "
+                                        "convergence_gate == READY_FOR_PILOT")
     report["attempted_em_executions"] = attempted
     report["non_converged_candidate_rows"] = len(non_converged)
     report["score_decided_columns"] = len(ambiguous)
@@ -662,6 +670,11 @@ def _finish(run_dir: Path, stage: str | None,
         "finding_count": len(findings),
         "progress_eligible": progress_eligible,
         "stage_progression": "ALLOWED" if progress_eligible else "BLOCKED",
+        # Overwritten for a completed run once the convergence gate is known;
+        # a run that never got that far can never be eligible.
+        "pilot_progress_eligible": False,
+        "pilot_progression_rule": "progress_eligible and "
+                                  "convergence_gate == READY_FOR_PILOT",
         "progression_rule": "blocker_count == 0 and high_count == 0 "
                             "and run_status == SUCCESS",
         "findings": list(findings),
@@ -693,12 +706,14 @@ def main(argv: Sequence[str] | None = None) -> int:
           f"blockers={report['blocker_count']} high={report['high_count']} "
           f"medium={report['medium_count']} "
           f"progression={report['stage_progression']} "
-          f"gate={report.get('convergence_gate', 'n/a')}")
+          f"gate={report.get('convergence_gate', 'n/a')} "
+          f"pilot_progress_eligible={report['pilot_progress_eligible']}")
     for finding in report["findings"]:
         print(f"  [{finding['severity']}] {finding['check']}: {finding['message']}")
-    # Exit 0 only when the next stage may proceed: a HIGH finding blocks it
-    # even though the verdict itself is PASS.
-    return 0 if report["progress_eligible"] else 1
+    # Exit 0 only when the NEXT EM STAGE may proceed. A HIGH finding blocks it
+    # even though the verdict itself is PASS, and so does a blocked
+    # convergence gate even though the artifacts are clean.
+    return 0 if report["pilot_progress_eligible"] else 1
 
 
 if __name__ == "__main__":                                  # pragma: no cover
