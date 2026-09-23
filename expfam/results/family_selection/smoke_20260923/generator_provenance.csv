@@ -1,0 +1,7 @@
+replicate,data_seed,column,family_x_true,generator_version,f_row_norm_sq,sigma_x_var,column_mean,column_min,column_max,binary_valued,ambiguous_true_poisson
+rep1,941001,0,gaussian,canonical-clean-mixed-v1,0.7652897335381645,1.0,0.05472143637987299,-2.8885501537084908,3.4466639534770014,False,False
+rep1,941001,1,gaussian,canonical-clean-mixed-v1,0.738954822583522,1.0,0.1498454575125332,-2.8008438260779247,3.8819315792921394,False,False
+rep1,941001,2,bernoulli,canonical-clean-mixed-v1,0.24196826461849688,,0.575,0.0,1.0,True,False
+rep1,941001,3,bernoulli,canonical-clean-mixed-v1,0.08343040566905184,,0.55,0.0,1.0,True,False
+rep1,941001,4,poisson,canonical-clean-mixed-v1,0.7459078326230867,,1.6,0.0,10.0,False,False
+rep1,941001,5,poisson,canonical-clean-mixed-v1,0.4244489409676789,,1.075,0.0,6.0,False,False

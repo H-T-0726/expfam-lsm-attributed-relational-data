@@ -1,0 +1,9 @@
+replicate,start_label,column,candidate_family,score,neg2_score,sigma_sq,optimiser_iterations,optimiser_converged,loading_norm,family_x_true,selected_family
+rep1,start_B,2,bernoulli,-27.095320060240574,54.19064012048115,,50,False,0.33524023247616225,bernoulli,bernoulli
+rep1,start_B,2,poisson,-39.223117782954105,78.44623556590821,,50,False,0.20602522004888166,bernoulli,bernoulli
+rep1,start_B,3,bernoulli,-27.378239444294213,54.756478888588425,,50,False,0.20982435916530143,bernoulli,bernoulli
+rep1,start_B,3,poisson,-39.33962471704882,78.67924943409764,,50,False,0.18531170303395178,bernoulli,bernoulli
+rep1,start_P,2,bernoulli,-27.07151525609256,54.14303051218512,,50,False,0.32833477563254493,bernoulli,bernoulli
+rep1,start_P,2,poisson,-39.447688082251474,78.89537616450295,,50,False,0.1788828829903236,bernoulli,bernoulli
+rep1,start_P,3,bernoulli,-27.269316767736303,54.538633535472606,,50,False,0.30994101123607043,bernoulli,bernoulli
+rep1,start_P,3,poisson,-39.431247343153444,78.86249468630689,,50,False,0.1956582687172876,bernoulli,bernoulli

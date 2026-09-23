@@ -1,0 +1,289 @@
+{
+  "stage": "smoke",
+  "runner_version": "family-selection-pilot-runner-v2",
+  "convergence_gate": {
+    "status": "BLOCKED_FOR_PILOT",
+    "non_converged_selection_rows": [
+      {
+        "iteration": 1,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.048701865672705
+      },
+      {
+        "iteration": 1,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.319715725935083
+      },
+      {
+        "iteration": 2,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.82433026296838
+      },
+      {
+        "iteration": 2,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.707183622055865
+      },
+      {
+        "iteration": 3,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.36781840194486
+      },
+      {
+        "iteration": 3,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.275826540278153
+      },
+      {
+        "iteration": 4,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.053999430826643
+      },
+      {
+        "iteration": 4,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.270364074420428
+      },
+      {
+        "iteration": 5,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.235547218978283
+      },
+      {
+        "iteration": 5,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.426166631225946
+      },
+      {
+        "iteration": 6,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.656436798481778
+      },
+      {
+        "iteration": 6,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.077759959889406
+      },
+      {
+        "iteration": 7,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.632227527672832
+      },
+      {
+        "iteration": 7,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.774324470586137
+      },
+      {
+        "iteration": 8,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.255595445427062
+      },
+      {
+        "iteration": 8,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 23.922770545509216
+      },
+      {
+        "iteration": 1,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.05979356605389
+      },
+      {
+        "iteration": 1,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.316717030626464
+      },
+      {
+        "iteration": 2,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.166221987967944
+      },
+      {
+        "iteration": 2,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 26.15297715837984
+      },
+      {
+        "iteration": 3,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.86715346569963
+      },
+      {
+        "iteration": 3,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.71079678815063
+      },
+      {
+        "iteration": 4,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.267959262192612
+      },
+      {
+        "iteration": 4,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.316646970051906
+      },
+      {
+        "iteration": 5,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.65617152206383
+      },
+      {
+        "iteration": 5,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.322100688448778
+      },
+      {
+        "iteration": 6,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.353726123519962
+      },
+      {
+        "iteration": 6,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 23.68259672832359
+      },
+      {
+        "iteration": 7,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.435626595369598
+      },
+      {
+        "iteration": 7,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.55738726740684
+      },
+      {
+        "iteration": 8,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.75234565231783
+      },
+      {
+        "iteration": 8,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.323861150834283
+      }
+    ],
+    "non_converged_candidate_count": 8,
+    "checked_selection_rows": 32,
+    "remedy_forbidden": [
+      "raise the optimiser budget",
+      "change the seed or the initialisation",
+      "change the optimiser",
+      "rerun"
+    ]
+  },
+  "per_run": [
+    {
+      "replicate": "rep1",
+      "start_label": "start_B",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        2,
+        3
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "2": 24.255595445427062,
+        "3": 23.922770545509216
+      }
+    },
+    {
+      "replicate": "rep1",
+      "start_label": "start_P",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        2,
+        3
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "2": 24.75234565231783,
+        "3": 24.323861150834283
+      }
+    }
+  ],
+  "start_agreement_by_replicate": {
+    "rep1": true
+  },
+  "true_bernoulli_selected_as_poisson": 0,
+  "ambiguous_true_poisson_decisions": 0,
+  "ambiguous_true_poisson_columns": [],
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "score_decides_only": "columns whose observations are all in {0,1} (Bernoulli vs Poisson)",
+    "gate_decides": "Gaussian columns and counts above 1",
+    "do_not_report": [
+      "an accuracy figure that includes gate-decided columns",
+      "evidence for automatic distribution selection in general",
+      "that automatic selection beats a human-specified family",
+      "any claim about real data"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
