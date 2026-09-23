@@ -320,14 +320,68 @@ def _fake_hybrid(protocol, dataset, ambiguous_start, search_seed, refit_seed,
 
 
 @pytest.fixture
+def approved(monkeypatch):
+    """Stand in for the human approval of the one unfrozen condition.
+
+    Issue #74 froze the refit num_iter but not the exploration length, so the
+    runner refuses to execute until a human records an approval.  The tests
+    that exercise the pipeline record one; the test that checks the refusal
+    does not use this fixture.
+    """
+
+    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved", True)
+    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved_by",
+                        "test fixture")
+    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved_in",
+                        "test_family_selection_pilot_harness.py")
+
+
+@pytest.fixture
 def stub_hybrid(monkeypatch):
     """Replace the hybrid driver so the pipeline runs without any EM."""
 
-    def _install(**options):
+    def _install(*, fail_at=None, fail_on_call=1, **options):
+        """Replace the hybrid driver.
+
+        The stub still calls ``execution_hook`` around each of the two EM
+        executions, so the ledger sees the same attempt sequence a real run
+        would produce.  ``fail_at`` makes the stub raise after signalling that
+        an execution has STARTED, which is what a real fit dying mid-run looks
+        like from the runner's side.
+        """
+
+        calls = {"n": 0}
+
+        # The auditor rightly raises a HIGH finding when the worktree was
+        # dirty at run time, since the recorded git SHA would not describe the
+        # code that ran. These tests must not depend on the state of the
+        # developer working tree, so the recorded flag is pinned; the test
+        # that checks a dirty tree blocks progression edits runinfo directly.
+        monkeypatch.setattr(runner, "_git_dirty", lambda: False)
+
         def fake(X, Y, *, k, ambiguous_start, family_y, L,
                  exploration_num_iter, refit_num_iter, search_seed,
-                 refit_seed, verbose=False):
+                 refit_seed, verbose=False, execution_hook=None):
             protocol = runner.PROTOCOLS[_install.stage]
+            calls["n"] += 1
+            should_fail = (fail_at is not None
+                           and calls["n"] == fail_on_call)
+
+            def notify(kind, status, seed):
+                if execution_hook is not None:
+                    execution_hook(kind, status, {"seed": seed, "k": k, "L": L,
+                                                  "ambiguous_start":
+                                                  ambiguous_start})
+
+            notify("exploration", "STARTED", search_seed)
+            if should_fail and fail_at == "exploration":
+                raise RuntimeError("synthetic exploration failure")
+            notify("exploration", "SUCCESS", search_seed)
+
+            notify("refit", "STARTED", refit_seed)
+            if should_fail and fail_at == "refit":
+                raise RuntimeError("synthetic refit failure")
+            notify("refit", "SUCCESS", refit_seed)
 
             class _D:
                 pass
@@ -344,7 +398,7 @@ def stub_hybrid(monkeypatch):
     return _install
 
 
-def test_execute_writes_every_required_artifact(tmp_path, stub_hybrid):
+def test_execute_writes_every_required_artifact(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     summary = runner.execute("smoke", out)
@@ -364,7 +418,7 @@ def test_execute_writes_every_required_artifact(tmp_path, stub_hybrid):
         auditor.REQUIRED_CLAIM_BOUNDARY_KEYS)
 
 
-def test_execute_refuses_to_overwrite_a_recorded_run(tmp_path, stub_hybrid):
+def test_execute_refuses_to_overwrite_a_recorded_run(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -372,8 +426,8 @@ def test_execute_refuses_to_overwrite_a_recorded_run(tmp_path, stub_hybrid):
         runner.execute("smoke", out)
 
 
-def test_gate_decided_columns_never_appear_in_family_scores(tmp_path,
-                                                            stub_hybrid):
+def test_gate_decided_columns_never_appear_in_family_scores(tmp_path, stub_hybrid,
+                                                            approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -403,8 +457,8 @@ def test_procrustes_rmse_is_invariant_to_the_arbitrary_rotation():
     assert runner.procrustes_rmse_z(Z_true + 1.0, Z_true) > 0.0
 
 
-def test_fit_results_carry_a_real_rmse_not_an_empty_column(tmp_path,
-                                                           stub_hybrid):
+def test_fit_results_carry_a_real_rmse_not_an_empty_column(tmp_path, stub_hybrid,
+                                                           approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -434,7 +488,7 @@ def test_auditor_does_not_import_the_runner():
     assert auditor.EXPECTED["pilot"]["family_x_list"].count("bernoulli") == 6
 
 
-def test_auditor_passes_a_well_formed_run(tmp_path, stub_hybrid):
+def test_auditor_passes_a_well_formed_run(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -448,7 +502,7 @@ def test_auditor_passes_a_well_formed_run(tmp_path, stub_hybrid):
     assert report["gate_decided_columns"] > 0
 
 
-def test_auditor_passes_the_pilot_stage_too(tmp_path, stub_hybrid):
+def test_auditor_passes_the_pilot_stage_too(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     stub_hybrid.stage = "pilot"
     out = tmp_path / "pilot_run"
@@ -457,8 +511,8 @@ def test_auditor_passes_the_pilot_stage_too(tmp_path, stub_hybrid):
     assert report["verdict"] == "PASS", report["findings"]
 
 
-def test_auditor_blocks_a_run_with_a_non_converged_candidate(tmp_path,
-                                                             stub_hybrid):
+def test_auditor_blocks_a_run_with_a_non_converged_candidate(tmp_path, stub_hybrid,
+                                                             approved):
     stub_hybrid(converged=False)
     out = tmp_path / "smoke_run"
     summary = runner.execute("smoke", out)
@@ -472,7 +526,7 @@ def test_auditor_blocks_a_run_with_a_non_converged_candidate(tmp_path,
     assert report["verdict"] == "PASS"
 
 
-def test_auditor_reports_a_mis_selection_without_failing(tmp_path, stub_hybrid):
+def test_auditor_reports_a_mis_selection_without_failing(tmp_path, stub_hybrid, approved):
     """Getting the family wrong is a result, not an integrity violation."""
 
     stub_hybrid(correct=False)
@@ -482,7 +536,7 @@ def test_auditor_reports_a_mis_selection_without_failing(tmp_path, stub_hybrid):
     assert report["verdict"] == "PASS", report["findings"]
 
 
-def test_auditor_reports_missing_artifacts(tmp_path, stub_hybrid):
+def test_auditor_reports_missing_artifacts(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -500,7 +554,7 @@ def test_auditor_reports_missing_artifacts(tmp_path, stub_hybrid):
     ("k_fit", 2),
     ("family_y", "poisson"),
 ])
-def test_auditor_catches_a_tampered_protocol(tmp_path, stub_hybrid, field, value):
+def test_auditor_catches_a_tampered_protocol(tmp_path, stub_hybrid, approved, field, value):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -515,7 +569,7 @@ def test_auditor_catches_a_tampered_protocol(tmp_path, stub_hybrid, field, value
                for f in report["findings"])
 
 
-def test_auditor_catches_a_changed_seed(tmp_path, stub_hybrid):
+def test_auditor_catches_a_changed_seed(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -529,7 +583,7 @@ def test_auditor_catches_a_changed_seed(tmp_path, stub_hybrid):
     assert any("data_seed" in f["message"] for f in report["findings"])
 
 
-def test_auditor_catches_a_retry(tmp_path, stub_hybrid):
+def test_auditor_catches_a_retry(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -548,7 +602,7 @@ def test_auditor_catches_a_retry(tmp_path, stub_hybrid):
     assert any("retry_count" in f["message"] for f in report["findings"])
 
 
-def test_auditor_catches_a_non_finite_score(tmp_path, stub_hybrid):
+def test_auditor_catches_a_non_finite_score(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -567,8 +621,8 @@ def test_auditor_catches_a_non_finite_score(tmp_path, stub_hybrid):
     assert any("not finite" in f["message"] for f in report["findings"])
 
 
-def test_auditor_catches_a_missing_run_and_a_duplicate_row(tmp_path,
-                                                           stub_hybrid):
+def test_auditor_catches_a_missing_run_and_a_duplicate_row(tmp_path, stub_hybrid,
+                                                           approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -589,8 +643,8 @@ def test_auditor_catches_a_missing_run_and_a_duplicate_row(tmp_path,
     assert "duplicate rows" in messages
 
 
-def test_auditor_catches_a_score_row_for_a_gate_decided_column(tmp_path,
-                                                               stub_hybrid):
+def test_auditor_catches_a_score_row_for_a_gate_decided_column(tmp_path, stub_hybrid,
+                                                               approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -619,8 +673,8 @@ def test_auditor_catches_a_score_row_for_a_gate_decided_column(tmp_path,
     assert any("gate decided" in f["message"] for f in report["findings"])
 
 
-def test_auditor_catches_a_summary_that_disagrees_with_its_rows(tmp_path,
-                                                                stub_hybrid):
+def test_auditor_catches_a_summary_that_disagrees_with_its_rows(tmp_path, stub_hybrid,
+                                                                approved):
     stub_hybrid(converged=False)
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -634,7 +688,7 @@ def test_auditor_catches_a_summary_that_disagrees_with_its_rows(tmp_path,
     assert any(f["check"] == "convergence_gate" for f in report["findings"])
 
 
-def test_auditor_writes_its_report_even_when_it_fails(tmp_path, stub_hybrid):
+def test_auditor_writes_its_report_even_when_it_fails(tmp_path, stub_hybrid, approved):
     stub_hybrid()
     out = tmp_path / "smoke_run"
     runner.execute("smoke", out)
@@ -643,3 +697,308 @@ def test_auditor_writes_its_report_even_when_it_fails(tmp_path, stub_hybrid):
     report = json.loads((out / "audit_report.json").read_text(encoding="utf-8"))
     assert report["verdict"] == "FAIL"
     assert "Do not rerun" in report["note"]
+
+
+# --------------------------------------------------------------------------
+# 7. evidence preservation when a run dies part-way through
+# --------------------------------------------------------------------------
+
+def _ledger(out):
+    with (out / "execution_ledger.csv").open(encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def test_run_directory_and_protocol_exist_before_any_em(tmp_path, stub_hybrid,
+                                                        approved):
+    """A run that dies inside the first fit must still have committed these."""
+
+    stub_hybrid(fail_at="exploration", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError, match="synthetic exploration failure"):
+        runner.execute("smoke", out)
+
+    assert (out / "protocol.json").is_file()
+    assert (out / "runinfo.json").is_file()
+    assert (out / "execution_ledger.csv").is_file()
+    assert (out / runner.FAILURE_ARTIFACT).is_file()
+    protocol = json.loads((out / "protocol.json").read_text(encoding="utf-8"))
+    assert protocol["n"] == 40
+
+
+def test_partial_exploration_failure_preserves_its_attempt(tmp_path,
+                                                           stub_hybrid,
+                                                           approved):
+    stub_hybrid(fail_at="exploration", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    rows = _ledger(out)
+    assert len(rows) == 1                       # one EM execution was started
+    assert rows[0]["execution_kind"] == "exploration"
+    assert rows[0]["status"] == "FAILED"
+    assert rows[0]["seed"] == "942001"
+
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["run_status"] == "FAILED"
+    assert runinfo["em_executions"] == 1        # attempted, not returned
+
+
+def test_refit_failure_counts_both_attempts(tmp_path, stub_hybrid, approved):
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError, match="synthetic refit failure"):
+        runner.execute("smoke", out)
+
+    rows = _ledger(out)
+    assert [r["execution_kind"] for r in rows] == ["exploration", "refit"]
+    assert [r["status"] for r in rows] == ["SUCCESS", "FAILED"]
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["em_executions"] == 2
+
+
+def test_a_failure_in_the_second_pair_keeps_the_first_pair(tmp_path,
+                                                           stub_hybrid,
+                                                           approved):
+    """Partial provenance survives: the completed start_B run is still there."""
+
+    stub_hybrid(fail_at="exploration", fail_on_call=2)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    rows = _ledger(out)
+    assert len(rows) == 3            # 2 for start_B, 1 started for start_P
+    assert rows[-1]["status"] == "FAILED"
+    assert rows[-1]["start_label"] == "start_P"
+    # The finished pair rows were written rather than discarded.
+    assert (out / "fit_results.csv").is_file()
+    with (out / "fit_results.csv").open(encoding="utf-8") as handle:
+        fits = list(csv.DictReader(handle))
+    assert [r["start_label"] for r in fits] == ["start_B"]
+    assert (out / "generator_provenance.csv").is_file()
+    # No summary: the run never reached a state worth summarising.
+    assert not (out / "summary.json").exists()
+
+
+def test_failure_json_records_what_is_needed_to_stop(tmp_path, stub_hybrid,
+                                                     approved):
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    failure = json.loads(
+        (out / runner.FAILURE_ARTIFACT).read_text(encoding="utf-8"))
+    for key in auditor.REQUIRED_FAILURE_KEYS:
+        assert key in failure, key
+    assert failure["exception_type"] == "RuntimeError"
+    assert "synthetic refit failure" in failure["message"]
+    assert failure["attempted_em_executions"] == 2
+    assert failure["execution_kind"] == "refit"
+    assert failure["start_label"] == "start_B"
+    assert failure["retry_count"] == 0
+    assert failure["replacement_count"] == 0
+    assert failure["seed_rescue_count"] == 0
+    assert failure["git_sha"]
+    assert "Do not rerun" in failure["note"]
+
+
+def test_a_failed_run_is_never_silently_resumed(tmp_path, stub_hybrid,
+                                                approved):
+    stub_hybrid(fail_at="exploration", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+    # Re-running into the same directory is refused, so a failed stage cannot
+    # be quietly retried on top of its own evidence.
+    with pytest.raises(runner.RunnerStop, match="never overwritten"):
+        runner.execute("smoke", out)
+
+
+def test_auditor_audits_a_failed_run(tmp_path, stub_hybrid, approved):
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    report = auditor.audit(out)
+    assert report["run_status"] == "FAILED"
+    assert report["attempted_em_executions"] == 2
+    # Preserving a failure correctly is not the same as having produced the
+    # result the next stage would be built on.
+    assert report["progress_eligible"] is False
+    assert report["stage_progression"] == "BLOCKED"
+    assert report["blocker_count"] == 0
+    assert (out / "audit_report.json").is_file()
+
+
+def test_auditor_flags_a_failed_run_with_no_failure_evidence(tmp_path,
+                                                             stub_hybrid,
+                                                             approved):
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+    (out / runner.FAILURE_ARTIFACT).unlink()
+
+    report = auditor.audit(out)
+    assert report["verdict"] == "FAIL"
+    assert any("no failure.json was preserved" in f["message"]
+               for f in report["findings"])
+
+
+def test_auditor_catches_an_undercounted_attempt(tmp_path, stub_hybrid,
+                                                 approved):
+    """The counter must mean attempts, so a lower number is a blocker."""
+
+    stub_hybrid(fail_at="refit", fail_on_call=1)
+    out = tmp_path / "smoke_run"
+    with pytest.raises(RuntimeError):
+        runner.execute("smoke", out)
+
+    path = out / "runinfo.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["em_executions"] = 1                 # "only one really finished"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = auditor.audit(out)
+    assert report["verdict"] == "FAIL"
+    assert any("must mean attempts" in f["message"]
+               for f in report["findings"])
+
+
+# --------------------------------------------------------------------------
+# 8. a HIGH finding blocks stage progression
+# --------------------------------------------------------------------------
+
+def test_a_clean_run_is_progress_eligible(tmp_path, stub_hybrid, approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+    report = auditor.audit(out)
+    assert report["verdict"] == "PASS"
+    assert report["blocker_count"] == 0
+    assert report["high_count"] == 0
+    assert report["medium_count"] == 0
+    assert report["progress_eligible"] is True
+    assert report["stage_progression"] == "ALLOWED"
+    assert auditor.main(["--run-dir", str(out)]) == 0
+
+
+def test_q_bic_failure_blocks_progression_without_failing_the_verdict(
+        tmp_path, stub_hybrid, approved):
+    """A HIGH finding must stop the next stage even though nothing was violated."""
+
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    path = out / "fit_results.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+        fieldnames = list(rows[0])
+    rows[0]["q_bic_failed"] = "True"
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    report = auditor.audit(out)
+    assert report["verdict"] == "PASS"           # no protocol violation
+    assert report["high_count"] >= 1
+    assert report["progress_eligible"] is False
+    assert report["stage_progression"] == "BLOCKED"
+    assert auditor.main(["--run-dir", str(out)]) == 1
+
+
+def test_a_dirty_worktree_blocks_progression(tmp_path, stub_hybrid, approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    path = out / "runinfo.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["git_dirty"] = True
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = auditor.audit(out)
+    assert report["high_count"] >= 1
+    assert report["progress_eligible"] is False
+    assert any("dirty" in f["message"] for f in report["findings"])
+
+
+def test_unexpected_rows_block_progression(tmp_path, stub_hybrid, approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    path = out / "generator_provenance.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+        fieldnames = list(rows[0])
+    extra = dict(rows[0])
+    extra["column"] = "99"
+    rows.append(extra)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    report = auditor.audit(out)
+    assert report["high_count"] >= 1
+    assert report["progress_eligible"] is False
+    assert any("unexpected rows" in f["message"] for f in report["findings"])
+
+
+# --------------------------------------------------------------------------
+# 9. the one condition Issue #74 did not freeze
+# --------------------------------------------------------------------------
+
+def test_exploration_num_iter_is_not_approved_by_default():
+    """The implementation must not promote its own protocol choice."""
+
+    record = runner.EXPLORATION_NUM_ITER_APPROVAL
+    assert record["parameter"] == "exploration_num_iter"
+    assert record["value"] == 8
+    assert record["approved"] is False
+    assert record["approved_by"] is None
+    assert record["approved_in"] is None
+
+
+def test_execute_refuses_to_run_without_that_approval(tmp_path, stub_hybrid):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    with pytest.raises(runner.RunnerStop, match="has not been approved"):
+        runner.execute("smoke", out)
+    assert not out.exists()                      # no EM, no directory
+
+
+def test_protocol_records_the_approval_state(tmp_path, stub_hybrid, approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+    protocol = json.loads((out / "protocol.json").read_text(encoding="utf-8"))
+    approval, = protocol["human_approvals"]
+    assert approval["parameter"] == "exploration_num_iter"
+    assert approval["approved"] is True
+    assert approval["approved_by"] == "test fixture"
+
+
+def test_auditor_blocks_progression_on_an_unapproved_condition(tmp_path,
+                                                               stub_hybrid,
+                                                               approved):
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    path = out / "protocol.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["human_approvals"][0]["approved"] = False
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = auditor.audit(out)
+    assert report["high_count"] >= 1
+    assert report["progress_eligible"] is False
+    assert any("without a recorded human approval" in f["message"]
+               for f in report["findings"])

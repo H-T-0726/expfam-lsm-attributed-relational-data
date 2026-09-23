@@ -790,6 +790,7 @@ def run_hybrid_family_selection(
     search_seed: int = 42,
     refit_seed: int = 43,
     verbose: bool = False,
+    execution_hook: Any = None,
 ) -> dict[str, Any]:
     """Scheme C: A-type exploration, then a fresh fixed-assignment refit.
 
@@ -801,25 +802,45 @@ def run_hybrid_family_selection(
     Per HG-1 the pilot performs exactly one exploration and one refit; it does
     not iterate further outer cycles, and this function makes no claim about
     how many cycles would be needed for the assignment to stop changing.
+
+    ``execution_hook`` is an optional callable ``hook(kind, status, info)``
+    invoked immediately BEFORE each of the two EM executions with status
+    ``"STARTED"`` and again after it returns with ``"SUCCESS"``.  ``kind`` is
+    ``"exploration"`` or ``"refit"``.  It exists so that a caller can record an
+    attempt on disk before the attempt can fail: a run that dies mid-EM must
+    still leave evidence of what it had already started, and a counter
+    incremented only on success would undercount real EM work.  Default
+    ``None`` calls nothing and changes nothing.
     """
+
+    def _notify(kind: str, status: str, seed: int) -> None:
+        if execution_hook is not None:
+            execution_hook(kind, status, {"seed": int(seed),
+                                          "k": int(k),
+                                          "L": int(L),
+                                          "ambiguous_start": ambiguous_start})
 
     gates = support_gate(X)
     start = initial_assignment(gates, ambiguous_start)
+    _notify("exploration", "STARTED", search_seed)
     exploration = run_family_exploration(
         X, Y, k=k, gates=gates, initial_families=start, family_y=family_y,
         L=L, num_iter=exploration_num_iter, seed=search_seed, verbose=verbose)
+    _notify("exploration", "SUCCESS", search_seed)
 
     # failure_policy='fail_fast' is required here, not optional. The legacy
     # policy repairs a non-finite E-step by substituting Z_prev and then
     # retries on a DIFFERENT seed, so a repaired refit would report as clean
     # and the pilot's "retry = replacement = seed rescue = 0" condition would
     # be unverifiable from the artifact.
+    _notify("refit", "STARTED", refit_seed)
     refit = run_em_experimental(
         X, Y, family_x="mixed", family_y=family_y, k=k, L=L,
         num_iter=refit_num_iter, seed=refit_seed,
         family_x_list=exploration.selected_assignment,
         compute_strict_Q=True, numerics_mode="consistent",
         failure_policy="fail_fast", verbose=verbose)
+    _notify("refit", "SUCCESS", refit_seed)
     _require(refit.get("failure_policy") == "fail_fast",
              "the reported refit did not run under failure_policy='fail_fast'")
     for counter in ("retry_count", "replacement_count", "seed_rescue_count"):

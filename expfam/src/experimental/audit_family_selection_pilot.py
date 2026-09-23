@@ -38,17 +38,34 @@ import math
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
-AUDITOR_VERSION = "family-selection-pilot-auditor-v1"
+AUDITOR_VERSION = "family-selection-pilot-auditor-v2"
 
-REQUIRED_ARTIFACTS = (
+# Present in every run, successful or not: these are written before the first
+# EM execution, so their absence means the run never reserved its directory.
+ALWAYS_REQUIRED_ARTIFACTS = (
     "protocol.json",
     "runinfo.json",
+    "execution_ledger.csv",
+)
+
+# Additionally required from a run that claims to have finished.
+COMPLETED_RUN_ARTIFACTS = (
     "generator_provenance.csv",
     "support_gate.csv",
     "family_scores.csv",
     "selection_trace.csv",
     "fit_results.csv",
     "summary.json",
+)
+
+REQUIRED_ARTIFACTS = ALWAYS_REQUIRED_ARTIFACTS + COMPLETED_RUN_ARTIFACTS
+
+FAILURE_ARTIFACT = "failure.json"
+
+REQUIRED_FAILURE_KEYS = (
+    "exception_type", "message", "attempted_em_executions", "replicate",
+    "start_label", "execution_kind", "retry_count", "replacement_count",
+    "seed_rescue_count", "git_sha",
 )
 
 # --------------------------------------------------------------------------
@@ -345,21 +362,114 @@ def _check_fits(fit_rows: Sequence[dict[str, str]], findings: list[Finding]
                 f"{label}: the Q/BIC computation failed"))
 
 
+def _check_ledger(rows: Sequence[dict[str, str]], runinfo: dict[str, Any],
+                  expected: dict[str, Any], findings: list[Finding]) -> int:
+    """The ledger is the record of EM work ATTEMPTED, not work that returned."""
+
+    attempted = len(rows)
+    recorded = runinfo.get("em_executions")
+    if recorded != attempted:
+        findings.append(Finding(
+            "BLOCKER", "execution_ledger",
+            f"runinfo records {recorded!r} EM executions but the ledger has "
+            f"{attempted} attempts; the counter must mean attempts"))
+    if attempted > MAX_TOTAL_EM_EXECUTIONS:
+        findings.append(Finding(
+            "BLOCKER", "execution_ledger",
+            f"{attempted} attempted EM executions exceeds the task cap of "
+            f"{MAX_TOTAL_EM_EXECUTIONS}"))
+    if attempted > expected["expected_em_executions"]:
+        findings.append(Finding(
+            "BLOCKER", "execution_ledger",
+            f"{attempted} attempted EM executions exceeds the "
+            f"{expected['expected_em_executions']} this stage implies"))
+
+    sequences = [_as_float(row.get("sequence", "")) for row in rows]
+    if sequences != [float(i + 1) for i in range(attempted)]:
+        findings.append(Finding(
+            "BLOCKER", "execution_ledger",
+            f"sequence numbers are not 1..{attempted}: {sequences}"))
+    for row in rows:
+        status = row.get("status", "")
+        if status not in ("STARTED", "SUCCESS", "FAILED"):
+            findings.append(Finding(
+                "BLOCKER", "execution_ledger",
+                f"sequence {row.get('sequence')!r}: status is {status!r}"))
+        if row.get("execution_kind") not in ("exploration", "refit"):
+            findings.append(Finding(
+                "BLOCKER", "execution_ledger",
+                f"sequence {row.get('sequence')!r}: execution_kind is "
+                f"{row.get('execution_kind')!r}"))
+        if not row.get("started_utc"):
+            findings.append(Finding(
+                "HIGH", "execution_ledger",
+                f"sequence {row.get('sequence')!r}: no start timestamp"))
+    return attempted
+
+
+def _check_failure_evidence(failure: dict[str, Any], attempted: int,
+                            findings: list[Finding]) -> None:
+    missing = [key for key in REQUIRED_FAILURE_KEYS if key not in failure]
+    if missing:
+        findings.append(Finding(
+            "BLOCKER", "failure",
+            f"failure.json is missing {missing}"))
+    if failure.get("attempted_em_executions") != attempted:
+        findings.append(Finding(
+            "BLOCKER", "failure",
+            f"failure.json records "
+            f"{failure.get('attempted_em_executions')!r} attempted "
+            f"executions but the ledger has {attempted}"))
+    for counter in ("retry_count", "replacement_count", "seed_rescue_count"):
+        if failure.get(counter) != 0:
+            findings.append(Finding(
+                "BLOCKER", "failure",
+                f"failure.json records {counter}={failure.get(counter)!r}; "
+                f"a failed stage must not have retried or reseeded"))
+    if not failure.get("git_sha"):
+        findings.append(Finding("HIGH", "failure", "git_sha is missing"))
+
+
+def _check_approvals(protocol: dict[str, Any],
+                     findings: list[Finding]) -> None:
+    """Every condition Issue #74 did not freeze needs a recorded approval."""
+
+    approvals = protocol.get("human_approvals")
+    if not approvals:
+        findings.append(Finding(
+            "HIGH", "human_approvals",
+            "protocol.json records no human approval for the conditions "
+            "Issue #74 left unfrozen (exploration_num_iter)"))
+        return
+    for approval in approvals:
+        name = approval.get("parameter")
+        if not approval.get("approved"):
+            findings.append(Finding(
+                "HIGH", "human_approvals",
+                f"{name!r} was set to {approval.get('value')!r} without a "
+                f"recorded human approval; Issue #74 did not freeze it"))
+        elif not approval.get("approved_by") or not approval.get("approved_in"):
+            findings.append(Finding(
+                "HIGH", "human_approvals",
+                f"{name!r} is marked approved but does not say who approved "
+                f"it or where"))
+
+
 def audit(run_dir: Path) -> dict[str, Any]:
     """Audit a finished run directory and return the report."""
 
     findings: list[Finding] = []
 
-    missing = [name for name in REQUIRED_ARTIFACTS
+    missing = [name for name in ALWAYS_REQUIRED_ARTIFACTS
                if not (run_dir / name).is_file()]
     if missing:
         findings.append(Finding(
-            "BLOCKER", "artifacts", f"missing required artifacts: {missing}"))
+            "BLOCKER", "artifacts",
+            f"missing artifacts that must exist before any EM runs: {missing}"))
         return _finish(run_dir, None, findings)
 
     protocol = _read_json(run_dir / "protocol.json")
     runinfo = _read_json(run_dir / "runinfo.json")
-    summary = _read_json(run_dir / "summary.json")
 
     stage = protocol.get("stage")
     if stage not in EXPECTED:
@@ -370,6 +480,53 @@ def audit(run_dir: Path) -> dict[str, Any]:
     expected = EXPECTED[stage]
 
     _check_protocol(protocol, expected, findings)
+    _check_approvals(protocol, findings)
+
+    ledger_rows = _read_csv(run_dir / "execution_ledger.csv")
+    attempted = _check_ledger(ledger_rows, runinfo, expected, findings)
+
+    run_status = runinfo.get("run_status", "UNKNOWN")
+    failure_path = run_dir / FAILURE_ARTIFACT
+    if failure_path.is_file() or run_status == "FAILED":
+        # A partial run: audit the EVIDENCE, not the missing results.
+        if not failure_path.is_file():
+            findings.append(Finding(
+                "BLOCKER", "failure",
+                "the run is marked FAILED but no failure.json was preserved"))
+        else:
+            _check_failure_evidence(_read_json(failure_path), attempted,
+                                    findings)
+        if run_status != "FAILED":
+            findings.append(Finding(
+                "BLOCKER", "runinfo",
+                f"failure.json exists but run_status is {run_status!r}"))
+        if attempted >= expected["expected_em_executions"]:
+            findings.append(Finding(
+                "HIGH", "failure",
+                f"a failed run attempted {attempted} executions, which is not "
+                f"fewer than the {expected['expected_em_executions']} a "
+                f"complete run implies"))
+        report = _finish(run_dir, stage, findings, run_status="FAILED")
+        report["attempted_em_executions"] = attempted
+        report["convergence_gate"] = "NOT_EVALUATED"
+        _write_report(run_dir, report)
+        return report
+
+    if run_status != "SUCCESS":
+        findings.append(Finding(
+            "HIGH", "runinfo",
+            f"run_status is {run_status!r}; a completed run should say "
+            f"SUCCESS"))
+
+    still_missing = [name for name in COMPLETED_RUN_ARTIFACTS
+                     if not (run_dir / name).is_file()]
+    if still_missing:
+        findings.append(Finding(
+            "BLOCKER", "artifacts",
+            f"missing required artifacts: {still_missing}"))
+        return _finish(run_dir, stage, findings, run_status=run_status)
+
+    summary = _read_json(run_dir / "summary.json")
     _check_runinfo(runinfo, expected, findings)
 
     provenance = _read_csv(run_dir / "generator_provenance.csv")
@@ -463,8 +620,9 @@ def audit(run_dir: Path) -> dict[str, Any]:
                 "HIGH", "summary",
                 f"claim_boundary is missing {key!r}"))
 
-    report = _finish(run_dir, stage, findings)
+    report = _finish(run_dir, stage, findings, run_status=run_status)
     report["convergence_gate"] = recomputed_gate
+    report["attempted_em_executions"] = attempted
     report["non_converged_candidate_rows"] = len(non_converged)
     report["score_decided_columns"] = len(ambiguous)
     report["gate_decided_columns"] = len(gate_rows) - len(ambiguous)
@@ -473,20 +631,45 @@ def audit(run_dir: Path) -> dict[str, Any]:
 
 
 def _finish(run_dir: Path, stage: str | None,
-            findings: Sequence[Finding]) -> dict[str, Any]:
-    blockers = [f for f in findings if f["severity"] == "BLOCKER"]
+            findings: Sequence[Finding],
+            run_status: str = "UNKNOWN") -> dict[str, Any]:
+    """Assemble the report.
+
+    Stage progression requires BLOCKER = 0 AND HIGH = 0.  A HIGH finding --
+    a failed Q/BIC computation, a dirty worktree, rows nothing should have
+    produced -- means the run is not the clean evidence the next stage would
+    be built on, even though the run itself did not violate the protocol.
+    Reporting only a PASS/FAIL verdict would let such a run wave the next
+    stage through.
+    """
+
+    counts = {severity: sum(1 for f in findings if f["severity"] == severity)
+              for severity in ("BLOCKER", "HIGH", "MEDIUM")}
+    # A run that did not complete is never eligible, however tidy its
+    # evidence is: preserving a failure correctly is not the same as having
+    # produced the result the next stage would be built on.
+    progress_eligible = (counts["BLOCKER"] == 0 and counts["HIGH"] == 0
+                         and run_status == "SUCCESS")
     report = {
         "auditor_version": AUDITOR_VERSION,
         "run_dir": str(run_dir),
         "stage": stage,
-        "verdict": "FAIL" if blockers else "PASS",
-        "blocker_count": len(blockers),
+        "run_status": run_status,
+        "verdict": "FAIL" if counts["BLOCKER"] else "PASS",
+        "blocker_count": counts["BLOCKER"],
+        "high_count": counts["HIGH"],
+        "medium_count": counts["MEDIUM"],
         "finding_count": len(findings),
+        "progress_eligible": progress_eligible,
+        "stage_progression": "ALLOWED" if progress_eligible else "BLOCKED",
+        "progression_rule": "blocker_count == 0 and high_count == 0 "
+                            "and run_status == SUCCESS",
         "findings": list(findings),
-        "note": "A FAIL is a finding to hand to a human. Do not rerun, "
-                "reseed, or widen the optimiser budget in response to it.",
+        "note": "A FAIL or a blocked progression is a finding to hand to a "
+                "human. Do not rerun, reseed, or widen the optimiser budget "
+                "in response to it.",
     }
-    if stage is None or blockers:
+    if stage is None or not progress_eligible:
         _write_report(run_dir, report)
     return report
 
@@ -506,12 +689,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     report = audit(args.run_dir)
-    print(f"verdict={report['verdict']} blockers={report['blocker_count']} "
-          f"findings={report['finding_count']} "
+    print(f"verdict={report['verdict']} run_status={report['run_status']} "
+          f"blockers={report['blocker_count']} high={report['high_count']} "
+          f"medium={report['medium_count']} "
+          f"progression={report['stage_progression']} "
           f"gate={report.get('convergence_gate', 'n/a')}")
     for finding in report["findings"]:
         print(f"  [{finding['severity']}] {finding['check']}: {finding['message']}")
-    return 0 if report["verdict"] == "PASS" else 1
+    # Exit 0 only when the next stage may proceed: a HIGH finding blocks it
+    # even though the verdict itself is PASS.
+    return 0 if report["progress_eligible"] else 1
 
 
 if __name__ == "__main__":                                  # pragma: no cover

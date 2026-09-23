@@ -65,7 +65,28 @@ from family_selection import (                                     # noqa: E402
     run_hybrid_family_selection,
 )
 
-RUNNER_VERSION = "family-selection-pilot-runner-v1"
+RUNNER_VERSION = "family-selection-pilot-runner-v2"
+
+# Issue #74 froze num_iter for the fixed-family REFIT only.  It says nothing
+# about how long the exploration should run, so that value is a scientific
+# protocol choice this implementation must not promote on its own.  It is
+# written down here with its approval state attached, recorded into
+# protocol.json, and checked before any EM runs: a human has to set
+# ``approved`` to True (and say where they approved it) before a stage can
+# execute.  Silently shipping 8 because 8 seemed reasonable is exactly the
+# kind of implementation-made protocol decision the review asked us not to
+# make.
+EXPLORATION_NUM_ITER_APPROVAL: dict[str, Any] = {
+    "parameter": "exploration_num_iter",
+    "value": 8,
+    "approved": False,
+    "rationale": "same budget as the fixed-family refit, which Issue #74 froze "
+                 "at 8; proposed for the minimal pilot only",
+    "approved_by": None,
+    "approved_in": None,
+    "note": "Issue #74 froze refit num_iter only. Until a human approves this "
+            "value, no stage may execute.",
+}
 
 # Both starts are run on the same data with the same seeds; the pair is what
 # makes the incumbent-loading path dependence visible.
@@ -122,6 +143,7 @@ class Protocol:
         payload["starts"] = [{"label": label, "ambiguous_start": family}
                              for label, family in STARTS]
         payload["expected_em_executions"] = self.expected_em_executions
+        payload["human_approvals"] = [dict(EXPLORATION_NUM_ITER_APPROVAL)]
         return payload
 
 
@@ -191,6 +213,81 @@ def _require(condition: bool, message: str) -> None:
         raise RunnerStop(message)
 
 
+class ExecutionLedger:
+    """Record of every real EM execution this run ATTEMPTED.
+
+    An attempt is written to disk BEFORE the execution starts, so a run that
+    dies inside an EM fit still leaves evidence of what it had begun.  The
+    attempted count -- not the number of calls that returned -- is what the
+    execution cap and the stop rule are about: EM work that failed still
+    happened.
+
+    The file is rewritten atomically on every transition rather than appended
+    to, so a reader never sees a half-written row.
+    """
+
+    FIELDS = ("sequence", "stage", "replicate", "start_label",
+              "execution_kind", "seed", "status", "started_utc",
+              "finished_utc", "detail")
+
+    def __init__(self, path: Path, stage: str) -> None:
+        self.path = path
+        self.stage = stage
+        self.entries: list[dict[str, Any]] = []
+        self._flush()
+
+    @property
+    def attempted(self) -> int:
+        """Real EM executions started, whether or not they returned."""
+
+        return len(self.entries)
+
+    def start(self, replicate: str, start_label: str, kind: str,
+              seed: int) -> dict[str, Any]:
+        entry = {
+            "sequence": len(self.entries) + 1,
+            "stage": self.stage,
+            "replicate": replicate,
+            "start_label": start_label,
+            "execution_kind": kind,
+            "seed": int(seed),
+            "status": "STARTED",
+            "started_utc": datetime.now(timezone.utc).isoformat(),
+            "finished_utc": "",
+            "detail": "",
+        }
+        self.entries.append(entry)
+        self._flush()
+        return entry
+
+    def finish(self, entry: dict[str, Any], status: str,
+               detail: str = "") -> None:
+        entry["status"] = status
+        entry["finished_utc"] = datetime.now(timezone.utc).isoformat()
+        entry["detail"] = detail
+        self._flush()
+
+    def fail_open_entries(self, detail: str) -> None:
+        for entry in self.entries:
+            if entry["status"] == "STARTED":
+                self.finish(entry, "FAILED", detail)
+
+    def open_entry(self) -> dict[str, Any] | None:
+        for entry in reversed(self.entries):
+            if entry["status"] in ("STARTED", "FAILED"):
+                return entry
+        return None
+
+    def _flush(self) -> None:
+        temporary = self.path.with_suffix(".tmp")
+        with temporary.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(self.FIELDS))
+            writer.writeheader()
+            for entry in self.entries:
+                writer.writerow({key: entry.get(key, "") for key in self.FIELDS})
+        temporary.replace(self.path)
+
+
 # --------------------------------------------------------------------------
 # provenance
 # --------------------------------------------------------------------------
@@ -214,8 +311,17 @@ def _git_dirty() -> bool:
     return bool(out.strip())
 
 
-def build_runinfo(protocol: Protocol, *, started: str, finished: str,
-                  em_executions: int) -> dict[str, Any]:
+def build_runinfo(protocol: Protocol, *, started: str,
+                  finished: str | None = None,
+                  em_executions: int = 0,
+                  status: str = "RUNNING") -> dict[str, Any]:
+    """Provenance for the run.
+
+    ``em_executions`` counts real EM executions ATTEMPTED, so a run that died
+    inside a fit still reports the work it started.  Written once before the
+    first execution and rewritten at the end.
+    """
+
     return {
         "runner_version": RUNNER_VERSION,
         "selector_version": SELECTOR_VERSION,
@@ -228,7 +334,10 @@ def build_runinfo(protocol: Protocol, *, started: str, finished: str,
         "numpy_version": np.__version__,
         "started_utc": started,
         "finished_utc": finished,
+        "run_status": status,
         "em_executions": int(em_executions),
+        "em_executions_semantics": "real EM executions ATTEMPTED, counted "
+                                   "before each call, not on return",
         "expected_em_executions": protocol.expected_em_executions,
         "numerics_mode": "consistent",
         "failure_policy": "fail_fast",
@@ -320,7 +429,8 @@ def procrustes_rmse_z(Z_est: np.ndarray, Z_true: np.ndarray) -> float:
 
 def run_one(protocol: Protocol, replicate: Replicate, dataset,
             start_label: str, ambiguous_start: str,
-            verbose: bool = False) -> dict[str, Any]:
+            verbose: bool = False,
+            execution_hook: Any = None) -> dict[str, Any]:
     """Run the hybrid selection once. Two EM executions happen inside."""
 
     result = run_hybrid_family_selection(
@@ -333,6 +443,7 @@ def run_one(protocol: Protocol, replicate: Replicate, dataset,
         search_seed=replicate.search_seed,
         refit_seed=replicate.refit_seed,
         verbose=verbose,
+        execution_hook=execution_hook,
     )
     result["replicate"] = replicate.label
     result["start_label"] = start_label
@@ -554,6 +665,7 @@ def _json_default(value: Any) -> Any:
 ARTIFACT_NAMES = (
     "protocol.json",
     "runinfo.json",
+    "execution_ledger.csv",
     "generator_provenance.csv",
     "support_gate.csv",
     "family_scores.csv",
@@ -562,24 +674,41 @@ ARTIFACT_NAMES = (
     "summary.json",
 )
 
+# Written only when a run dies part-way through.
+FAILURE_ARTIFACT = "failure.json"
 
-def write_artifacts(out_dir: Path, protocol: Protocol, *,
+
+def write_artifacts(out_dir: Path, *,
                     runinfo: dict[str, Any],
                     provenance: Sequence[dict[str, Any]],
                     gates: Sequence[dict[str, Any]],
                     scores: Sequence[dict[str, Any]],
                     traces: Sequence[dict[str, Any]],
                     fits: Sequence[dict[str, Any]],
-                    summary: dict[str, Any]) -> None:
-    out_dir.mkdir(parents=True, exist_ok=False)
-    _write_json(out_dir / "protocol.json", protocol.as_json())
+                    summary: dict[str, Any] | None) -> list[str]:
+    """Write the result tables into an ALREADY RESERVED run directory.
+
+    protocol.json, the initial runinfo.json and the ledger are written before
+    the first EM execution, not here.  Empty tables are skipped rather than
+    written as headers alone, and the names actually written are returned so
+    that a partial run can say which evidence it managed to preserve.
+    """
+
+    written: list[str] = []
     _write_json(out_dir / "runinfo.json", runinfo)
-    _write_csv(out_dir / "generator_provenance.csv", provenance)
-    _write_csv(out_dir / "support_gate.csv", gates)
-    _write_csv(out_dir / "family_scores.csv", scores)
-    _write_csv(out_dir / "selection_trace.csv", traces)
-    _write_csv(out_dir / "fit_results.csv", fits)
-    _write_json(out_dir / "summary.json", summary)
+    written.append("runinfo.json")
+    for name, rows in (("generator_provenance.csv", provenance),
+                       ("support_gate.csv", gates),
+                       ("family_scores.csv", scores),
+                       ("selection_trace.csv", traces),
+                       ("fit_results.csv", fits)):
+        if rows:
+            _write_csv(out_dir / name, rows)
+            written.append(name)
+    if summary is not None:
+        _write_json(out_dir / "summary.json", summary)
+        written.append("summary.json")
+    return written
 
 
 # --------------------------------------------------------------------------
@@ -587,46 +716,113 @@ def write_artifacts(out_dir: Path, protocol: Protocol, *,
 # --------------------------------------------------------------------------
 
 def execute(stage: str, out_dir: Path, verbose: bool = False) -> dict[str, Any]:
-    """Run a frozen stage exactly once and write its artifacts."""
+    """Run a frozen stage exactly once and write its artifacts.
+
+    The run directory, the frozen protocol and the initial runinfo are all
+    committed to disk BEFORE the first EM execution, and every execution is
+    recorded in the ledger before it starts.  If anything raises, the partial
+    evidence and a failure.json stay behind and the exception propagates: the
+    stage is never rerun, reseeded or repaired.
+    """
 
     _require(stage in PROTOCOLS,
              f"unknown stage {stage!r}; choose from {sorted(PROTOCOLS)}")
     protocol = PROTOCOLS[stage]
     _require(not out_dir.exists(),
              f"{out_dir} already exists; a recorded run is never overwritten")
+    _require(bool(EXPLORATION_NUM_ITER_APPROVAL["approved"]),
+             "exploration_num_iter is not frozen by Issue #74 and has not "
+             "been approved by a human yet. Issue #74 froze the refit "
+             "num_iter only. Set EXPLORATION_NUM_ITER_APPROVAL['approved'] "
+             "to True, with approved_by and approved_in filled in, once a "
+             "human has approved the value; until then no stage executes.")
 
     started = datetime.now(timezone.utc).isoformat()
+
+    # --- reserve the run directory and commit the protocol before any EM ---
+    out_dir.mkdir(parents=True, exist_ok=False)
+    _write_json(out_dir / "protocol.json", protocol.as_json())
+    _write_json(out_dir / "runinfo.json",
+                build_runinfo(protocol, started=started, em_executions=0,
+                              status="RUNNING"))
+    ledger = ExecutionLedger(out_dir / "execution_ledger.csv", protocol.stage)
+
     provenance: list[dict[str, Any]] = []
     gates: list[dict[str, Any]] = []
     scores: list[dict[str, Any]] = []
     traces: list[dict[str, Any]] = []
     fits: list[dict[str, Any]] = []
     results: list[dict[str, Any]] = []
-    em_executions = 0
+    context: dict[str, Any] = {"replicate": "", "start_label": "",
+                               "execution_kind": ""}
 
-    for replicate in protocol.replicates:
-        dataset = build_dataset(protocol, replicate)
-        provenance.extend(generator_provenance_rows(protocol, replicate, dataset))
-        for start_label, ambiguous_start in STARTS:
-            result = run_one(protocol, replicate, dataset,
-                             start_label, ambiguous_start, verbose=verbose)
-            em_executions += 2            # one exploration, one refit
-            results.append(result)
-            gates.extend(support_gate_rows(protocol, result))
-            scores.extend(family_score_rows(protocol, result))
-            traces.extend(selection_trace_rows(protocol, result))
-            fits.append(fit_result_row(protocol, result))
+    try:
+        for replicate in protocol.replicates:
+            context["replicate"] = replicate.label
+            dataset = build_dataset(protocol, replicate)
+            provenance.extend(
+                generator_provenance_rows(protocol, replicate, dataset))
+            for start_label, ambiguous_start in STARTS:
+                context["start_label"] = start_label
 
-    _require(em_executions == protocol.expected_em_executions,
-             f"ran {em_executions} EM executions, expected "
+                def hook(kind: str, status: str, info: dict[str, Any],
+                         _replicate=replicate, _start=start_label) -> None:
+                    context["execution_kind"] = kind
+                    if status == "STARTED":
+                        hook.entry = ledger.start(          # type: ignore[attr-defined]
+                            _replicate.label, _start, kind, info["seed"])
+                    else:
+                        ledger.finish(hook.entry, status)   # type: ignore[attr-defined]
+
+                result = run_one(protocol, replicate, dataset, start_label,
+                                 ambiguous_start, verbose=verbose,
+                                 execution_hook=hook)
+                results.append(result)
+                gates.extend(support_gate_rows(protocol, result))
+                scores.extend(family_score_rows(protocol, result))
+                traces.extend(selection_trace_rows(protocol, result))
+                fits.append(fit_result_row(protocol, result))
+    except BaseException as exc:                # noqa: BLE001 - evidence first
+        ledger.fail_open_entries(f"{type(exc).__name__}: {exc}")
+        runinfo = build_runinfo(
+            protocol, started=started,
+            finished=datetime.now(timezone.utc).isoformat(),
+            em_executions=ledger.attempted, status="FAILED")
+        written = write_artifacts(
+            out_dir, runinfo=runinfo, provenance=provenance, gates=gates,
+            scores=scores, traces=traces, fits=fits, summary=None)
+        _write_json(out_dir / FAILURE_ARTIFACT, {
+            "run_status": "FAILED",
+            "stage": protocol.stage,
+            "exception_type": type(exc).__name__,
+            "message": str(exc),
+            "attempted_em_executions": ledger.attempted,
+            "expected_em_executions": protocol.expected_em_executions,
+            "replicate": context["replicate"],
+            "start_label": context["start_label"],
+            "execution_kind": context["execution_kind"],
+            # Structurally zero: nothing here retries, replaces Z or reseeds.
+            "retry_count": 0,
+            "replacement_count": 0,
+            "seed_rescue_count": 0,
+            "git_sha": _git_sha(),
+            "artifacts_written": written,
+            "completed_runs": len(results),
+            "note": "The stage stopped here. Do not rerun, reseed or widen "
+                    "any budget in response; hand this to a human.",
+        })
+        raise
+
+    _require(ledger.attempted == protocol.expected_em_executions,
+             f"attempted {ledger.attempted} EM executions, expected "
              f"{protocol.expected_em_executions}")
 
     summary = build_summary(protocol, results, provenance)
     runinfo = build_runinfo(
         protocol, started=started,
         finished=datetime.now(timezone.utc).isoformat(),
-        em_executions=em_executions)
-    write_artifacts(out_dir, protocol, runinfo=runinfo, provenance=provenance,
+        em_executions=ledger.attempted, status="SUCCESS")
+    write_artifacts(out_dir, runinfo=runinfo, provenance=provenance,
                     gates=gates, scores=scores, traces=traces, fits=fits,
                     summary=summary)
     return summary
