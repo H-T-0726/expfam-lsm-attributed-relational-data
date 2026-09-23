@@ -694,10 +694,22 @@ def audit(run_dir: Path,
     # Candidate-convergence gate: an execution-integrity condition, not an
     # accuracy threshold.  Recomputed here from the artifact rather than
     # trusted from summary.json.
+    #
+    # It has to read BOTH tables. family_scores.csv holds the final
+    # iteration's candidates, but the A-type update selects a family at every
+    # EM iteration and each of those decisions feeds the next E-step, so a
+    # candidate that failed to converge in an earlier iteration still shaped
+    # the result. selection_trace.csv is where those iterations are recorded.
     non_converged = [row for row in score_rows
                      if row.get("optimiser_converged", "") != ""
                      and not _truthy(row.get("optimiser_converged", ""))]
-    recomputed_gate = "BLOCKED_FOR_PILOT" if non_converged else "READY_FOR_PILOT"
+    non_converged_iterations = [
+        row for row in trace_rows
+        if row.get("all_candidates_converged", "") != ""
+        and not _truthy(row.get("all_candidates_converged", ""))]
+    recomputed_gate = ("BLOCKED_FOR_PILOT"
+                       if (non_converged or non_converged_iterations)
+                       else "READY_FOR_PILOT")
     reported_gate = (summary.get("convergence_gate", {}) or {}).get("status")
     if reported_gate != recomputed_gate:
         findings.append(Finding(
@@ -718,6 +730,7 @@ def audit(run_dir: Path,
 
     report = _finish(run_dir, stage, findings, run_status=run_status)
     report["convergence_gate"] = recomputed_gate
+    report["non_converged_iteration_rows"] = len(non_converged_iterations)
     # The composite gate. An artifact audit says the run is clean evidence;
     # the convergence gate says the frozen score was actually optimised.  The
     # next EM stage needs BOTH, and automation must read this field rather

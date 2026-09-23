@@ -1117,3 +1117,57 @@ def test_the_composite_rule_is_stated_in_the_report(tmp_path, stub_hybrid,
     report = auditor.audit(out)
     assert report["pilot_progression_rule"] == (
         "progress_eligible and convergence_gate == READY_FOR_PILOT")
+
+
+def test_the_gate_recomputation_reads_the_iteration_trace_too(tmp_path,
+                                                              stub_hybrid,
+                                                              approved):
+    """A candidate that failed to converge in an earlier iteration still counts.
+
+    The A-type update selects a family at every EM iteration and each of those
+    decisions feeds the next E-step, so reading only the final iteration's
+    candidate rows would let an earlier non-convergence disappear from the
+    gate. Gate 74-B3 smoke-v2 hit exactly this: every final candidate
+    converged while seven intermediate iterations had one that did not.
+    """
+
+    stub_hybrid()
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    # The run is clean, so both tables agree and the gate is READY.
+    assert auditor.audit(out)["convergence_gate"] == PILOT_GATE_PASS
+
+    # Now mark one INTERMEDIATE trace row as not converged, leaving every
+    # family_scores row converged.
+    path = out / "selection_trace.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+        fieldnames = list(rows[0])
+    rows[0]["all_candidates_converged"] = "False"
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    with (out / "family_scores.csv").open(encoding="utf-8") as handle:
+        scores = list(csv.DictReader(handle))
+    assert all(row["optimiser_converged"] == "True" for row in scores)
+
+    report = auditor.audit(out)
+    assert report["convergence_gate"] == PILOT_GATE_BLOCKED
+    assert report["non_converged_iteration_rows"] == 1
+    assert report["pilot_progress_eligible"] is False
+
+
+def test_the_gate_recomputation_still_reads_the_candidate_rows(tmp_path,
+                                                               stub_hybrid,
+                                                               approved):
+    """The other source must keep working: both tables, not one or the other."""
+
+    stub_hybrid(converged=False)
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+    report = auditor.audit(out)
+    assert report["convergence_gate"] == PILOT_GATE_BLOCKED
+    assert report["non_converged_candidate_rows"] > 0
