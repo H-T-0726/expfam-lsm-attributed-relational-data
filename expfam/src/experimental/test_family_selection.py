@@ -238,7 +238,7 @@ def test_optimiser_improves_its_own_objective(fixed_samples):
     init = np.full(K, 0.05)
     for family in ("bernoulli", "poisson"):
         before = column_log_likelihood(x, fixed_samples, init, family)
-        loading, sigma_sq, _ = optimise_column_loading(
+        loading, sigma_sq, _, _ = optimise_column_loading(
             x, fixed_samples, family, loading_init=init)
         after = column_log_likelihood(x, fixed_samples, loading, family,
                                       sigma_sq=sigma_sq)
@@ -272,6 +272,31 @@ def test_gaussian_candidate_profiles_its_variance(fixed_samples):
 def _record(family: str, score: float) -> CandidateRecord:
     return CandidateRecord(column=0, family=family, score=score,
                            loading=np.zeros(K), sigma_sq=None, n_iter=1)
+
+
+def test_candidate_convergence_is_reported(fixed_samples):
+    """A challenger that used the whole budget must be visible to an audit.
+
+    Both candidates start from the incumbent loading, so a challenger can stop
+    short of its own optimum and score too low.  The flag is what lets a
+    reviewer tell that case apart from a genuine margin.
+    """
+
+    x = np.array([0.0, 1.0] * (N // 2))
+    init = np.full(K, 0.05)
+    _, _, n_iter, converged = optimise_column_loading(
+        x, fixed_samples, "bernoulli", loading_init=init, max_iter=2)
+    assert n_iter == 2 and converged is False
+
+    _, _, _, converged_loose = optimise_column_loading(
+        x, fixed_samples, "bernoulli", loading_init=init, tol=1e9)
+    assert converged_loose is True
+
+    gate, = support_gate(x[:, None])
+    records = score_column_candidates(x, fixed_samples, gate, loading_init=init)
+    for record in records:
+        assert isinstance(record.converged, bool)
+        assert record.as_row()["optimiser_converged"] == record.converged
 
 
 def test_tie_rule_is_deterministic_and_follows_the_declared_priority():
@@ -405,6 +430,7 @@ def test_selection_trace_records_both_candidate_scores(mixed_columns, fixed_samp
     assert row["margin_neg2"] >= 0.0
     assert row["previous_family"] == "bernoulli"
     assert isinstance(row["changed"], bool)
+    assert isinstance(row["all_candidates_converged"], bool)
 
 
 def test_reassign_families_updates_the_column_index_sets(mixed_columns):

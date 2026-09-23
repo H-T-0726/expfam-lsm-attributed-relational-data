@@ -314,7 +314,7 @@ def optimise_column_loading(
     beta2: float = ADAM_BETA2,
     eps: float = ADAM_EPS,
     tol: float = ADAM_TOL,
-) -> tuple[np.ndarray, float | None, int]:
+) -> tuple[np.ndarray, float | None, int, bool]:
     """Optimise ``f_l`` for ONE candidate family on FIXED posterior samples.
 
     Every candidate gets its own ``f_l``: a different link implies a different
@@ -323,8 +323,19 @@ def optimise_column_loading(
     candidate also gets the SAME ``Z_samples``, the same optimiser budget and
     the same tolerance, so a score difference cannot come from unequal effort.
 
-    Returns ``(loading, sigma_sq, n_iter)``; ``sigma_sq`` is the profiled
-    Gaussian variance, and ``None`` for the other families.
+    Both candidates also start from the SAME loading: the incumbent row of the
+    current ``F``.  That is the only shared starting point available inside the
+    EM, but it is not neutral -- the incumbent family's row is already near ITS
+    optimum, while the challenger may need more than ``max_iter`` steps to
+    reach its own.  A challenger that stops early scores too low, which biases
+    the comparison toward the incumbent and is one concrete mechanism behind
+    the path dependence that design section 7 flags for scheme A.  The returned
+    ``converged`` flag makes that observable instead of silent: an audit can
+    count the candidates that used the whole budget, and a margin backed by a
+    non-converged challenger should not be read as a confident decision.
+
+    Returns ``(loading, sigma_sq, n_iter, converged)``; ``sigma_sq`` is the
+    profiled Gaussian variance, and ``None`` for the other families.
     """
 
     _require(family in VALID_FAMILIES, f"unknown family {family!r}")
@@ -336,6 +347,7 @@ def optimise_column_loading(
     first_moment = np.zeros_like(loading)
     second_moment = np.zeros_like(loading)
     used_iter = 0
+    converged = False
 
     for step in range(1, max_iter + 1):
         used_iter = step
@@ -366,7 +378,7 @@ def optimise_column_loading(
         residual = np.asarray(x_column, dtype=np.float64)[:, None] - \
             _column_eta(Z_samples, loading)
         sigma_sq = max(float(np.mean(residual ** 2)), SIGMA_SQ_FLOOR)
-    return loading, sigma_sq, used_iter
+    return loading, sigma_sq, used_iter, converged
 
 
 @dataclass
@@ -379,6 +391,7 @@ class CandidateRecord:
     loading: np.ndarray
     sigma_sq: float | None
     n_iter: int
+    converged: bool = True
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -388,6 +401,7 @@ class CandidateRecord:
             "neg2_score": -2.0 * self.score,
             "sigma_sq": "" if self.sigma_sq is None else self.sigma_sq,
             "optimiser_iterations": self.n_iter,
+            "optimiser_converged": self.converged,
             "loading_norm": float(np.linalg.norm(self.loading)),
         }
 
@@ -403,13 +417,14 @@ def score_column_candidates(
 
     records: list[CandidateRecord] = []
     for family in gate.candidates:
-        loading, sigma_sq, n_iter = optimise_column_loading(
+        loading, sigma_sq, n_iter, converged = optimise_column_loading(
             x_column, Z_samples, family, loading_init=loading_init)
         score = column_log_likelihood(
             x_column, Z_samples, loading, family, sigma_sq=sigma_sq)
         records.append(CandidateRecord(
             column=gate.column, family=family, score=score,
-            loading=loading, sigma_sq=sigma_sq, n_iter=n_iter))
+            loading=loading, sigma_sq=sigma_sq, n_iter=n_iter,
+            converged=converged))
     return records
 
 
@@ -502,6 +517,10 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
                 "selected_family": chosen,
                 "margin_neg2": margin,
                 "changed": chosen != self.family_x_list[gate.column],
+                # A margin whose loser never converged is not a confident
+                # decision; record it rather than let the margin stand alone.
+                "all_candidates_converged": all(r.converged
+                                                for r in column_records),
                 **{f"score_{r.family}": r.score for r in column_records},
             })
         self.last_candidate_records = records
