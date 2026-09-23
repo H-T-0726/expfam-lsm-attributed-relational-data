@@ -1,0 +1,208 @@
+{
+  "validator_version": "candidate-optimizer-migration-v1",
+  "gate": "74-B2",
+  "derived_from_gate": "74-B1R",
+  "uses_rng": false,
+  "uses_smoke_artifacts": false,
+  "em_executions": 0,
+  "phase9c_candidate_optimizer": "bfgs",
+  "candidate_optimizer_settings": {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": false,
+    "fallback_solvers": []
+  },
+  "candidate_convergence_rule": {
+    "rule": "finite and final analytic gradient infinity norm <= tol",
+    "convergence_grad_inf_tol": 1e-08,
+    "scipy_success_is_criterion": false
+  },
+  "historical_adam_preserved": true,
+  "historical_adam_settings": {
+    "max_iter": 50,
+    "lr": 0.01,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "eps": 1e-08,
+    "tol": 1e-06,
+    "convergence_rule": "step infinity norm below tol"
+  },
+  "comparison_tolerances": {
+    "score_match_tol": 1e-08,
+    "loading_match_tol": 1e-05
+  },
+  "certified_reference": {
+    "gate": "74-B1R",
+    "artifact_path": "D:\\tento\\kennkyu-74-family-impl\\expfam\\results\\family_selection\\optimizer_validation_analytic_jac_20260923",
+    "git_sha": "b84ec9e8984a12354b5ec1523b28c1563588d724",
+    "validator_version": "candidate-optimizer-validation-analytic-jac-v1",
+    "solver": {
+      "library": "scipy.optimize.minimize",
+      "method": "BFGS",
+      "jac": "analytic_production_gradient",
+      "maxiter": 2000,
+      "gtol": 1e-10,
+      "finite_difference_jacobian": false,
+      "fallback_solvers": [],
+      "changed_from_b1": "jac only: B1 used numerical differentiation (jac=None); B1R supplies the production analytic gradient that B1 validated"
+    },
+    "used_as": "frozen comparison target only; never recomputed, never written to"
+  },
+  "base_vectors": [
+    [
+      1.0,
+      0.2,
+      -0.1
+    ],
+    [
+      -0.6,
+      1.0,
+      0.3
+    ],
+    [
+      0.4,
+      -0.7,
+      1.0
+    ],
+    [
+      -1.0,
+      -0.2,
+      0.5
+    ],
+    [
+      0.3,
+      0.8,
+      -0.9
+    ],
+    [
+      -0.5,
+      0.4,
+      -0.8
+    ]
+  ],
+  "group_repeats": 4,
+  "sample_scales": [
+    0.96,
+    0.98,
+    1.0,
+    1.02,
+    1.04
+  ],
+  "n": 24,
+  "k": 3,
+  "L": 5,
+  "z_samples_sha256": "bb44ccbe96afaa1deddaea0137701c177e3158edef7af9dc0111f57caabe1a63",
+  "cases": {
+    "case_A_balanced_nonseparable": [
+      [
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ]
+    ],
+    "case_B_sparse_nonseparable": [
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "case_column_sha256": {
+    "case_A_balanced_nonseparable": "388dd028982d5aa7de5711b0314a536bfd08cbe95ecbb863052fc039f41d3e1c",
+    "case_B_sparse_nonseparable": "44f19ec86df0364632c09c75ec3297e37ea94cb30b35e82f665120f57eb03e4c"
+  },
+  "initialisations": {
+    "init_zero": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "init_pos": [
+      0.6,
+      -0.4,
+      0.3
+    ],
+    "init_neg": [
+      -0.6,
+      0.4,
+      -0.3
+    ]
+  },
+  "families": [
+    "bernoulli",
+    "poisson"
+  ],
+  "expected_migration_rows": 12,
+  "production_change_outside_phase9c_selector": false,
+  "git_sha": "a348b2ab7d12d99ece4dbbaa6fb6a2be523463ea",
+  "git_dirty": false,
+  "python_version": "3.13.14",
+  "numpy_version": "2.3.5",
+  "scipy_version": "1.16.3",
+  "note": "Migration regression check for Gate 74-B2 only. It is not a new scientific experiment, it does not reclassify the Gate 74-B smoke, and it authorises no execution by itself."
+}

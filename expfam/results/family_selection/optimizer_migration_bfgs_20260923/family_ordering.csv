@@ -1,0 +1,7 @@
+case,init,reference_winner,reference_score_bernoulli,reference_score_poisson,migrated_winner,migrated_score_bernoulli,migrated_score_poisson,ordering_agrees
+case_A_balanced_nonseparable,init_zero,bernoulli,-14.827889129646644,-21.52200123228716,bernoulli,-14.827889129646644,-21.52200123228716,True
+case_A_balanced_nonseparable,init_pos,bernoulli,-14.827889129646644,-21.52200123228716,bernoulli,-14.827889129646644,-21.52200123228716,True
+case_A_balanced_nonseparable,init_neg,bernoulli,-14.827889129646644,-21.52200123228716,bernoulli,-14.827889129646646,-21.52200123228716,True
+case_B_sparse_nonseparable,init_zero,bernoulli,-15.373228816243131,-21.44416310994483,bernoulli,-15.373228816243131,-21.44416310994483,True
+case_B_sparse_nonseparable,init_pos,bernoulli,-15.373228816243131,-21.44416310994483,bernoulli,-15.373228816243131,-21.44416310994483,True
+case_B_sparse_nonseparable,init_neg,bernoulli,-15.373228816243131,-21.44416310994483,bernoulli,-15.373228816243131,-21.44416310994483,True
