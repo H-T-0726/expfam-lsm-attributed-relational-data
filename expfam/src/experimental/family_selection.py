@@ -661,6 +661,29 @@ def score_column_candidates(
     return records
 
 
+def _candidate_provenance_fields(records: Sequence[CandidateRecord]
+                                 ) -> dict[str, Any]:
+    """Per-candidate diagnostics for one selection-trace row.
+
+    Purely observational: every value is read from a CandidateRecord that has
+    already been computed, so adding these fields runs no optimiser and
+    changes no number. The aggregate ``all_candidates_converged`` continues to
+    carry the gate; these say how far each candidate actually got.
+    """
+
+    fields: dict[str, Any] = {}
+    for record in records:
+        prefix = record.family
+        provenance = record.provenance or {}
+        fields[f"{prefix}_optimizer"] = record.optimizer
+        fields[f"{prefix}_n_iter"] = record.n_iter
+        fields[f"{prefix}_converged"] = record.converged
+        fields[f"{prefix}_grad_inf"] = record.gradient_inf
+        fields[f"{prefix}_scipy_success"] = provenance.get("scipy_success", "")
+        fields[f"{prefix}_scipy_status"] = provenance.get("scipy_status", "")
+    return fields
+
+
 def select_from_records(records: Sequence[CandidateRecord]) -> tuple[str, float]:
     """Pick the best candidate and report its margin, with a deterministic tie rule.
 
@@ -767,14 +790,29 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
                 "changed": chosen != self.family_x_list[gate.column],
                 # A margin whose loser never converged is not a confident
                 # decision; record it rather than let the margin stand alone.
+                # This aggregate keeps its original meaning: the strict gate
+                # reads it, and B4 did not change what it means.
                 "all_candidates_converged": all(r.converged
                                                 for r in column_records),
                 **{f"score_{r.family}": r.score for r in column_records},
+                # Per-candidate diagnostics. Gate 74-B3 recorded only the
+                # aggregate above, so when seven intermediate iterations came
+                # back false there was no way to tell how far off they were.
+                # Read straight off the records that were already computed:
+                # no optimiser runs again for this.
+                **_candidate_provenance_fields(column_records),
             })
         self.last_candidate_records = records
         return assignment
 
     def calc_F(self, X: np.ndarray, Z_samples: np.ndarray) -> np.ndarray:
+        # NOTE on what this does and does not install. select_families
+        # optimises a candidate-specific loading for each family PURELY TO
+        # SCORE IT, and keeps only the winning family NAME. The loading is
+        # discarded: super().calc_F below recomputes the whole of F from
+        # self.params["F"] under the new assignment. So the parameter the
+        # model carries forward for an ambiguous column is not the optimum
+        # that produced its score. See the Gate 74-B4 semantics report.
         if self.family_update_enabled:
             self._iteration += 1
             self.reassign_families(self.select_families(X, Z_samples))
@@ -1133,6 +1171,7 @@ __all__ = [
     "run_hybrid_family_selection",
     "pilot_convergence_gate",
     "PILOT_GATE_PASS",
+    "_candidate_provenance_fields",
     "PILOT_GATE_BLOCKED",
     "EMFailFast",
 ]
