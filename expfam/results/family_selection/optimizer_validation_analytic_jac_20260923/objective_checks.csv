@@ -1,0 +1,13 @@
+case,family,init,production_score,independent_score,abs_difference,tolerance,passed
+case_A_balanced_nonseparable,bernoulli,init_zero,-16.635532333438686,-16.635532333438686,0.0,1e-10,True
+case_A_balanced_nonseparable,bernoulli,init_pos,-15.344413451464007,-15.344413451464007,0.0,1e-10,True
+case_A_balanced_nonseparable,bernoulli,init_neg,-20.04441345146401,-20.04441345146401,0.0,1e-10,True
+case_A_balanced_nonseparable,poisson,init_zero,-24.0,-24.0,0.0,1e-10,True
+case_A_balanced_nonseparable,poisson,init_pos,-24.396134740052045,-24.396134740052045,0.0,1e-10,True
+case_A_balanced_nonseparable,poisson,init_neg,-32.576816080119464,-32.576816080119464,0.0,1e-10,True
+case_B_sparse_nonseparable,bernoulli,init_zero,-16.635532333438686,-16.635532333438686,0.0,1e-10,True
+case_B_sparse_nonseparable,bernoulli,init_pos,-15.544413451464006,-15.544413451464006,0.0,1e-10,True
+case_B_sparse_nonseparable,bernoulli,init_neg,-19.84441345146401,-19.84441345146401,0.0,1e-10,True
+case_B_sparse_nonseparable,poisson,init_zero,-24.0,-24.0,0.0,1e-10,True
+case_B_sparse_nonseparable,poisson,init_pos,-24.596134740052044,-24.596134740052044,0.0,1e-10,True
+case_B_sparse_nonseparable,poisson,init_neg,-32.37681608011947,-32.37681608011947,0.0,1e-10,True
