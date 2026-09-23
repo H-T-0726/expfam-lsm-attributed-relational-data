@@ -79,13 +79,20 @@ RUNNER_VERSION = "family-selection-pilot-runner-v2"
 EXPLORATION_NUM_ITER_APPROVAL: dict[str, Any] = {
     "parameter": "exploration_num_iter",
     "value": 8,
-    "approved": False,
-    "rationale": "same budget as the fixed-family refit, which Issue #74 froze "
-                 "at 8; proposed for the minimal pilot only",
-    "approved_by": None,
-    "approved_in": None,
-    "note": "Issue #74 froze refit num_iter only. Until a human approves this "
-            "value, no stage may execute.",
+    "approved": True,
+    "rationale": "match the already-frozen fixed-family refit budget "
+                 "(num_iter=8) and avoid introducing a new tuning axis in "
+                 "this feasibility pilot",
+    "approved_by": "Human",
+    "approved_in": "Issue #74 Human Gate approval comment",
+    "approval_url": "https://github.com/H-T-0726/"
+                    "expfam-lsm-attributed-relational-data/issues/74"
+                    "#issuecomment-5795174457",
+    "approval_date": "2026-09-23",
+    "scope": "Issue #74 Phase 9C feasibility pilot only; does not generalise "
+             "to other experiments or to any manuscript claim",
+    "note": "Issue #74 froze refit num_iter only. This value was approved "
+            "separately and explicitly; no stage may execute without it.",
 }
 
 # Both starts are run on the same data with the same seeds; the pair is what
@@ -314,12 +321,19 @@ def _git_dirty() -> bool:
 def build_runinfo(protocol: Protocol, *, started: str,
                   finished: str | None = None,
                   em_executions: int = 0,
-                  status: str = "RUNNING") -> dict[str, Any]:
+                  status: str = "RUNNING",
+                  git_sha: str | None = None,
+                  git_dirty: bool | None = None) -> dict[str, Any]:
     """Provenance for the run.
 
     ``em_executions`` counts real EM executions ATTEMPTED, so a run that died
     inside a fit still reports the work it started.  Written once before the
     first execution and rewritten at the end.
+
+    ``git_sha`` and ``git_dirty`` are captured by the caller BEFORE the run
+    creates its own output directory, because "was the working tree clean"
+    is a question about the code that ran, and a run writing its own artifacts
+    into the repository would otherwise report itself as a modification.
     """
 
     return {
@@ -327,8 +341,8 @@ def build_runinfo(protocol: Protocol, *, started: str,
         "selector_version": SELECTOR_VERSION,
         "generator_version": MIXED_GENERATOR_VERSION,
         "stage": protocol.stage,
-        "git_sha": _git_sha(),
-        "git_dirty": _git_dirty(),
+        "git_sha": _git_sha() if git_sha is None else git_sha,
+        "git_dirty": _git_dirty() if git_dirty is None else git_dirty,
         "python_version": platform.python_version(),
         "platform": platform.platform(),
         "numpy_version": np.__version__,
@@ -738,13 +752,18 @@ def execute(stage: str, out_dir: Path, verbose: bool = False) -> dict[str, Any]:
              "human has approved the value; until then no stage executes.")
 
     started = datetime.now(timezone.utc).isoformat()
+    # Captured before the run writes anything: the run's own artifacts are not
+    # a modification of the code under test.
+    code_sha = _git_sha()
+    code_dirty = _git_dirty()
 
     # --- reserve the run directory and commit the protocol before any EM ---
     out_dir.mkdir(parents=True, exist_ok=False)
     _write_json(out_dir / "protocol.json", protocol.as_json())
     _write_json(out_dir / "runinfo.json",
                 build_runinfo(protocol, started=started, em_executions=0,
-                              status="RUNNING"))
+                              status="RUNNING", git_sha=code_sha,
+                              git_dirty=code_dirty))
     ledger = ExecutionLedger(out_dir / "execution_ledger.csv", protocol.stage)
 
     provenance: list[dict[str, Any]] = []
@@ -787,7 +806,8 @@ def execute(stage: str, out_dir: Path, verbose: bool = False) -> dict[str, Any]:
         runinfo = build_runinfo(
             protocol, started=started,
             finished=datetime.now(timezone.utc).isoformat(),
-            em_executions=ledger.attempted, status="FAILED")
+            em_executions=ledger.attempted, status="FAILED",
+            git_sha=code_sha, git_dirty=code_dirty)
         written = write_artifacts(
             out_dir, runinfo=runinfo, provenance=provenance, gates=gates,
             scores=scores, traces=traces, fits=fits, summary=None)
@@ -805,7 +825,8 @@ def execute(stage: str, out_dir: Path, verbose: bool = False) -> dict[str, Any]:
             "retry_count": 0,
             "replacement_count": 0,
             "seed_rescue_count": 0,
-            "git_sha": _git_sha(),
+            "git_sha": code_sha,
+            "git_dirty": code_dirty,
             "artifacts_written": written,
             "completed_runs": len(results),
             "note": "The stage stopped here. Do not rerun, reseed or widen "
@@ -821,7 +842,8 @@ def execute(stage: str, out_dir: Path, verbose: bool = False) -> dict[str, Any]:
     runinfo = build_runinfo(
         protocol, started=started,
         finished=datetime.now(timezone.utc).isoformat(),
-        em_executions=ledger.attempted, status="SUCCESS")
+        em_executions=ledger.attempted, status="SUCCESS",
+        git_sha=code_sha, git_dirty=code_dirty)
     write_artifacts(out_dir, runinfo=runinfo, provenance=provenance,
                     gates=gates, scores=scores, traces=traces, fits=fits,
                     summary=summary)

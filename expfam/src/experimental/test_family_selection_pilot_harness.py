@@ -320,20 +320,16 @@ def _fake_hybrid(protocol, dataset, ambiguous_start, search_seed, refit_seed,
 
 
 @pytest.fixture
-def approved(monkeypatch):
-    """Stand in for the human approval of the one unfrozen condition.
+def approved():
+    """The human approval is now recorded in the module itself.
 
-    Issue #74 froze the refit num_iter but not the exploration length, so the
-    runner refuses to execute until a human records an approval.  The tests
-    that exercise the pipeline record one; the test that checks the refusal
-    does not use this fixture.
+    Issue #74 froze the refit num_iter but not the exploration length; a human
+    approved the latter separately (Issue #74 Human Gate comment), so the
+    record ships approved.  This fixture stays as the seam the pipeline tests
+    declare, and asserts the precondition they rely on rather than faking it.
     """
 
-    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved", True)
-    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved_by",
-                        "test fixture")
-    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved_in",
-                        "test_family_selection_pilot_harness.py")
+    assert runner.EXPLORATION_NUM_ITER_APPROVAL["approved"] is True
 
 
 @pytest.fixture
@@ -955,19 +951,30 @@ def test_unexpected_rows_block_progression(tmp_path, stub_hybrid, approved):
 # 9. the one condition Issue #74 did not freeze
 # --------------------------------------------------------------------------
 
-def test_exploration_num_iter_is_not_approved_by_default():
-    """The implementation must not promote its own protocol choice."""
+def test_the_human_approval_is_recorded_with_its_provenance():
+    """The value is 8 because a human said so, and the record says where."""
 
     record = runner.EXPLORATION_NUM_ITER_APPROVAL
     assert record["parameter"] == "exploration_num_iter"
     assert record["value"] == 8
-    assert record["approved"] is False
-    assert record["approved_by"] is None
-    assert record["approved_in"] is None
+    assert record["approved"] is True
+    assert record["approved_by"] == "Human"
+    assert "Issue #74" in record["approved_in"]
+    assert "issuecomment-5795174457" in record["approval_url"]
+    # The approval is scoped; it is not a general licence for this value.
+    assert "feasibility pilot only" in record["scope"]
+    assert runner.SMOKE.exploration_num_iter == record["value"]
+    assert runner.PILOT.exploration_num_iter == record["value"]
 
 
-def test_execute_refuses_to_run_without_that_approval(tmp_path, stub_hybrid):
+def test_execute_still_refuses_when_an_approval_is_withdrawn(tmp_path,
+                                                             stub_hybrid,
+                                                             monkeypatch):
+    """The gate is a live check, not a comment that was true once."""
+
     stub_hybrid()
+    monkeypatch.setitem(runner.EXPLORATION_NUM_ITER_APPROVAL, "approved",
+                        False)
     out = tmp_path / "smoke_run"
     with pytest.raises(runner.RunnerStop, match="has not been approved"):
         runner.execute("smoke", out)
@@ -982,7 +989,8 @@ def test_protocol_records_the_approval_state(tmp_path, stub_hybrid, approved):
     approval, = protocol["human_approvals"]
     assert approval["parameter"] == "exploration_num_iter"
     assert approval["approved"] is True
-    assert approval["approved_by"] == "test fixture"
+    assert approval["approved_by"] == "Human"
+    assert "issuecomment-5795174457" in approval["approval_url"]
 
 
 def test_auditor_blocks_progression_on_an_unapproved_condition(tmp_path,
@@ -1002,3 +1010,33 @@ def test_auditor_blocks_progression_on_an_unapproved_condition(tmp_path,
     assert report["progress_eligible"] is False
     assert any("without a recorded human approval" in f["message"]
                for f in report["findings"])
+
+
+def test_worktree_state_is_captured_before_the_run_writes_anything(
+        tmp_path, stub_hybrid, approved, monkeypatch):
+    """A run writing its own artifacts must not report itself as a change.
+
+    "Was the working tree clean" is a question about the code that ran. If it
+    were evaluated after the run had created its output directory inside the
+    repository, every run would record git_dirty=True and block its own
+    progression.
+    """
+
+    stub_hybrid()
+    calls = {"n": 0}
+
+    def counting_dirty():
+        calls["n"] += 1
+        return calls["n"] > 1          # clean only on the first call
+
+    # Installed after stub_hybrid, which also pins _git_dirty.
+    monkeypatch.setattr(runner, "_git_dirty", counting_dirty)
+    out = tmp_path / "smoke_run"
+    runner.execute("smoke", out)
+
+    runinfo = json.loads((out / "runinfo.json").read_text(encoding="utf-8"))
+    assert runinfo["git_dirty"] is False
+    assert calls["n"] == 1             # asked once, before the run began
+
+    report = auditor.audit(out)
+    assert report["progress_eligible"] is True
