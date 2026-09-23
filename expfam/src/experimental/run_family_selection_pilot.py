@@ -60,6 +60,12 @@ from data_generator_canonical_mixed import (                       # noqa: E402
     generate_canonical_mixed_data,
 )
 from family_selection import (                                     # noqa: E402
+    BFGS_GTOL,
+    BFGS_MAXITER,
+    BFGS_METHOD,
+    CANDIDATE_GRAD_INF_TOL,
+    OPTIMIZER_BFGS,
+    PHASE9C_CANDIDATE_OPTIMIZER,
     SELECTOR_VERSION,
     pilot_convergence_gate,
     run_hybrid_family_selection,
@@ -151,6 +157,20 @@ class Protocol:
                              for label, family in STARTS]
         payload["expected_em_executions"] = self.expected_em_executions
         payload["human_approvals"] = [dict(EXPLORATION_NUM_ITER_APPROVAL)]
+        # Which optimiser produced the candidate scores is part of what the
+        # run means, so it is recorded in the protocol rather than left to be
+        # inferred from the rows.
+        payload["candidate_optimizer"] = PHASE9C_CANDIDATE_OPTIMIZER
+        payload["candidate_optimizer_settings"] = (
+            {"method": BFGS_METHOD, "jac": "analytic_production_gradient",
+             "maxiter": BFGS_MAXITER, "gtol": BFGS_GTOL,
+             "finite_difference_jacobian": False, "fallback_solvers": []}
+            if PHASE9C_CANDIDATE_OPTIMIZER == OPTIMIZER_BFGS else {})
+        payload["candidate_convergence_rule"] = {
+            "rule": "finite and final analytic gradient infinity norm <= tol",
+            "convergence_grad_inf_tol": CANDIDATE_GRAD_INF_TOL,
+            "scipy_success_is_criterion": False,
+        }
         return payload
 
 
@@ -355,6 +375,7 @@ def build_runinfo(protocol: Protocol, *, started: str,
         "expected_em_executions": protocol.expected_em_executions,
         "numerics_mode": "consistent",
         "failure_policy": "fail_fast",
+        "candidate_optimizer": PHASE9C_CANDIDATE_OPTIMIZER,
         "lineage": "E (experimental prototype; not adoptable for the manuscript)",
     }
 

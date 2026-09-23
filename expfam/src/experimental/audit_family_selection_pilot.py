@@ -132,6 +132,20 @@ MAX_TOTAL_EM_EXECUTIONS = 16
 REQUIRED_CLAIM_BOUNDARY_KEYS = (
     "score_decides_only", "gate_decides", "do_not_report", "lineage")
 
+# The Phase 9C candidate optimiser a human approved in the Gate 74-B2
+# migration, transcribed here rather than imported. Only checked when the
+# caller says which optimiser it expects: a run recorded before this field
+# existed is audited on its own terms, not retroactively failed.
+APPROVED_CANDIDATE_OPTIMIZER = "bfgs"
+APPROVED_OPTIMIZER_SETTINGS = {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": False,
+}
+APPROVED_CONVERGENCE_GRAD_INF_TOL = 1e-8
+
 
 class Finding(dict):
     """One audit finding. A dict so it serialises without ceremony."""
@@ -335,6 +349,77 @@ def _check_gate_columns(gate_rows: Sequence[dict[str, str]],
     return ambiguous
 
 
+def _check_candidate_optimizer(protocol: dict[str, Any],
+                               score_rows: Sequence[dict[str, str]],
+                               expected: str,
+                               findings: list[Finding]) -> None:
+    """Verify the run used the optimiser the caller says it should have.
+
+    The candidate optimiser is the one intended difference between Gate 74-B
+    smoke and smoke-v2, so "only that changed" is worth checking positively:
+    the protocol must declare it, the approved settings must be recorded, and
+    every scored candidate row must carry that optimiser with a convergence
+    flag consistent with the gradient it reached.
+    """
+
+    declared = protocol.get("candidate_optimizer")
+    if declared != expected:
+        findings.append(Finding(
+            "BLOCKER", "candidate_optimizer",
+            f"protocol.json declares candidate_optimizer {declared!r}, "
+            f"expected {expected!r}"))
+
+    if expected == APPROVED_CANDIDATE_OPTIMIZER:
+        settings = protocol.get("candidate_optimizer_settings", {}) or {}
+        for key, wanted in APPROVED_OPTIMIZER_SETTINGS.items():
+            if settings.get(key) != wanted:
+                findings.append(Finding(
+                    "BLOCKER", "candidate_optimizer",
+                    f"candidate optimiser {key} is {settings.get(key)!r}, "
+                    f"expected the approved {wanted!r}"))
+        if settings.get("fallback_solvers"):
+            findings.append(Finding(
+                "BLOCKER", "candidate_optimizer",
+                f"a fallback solver is recorded: "
+                f"{settings.get('fallback_solvers')!r}"))
+        rule = protocol.get("candidate_convergence_rule", {}) or {}
+        if rule.get("convergence_grad_inf_tol") != \
+                APPROVED_CONVERGENCE_GRAD_INF_TOL:
+            findings.append(Finding(
+                "BLOCKER", "candidate_optimizer",
+                f"the candidate convergence threshold is "
+                f"{rule.get('convergence_grad_inf_tol')!r}, expected "
+                f"{APPROVED_CONVERGENCE_GRAD_INF_TOL!r}"))
+        if rule.get("scipy_success_is_criterion") is not False:
+            findings.append(Finding(
+                "BLOCKER", "candidate_optimizer",
+                "SciPy success must not be the convergence criterion"))
+
+    for row in score_rows:
+        label = (f"{row.get('replicate')}/{row.get('start_label')}/"
+                 f"column {row.get('column')}/{row.get('candidate_family')}")
+        if row.get("optimizer") != expected:
+            findings.append(Finding(
+                "BLOCKER", "candidate_optimizer",
+                f"{label}: optimizer is {row.get('optimizer')!r}, expected "
+                f"{expected!r}"))
+        gradient = _as_float(row.get("optimiser_gradient_inf", ""))
+        if gradient is None or not math.isfinite(gradient):
+            findings.append(Finding(
+                "BLOCKER", "candidate_optimizer",
+                f"{label}: gradient infinity norm is "
+                f"{row.get('optimiser_gradient_inf')!r}"))
+            continue
+        if expected == APPROVED_CANDIDATE_OPTIMIZER:
+            converged = _truthy(row.get("optimiser_converged", ""))
+            should = gradient <= APPROVED_CONVERGENCE_GRAD_INF_TOL
+            if converged != should:
+                findings.append(Finding(
+                    "BLOCKER", "candidate_optimizer",
+                    f"{label}: converged={converged} but the gradient "
+                    f"{gradient:.3e} implies {should}"))
+
+
 def _check_fits(fit_rows: Sequence[dict[str, str]], findings: list[Finding]
                 ) -> None:
     for row in fit_rows:
@@ -455,8 +540,15 @@ def _check_approvals(protocol: dict[str, Any],
                 f"it or where"))
 
 
-def audit(run_dir: Path) -> dict[str, Any]:
-    """Audit a finished run directory and return the report."""
+def audit(run_dir: Path,
+          expect_candidate_optimizer: str | None = None) -> dict[str, Any]:
+    """Audit a finished run directory and return the report.
+
+    ``expect_candidate_optimizer`` opts into the Gate 74-B3 check that the run
+    used a named candidate optimiser. It is off by default so that a run
+    recorded before that field existed is audited on its own terms rather than
+    retroactively failed.
+    """
 
     findings: list[Finding] = []
 
@@ -613,6 +705,10 @@ def audit(run_dir: Path) -> dict[str, Any]:
             f"summary.json reports {reported_gate!r} but the artifact rows "
             f"imply {recomputed_gate!r}"))
 
+    if expect_candidate_optimizer is not None:
+        _check_candidate_optimizer(protocol, score_rows,
+                                   expect_candidate_optimizer, findings)
+
     claim_boundary = summary.get("claim_boundary", {}) or {}
     for key in REQUIRED_CLAIM_BOUNDARY_KEYS:
         if key not in claim_boundary:
@@ -630,6 +726,7 @@ def audit(run_dir: Path) -> dict[str, Any]:
         report["progress_eligible"] and recomputed_gate == "READY_FOR_PILOT")
     report["pilot_progression_rule"] = ("progress_eligible and "
                                         "convergence_gate == READY_FOR_PILOT")
+    report["expected_candidate_optimizer"] = expect_candidate_optimizer
     report["attempted_em_executions"] = attempted
     report["non_converged_candidate_rows"] = len(non_converged)
     report["score_decided_columns"] = len(ambiguous)
@@ -675,6 +772,7 @@ def _finish(run_dir: Path, stage: str | None,
         "pilot_progress_eligible": False,
         "pilot_progression_rule": "progress_eligible and "
                                   "convergence_gate == READY_FOR_PILOT",
+        "expected_candidate_optimizer": None,
         "progression_rule": "blocker_count == 0 and high_count == 0 "
                             "and run_status == SUCCESS",
         "findings": list(findings),
@@ -699,9 +797,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Audit an Issue #74 family-selection run from its artifacts.")
     parser.add_argument("--run-dir", required=True, type=Path)
+    parser.add_argument("--expect-candidate-optimizer", default=None,
+                        help="require the run to have used this candidate "
+                             "optimizer (Gate 74-B3 uses 'bfgs')")
     args = parser.parse_args(argv)
 
-    report = audit(args.run_dir)
+    report = audit(args.run_dir, args.expect_candidate_optimizer)
     print(f"verdict={report['verdict']} run_status={report['run_status']} "
           f"blockers={report['blocker_count']} high={report['high_count']} "
           f"medium={report['medium_count']} "
