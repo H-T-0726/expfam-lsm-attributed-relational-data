@@ -64,6 +64,7 @@ from family_selection import (                                     # noqa: E402
     BFGS_MAXITER,
     BFGS_METHOD,
     CANDIDATE_GRAD_INF_TOL,
+    LOADING_INSTALLATION_POLICY,
     OPTIMIZER_BFGS,
     PHASE9C_CANDIDATE_OPTIMIZER,
     SELECTOR_VERSION,
@@ -171,6 +172,9 @@ class Protocol:
             "convergence_grad_inf_tol": CANDIDATE_GRAD_INF_TOL,
             "scipy_success_is_criterion": False,
         }
+        # What the exploration M-step installs for an ambiguous column
+        # (Gate 74-B5). Recorded so a run says which semantics produced it.
+        payload["ambiguous_loading_installation"] = LOADING_INSTALLATION_POLICY
         return payload
 
 
@@ -376,6 +380,7 @@ def build_runinfo(protocol: Protocol, *, started: str,
         "numerics_mode": "consistent",
         "failure_policy": "fail_fast",
         "candidate_optimizer": PHASE9C_CANDIDATE_OPTIMIZER,
+        "ambiguous_loading_installation": LOADING_INSTALLATION_POLICY,
         "lineage": "E (experimental prototype; not adoptable for the manuscript)",
     }
 

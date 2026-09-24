@@ -225,8 +225,13 @@ def test_the_cli_reports_and_can_write_a_report(tmp_path, capsys):
 def test_the_optimizer_check_is_opt_in(tmp_path, monkeypatch):
     """A run recorded before the field existed is audited on its own terms."""
 
-    signature_default = auditor.audit.__defaults__
-    assert signature_default == (None,)
+    import inspect
+
+    parameters = inspect.signature(auditor.audit).parameters
+    # Both later checks are opt-in: a run recorded before either field
+    # existed is audited on its own terms, not retroactively failed.
+    assert parameters["expect_candidate_optimizer"].default is None
+    assert parameters["require_installation_provenance"].default is False
 
 
 def test_the_runner_protocol_declares_the_optimizer():

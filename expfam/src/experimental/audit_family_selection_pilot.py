@@ -146,6 +146,20 @@ APPROVED_OPTIMIZER_SETTINGS = {
 }
 APPROVED_CONVERGENCE_GRAD_INF_TOL = 1e-8
 
+# Gate 74-B5 selected-candidate loading installation, transcribed here rather
+# than imported. Checked only when the caller asks for it, for the same reason
+# as the optimiser check: an earlier run is audited on its own terms.
+APPROVED_LOADING_INSTALLATION = "selected_candidate_loading"
+AMBIGUOUS_CANDIDATE_FAMILIES = ("bernoulli", "poisson")
+PER_CANDIDATE_PROVENANCE_SUFFIXES = ("optimizer", "n_iter", "converged",
+                                     "grad_inf", "scipy_success",
+                                     "scipy_status")
+INSTALLATION_FIELDS = ("selected_candidate_family", "selected_candidate_score",
+                       "selected_loading", "selected_loading_sha256",
+                       "loading_installation_policy",
+                       "selected_loading_installed",
+                       "installed_loading_sha256")
+
 
 class Finding(dict):
     """One audit finding. A dict so it serialises without ceremony."""
@@ -420,6 +434,81 @@ def _check_candidate_optimizer(protocol: dict[str, Any],
                     f"{gradient:.3e} implies {should}"))
 
 
+def _check_installation_provenance(protocol: dict[str, Any],
+                                   trace_rows: Sequence[dict[str, str]],
+                                   findings: list[Finding]) -> None:
+    """Require complete per-candidate and selected-loading evidence.
+
+    Every ambiguous selection-trace row must say, for each candidate, which
+    optimiser ran, for how many iterations, whether it converged, the
+    gradient it reached and the SciPy status; and it must show that the
+    loading installed into F is the winning candidate's own loading. A
+    missing field is a BLOCKER: the progression rule needs the evidence, and
+    an absent value cannot be read as a passing one.
+    """
+
+    declared = protocol.get("ambiguous_loading_installation")
+    if declared != APPROVED_LOADING_INSTALLATION:
+        findings.append(Finding(
+            "BLOCKER", "installation",
+            f"protocol.json declares ambiguous_loading_installation "
+            f"{declared!r}, expected {APPROVED_LOADING_INSTALLATION!r}"))
+
+    if not trace_rows:
+        findings.append(Finding(
+            "BLOCKER", "installation",
+            "there are no selection-trace rows to carry the evidence"))
+    for index, row in enumerate(trace_rows):
+        label = (f"trace row {index} ({row.get('start_label')}, iteration "
+                 f"{row.get('iteration')}, column {row.get('column')})")
+        for family in AMBIGUOUS_CANDIDATE_FAMILIES:
+            for suffix in PER_CANDIDATE_PROVENANCE_SUFFIXES:
+                key = f"{family}_{suffix}"
+                if row.get(key, "") == "":
+                    findings.append(Finding(
+                        "BLOCKER", "installation",
+                        f"{label}: {key} is missing"))
+        for key in INSTALLATION_FIELDS:
+            if row.get(key, "") == "":
+                findings.append(Finding(
+                    "BLOCKER", "installation", f"{label}: {key} is missing"))
+        if row.get("loading_installation_policy", "") not in (
+                "", APPROVED_LOADING_INSTALLATION):
+            findings.append(Finding(
+                "BLOCKER", "installation",
+                f"{label}: loading_installation_policy is "
+                f"{row.get('loading_installation_policy')!r}"))
+        if row.get("selected_loading_installed", "") != "" and \
+                not _truthy(row.get("selected_loading_installed", "")):
+            findings.append(Finding(
+                "BLOCKER", "installation",
+                f"{label}: the selected loading was not installed"))
+        selected = row.get("selected_loading_sha256", "")
+        installed = row.get("installed_loading_sha256", "")
+        if selected and installed and selected != installed:
+            findings.append(Finding(
+                "BLOCKER", "installation",
+                f"{label}: installed loading digest does not match the "
+                f"selected candidate's"))
+        if row.get("selected_candidate_family", "") and \
+                row.get("selected_candidate_family") != row.get("selected_family"):
+            findings.append(Finding(
+                "BLOCKER", "installation",
+                f"{label}: selected_candidate_family "
+                f"{row.get('selected_candidate_family')!r} is not the "
+                f"selected_family {row.get('selected_family')!r}"))
+        for family in AMBIGUOUS_CANDIDATE_FAMILIES:
+            gradient = _as_float(row.get(f"{family}_grad_inf", ""))
+            if gradient is None or not math.isfinite(gradient):
+                continue
+            converged = _truthy(row.get(f"{family}_converged", ""))
+            if converged != (gradient <= APPROVED_CONVERGENCE_GRAD_INF_TOL):
+                findings.append(Finding(
+                    "BLOCKER", "installation",
+                    f"{label}: {family}_converged={converged} but its "
+                    f"gradient {gradient:.3e} implies otherwise"))
+
+
 def _check_fits(fit_rows: Sequence[dict[str, str]], findings: list[Finding]
                 ) -> None:
     for row in fit_rows:
@@ -541,7 +630,8 @@ def _check_approvals(protocol: dict[str, Any],
 
 
 def audit(run_dir: Path,
-          expect_candidate_optimizer: str | None = None) -> dict[str, Any]:
+          expect_candidate_optimizer: str | None = None,
+          require_installation_provenance: bool = False) -> dict[str, Any]:
     """Audit a finished run directory and return the report.
 
     ``expect_candidate_optimizer`` opts into the Gate 74-B3 check that the run
@@ -720,6 +810,8 @@ def audit(run_dir: Path,
     if expect_candidate_optimizer is not None:
         _check_candidate_optimizer(protocol, score_rows,
                                    expect_candidate_optimizer, findings)
+    if require_installation_provenance:
+        _check_installation_provenance(protocol, trace_rows, findings)
 
     claim_boundary = summary.get("claim_boundary", {}) or {}
     for key in REQUIRED_CLAIM_BOUNDARY_KEYS:
@@ -740,6 +832,8 @@ def audit(run_dir: Path,
     report["pilot_progression_rule"] = ("progress_eligible and "
                                         "convergence_gate == READY_FOR_PILOT")
     report["expected_candidate_optimizer"] = expect_candidate_optimizer
+    report["installation_provenance_required"] = bool(
+        require_installation_provenance)
     report["attempted_em_executions"] = attempted
     report["non_converged_candidate_rows"] = len(non_converged)
     report["score_decided_columns"] = len(ambiguous)
@@ -813,9 +907,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--expect-candidate-optimizer", default=None,
                         help="require the run to have used this candidate "
                              "optimizer (Gate 74-B3 uses 'bfgs')")
+    parser.add_argument("--require-installation-provenance",
+                        action="store_true",
+                        help="require complete per-candidate provenance and "
+                             "Gate 74-B5 selected-loading installation "
+                             "evidence on every selection-trace row")
     args = parser.parse_args(argv)
 
-    report = audit(args.run_dir, args.expect_candidate_optimizer)
+    report = audit(args.run_dir, args.expect_candidate_optimizer,
+                   args.require_installation_provenance)
     print(f"verdict={report['verdict']} run_status={report['run_status']} "
           f"blockers={report['blocker_count']} high={report['high_count']} "
           f"medium={report['medium_count']} "
