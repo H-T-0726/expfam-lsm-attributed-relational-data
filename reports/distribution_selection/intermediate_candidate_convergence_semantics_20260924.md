@@ -229,7 +229,12 @@ Q_after  = Q_strict( X, Y, Z_samples ; assignment_t+1, F_t+1, sigma_t+1, w0_t+1,
 **早速分かったこと**: 固定 B1 列で Poisson 候補は
 `scipy_success = False` / `status = 2`（precision loss）を返しながら
 `grad_inf = 2.2e-9 ≤ 1e-8` に到達している。
-**収束規則を SciPy の success ではなく勾配に置いた判断が、実データで裏付けられた形**である。
+この観測は、収束規則を SciPy の success ではなく勾配に置いた判断と整合する。
+ただしこれは **固定された決定論的 validation case（Gate 74-B1 の frozen 列）上での
+実際の BFGS 実行**で得られた 1 例であり、実世界データでの観測ではない。
+
+> **2026-09-24 訂正（Gate 74-B5）**: 初版では上記を「実データで裏付けられた形」と書いていた。
+> 根拠は固定 deterministic validation case であって実データではないため、Human の指示により訂正した。
 
 **変更していないもの**: BFGS `maxiter=2000` / `gtol=1e-10` / analytic-jac 経路 /
 収束閾値 `1e-8` / 選択規則 / margin 定義 / 現行 convergence gate / pilot progression rule。
@@ -271,3 +276,58 @@ Q_after  = Q_strict( X, Y, Z_samples ; assignment_t+1, F_t+1, sigma_t+1, w0_t+1,
    これは新規実行を伴う。
 3. A-2 と A-3 を踏まえ、**exploration の F 更新が依然 50-step Adam である**ことを
    どう扱うか（B2 の承認範囲外であり、別の Human Gate）。
+
+---
+
+## 2026-09-24 追記 — Gate 74-B5: selected-candidate loading installation
+
+**本節は追記であり、上記 B4 の所見（A-2）は当時の実装についての記録としてそのまま保持する。**
+
+Human 判断（2026-09-24）:
+
+- **S1 strict all-iterations convergence を Phase 9C の gate として維持する。**
+- S2 は採用しない。
+- S3 は引き続き `NOT_CURRENTLY_CERTIFIABLE`。
+
+そのうえで Gate 74-B5 は、A-2 で特定した不整合 **だけ** を解消した。
+以後の Phase 9C exploration では、ambiguous 列について次の順で M-step が進む。
+
+1. 固定 `Z_samples` 上で候補を score / 最適化する（従来どおり）
+2. 勝者 `CandidateRecord` を選ぶ（従来どおり）
+3. 勝者の family を install する（従来どおり）
+4. parent `calc_F` で F 全体を更新する（gate 決定列の挙動は従来どおり）
+5. **その後、ambiguous 列の行だけを、同じ反復の勝者 `CandidateRecord.loading` で上書きする**
+6. その F を残りの M-step と次の E-step に渡す
+
+data-flow invariant: **選択 family・選択 score・選択 loading・install される F 行は、
+すべて同一の `CandidateRecord` に由来する。** 選択後の再最適化はせず、敗者の loading は
+install せず、前反復の record は再利用しない（勝者は選択ごとに作り直され、install した
+呼び出しで消費される）。
+
+実装: `family_selection.py` `FamilySelectingPerColumnLSM.calc_F` /
+`select_families`（`LOADING_INSTALLATION_POLICY = "selected_candidate_loading"`）。
+selection trace の各行に `selected_candidate_family` / `selected_candidate_score` /
+`selected_loading`（直列化） / `selected_loading_sha256` / `selected_loading_installed` /
+`installed_loading_sha256` を記録する。
+
+### この変更で主張してよいこと・いけないこと
+
+- **意図的に変わること**: exploration M-step が返す ambiguous 行の F が、
+  parent Adam の結果ではなく、勝者 BFGS 候補の loading になる。
+- **変わらないこと（固定 scoring 入力上）**: 候補 score、候補 optimizer の出力、
+  選択 family、margin、収束 provenance。
+- **B3 との exploration 経路の bitwise 同値性は主張しない。** ambiguous 行の F が変わるので、
+  以後の E-step も変わる。
+- **帰結として明記しておくこと（初期化 policy は不変、初期値は変わる）**: 候補最適化の
+  初期化 policy は従来どおり「その時点の F 行から warm-start する」
+  （`select_families` の `loading_init=loadings[gate.column, :]`、コード不変）。
+  ただし B5 により F 行そのものが前反復の勝者 loading になったため、**次反復の両候補の
+  warm-start 値は前反復の勝者 loading になる**（B5 以前は parent Adam の行だった）。
+  policy の変更ではなく、承認された「勝者 loading を次の反復へ渡す」ことの直接の帰結である。
+  敗者 family の候補も勝者 loading（別 link で得られた値）から出発する点は、B5 以前に
+  Adam 行から出発していたのと同じ構造である。
+- **A-4 の結論は変わらない。** gate 決定列の F 更新は依然 parent の 50-step Adam であり、
+  Q は評価されていない。したがって B5 以後も GEM / ECM / 厳密 coordinate ascent とは呼ばない。
+  B5 が保証するのは「ambiguous 列について、score を生んだ loading が実際に持ち越される」ことだけである。
+- 保存済み artifact（smoke / B1 / B1R / B2 / smoke-v2）はすべて B5 以前の実装によるもので、
+  A-2 の状態で実行されている。遡って B5 の意味論で解釈しない。

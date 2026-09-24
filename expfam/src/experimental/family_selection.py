@@ -104,6 +104,13 @@ BFGS_METHOD = "BFGS"
 BFGS_MAXITER = 2000
 BFGS_GTOL = 1e-10
 
+# What the exploration M-step installs for an ambiguous column (Gate 74-B5).
+# Gate 74-B4 found that the winning candidate's loading was used only to score
+# it and then discarded, so the column carried forward a loading from the
+# parent 50-step Adam instead. Phase 9C now installs the loading that actually
+# produced the winning score.
+LOADING_INSTALLATION_POLICY = "selected_candidate_loading"
+
 # A BFGS candidate counts as converged only on the gradient it actually
 # reached. SciPy's success flag is recorded as provenance but does not decide
 # this: B1 showed a solver can report success at a point whose gradient is
@@ -661,6 +668,19 @@ def score_column_candidates(
     return records
 
 
+def loading_digest(loading: np.ndarray) -> str:
+    """A stable digest of a loading vector, for installation evidence.
+
+    Computed over the exact float64 bytes, so two digests agree only if the
+    installed row is bit-for-bit the selected candidate's loading.
+    """
+
+    import hashlib
+
+    return hashlib.sha256(np.ascontiguousarray(
+        np.asarray(loading, dtype=np.float64)).tobytes()).hexdigest()
+
+
 def _candidate_provenance_fields(records: Sequence[CandidateRecord]
                                  ) -> dict[str, Any]:
     """Per-candidate diagnostics for one selection-trace row.
@@ -742,6 +762,11 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
         # Named here rather than inherited from a default deeper down, so the
         # artifact can say which optimiser produced every candidate score.
         self.candidate_optimizer = candidate_optimizer
+        # The winning CandidateRecord per ambiguous column for the CURRENT
+        # selection only. Replaced wholesale at every select_families call so
+        # a record from an earlier iteration can never be installed.
+        self.current_iteration_winners: dict[int, CandidateRecord] = {}
+        self._current_iteration_trace_rows: list[dict[str, Any]] = []
         self.family_update_enabled = True
         self.selection_trace: list[dict[str, Any]] = []
         self.last_candidate_records: list[CandidateRecord] = []
@@ -770,6 +795,10 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
         assignment = list(self.family_x_list)
         records: list[CandidateRecord] = []
         loadings = self.params["F"]
+        # Fresh per-call state: nothing selected in an earlier iteration may
+        # survive into this one.
+        winners: dict[int, CandidateRecord] = {}
+        iteration_rows: list[dict[str, Any]] = []
         for gate in self.gates:
             if not gate.is_ambiguous:
                 continue
@@ -778,9 +807,14 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
                 loading_init=loadings[gate.column, :],
                 optimizer=self.candidate_optimizer)
             chosen, margin = select_from_records(column_records)
+            # The record whose score won. Family, score and loading all come
+            # from this one object, which is what Gate 74-B5 requires.
+            winner, = [record for record in column_records
+                       if record.family == chosen]
+            winners[gate.column] = winner
             records.extend(column_records)
             assignment[gate.column] = chosen
-            self.selection_trace.append({
+            row = {
                 "iteration": self._iteration,
                 "column": gate.column,
                 "candidate_optimizer": self.candidate_optimizer,
@@ -801,22 +835,75 @@ class FamilySelectingPerColumnLSM(DualExpFamLSMPerColumnConsistent):
                 # Read straight off the records that were already computed:
                 # no optimiser runs again for this.
                 **_candidate_provenance_fields(column_records),
-            })
+                # Selected-loading evidence (Gate 74-B5). The installation
+                # fields are filled in by calc_F once the row is actually
+                # written into F; a row selected outside calc_F stays
+                # uninstalled and says so.
+                "selected_candidate_family": winner.family,
+                "selected_candidate_score": winner.score,
+                "selected_loading": "|".join(f"{v:.17g}"
+                                             for v in winner.loading),
+                "selected_loading_sha256": loading_digest(winner.loading),
+                "loading_installation_policy": LOADING_INSTALLATION_POLICY,
+                "selected_loading_installed": False,
+                "installed_loading_sha256": "",
+            }
+            self.selection_trace.append(row)
+            iteration_rows.append(row)
         self.last_candidate_records = records
+        self.current_iteration_winners = winners
+        self._current_iteration_trace_rows = iteration_rows
         return assignment
 
     def calc_F(self, X: np.ndarray, Z_samples: np.ndarray) -> np.ndarray:
-        # NOTE on what this does and does not install. select_families
-        # optimises a candidate-specific loading for each family PURELY TO
-        # SCORE IT, and keeps only the winning family NAME. The loading is
-        # discarded: super().calc_F below recomputes the whole of F from
-        # self.params["F"] under the new assignment. So the parameter the
-        # model carries forward for an ambiguous column is not the optimum
-        # that produced its score. See the Gate 74-B4 semantics report.
-        if self.family_update_enabled:
-            self._iteration += 1
-            self.reassign_families(self.select_families(X, Z_samples))
-        return super().calc_F(X, Z_samples)
+        """Select ambiguous families, update F, and install the winners.
+
+        Gate 74-B4 found that the winning candidate's loading was used only to
+        score it and then discarded, so an ambiguous column carried forward the
+        parent 50-step Adam row instead of the optimum that produced its score.
+        Gate 74-B5 closes exactly that gap and nothing else:
+
+        1. score and select exactly as before, on this call's fixed Z_samples;
+        2. install the winning family name exactly as before;
+        3. run the parent calc_F for the whole of F, so gate-decided rows keep
+           their existing behaviour;
+        4. overwrite ONLY each ambiguous row with the loading of the winning
+           record from this same call, and record that it happened.
+
+        No optimiser runs after selection, losing loadings are never
+        installed, and a record from an earlier call cannot be installed
+        because the winners are rebuilt on every selection and consumed here.
+        """
+
+        if not self.family_update_enabled:
+            # No selection this call, so nothing may be installed -- not even
+            # a winner left over from an earlier one.
+            self.current_iteration_winners = {}
+            self._current_iteration_trace_rows = []
+            return super().calc_F(X, Z_samples)
+
+        self._iteration += 1
+        self.reassign_families(self.select_families(X, Z_samples))
+        winners = self.current_iteration_winners
+        rows = {row["column"]: row for row in self._current_iteration_trace_rows}
+
+        F = np.array(super().calc_F(X, Z_samples), dtype=np.float64, copy=True)
+        for column, winner in winners.items():
+            _require(winner.family == self.family_x_list[column],
+                     f"column {column}: the installed family "
+                     f"{self.family_x_list[column]!r} is not the winning "
+                     f"record's family {winner.family!r}")
+            _require(bool(np.all(np.isfinite(winner.loading))),
+                     f"column {column}: the winning loading is not finite")
+            F[column, :] = winner.loading
+            row = rows[column]
+            row["selected_loading_installed"] = True
+            row["installed_loading_sha256"] = loading_digest(F[column, :])
+
+        # Consumed: the next call starts from nothing.
+        self.current_iteration_winners = {}
+        self._current_iteration_trace_rows = []
+        return F
 
     def __repr__(self) -> str:                               # pragma: no cover
         counts = {f: len(idx) for f, idx in self._col_idx.items() if len(idx)}
@@ -1025,6 +1112,7 @@ def run_family_exploration(
                  "eps": ADAM_EPS, "tol": ADAM_TOL,
                  "convergence_rule": "step infinity norm below tol"}),
             "historical_adam_preserved": True,
+            "ambiguous_loading_installation": LOADING_INSTALLATION_POLICY,
             "newton_alpha": float(newton_alpha),
             "L": int(L),
             "num_iter": int(num_iter),
@@ -1172,6 +1260,8 @@ __all__ = [
     "pilot_convergence_gate",
     "PILOT_GATE_PASS",
     "_candidate_provenance_fields",
+    "LOADING_INSTALLATION_POLICY",
+    "loading_digest",
     "PILOT_GATE_BLOCKED",
     "EMFailFast",
 ]
