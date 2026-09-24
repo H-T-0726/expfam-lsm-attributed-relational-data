@@ -1,0 +1,71 @@
+{
+  "stage": "smoke",
+  "n": 40,
+  "d": 6,
+  "k_true": 3,
+  "family_x_list": [
+    "gaussian",
+    "gaussian",
+    "bernoulli",
+    "bernoulli",
+    "poisson",
+    "poisson"
+  ],
+  "family_y": "bernoulli",
+  "sigma_x_var": 1.0,
+  "w0": -1.0,
+  "w": 1.0,
+  "f_scale": 1.0,
+  "L": 5,
+  "refit_num_iter": 8,
+  "exploration_num_iter": 8,
+  "replicates": [
+    {
+      "label": "rep1",
+      "data_seed": 941001,
+      "search_seed": 942001,
+      "refit_seed": 943001
+    }
+  ],
+  "k_fit": 3,
+  "starts": [
+    {
+      "label": "start_B",
+      "ambiguous_start": "bernoulli"
+    },
+    {
+      "label": "start_P",
+      "ambiguous_start": "poisson"
+    }
+  ],
+  "expected_em_executions": 4,
+  "human_approvals": [
+    {
+      "parameter": "exploration_num_iter",
+      "value": 8,
+      "approved": true,
+      "rationale": "match the already-frozen fixed-family refit budget (num_iter=8) and avoid introducing a new tuning axis in this feasibility pilot",
+      "approved_by": "Human",
+      "approved_in": "Issue #74 Human Gate approval comment",
+      "approval_url": "https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/issues/74#issuecomment-5795174457",
+      "approval_date": "2026-09-23",
+      "scope": "Issue #74 Phase 9C feasibility pilot only; does not generalise to other experiments or to any manuscript claim",
+      "note": "Issue #74 froze refit num_iter only. This value was approved separately and explicitly; no stage may execute without it."
+    }
+  ],
+  "candidate_optimizer": "bfgs",
+  "candidate_optimizer_settings": {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": false,
+    "fallback_solvers": []
+  },
+  "candidate_convergence_rule": {
+    "rule": "finite and final analytic gradient infinity norm <= tol",
+    "convergence_grad_inf_tol": 1e-08,
+    "scipy_success_is_criterion": false
+  },
+  "ambiguous_loading_installation": "selected_candidate_loading"
+}

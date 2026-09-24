@@ -1,0 +1,115 @@
+{
+  "stage": "smoke",
+  "runner_version": "family-selection-pilot-runner-v2",
+  "convergence_gate": {
+    "status": "BLOCKED_FOR_PILOT",
+    "non_converged_selection_rows": [
+      {
+        "iteration": 2,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 26.38527246857805
+      },
+      {
+        "iteration": 1,
+        "column": 2,
+        "selected_family": "bernoulli",
+        "margin_neg2": 25.009493948251617
+      },
+      {
+        "iteration": 1,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 24.322584491520715
+      }
+    ],
+    "non_converged_candidate_count": 0,
+    "checked_selection_rows": 32,
+    "remedy_forbidden": [
+      "raise the optimiser budget",
+      "change the seed or the initialisation",
+      "change the optimiser",
+      "rerun"
+    ]
+  },
+  "per_run": [
+    {
+      "replicate": "rep1",
+      "start_label": "start_B",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        2,
+        3
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "2": 24.586604592162082,
+        "3": 24.64045883533221
+      }
+    },
+    {
+      "replicate": "rep1",
+      "start_label": "start_P",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        2,
+        3
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "2": 24.23498289027993,
+        "3": 24.41679332167307
+      }
+    }
+  ],
+  "start_agreement_by_replicate": {
+    "rep1": true
+  },
+  "true_bernoulli_selected_as_poisson": 0,
+  "ambiguous_true_poisson_decisions": 0,
+  "ambiguous_true_poisson_columns": [],
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "score_decides_only": "columns whose observations are all in {0,1} (Bernoulli vs Poisson)",
+    "gate_decides": "Gaussian columns and counts above 1",
+    "do_not_report": [
+      "an accuracy figure that includes gate-decided columns",
+      "evidence for automatic distribution selection in general",
+      "that automatic selection beats a human-specified family",
+      "any claim about real data"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
