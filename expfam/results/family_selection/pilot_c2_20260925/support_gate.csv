@@ -1,0 +1,73 @@
+replicate,start_label,column,candidates,n_candidates,decided_by,gate_reason,fixed_family,family_x_true
+rep1,start_B,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_B,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_B,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_B,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_B,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep1,start_B,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep1,start_B,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep1,start_P,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_P,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_P,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep1,start_P,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep1,start_P,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep1,start_P,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep1,start_P,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_B,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_B,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_B,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_B,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_B,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_B,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_B,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_P,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_P,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_P,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep2,start_P,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep2,start_P,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_P,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep2,start_P,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_B,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_B,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_B,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_B,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_B,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_B,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_B,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_P,0,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_P,1,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_P,2,gaussian,1,gate,a non-integer or negative value is present; no implemented discrete family admits it,gaussian,gaussian
+rep3,start_P,3,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,4,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,5,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,6,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,7,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,8,bernoulli|poisson,2,score,"all values in {0,1}; both families share the counting measure, so the comparison is legitimate",,bernoulli
+rep3,start_P,9,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_P,10,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson
+rep3,start_P,11,poisson,1,gate,non-negative integers with a value above 1; Bernoulli support is violated,poisson,poisson

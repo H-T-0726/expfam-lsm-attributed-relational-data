@@ -1,0 +1,1549 @@
+{
+  "stage": "pilot",
+  "runner_version": "family-selection-pilot-runner-v2",
+  "convergence_gate": {
+    "status": "BLOCKED_FOR_PILOT",
+    "non_converged_selection_rows": [
+      {
+        "iteration": 1,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.460353133432875
+      },
+      {
+        "iteration": 3,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.302044131507884
+      },
+      {
+        "iteration": 3,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.24381446568998
+      },
+      {
+        "iteration": 4,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 68.0135363725818
+      },
+      {
+        "iteration": 4,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.66091374789066
+      },
+      {
+        "iteration": 4,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.02631016179477
+      },
+      {
+        "iteration": 4,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.813442912649364
+      },
+      {
+        "iteration": 5,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.09236594901519
+      },
+      {
+        "iteration": 6,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.66008526899326
+      },
+      {
+        "iteration": 8,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.0308419612455
+      },
+      {
+        "iteration": 1,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 52.488876234687226
+      },
+      {
+        "iteration": 1,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.16733083041895
+      },
+      {
+        "iteration": 2,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.79399017028521
+      },
+      {
+        "iteration": 2,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.59726262211292
+      },
+      {
+        "iteration": 2,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.44874751331797
+      },
+      {
+        "iteration": 2,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.969800931656124
+      },
+      {
+        "iteration": 3,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.40058693941022
+      },
+      {
+        "iteration": 3,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.681286621377865
+      },
+      {
+        "iteration": 4,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 58.69743094740751
+      },
+      {
+        "iteration": 4,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.74431107379445
+      },
+      {
+        "iteration": 4,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.368530858497735
+      },
+      {
+        "iteration": 4,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.9371497143333
+      },
+      {
+        "iteration": 5,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 66.25951513222682
+      },
+      {
+        "iteration": 6,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 64.07281329236872
+      },
+      {
+        "iteration": 6,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.640844957151415
+      },
+      {
+        "iteration": 7,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.8550939211853
+      },
+      {
+        "iteration": 1,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.28469878196384
+      },
+      {
+        "iteration": 1,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.04550057459352
+      },
+      {
+        "iteration": 2,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 46.42513812302357
+      },
+      {
+        "iteration": 2,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.13380758249305
+      },
+      {
+        "iteration": 3,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.3155065706255
+      },
+      {
+        "iteration": 3,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.83984172381268
+      },
+      {
+        "iteration": 3,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.56817915843308
+      },
+      {
+        "iteration": 3,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 55.5117908524396
+      },
+      {
+        "iteration": 5,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 56.44494900213722
+      },
+      {
+        "iteration": 7,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 45.75393267646848
+      },
+      {
+        "iteration": 8,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 46.029875978181934
+      },
+      {
+        "iteration": 8,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 56.44748087733754
+      },
+      {
+        "iteration": 2,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.572459245933686
+      },
+      {
+        "iteration": 5,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.0752315292778
+      },
+      {
+        "iteration": 7,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.29247302309514
+      },
+      {
+        "iteration": 8,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.93392813509119
+      },
+      {
+        "iteration": 8,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.411952187145545
+      },
+      {
+        "iteration": 2,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.37551457077889
+      },
+      {
+        "iteration": 2,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.855144980982814
+      },
+      {
+        "iteration": 4,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 52.603319095029036
+      },
+      {
+        "iteration": 5,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.78209807741828
+      },
+      {
+        "iteration": 6,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.30277812761514
+      },
+      {
+        "iteration": 6,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.07282211797644
+      },
+      {
+        "iteration": 7,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.37840910258822
+      },
+      {
+        "iteration": 8,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.223735223258004
+      },
+      {
+        "iteration": 8,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 65.49598432777896
+      },
+      {
+        "iteration": 1,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.30374045577821
+      },
+      {
+        "iteration": 2,
+        "column": 3,
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.41303376240283
+      },
+      {
+        "iteration": 4,
+        "column": 5,
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.78388628074205
+      },
+      {
+        "iteration": 4,
+        "column": 7,
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.99440985097006
+      },
+      {
+        "iteration": 4,
+        "column": 8,
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.95585942745326
+      },
+      {
+        "iteration": 5,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 55.896435486763025
+      },
+      {
+        "iteration": 6,
+        "column": 6,
+        "selected_family": "bernoulli",
+        "margin_neg2": 64.11915049963932
+      },
+      {
+        "iteration": 8,
+        "column": 4,
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.19148195826163
+      }
+    ],
+    "non_converged_candidate_count": 8,
+    "checked_selection_rows": 288,
+    "remedy_forbidden": [
+      "raise the optimiser budget",
+      "change the seed or the initialisation",
+      "change the optimiser",
+      "rerun"
+    ]
+  },
+  "convergence_gate_role": "diagnostic (research-first C2 policy)",
+  "candidate_convergence_diagnostic": {
+    "status": "CONVERGENCE_WARNING",
+    "role": "diagnostic",
+    "convergence_grad_inf_tol": 1e-08,
+    "selection_rows": 288,
+    "selection_rows_with_warning": 60,
+    "candidate_evaluations": 576,
+    "candidate_warnings": 64,
+    "final_candidate_rows": 72,
+    "final_candidate_rows_non_converged": 8,
+    "warnings": [
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 1,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.460353133432875,
+        "grad_inf": 6.530185759912044e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 5,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.302044131507884,
+        "grad_inf": 1.549365190589569e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.24381446568998,
+        "grad_inf": 1.7482768930321412e-07,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.24381446568998,
+        "grad_inf": 1.8730686464074607e-07,
+        "n_iter": 12,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 4,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 68.0135363725818,
+        "grad_inf": 4.092354863871606e-08,
+        "n_iter": 15,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 4,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.66091374789066,
+        "grad_inf": 4.9894678255668624e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 4,
+        "column": 6,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.02631016179477,
+        "grad_inf": 2.3892982259354767e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 4,
+        "column": 7,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.813442912649364,
+        "grad_inf": 1.3904753437543604e-08,
+        "n_iter": 5,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 5,
+        "column": 5,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.09236594901519,
+        "grad_inf": 1.2945552407828131e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 6,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.66008526899326,
+        "grad_inf": 1.0378615411532621e-08,
+        "n_iter": 11,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": 8,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.0308419612455,
+        "grad_inf": 2.3234617174683336e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 1,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 52.488876234687226,
+        "grad_inf": 1.6700255578427913e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 1,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.16733083041895,
+        "grad_inf": 6.264879051920413e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.79399017028521,
+        "grad_inf": 2.4088908912034413e-08,
+        "n_iter": 11,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 4,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.59726262211292,
+        "grad_inf": 1.8506064209944383e-07,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.59726262211292,
+        "grad_inf": 3.6937754233079545e-07,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 6,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.44874751331797,
+        "grad_inf": 1.722439861850944e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.969800931656124,
+        "grad_inf": 6.802621441870382e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 3,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.40058693941022,
+        "grad_inf": 2.3672447477807168e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 3,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.681286621377865,
+        "grad_inf": 1.97095753939891e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 58.69743094740751,
+        "grad_inf": 4.789949756833778e-08,
+        "n_iter": 8,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 6,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.74431107379445,
+        "grad_inf": 4.581774541101424e-07,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.368530858497735,
+        "grad_inf": 8.623634722149109e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.9371497143333,
+        "grad_inf": 1.2199063825768518e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 5,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 66.25951513222682,
+        "grad_inf": 1.2971889162827211e-08,
+        "n_iter": 13,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 6,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 64.07281329236872,
+        "grad_inf": 7.692740773279638e-08,
+        "n_iter": 12,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 6,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.640844957151415,
+        "grad_inf": 1.1583100656409328e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": 7,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.8550939211853,
+        "grad_inf": 1.0209925980220191e-07,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 1,
+        "column": 5,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.28469878196384,
+        "grad_inf": 7.484116597566981e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 1,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.28469878196384,
+        "grad_inf": 1.5089068042817288e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 1,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.04550057459352,
+        "grad_inf": 2.6688409171526926e-08,
+        "n_iter": 11,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 2,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 46.42513812302357,
+        "grad_inf": 8.571136806967417e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 2,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.13380758249305,
+        "grad_inf": 1.0145951718776303e-07,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.3155065706255,
+        "grad_inf": 2.5753260946004276e-08,
+        "n_iter": 8,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.83984172381268,
+        "grad_inf": 4.370016684962508e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 6,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.56817915843308,
+        "grad_inf": 2.3026259983183194e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 3,
+        "column": 7,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 55.5117908524396,
+        "grad_inf": 5.1390900923653504e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 5,
+        "column": 7,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 56.44494900213722,
+        "grad_inf": 2.863026849486694e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 7,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 45.75393267646848,
+        "grad_inf": 1.1743611265657705e-07,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 8,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 46.029875978181934,
+        "grad_inf": 1.0335439633024635e-07,
+        "n_iter": 8,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": 8,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 56.44748087733754,
+        "grad_inf": 1.300721548247452e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.572459245933686,
+        "grad_inf": 1.6763293331223393e-08,
+        "n_iter": 8,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": 5,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.0752315292778,
+        "grad_inf": 1.1986860271040457e-08,
+        "n_iter": 13,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": 7,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.29247302309514,
+        "grad_inf": 6.712754480719952e-07,
+        "n_iter": 11,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": 8,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.93392813509119,
+        "grad_inf": 1.1825769519191454e-08,
+        "n_iter": 14,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": 8,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.411952187145545,
+        "grad_inf": 1.535603300073518e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 2,
+        "column": 6,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 47.37551457077889,
+        "grad_inf": 4.280463882233576e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 2,
+        "column": 8,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.855144980982814,
+        "grad_inf": 1.4742184197835684e-07,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 2,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 48.855144980982814,
+        "grad_inf": 2.0483809759497262e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 4,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 52.603319095029036,
+        "grad_inf": 2.3391123349369992e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 5,
+        "column": 5,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 59.78209807741828,
+        "grad_inf": 1.8333924156621606e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 6,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 54.30277812761514,
+        "grad_inf": 1.4426282735069406e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 6,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.07282211797644,
+        "grad_inf": 3.968701152157195e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 7,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 49.37840910258822,
+        "grad_inf": 1.1650382283207029e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 8,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.223735223258004,
+        "grad_inf": 3.023984225247745e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": 8,
+        "column": 6,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 65.49598432777896,
+        "grad_inf": 6.189538943601747e-08,
+        "n_iter": 14,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 1,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.30374045577821,
+        "grad_inf": 1.2974553913913666e-06,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 2,
+        "column": 3,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 50.41303376240283,
+        "grad_inf": 4.308578367417937e-08,
+        "n_iter": 7,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 5,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.78388628074205,
+        "grad_inf": 1.5399333692656113e-07,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 7,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 60.99440985097006,
+        "grad_inf": 9.608913356107252e-08,
+        "n_iter": 6,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 4,
+        "column": 8,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 51.95585942745326,
+        "grad_inf": 5.046588285040343e-08,
+        "n_iter": 9,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 5,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 55.896435486763025,
+        "grad_inf": 1.781306964154794e-07,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 6,
+        "column": 6,
+        "candidate_family": "bernoulli",
+        "selected_family": "bernoulli",
+        "margin_neg2": 64.11915049963932,
+        "grad_inf": 4.338071031284585e-08,
+        "n_iter": 5,
+        "scipy_success": false,
+        "scipy_status": 2
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": 8,
+        "column": 4,
+        "candidate_family": "poisson",
+        "selected_family": "bernoulli",
+        "margin_neg2": 53.19148195826163,
+        "grad_inf": 1.6859758034115657e-08,
+        "n_iter": 10,
+        "scipy_success": false,
+        "scipy_status": 2
+      }
+    ]
+  },
+  "per_run": [
+    {
+      "replicate": "rep1",
+      "start_label": "start_B",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 63.20866286312892,
+        "4": 50.88108927700914,
+        "5": 58.625926468280795,
+        "6": 49.18186164206267,
+        "7": 48.537733972791855,
+        "8": 54.0308419612455
+      }
+    },
+    {
+      "replicate": "rep1",
+      "start_label": "start_P",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 62.059424171253625,
+        "4": 50.297870053521095,
+        "5": 59.170646488153494,
+        "6": 49.03507635639275,
+        "7": 48.76364581989009,
+        "8": 53.70925243420177
+      }
+    },
+    {
+      "replicate": "rep2",
+      "start_label": "start_B",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 61.5275240592897,
+        "4": 46.029875978181934,
+        "5": 52.93349553948626,
+        "6": 49.58898711167052,
+        "7": 54.603369755063454,
+        "8": 56.44748087733754
+      }
+    },
+    {
+      "replicate": "rep2",
+      "start_label": "start_P",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 59.93392813509119,
+        "4": 45.69357673507031,
+        "5": 54.411952187145545,
+        "6": 50.279859631601,
+        "7": 56.8102017396468,
+        "8": 55.336470584448605
+      }
+    },
+    {
+      "replicate": "rep3",
+      "start_label": "start_B",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 48.59208671472062,
+        "4": 53.48775094060392,
+        "5": 60.223735223258004,
+        "6": 65.49598432777896,
+        "7": 60.2310780423942,
+        "8": 51.981257117146484
+      }
+    },
+    {
+      "replicate": "rep3",
+      "start_label": "start_P",
+      "selected_assignment": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "ambiguous_columns": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "ambiguous_selected": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "ambiguous_true": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "margins": {
+        "3": 48.87012836901309,
+        "4": 53.19148195826163,
+        "5": 59.0876590706729,
+        "6": 65.33428483121698,
+        "7": 60.37855459106376,
+        "8": 51.98946498271175
+      }
+    }
+  ],
+  "start_agreement_by_replicate": {
+    "rep1": true,
+    "rep2": true,
+    "rep3": true
+  },
+  "true_bernoulli_selected_as_poisson": 0,
+  "ambiguous_true_poisson_decisions": 0,
+  "ambiguous_true_poisson_columns": [],
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "score_decides_only": "columns whose observations are all in {0,1} (Bernoulli vs Poisson)",
+    "gate_decides": "Gaussian columns and counts above 1",
+    "do_not_report": [
+      "an accuracy figure that includes gate-decided columns",
+      "evidence for automatic distribution selection in general",
+      "that automatic selection beats a human-specified family",
+      "any claim about real data"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
