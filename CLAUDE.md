@@ -141,6 +141,42 @@ agent に委任せず、人間自身が実行する。**
 実装中に別の研究課題や改善を発見しても scope を拡張しない。
 承認済み作業が終わったら人間へ結果を返し、次の phase や次の実験を自動開始しない。
 
+### Research-first operating policy（研究を主役にする）
+
+この repository の主目的は、**研究上の問いに、再現可能で過剰主張のない証拠で答えること**である。
+コード・CI・gate・audit・optimizer は研究を支える手段であり、green check や数値的完全性そのものを目的にしない。
+
+優先順位は原則として:
+
+1. **scientific validity**
+2. **evidence integrity / provenance**
+3. **reproducibility**
+4. **engineering quality**
+
+研究作業では次を常に守る。
+
+- task を THEORY / IMPLEMENTATION / EXPLORATORY / CONFIRMATORY / REPRODUCTION / CHARACTERIZATION のどれかとして位置づける
+- 実験前に research question、primary metric、比較、主要条件、必要な seeds/replicates、technical integrity 条件だけを固定する
+- FACT / DERIVED / OBSERVED / INTERPRETATION / HYPOTHESIS / DECISION を混同しない
+- **technical validity と scientific outcome を分離する**。悪化・差なし・不安定性も valid run なら研究結果であり、FAIL ではない
+- 問題は BLOCKER / WARNING / DIAGNOSTIC に分け、**研究結論を無効・解釈不能にするものだけを原則 BLOCKER にする**
+- solver warning、precision loss、単一の厳しい tolerance 未達だけで自動的に progression を止めない
+- 新しい gate を置く前に「どの研究主張を守るか」「なぜ WARNING では不足か」「閾値の根拠」を説明する
+- 結果を見た後に threshold / seed / comparator / metric を動かして同じ run を救わない
+- exploratory finding を confirmatory evidence に昇格させない。必要なら future run で確認する
+- synthetic と real-data の役割を分け、証拠より強い claim をしない
+- test は scientific/public contract を固定し、private defaults や incidental tuple の完全一致を必要以上に pin しない
+- 前の gate が通らなかったこと自体を理由に validation-only sub-gate を増やさない
+- 追加実験前に「結果 A/B のどちらでも研究判断が変わるか」を確認し、engineering curiosity だけなら優先度を下げる
+- pilot / phase 終了時は、追加実装より先に **研究問い / 方法 / 一次結果 / 言えること / 言えないこと / 次の Human 判断** を整理する
+- 過去 artifact / frozen protocol / historical verdict は遡及変更しない
+
+**「完全 PASS でなければ研究失敗」と解釈しない。**
+厳密さは、研究上意味のある主張・比較・再現性に集中させる。
+
+実験設計・gate 設計・severity 判断・結果解釈を行うときは、詳細規約
+`docs/research_operating_policy.md` を読む。
+
 ---
 
 ## 7. 作業時の安全ルール
@@ -169,5 +205,6 @@ agent に委任せず、人間自身が実行する。**
 | `EXPERIMENT_REGISTRY.md` | 実験 → スクリプト → CSV → 図 → 主張の provenance |
 | `conference_submission_final_draft.md` | 学会予稿（完成・変更しない） |
 | `reports/environment/baseline_20260818.md` | 実行環境ベースライン |
+| `docs/research_operating_policy.md` | 実験設計・gate・evidence・severity・結果解釈の詳細研究規約 |
 
 **今後やること（TODO）は GitHub Issue で管理する。このファイルにも他の canonical docs にも書かない。**
