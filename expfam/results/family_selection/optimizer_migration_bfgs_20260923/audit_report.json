@@ -1,0 +1,18 @@
+{
+  "auditor_version": "candidate-optimizer-migration-auditor-v1",
+  "run_dir": "expfam\\results\\family_selection\\optimizer_migration_bfgs_20260923",
+  "gate": "74-B2",
+  "recomputed_status": "B2_READY_FOR_SMOKE_V2",
+  "verdict": "PASS",
+  "blocker_count": 0,
+  "high_count": 0,
+  "medium_count": 0,
+  "finding_count": 0,
+  "audit_clean": true,
+  "findings": [],
+  "note": "B2 authorises no execution by itself. smoke-v2 and C2 remain separate Human Gate decisions.",
+  "migration_rows": 12,
+  "migration_passes": 12,
+  "ordering_rows": 6,
+  "ordering_agreements": 6
+}

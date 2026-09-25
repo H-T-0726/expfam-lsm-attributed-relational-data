@@ -1,0 +1,102 @@
+{
+  "stage": "pilot",
+  "n": 75,
+  "d": 12,
+  "k_true": 3,
+  "family_x_list": [
+    "gaussian",
+    "gaussian",
+    "gaussian",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "poisson",
+    "poisson",
+    "poisson"
+  ],
+  "family_y": "bernoulli",
+  "sigma_x_var": 1.0,
+  "w0": -1.0,
+  "w": 1.0,
+  "f_scale": 1.4142135623730951,
+  "L": 5,
+  "refit_num_iter": 8,
+  "exploration_num_iter": 8,
+  "replicates": [
+    {
+      "label": "rep1",
+      "data_seed": 951001,
+      "search_seed": 952001,
+      "refit_seed": 953001
+    },
+    {
+      "label": "rep2",
+      "data_seed": 951002,
+      "search_seed": 952002,
+      "refit_seed": 953002
+    },
+    {
+      "label": "rep3",
+      "data_seed": 951003,
+      "search_seed": 952003,
+      "refit_seed": 953003
+    }
+  ],
+  "k_fit": 3,
+  "starts": [
+    {
+      "label": "start_B",
+      "ambiguous_start": "bernoulli"
+    },
+    {
+      "label": "start_P",
+      "ambiguous_start": "poisson"
+    }
+  ],
+  "expected_em_executions": 12,
+  "human_approvals": [
+    {
+      "parameter": "exploration_num_iter",
+      "value": 8,
+      "approved": true,
+      "rationale": "match the already-frozen fixed-family refit budget (num_iter=8) and avoid introducing a new tuning axis in this feasibility pilot",
+      "approved_by": "Human",
+      "approved_in": "Issue #74 Human Gate approval comment",
+      "approval_url": "https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/issues/74#issuecomment-5795174457",
+      "approval_date": "2026-09-23",
+      "scope": "Issue #74 Phase 9C feasibility pilot only; does not generalise to other experiments or to any manuscript claim",
+      "note": "Issue #74 froze refit num_iter only. This value was approved separately and explicitly; no stage may execute without it."
+    }
+  ],
+  "candidate_optimizer": "bfgs",
+  "candidate_optimizer_settings": {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": false,
+    "fallback_solvers": []
+  },
+  "candidate_convergence_rule": {
+    "rule": "finite and final analytic gradient infinity norm <= tol",
+    "convergence_grad_inf_tol": 1e-08,
+    "scipy_success_is_criterion": false
+  },
+  "ambiguous_loading_installation": "selected_candidate_loading",
+  "progression_policy": {
+    "policy": "research_first_c2_exploratory_v1",
+    "applies_to_stage": "pilot",
+    "research_mode": "EXPLORATORY / FEASIBILITY CHARACTERIZATION",
+    "technical_validity": "artifact audit BLOCKER = 0 and HIGH = 0 and run_status == SUCCESS",
+    "candidate_convergence_role": "diagnostic (WARNING, not a progression blocker)",
+    "convergence_threshold_changed": false,
+    "approved": true,
+    "approved_by": "Human",
+    "approved_in": "Issue #74 Human Gate -- Phase 9C research-first C2 exploratory feasibility pilot",
+    "approval_url": "https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/issues/74#issuecomment-5831839025",
+    "approval_date": "2026-09-25"
+  }
+}

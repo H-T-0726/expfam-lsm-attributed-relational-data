@@ -1,0 +1,20 @@
+{
+  "auditor_version": "candidate-optimizer-validation-auditor-v1",
+  "run_dir": "expfam\\results\\family_selection\\optimizer_validation_20260923",
+  "gate": "74-B1",
+  "recomputed_status": "REFERENCE_NOT_CERTIFIED",
+  "verdict": "PASS",
+  "blocker_count": 0,
+  "high_count": 0,
+  "medium_count": 0,
+  "finding_count": 0,
+  "audit_clean": true,
+  "findings": [],
+  "note": "B1 certifies nothing about the production optimiser by itself. Any change to the optimiser is a separate Human Gate decision.",
+  "recomputed_adam_verdict": "HUMAN_OPTIMIZER_DECISION_REQUIRED",
+  "certified_problems": 0,
+  "adam_rows": 0,
+  "ordering_rows": 0,
+  "ordering_agreements": 0,
+  "adam_converged_flag_true": 0
+}

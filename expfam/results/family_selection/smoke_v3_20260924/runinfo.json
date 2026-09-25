@@ -1,0 +1,22 @@
+{
+  "runner_version": "family-selection-pilot-runner-v2",
+  "selector_version": "family-selection-v1",
+  "generator_version": "canonical-clean-mixed-v1",
+  "stage": "smoke",
+  "git_sha": "e15acad659e377356d2494764b0d429619d5327b",
+  "git_dirty": false,
+  "python_version": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "numpy_version": "2.3.5",
+  "started_utc": "2026-09-24T03:48:21.032521+00:00",
+  "finished_utc": "2026-09-24T03:48:43.791614+00:00",
+  "run_status": "SUCCESS",
+  "em_executions": 4,
+  "em_executions_semantics": "real EM executions ATTEMPTED, counted before each call, not on return",
+  "expected_em_executions": 4,
+  "numerics_mode": "consistent",
+  "failure_policy": "fail_fast",
+  "candidate_optimizer": "bfgs",
+  "ambiguous_loading_installation": "selected_candidate_loading",
+  "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+}

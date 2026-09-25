@@ -1,0 +1,9 @@
+replicate,start_label,column,candidate_family,score,neg2_score,sigma_sq,optimizer,optimiser_iterations,optimiser_converged,optimiser_gradient_inf,scipy_success,loading_norm,family_x_true,selected_family
+rep1,start_B,2,bernoulli,-26.972081167655983,53.944162335311965,,bfgs,6,True,9.463376748897189e-11,True,0.4004945256431162,bernoulli,bernoulli
+rep1,start_B,2,poisson,-39.265383463737024,78.53076692747405,,bfgs,8,True,2.1034285424548216e-12,True,0.20383377486762427,bernoulli,bernoulli
+rep1,start_B,3,bernoulli,-27.067923210468088,54.135846420936176,,bfgs,7,True,1.971223184682458e-12,True,0.35271934515600784,bernoulli,bernoulli
+rep1,start_B,3,poisson,-39.38815262813419,78.77630525626839,,bfgs,8,True,7.503443977263658e-11,True,0.18831535911065028,bernoulli,bernoulli
+rep1,start_P,2,bernoulli,-27.107696144189436,54.21539228837887,,bfgs,6,True,4.6827874911059556e-12,True,0.378423411939584,bernoulli,bernoulli
+rep1,start_P,2,poisson,-39.2251875893294,78.4503751786588,,bfgs,9,True,3.2317259979208756e-12,True,0.22486785016389527,bernoulli,bernoulli
+rep1,start_P,3,bernoulli,-26.97954630779637,53.95909261559274,,bfgs,7,True,2.718747449392822e-10,False,0.3688944140209188,bernoulli,bernoulli
+rep1,start_P,3,poisson,-39.1879429686329,78.3758859372658,,bfgs,7,True,1.7941420571432333e-11,True,0.22050500971477072,bernoulli,bernoulli

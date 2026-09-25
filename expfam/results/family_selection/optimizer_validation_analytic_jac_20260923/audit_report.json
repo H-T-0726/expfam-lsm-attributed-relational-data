@@ -1,0 +1,20 @@
+{
+  "auditor_version": "candidate-optimizer-analytic-jac-auditor-v1",
+  "run_dir": "expfam\\results\\family_selection\\optimizer_validation_analytic_jac_20260923",
+  "gate": "74-B1R",
+  "recomputed_status": "REFERENCE_V2_CERTIFIED",
+  "recomputed_adam_verdict": "HUMAN_OPTIMIZER_DECISION_REQUIRED",
+  "verdict": "PASS",
+  "blocker_count": 0,
+  "high_count": 0,
+  "medium_count": 0,
+  "finding_count": 0,
+  "audit_clean": true,
+  "findings": [],
+  "note": "B1R certifies nothing about the production optimiser by itself. Any change to the optimiser or to its convergence rule is a separate Human Gate decision.",
+  "certified_problems": 4,
+  "adam_rows": 12,
+  "ordering_rows": 6,
+  "ordering_agreements": 6,
+  "adam_converged_flag_true": 0
+}

@@ -1,0 +1,83 @@
+{
+  "validator_version": "candidate-optimizer-validation-analytic-jac-v1",
+  "gate": "74-B1R",
+  "status": "REFERENCE_V2_CERTIFIED",
+  "adam_verdict": "HUMAN_OPTIMIZER_DECISION_REQUIRED",
+  "em_executions": 0,
+  "started_utc": "2026-09-23T13:33:43.577330+00:00",
+  "finished_utc": "2026-09-23T13:33:43.827008+00:00",
+  "objective_checks": {
+    "total": 12,
+    "passed": 12,
+    "max_abs_difference": 0.0,
+    "tolerance": 1e-10
+  },
+  "gradient_checks": {
+    "total": 12,
+    "passed": 12,
+    "max_abs_difference": 2.3841039420435806e-09,
+    "tolerance": 1e-05
+  },
+  "reference_certification": {
+    "solver_jac": "analytic_production_gradient",
+    "problems": 4,
+    "certified": 4,
+    "failures": [],
+    "max_analytic_grad_inf": 3.2178177455932657e-09,
+    "max_score_spread": 1.7763568394002505e-15,
+    "max_loading_spread": 4.704734934968258e-09,
+    "grad_inf_tolerance": 1e-08,
+    "score_spread_tolerance": 1e-08,
+    "loading_spread_tolerance": 1e-05
+  },
+  "adam_summary": {
+    "runs": 12,
+    "not_run_reason": "",
+    "converged_flag_true": 0,
+    "hit_budget": 12,
+    "max_objective_gap_per_observation": 0.12593902204609617,
+    "max_adam_grad_inf": 5.446002227171858,
+    "max_loading_inf_distance_to_ref": 1.383470511927309,
+    "failures": [
+      "case_A_balanced_nonseparable/bernoulli/init_zero: objective_gap_per_observation 1.813834e-02 > 1e-06",
+      "case_A_balanced_nonseparable/bernoulli/init_zero: adam_grad_inf 1.492978e+00 > 0.0001",
+      "case_A_balanced_nonseparable/bernoulli/init_pos: objective_gap_per_observation 5.309662e-04 > 1e-06",
+      "case_A_balanced_nonseparable/bernoulli/init_pos: adam_grad_inf 1.758608e-01 > 0.0001",
+      "case_A_balanced_nonseparable/bernoulli/init_neg: objective_gap_per_observation 8.895959e-02 > 1e-06",
+      "case_A_balanced_nonseparable/bernoulli/init_neg: adam_grad_inf 3.335994e+00 > 0.0001",
+      "case_A_balanced_nonseparable/poisson/init_zero: objective_gap_per_observation 2.789913e-02 > 1e-06",
+      "case_A_balanced_nonseparable/poisson/init_zero: adam_grad_inf 1.795840e+00 > 0.0001",
+      "case_A_balanced_nonseparable/poisson/init_pos: objective_gap_per_observation 3.361374e-02 > 1e-06",
+      "case_A_balanced_nonseparable/poisson/init_pos: adam_grad_inf 1.708811e+00 > 0.0001",
+      "case_A_balanced_nonseparable/poisson/init_neg: objective_gap_per_observation 1.259390e-01 > 1e-06",
+      "case_A_balanced_nonseparable/poisson/init_neg: adam_grad_inf 5.446002e+00 > 0.0001",
+      "case_B_sparse_nonseparable/bernoulli/init_zero: objective_gap_per_observation 7.631214e-03 > 1e-06",
+      "case_B_sparse_nonseparable/bernoulli/init_zero: adam_grad_inf 5.512105e-01 > 0.0001",
+      "case_B_sparse_nonseparable/bernoulli/init_pos: objective_gap_per_observation 2.135294e-04 > 1e-06",
+      "case_B_sparse_nonseparable/bernoulli/init_pos: adam_grad_inf 7.430967e-02 > 0.0001",
+      "case_B_sparse_nonseparable/bernoulli/init_neg: objective_gap_per_observation 5.553136e-02 > 1e-06",
+      "case_B_sparse_nonseparable/bernoulli/init_neg: adam_grad_inf 2.173049e+00 > 0.0001",
+      "case_B_sparse_nonseparable/poisson/init_zero: objective_gap_per_observation 3.723428e-02 > 1e-06",
+      "case_B_sparse_nonseparable/poisson/init_zero: adam_grad_inf 2.015832e+00 > 0.0001",
+      "case_B_sparse_nonseparable/poisson/init_pos: objective_gap_per_observation 3.280120e-02 > 1e-06",
+      "case_B_sparse_nonseparable/poisson/init_pos: adam_grad_inf 1.685367e+00 > 0.0001",
+      "case_B_sparse_nonseparable/poisson/init_neg: objective_gap_per_observation 1.204761e-01 > 1e-06",
+      "case_B_sparse_nonseparable/poisson/init_neg: adam_grad_inf 4.609455e+00 > 0.0001"
+    ]
+  },
+  "family_ordering": {
+    "rows": 6,
+    "agreements": 6,
+    "reference_winner_by_case": {
+      "case_A_balanced_nonseparable": "bernoulli",
+      "case_B_sparse_nonseparable": "bernoulli"
+    }
+  },
+  "interpretation": {
+    "changed_from_b1": "the reference Jacobian only",
+    "converged_flag_recorded_not_certifying": "the production step-based converged flag is recorded for every Adam run and is not a B1R criterion, so an accurate optimiser with an over-strict flag is distinguishable from an inaccurate one",
+    "no_production_change": "no production optimiser setting and no production convergence rule was changed",
+    "does_not_reinterpret_b1": true,
+    "smoke_artifacts_used_as_input": false
+  }
+}

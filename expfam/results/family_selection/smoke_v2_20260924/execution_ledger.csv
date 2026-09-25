@@ -1,0 +1,5 @@
+sequence,stage,replicate,start_label,execution_kind,seed,status,started_utc,finished_utc,detail
+1,smoke,rep1,start_B,exploration,942001,SUCCESS,2026-09-23T15:08:53.958321+00:00,2026-09-23T15:09:00.386282+00:00,
+2,smoke,rep1,start_B,refit,943001,SUCCESS,2026-09-23T15:09:00.387606+00:00,2026-09-23T15:09:06.762553+00:00,
+3,smoke,rep1,start_P,exploration,942001,SUCCESS,2026-09-23T15:09:06.764503+00:00,2026-09-23T15:09:13.193389+00:00,
+4,smoke,rep1,start_P,refit,943001,SUCCESS,2026-09-23T15:09:13.194990+00:00,2026-09-23T15:09:19.569736+00:00,
