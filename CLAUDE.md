@@ -141,6 +141,80 @@ agent に委任せず、人間自身が実行する。**
 実装中に別の研究課題や改善を発見しても scope を拡張しない。
 承認済み作業が終わったら人間へ結果を返し、次の phase や次の実験を自動開始しない。
 
+### Research proportionality（研究目的に対して検証を重くしすぎない）
+
+検証・gate・audit は**研究上の主張を守るための手段**であり、数値的完全性そのものを研究目的にしない。
+特に feasibility pilot / exploratory experiment では、「手法が動くか・どの条件で有効か・どこに限界があるか」
+を調べることを優先し、研究結論を実質的に変えない診断上の不完全さだけで進行を止めない。
+
+新しい gate / blocker / 数値閾値を追加する前に、必ず次の 4 点を明記する。
+
+1. **守る研究主張または primary estimand は何か**
+2. **その問題を放置すると、どのように主張が無効・解釈不能になるか**
+3. **なぜ WARNING / DIAGNOSTIC として記録するだけでは不十分か**
+4. **数値閾値の根拠は何か**（理論・既存規約・独立 reference・実質的な結果差のいずれか）
+
+これらを説明できない項目は、原則として progression を止める gate にしない。
+
+#### severity の意味
+
+- **BLOCKER**
+  - 結果が無効・解釈不能になる実装誤り
+  - model / objective / data generation の誤り
+  - nonfinite・破損 artifact・provenance 欠落で一次証拠を信用できない
+  - frozen protocol 違反、hidden retry / replacement / seed rescue
+  - primary な結論・選択結果を実質的に変えうることが具体的に示された欠陥
+- **WARNING**
+  - 結果は解釈できるが限定が必要な数値的不安定性・solver warning・軽微な閾値未達
+  - primary な結論を変えることが示されていない limitation
+  - artifact に明示して本文・報告で限定すれば利用可能な問題
+- **DIAGNOSTIC**
+  - provenance、デバッグ、性能観測、将来改善のための情報
+  - scientific progression の可否には直接使わない
+
+**測定できる問題だから BLOCKER にする、という判断は禁止。**
+WARNING / DIAGNOSTIC は、Approved Task の範囲内では記録して原則継続する。
+ただし Human が frozen spec で明示的に stop condition としたものは、その spec を人間が変更するまで従う。
+
+#### 数値最適化・収束判定
+
+- solver の `success=False`、precision-loss warning、単一の厳しい tolerance 未達だけを理由に
+  自動的に BLOCKER にしない。
+- 収束を progression gate に使う場合は、**score / selected model / 主要指標への実質的影響**、
+  独立 reference との差、または理論上必要な精度との対応を示す。
+- 極端に厳しい tolerance を「念のため」で採用しない。
+  閾値の根拠が研究主張と結びつかない場合は diagnostic として保存する。
+- 結果を見た後に閾値を動かして当該 run を PASS にすることはしない。
+  新しい rule は future-facing に preregister し、過去 artifact を遡及改変しない。
+
+#### gate proliferation を避ける
+
+- concrete な研究上の欠陥がない限り、「validation の validation」のためだけに
+  新しい sub-gate を連鎖させない。
+- 同じ論点で validation-only stage が繰り返される場合は、
+  追加 gate より先に **研究上の便益・残る不確実性・このまま実験へ進む場合の限定**を人間へ要約する。
+- 実装の正しさに必要な最低限の確認が終わったら、原則として
+  **scientific experiment → 結果解釈 → limitation 整理**へ戻る。
+
+#### feasibility pilot の既定姿勢
+
+feasibility pilot の目的は通常、完全な数値解析証明ではなく次を確認することである。
+
+- machinery が意図したデータフローで動く
+- hidden repair / seed rescue なしに実行できる
+- 主要な選択・推定結果を記録できる
+- start / condition に対する安定性と失敗条件を観測できる
+- limitation を一次証拠付きで説明できる
+
+これを満たす結果は、WARNING を含んでいても研究上有用でありうる。
+「完全 PASS でなければ研究失敗」と解釈しない。
+
+#### frozen spec との関係
+
+この原則は**過去の frozen gate・既存 artifact・過去判定を遡及的に変更しない**。
+既存の strict gate を緩和・再定義する場合は Human Gate として明示的に承認し、
+変更後の rule は新しい実験に対してのみ適用する。
+
 ---
 
 ## 7. 作業時の安全ルール
