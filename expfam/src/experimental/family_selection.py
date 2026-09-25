@@ -965,6 +965,69 @@ def pilot_convergence_gate(
     }
 
 
+CONVERGENCE_ALL_CONVERGED = "ALL_CONVERGED"
+CONVERGENCE_WARNING = "CONVERGENCE_WARNING"
+
+
+def candidate_convergence_diagnostic(
+    selection_trace: Sequence[dict[str, Any]],
+    candidate_rows: Sequence[dict[str, Any]] = (),
+) -> dict[str, Any]:
+    """Describe candidate convergence without deciding anything with it.
+
+    Same measurement as ``pilot_convergence_gate`` -- the unchanged rule
+    ``finite and grad_inf <= CANDIDATE_GRAD_INF_TOL`` recorded on every
+    candidate -- but reported as a diagnostic. Under the research-first C2
+    policy (Issue #74, 2026-09-25) a finite candidate that misses the
+    tolerance is a WARNING, never a clean pass and never on its own a
+    technical failure. A non-finite value is not handled here: the selector
+    already stops on one, and the auditor treats it as a technical BLOCKER.
+
+    Each warning lists the candidate's own provenance (optimiser iterations,
+    final gradient, SciPy status) so that where the warnings occurred can be
+    reported rather than summarised away.
+    """
+
+    warnings: list[dict[str, Any]] = []
+    candidate_evaluations = 0
+    for row in selection_trace:
+        for family in ("bernoulli", "poisson"):
+            if f"{family}_converged" not in row:
+                continue
+            candidate_evaluations += 1
+            if row.get(f"{family}_converged") is False:
+                warnings.append({
+                    "replicate": row.get("replicate", ""),
+                    "start_label": row.get("start_label", ""),
+                    "iteration": row.get("iteration"),
+                    "column": row.get("column"),
+                    "candidate_family": family,
+                    "selected_family": row.get("selected_family"),
+                    "margin_neg2": row.get("margin_neg2"),
+                    "grad_inf": row.get(f"{family}_grad_inf"),
+                    "n_iter": row.get(f"{family}_n_iter"),
+                    "scipy_success": row.get(f"{family}_scipy_success"),
+                    "scipy_status": row.get(f"{family}_scipy_status"),
+                })
+    rows_with_warning = sum(1 for row in selection_trace
+                            if row.get("all_candidates_converged") is False)
+    final_non_converged = sum(1 for row in candidate_rows
+                              if row.get("optimiser_converged") is False)
+    clean = not warnings and rows_with_warning == 0 and final_non_converged == 0
+    return {
+        "status": CONVERGENCE_ALL_CONVERGED if clean else CONVERGENCE_WARNING,
+        "role": "diagnostic",
+        "convergence_grad_inf_tol": CANDIDATE_GRAD_INF_TOL,
+        "selection_rows": len(selection_trace),
+        "selection_rows_with_warning": rows_with_warning,
+        "candidate_evaluations": candidate_evaluations,
+        "candidate_warnings": len(warnings),
+        "final_candidate_rows": len(candidate_rows),
+        "final_candidate_rows_non_converged": final_non_converged,
+        "warnings": warnings,
+    }
+
+
 # --------------------------------------------------------------------------
 # A4b. the hybrid driver: exploration, then a fresh fixed-family refit
 # --------------------------------------------------------------------------

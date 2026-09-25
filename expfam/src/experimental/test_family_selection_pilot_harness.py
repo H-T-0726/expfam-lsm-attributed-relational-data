@@ -504,7 +504,13 @@ def test_auditor_passes_the_pilot_stage_too(tmp_path, stub_hybrid, approved):
     out = tmp_path / "pilot_run"
     runner.execute("pilot", out)
     report = auditor.audit(out)
-    assert report["verdict"] == "PASS", report["findings"]
+    # Under the research-first C2 policy the pilot stage requires the BFGS
+    # and selected-loading provenance, which this pre-B2 stub does not
+    # carry; only those checks may fail. The passing pilot case, with full
+    # provenance, is in test_research_first_c2_policy.py.
+    assert {f["check"] for f in report["findings"]} <= {
+        "candidate_optimizer", "installation"}, report["findings"]
+    assert report["technical_validity"] == "INVALID"
 
 
 def test_auditor_blocks_a_run_with_a_non_converged_candidate(tmp_path, stub_hybrid,

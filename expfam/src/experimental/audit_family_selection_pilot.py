@@ -161,6 +161,13 @@ INSTALLATION_FIELDS = ("selected_candidate_family", "selected_candidate_score",
                        "installed_loading_sha256")
 
 
+# The research-first C2 policy (Issue #74 Human Gate, 2026-09-25),
+# transcribed rather than imported. A pilot-stage protocol must declare it;
+# a run that does not is not the run that policy approved.
+RESEARCH_FIRST_POLICY_NAME = "research_first_c2_exploratory_v1"
+RESEARCH_FIRST_STAGE = "pilot"
+
+
 class Finding(dict):
     """One audit finding. A dict so it serialises without ceremony."""
 
@@ -509,6 +516,109 @@ def _check_installation_provenance(protocol: dict[str, Any],
                     f"gradient {gradient:.3e} implies otherwise"))
 
 
+def _check_research_first_policy(protocol: dict[str, Any],
+                                 findings: list[Finding]) -> None:
+    policy = protocol.get("progression_policy") or {}
+    if policy.get("policy") != RESEARCH_FIRST_POLICY_NAME:
+        findings.append(Finding(
+            "BLOCKER", "progression_policy",
+            f"a {RESEARCH_FIRST_STAGE} protocol must declare "
+            f"{RESEARCH_FIRST_POLICY_NAME!r}; it declares "
+            f"{policy.get('policy')!r}"))
+        return
+    if policy.get("convergence_threshold_changed") is not False:
+        findings.append(Finding(
+            "BLOCKER", "progression_policy",
+            "the policy must record that the convergence threshold is "
+            "unchanged"))
+    if not policy.get("approved") or not policy.get("approved_by") or \
+            not policy.get("approved_in"):
+        findings.append(Finding(
+            "HIGH", "progression_policy",
+            "the research-first policy does not record who approved it or "
+            "where"))
+    settings = protocol.get("candidate_optimizer_settings") or {}
+    for key, wanted in APPROVED_OPTIMIZER_SETTINGS.items():
+        if settings.get(key) != wanted:
+            findings.append(Finding(
+                "BLOCKER", "progression_policy",
+                f"candidate_optimizer_settings.{key}: {settings.get(key)!r}, "
+                f"the approved setting is {wanted!r}"))
+    rule = protocol.get("candidate_convergence_rule") or {}
+    if rule.get("convergence_grad_inf_tol") != APPROVED_CONVERGENCE_GRAD_INF_TOL:
+        findings.append(Finding(
+            "BLOCKER", "progression_policy",
+            f"convergence_grad_inf_tol: "
+            f"{rule.get('convergence_grad_inf_tol')!r}, the unchanged "
+            f"tolerance is {APPROVED_CONVERGENCE_GRAD_INF_TOL!r}"))
+
+
+def _recompute_convergence_diagnostic(score_rows: Sequence[dict[str, str]],
+                                      trace_rows: Sequence[dict[str, str]],
+                                      findings: list[Finding]
+                                      ) -> dict[str, Any]:
+    """Recount warnings from the rows; flag any non-finite candidate value.
+
+    A finite candidate that misses the tolerance is a WARNING and is only
+    counted. A non-finite gradient or loading means the comparison itself
+    was not made, which is a technical BLOCKER.
+    """
+
+    warnings = []
+    evaluations = 0
+    for index, row in enumerate(trace_rows):
+        for family in AMBIGUOUS_CANDIDATE_FAMILIES:
+            converged = row.get(f"{family}_converged", "")
+            if converged == "":
+                continue
+            evaluations += 1
+            gradient = _as_float(row.get(f"{family}_grad_inf", ""))
+            if gradient is None or not math.isfinite(gradient):
+                findings.append(Finding(
+                    "BLOCKER", "candidate_values",
+                    f"trace row {index}: {family}_grad_inf is not finite "
+                    f"({row.get(f'{family}_grad_inf')!r})"))
+            if not _truthy(converged):
+                warnings.append({
+                    "replicate": row.get("replicate", ""),
+                    "start_label": row.get("start_label", ""),
+                    "iteration": row.get("iteration", ""),
+                    "column": row.get("column", ""),
+                    "candidate_family": family,
+                    "grad_inf": row.get(f"{family}_grad_inf", ""),
+                    "n_iter": row.get(f"{family}_n_iter", ""),
+                    "scipy_status": row.get(f"{family}_scipy_status", ""),
+                })
+        loading = row.get("selected_loading", "")
+        if loading:
+            values = [_as_float(part) for part in loading.split("|")]
+            if any(v is None or not math.isfinite(v) for v in values):
+                findings.append(Finding(
+                    "BLOCKER", "candidate_values",
+                    f"trace row {index}: selected_loading is not finite"))
+    final_non_converged = sum(
+        1 for row in score_rows
+        if row.get("optimiser_converged", "") != ""
+        and not _truthy(row.get("optimiser_converged", "")))
+    rows_with_warning = sum(
+        1 for row in trace_rows
+        if row.get("all_candidates_converged", "") != ""
+        and not _truthy(row.get("all_candidates_converged", "")))
+    clean = not warnings and not final_non_converged and not rows_with_warning
+    return {
+        "status": "ALL_CONVERGED" if clean else "CONVERGENCE_WARNING",
+        "role": "diagnostic",
+        "convergence_grad_inf_tol": APPROVED_CONVERGENCE_GRAD_INF_TOL,
+        "selection_rows": len(trace_rows),
+        "selection_rows_with_warning": rows_with_warning,
+        "candidate_evaluations": evaluations,
+        "candidate_warnings": len(warnings),
+        "final_candidate_rows": len(score_rows),
+        "final_candidate_rows_non_converged": final_non_converged,
+        "warnings": warnings,
+    }
+
+
 def _check_fits(fit_rows: Sequence[dict[str, str]], findings: list[Finding]
                 ) -> None:
     for row in fit_rows:
@@ -663,6 +773,14 @@ def audit(run_dir: Path,
 
     _check_protocol(protocol, expected, findings)
     _check_approvals(protocol, findings)
+    research_first = stage == RESEARCH_FIRST_STAGE
+    if research_first:
+        # The policy approved this run under the B2 optimiser and the B5
+        # installation semantics, so both are required rather than opt-in.
+        _check_research_first_policy(protocol, findings)
+        expect_candidate_optimizer = (expect_candidate_optimizer
+                                      or APPROVED_CANDIDATE_OPTIMIZER)
+        require_installation_provenance = True
 
     ledger_rows = _read_csv(run_dir / "execution_ledger.csv")
     attempted = _check_ledger(ledger_rows, runinfo, expected, findings)
@@ -691,6 +809,10 @@ def audit(run_dir: Path,
         report = _finish(run_dir, stage, findings, run_status="FAILED")
         report["attempted_em_executions"] = attempted
         report["convergence_gate"] = "NOT_EVALUATED"
+        report["research_first_policy_applied"] = research_first
+        if research_first:
+            report["technical_validity"] = "INVALID"
+            report["candidate_convergence_diagnostic"] = None
         _write_report(run_dir, report)
         return report
 
@@ -812,6 +934,19 @@ def audit(run_dir: Path,
                                    expect_candidate_optimizer, findings)
     if require_installation_provenance:
         _check_installation_provenance(protocol, trace_rows, findings)
+    diagnostic = None
+    if research_first:
+        diagnostic = _recompute_convergence_diagnostic(score_rows, trace_rows,
+                                                       findings)
+        reported = summary.get("candidate_convergence_diagnostic") or {}
+        for key in ("status", "candidate_evaluations", "candidate_warnings",
+                    "selection_rows_with_warning",
+                    "final_candidate_rows_non_converged"):
+            if reported.get(key) != diagnostic[key]:
+                findings.append(Finding(
+                    "BLOCKER", "candidate_convergence_diagnostic",
+                    f"summary.json reports {key}={reported.get(key)!r} but "
+                    f"the artifact rows imply {diagnostic[key]!r}"))
 
     claim_boundary = summary.get("claim_boundary", {}) or {}
     for key in REQUIRED_CLAIM_BOUNDARY_KEYS:
@@ -834,6 +969,23 @@ def audit(run_dir: Path,
     report["expected_candidate_optimizer"] = expect_candidate_optimizer
     report["installation_provenance_required"] = bool(
         require_installation_provenance)
+    report["research_first_policy_applied"] = research_first
+    if research_first:
+        # Two separate answers. technical_validity: is this run valid
+        # evidence. candidate_convergence_diagnostic: did every candidate
+        # meet the unchanged tolerance. A WARNING is kept as a WARNING; it is
+        # never reported as a clean-convergence pass. The historical
+        # composite above is left as it is computed and is not the
+        # progression field for this policy.
+        report["technical_validity"] = ("VALID" if report["progress_eligible"]
+                                        else "INVALID")
+        report["technical_validity_rule"] = ("blocker_count == 0 and "
+                                             "high_count == 0 and "
+                                             "run_status == SUCCESS")
+        report["candidate_convergence_diagnostic"] = diagnostic
+        report["pilot_progression_rule"] = (
+            "not applicable under the research-first C2 policy; "
+            "read technical_validity")
     report["attempted_em_executions"] = attempted
     report["non_converged_candidate_rows"] = len(non_converged)
     report["score_decided_columns"] = len(ambiguous)
@@ -924,6 +1076,13 @@ def main(argv: Sequence[str] | None = None) -> int:
           f"pilot_progress_eligible={report['pilot_progress_eligible']}")
     for finding in report["findings"]:
         print(f"  [{finding['severity']}] {finding['check']}: {finding['message']}")
+    if report.get("research_first_policy_applied"):
+        diagnostic = report.get("candidate_convergence_diagnostic") or {}
+        print(f"technical_validity={report.get('technical_validity', 'INVALID')} "
+              f"candidate_convergence_diagnostic="
+              f"{diagnostic.get('status', 'NOT_EVALUATED')} "
+              f"warnings={diagnostic.get('candidate_warnings', 'n/a')}")
+        return 0 if report.get("technical_validity") == "VALID" else 1
     # Exit 0 only when the NEXT EM STAGE may proceed. A HIGH finding blocks it
     # even though the verdict itself is PASS, and so does a blocked
     # convergence gate even though the artifacts are clean.

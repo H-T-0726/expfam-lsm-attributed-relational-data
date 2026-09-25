@@ -68,6 +68,7 @@ from family_selection import (                                     # noqa: E402
     OPTIMIZER_BFGS,
     PHASE9C_CANDIDATE_OPTIMIZER,
     SELECTOR_VERSION,
+    candidate_convergence_diagnostic,
     pilot_convergence_gate,
     run_hybrid_family_selection,
 )
@@ -175,7 +176,35 @@ class Protocol:
         # What the exploration M-step installs for an ambiguous column
         # (Gate 74-B5). Recorded so a run says which semantics produced it.
         payload["ambiguous_loading_installation"] = LOADING_INSTALLATION_POLICY
+        if self.stage == RESEARCH_FIRST_C2_POLICY["applies_to_stage"]:
+            payload["progression_policy"] = dict(RESEARCH_FIRST_C2_POLICY)
         return payload
+
+
+# Research-first C2 policy (Issue #74 Human Gate, 2026-09-25). For the
+# pilot stage only, candidate convergence at the UNCHANGED tolerance is
+# measured and reported as a diagnostic instead of gating progression; a run
+# is technically invalid only for integrity failures. Historical smoke
+# artifacts and their verdicts are untouched: the smoke protocol does not
+# carry this policy.
+RESEARCH_FIRST_C2_POLICY: dict[str, Any] = {
+    "policy": "research_first_c2_exploratory_v1",
+    "applies_to_stage": "pilot",
+    "research_mode": "EXPLORATORY / FEASIBILITY CHARACTERIZATION",
+    "technical_validity": "artifact audit BLOCKER = 0 and HIGH = 0 and "
+                          "run_status == SUCCESS",
+    "candidate_convergence_role": "diagnostic (WARNING, not a progression "
+                                  "blocker)",
+    "convergence_threshold_changed": False,
+    "approved": True,
+    "approved_by": "Human",
+    "approved_in": "Issue #74 Human Gate -- Phase 9C research-first C2 "
+                   "exploratory feasibility pilot",
+    "approval_url": "https://github.com/H-T-0726/"
+                    "expfam-lsm-attributed-relational-data/issues/74"
+                    "#issuecomment-5831839025",
+    "approval_date": "2026-09-25",
+}
 
 
 # --------------------------------------------------------------------------
@@ -593,6 +622,11 @@ def build_summary(protocol: Protocol, results: Sequence[dict[str, Any]],
     candidate_rows = [row for result in results
                       for row in result["candidate_rows"]]
     gate = pilot_convergence_gate(traces, candidate_rows)
+    tagged_traces = [{"replicate": result["replicate"],
+                      "start_label": result["start_label"], **row}
+                     for result in results for row in result["selection_trace"]]
+    diagnostic = candidate_convergence_diagnostic(tagged_traces,
+                                                  candidate_rows)
 
     per_run = []
     for result in results:
@@ -630,10 +664,18 @@ def build_summary(protocol: Protocol, results: Sequence[dict[str, Any]],
             if true_family == "poisson":
                 ambiguous_true_poisson += 1
 
+    research_first = (protocol.stage
+                      == RESEARCH_FIRST_C2_POLICY["applies_to_stage"])
     return {
         "stage": protocol.stage,
         "runner_version": RUNNER_VERSION,
+        # The historical strict S1 value, still computed the same way. Under
+        # the research-first C2 policy it is reported, not acted on.
         "convergence_gate": gate,
+        "convergence_gate_role": ("diagnostic (research-first C2 policy)"
+                                  if research_first
+                                  else "progression gate"),
+        "candidate_convergence_diagnostic": diagnostic,
         "per_run": per_run,
         "start_agreement_by_replicate": agreement,
         "true_bernoulli_selected_as_poisson": true_bernoulli_to_poisson,
@@ -890,6 +932,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     gate = summary["convergence_gate"]["status"]
     print(f"stage={summary['stage']} convergence_gate={gate}")
     print(f"artifacts written to {args.out}")
+    if args.stage == RESEARCH_FIRST_C2_POLICY["applies_to_stage"]:
+        diagnostic = summary["candidate_convergence_diagnostic"]
+        print(f"candidate_convergence_diagnostic={diagnostic['status']} "
+              f"warnings={diagnostic['candidate_warnings']}/"
+              f"{diagnostic['candidate_evaluations']} (diagnostic only; "
+              f"technical validity is decided by the artifact audit)")
+        return 0
     if gate != "READY_FOR_PILOT":
         print("BLOCKED_FOR_PILOT: at least one ambiguous column had a "
               "candidate that did not converge. Do not raise the optimiser "
