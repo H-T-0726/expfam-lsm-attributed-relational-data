@@ -1,0 +1,3083 @@
+{
+  "auditor_version": "joint-family-k-auditor-v1",
+  "run_dir": "expfam\\results\\joint_family_k_selection\\gate75b_20260927",
+  "run_status": "SUCCESS",
+  "verdict": "PASS",
+  "blocker_count": 0,
+  "high_count": 0,
+  "warning_count": 1,
+  "technical_validity": "VALID",
+  "technical_validity_rule": "BLOCKER == 0 and HIGH == 0 and run_status == SUCCESS",
+  "attempted_em_executions": 60,
+  "expected_em_executions": 60,
+  "candidate_convergence_diagnostic": {
+    "status": "CONVERGENCE_WARNING",
+    "role": "diagnostic",
+    "convergence_grad_inf_tol": 1e-08,
+    "selection_rows": 1440,
+    "selection_rows_with_warning": 289,
+    "candidate_evaluations": 2880,
+    "candidate_warnings": 305,
+    "final_candidate_rows": 360,
+    "final_candidate_rows_non_converged": 36,
+    "warnings": [
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.5014473720451636e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4105272638786915e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "8.687265875551021e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.156595260149885e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "4.7187647862767526e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "5.94496416131407e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "4.5916574747950636e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3578544950931804e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.6771058404252414e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.107680057454985e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.1149482809512678e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2004046062719098e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1512314079809016e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "3.989190765982254e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.424459320695462e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.7701505949929695e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1582325137871052e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.1692012341922862e-07",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1824056195551832e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "9.794240048571768e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "9.616138990642398e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.5068411889938035e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0630347462292633e-07",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.164402926914001e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2494937095541836e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.195876920268013e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.008384417135801e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.435814014489779e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "3.2844704733747676e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.695806899348895e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "7.322941268927962e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3721741760897021e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.6801650604711964e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.2145908573634186e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0681515316690593e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0144376183518488e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.334837840261116e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.8287349323742318e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "7.77703300869348e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.3268619197814857e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1924255036710462e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.748906991507539e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.0168027337064132e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0939458017222847e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.1510472158501345e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "7.993249215298981e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.8180327235883808e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "5.7787783569462905e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "3.56045286975526e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "3.770557768234539e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "9.293747183711232e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.804800008389009e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.895926110747405e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.7836462529174923e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.43784598310992e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "9.413519545253824e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "4.345929470184196e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "8.135037772305509e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.942024516754515e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2604439328378626e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.6562037458432997e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.6760223428845543e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7087668924276046e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.034520095201998e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "9.146357198008825e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0642111147873833e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "2.0777927828286026e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.6278422350080034e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.1354980095367183e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.041227716269688e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "4.5899761702550276e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.322553086768874e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7432760757163378e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "6.825118150644017e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "2.5636622488778293e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.001709977188625e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.2422944495327216e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1724841075810843e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1443900449492616e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.0838155861957473e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "3.205341470524647e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.6377195133365775e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.334865480373537e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.3495972971687707e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.020972136307364e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.943497811573991e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2022450301962807e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9737018064347468e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep1",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0372262937430321e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.5830138728745168e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.5780032412446874e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "5.764137493535771e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.243326099853448e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "4.1851212078114487e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "2.2736383616939194e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.9330271189564884e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.2843251440131098e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.857556323203724e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.211183618427981e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1030175528503605e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.8438377963624363e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.1540213079873638e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.3056876313477516e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1720143283943117e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "4.852216664019693e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1704431912562541e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1306246329455546e-07",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "2.0682761459056564e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "3.110765476321831e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.935398220049734e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.364175536977541e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.3285893830690155e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "5.5338338356136774e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4109140566986866e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "3.903359186985256e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "5.5537642307257326e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.5219055227742047e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "5.273078926393282e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3271743171117123e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3528378151050901e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0150611284842626e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "7.18792157128334e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3446104268899361e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.195393751096674e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.6955473764189718e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.82752880057069e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.217300245632714e-07",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "9.398673386229462e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7739538229477603e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.36334964604157e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.828574499040947e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.6507106392893434e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4089149225071652e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "4.1876397691709146e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.6079470155361264e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9343008261785143e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9883925873043217e-07",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7749248648613046e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.5554654719807105e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.499495869694556e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.9272432122695592e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.481892912939657e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.718094747582555e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.6908093526431005e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "2.5032008839076524e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1584302725964334e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.4257575076115358e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "9.696825467031545e-08",
+        "n_iter": "2",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.555702287107778e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.2959057507089256e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0938700212292929e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.237856495668211e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "8.017783432734405e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.096784877281266e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "9.284388395869314e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "3.8094810150823835e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "2.2100565018057238e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.6718928225477612e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "2.0678694756526284e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.8619084718451973e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.534036915413651e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.1845154662969436e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.4520220459910433e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.558413140756443e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "3.042584495460687e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.52415882159751e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0409675921252415e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1327261706384207e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0532065175539173e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.899120392172108e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.91606021107782e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.809876138267555e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0612514245167404e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "6.115470121415001e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.125434920927319e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2249030676425576e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0128351979332707e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.3578289543024766e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.4534058390136551e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "2.4497173356508028e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "9.94377616303499e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.634061455064618e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.170919102262303e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.94071341219626e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9138010287633733e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9217879216881783e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.020697392803641e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0668456758011758e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.9126953709758253e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "3.974240447846e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0531050342876824e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.8716311312469995e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.8727964645748328e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2365612711562334e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "2.896404855956547e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2701186768993011e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4075977722294297e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.8007190600854982e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4112573865077138e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep2",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0418582041538117e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.6402601983322994e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.377107306081541e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "6.633644797915394e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "4.7443933195445707e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "7.211537706997007e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0510931058860252e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "7.158214039293398e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "8.928811368047462e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.769991493816292e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "5.052067270305826e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.5171391660739885e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.380670248713912e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "2.408219839100667e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.9796887191780853e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7579084570229498e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.10121376906136e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "8.051503748163214e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "9.749909164469273e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.19773316101346e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.948444723458124e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.870122118250108e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9688058872091573e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "4.742607595531467e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.6106635608869057e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3849382796138344e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.3372320230308218e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "3.532595568567221e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "9.676369590039258e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2075935096333978e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0255101350331585e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "4.946694394103446e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1529284612853417e-07",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "2.990844976819007e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.0118605710025577e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1401423805068589e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1490977573913596e-07",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2576169634570532e-07",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.0996314048217215e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "9.5740223447216e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.3428884194108833e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "4.3474998534520634e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.7323052897699754e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "5",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.097882768088312e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2716628141618003e-07",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_B",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "4.9507752919453195e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.0076792644753141e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2067824131989368e-06",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.2770220214619599e-07",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "5.6823124339189234e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.3468704196384352e-08",
+        "n_iter": "3",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "6.955159914667775e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4040944393833854e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.5257561681898435e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.194381460511984e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.844182581147493e-08",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "8.909797326595026e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "4.940327325009264e-08",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "4.297587283375037e-07",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "8.398164555445398e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.1146317340227085e-07",
+        "n_iter": "4",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3820546872378436e-06",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "4.194256061573753e-07",
+        "n_iter": "5",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "6.9016068739991e-07",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "3.8172758420884634e-07",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.6940515302230634e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.4544353603151982e-07",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.710376841326024e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1520633097793507e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.71404964888211e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "2.9128282341694955e-07",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.5439310860898558e-07",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.0577949033651065e-08",
+        "n_iter": "6",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "2.106711864957589e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.2271969274688675e-08",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "9.830408194133611e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.610340509827779e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "3.892943487224243e-08",
+        "n_iter": "7",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2257512582714014e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "5",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3982490187913755e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "7.693319463708548e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "5",
+        "candidate_family": "bernoulli",
+        "grad_inf": "7.681809397475092e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.2547633931880853e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.6443474927518854e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "8.030292821814556e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "3.8977628236125383e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "4",
+        "candidate_family": "bernoulli",
+        "grad_inf": "5.024309359669132e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "6",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.8017718339535803e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "1",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "2.8691910580747048e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "1.138098833369794e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "3.724261101734072e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "2",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.2435450877923415e-07",
+        "n_iter": "10",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1189810411593726e-08",
+        "n_iter": "16",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "4",
+        "candidate_family": "poisson",
+        "grad_inf": "3.040024482814374e-07",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.9827016334295067e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "3",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "3.2710717015049793e-07",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "1.5070292569419053e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.6269392886236744e-07",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "4",
+        "column": "8",
+        "candidate_family": "poisson",
+        "grad_inf": "2.7028949478591357e-08",
+        "n_iter": "14",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "6",
+        "column": "3",
+        "candidate_family": "poisson",
+        "grad_inf": "5.060708954118809e-08",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "3.9762369813400866e-08",
+        "n_iter": "12",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "6",
+        "candidate_family": "poisson",
+        "grad_inf": "1.1009671396777776e-08",
+        "n_iter": "11",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "7",
+        "column": "8",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.7433151899837186e-08",
+        "n_iter": "8",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "5",
+        "candidate_family": "poisson",
+        "grad_inf": "2.1787524000504989e-07",
+        "n_iter": "13",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "7",
+        "candidate_family": "bernoulli",
+        "grad_inf": "1.5936917652226158e-08",
+        "n_iter": "9",
+        "scipy_status": "2"
+      },
+      {
+        "replicate": "rep3",
+        "start_label": "start_P",
+        "iteration": "8",
+        "column": "7",
+        "candidate_family": "poisson",
+        "grad_inf": "1.3621221350845758e-08",
+        "n_iter": "15",
+        "scipy_status": "2"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "severity": "WARNING",
+      "check": "candidate_convergence",
+      "message": "305/2880 candidate evaluations missed grad_inf <= 1e-8 with finite values (diagnostic)"
+    }
+  ]
+}

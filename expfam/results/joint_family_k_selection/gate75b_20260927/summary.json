@@ -1,0 +1,91 @@
+{
+  "stage": "joint",
+  "runner_version": "joint-family-k-runner-v1",
+  "paths": 6,
+  "P1_k_recovery": {
+    "k_hat_by_path": {
+      "rep1/start_B": 2,
+      "rep1/start_P": 2,
+      "rep2/start_B": 3,
+      "rep2/start_P": 3,
+      "rep3/start_B": 3,
+      "rep3/start_P": 3
+    },
+    "exact": 4,
+    "under": 2,
+    "over": 0
+  },
+  "P2_family_recovery_at_k_hat": {
+    "bernoulli_to_poisson_total": 0,
+    "all_six_exact_paths": 6
+  },
+  "P3_joint_exact_paths": 4,
+  "P4_start_stability": {
+    "rep1": {
+      "k_hat_agree": true,
+      "assignment_at_k_hat_agree": true,
+      "cq_ordering_agree": true
+    },
+    "rep2": {
+      "k_hat_agree": true,
+      "assignment_at_k_hat_agree": true,
+      "cq_ordering_agree": true
+    },
+    "rep3": {
+      "k_hat_agree": true,
+      "assignment_at_k_hat_agree": true,
+      "cq_ordering_agree": true
+    }
+  },
+  "candidate_convergence_warnings_by_k": {
+    "rep1/start_B/K=1": 2,
+    "rep1/start_B/K=2": 8,
+    "rep1/start_B/K=3": 6,
+    "rep1/start_B/K=4": 11,
+    "rep1/start_B/K=5": 9,
+    "rep1/start_P/K=1": 4,
+    "rep1/start_P/K=2": 11,
+    "rep1/start_P/K=3": 11,
+    "rep1/start_P/K=4": 13,
+    "rep1/start_P/K=5": 14,
+    "rep2/start_B/K=1": 7,
+    "rep2/start_B/K=2": 6,
+    "rep2/start_B/K=3": 12,
+    "rep2/start_B/K=4": 10,
+    "rep2/start_B/K=5": 15,
+    "rep2/start_P/K=1": 9,
+    "rep2/start_P/K=2": 14,
+    "rep2/start_P/K=3": 12,
+    "rep2/start_P/K=4": 8,
+    "rep2/start_P/K=5": 18,
+    "rep3/start_B/K=1": 9,
+    "rep3/start_B/K=2": 5,
+    "rep3/start_B/K=3": 11,
+    "rep3/start_B/K=4": 9,
+    "rep3/start_B/K=5": 11,
+    "rep3/start_P/K=1": 6,
+    "rep3/start_P/K=2": 12,
+    "rep3/start_P/K=3": 9,
+    "rep3/start_P/K=4": 13,
+    "rep3/start_P/K=5": 20
+  },
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "unit": "pipeline path (replicate, start); starts share data and are not independent replicates; no confidence interval from six paths",
+    "family_accuracy_columns": "score-decided true-Bernoulli columns 3-8 only",
+    "criterion": "C_Q: Q-based complete-data / ICL-type, not Schwarz BIC; discrete family search not separately penalised (known limitation)",
+    "do_not_claim": [
+      "K-selection consistency",
+      "general family-selection validity",
+      "general joint-selection reliability",
+      "real-data effectiveness",
+      "superiority over human choices",
+      "robustness beyond this frozen condition and K grid"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
