@@ -167,6 +167,7 @@ agent に委任せず、人間自身が実行する。**
 - synthetic と real-data の役割を分け、証拠より強い claim をしない
 - test は scientific/public contract を固定し、private defaults や incidental tuple の完全一致を必要以上に pin しない
 - 前の gate が通らなかったこと自体を理由に validation-only sub-gate を増やさない
+- **既に technical valid として実走済みの pipeline を、replicate 数・seed 集合・既存条件の反復だけに再利用する場合、新しい runner / independent auditor / validation gate を原則追加しない。科学的差分に必要な最小 wrapper・contract test・記録だけを追加する**
 - 追加実験前に「結果 A/B のどちらでも研究判断が変わるか」を確認し、engineering curiosity だけなら優先度を下げる
 - pilot / phase 終了時は、追加実装より先に **研究問い / 方法 / 一次結果 / 言えること / 言えないこと / 次の Human 判断** を整理する
 - 過去 artifact / frozen protocol / historical verdict は遡及変更しない
