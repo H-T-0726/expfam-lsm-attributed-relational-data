@@ -3,7 +3,7 @@
 - 位置づけ: **PROSPECTIVELY FROZEN APPROXIMATION-ERROR CHARACTERIZATION**（Issue #92）。K 選択性能の研究ではない。
 - 系列: **E（experimental prototype; 本文採用不可）**
 - 一次データ: `expfam/results/laplace_is_diagnostic/phase9j_20260928/`
-  （`is_records.json`＝fit ごとの Laplace と全 batch の診断、`is_summary.json`、`fitted_states.npz`、Phase 9E 形式の CSV）
+  （`is_records.json`＝fit ごとの Laplace と全 batch の診断、`is_summary.json`、`fitted_states.json`（commit 済みの fitted state）、Phase 9E 形式の CSV）
 - 実行コード: `368487a`（git_dirty = False）。1 回だけ実行。rerun / 追加サンプル / proposal 変更なし。
 
 ---
@@ -91,9 +91,15 @@
 
 ## 6. fitted state の保存
 
-`fitted_states.npz`: 6 refit それぞれの F、Gaussian 分散（sigma 対角）、w0、w、var_z、最終 Z_est、family assignment、seeds、
-X と Y の配列（`X`, `Y` を保存。data seed から `run_family_selection_pilot.build_dataset` でも再生成できる）、code SHA `368487a`、evaluator / IS version を含む。
+**commit 済みの成果物は `fitted_states.json`**: 6 refit それぞれの replicate、K、data/search/refit seed、family assignment、F、
+Gaussian 分散（sigma 対角）、w0、w、var_z、最終 Z_est、code SHA `368487a`、evaluator / IS / wrapper version を含む
+（浮動小数点は Python の往復可能な float repr で、float64 と完全一致）。
+X と Y の配列は JSON に入れていない。data seed から `run_family_selection_pilot.build_dataset(PROTOCOL, replicate)` で完全に再生成できる。
 今後の事後解析はこの state を使えば、EM を再実行せずにできる。
+
+> **provenance note**: ローカルの実行では `fitted_states.npz`（X, Y の配列も含む）が生成されたが、root `.gitignore` の `*.npz` で除外されるため commit されていない。
+> `fitted_states.json` は、再実行なしにこの NPZ から変換したもので、F・sigma 対角・Z_est は 6 entry すべてで NPZ と `array_equal` で一致する。
+> data seed から再生成した X, Y も NPZ の配列と `array_equal` で一致する（生成器を呼んだだけで、EM は実行していない）。
 
 ## 7. 次の Human 判断
 
