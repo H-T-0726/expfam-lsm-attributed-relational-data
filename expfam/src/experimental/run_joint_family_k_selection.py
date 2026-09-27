@@ -66,9 +66,9 @@ STARTS = pilot.STARTS                     # (("start_B", "bernoulli"), ("start_P
 # execute() refuses to run until a human flips this and says where.
 EXECUTION_AUTHORIZATION: dict[str, Any] = {
     "gate": "75-B",
-    "authorized": False,
-    "authorized_by": None,
-    "authorized_in": None,
+    "authorized": True,
+    "authorized_by": "Human",
+    "authorized_in": "Issue #75 Human Gate comment 5855763104",
 }
 
 
