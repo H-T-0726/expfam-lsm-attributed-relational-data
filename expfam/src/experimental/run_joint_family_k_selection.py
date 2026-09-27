@@ -100,12 +100,19 @@ class JointProtocol:
     refit_num_iter: int
     k_candidates: tuple[int, ...]
     replicates: tuple[Replicate, ...]
+    # Forward-only additions (Issue #81). Defaults reproduce Phase 9D.
+    starts: tuple[tuple[str, str], ...] = STARTS
+    # "run": any failure stops the whole run (Phase 9D).
+    # "dataset": an isolated numerical failure marks that dataset
+    #   INCOMPLETE, is recorded, and the next pre-frozen dataset runs.
+    failure_scope: str = "run"
 
     @property
     def expected_em_executions(self) -> int:
         """exploration + refit per (replicate, start, K)."""
 
-        return len(self.replicates) * len(STARTS) * len(self.k_candidates) * 2
+        return (len(self.replicates) * len(self.starts)
+                * len(self.k_candidates) * 2)
 
     def as_json(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -113,7 +120,7 @@ class JointProtocol:
         payload["k_candidates"] = list(self.k_candidates)
         payload["replicates"] = [asdict(r) for r in self.replicates]
         payload["starts"] = [{"label": label, "ambiguous_start": family}
-                             for label, family in STARTS]
+                             for label, family in self.starts]
         payload["expected_em_executions"] = self.expected_em_executions
         payload["candidate_optimizer"] = fs.PHASE9C_CANDIDATE_OPTIMIZER
         payload["candidate_optimizer_settings"] = {
@@ -343,15 +350,23 @@ def family_rows(protocol: JointProtocol, replicate: Replicate,
 # --------------------------------------------------------------------------
 
 def path_results(protocol: JointProtocol, cq_rows: Sequence[dict[str, Any]],
-                 fam_rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+                 fam_rows: Sequence[dict[str, Any]],
+                 completed: Sequence[str] | None = None
+                 ) -> list[dict[str, Any]]:
     """One row per (replicate, start) pipeline path. True labels enter only
-    here, as evaluation targets, after K_hat has been chosen."""
+    here, as evaluation targets, after K_hat has been chosen.
+
+    ``completed`` restricts the paths to datasets with a full K curve
+    (dataset failure scope); None means every replicate.
+    """
 
     score_cols = [c for c, f in enumerate(protocol.family_x_list)
                   if f == "bernoulli"]                    # columns 3-8
     out = []
     for replicate in protocol.replicates:
-        for start_label, _ in STARTS:
+        if completed is not None and replicate.label not in completed:
+            continue
+        for start_label, _ in protocol.starts:
             mine = [r for r in cq_rows if r["replicate"] == replicate.label
                     and r["start_label"] == start_label]
             cq = {int(r["k"]): float(r["C_Q"]) for r in mine}
@@ -391,6 +406,8 @@ def start_stability(paths: Sequence[dict[str, Any]]) -> dict[str, Any]:
     out = {}
     for label in dict.fromkeys(p["replicate"] for p in paths):
         pair = {p["start_label"]: p for p in paths if p["replicate"] == label}
+        if "start_B" not in pair or "start_P" not in pair:
+            continue                               # single-start protocol
         b, p = pair["start_B"], pair["start_P"]
         out[label] = {
             "k_hat_agree": b["k_hat"] == p["k_hat"],
@@ -402,11 +419,17 @@ def start_stability(paths: Sequence[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build_summary(protocol: JointProtocol, cq_rows, fam_rows, paths,
-                  warnings_by_k) -> dict[str, Any]:
+                  warnings_by_k, incomplete: Sequence[dict[str, Any]] = ()
+                  ) -> dict[str, Any]:
     return {
         "stage": protocol.stage,
         "runner_version": RUNNER_VERSION,
         "paths": len(paths),
+        "datasets": {
+            "planned": len(protocol.replicates),
+            "completed": len(protocol.replicates) - len(incomplete),
+            "incomplete": list(incomplete),
+        },
         "P1_k_recovery": {
             "k_hat_by_path": {f"{p['replicate']}/{p['start_label']}":
                               p["k_hat"] for p in paths},
@@ -487,9 +510,16 @@ ARTIFACTS = ("protocol.json", "runinfo.json", "execution_ledger.csv",
 FAILURE_ARTIFACT = "failure.json"
 
 
+# Failures that are numerical and local to one dataset's fit. Anything else
+# (a programming error, a broken artifact) stops the whole run.
+DATASET_ISOLATABLE = (RunnerStop, fs.SelectorStop, fs.EMFailFast,
+                      FloatingPointError, np.linalg.LinAlgError)
+
+
 def execute(out_dir: Path, *, protocol: JointProtocol = PROTOCOL,
             driver: Callable[..., dict[str, Any]] | None = None,
-            verbose: bool = False) -> dict[str, Any]:
+            verbose: bool = False,
+            authorization: dict[str, Any] | None = None) -> dict[str, Any]:
     """Run the frozen protocol exactly once and write its artifacts.
 
     ``driver`` defaults to the merged #74 ``run_hybrid_family_selection``;
@@ -498,9 +528,12 @@ def execute(out_dir: Path, *, protocol: JointProtocol = PROTOCOL,
     any other call.
     """
 
-    _require(bool(EXECUTION_AUTHORIZATION["authorized"]),
-             "Gate 75-B is not authorised: Issue #75 says EM is not yet "
-             "authorised. A human must record the authorisation first.")
+    auth = EXECUTION_AUTHORIZATION if authorization is None else authorization
+    _require(bool(auth["authorized"]),
+             f"{auth.get('gate')} is not authorised: a human must record "
+             f"the authorisation first.")
+    _require(protocol.failure_scope in ("run", "dataset"),
+             f"unknown failure_scope {protocol.failure_scope!r}")
     _require(not out_dir.exists(),
              f"{out_dir} already exists; a recorded run is never overwritten")
     run = driver if driver is not None else fs.run_hybrid_family_selection
@@ -508,7 +541,9 @@ def execute(out_dir: Path, *, protocol: JointProtocol = PROTOCOL,
     started = datetime.now(timezone.utc).isoformat()
     code_sha, code_dirty = pilot._git_sha(), pilot._git_dirty()
     out_dir.mkdir(parents=True, exist_ok=False)
-    pilot._write_json(out_dir / "protocol.json", protocol.as_json())
+    payload = protocol.as_json()
+    payload["execution_authorization"] = dict(auth)
+    pilot._write_json(out_dir / "protocol.json", payload)
     pilot._write_json(out_dir / "runinfo.json", build_runinfo(
         protocol, started=started, git_sha=code_sha, git_dirty=code_dirty,
         em_executions=0, status="RUNNING"))
@@ -522,67 +557,40 @@ def execute(out_dir: Path, *, protocol: JointProtocol = PROTOCOL,
     warnings_by_k: dict[str, int] = {}
     context = {"replicate": "", "start_label": "", "k": "",
                "execution_kind": ""}
+    incomplete: list[dict[str, Any]] = []
+    per_dataset = protocol.failure_scope == "dataset"
+    main_tables = tables
     try:
         for replicate in protocol.replicates:
             context["replicate"] = replicate.label
-            dataset = pilot.build_dataset(protocol, replicate)   # one draw
-            tables["generator_provenance"].extend(
-                pilot.generator_provenance_rows(protocol, replicate, dataset))
-            for start_label, ambiguous_start in STARTS:
-                for k in protocol.k_candidates:
-                    context.update(start_label=start_label, k=k)
-
-                    def hook(kind, status, info, _r=replicate.label,
-                             _s=start_label, _k=k):
-                        context["execution_kind"] = kind
-                        if status == "STARTED":
-                            hook.entry = ledger.start(_r, _s, kind,
-                                                      info["seed"], _k)
-                        else:
-                            ledger.finish(hook.entry, status)
-
-                    X, Y = dataset.X.copy(), dataset.Y.copy()
-                    result = run(
-                        X, Y, k=k, ambiguous_start=ambiguous_start,
-                        family_y=protocol.family_y, L=protocol.L,
-                        exploration_num_iter=protocol.exploration_num_iter,
-                        refit_num_iter=protocol.refit_num_iter,
-                        search_seed=replicate.search_seed,
-                        refit_seed=replicate.refit_seed,
-                        verbose=verbose, execution_hook=hook)
-                    refit = result["refit"]
-                    _require(not refit.get("q_bic_failed")
-                             and math.isfinite(float(refit.get("bic"))),
-                             f"{replicate.label}/{start_label}/K={k}: final "
-                             f"C_Q is not finite")
-                    result["replicate"] = replicate.label
-                    result["start_label"] = start_label
-                    tagged = [{"replicate": replicate.label,
-                               "start_label": start_label, **row}
-                              for row in result["selection_trace"]]
-                    result["candidate_convergence_diagnostic"] = \
-                        fs.candidate_convergence_diagnostic(
-                            tagged, result["candidate_rows"])
-                    warnings_by_k[f"{replicate.label}/{start_label}/K={k}"] = \
-                        result["candidate_convergence_diagnostic"][
-                            "candidate_warnings"]
-                    tables["support_gate"].extend(_tag(
-                        pilot.support_gate_rows(protocol, result), k))
-                    tables["family_scores"].extend(_tag(
-                        pilot.family_score_rows(protocol, result), k))
-                    tables["selection_trace"].extend(_tag(
-                        pilot.selection_trace_rows(protocol, result), k))
-                    tables["family_by_k"].extend(family_rows(
-                        protocol, replicate, start_label, k, result))
-                    tables["cq_by_k"].append(cq_row(
-                        protocol, replicate, start_label, k, result))
-                    tables["cq_decomposition"].append({
-                        "replicate": replicate.label,
-                        "start_label": start_label, "k": k,
-                        "num_params": refit["num_params"],
-                        **cq_decomposition(refit, dataset.X, dataset.Y,
-                                           protocol.n)})
+            if per_dataset:
+                tables = {name: [] for name in main_tables}
+            try:
+                _run_dataset(protocol, replicate, run, ledger, tables,
+                             warnings_by_k, context, verbose)
+                status = "completed"
+            except DATASET_ISOLATABLE as exc:
+                if not per_dataset:
+                    raise
+                ledger.fail_open_entries(f"{type(exc).__name__}: {exc}")
+                incomplete.append({
+                    "replicate": replicate.label,
+                    "data_seed": replicate.data_seed,
+                    "start_label": context["start_label"],
+                    "k": context["k"],
+                    "execution_kind": context["execution_kind"],
+                    "exception_type": type(exc).__name__,
+                    "message": str(exc),
+                    "replaced": False,
+                })
+                status = "incomplete"
+            if per_dataset:
+                for name, rows in tables.items():
+                    main_tables[name].extend(
+                        {**row, "dataset_status": status} for row in rows)
+                tables = main_tables
     except BaseException as exc:                # noqa: BLE001 - evidence first
+        tables = main_tables
         ledger.fail_open_entries(f"{type(exc).__name__}: {exc}")
         written = _write_tables(out_dir, tables)
         pilot._write_json(out_dir / "runinfo.json", build_runinfo(
@@ -598,25 +606,107 @@ def execute(out_dir: Path, *, protocol: JointProtocol = PROTOCOL,
             "retry_count": 0, "replacement_count": 0, "seed_rescue_count": 0,
             "git_sha": code_sha, "git_dirty": code_dirty,
             "artifacts_written": written,
+            "incomplete_datasets": incomplete,
             "note": "Stopped. Do not rerun, reseed or change conditions; "
                     "hand this to a human.",
         })
         raise
 
-    _require(ledger.attempted == protocol.expected_em_executions,
-             f"attempted {ledger.attempted} EM executions, expected "
+    per_execution = 2 * len(protocol.starts) * len(protocol.k_candidates)
+    keys = [(e["replicate"], e["start_label"], e["k"], e["execution_kind"])
+            for e in ledger.entries]
+    _require(len(keys) == len(set(keys)),
+             "an execution appears twice in the ledger (hidden retry)")
+    done = {i["replicate"] for i in incomplete}
+    for replicate in protocol.replicates:
+        if replicate.label in done:
+            continue
+        ok = sum(1 for e in ledger.entries if e["replicate"] == replicate.label
+                 and e["status"] == "SUCCESS")
+        _require(ok == per_execution,
+                 f"{replicate.label}: {ok} successful EM executions, "
+                 f"expected {per_execution}")
+    _require(ledger.attempted <= protocol.expected_em_executions,
+             f"attempted {ledger.attempted} EM executions, more than "
              f"{protocol.expected_em_executions}")
-    paths = path_results(protocol, tables["cq_by_k"], tables["family_by_k"])
+    completed = [r.label for r in protocol.replicates if r.label not in done]
+    paths = path_results(protocol, tables["cq_by_k"], tables["family_by_k"],
+                         completed if per_dataset else None)
     tables["joint_selection"] = paths
     summary = build_summary(protocol, tables["cq_by_k"],
-                            tables["family_by_k"], paths, warnings_by_k)
+                            tables["family_by_k"], paths, warnings_by_k,
+                            incomplete)
     _write_tables(out_dir, tables)
     pilot._write_json(out_dir / "summary.json", summary)
     pilot._write_json(out_dir / "runinfo.json", build_runinfo(
         protocol, started=started, git_sha=code_sha, git_dirty=code_dirty,
-        em_executions=ledger.attempted, status="SUCCESS",
+        em_executions=ledger.attempted,
+        status="SUCCESS" if not incomplete else "SUCCESS_WITH_INCOMPLETE_DATASETS",
         finished=datetime.now(timezone.utc).isoformat()))
     return summary
+
+
+def _run_dataset(protocol, replicate, run, ledger, tables, warnings_by_k,
+                 context, verbose) -> None:
+    """One dataset: one draw, then every (start, K) fit from scratch."""
+
+    dataset = pilot.build_dataset(protocol, replicate)   # one draw
+    tables["generator_provenance"].extend(
+        pilot.generator_provenance_rows(protocol, replicate, dataset))
+    for start_label, ambiguous_start in protocol.starts:
+        for k in protocol.k_candidates:
+            context.update(start_label=start_label, k=k)
+
+            def hook(kind, status, info, _r=replicate.label,
+                     _s=start_label, _k=k):
+                context["execution_kind"] = kind
+                if status == "STARTED":
+                    hook.entry = ledger.start(_r, _s, kind,
+                                              info["seed"], _k)
+                else:
+                    ledger.finish(hook.entry, status)
+
+            X, Y = dataset.X.copy(), dataset.Y.copy()
+            result = run(
+                X, Y, k=k, ambiguous_start=ambiguous_start,
+                family_y=protocol.family_y, L=protocol.L,
+                exploration_num_iter=protocol.exploration_num_iter,
+                refit_num_iter=protocol.refit_num_iter,
+                search_seed=replicate.search_seed,
+                refit_seed=replicate.refit_seed,
+                verbose=verbose, execution_hook=hook)
+            refit = result["refit"]
+            _require(not refit.get("q_bic_failed")
+                     and math.isfinite(float(refit.get("bic"))),
+                     f"{replicate.label}/{start_label}/K={k}: final "
+                     f"C_Q is not finite")
+            result["replicate"] = replicate.label
+            result["start_label"] = start_label
+            tagged = [{"replicate": replicate.label,
+                       "start_label": start_label, **row}
+                      for row in result["selection_trace"]]
+            result["candidate_convergence_diagnostic"] = \
+                fs.candidate_convergence_diagnostic(
+                    tagged, result["candidate_rows"])
+            warnings_by_k[f"{replicate.label}/{start_label}/K={k}"] = \
+                result["candidate_convergence_diagnostic"][
+                    "candidate_warnings"]
+            tables["support_gate"].extend(_tag(
+                pilot.support_gate_rows(protocol, result), k))
+            tables["family_scores"].extend(_tag(
+                pilot.family_score_rows(protocol, result), k))
+            tables["selection_trace"].extend(_tag(
+                pilot.selection_trace_rows(protocol, result), k))
+            tables["family_by_k"].extend(family_rows(
+                protocol, replicate, start_label, k, result))
+            tables["cq_by_k"].append(cq_row(
+                protocol, replicate, start_label, k, result))
+            tables["cq_decomposition"].append({
+                "replicate": replicate.label,
+                "start_label": start_label, "k": k,
+                "num_params": refit["num_params"],
+                **cq_decomposition(refit, dataset.X, dataset.Y,
+                                   protocol.n)})
 
 
 def _write_tables(out_dir: Path, tables: dict[str, list]) -> list[str]:
