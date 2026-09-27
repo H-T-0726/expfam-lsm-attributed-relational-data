@@ -1,0 +1,175 @@
+{
+  "wrapper_version": "laplace-pilot-v1",
+  "laplace_settings": {
+    "evaluator_version": "laplace-k-criterion-v1",
+    "theta": "fresh refit final parameters",
+    "joint_mode_start": "fresh refit Z_est",
+    "grad_tol": 1e-08,
+    "max_iter": 200,
+    "restart": false,
+    "alternate_start": false,
+    "jitter_or_ridge": false,
+    "N": 75,
+    "N_status": "working convention (Phase 9G), not a proven sample size",
+    "d_K": "K*d - K(K-1)/2 + n_gaussian_selected(K); w0/w not counted"
+  },
+  "P0_evaluability": {
+    "refits_evaluated": 15,
+    "OK": 15,
+    "NOT_STATIONARY": 0,
+    "HESSIAN_NOT_PD": 0,
+    "EVALUATION_ERROR": 0,
+    "c_lap_complete_datasets": 3
+  },
+  "datasets": [
+    {
+      "replicate": "rep01",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5204.030116259995,
+        "2": 5114.691289378235,
+        "3": 5189.744465575506,
+        "4": 5353.182218788209,
+        "5": 5509.617727004756
+      },
+      "C_Lap": {
+        "1": 5188.599736582894,
+        "2": 5060.932996471597,
+        "3": 5059.406208054932,
+        "4": 5105.755205969857,
+        "5": 5149.908294698653
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 75.05317619727157,
+      "delta_Lap_23": -1.526788416665113,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ]
+    },
+    {
+      "replicate": "rep02",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5149.952869553233,
+        "2": 5011.140727058834,
+        "3": 5079.438632092719,
+        "4": 5265.995131783131,
+        "5": 5420.833787259797
+      },
+      "C_Lap": {
+        "1": 5166.15090493506,
+        "2": 4999.988123419518,
+        "3": 4988.010563972313,
+        "4": 5041.217562368552,
+        "5": 5088.63427309434
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 68.29790503388449,
+      "delta_Lap_23": -11.97755944720484,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ]
+    },
+    {
+      "replicate": "rep03",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5414.612376865503,
+        "2": 5316.812346170556,
+        "3": 5173.350158311736,
+        "4": 5328.2587963270435,
+        "5": 5540.88781085369
+      },
+      "C_Lap": {
+        "1": 5411.401378689493,
+        "2": 5275.406036122672,
+        "3": 5103.661109635229,
+        "4": 5144.171889520422,
+        "5": 5207.304750119798
+      },
+      "K_hat_Q": 3,
+      "K_hat_Lap": 3,
+      "delta_Q_23": -143.46218785882047,
+      "delta_Lap_23": -171.74492648744308,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ]
+    }
+  ],
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "unit": "3 frozen datasets, start_B only; descriptive",
+    "comparison": "C_Q and C_Lap on the same refits; no claim that either is better or correct",
+    "N": "working convention (Phase 9G), not a proven sample size",
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
