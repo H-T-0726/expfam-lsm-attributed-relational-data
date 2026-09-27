@@ -1,0 +1,19 @@
+{
+  "runner_version": "joint-family-k-runner-v1",
+  "selector_version": "family-selection-v1",
+  "generator_version": "canonical-clean-mixed-v1",
+  "stage": "laplace_is_diagnostic",
+  "git_sha": "368487a057eb670ed6f89cc21228906d596b049e",
+  "git_dirty": false,
+  "python_version": "3.13.14",
+  "numpy_version": "2.3.5",
+  "started_utc": "2026-09-27T16:37:11.418010+00:00",
+  "finished_utc": "2026-09-27T16:39:23.476766+00:00",
+  "run_status": "SUCCESS",
+  "em_executions": 12,
+  "em_executions_semantics": "real EM executions ATTEMPTED",
+  "expected_em_executions": 12,
+  "numerics_mode": "consistent",
+  "failure_policy": "fail_fast",
+  "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+}

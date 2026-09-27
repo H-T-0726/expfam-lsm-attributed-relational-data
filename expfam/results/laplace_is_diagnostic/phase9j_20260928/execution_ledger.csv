@@ -1,0 +1,13 @@
+sequence,stage,replicate,start_label,k,execution_kind,seed,status,started_utc,finished_utc,detail
+1,laplace_is_diagnostic,rep01,start_B,2,exploration,992001,SUCCESS,2026-09-27T16:37:11.516880+00:00,2026-09-27T16:37:21.753630+00:00,
+2,laplace_is_diagnostic,rep01,start_B,2,refit,993001,SUCCESS,2026-09-27T16:37:21.754658+00:00,2026-09-27T16:37:31.466277+00:00,
+3,laplace_is_diagnostic,rep01,start_B,3,exploration,992001,SUCCESS,2026-09-27T16:37:33.291618+00:00,2026-09-27T16:37:43.816760+00:00,
+4,laplace_is_diagnostic,rep01,start_B,3,refit,993001,SUCCESS,2026-09-27T16:37:43.817920+00:00,2026-09-27T16:37:53.807330+00:00,
+5,laplace_is_diagnostic,rep02,start_B,2,exploration,992002,SUCCESS,2026-09-27T16:37:55.633680+00:00,2026-09-27T16:38:05.899843+00:00,
+6,laplace_is_diagnostic,rep02,start_B,2,refit,993002,SUCCESS,2026-09-27T16:38:05.901049+00:00,2026-09-27T16:38:15.766287+00:00,
+7,laplace_is_diagnostic,rep02,start_B,3,exploration,992002,SUCCESS,2026-09-27T16:38:17.455041+00:00,2026-09-27T16:38:27.735151+00:00,
+8,laplace_is_diagnostic,rep02,start_B,3,refit,993002,SUCCESS,2026-09-27T16:38:27.736409+00:00,2026-09-27T16:38:37.786828+00:00,
+9,laplace_is_diagnostic,rep03,start_B,2,exploration,992003,SUCCESS,2026-09-27T16:38:39.592302+00:00,2026-09-27T16:38:49.751571+00:00,
+10,laplace_is_diagnostic,rep03,start_B,2,refit,993003,SUCCESS,2026-09-27T16:38:49.752657+00:00,2026-09-27T16:38:59.549928+00:00,
+11,laplace_is_diagnostic,rep03,start_B,3,exploration,992003,SUCCESS,2026-09-27T16:39:01.333838+00:00,2026-09-27T16:39:11.653884+00:00,
+12,laplace_is_diagnostic,rep03,start_B,3,refit,993003,SUCCESS,2026-09-27T16:39:11.655259+00:00,2026-09-27T16:39:21.622029+00:00,
