@@ -1,0 +1,53 @@
+{
+  "stage": "laplace_is_diagnostic",
+  "runner_version": "joint-family-k-runner-v1",
+  "paths": 3,
+  "datasets": {
+    "planned": 3,
+    "completed": 3,
+    "incomplete": []
+  },
+  "P1_k_recovery": {
+    "k_hat_by_path": {
+      "rep01/start_B": 2,
+      "rep02/start_B": 3,
+      "rep03/start_B": 3
+    },
+    "exact": 2,
+    "under": 1,
+    "over": 0
+  },
+  "P2_family_recovery_at_k_hat": {
+    "bernoulli_to_poisson_total": 0,
+    "all_six_exact_paths": 3
+  },
+  "P3_joint_exact_paths": 2,
+  "P4_start_stability": {},
+  "candidate_convergence_warnings_by_k": {
+    "rep01/start_B/K=2": 10,
+    "rep01/start_B/K=3": 9,
+    "rep02/start_B/K=2": 6,
+    "rep02/start_B/K=3": 7,
+    "rep03/start_B/K=2": 6,
+    "rep03/start_B/K=3": 8
+  },
+  "integrity": {
+    "retry_count": 0,
+    "replacement_count": 0,
+    "seed_rescue_count": 0
+  },
+  "claim_boundary": {
+    "unit": "pipeline path (replicate, start); starts share data and are not independent replicates; no confidence interval from six paths",
+    "family_accuracy_columns": "score-decided true-Bernoulli columns 3-8 only",
+    "criterion": "C_Q: Q-based complete-data / ICL-type, not Schwarz BIC; discrete family search not separately penalised (known limitation)",
+    "do_not_claim": [
+      "K-selection consistency",
+      "general family-selection validity",
+      "general joint-selection reliability",
+      "real-data effectiveness",
+      "superiority over human choices",
+      "robustness beyond this frozen condition and K grid"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  }
+}
