@@ -1,0 +1,97 @@
+{
+  "stage": "laplace_pilot",
+  "n": 75,
+  "d": 12,
+  "k_true": 3,
+  "family_x_list": [
+    "gaussian",
+    "gaussian",
+    "gaussian",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "poisson",
+    "poisson",
+    "poisson"
+  ],
+  "family_y": "bernoulli",
+  "sigma_x_var": 1.0,
+  "w0": -1.0,
+  "w": 1.0,
+  "f_scale": 1.4142135623730951,
+  "L": 5,
+  "exploration_num_iter": 8,
+  "refit_num_iter": 8,
+  "k_candidates": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "replicates": [
+    {
+      "label": "rep01",
+      "data_seed": 981001,
+      "search_seed": 982001,
+      "refit_seed": 983001
+    },
+    {
+      "label": "rep02",
+      "data_seed": 981002,
+      "search_seed": 982002,
+      "refit_seed": 983002
+    },
+    {
+      "label": "rep03",
+      "data_seed": 981003,
+      "search_seed": 982003,
+      "refit_seed": 983003
+    }
+  ],
+  "starts": [
+    {
+      "label": "start_B",
+      "ambiguous_start": "bernoulli"
+    }
+  ],
+  "failure_scope": "dataset",
+  "expected_em_executions": 30,
+  "candidate_optimizer": "bfgs",
+  "candidate_optimizer_settings": {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": false,
+    "fallback_solvers": []
+  },
+  "candidate_convergence_rule": {
+    "rule": "finite and final analytic gradient infinity norm <= tol",
+    "convergence_grad_inf_tol": 1e-08,
+    "role": "diagnostic (WARNING), research-first policy"
+  },
+  "ambiguous_loading_installation": "selected_candidate_loading",
+  "refit_failure_policy": "fail_fast",
+  "k_criterion": {
+    "name": "C_Q",
+    "formula": "-2 Q_strict + p_K ln n",
+    "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+    "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+    "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+    "tie_rule": "exact floating equality -> smaller K",
+    "family_search_penalty": "none"
+  },
+  "cross_k_state": "none (each K fit from scratch)",
+  "start_policy": "both starts retained; never choose the better start",
+  "data_draws": "one per replicate, shared by all K and starts",
+  "execution_authorization": {
+    "gate": "Phase 9I bounded Laplace pilot",
+    "authorized": true,
+    "authorized_by": "Human",
+    "authorized_in": "Issue #90 body (bounded execution authorization)"
+  }
+}
