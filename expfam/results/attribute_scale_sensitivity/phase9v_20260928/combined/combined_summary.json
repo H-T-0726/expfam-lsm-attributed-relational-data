@@ -1,0 +1,3206 @@
+{
+  "wrapper_version": "attribute-scale-sensitivity-v1",
+  "code_sha": "356498a77ec06fef53d5e57014c09a80d0242b34",
+  "phase9u_sha256": {
+    "design.json": "0dd438f863c0ece43c567493615bbf57bd3e5563e045974d4eeb2958c8c9aa93",
+    "future_protocol.json": "eaa84c428b69ff4a79c26ddf3a8f44128a128be046887b2ea1c94e2cb74339c2",
+    "pairing_checks.json": "d991b78e721f321eea8ffc4a8ed1e0667903dfa546b3fa19aa54ef523f44fad6"
+  },
+  "new_em_planned": 600,
+  "new_em_attempted": 593,
+  "new_em_successful": 592,
+  "retries": 0,
+  "replacements": 0,
+  "historical_baseline_reused": false,
+  "preflight_all_pass": true,
+  "y_hash_identical": 20,
+  "conditions": {
+    "weak": {
+      "f_scale": 1.0,
+      "loading_energy": 0.25,
+      "technical": {
+        "em_attempted": 200,
+        "em_success": 200,
+        "run_status": "SUCCESS",
+        "em_complete_datasets": 20,
+        "incomplete_datasets": 0,
+        "c_lap_complete_datasets": 20,
+        "refits_evaluated": 100,
+        "OK": 100,
+        "NOT_STATIONARY": 0,
+        "HESSIAN_NOT_PD": 0,
+        "EVALUATION_ERROR": 0
+      },
+      "K_hat_Lap": {
+        "counts": {
+          "1": 0,
+          "2": 0,
+          "3": 20,
+          "4": 0,
+          "5": 0
+        },
+        "exact": 20,
+        "under": 0,
+        "over": 0,
+        "denominator": 20
+      },
+      "K_hat_Q": {
+        "counts": {
+          "1": 0,
+          "2": 9,
+          "3": 11,
+          "4": 0,
+          "5": 0
+        },
+        "exact": 11,
+        "under": 9,
+        "over": 0,
+        "denominator": 20
+      },
+      "paired": {
+        "denominator": 20,
+        "both_K3": 11,
+        "lap_only_K3": 9,
+        "q_only_K3": 0,
+        "neither_K3": 0,
+        "same_K": 11,
+        "different_K": 9
+      },
+      "margins": {
+        "delta_Lap_23": {
+          "n": 20,
+          "min": -125.73636075667764,
+          "median": -73.33398547083607,
+          "max": -18.74522751636141,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "delta_Q_23": {
+          "n": 20,
+          "min": -85.87379536803383,
+          "median": -5.071346267799981,
+          "max": 58.50174189117206,
+          "negative": 11,
+          "positive": 9,
+          "zero": 0
+        },
+        "lap_gap": {
+          "n": 20,
+          "min": 18.74522751636141,
+          "median": 45.607508767013314,
+          "max": 59.87365434300409,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_gap": {
+          "n": 20,
+          "min": 0.445501190351024,
+          "median": 39.15299997886268,
+          "max": 85.87379536803383,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "five_smallest_lap_gaps": [
+          {
+            "replicate": "rep07",
+            "gap": 18.74522751636141,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep18",
+            "gap": 30.316770747856935,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep06",
+            "gap": 31.485009081547105,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep19",
+            "gap": 34.40509197474603,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep13",
+            "gap": 36.76375585853202,
+            "best_k": 3,
+            "second_k": 2
+          }
+        ]
+      },
+      "decomposition_K2_to_K3": {
+        "lap_fit_gain": {
+          "n": 20,
+          "min": 281.75687155056494,
+          "median": 345.2563207390631,
+          "max": 419.82521267998163,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "lap_volume_increment": {
+          "n": 20,
+          "min": 213.88392403259866,
+          "median": 231.8764599466085,
+          "max": 256.4472940846721,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "lap_parameter_increment": {
+          "n": 20,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_fit_gain": {
+          "n": 20,
+          "min": 197.51391922489074,
+          "median": 261.0870073838646,
+          "max": 341.88945648409754,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_PZ_increment": {
+          "n": 20,
+          "min": 212.84077998070086,
+          "median": 212.84077998070092,
+          "max": 212.84077998070103,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_parameter_increment": {
+          "n": 20,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "fit_gain_lap_minus_q": {
+          "n": 20,
+          "min": 51.24014824794631,
+          "median": 77.52177756948049,
+          "max": 106.49835912935578,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        }
+      },
+      "technical_by_K": {
+        "K1": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 4.0,
+            "median": 5.0,
+            "max": 6.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 2.4424906541753444e-15,
+            "median": 3.146525817676604e-10,
+            "max": 7.165991133817329e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 1.1431209043376391,
+            "median": 2.2170811825057046,
+            "max": 4.584233528163252,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 165.51034570589812,
+            "median": 185.23437031009382,
+            "max": 218.3485149650642,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 1.0,
+            "median": 5.0,
+            "max": 10.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K2": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 5.0,
+            "median": 5.0,
+            "max": 7.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 2.6645352591003757e-15,
+            "median": 1.958225248621659e-13,
+            "max": 3.7013403453300953e-10,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.49073027008852443,
+            "median": 0.8634882298692179,
+            "max": 1.1755952795048685,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 328.72250444900914,
+            "median": 360.62862030161034,
+            "max": 400.6985271076383,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 1.0,
+            "median": 8.0,
+            "max": 11.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K3": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 5.0,
+            "median": 6.0,
+            "max": 8.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 3.552713678800501e-15,
+            "median": 5.936143070151001e-12,
+            "max": 9.396220912449849e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.39851004094584636,
+            "median": 0.6119649168578711,
+            "max": 0.9571755061592642,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 475.53956590911105,
+            "median": 518.256190964702,
+            "max": 569.9850099239901,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 6.0,
+            "median": 9.5,
+            "max": 18.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K4": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 6.0,
+            "median": 7.0,
+            "max": 10.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 3.1086244689504383e-15,
+            "median": 1.6266293867417403e-11,
+            "max": 7.73044800395084e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.2743243518263099,
+            "median": 0.40957452949217427,
+            "max": 0.6087960110231463,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 559.6437612160914,
+            "median": 597.4341939354115,
+            "max": 656.7840766190336,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 8.0,
+            "median": 13.5,
+            "max": 20.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K5": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 6.0,
+            "median": 9.0,
+            "max": 36.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 2.9976021664879227e-15,
+            "median": 1.9365065107024293e-11,
+            "max": 9.20001230753087e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.11223908599640385,
+            "median": 0.26190246305067855,
+            "max": 0.48163679877647586,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 619.9421478388012,
+            "median": 684.7707380412995,
+            "max": 752.4735775414897,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 8.0,
+            "median": 14.5,
+            "max": 23.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        }
+      },
+      "family_by_K": {
+        "K1": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K2": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K3": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K4": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K5": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        }
+      },
+      "signal_context": {
+        "f_scale": {
+          "n": 20,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_min": {
+          "n": 20,
+          "min": 0.0031656316280687827,
+          "median": 0.03839207506020781,
+          "max": 0.09783802957419266,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_median": {
+          "n": 20,
+          "min": 0.17970282037280447,
+          "median": 0.21311616421231794,
+          "max": 0.28683982509035505,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_max": {
+          "n": 20,
+          "min": 0.4486569473599407,
+          "median": 0.5685012955765464,
+          "max": 0.8051050122580464,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_mean": {
+          "n": 20,
+          "min": 0.2499999999999999,
+          "median": 0.25,
+          "max": 0.25000000000000006,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_overall": {
+          "n": 20,
+          "min": 0.47235886532981297,
+          "median": 0.49792356729215703,
+          "max": 0.5353184030684291,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_gaussian": {
+          "n": 20,
+          "min": 0.3986721160907411,
+          "median": 0.5182615494921574,
+          "max": 0.7190907112662122,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_bernoulli": {
+          "n": 20,
+          "min": 0.36780384950794,
+          "median": 0.47990583399079606,
+          "max": 0.5877228981715573,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_poisson": {
+          "n": 20,
+          "min": 0.3420308896302729,
+          "median": 0.4980967682107068,
+          "max": 0.6335555046966838,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q01": {
+          "n": 20,
+          "min": -2.0796258883845846,
+          "median": -1.274272012942922,
+          "max": -0.9062124925744491,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q05": {
+          "n": 20,
+          "min": -1.2019894980881205,
+          "median": -0.8339766195192845,
+          "max": -0.6044500202561726,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q50": {
+          "n": 20,
+          "min": -0.06083368441769041,
+          "median": 0.0019996178901849427,
+          "max": 0.03692780068563947,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_gaussian_q95": {
+          "n": 20,
+          "min": 0.663329938306825,
+          "median": 0.8561245052846891,
+          "max": 1.11768152659274,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q99": {
+          "n": 20,
+          "min": 0.927802329823089,
+          "median": 1.237432236480589,
+          "max": 1.652911350307459,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q01": {
+          "n": 20,
+          "min": -1.6487223629637602,
+          "median": -1.1894375028871997,
+          "max": -0.8456544773553932,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q05": {
+          "n": 20,
+          "min": -0.9239821816838657,
+          "median": -0.7890374025348381,
+          "max": -0.5799621959502883,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q50": {
+          "n": 20,
+          "min": -0.033713193078089565,
+          "median": 0.0005602321876153199,
+          "max": 0.08171248320640655,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_bernoulli_q95": {
+          "n": 20,
+          "min": 0.6651343521611152,
+          "median": 0.7841540223756673,
+          "max": 1.0293974185386867,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q99": {
+          "n": 20,
+          "min": 0.9372001185365604,
+          "median": 1.2335721597432245,
+          "max": 1.610152583426051,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q01": {
+          "n": 20,
+          "min": -1.6820117068480478,
+          "median": -1.2381107386940857,
+          "max": -0.795446478060255,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q05": {
+          "n": 20,
+          "min": -1.1779248258211437,
+          "median": -0.8227053850496799,
+          "max": -0.4793588011768227,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q50": {
+          "n": 20,
+          "min": -0.04792103781592985,
+          "median": -0.010709284872468215,
+          "max": 0.06802826132244974,
+          "negative": 12,
+          "positive": 8,
+          "zero": 0
+        },
+        "eta_poisson_q95": {
+          "n": 20,
+          "min": 0.5731722652114126,
+          "median": 0.8096882974651143,
+          "max": 1.1337365071345755,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q99": {
+          "n": 20,
+          "min": 0.8459681907887557,
+          "median": 1.242358357666016,
+          "max": 1.6412124303511837,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_min": {
+          "n": 20,
+          "min": 0.035009514122074176,
+          "median": 0.10532354424613335,
+          "max": 0.21633512545700082,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_mean": {
+          "n": 20,
+          "min": 0.15856014734416132,
+          "median": 0.26121498373335916,
+          "max": 0.5142367173428811,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_max": {
+          "n": 20,
+          "min": 0.2591588274877315,
+          "median": 0.4181217757173564,
+          "max": 0.9120495473894692,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_noise_var": {
+          "n": 20,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_snr_mean": {
+          "n": 20,
+          "min": 0.15856014734416132,
+          "median": 0.26121498373335916,
+          "max": 0.5142367173428811,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_mean": {
+          "n": 20,
+          "min": 0.4926478122484709,
+          "median": 0.5004694176433186,
+          "max": 0.5178000555713478,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_sd": {
+          "n": 20,
+          "min": 0.08873639431327321,
+          "median": 0.11187012062129746,
+          "max": 0.13027641191632025,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q01": {
+          "n": 20,
+          "min": 0.16133674207537138,
+          "median": 0.23336018119097812,
+          "max": 0.30056981572181907,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q05": {
+          "n": 20,
+          "min": 0.2841483468295835,
+          "median": 0.312375833616495,
+          "max": 0.3589413022708619,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q50": {
+          "n": 20,
+          "min": 0.4915725002162463,
+          "median": 0.5001400579399798,
+          "max": 0.520416760514338,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q95": {
+          "n": 20,
+          "min": 0.6604127698370303,
+          "median": 0.6865606155359342,
+          "max": 0.7367975074201134,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q99": {
+          "n": 20,
+          "min": 0.7185141976089362,
+          "median": 0.7744159340129508,
+          "max": 0.8333371538808413,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_share_p_lt_0.05": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "negative": 0,
+          "positive": 0,
+          "zero": 20
+        },
+        "bernoulli_share_p_gt_0.95": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "negative": 0,
+          "positive": 0,
+          "zero": 20
+        },
+        "bernoulli_observed_mean": {
+          "n": 20,
+          "min": 0.46444444444444444,
+          "median": 0.5,
+          "max": 0.5511111111111111,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_mean": {
+          "n": 20,
+          "min": 1.049857181283047,
+          "median": 1.1288634270891706,
+          "max": 1.322943954049751,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_median": {
+          "n": 20,
+          "min": 0.9532090515745288,
+          "median": 0.9893495334874625,
+          "max": 1.070395558845352,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_max": {
+          "n": 20,
+          "min": 2.7855545200972514,
+          "median": 4.639632236452498,
+          "max": 18.683366510556905,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q01": {
+          "n": 20,
+          "min": 0.18599960399713247,
+          "median": 0.2906818153996634,
+          "max": 0.45137967286079483,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q05": {
+          "n": 20,
+          "min": 0.3079200644390512,
+          "median": 0.4392563686118718,
+          "max": 0.619185017860745,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q50": {
+          "n": 20,
+          "min": 0.9532090515745288,
+          "median": 0.9893495334874625,
+          "max": 1.070395558845352,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q95": {
+          "n": 20,
+          "min": 1.7739071942050277,
+          "median": 2.247211329241253,
+          "max": 3.1077021148118993,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q99": {
+          "n": 20,
+          "min": 2.330484581522983,
+          "median": 3.473108300972259,
+          "max": 5.173519017257816,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_safety_margin": {
+          "n": 20,
+          "min": 53523.54456221565,
+          "median": 215710.3895766147,
+          "max": 358994.947966442,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_theoretical_mean": {
+          "n": 20,
+          "min": 1.0678347893387745,
+          "median": 1.141705264158661,
+          "max": 1.2546304291289958,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_mean": {
+          "n": 20,
+          "min": 1.0,
+          "median": 1.1400000000000001,
+          "max": 1.3466666666666667,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_max": {
+          "n": 20,
+          "min": 4.0,
+          "median": 7.0,
+          "max": 16.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "y_edge_density": {
+          "n": 20,
+          "min": 0.3127927927927928,
+          "median": 0.329009009009009,
+          "max": 0.3520720720720721,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        }
+      }
+    },
+    "base": {
+      "f_scale": 1.4142135623730951,
+      "loading_energy": 0.5000000000000001,
+      "technical": {
+        "em_attempted": 200,
+        "em_success": 200,
+        "run_status": "SUCCESS",
+        "em_complete_datasets": 20,
+        "incomplete_datasets": 0,
+        "c_lap_complete_datasets": 20,
+        "refits_evaluated": 100,
+        "OK": 100,
+        "NOT_STATIONARY": 0,
+        "HESSIAN_NOT_PD": 0,
+        "EVALUATION_ERROR": 0
+      },
+      "K_hat_Lap": {
+        "counts": {
+          "1": 0,
+          "2": 0,
+          "3": 20,
+          "4": 0,
+          "5": 0
+        },
+        "exact": 20,
+        "under": 0,
+        "over": 0,
+        "denominator": 20
+      },
+      "K_hat_Q": {
+        "counts": {
+          "1": 0,
+          "2": 5,
+          "3": 15,
+          "4": 0,
+          "5": 0
+        },
+        "exact": 15,
+        "under": 5,
+        "over": 0,
+        "denominator": 20
+      },
+      "paired": {
+        "denominator": 20,
+        "both_K3": 15,
+        "lap_only_K3": 5,
+        "q_only_K3": 0,
+        "neither_K3": 0,
+        "same_K": 15,
+        "different_K": 5
+      },
+      "margins": {
+        "delta_Lap_23": {
+          "n": 20,
+          "min": -203.69108612319178,
+          "median": -105.34623701934333,
+          "max": -42.4302817071175,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "delta_Q_23": {
+          "n": 20,
+          "min": -154.74118952015488,
+          "median": -59.46065776276873,
+          "max": 43.3396152698042,
+          "negative": 15,
+          "positive": 5,
+          "zero": 0
+        },
+        "lap_gap": {
+          "n": 20,
+          "min": 39.76000448045488,
+          "median": 51.58515639606367,
+          "max": 68.17951367763362,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_gap": {
+          "n": 20,
+          "min": 0.671120433521537,
+          "median": 59.46065776276873,
+          "max": 154.74118952015488,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "five_smallest_lap_gaps": [
+          {
+            "replicate": "rep18",
+            "gap": 39.76000448045488,
+            "best_k": 3,
+            "second_k": 4
+          },
+          {
+            "replicate": "rep06",
+            "gap": 41.67442127944287,
+            "best_k": 3,
+            "second_k": 4
+          },
+          {
+            "replicate": "rep07",
+            "gap": 42.4302817071175,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep19",
+            "gap": 42.553971034665665,
+            "best_k": 3,
+            "second_k": 2
+          },
+          {
+            "replicate": "rep17",
+            "gap": 44.727245984613546,
+            "best_k": 3,
+            "second_k": 4
+          }
+        ]
+      },
+      "decomposition_K2_to_K3": {
+        "lap_fit_gain": {
+          "n": 20,
+          "min": 307.64365829520284,
+          "median": 391.877723037524,
+          "max": 494.3186909875403,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "lap_volume_increment": {
+          "n": 20,
+          "min": 221.91480612517358,
+          "median": 239.4347168510215,
+          "max": 265.73186111884195,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "lap_parameter_increment": {
+          "n": 20,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_fit_gain": {
+          "n": 20,
+          "min": 212.6760458462595,
+          "median": 315.47631887883244,
+          "max": 410.7568506362186,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_PZ_increment": {
+          "n": 20,
+          "min": 212.84077998070074,
+          "median": 212.84077998070092,
+          "max": 212.84077998070092,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "q_parameter_increment": {
+          "n": 20,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "fit_gain_lap_minus_q": {
+          "n": 20,
+          "min": 40.40594514055556,
+          "median": 77.40325525909111,
+          "max": 96.48107877155053,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        }
+      },
+      "technical_by_K": {
+        "K1": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 4.0,
+            "median": 4.0,
+            "max": 5.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 1.9984014443252818e-15,
+            "median": 5.564932958890267e-10,
+            "max": 8.054704903059928e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 1.0834058039993195,
+            "median": 3.0371258014355944,
+            "max": 5.187659402430222,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 160.9798197659735,
+            "median": 192.4351370290122,
+            "max": 221.48086096625576,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 2.0,
+            "median": 5.0,
+            "max": 8.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K2": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 4.0,
+            "median": 5.0,
+            "max": 11.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 2.9976021664879227e-15,
+            "median": 4.887305837808498e-13,
+            "max": 9.376737164501492e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 1.0310855254181797,
+            "median": 1.570553016793343,
+            "max": 2.145253469578676,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 338.36519066087624,
+            "median": 374.8304266133031,
+            "max": 413.02822112218274,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 4.0,
+            "median": 8.5,
+            "max": 11.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K3": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 5.0,
+            "median": 5.0,
+            "max": 6.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 3.1086244689504383e-15,
+            "median": 2.070565940925917e-13,
+            "max": 8.502622605988108e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.6924404028482538,
+            "median": 1.1157400326670956,
+            "max": 1.7442970216735176,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 492.74968646233395,
+            "median": 540.3108144382526,
+            "max": 589.1915168199163,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 6.0,
+            "median": 10.0,
+            "max": 16.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K4": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 6.0,
+            "median": 7.0,
+            "max": 12.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 3.552713678800501e-15,
+            "median": 1.0801803895787998e-11,
+            "max": 8.525319006302823e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.18708111972400324,
+            "median": 0.49573884865694073,
+            "max": 0.7454780977664097,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 580.559777030639,
+            "median": 626.8107169692391,
+            "max": 670.7532966905759,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 8.0,
+            "median": 12.5,
+            "max": 20.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K5": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 7.0,
+            "median": 8.0,
+            "max": 18.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 3.783431901105416e-15,
+            "median": 1.0967893260271921e-12,
+            "max": 8.254859954447136e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 0.12849981696669893,
+            "median": 0.36516369094937207,
+            "max": 0.68514864832749,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 647.8206379969654,
+            "median": 709.613583885619,
+            "max": 789.8603536170939,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 12.0,
+            "median": 17.0,
+            "max": 24.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        }
+      },
+      "family_by_K": {
+        "K1": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K2": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K3": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K4": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K5": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        }
+      },
+      "signal_context": {
+        "f_scale": {
+          "n": 20,
+          "min": 1.4142135623730951,
+          "median": 1.4142135623730951,
+          "max": 1.4142135623730951,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_min": {
+          "n": 20,
+          "min": 0.006331263256137566,
+          "median": 0.07678415012041565,
+          "max": 0.19567605914838532,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_median": {
+          "n": 20,
+          "min": 0.35940564074560893,
+          "median": 0.42623232842463593,
+          "max": 0.5736796501807102,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_max": {
+          "n": 20,
+          "min": 0.8973138947198818,
+          "median": 1.137002591153093,
+          "max": 1.6102100245160933,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_mean": {
+          "n": 20,
+          "min": 0.49999999999999983,
+          "median": 0.5000000000000001,
+          "max": 0.5000000000000002,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_overall": {
+          "n": 20,
+          "min": 0.668016313656588,
+          "median": 0.704170261889761,
+          "max": 0.7570545458072796,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_gaussian": {
+          "n": 20,
+          "min": 0.5638075135155071,
+          "median": 0.7329325121483041,
+          "max": 1.0169478364491928,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_bernoulli": {
+          "n": 20,
+          "min": 0.5201531922671616,
+          "median": 0.6786893390917549,
+          "max": 0.8311656935114381,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_poisson": {
+          "n": 20,
+          "min": 0.48370472286566724,
+          "median": 0.7044152049777894,
+          "max": 0.8959827872581813,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q01": {
+          "n": 20,
+          "min": -2.941035136015676,
+          "median": -1.8020927628563443,
+          "max": -1.2815779973907135,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q05": {
+          "n": 20,
+          "min": -1.6998698500262497,
+          "median": -1.1794210460262387,
+          "max": -0.8548214164229714,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q50": {
+          "n": 20,
+          "min": -0.08603182155262265,
+          "median": 0.0028278867398634174,
+          "max": 0.0522237965582418,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_gaussian_q95": {
+          "n": 20,
+          "min": 0.9380901950816203,
+          "median": 1.210742886453564,
+          "max": 1.580640373321318,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q99": {
+          "n": 20,
+          "min": 1.3121106380371679,
+          "median": 1.7499934513485202,
+          "max": 2.337569649005235,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q01": {
+          "n": 20,
+          "min": -2.3316455262911666,
+          "median": -1.6821186481782657,
+          "max": -1.1959360309575287,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q05": {
+          "n": 20,
+          "min": -1.306708132728404,
+          "median": -1.1158673958844072,
+          "max": -0.8201904031765802,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q50": {
+          "n": 20,
+          "min": -0.04767765488193704,
+          "median": 0.0007922879578035344,
+          "max": 0.11555890196568394,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_bernoulli_q95": {
+          "n": 20,
+          "min": 0.9406420216264916,
+          "median": 1.1089612534330842,
+          "max": 1.455787790369264,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q99": {
+          "n": 20,
+          "min": 1.3254011182920762,
+          "median": 1.7445344784747383,
+          "max": 2.277099620971198,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q01": {
+          "n": 20,
+          "min": -2.3787237678948276,
+          "median": -1.7509529983809473,
+          "max": -1.1249311974147254,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q05": {
+          "n": 20,
+          "min": -1.6658372641322272,
+          "median": -1.1634811133746368,
+          "max": -0.6779157178671706,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q50": {
+          "n": 20,
+          "min": -0.06777058160228198,
+          "median": -0.015145215909961573,
+          "max": 0.09620648978686948,
+          "negative": 12,
+          "positive": 8,
+          "zero": 0
+        },
+        "eta_poisson_q95": {
+          "n": 20,
+          "min": 0.8105879910380884,
+          "median": 1.1450721715699457,
+          "max": 1.6033455445472182,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q99": {
+          "n": 20,
+          "min": 1.1963796887496885,
+          "median": 1.7569600387388444,
+          "max": 2.3210248777379525,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_min": {
+          "n": 20,
+          "min": 0.07001902824414837,
+          "median": 0.21064708849226677,
+          "max": 0.4326702509140017,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_mean": {
+          "n": 20,
+          "min": 0.3171202946883227,
+          "median": 0.5224299674667183,
+          "max": 1.0284734346857627,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_max": {
+          "n": 20,
+          "min": 0.518317654975463,
+          "median": 0.836243551434713,
+          "max": 1.8240990947789393,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_noise_var": {
+          "n": 20,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_snr_mean": {
+          "n": 20,
+          "min": 0.3171202946883227,
+          "median": 0.5224299674667183,
+          "max": 1.0284734346857627,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_mean": {
+          "n": 20,
+          "min": 0.490538059187678,
+          "median": 0.5006319630056967,
+          "max": 0.5243616021057275,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_sd": {
+          "n": 20,
+          "min": 0.12155752807721781,
+          "median": 0.1499430013903873,
+          "max": 0.17026247666252284,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q01": {
+          "n": 20,
+          "min": 0.08861558752073888,
+          "median": 0.1568163240297077,
+          "max": 0.2327101882053101,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q05": {
+          "n": 20,
+          "min": 0.21304074381627977,
+          "median": 0.24677966813510754,
+          "max": 0.30572326910036873,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q50": {
+          "n": 20,
+          "min": 0.48808284448147243,
+          "median": 0.5001980716870247,
+          "max": 0.5288576151781467,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q95": {
+          "n": 20,
+          "min": 0.7192292390307734,
+          "median": 0.751902302587998,
+          "max": 0.8108843663592153,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q99": {
+          "n": 20,
+          "min": 0.7900363406782169,
+          "median": 0.8512116388712072,
+          "max": 0.9068209560889793,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_share_p_lt_0.05": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0044444444444444444,
+          "negative": 0,
+          "positive": 3,
+          "zero": 17
+        },
+        "bernoulli_share_p_gt_0.95": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0044444444444444444,
+          "negative": 0,
+          "positive": 3,
+          "zero": 17
+        },
+        "bernoulli_observed_mean": {
+          "n": 20,
+          "min": 0.46,
+          "median": 0.4888888888888889,
+          "max": 0.5577777777777778,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_mean": {
+          "n": 20,
+          "min": 1.1403398264177667,
+          "median": 1.2826381161547808,
+          "max": 1.7444768630169902,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_median": {
+          "n": 20,
+          "min": 0.934474834706366,
+          "median": 0.9849722374637033,
+          "max": 1.100986382967213,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_max": {
+          "n": 20,
+          "min": 4.2579455945635285,
+          "median": 8.763022029651324,
+          "max": 62.82161452295453,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q01": {
+          "n": 20,
+          "min": 0.09266894922106178,
+          "median": 0.17451911871020417,
+          "max": 0.32467482526745567,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q05": {
+          "n": 20,
+          "min": 0.1890360169631241,
+          "median": 0.31241761538351254,
+          "max": 0.5076817982417894,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q50": {
+          "n": 20,
+          "min": 0.934474834706366,
+          "median": 0.9849722374637033,
+          "max": 1.100986382967213,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q95": {
+          "n": 20,
+          "min": 2.249285412747496,
+          "median": 3.1426790949540795,
+          "max": 4.971087557107119,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q99": {
+          "n": 20,
+          "min": 3.308831838724334,
+          "median": 5.825450818311313,
+          "max": 10.233323535967873,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_safety_margin": {
+          "n": 20,
+          "min": 15918.088186584375,
+          "median": 114302.3714658733,
+          "max": 234855.04400920076,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_theoretical_mean": {
+          "n": 20,
+          "min": 1.1415319712601644,
+          "median": 1.3041300529064186,
+          "max": 1.5744936078520118,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_mean": {
+          "n": 20,
+          "min": 1.0711111111111111,
+          "median": 1.3288888888888888,
+          "max": 1.6888888888888889,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_max": {
+          "n": 20,
+          "min": 6.0,
+          "median": 10.0,
+          "max": 57.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "y_edge_density": {
+          "n": 20,
+          "min": 0.3127927927927928,
+          "median": 0.329009009009009,
+          "max": 0.3520720720720721,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        }
+      }
+    },
+    "strong": {
+      "f_scale": 2.0,
+      "loading_energy": 1.0,
+      "technical": {
+        "em_attempted": 193,
+        "em_success": 192,
+        "run_status": "SUCCESS_WITH_INCOMPLETE_DATASETS",
+        "em_complete_datasets": 19,
+        "incomplete_datasets": 1,
+        "c_lap_complete_datasets": 19,
+        "refits_evaluated": 96,
+        "OK": 96,
+        "NOT_STATIONARY": 0,
+        "HESSIAN_NOT_PD": 0,
+        "EVALUATION_ERROR": 0
+      },
+      "K_hat_Lap": {
+        "counts": {
+          "1": 0,
+          "2": 0,
+          "3": 18,
+          "4": 1,
+          "5": 0
+        },
+        "exact": 18,
+        "under": 0,
+        "over": 1,
+        "denominator": 19
+      },
+      "K_hat_Q": {
+        "counts": {
+          "1": 0,
+          "2": 1,
+          "3": 18,
+          "4": 0,
+          "5": 0
+        },
+        "exact": 18,
+        "under": 1,
+        "over": 0,
+        "denominator": 19
+      },
+      "paired": {
+        "denominator": 19,
+        "both_K3": 17,
+        "lap_only_K3": 1,
+        "q_only_K3": 1,
+        "neither_K3": 0,
+        "same_K": 17,
+        "different_K": 2
+      },
+      "margins": {
+        "delta_Lap_23": {
+          "n": 19,
+          "min": -270.84551527230724,
+          "median": -151.15650667617774,
+          "max": -65.89988949657254,
+          "negative": 19,
+          "positive": 0,
+          "zero": 0
+        },
+        "delta_Q_23": {
+          "n": 19,
+          "min": -269.0511890010748,
+          "median": -129.3524542536361,
+          "max": 12.59005434221126,
+          "negative": 18,
+          "positive": 1,
+          "zero": 0
+        },
+        "lap_gap": {
+          "n": 19,
+          "min": 13.645472602056543,
+          "median": 51.10163502723026,
+          "max": 76.4345964816066,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "q_gap": {
+          "n": 19,
+          "min": 12.59005434221126,
+          "median": 129.3524542536361,
+          "max": 208.24903736950637,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "five_smallest_lap_gaps": [
+          {
+            "replicate": "rep06",
+            "gap": 13.645472602056543,
+            "best_k": 4,
+            "second_k": 3
+          },
+          {
+            "replicate": "rep19",
+            "gap": 35.86109484127428,
+            "best_k": 3,
+            "second_k": 4
+          },
+          {
+            "replicate": "rep18",
+            "gap": 40.84133947990813,
+            "best_k": 3,
+            "second_k": 4
+          },
+          {
+            "replicate": "rep02",
+            "gap": 45.68875032191863,
+            "best_k": 3,
+            "second_k": 4
+          },
+          {
+            "replicate": "rep13",
+            "gap": 48.178945499516885,
+            "best_k": 3,
+            "second_k": 4
+          }
+        ]
+      },
+      "decomposition_K2_to_K3": {
+        "lap_fit_gain": {
+          "n": 19,
+          "min": 334.81380492271546,
+          "median": 458.8270998253529,
+          "max": 595.2335288588974,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "lap_volume_increment": {
+          "n": 19,
+          "min": 225.73903429077995,
+          "median": 258.2190062846871,
+          "max": 282.5276228754351,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "lap_parameter_increment": {
+          "n": 19,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "q_fit_gain": {
+          "n": 19,
+          "min": 243.42560677385245,
+          "median": 385.3681153696998,
+          "max": 525.0668501171376,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "q_PZ_increment": {
+          "n": 19,
+          "min": 212.8407799807008,
+          "median": 212.84077998070092,
+          "max": 212.8407799807011,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "q_parameter_increment": {
+          "n": 19,
+          "min": 43.17488113536311,
+          "median": 43.17488113536311,
+          "max": 43.17488113536311,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        },
+        "fit_gain_lap_minus_q": {
+          "n": 19,
+          "min": 49.44931526306027,
+          "median": 76.15782703651166,
+          "max": 93.24372623335603,
+          "negative": 0,
+          "positive": 19,
+          "zero": 0
+        }
+      },
+      "technical_by_K": {
+        "K1": {
+          "refits": 20,
+          "OK": 20,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 20,
+            "min": 4.0,
+            "median": 4.0,
+            "max": 5.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 20,
+            "min": 2.4424906541753444e-15,
+            "median": 9.310585635802227e-11,
+            "max": 7.295251069905362e-09,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 20,
+            "min": 1.8747721322196291,
+            "median": 4.705078272059261,
+            "max": 6.315575096602739,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 20,
+            "min": 168.49560924707214,
+            "median": 209.8679920678875,
+            "max": 227.0050137425775,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 20,
+            "min": 3.0,
+            "median": 5.0,
+            "max": 11.0,
+            "negative": 0,
+            "positive": 20,
+            "zero": 0
+          }
+        },
+        "K2": {
+          "refits": 19,
+          "OK": 19,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 19,
+            "min": 4.0,
+            "median": 5.0,
+            "max": 15.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 19,
+            "min": 3.1086244689504383e-15,
+            "median": 4.9182879990894435e-14,
+            "max": 9.77489955644728e-09,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 19,
+            "min": 1.518992553916159,
+            "median": 2.813710521084868,
+            "max": 3.772890311513206,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 19,
+            "min": 358.10932773352374,
+            "median": 393.87399381518475,
+            "max": 437.69399080680114,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 19,
+            "min": 2.0,
+            "median": 8.0,
+            "max": 14.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          }
+        },
+        "K3": {
+          "refits": 19,
+          "OK": 19,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 19,
+            "min": 4.0,
+            "median": 5.0,
+            "max": 39.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 19,
+            "min": 3.3306690738754696e-15,
+            "median": 1.0949574580365606e-14,
+            "max": 6.5758618550404435e-09,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 19,
+            "min": 1.3056137414106712,
+            "median": 2.1827705840552802,
+            "max": 3.0879630765552,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 19,
+            "min": 525.3319765775725,
+            "median": 581.1945874125375,
+            "max": 637.8072003283858,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 19,
+            "min": 4.0,
+            "median": 14.0,
+            "max": 17.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          }
+        },
+        "K4": {
+          "refits": 19,
+          "OK": 19,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 19,
+            "min": 6.0,
+            "median": 7.0,
+            "max": 9.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 19,
+            "min": 3.552713678800501e-15,
+            "median": 1.507793889743425e-11,
+            "max": 9.681672574757272e-09,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 19,
+            "min": 0.14694194746651573,
+            "median": 0.6203901783381826,
+            "max": 1.0238183980779867,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 19,
+            "min": 620.1184245838218,
+            "median": 665.9381864995656,
+            "max": 809.348793926802,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 19,
+            "min": 9.0,
+            "median": 17.0,
+            "max": 24.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          }
+        },
+        "K5": {
+          "refits": 19,
+          "OK": 19,
+          "NOT_STATIONARY": 0,
+          "HESSIAN_NOT_PD": 0,
+          "EVALUATION_ERROR": 0,
+          "joint_mode_iterations": {
+            "n": 19,
+            "min": 7.0,
+            "median": 8.0,
+            "max": 11.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "grad_inf": {
+            "n": 19,
+            "min": 3.1086244689504383e-15,
+            "median": 1.9959589536711064e-12,
+            "max": 8.210814028686286e-09,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "min_eigenvalue_H": {
+            "n": 19,
+            "min": 0.12270583486279225,
+            "median": 0.32161053452788346,
+            "max": 0.594527291768688,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "logdet_H": {
+            "n": 19,
+            "min": 678.1954492777395,
+            "median": 755.9208447415813,
+            "max": 834.6913857402312,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          },
+          "candidate_convergence_warnings": {
+            "n": 19,
+            "min": 9.0,
+            "median": 19.0,
+            "max": 24.0,
+            "negative": 0,
+            "positive": 19,
+            "zero": 0
+          }
+        }
+      },
+      "family_by_K": {
+        "K1": {
+          "exact_true_assignment": 20,
+          "refits": 20,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 60
+            },
+            "bernoulli": {
+              "bernoulli": 120
+            },
+            "poisson": {
+              "poisson": 60
+            }
+          }
+        },
+        "K2": {
+          "exact_true_assignment": 19,
+          "refits": 19,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 57
+            },
+            "bernoulli": {
+              "bernoulli": 114
+            },
+            "poisson": {
+              "poisson": 57
+            }
+          }
+        },
+        "K3": {
+          "exact_true_assignment": 19,
+          "refits": 19,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 57
+            },
+            "bernoulli": {
+              "bernoulli": 114
+            },
+            "poisson": {
+              "poisson": 57
+            }
+          }
+        },
+        "K4": {
+          "exact_true_assignment": 19,
+          "refits": 19,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 57
+            },
+            "bernoulli": {
+              "bernoulli": 114
+            },
+            "poisson": {
+              "poisson": 57
+            }
+          }
+        },
+        "K5": {
+          "exact_true_assignment": 19,
+          "refits": 19,
+          "selected_by_true_family": {
+            "gaussian": {
+              "gaussian": 57
+            },
+            "bernoulli": {
+              "bernoulli": 114
+            },
+            "poisson": {
+              "poisson": 57
+            }
+          }
+        }
+      },
+      "signal_context": {
+        "f_scale": {
+          "n": 20,
+          "min": 2.0,
+          "median": 2.0,
+          "max": 2.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_min": {
+          "n": 20,
+          "min": 0.01266252651227513,
+          "median": 0.15356830024083123,
+          "max": 0.39135211829677063,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_median": {
+          "n": 20,
+          "min": 0.7188112814912179,
+          "median": 0.8524646568492718,
+          "max": 1.1473593003614202,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_max": {
+          "n": 20,
+          "min": 1.7946277894397629,
+          "median": 2.2740051823061855,
+          "max": 3.2204200490321857,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "row_norm_sq_mean": {
+          "n": 20,
+          "min": 0.9999999999999996,
+          "median": 1.0,
+          "max": 1.0000000000000002,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_overall": {
+          "n": 20,
+          "min": 0.9447177306596259,
+          "median": 0.9958471345843141,
+          "max": 1.0706368061368583,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_gaussian": {
+          "n": 20,
+          "min": 0.7973442321814822,
+          "median": 1.0365230989843148,
+          "max": 1.4381814225324243,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_bernoulli": {
+          "n": 20,
+          "min": 0.73560769901588,
+          "median": 0.9598116679815921,
+          "max": 1.1754457963431146,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_sd_poisson": {
+          "n": 20,
+          "min": 0.6840617792605458,
+          "median": 0.9961935364214136,
+          "max": 1.2671110093933675,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q01": {
+          "n": 20,
+          "min": -4.159251776769169,
+          "median": -2.548544025885844,
+          "max": -1.8124249851488983,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q05": {
+          "n": 20,
+          "min": -2.403978996176241,
+          "median": -1.667953239038569,
+          "max": -1.2089000405123451,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_gaussian_q50": {
+          "n": 20,
+          "min": -0.12166736883538082,
+          "median": 0.003999235780369885,
+          "max": 0.07385560137127894,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_gaussian_q95": {
+          "n": 20,
+          "min": 1.32665987661365,
+          "median": 1.7122490105693782,
+          "max": 2.23536305318548,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_gaussian_q99": {
+          "n": 20,
+          "min": 1.855604659646178,
+          "median": 2.474864472961178,
+          "max": 3.305822700614918,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q01": {
+          "n": 20,
+          "min": -3.2974447259275204,
+          "median": -2.3788750057743995,
+          "max": -1.6913089547107865,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q05": {
+          "n": 20,
+          "min": -1.8479643633677314,
+          "median": -1.5780748050696762,
+          "max": -1.1599243919005766,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_bernoulli_q50": {
+          "n": 20,
+          "min": -0.06742638615617913,
+          "median": 0.0011204643752306398,
+          "max": 0.1634249664128131,
+          "negative": 9,
+          "positive": 11,
+          "zero": 0
+        },
+        "eta_bernoulli_q95": {
+          "n": 20,
+          "min": 1.3302687043222303,
+          "median": 1.5683080447513347,
+          "max": 2.0587948370773734,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_bernoulli_q99": {
+          "n": 20,
+          "min": 1.8744002370731208,
+          "median": 2.467144319486449,
+          "max": 3.220305166852102,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q01": {
+          "n": 20,
+          "min": -3.3640234136960956,
+          "median": -2.4762214773881714,
+          "max": -1.59089295612051,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q05": {
+          "n": 20,
+          "min": -2.3558496516422873,
+          "median": -1.6454107700993599,
+          "max": -0.9587176023536454,
+          "negative": 20,
+          "positive": 0,
+          "zero": 0
+        },
+        "eta_poisson_q50": {
+          "n": 20,
+          "min": -0.0958420756318597,
+          "median": -0.02141856974493643,
+          "max": 0.13605652264489948,
+          "negative": 12,
+          "positive": 8,
+          "zero": 0
+        },
+        "eta_poisson_q95": {
+          "n": 20,
+          "min": 1.1463445304228252,
+          "median": 1.6193765949302286,
+          "max": 2.267473014269151,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "eta_poisson_q99": {
+          "n": 20,
+          "min": 1.6919363815775115,
+          "median": 2.484716715332032,
+          "max": 3.2824248607023674,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_min": {
+          "n": 20,
+          "min": 0.1400380564882967,
+          "median": 0.4212941769845334,
+          "max": 0.8653405018280033,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_mean": {
+          "n": 20,
+          "min": 0.6342405893766453,
+          "median": 1.0448599349334367,
+          "max": 2.0569468693715245,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_signal_var_max": {
+          "n": 20,
+          "min": 1.036635309950926,
+          "median": 1.6724871028694257,
+          "max": 3.648198189557877,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_noise_var": {
+          "n": 20,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "gaussian_snr_mean": {
+          "n": 20,
+          "min": 0.6342405893766453,
+          "median": 1.0448599349334367,
+          "max": 2.0569468693715245,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_mean": {
+          "n": 20,
+          "min": 0.4884198061438581,
+          "median": 0.5007862297391763,
+          "max": 0.5325813772272223,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_sd": {
+          "n": 20,
+          "min": 0.16264266447105946,
+          "median": 0.19520988381022203,
+          "max": 0.2152678448645837,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q01": {
+          "n": 20,
+          "min": 0.03573575456476426,
+          "median": 0.08479953066249218,
+          "max": 0.15657356622697288,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q05": {
+          "n": 20,
+          "min": 0.1361165825066917,
+          "median": 0.17107034129001297,
+          "max": 0.23868108144529004,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q50": {
+          "n": 20,
+          "min": 0.4831497891681594,
+          "median": 0.5002801152384188,
+          "max": 0.5407655409110899,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q95": {
+          "n": 20,
+          "min": 0.790884892288432,
+          "median": 0.8274760274111035,
+          "max": 0.8868280359953863,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_prob_q99": {
+          "n": 20,
+          "min": 0.8668916868028141,
+          "median": 0.9217373012525552,
+          "max": 0.9614505259690175,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "bernoulli_share_p_lt_0.05": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.0044444444444444444,
+          "max": 0.015555555555555555,
+          "negative": 0,
+          "positive": 14,
+          "zero": 6
+        },
+        "bernoulli_share_p_gt_0.95": {
+          "n": 20,
+          "min": 0.0,
+          "median": 0.003333333333333333,
+          "max": 0.017777777777777778,
+          "negative": 0,
+          "positive": 13,
+          "zero": 7
+        },
+        "bernoulli_observed_mean": {
+          "n": 20,
+          "min": 0.45555555555555555,
+          "median": 0.4911111111111111,
+          "max": 0.5555555555555556,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_mean": {
+          "n": 20,
+          "min": 1.3499060132545506,
+          "median": 1.6514697743379683,
+          "max": 3.6061633312445314,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_median": {
+          "n": 20,
+          "min": 0.9086074960036128,
+          "median": 0.9788158199185732,
+          "max": 1.1457466523958533,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_max": {
+          "n": 20,
+          "min": 7.759313984434228,
+          "median": 21.54375718905263,
+          "max": 349.06818416779925,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q01": {
+          "n": 20,
+          "min": 0.03459592005418556,
+          "median": 0.0849596360350789,
+          "max": 0.2037436217573657,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q05": {
+          "n": 20,
+          "min": 0.0948166260117624,
+          "median": 0.1929589962278852,
+          "max": 0.38339597376876056,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q50": {
+          "n": 20,
+          "min": 0.9086074960036128,
+          "median": 0.9788158199185732,
+          "max": 1.1457466523958533,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q95": {
+          "n": 20,
+          "min": 3.1468237774362433,
+          "median": 5.049976288751416,
+          "max": 9.660604481154927,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_rate_q99": {
+          "n": 20,
+          "min": 5.432317778156426,
+          "median": 12.12143805262392,
+          "max": 26.883507485140168,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_safety_margin": {
+          "n": 20,
+          "min": 2864.7698225034846,
+          "median": 46568.95123813012,
+          "max": 128877.37266542838,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_theoretical_mean": {
+          "n": 20,
+          "min": 1.308980033726991,
+          "median": 1.733743709856129,
+          "max": 2.5427884413035726,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_mean": {
+          "n": 20,
+          "min": 1.2844444444444445,
+          "median": 1.7111111111111112,
+          "max": 3.502222222222222,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "poisson_observed_max": {
+          "n": 20,
+          "min": 9.0,
+          "median": 20.0,
+          "max": 336.0,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        },
+        "y_edge_density": {
+          "n": 20,
+          "min": 0.3127927927927928,
+          "median": 0.329009009009009,
+          "max": 0.3520720720720721,
+          "negative": 0,
+          "positive": 20,
+          "zero": 0
+        }
+      }
+    }
+  },
+  "K_hat_Lap_transitions": {
+    "all_three_same": 18,
+    "weak_to_base": {
+      "same": 20
+    },
+    "base_to_strong": {
+      "exact->over": 1,
+      "same": 18,
+      "unavailable": 1
+    },
+    "paths": {
+      "3->3->3": 18,
+      "3->3->4": 1,
+      "3->3->NA": 1
+    },
+    "over_selection": 1
+  },
+  "K_hat_Q_transitions": {
+    "all_three_same": 11,
+    "weak_to_base": {
+      "same": 16,
+      "under->exact": 4
+    },
+    "base_to_strong": {
+      "same": 15,
+      "unavailable": 1,
+      "under->exact": 4
+    },
+    "paths": {
+      "2->2->2": 1,
+      "2->2->3": 4,
+      "2->3->3": 4,
+      "3->3->3": 10,
+      "3->3->NA": 1
+    },
+    "over_selection": 0
+  },
+  "matched_margin_changes": {
+    "delta_Lap_23_change_weak_to_base": {
+      "n": 20,
+      "min": -107.51313901017693,
+      "median": -26.981431873328802,
+      "max": -8.148879059919636,
+      "negative": 20,
+      "positive": 0,
+      "zero": 0
+    },
+    "delta_Lap_23_change_base_to_strong": {
+      "n": 19,
+      "min": -179.67923038234585,
+      "median": -51.00550049890353,
+      "max": -2.677243350422941,
+      "negative": 19,
+      "positive": 0,
+      "zero": 0
+    },
+    "delta_Q_23_change_weak_to_base": {
+      "n": 20,
+      "min": -145.04399817490594,
+      "median": -39.33631777849996,
+      "max": -15.162126621367861,
+      "negative": 20,
+      "positive": 0,
+      "zero": 0
+    },
+    "delta_Q_23_change_base_to_strong": {
+      "n": 19,
+      "min": -248.54128483712157,
+      "median": -67.26050441498683,
+      "max": -16.966834798404307,
+      "negative": 19,
+      "positive": 0,
+      "zero": 0
+    },
+    "lap_gap_change_weak_to_base": {
+      "n": 20,
+      "min": -6.686942663870468,
+      "median": 4.870701934994031,
+      "max": 24.807106399018267,
+      "negative": 4,
+      "positive": 16,
+      "zero": 0
+    },
+    "lap_gap_change_base_to_strong": {
+      "n": 19,
+      "min": -28.028948677386325,
+      "median": -1.3292728534388516,
+      "max": 31.707350496993058,
+      "negative": 10,
+      "positive": 9,
+      "zero": 0
+    },
+    "q_gap_change_weak_to_base": {
+      "n": 20,
+      "min": -54.384606028093,
+      "median": 37.597826021831224,
+      "max": 145.04399817490594,
+      "negative": 6,
+      "positive": 14,
+      "zero": 0
+    },
+    "q_gap_change_base_to_strong": {
+      "n": 19,
+      "min": -30.74956092759294,
+      "median": 57.52273070402225,
+      "max": 165.27631482414017,
+      "negative": 1,
+      "positive": 18,
+      "zero": 0
+    },
+    "delta_Lap_23_sign_change_weak_to_base": 0,
+    "delta_Lap_23_sign_change_base_to_strong": 0,
+    "delta_Q_23_sign_change_weak_to_base": 4,
+    "delta_Q_23_sign_change_base_to_strong": 4
+  },
+  "decomposition_changes": {
+    "lap_fit_gain_change_weak_to_base": {
+      "n": 20,
+      "min": 9.404663365245142,
+      "median": 36.943759097398015,
+      "max": 122.10747939687099,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "lap_volume_increment_change_weak_to_base": {
+      "n": 20,
+      "min": 1.2557843053247666,
+      "median": 8.645493971886253,
+      "max": 20.341241728978503,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "q_fit_gain_change_weak_to_base": {
+      "n": 20,
+      "min": 15.16212662136877,
+      "median": 39.33631777849905,
+      "max": 145.04399817490503,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "fit_gain_lap_minus_q_change_weak_to_base": {
+      "n": 20,
+      "min": -22.936518778034042,
+      "median": 0.0961531949228629,
+      "max": 11.817308024409613,
+      "negative": 9,
+      "positive": 11,
+      "zero": 0
+    },
+    "lap_fit_gain_change_base_to_strong": {
+      "n": 19,
+      "min": 26.244531591170016,
+      "median": 65.7816111115635,
+      "max": 221.76709674903213,
+      "negative": 0,
+      "positive": 19,
+      "zero": 0
+    },
+    "lap_volume_increment_change_base_to_strong": {
+      "n": 19,
+      "min": 3.824228165606371,
+      "median": 15.944359400294957,
+      "max": 42.08786636668583,
+      "negative": 0,
+      "positive": 19,
+      "zero": 0
+    },
+    "q_fit_gain_change_base_to_strong": {
+      "n": 19,
+      "min": 16.966834798404307,
+      "median": 67.26050441498774,
+      "max": 248.54128483712066,
+      "negative": 0,
+      "positive": 19,
+      "zero": 0
+    },
+    "fit_gain_lap_minus_q_change_base_to_strong": {
+      "n": 19,
+      "min": -41.347747772803814,
+      "median": -1.225747469236012,
+      "max": 17.868346968421974,
+      "negative": 11,
+      "positive": 8,
+      "zero": 0
+    }
+  },
+  "family_assignment_changes": {
+    "assignment_changed_weak_to_base": 0,
+    "compared_weak_to_base": 100,
+    "assignment_changed_base_to_strong": 0,
+    "compared_base_to_strong": 96
+  },
+  "DECISION": "ATTRIBUTE_SCALE_SENSITIVITY_PARTIAL",
+  "unit": "the same 20 paired replicate lineages (shared Z, Q, Y and search/refit seeds) under three attribute loading scales",
+  "interpretation": "attribute-loading-scale sensitivity; not a pure or family-independent attribute-information effect",
+  "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+}
