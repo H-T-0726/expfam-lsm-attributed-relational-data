@@ -1,0 +1,64 @@
+{
+  "design_version": "matched-k-true-design-v1",
+  "code_sha": "4c22d75fe744babb06deb44dd5f40b1aa75585f0",
+  "git_dirty": false,
+  "K_true": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "candidate_K": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "matching": {
+    "K1": {
+      "f_scale": 2.449489742783178,
+      "w": 1.7320508075688772,
+      "avg_row_energy": 0.49999999999999994,
+      "w2_K": 2.9999999999999996
+    },
+    "K2": {
+      "f_scale": 1.7320508075688772,
+      "w": 1.224744871391589,
+      "avg_row_energy": 0.49999999999999994,
+      "w2_K": 2.9999999999999996
+    },
+    "K3": {
+      "f_scale": 1.4142135623730951,
+      "w": 1.0,
+      "avg_row_energy": 0.5000000000000001,
+      "w2_K": 3.0
+    },
+    "K4": {
+      "f_scale": 1.224744871391589,
+      "w": 0.8660254037844386,
+      "avg_row_energy": 0.49999999999999994,
+      "w2_K": 2.9999999999999996
+    }
+  },
+  "matching_ok": true,
+  "K3_equals_phase9k": true,
+  "p_target": 0.3314062121314677,
+  "w0": {
+    "1": -0.9305782473108135,
+    "2": -0.9779597638183112,
+    "3": -1.0,
+    "4": -1.0127634215799726
+  },
+  "calibration_pass": true,
+  "crosscheck_pass": true,
+  "zero_inference_safe": true,
+  "generator_stop": null,
+  "K1_blocker": false,
+  "K3_anchor_reusable": true,
+  "future_new_em_cap": 300,
+  "DECISION": "MATCHED_K_TRUE_DESIGN_READY",
+  "em_executions": 0,
+  "refits": 0,
+  "interpretation": "matched-signal K_true sensitivity; matches average X loading energy, Y natural-parameter variance and population mean edge probability only"
+}

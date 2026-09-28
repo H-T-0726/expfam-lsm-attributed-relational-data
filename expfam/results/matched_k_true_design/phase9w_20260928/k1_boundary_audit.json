@@ -1,0 +1,20 @@
+{
+  "loading_parameter_count": {
+    "1": 12,
+    "2": 23,
+    "3": 33,
+    "4": 42,
+    "5": 50
+  },
+  "rotation_dimension_K1": 0,
+  "notes": {
+    "generator": "build_full_rank_loadings(k=1): reduced QR of a 12x1 Gaussian, rank 1 by construction; checked on every K_true=1 dataset (F_rank in context)",
+    "identifiability": "O(1) = {+1, -1}: only a discrete sign ambiguity, no continuous rotation; the loading count 1*12 - 0 = 12 is consistent",
+    "candidate_b_at_model_K1": "Phase 9K evaluated Candidate B at model K=1 on 20 refits: 20 OK",
+    "joint_runner": "k_category / k_hat_equals_k_true use protocol.k_true (generic)",
+    "summary_helpers": "run_lap_vs_cq_20.K_TRUE = 3, category() and paired_summary's both_K3 / lap_only_K3 counts are hard-coded to 3; a future Phase 9X runner must compute every outcome relative to its condition's K_true (requirement, not a model blocker)",
+    "procrustes": "procrustes_rmse_z is used only by the Phase 9C pilot path, not by the joint runner"
+  },
+  "blocker": false,
+  "future_requirement": "outcomes (exact/under/over, signed error, true-K gaps) must use each condition's K_true, not the hard-coded K_TRUE = 3"
+}
