@@ -60,6 +60,20 @@ block ごと（median; K=2 / 3 / 4）:
 - **利用可能性**: 主の勾配（h/2）は **60 / 60 状態で全成分が利用可能**。
   感度用の h の勾配では、9 状態（rep01 K4, rep04 K2, rep04 K3, rep05 K2, rep06 K4, rep12 K3, rep13 K4, rep15 K4, rep18 K2）で各 1 成分が利用不可だった
   （摂動した点で status が OK にならなかった。どの座標かは記録していない。救済はしていない）。
+- **最終集計**（主の勾配と感度用の勾配を分けて数える）:
+
+  | 項目 | 値 |
+  |---|---|
+  | primary derivative-evaluable states（h/2 の全成分が利用可能） | **60 / 60** |
+  | full h-vs-h/2 sensitivity comparison（h の全成分も利用可能） | **51 / 60** |
+  | 感度用の h 側だけ 1 成分が利用不可の状態 | 9 |
+
+  `summary.json` では `primary_derivative_evaluable` / `sensitivity_comparison_evaluable` / `sensitivity_partial_states`、
+  `per_state_gradient.csv` では `primary_unavailable_components` / `sensitivity_unavailable_components` がこれに対応する。
+  当初の `summary.json` の `derivative_evaluable: 51` は、主と感度の利用不可成分を合算した列
+  （`unavailable_components`、後方互換のため CSV に残すが集計には使わない）から数えていたため、意味が不正確だった。
+  この分離は committed CSV から事後に行ったもので（主の勾配が完全なことは `grad_L2` が有限であること、
+  h 側の欠損は `h_vs_h2_max_abs` が NaN であることで照合）、評価の再実行はしていない。数値・DECISION は変わらない。
 - **h と h/2 の差**（利用可能な 51 状態）: 最大絶対差 7.0e-4、正規化差（`‖g_h − g_{h/2}‖ / ‖g_{h/2}‖`）最大 5.8e-5。
 
 ### 回転方向の数値診断
