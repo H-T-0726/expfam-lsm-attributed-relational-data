@@ -1,0 +1,5 @@
+{
+  "data_generator": "paired_attribute_scale.generate(data_seed, 'base')",
+  "paired_generator_version": "paired-attribute-scale-v1",
+  "note": "runinfo.json's generator_version names the joint runner's constant; the data actually came from the paired generator (see generator_provenance.csv)"
+}
