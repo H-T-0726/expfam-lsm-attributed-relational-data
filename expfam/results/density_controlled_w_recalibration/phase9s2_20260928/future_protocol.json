@@ -1,0 +1,475 @@
+{
+  "phase": "9T (future; NOT RUN)",
+  "status": "FROZEN_NOT_EXECUTED",
+  "execution_authorized": false,
+  "recalibration_version": "density-w-recalibration-v1",
+  "calibration_code_sha": "248b11aa03656d6ecf58d5f8f5ab1920ed3d44c2",
+  "p_target": 0.33140621213146765,
+  "frozen": {
+    "weak_w": {
+      "w0": -0.8780994405393426,
+      "w": 0.7071067811865475
+    },
+    "baseline": {
+      "w0": -1.0,
+      "w": 1.0
+    },
+    "strong_w": {
+      "w0": -1.1890648128923011,
+      "w": 1.4142135623730951
+    }
+  },
+  "baseline": {
+    "w0": -1.0,
+    "w": 1.0,
+    "source": "historical Phase 9K artifact expfam/results/lap_vs_cq_20/phase9k_20260928/ (reuse; never rerun)"
+  },
+  "conditions": {
+    "weak_w": {
+      "stage": "density_w_weak_w",
+      "n": 75,
+      "d": 12,
+      "k_true": 3,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -0.8780994405393426,
+      "w": 0.7071067811865475,
+      "f_scale": 1.4142135623730951,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        },
+        {
+          "label": "rep11",
+          "data_seed": 1001011,
+          "search_seed": 1002011,
+          "refit_seed": 1003011
+        },
+        {
+          "label": "rep12",
+          "data_seed": 1001012,
+          "search_seed": 1002012,
+          "refit_seed": 1003012
+        },
+        {
+          "label": "rep13",
+          "data_seed": 1001013,
+          "search_seed": 1002013,
+          "refit_seed": 1003013
+        },
+        {
+          "label": "rep14",
+          "data_seed": 1001014,
+          "search_seed": 1002014,
+          "refit_seed": 1003014
+        },
+        {
+          "label": "rep15",
+          "data_seed": 1001015,
+          "search_seed": 1002015,
+          "refit_seed": 1003015
+        },
+        {
+          "label": "rep16",
+          "data_seed": 1001016,
+          "search_seed": 1002016,
+          "refit_seed": 1003016
+        },
+        {
+          "label": "rep17",
+          "data_seed": 1001017,
+          "search_seed": 1002017,
+          "refit_seed": 1003017
+        },
+        {
+          "label": "rep18",
+          "data_seed": 1001018,
+          "search_seed": 1002018,
+          "refit_seed": 1003018
+        },
+        {
+          "label": "rep19",
+          "data_seed": 1001019,
+          "search_seed": 1002019,
+          "refit_seed": 1003019
+        },
+        {
+          "label": "rep20",
+          "data_seed": 1001020,
+          "search_seed": 1002020,
+          "refit_seed": 1003020
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 200,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "both starts retained; never choose the better start",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "gate": "75-B",
+        "authorized": true,
+        "authorized_by": "Human",
+        "authorized_in": "Issue #75 Human Gate comment 5855763104"
+      }
+    },
+    "strong_w": {
+      "stage": "density_w_strong_w",
+      "n": 75,
+      "d": 12,
+      "k_true": 3,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -1.1890648128923011,
+      "w": 1.4142135623730951,
+      "f_scale": 1.4142135623730951,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        },
+        {
+          "label": "rep11",
+          "data_seed": 1001011,
+          "search_seed": 1002011,
+          "refit_seed": 1003011
+        },
+        {
+          "label": "rep12",
+          "data_seed": 1001012,
+          "search_seed": 1002012,
+          "refit_seed": 1003012
+        },
+        {
+          "label": "rep13",
+          "data_seed": 1001013,
+          "search_seed": 1002013,
+          "refit_seed": 1003013
+        },
+        {
+          "label": "rep14",
+          "data_seed": 1001014,
+          "search_seed": 1002014,
+          "refit_seed": 1003014
+        },
+        {
+          "label": "rep15",
+          "data_seed": 1001015,
+          "search_seed": 1002015,
+          "refit_seed": 1003015
+        },
+        {
+          "label": "rep16",
+          "data_seed": 1001016,
+          "search_seed": 1002016,
+          "refit_seed": 1003016
+        },
+        {
+          "label": "rep17",
+          "data_seed": 1001017,
+          "search_seed": 1002017,
+          "refit_seed": 1003017
+        },
+        {
+          "label": "rep18",
+          "data_seed": 1001018,
+          "search_seed": 1002018,
+          "refit_seed": 1003018
+        },
+        {
+          "label": "rep19",
+          "data_seed": 1001019,
+          "search_seed": 1002019,
+          "refit_seed": 1003019
+        },
+        {
+          "label": "rep20",
+          "data_seed": 1001020,
+          "search_seed": 1002020,
+          "refit_seed": 1003020
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 200,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "both starts retained; never choose the better start",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "gate": "75-B",
+        "authorized": true,
+        "authorized_by": "Human",
+        "authorized_in": "Issue #75 Human Gate comment 5855763104"
+      }
+    }
+  },
+  "differs_from_phase9k_protocol_only_in": {
+    "weak_w": [
+      "stage",
+      "w",
+      "w0"
+    ],
+    "strong_w": [
+      "stage",
+      "w",
+      "w0"
+    ]
+  },
+  "differs_from_phase9p_protocol_only_in": {
+    "weak_w": [
+      "stage",
+      "w0"
+    ],
+    "strong_w": [
+      "stage",
+      "w0"
+    ]
+  },
+  "new_em_cap": 400,
+  "preflight_required": "regenerate weak/base/strong datasets without inference; Z, F, X bit-identical in 20/20 (as Phase 9P); Y differs",
+  "y_context_required": [
+    "frozen w0 / w",
+    "population p_target",
+    "per-replicate true mean edge probability",
+    "realized edge density",
+    "eta mean / sd",
+    "probability mean / sd",
+    "probability q01 q05 q50 q95 q99",
+    "share p < 0.05",
+    "share p > 0.95"
+  ],
+  "primary_outcomes": [
+    "technical completeness",
+    "K_hat_Lap",
+    "K_hat_Q",
+    "exact/under/over",
+    "paired C_Q vs C_Lap",
+    "delta_23",
+    "best-vs-second gap",
+    "K2->3 decomposition",
+    "Candidate-B technical diagnostics",
+    "family assignment (secondary)"
+  ],
+  "interpretation": "mean-density-controlled relational-w sensitivity; population mean edge probability matched by design only"
+}

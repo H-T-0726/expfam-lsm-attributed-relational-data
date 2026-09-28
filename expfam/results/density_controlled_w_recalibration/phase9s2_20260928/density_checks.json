@@ -1,0 +1,30 @@
+{
+  "normalization": 1.0000000000000002,
+  "normalization_error": 2.220446049250313e-16,
+  "mean": 0.0,
+  "mean_note": "exactly 0 by symmetry of f_S",
+  "second_moment": 2.9999999999999987,
+  "second_moment_error": 1.3322676295501878e-15,
+  "fourth_moment": 45.0,
+  "fourth_moment_exact": 45.0,
+  "characteristic_function": {
+    "0.5": {
+      "numerical": 0.7155417528000158,
+      "exact": 0.7155417527999327,
+      "abs_error": 8.304468224196171e-14
+    },
+    "1.0": {
+      "numerical": 0.3535533905933729,
+      "exact": 0.3535533905932738,
+      "abs_error": 9.908740494779522e-14
+    },
+    "2.0": {
+      "numerical": 0.08944271910004896,
+      "exact": 0.08944271909999159,
+      "abs_error": 5.737077479750496e-14
+    }
+  },
+  "tolerance": 1e-11,
+  "fourth_moment_error": 0.0,
+  "pass": true
+}

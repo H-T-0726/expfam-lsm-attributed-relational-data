@@ -1,0 +1,116 @@
+{
+  "recalibration_version": "density-w-recalibration-v1",
+  "code_sha": "248b11aa03656d6ecf58d5f8f5ab1920ed3d44c2",
+  "git_dirty": false,
+  "estimand": "p_bar(w0, w) = E[sigmoid(w0 + w z_i^T z_j)], K=3",
+  "density": "f_S(s) = |s| K_1(|s|) / pi",
+  "primary_settings": [
+    [
+      "A",
+      1e-10,
+      1e-10
+    ],
+    [
+      "B",
+      1e-12,
+      1e-12
+    ],
+    [
+      "C",
+      2e-13,
+      2e-13
+    ]
+  ],
+  "quad_limit": 200,
+  "freeze_tol": 1e-12,
+  "density_tol": 1e-11,
+  "crosscheck_nodes": [
+    256,
+    512,
+    1024,
+    2048
+  ],
+  "root_solver": {
+    "method": "brentq",
+    "xtol": 1e-15,
+    "rtol": 8.881784197001252e-16,
+    "bracket": "deterministic doubling from [-1, 1] (Phase 9S)"
+  },
+  "density_checks_pass": true,
+  "freeze_rule": {
+    "pass": true,
+    "compared": [
+      "B",
+      "C"
+    ],
+    "differences": {
+      "p_target": 2.220446049250313e-16,
+      "w0_weak_w": 2.220446049250313e-16,
+      "w0_baseline": 0.0,
+      "w0_strong_w": 4.440892098500626e-16
+    },
+    "stricter_residuals": {
+      "weak_w": 5.551115123125783e-17,
+      "baseline": 0.0,
+      "strong_w": 0.0
+    },
+    "density_ok": true
+  },
+  "crosscheck_rule": {
+    "pass": true,
+    "internal_finest_two": {
+      "p_target": 6.755707104844078e-14,
+      "w0_weak_w": 1.2434497875801753e-14,
+      "w0_baseline": 0.0,
+      "w0_strong_w": 2.3092638912203256e-14
+    },
+    "finest_vs_primary": {
+      "p_target": 7.205347429817266e-14,
+      "w0_weak_w": 1.3211653993039363e-14,
+      "w0_baseline": 0.0,
+      "w0_strong_w": 2.398081733190338e-14
+    }
+  },
+  "p_target": 0.33140621213146765,
+  "calibrated": {
+    "weak_w": {
+      "w0": -0.8780994405393426,
+      "w": 0.7071067811865475,
+      "p_bar_residual": 5.551115123125783e-17
+    },
+    "baseline": {
+      "w0": -1.0,
+      "w": 1.0,
+      "p_bar_residual": 0.0
+    },
+    "strong_w": {
+      "w0": -1.1890648128923011,
+      "w": 1.4142135623730951,
+      "p_bar_residual": 0.0
+    }
+  },
+  "production_setting": "C",
+  "comparison_to_phase9s_provisional": {
+    "p_target": {
+      "phase9s2": 0.33140621213146765,
+      "phase9s_provisional": 0.3314062121315355,
+      "difference": -6.783462680459706e-14
+    },
+    "w0_weak_w": {
+      "phase9s2": -0.8780994405393426,
+      "phase9s_provisional": -0.878099440538959,
+      "difference": -3.835820550079916e-13
+    },
+    "w0_strong_w": {
+      "phase9s2": -1.1890648128923011,
+      "phase9s_provisional": -1.1890648128624175,
+      "difference": -2.9883651109230414e-11
+    }
+  },
+  "DECISION": "DENSITY_CONTROLLED_W_CALIBRATION_READY",
+  "controls_only": "population mean Bernoulli edge probability; not the probability variance, quantiles, saturation, full distribution or realized finite-sample density",
+  "em_executions": 0,
+  "refits": 0,
+  "mc_crosscheck": "independent_mc_crosscheck.json",
+  "future_protocol": "FROZEN_NOT_EXECUTED"
+}
