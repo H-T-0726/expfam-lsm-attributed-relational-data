@@ -1,0 +1,181 @@
+{
+  "diagnostic_version": "theta-stationarity-v1",
+  "states": 60,
+  "reconstructed_ok": 60,
+  "primary_derivative_evaluable": 60,
+  "sensitivity_comparison_evaluable": 51,
+  "sensitivity_partial_states": 9,
+  "availability_note": "primary = h/2 gradient (used for all results); sensitivity = h gradient (h-vs-h/2 comparison only). Split post hoc from the committed per_state_gradient.csv; no re-evaluation. The legacy column unavailable_components is primary + sensitivity combined and is not used here.",
+  "grad_L2_by_k": {
+    "2": {
+      "n": 20,
+      "min": 4.213551918842614,
+      "median": 6.731229622359953,
+      "max": 13.670021889889707
+    },
+    "3": {
+      "n": 20,
+      "min": 5.5500277629966535,
+      "median": 8.1165862234695,
+      "max": 18.393219530562536
+    },
+    "4": {
+      "n": 20,
+      "min": 7.658663032370229,
+      "median": 11.79996992339386,
+      "max": 19.86959381705933
+    }
+  },
+  "grad_inf_by_k": {
+    "2": {
+      "n": 20,
+      "min": 2.555993378337007,
+      "median": 3.8205023281064747,
+      "max": 8.259406163233507
+    },
+    "3": {
+      "n": 20,
+      "min": 2.7829357350128703,
+      "median": 4.088450148174161,
+      "max": 13.693123564735288
+    },
+    "4": {
+      "n": 20,
+      "min": 2.878531295209541,
+      "median": 5.554339522859664,
+      "max": 13.913258426327957
+    }
+  },
+  "gradF_L2_by_k": {
+    "2": {
+      "n": 20,
+      "min": 2.763761041943421,
+      "median": 5.734870524221934,
+      "max": 12.262344590204611
+    },
+    "3": {
+      "n": 20,
+      "min": 4.40722056055229,
+      "median": 6.881813311430772,
+      "max": 8.855203066022398
+    },
+    "4": {
+      "n": 20,
+      "min": 5.986296461740243,
+      "median": 8.961756376822446,
+      "max": 12.64629478831503
+    }
+  },
+  "grad_logvar_L2_by_k": {
+    "2": {
+      "n": 20,
+      "min": 0.13675120292925944,
+      "median": 0.9362193534974677,
+      "max": 2.613478418453601
+    },
+    "3": {
+      "n": 20,
+      "min": 0.16402741617546807,
+      "median": 1.1021107035431825,
+      "max": 3.58096747138479
+    },
+    "4": {
+      "n": 20,
+      "min": 0.3530099051573532,
+      "median": 2.4435260890883654,
+      "max": 6.331537849613597
+    }
+  },
+  "abs_grad_w0_by_k": {
+    "2": {
+      "n": 20,
+      "min": 0.08073283879639348,
+      "median": 2.3874530279499595,
+      "max": 6.377711638378969
+    },
+    "3": {
+      "n": 20,
+      "min": 0.3555548391886987,
+      "median": 3.004823088303965,
+      "max": 13.693123564735288
+    },
+    "4": {
+      "n": 20,
+      "min": 0.06184342751992379,
+      "median": 2.4620134057789675,
+      "max": 12.568503848998475
+    }
+  },
+  "abs_grad_w_by_k": {
+    "2": {
+      "n": 20,
+      "min": 0.000536388142791111,
+      "median": 1.2985350159258702,
+      "max": 5.2277588529583365
+    },
+    "3": {
+      "n": 20,
+      "min": 0.5971915106783854,
+      "median": 2.0616703682208026,
+      "max": 9.384966883771995
+    },
+    "4": {
+      "n": 20,
+      "min": 0.35478060908644693,
+      "median": 4.080375131252367,
+      "max": 13.913258426327957
+    }
+  },
+  "h_vs_h2_normalized": {
+    "n": 51,
+    "min": 5.6369358595473885e-08,
+    "median": 6.312006776471526e-06,
+    "max": 5.745989937626709e-05
+  },
+  "h_vs_h2_max_abs": {
+    "n": 51,
+    "min": 3.3043891167761075e-07,
+    "median": 4.660733472050538e-05,
+    "max": 0.0007010089575487655
+  },
+  "vertical_over_total_F": {
+    "n": 60,
+    "min": 0.0,
+    "median": 9.33259388794232e-10,
+    "max": 4.0508042625569584e-05
+  },
+  "one_step_status": {
+    "ACCEPTED": 60,
+    "NO_ACCEPTED_STEP": 0,
+    "UNAVAILABLE": 0
+  },
+  "delta_ell_one_step_by_k": {
+    "2": {
+      "n": 20,
+      "min": 0.04146710091526984,
+      "median": 0.1852220654679968,
+      "max": 1.0332069658325054
+    },
+    "3": {
+      "n": 20,
+      "min": 0.09670048560110445,
+      "median": 0.25826929100367124,
+      "max": 0.5384038049414812
+    },
+    "4": {
+      "n": 20,
+      "min": 0.2331443183902593,
+      "median": 0.5874577451743335,
+      "max": 1.4044464034600423
+    }
+  },
+  "ordering_counts": {
+    "retained": 20,
+    "flipped": 0,
+    "tie": 0,
+    "unavailable": 0
+  },
+  "flipped_replicates": [],
+  "DECISION": "ONE_STEP_LOCAL_ORDERING_STABLE",
+  "decision_scope": "one-step local diagnostic only; not a claim of convergence to the MLE"
+}
