@@ -1,0 +1,81 @@
+{
+  "diagnostic_version": "weak-small-gap-one-step-v1",
+  "states_requested": 10,
+  "states_reconstructed": 10,
+  "primary_derivative_evaluable": 10,
+  "sensitivity_comparison_evaluable": 10,
+  "sensitivity_partial_states": 0,
+  "one_step_status": {
+    "ACCEPTED": 10,
+    "NO_ACCEPTED_STEP": 0,
+    "UNAVAILABLE": 0
+  },
+  "ordering_counts": {
+    "retained": 5,
+    "flipped": 0,
+    "tie": 0,
+    "unavailable": 0
+  },
+  "flip_or_tie_replicates": [],
+  "pairs": [
+    {
+      "replicate": "rep10",
+      "best_k": 2,
+      "second_k": 3,
+      "original_gap": 1.5360794014204657,
+      "in_scope": true,
+      "ordering": "retained",
+      "delta_Lap_23": 1.5360794014204657,
+      "delta_Lap_23_one_step": 1.3283438650314565,
+      "one_step_gap": 1.3283438650314565
+    },
+    {
+      "replicate": "rep11",
+      "best_k": 3,
+      "second_k": 2,
+      "original_gap": 4.537189357097304,
+      "in_scope": true,
+      "ordering": "retained",
+      "delta_Lap_23": -4.537189357097304,
+      "delta_Lap_23_one_step": -4.680836551654465,
+      "one_step_gap": 4.680836551654465
+    },
+    {
+      "replicate": "rep07",
+      "best_k": 2,
+      "second_k": 3,
+      "original_gap": 5.2639028341827725,
+      "in_scope": true,
+      "ordering": "retained",
+      "delta_Lap_23": 5.2639028341827725,
+      "delta_Lap_23_one_step": 5.209467434164253,
+      "one_step_gap": 5.209467434164253
+    },
+    {
+      "replicate": "rep04",
+      "best_k": 2,
+      "second_k": 3,
+      "original_gap": 7.022926612094125,
+      "in_scope": true,
+      "ordering": "retained",
+      "delta_Lap_23": 7.022926612094125,
+      "delta_Lap_23_one_step": 6.713360840609312,
+      "one_step_gap": 6.713360840609312
+    },
+    {
+      "replicate": "rep09",
+      "best_k": 3,
+      "second_k": 2,
+      "original_gap": 10.70233453011133,
+      "in_scope": true,
+      "ordering": "retained",
+      "delta_Lap_23": -10.70233453011133,
+      "delta_Lap_23_one_step": -11.007059578651933,
+      "one_step_gap": 11.007059578651933
+    }
+  ],
+  "DECISION": "WEAK_SMALL_GAP_ONE_STEP_STABLE",
+  "decision_scope": "one-step local diagnostic on 5 fixed weak_w pairs only; not a full-optimization or MLE claim; Phase 9P counts unchanged",
+  "em_executions": 0,
+  "refits": 0
+}
