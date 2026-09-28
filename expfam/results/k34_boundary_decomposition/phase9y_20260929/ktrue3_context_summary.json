@@ -1,0 +1,177 @@
+{
+  "available": 10,
+  "requested": 10,
+  "components": {
+    "delta34_Lap": {
+      "n": 10,
+      "min": 27.118793429561265,
+      "median": 52.0818557760158,
+      "max": 58.44229689109579,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "fit_gain_Lap_34": {
+      "n": 10,
+      "min": 114.46336691192118,
+      "median": 144.86326370024062,
+      "max": 189.42418217944214,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "volume_increment_34": {
+      "n": 10,
+      "min": 131.94839963775064,
+      "median": 156.4328640164,
+      "max": 177.685582587177,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "logdet_increment_34": {
+      "n": 10,
+      "min": 61.89781704874031,
+      "median": 87.34491075207495,
+      "max": 107.54653674642736,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "zhat_sq_increment_34": {
+      "n": 10,
+      "min": 65.10037230232561,
+      "median": 69.33262247392489,
+      "max": 76.91655678111493,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "param_increment_Lap": {
+      "n": 10,
+      "min": 38.857393021826766,
+      "median": 38.857393021826766,
+      "max": 38.857393021826766,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "margin_Lap": {
+      "n": 10,
+      "min": -58.44229689109537,
+      "median": -52.081855776015544,
+      "max": -27.118793429561634,
+      "negative": 10,
+      "positive": 0,
+      "zero": 0
+    },
+    "delta34_Q": {
+      "n": 10,
+      "min": 136.78987095965203,
+      "median": 163.61070517710368,
+      "max": 192.664779137619,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "fit_gain_Q_34": {
+      "n": 10,
+      "min": 59.03339386490825,
+      "median": 88.08746782542494,
+      "max": 114.90830204287704,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "P_Z_increment_34": {
+      "n": 10,
+      "min": 212.84077998070086,
+      "median": 212.84077998070086,
+      "max": 212.84077998070086,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "param_increment_Q": {
+      "n": 10,
+      "min": 38.857393021826766,
+      "median": 38.857393021826766,
+      "max": 38.857393021826766,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "margin_Q": {
+      "n": 10,
+      "min": -192.66477913761938,
+      "median": -163.6107051771027,
+      "max": -136.78987095965059,
+      "negative": 10,
+      "positive": 0,
+      "zero": 0
+    }
+  },
+  "max_residual_Lap": 5.400124791776761e-13,
+  "max_residual_Q": 1.4495071809506044e-12,
+  "descriptive_groups_exploratory": {
+    "Lap_K3_over_K4": {
+      "n": 10,
+      "replicates": [
+        "rep01",
+        "rep02",
+        "rep03",
+        "rep04",
+        "rep05",
+        "rep06",
+        "rep07",
+        "rep08",
+        "rep09",
+        "rep10"
+      ],
+      "component_medians": {
+        "delta34_Lap": 52.0818557760158,
+        "fit_gain_Lap_34": 144.86326370024062,
+        "volume_increment_34": 156.4328640164,
+        "logdet_increment_34": 87.34491075207495,
+        "zhat_sq_increment_34": 69.33262247392489,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": -52.081855776015544,
+        "delta34_Q": 163.61070517710368,
+        "fit_gain_Q_34": 88.08746782542494,
+        "P_Z_increment_34": 212.84077998070086,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": -163.6107051771027
+      }
+    },
+    "Q_K3_over_K4": {
+      "n": 10,
+      "replicates": [
+        "rep01",
+        "rep02",
+        "rep03",
+        "rep04",
+        "rep05",
+        "rep06",
+        "rep07",
+        "rep08",
+        "rep09",
+        "rep10"
+      ],
+      "component_medians": {
+        "delta34_Lap": 52.0818557760158,
+        "fit_gain_Lap_34": 144.86326370024062,
+        "volume_increment_34": 156.4328640164,
+        "logdet_increment_34": 87.34491075207495,
+        "zhat_sq_increment_34": 69.33262247392489,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": -52.081855776015544,
+        "delta34_Q": 163.61070517710368,
+        "fit_gain_Q_34": 88.08746782542494,
+        "P_Z_increment_34": 212.84077998070086,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": -163.6107051771027
+      }
+    }
+  },
+  "note": "context comparator only; same seed labels are not the same datasets; no paired inference"
+}

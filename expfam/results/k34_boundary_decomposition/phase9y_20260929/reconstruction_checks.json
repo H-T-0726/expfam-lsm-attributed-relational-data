@@ -1,0 +1,21 @@
+{
+  "ktrue4": {
+    "available": 10,
+    "max_residual_Lap": 1.5631940186722204e-12,
+    "max_residual_Q": 1.4495071809506044e-12,
+    "all_within_tol": true,
+    "param_increment_Lap_equals_dK": true,
+    "param_increment_Q_equals_num_params": true,
+    "num_params_equals_d_K": true
+  },
+  "ktrue3_context": {
+    "available": 10,
+    "max_residual_Lap": 5.400124791776761e-13,
+    "max_residual_Q": 1.4495071809506044e-12,
+    "all_within_tol": true,
+    "param_increment_Lap_equals_dK": true,
+    "param_increment_Q_equals_num_params": true,
+    "num_params_equals_d_K": true
+  },
+  "tolerance": 1e-10
+}

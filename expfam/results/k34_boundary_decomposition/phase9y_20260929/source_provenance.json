@@ -1,0 +1,23 @@
+{
+  "phase9x_merge": "1cb316bdde7b05b9c17c73eafede0d2ce367e536",
+  "sources": {
+    "ktrue4_laplace": "expfam/results/matched_k_true_sensitivity/phase9x_20260928/K4/laplace_by_k.csv",
+    "ktrue4_cq": "expfam/results/matched_k_true_sensitivity/phase9x_20260928/K4/cq_decomposition.csv",
+    "combined_rows": "expfam/results/matched_k_true_sensitivity/phase9x_20260928/combined/dataset_rows.csv",
+    "ktrue3_laplace": "expfam/results/lap_vs_cq_20/phase9k_20260928/laplace_by_k.csv",
+    "ktrue3_cq": "expfam/results/lap_vs_cq_20/phase9k_20260928/cq_decomposition.csv"
+  },
+  "sha256_at_merge": {
+    "ktrue4_laplace": "7962718437372967c55ed3558f07e4590efabd6df5f63a11f380264ece82e800",
+    "ktrue4_cq": "727f2f5b3d4281f7a88d9ea9bf215fb5b41d10c61c358277ead34ce9b5a0a704",
+    "combined_rows": "61929c202263ea057e551417f1054dd7b6cd55bc820f62c0d64eaadb054339cf",
+    "ktrue3_laplace": "d46c40622db10a2151ea3af568cc8dbf907beccd570b743b04fbf6abec4a934e",
+    "ktrue3_cq": "b4c1b9c52e7b01a31b433b7b0798b0efcef231c87713875dfee10f495bdf5931"
+  },
+  "code_sha": "03dd8da712624edf77c4814e9799639617a59bbf",
+  "git_dirty": false,
+  "em_executions": 0,
+  "refits": 0,
+  "candidate_b_re_evaluations": 0,
+  "mode": "post-hoc exploratory; committed values only"
+}
