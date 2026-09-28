@@ -441,9 +441,10 @@ def analyze(root: Path) -> dict[str, Any]:
                                    ("OK", "NOT_STATIONARY", "HESSIAN_NOT_PD",
                                     "EVALUATION_ERROR")},
             "technical_by_model_K": ws.technical(data[k]),
-            "family_by_model_K": family_summary(data[k]),
-            "decomposition_K2_to_K3": ws.decomposition(
-                data[k], pc.PROTOCOL.n)["summary"]})
+            # No K2->K3 (or K3->K4) decomposition: not a prespecified
+            # Phase 9X output (Issue #122). cq_decomposition.csv stays a raw
+            # runner artifact and is not used for interpretation.
+            "family_by_model_K": family_summary(data[k])})
         per_k[f"K{k}"] = s
     context = pc._read(DESIGN_DIR / "zero_inference_context.csv")
     ctx_keys = [c for c in context[0] if c not in ("K_true", "replicate",
