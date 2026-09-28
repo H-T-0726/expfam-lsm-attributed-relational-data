@@ -1,0 +1,58 @@
+{
+  "paired_generator_version": "paired-attribute-scale-v1",
+  "code_sha": "5bcdf30a68ec406d9e2baa967f5b685cfb0ac28a",
+  "f_scales": {
+    "weak": 1.0,
+    "base": 1.4142135623730951,
+    "strong": 2.0
+  },
+  "loading_energy": {
+    "weak": {
+      "f_scale": 1.0,
+      "avg_row_norm_sq_derived": 0.25
+    },
+    "base": {
+      "f_scale": 1.4142135623730951,
+      "avg_row_norm_sq_derived": 0.5000000000000001
+    },
+    "strong": {
+      "f_scale": 2.0,
+      "avg_row_norm_sq_derived": 1.0
+    }
+  },
+  "common": {
+    "n": 75,
+    "d": 12,
+    "K_true": 3,
+    "family_x": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "poisson",
+      "poisson",
+      "poisson"
+    ],
+    "family_y": "bernoulli",
+    "sigma_x_var": 1.0,
+    "w0": -1.0,
+    "w": 1.0,
+    "poisson_lambda_max": 1000000.0
+  },
+  "streams": "SeedSequence(data_seed).spawn(15): 0 Z, 1 F_orientation, 2..13 X columns 0..11, 14 Y",
+  "coupling": {
+    "gaussian": "shared standard-normal noise",
+    "bernoulli": "shared uniform, X = 1[U < sigmoid(eta)]",
+    "poisson": "shared uniform + inverse Poisson CDF (scipy.stats.poisson.ppf; U = 0 -> 0), entrywise inversion check",
+    "Y": "dedicated stream, shared uniform, Y = 1[V < sigmoid(-1 + z_i^T z_j)]"
+  },
+  "DECISION": "ATTRIBUTE_SCALE_DESIGN_READY",
+  "em_executions": 0,
+  "refits": 0,
+  "interpretation": "attribute-loading-scale sensitivity; not a pure attribute-information effect"
+}
