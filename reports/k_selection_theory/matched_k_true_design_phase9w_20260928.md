@@ -3,7 +3,11 @@
 - 位置づけ: **THEORY / DESIGN / ZERO-EM CALIBRATION AND COMPATIBILITY AUDIT ONLY**（Issue #120）。EM・refit・family 選択・K 選択・新しい fitted state での Candidate B の評価なし。
 - 結果: `expfam/results/matched_k_true_design/phase9w_20260928/`
   （`design.json`, `calibration_by_k.json/csv`, `deterministic_crosscheck.json/csv`, `zero_inference_context.csv`, `k1_boundary_audit.json`, `k3_anchor_compatibility.json`, `future_protocol.json`）
-- 実行コード: `4c22d75`（`expfam/src/experimental/matched_k_true_design.py`、実行時 clean）。数値の設定はすべて実行前にコードで固定し、1 回だけ実行した。
+- 実行コード: `4c22d75`（`expfam/src/experimental/matched_k_true_design.py`、実行時 clean）。数値の設定はすべて実行前にコードで固定した。
+  merge 前の provenance の修正（`b913276`）で、`future_protocol.json` の各条件に `JointProtocol.as_json()` から入っていた
+  Issue #75 の execution authorization と 2 start の `start_policy` を、fail-closed な値（`authorized: false` / `NOT_AUTHORIZED_YET`、`start_B only`）に置き換えた。
+  artifact はその code で clean な tree から再生成した（記録された code SHA は `810b8ff`、code は `b913276` と同一）。
+  再生成の前後で数値の結果（CSV はバイト単位、JSON は provenance の SHA 以外の全項目）は同一で、DECISION も変わらない。
   historical な generator・推定器・Candidate B・C_Q・Phase 9K の artifact は変更していない。
 - 系列 E（experimental prototype; 本文採用不可）
 
