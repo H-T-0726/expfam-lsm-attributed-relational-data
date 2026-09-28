@@ -1,0 +1,66 @@
+{
+  "diagnostic_version": "weak-small-gap-one-step-v1",
+  "reused": "theta_stationarity_diagnostic (Phase 9M) theta-stationarity-v1",
+  "code_sha": "ddccacede8480cdfa0e1a2cd890c0aa33ff5b3f2",
+  "git_dirty": false,
+  "source_dir": "expfam\\results\\relational_w_sensitivity\\phase9p_20260928\\weak_w",
+  "source_sha256": {
+    "fitted_states.json": "f081797738e3616547082e6d3f05c49a3adead1c5893aacf004b0f6f2e7633e9",
+    "laplace_by_k.csv": "a520b92cb047f2e2efa7bc53506ac2e73ddcd366d227d4349623f00d872ce47b",
+    "paired_summary.json": "0da011dd9c3bb74bb17c259b6c2d45aa8ee708cb0c77375f4f3857df786e2b33",
+    "protocol.json": "0b976c94a426958cbdd0706c49a866b0c430d8343695a4baddc1ea94eec9d7c0"
+  },
+  "source_code_sha": "d3db3a0f483bacf7338b12bb135b48af97b909b0",
+  "condition": "weak_w",
+  "w": 0.7071067811865475,
+  "pairs": [
+    [
+      "rep10",
+      2,
+      3,
+      1.5360794014
+    ],
+    [
+      "rep11",
+      3,
+      2,
+      4.5371893571
+    ],
+    [
+      "rep07",
+      2,
+      3,
+      5.2639028342
+    ],
+    [
+      "rep04",
+      2,
+      3,
+      7.0229266121
+    ],
+    [
+      "rep09",
+      3,
+      2,
+      10.7023345301
+    ]
+  ],
+  "h_base": 0.0001,
+  "primary_step": "h/2",
+  "eps_dir": 0.001,
+  "step_factors": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625,
+    0.03125,
+    0.015625
+  ],
+  "reconstruction_rtol": 1e-09,
+  "joint_mode": "Phase 9H defaults (grad_tol 1e-8, max_iter 200); every evaluation starts at the base Z_hat0",
+  "x_y": "regenerated with run_family_selection_pilot.build_dataset(run_w_sensitivity.protocol_for('weak_w'), replicate)",
+  "em_executions": 0,
+  "refits": 0,
+  "max_accepted_steps_per_state": 1
+}
