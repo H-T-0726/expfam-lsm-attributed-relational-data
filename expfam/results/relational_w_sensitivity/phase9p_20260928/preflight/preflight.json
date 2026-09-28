@@ -1,0 +1,10 @@
+{
+  "wrapper_version": "w-sensitivity-v1",
+  "code_sha": "2a9913361ba3c5d6097ccb4a105feccf339ace25",
+  "git_dirty": true,
+  "replicates": 20,
+  "zfx_identical_all": true,
+  "zfx_identical_count": 20,
+  "inference_runs": 0,
+  "note": "Y is the manipulated side; no claim of identical Bernoulli random-number coupling across w."
+}
