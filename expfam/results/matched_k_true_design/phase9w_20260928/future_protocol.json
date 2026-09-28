@@ -1,0 +1,610 @@
+{
+  "phase": "9X (future; NOT RUN)",
+  "status": "FROZEN_NOT_EXECUTED",
+  "execution_authorized": false,
+  "design_code_sha": "810b8ff1c267bfc436172f62ec801fbb3173faab",
+  "p_target": 0.3314062121314677,
+  "conditions": {
+    "K1": {
+      "stage": "matched_k_true_K1",
+      "n": 75,
+      "d": 12,
+      "k_true": 1,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -0.9305782473108135,
+      "w": 1.7320508075688772,
+      "f_scale": 2.449489742783178,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 100,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "start_B only (single start; no start comparison or selection)",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "authorized": false,
+        "status": "NOT_AUTHORIZED_YET",
+        "gate": "Phase 9X (future)",
+        "note": "requires a new Human Gate; the Issue #75 authorization inherited from JointProtocol.as_json() does not apply"
+      },
+      "role": "new run"
+    },
+    "K2": {
+      "stage": "matched_k_true_K2",
+      "n": 75,
+      "d": 12,
+      "k_true": 2,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -0.9779597638183112,
+      "w": 1.224744871391589,
+      "f_scale": 1.7320508075688772,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 100,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "start_B only (single start; no start comparison or selection)",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "authorized": false,
+        "status": "NOT_AUTHORIZED_YET",
+        "gate": "Phase 9X (future)",
+        "note": "requires a new Human Gate; the Issue #75 authorization inherited from JointProtocol.as_json() does not apply"
+      },
+      "role": "new run"
+    },
+    "K3": {
+      "stage": "matched_k_true_K3",
+      "n": 75,
+      "d": 12,
+      "k_true": 3,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -1.0,
+      "w": 1.0,
+      "f_scale": 1.4142135623730951,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 100,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "start_B only (single start; no start comparison or selection)",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "authorized": false,
+        "status": "NOT_AUTHORIZED_YET",
+        "gate": "Phase 9X (future)",
+        "note": "requires a new Human Gate; the Issue #75 authorization inherited from JointProtocol.as_json() does not apply"
+      },
+      "role": "historical anchor: Phase 9K rep01..rep10 results reused read-only (not rerun)"
+    },
+    "K4": {
+      "stage": "matched_k_true_K4",
+      "n": 75,
+      "d": 12,
+      "k_true": 4,
+      "family_x_list": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "family_y": "bernoulli",
+      "sigma_x_var": 1.0,
+      "w0": -1.0127634215799726,
+      "w": 0.8660254037844386,
+      "f_scale": 1.224744871391589,
+      "L": 5,
+      "exploration_num_iter": 8,
+      "refit_num_iter": 8,
+      "k_candidates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "replicates": [
+        {
+          "label": "rep01",
+          "data_seed": 1001001,
+          "search_seed": 1002001,
+          "refit_seed": 1003001
+        },
+        {
+          "label": "rep02",
+          "data_seed": 1001002,
+          "search_seed": 1002002,
+          "refit_seed": 1003002
+        },
+        {
+          "label": "rep03",
+          "data_seed": 1001003,
+          "search_seed": 1002003,
+          "refit_seed": 1003003
+        },
+        {
+          "label": "rep04",
+          "data_seed": 1001004,
+          "search_seed": 1002004,
+          "refit_seed": 1003004
+        },
+        {
+          "label": "rep05",
+          "data_seed": 1001005,
+          "search_seed": 1002005,
+          "refit_seed": 1003005
+        },
+        {
+          "label": "rep06",
+          "data_seed": 1001006,
+          "search_seed": 1002006,
+          "refit_seed": 1003006
+        },
+        {
+          "label": "rep07",
+          "data_seed": 1001007,
+          "search_seed": 1002007,
+          "refit_seed": 1003007
+        },
+        {
+          "label": "rep08",
+          "data_seed": 1001008,
+          "search_seed": 1002008,
+          "refit_seed": 1003008
+        },
+        {
+          "label": "rep09",
+          "data_seed": 1001009,
+          "search_seed": 1002009,
+          "refit_seed": 1003009
+        },
+        {
+          "label": "rep10",
+          "data_seed": 1001010,
+          "search_seed": 1002010,
+          "refit_seed": 1003010
+        }
+      ],
+      "starts": [
+        {
+          "label": "start_B",
+          "ambiguous_start": "bernoulli"
+        }
+      ],
+      "failure_scope": "dataset",
+      "expected_em_executions": 100,
+      "candidate_optimizer": "bfgs",
+      "candidate_optimizer_settings": {
+        "method": "BFGS",
+        "jac": "analytic_production_gradient",
+        "maxiter": 2000,
+        "gtol": 1e-10,
+        "finite_difference_jacobian": false,
+        "fallback_solvers": []
+      },
+      "candidate_convergence_rule": {
+        "rule": "finite and final analytic gradient infinity norm <= tol",
+        "convergence_grad_inf_tol": 1e-08,
+        "role": "diagnostic (WARNING), research-first policy"
+      },
+      "ambiguous_loading_installation": "selected_candidate_loading",
+      "refit_failure_policy": "fail_fast",
+      "k_criterion": {
+        "name": "C_Q",
+        "formula": "-2 Q_strict + p_K ln n",
+        "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+        "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+        "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+        "tie_rule": "exact floating equality -> smaller K",
+        "family_search_penalty": "none"
+      },
+      "cross_k_state": "none (each K fit from scratch)",
+      "start_policy": "start_B only (single start; no start comparison or selection)",
+      "data_draws": "one per replicate, shared by all K and starts",
+      "execution_authorization": {
+        "authorized": false,
+        "status": "NOT_AUTHORIZED_YET",
+        "gate": "Phase 9X (future)",
+        "note": "requires a new Human Gate; the Issue #75 authorization inherited from JointProtocol.as_json() does not apply"
+      },
+      "role": "new run"
+    }
+  },
+  "new_K_true": [
+    1,
+    2,
+    4
+  ],
+  "K3_anchor_reusable": true,
+  "replicates": [
+    "rep01",
+    "rep02",
+    "rep03",
+    "rep04",
+    "rep05",
+    "rep06",
+    "rep07",
+    "rep08",
+    "rep09",
+    "rep10"
+  ],
+  "candidate_K": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "start": "start_B only",
+  "future_new_em_cap": 300,
+  "data_generator": "run_family_selection_pilot.build_dataset (historical canonical mixed generator)",
+  "runner_requirement": "outcomes (exact/under/over, signed error, true-K gaps) must use each condition's K_true, not the hard-coded K_TRUE = 3",
+  "primary_outcomes": [
+    "K_hat_Lap and K_hat_Q counts per K_true",
+    "exact/under/over relative to K_true",
+    "signed error K_hat - K_true",
+    "absolute error",
+    "best-vs-second gap",
+    "criterion difference between K_true and the nearest under/over candidates",
+    "family assignment",
+    "Candidate-B technical status",
+    "confusion-style K_true x K_hat table (not an accuracy)"
+  ],
+  "interpretation": "matched-signal K_true sensitivity; not a pure latent-dimension effect"
+}

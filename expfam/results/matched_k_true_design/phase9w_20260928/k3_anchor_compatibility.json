@@ -1,0 +1,175 @@
+{
+  "protocol_fields_differing_from_phase9k": [
+    "stage"
+  ],
+  "replicates": [
+    {
+      "replicate": "rep01",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep02",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep03",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep04",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep05",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep06",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep07",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep08",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep09",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep10",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep11",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep12",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep13",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep14",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep15",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep16",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep17",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep18",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep19",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    },
+    {
+      "replicate": "rep20",
+      "Z_bit_identical": true,
+      "F_bit_identical": true,
+      "X_bit_identical": true,
+      "Y_bit_identical": true,
+      "matches_committed_generator_provenance": true
+    }
+  ],
+  "counts": {
+    "Z_bit_identical": 20,
+    "F_bit_identical": 20,
+    "X_bit_identical": 20,
+    "Y_bit_identical": 20,
+    "matches_committed_generator_provenance": 20
+  },
+  "K3_anchor_reusable": true
+}
