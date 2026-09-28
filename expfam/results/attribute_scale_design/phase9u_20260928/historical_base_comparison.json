@@ -1,0 +1,12 @@
+{
+  "counts": {
+    "Z_identical": 0,
+    "F_identical": 0,
+    "X_identical": 0,
+    "Y_identical": 0
+  },
+  "replicates": 20,
+  "historical_base_reusable": false,
+  "future_base_rerun_required": true,
+  "future_new_em_cap": 600
+}

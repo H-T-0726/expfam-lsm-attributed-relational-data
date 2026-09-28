@@ -1,0 +1,29 @@
+{
+  "required_checks": [
+    "Z_identical",
+    "Q_identical",
+    "F_exact_scale",
+    "F_weak_equals_Q",
+    "rank_F_3",
+    "Y_identical",
+    "finite",
+    "poisson_inversion_ok",
+    "poisson_safe",
+    "deterministic_repeat"
+  ],
+  "pass_counts": {
+    "Z_identical": 20,
+    "Q_identical": 20,
+    "F_exact_scale": 20,
+    "F_weak_equals_Q": 20,
+    "rank_F_3": 20,
+    "Y_identical": 20,
+    "finite": 20,
+    "poisson_inversion_ok": 20,
+    "poisson_safe": 20,
+    "deterministic_repeat": 20
+  },
+  "replicates": 20,
+  "generator_stop": null,
+  "all_pass": true
+}
