@@ -1,0 +1,56 @@
+{
+  "pilot_version": "multistep-local-v1",
+  "code_sha": "c16be84e29ff85e958058ac58c57077a8920115e",
+  "git_dirty": false,
+  "source_dir": "expfam\\results\\lap_vs_cq_20\\phase9k_20260928",
+  "source_sha256": {
+    "fitted_states.json": "114a3f815dc090804f5e513de225d13a54d24b730f4bea2e694ba3498f2bf885",
+    "laplace_by_k.csv": "aebba7edc621b1b5d0c665930d50d64ff5ca1e316d51b249d6f80206e5b2f56e",
+    "paired_summary.json": "973e91168e9a18e2c998e88ef79a03da85a2a36f1a7179209fdedce0880b4798"
+  },
+  "source_code_sha": "bbf45e461a2ef252909a02a64732faaa721a8311",
+  "pairs": [
+    [
+      "rep10",
+      3,
+      2
+    ],
+    [
+      "rep04",
+      3,
+      2
+    ],
+    [
+      "rep19",
+      3,
+      2
+    ],
+    [
+      "rep09",
+      3,
+      4
+    ],
+    [
+      "rep18",
+      3,
+      4
+    ]
+  ],
+  "fd_step": "Phase 9M primary: 5e-5 (F horizontal, log-variance); 5e-5*max(1,|w0|), 5e-5*max(1,|w|) at the current centre",
+  "eps_dir": 0.001,
+  "step_factors": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625,
+    0.03125,
+    0.015625
+  ],
+  "score_tol": 0.001,
+  "max_accepted": 20,
+  "chart": "horizontal complement of {F A : A^T=-A}, rebuilt from the current F after every accepted step",
+  "joint_mode": "Phase 9H defaults (grad_tol 1e-8, max_iter 200); every evaluation starts at the current accepted mode",
+  "reconstruction_rtol": 1e-09,
+  "em_executions": 0
+}

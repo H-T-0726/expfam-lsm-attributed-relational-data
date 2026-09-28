@@ -1,0 +1,25 @@
+{
+  "pilot_version": "multistep-local-v1",
+  "states_requested": 10,
+  "states_reconstructed": 10,
+  "status_counts": {
+    "CONVERGED_SCORE": 0,
+    "MAX_ITER_20": 7,
+    "NO_ACCEPTED_STEP": 0,
+    "CURVATURE_NONNEGATIVE": 0,
+    "DERIVATIVE_UNAVAILABLE": 3,
+    "CHART_RANK_FAILURE": 0,
+    "OBJECTIVE_UNAVAILABLE": 0
+  },
+  "ordering_counts": {
+    "retained": 3,
+    "flipped": 0,
+    "tie": 0,
+    "unavailable": 2
+  },
+  "flipped_replicates": [],
+  "intermediate_flip_replicates": [],
+  "DECISION": "MULTISTEP_PILOT_INCONCLUSIVE",
+  "decision_scope": "bounded (<=20 accepted steps) local diagnostic on 5 fixed pairs; MAX_ITER_20 is not convergence; not a new criterion or an MLE claim",
+  "em_executions": 0
+}
