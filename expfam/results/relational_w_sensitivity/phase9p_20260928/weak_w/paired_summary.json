@@ -1,0 +1,1277 @@
+{
+  "wrapper_version": "lap-vs-cq-20-v1",
+  "laplace_settings": {
+    "evaluator_version": "laplace-k-criterion-v1",
+    "theta": "fresh refit final parameters",
+    "joint_mode_start": "fresh refit Z_est",
+    "grad_tol": 1e-08,
+    "max_iter": 200,
+    "restart": false,
+    "alternate_start": false,
+    "jitter_or_ridge": false,
+    "N": 75,
+    "N_status": "working convention (Phase 9G), not a proven sample size",
+    "d_K": "K*d - K(K-1)/2 + n_gaussian_selected(K); w0/w not counted"
+  },
+  "datasets_planned": 20,
+  "em_complete_datasets": 20,
+  "c_lap_complete_datasets": 20,
+  "P1_K_hat_Lap": {
+    "counts": {
+      "1": 0,
+      "2": 4,
+      "3": 16,
+      "4": 0,
+      "5": 0
+    },
+    "exact": 16,
+    "under": 4,
+    "over": 0,
+    "denominator": 20
+  },
+  "P2_K_hat_Q": {
+    "counts": {
+      "1": 9,
+      "2": 10,
+      "3": 1,
+      "4": 0,
+      "5": 0
+    },
+    "exact": 1,
+    "under": 19,
+    "over": 0,
+    "denominator": 20
+  },
+  "P3_paired": {
+    "denominator": 20,
+    "both_K3": 1,
+    "lap_only_K3": 15,
+    "q_only_K3": 0,
+    "neither_K3": 4,
+    "same_K": 2,
+    "different_K": 18,
+    "pairs": {
+      "rep01": [
+        2,
+        3
+      ],
+      "rep02": [
+        2,
+        3
+      ],
+      "rep03": [
+        1,
+        3
+      ],
+      "rep04": [
+        1,
+        2
+      ],
+      "rep05": [
+        1,
+        3
+      ],
+      "rep06": [
+        1,
+        3
+      ],
+      "rep07": [
+        1,
+        2
+      ],
+      "rep08": [
+        1,
+        3
+      ],
+      "rep09": [
+        2,
+        3
+      ],
+      "rep10": [
+        2,
+        2
+      ],
+      "rep11": [
+        1,
+        3
+      ],
+      "rep12": [
+        2,
+        3
+      ],
+      "rep13": [
+        1,
+        3
+      ],
+      "rep14": [
+        2,
+        3
+      ],
+      "rep15": [
+        3,
+        3
+      ],
+      "rep16": [
+        2,
+        3
+      ],
+      "rep17": [
+        2,
+        3
+      ],
+      "rep18": [
+        2,
+        3
+      ],
+      "rep19": [
+        2,
+        3
+      ],
+      "rep20": [
+        1,
+        2
+      ]
+    }
+  },
+  "P4_margins": {
+    "delta_Lap_23": {
+      "n": 20,
+      "min": -80.21897282162809,
+      "median": -22.008718389115074,
+      "max": 44.74947359006546,
+      "negative": 16,
+      "positive": 4,
+      "zero": 0
+    },
+    "delta_Q_23": {
+      "n": 20,
+      "min": -17.29906172327628,
+      "median": 63.269813069079646,
+      "max": 171.28354623766154,
+      "negative": 2,
+      "positive": 18,
+      "zero": 0
+    },
+    "lap_gap": {
+      "n": 20,
+      "min": 1.5360794014204657,
+      "median": 23.96292936369764,
+      "max": 52.90409756959616,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "q_gap": {
+      "n": 20,
+      "min": 1.3282901451793805,
+      "median": 34.33702307167596,
+      "max": 102.05904523684057,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "five_smallest_lap_gaps": [
+      {
+        "replicate": "rep10",
+        "gap": 1.5360794014204657,
+        "best_k": 2,
+        "second_k": 3
+      },
+      {
+        "replicate": "rep11",
+        "gap": 4.537189357097304,
+        "best_k": 3,
+        "second_k": 2
+      },
+      {
+        "replicate": "rep07",
+        "gap": 5.2639028341827725,
+        "best_k": 2,
+        "second_k": 3
+      },
+      {
+        "replicate": "rep04",
+        "gap": 7.022926612094125,
+        "best_k": 2,
+        "second_k": 3
+      },
+      {
+        "replicate": "rep09",
+        "gap": 10.70233453011133,
+        "best_k": 3,
+        "second_k": 2
+      }
+    ]
+  },
+  "P5_technical": {
+    "refits_evaluated": 100,
+    "OK": 100,
+    "NOT_STATIONARY": 0,
+    "HESSIAN_NOT_PD": 0,
+    "EVALUATION_ERROR": 0
+  },
+  "datasets": [
+    {
+      "replicate": "rep01",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5386.713216452714,
+        "2": 5371.362036820517,
+        "3": 5419.320142279446,
+        "4": 5588.729497418196,
+        "5": 5748.992438337818
+      },
+      "C_Lap": {
+        "1": 5377.850491563957,
+        "2": 5301.956689598325,
+        "3": 5239.31257867003,
+        "4": 5284.325229942652,
+        "5": 5325.297628501186
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 47.95810545892982,
+      "delta_Lap_23": -62.64411092829505,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 4,
+      "lap_gap": 45.01265127262195,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 15.351179632197272
+    },
+    {
+      "replicate": "rep02",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5473.324889277429,
+        "2": 5444.902766008377,
+        "3": 5528.137823086467,
+        "4": 5747.441411852101,
+        "5": 5879.52838821025
+      },
+      "C_Lap": {
+        "1": 5411.903029256886,
+        "2": 5337.731680935827,
+        "3": 5324.357602311612,
+        "4": 5374.082083686317,
+        "5": 5410.096097041214
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 83.23505707809,
+      "delta_Lap_23": -13.374078624215144,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 13.374078624215144,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 28.422123269052463
+    },
+    {
+      "replicate": "rep03",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5494.689291359821,
+        "2": 5533.621245204595,
+        "3": 5516.3221834813185,
+        "4": 5659.773734793995,
+        "5": 5841.697323404171
+      },
+      "C_Lap": {
+        "1": 5451.517410159459,
+        "2": 5400.9404368898995,
+        "3": 5339.636808242733,
+        "4": 5385.472177168822,
+        "5": 5423.093116151609
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": -17.29906172327628,
+      "delta_Lap_23": -61.30362864716608,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 4,
+      "lap_gap": 45.83536892608845,
+      "q_best_k": 1,
+      "q_second_k": 3,
+      "q_gap": 21.632892121497207
+    },
+    {
+      "replicate": "rep04",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5271.758018761511,
+        "2": 5353.599864746797,
+        "3": 5443.557821528382,
+        "4": 5637.632366869527,
+        "5": 5821.299919295483
+      },
+      "C_Lap": {
+        "1": 5238.286295416921,
+        "2": 5231.229863969593,
+        "3": 5238.252790581687,
+        "4": 5269.949527721021,
+        "5": 5313.33604846689
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 2,
+      "delta_Q_23": 89.95795678158538,
+      "delta_Lap_23": 7.022926612094125,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 2,
+      "lap_second_k": 3,
+      "lap_gap": 7.022926612094125,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 81.84184598528554
+    },
+    {
+      "replicate": "rep05",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5369.090580946945,
+        "2": 5418.76697665622,
+        "3": 5454.066459976073,
+        "4": 5645.555883864978,
+        "5": 5875.806714844835
+      },
+      "C_Lap": {
+        "1": 5299.040404830132,
+        "2": 5272.070867633872,
+        "3": 5233.636646824617,
+        "4": 5281.1348754740475,
+        "5": 5318.0834763066905
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 35.2994833198527,
+      "delta_Lap_23": -38.43422080925484,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 38.43422080925484,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 49.67639570927531
+    },
+    {
+      "replicate": "rep06",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5318.491329058128,
+        "2": 5328.377156732081,
+        "3": 5393.616434238433,
+        "4": 5583.266286468498,
+        "5": 5780.986567239886
+      },
+      "C_Lap": {
+        "1": 5273.178500380404,
+        "2": 5210.707427440198,
+        "3": 5188.295973846093,
+        "4": 5234.410979175985,
+        "5": 5280.573070367413
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 65.23927750635175,
+      "delta_Lap_23": -22.411453594105296,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 22.411453594105296,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 9.885827673952917
+    },
+    {
+      "replicate": "rep07",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5403.065236908677,
+        "2": 5499.082290930806,
+        "3": 5621.740439029432,
+        "4": 5793.668260802148,
+        "5": 6010.00615556827
+      },
+      "C_Lap": {
+        "1": 5321.2787430778735,
+        "2": 5313.467674041497,
+        "3": 5318.73157687568,
+        "4": 5363.236380953138,
+        "5": 5391.834436972751
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 2,
+      "delta_Q_23": 122.65814809862604,
+      "delta_Lap_23": 5.2639028341827725,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 2,
+      "lap_second_k": 3,
+      "lap_gap": 5.2639028341827725,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 96.01705402212883
+    },
+    {
+      "replicate": "rep08",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5331.020565939262,
+        "2": 5391.504742624658,
+        "3": 5462.121319873521,
+        "4": 5624.018745921111,
+        "5": 5797.832102094291
+      },
+      "C_Lap": {
+        "1": 5311.595564572708,
+        "2": 5289.014703041959,
+        "3": 5263.500297908669,
+        "4": 5305.167729436403,
+        "5": 5338.8520530196965
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 70.616577248863,
+      "delta_Lap_23": -25.514405133289983,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 25.514405133289983,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 60.48417668539605
+    },
+    {
+      "replicate": "rep09",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5320.605290631517,
+        "2": 5291.3015420204065,
+        "3": 5401.721891574804,
+        "4": 5549.63856914421,
+        "5": 5690.419084793628
+      },
+      "C_Lap": {
+        "1": 5284.83510244692,
+        "2": 5208.430977360593,
+        "3": 5197.7286428304815,
+        "4": 5232.307391798731,
+        "5": 5273.822576562847
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 110.42034955439794,
+      "delta_Lap_23": -10.70233453011133,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 10.70233453011133,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 29.303748611110677
+    },
+    {
+      "replicate": "rep10",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5517.83652547278,
+        "2": 5415.777480235939,
+        "3": 5520.75384768686,
+        "4": 5720.394992940246,
+        "5": 5873.174218210614
+      },
+      "C_Lap": {
+        "1": 5474.460691916476,
+        "2": 5335.510235753586,
+        "3": 5337.046315155007,
+        "4": 5370.196220068869,
+        "5": 5407.995745208584
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 2,
+      "delta_Q_23": 104.97636745092132,
+      "delta_Lap_23": 1.5360794014204657,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 2,
+      "lap_second_k": 3,
+      "lap_gap": 1.5360794014204657,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 102.05904523684057
+    },
+    {
+      "replicate": "rep11",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5345.019668870861,
+        "2": 5362.93558558961,
+        "3": 5456.519833325686,
+        "4": 5584.283942043426,
+        "5": 5772.850895760455
+      },
+      "C_Lap": {
+        "1": 5315.8002707599735,
+        "2": 5257.870051652086,
+        "3": 5253.332862294988,
+        "4": 5287.081902346789,
+        "5": 5323.864970852634
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 93.58424773607567,
+      "delta_Lap_23": -4.537189357097304,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 4.537189357097304,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 17.91591671874903
+    },
+    {
+      "replicate": "rep12",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5487.460264400493,
+        "2": 5441.941001298317,
+        "3": 5500.122851085581,
+        "4": 5720.931182316788,
+        "5": 5876.095910684469
+      },
+      "C_Lap": {
+        "1": 5433.621924780153,
+        "2": 5331.890316344228,
+        "3": 5305.081228886591,
+        "4": 5352.217090562139,
+        "5": 5389.896775316698
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 58.18184978726367,
+      "delta_Lap_23": -26.80908745763736,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 26.80908745763736,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 45.5192631021755
+    },
+    {
+      "replicate": "rep13",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5384.47181226343,
+        "2": 5428.623616733611,
+        "3": 5512.805388480436,
+        "4": 5686.214665381171,
+        "5": 5870.066285809524
+      },
+      "C_Lap": {
+        "1": 5332.309346694485,
+        "2": 5294.066494479434,
+        "3": 5282.3506172587095,
+        "4": 5326.343608633796,
+        "5": 5361.044326094559
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 84.18177174682478,
+      "delta_Lap_23": -11.715877220724906,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 11.715877220724906,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 44.15180447018065
+    },
+    {
+      "replicate": "rep14",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5408.008881681254,
+        "2": 5337.821992832191,
+        "3": 5399.122341463999,
+        "4": 5572.3129867400885,
+        "5": 5711.123533322903
+      },
+      "C_Lap": {
+        "1": 5365.802081350499,
+        "2": 5246.827523521768,
+        "3": 5225.221540337643,
+        "4": 5277.767985443458,
+        "5": 5319.002118472614
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 61.30034863180754,
+      "delta_Lap_23": -21.605983184124852,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 21.605983184124852,
+      "q_best_k": 2,
+      "q_second_k": 3,
+      "q_gap": 61.30034863180754
+    },
+    {
+      "replicate": "rep15",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5508.073164911981,
+        "2": 5476.100464782799,
+        "3": 5474.772174637619,
+        "4": 5663.705843730328,
+        "5": 5847.831425291659
+      },
+      "C_Lap": {
+        "1": 5423.277616328984,
+        "2": 5343.187026886258,
+        "3": 5262.9680540646295,
+        "4": 5315.872151634226,
+        "5": 5351.280645411178
+      },
+      "K_hat_Q": 3,
+      "K_hat_Lap": 3,
+      "delta_Q_23": -1.3282901451793805,
+      "delta_Lap_23": -80.21897282162809,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 4,
+      "lap_gap": 52.90409756959616,
+      "q_best_k": 3,
+      "q_second_k": 2,
+      "q_gap": 1.3282901451793805
+    },
+    {
+      "replicate": "rep16",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5477.678491342078,
+        "2": 5440.734811879396,
+        "3": 5453.180433524154,
+        "4": 5634.626338971685,
+        "5": 5749.996972491954
+      },
+      "C_Lap": {
+        "1": 5435.169509434802,
+        "2": 5326.489009075114,
+        "3": 5269.254720402555,
+        "4": 5317.141954441771,
+        "5": 5340.66093288429
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 12.44562164475792,
+      "delta_Lap_23": -57.23428867255916,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 4,
+      "lap_gap": 47.88723403921631,
+      "q_best_k": 2,
+      "q_second_k": 3,
+      "q_gap": 12.44562164475792
+    },
+    {
+      "replicate": "rep17",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5488.448359362528,
+        "2": 5449.078061830287,
+        "3": 5494.058551500679,
+        "4": 5697.663924634022,
+        "5": 5835.735051019386
+      },
+      "C_Lap": {
+        "1": 5422.449310193196,
+        "2": 5323.335315808437,
+        "3": 5303.916114383881,
+        "4": 5345.689123674094,
+        "5": 5382.926626544562
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 44.98048967039176,
+      "delta_Lap_23": -19.419201424556377,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 19.419201424556377,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 39.37029753224124
+    },
+    {
+      "replicate": "rep18",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5421.730903654397,
+        "2": 5386.743092975842,
+        "3": 5398.716357267329,
+        "4": 5593.271569283462,
+        "5": 5778.288015186459
+      },
+      "C_Lap": {
+        "1": 5389.08172593061,
+        "2": 5302.691687846149,
+        "3": 5262.870569458464,
+        "4": 5295.544415060073,
+        "5": 5340.125971718591
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 11.973264291486885,
+      "delta_Lap_23": -39.82111838768469,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 4,
+      "lap_gap": 32.67384560160917,
+      "q_best_k": 2,
+      "q_second_k": 3,
+      "q_gap": 11.973264291486885
+    },
+    {
+      "replicate": "rep19",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5326.051567502289,
+        "2": 5301.050924354099,
+        "3": 5342.187399964526,
+        "4": 5519.916962314274,
+        "5": 5683.576096810244
+      },
+      "C_Lap": {
+        "1": 5283.519017111309,
+        "2": 5199.003652350122,
+        "3": 5167.060805230797,
+        "4": 5209.285299565102,
+        "5": 5241.390356713577
+      },
+      "K_hat_Q": 2,
+      "K_hat_Lap": 3,
+      "delta_Q_23": 41.136475610426714,
+      "delta_Lap_23": -31.94284711932505,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 3,
+      "lap_second_k": 2,
+      "lap_gap": 31.94284711932505,
+      "q_best_k": 2,
+      "q_second_k": 1,
+      "q_gap": 25.000643148189738
+    },
+    {
+      "replicate": "rep20",
+      "em_complete": true,
+      "c_lap_complete": true,
+      "statuses": {
+        "1": "OK",
+        "2": "OK",
+        "3": "OK",
+        "4": "OK",
+        "5": "OK"
+      },
+      "C_Q": {
+        "1": 5309.712173576314,
+        "2": 5358.913605830365,
+        "3": 5530.197152068026,
+        "4": 5727.505976252169,
+        "5": 5905.471509493369
+      },
+      "C_Lap": {
+        "1": 5272.039933820326,
+        "2": 5243.425180921325,
+        "3": 5288.17465451139,
+        "4": 5329.860469565897,
+        "5": 5358.006668990798
+      },
+      "K_hat_Q": 1,
+      "K_hat_Lap": 2,
+      "delta_Q_23": 171.28354623766154,
+      "delta_Lap_23": 44.74947359006546,
+      "cols_3_8_at_K_hat_Q": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "cols_3_8_at_K_hat_Lap": [
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli"
+      ],
+      "lap_best_k": 2,
+      "lap_second_k": 1,
+      "lap_gap": 28.61475289900136,
+      "q_best_k": 1,
+      "q_second_k": 2,
+      "q_gap": 49.201432254050815
+    }
+  ],
+  "claim_boundary": {
+    "unit": "20 prospectively frozen datasets under one condition, start_B only; C_Q and C_Lap on the same refits",
+    "do_not_claim": [
+      "consistency",
+      "general superiority",
+      "general recovery rate",
+      "robustness",
+      "generalisation to other n/d/K_true/signal",
+      "theoretical correctness of N = 75",
+      "exact marginal likelihood",
+      "a Laplace error bound",
+      "real-data effectiveness"
+    ],
+    "not_pooled_with": [
+      "Phase 9E",
+      "Phase 9I",
+      "Phase 9J"
+    ],
+    "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+  },
+  "condition": "weak_w",
+  "w": 0.7071067811865475
+}
