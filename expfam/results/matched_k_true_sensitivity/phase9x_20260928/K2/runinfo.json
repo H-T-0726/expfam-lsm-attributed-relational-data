@@ -1,0 +1,19 @@
+{
+  "runner_version": "joint-family-k-runner-v1",
+  "selector_version": "family-selection-v1",
+  "generator_version": "canonical-clean-mixed-v1",
+  "stage": "matched_k_true_K2",
+  "git_sha": "41d9e1b9d9f8380141a1173a5bda93746060c50f",
+  "git_dirty": false,
+  "python_version": "3.13.14",
+  "numpy_version": "2.3.5",
+  "started_utc": "2026-09-28T15:18:27.670904+00:00",
+  "finished_utc": "2026-09-28T15:34:56.945093+00:00",
+  "run_status": "SUCCESS",
+  "em_executions": 100,
+  "em_executions_semantics": "real EM executions ATTEMPTED",
+  "expected_em_executions": 100,
+  "numerics_mode": "consistent",
+  "failure_policy": "fail_fast",
+  "lineage": "E (experimental prototype; not adoptable for the manuscript)"
+}

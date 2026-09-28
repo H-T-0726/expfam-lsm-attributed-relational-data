@@ -1,0 +1,178 @@
+{
+  "stage": "matched_k_true_K2",
+  "n": 75,
+  "d": 12,
+  "k_true": 2,
+  "family_x_list": [
+    "gaussian",
+    "gaussian",
+    "gaussian",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "poisson",
+    "poisson",
+    "poisson"
+  ],
+  "family_y": "bernoulli",
+  "sigma_x_var": 1.0,
+  "w0": -0.9779597638183112,
+  "w": 1.224744871391589,
+  "f_scale": 1.7320508075688772,
+  "L": 5,
+  "exploration_num_iter": 8,
+  "refit_num_iter": 8,
+  "k_candidates": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "replicates": [
+    {
+      "label": "rep01",
+      "data_seed": 1001001,
+      "search_seed": 1002001,
+      "refit_seed": 1003001
+    },
+    {
+      "label": "rep02",
+      "data_seed": 1001002,
+      "search_seed": 1002002,
+      "refit_seed": 1003002
+    },
+    {
+      "label": "rep03",
+      "data_seed": 1001003,
+      "search_seed": 1002003,
+      "refit_seed": 1003003
+    },
+    {
+      "label": "rep04",
+      "data_seed": 1001004,
+      "search_seed": 1002004,
+      "refit_seed": 1003004
+    },
+    {
+      "label": "rep05",
+      "data_seed": 1001005,
+      "search_seed": 1002005,
+      "refit_seed": 1003005
+    },
+    {
+      "label": "rep06",
+      "data_seed": 1001006,
+      "search_seed": 1002006,
+      "refit_seed": 1003006
+    },
+    {
+      "label": "rep07",
+      "data_seed": 1001007,
+      "search_seed": 1002007,
+      "refit_seed": 1003007
+    },
+    {
+      "label": "rep08",
+      "data_seed": 1001008,
+      "search_seed": 1002008,
+      "refit_seed": 1003008
+    },
+    {
+      "label": "rep09",
+      "data_seed": 1001009,
+      "search_seed": 1002009,
+      "refit_seed": 1003009
+    },
+    {
+      "label": "rep10",
+      "data_seed": 1001010,
+      "search_seed": 1002010,
+      "refit_seed": 1003010
+    }
+  ],
+  "starts": [
+    {
+      "label": "start_B",
+      "ambiguous_start": "bernoulli"
+    }
+  ],
+  "failure_scope": "dataset",
+  "expected_em_executions": 100,
+  "candidate_optimizer": "bfgs",
+  "candidate_optimizer_settings": {
+    "method": "BFGS",
+    "jac": "analytic_production_gradient",
+    "maxiter": 2000,
+    "gtol": 1e-10,
+    "finite_difference_jacobian": false,
+    "fallback_solvers": []
+  },
+  "candidate_convergence_rule": {
+    "rule": "finite and final analytic gradient infinity norm <= tol",
+    "convergence_grad_inf_tol": 1e-08,
+    "role": "diagnostic (WARNING), research-first policy"
+  },
+  "ambiguous_loading_installation": "selected_candidate_loading",
+  "refit_failure_policy": "fail_fast",
+  "k_criterion": {
+    "name": "C_Q",
+    "formula": "-2 Q_strict + p_K ln n",
+    "p_K": "K*d - K*(K-1)/2 + n_gaussian_x_cols(selected) + 1{family_y=gaussian}",
+    "source": "run_em_experimental -> eval_utils.calc_bic_exp",
+    "interpretation": "Q-based complete-data / ICL-type; not Schwarz BIC",
+    "tie_rule": "exact floating equality -> smaller K",
+    "family_search_penalty": "none"
+  },
+  "cross_k_state": "none (each K fit from scratch)",
+  "start_policy": "both starts retained; never choose the better start",
+  "data_draws": "one per replicate, shared by all K and starts",
+  "execution_authorization": {
+    "issue": 122,
+    "authorized": true,
+    "authorized_by": "Human",
+    "authorization_scope": "Phase 9X only",
+    "gate": "Phase 9X matched-signal K_true sensitivity, K_true=2",
+    "authorized_in": "Issue #122 body (bounded authorization)",
+    "phase9w_merge_sha": "ba399d5779375540e3b50aa397d81598fbec736a",
+    "phase9w_artifact_sha256": {
+      "design.json": "cdf15bd25ee37cf10dbd7fdbdd4a4190bd3aa5793aac79ab2be46e8761607581",
+      "future_protocol.json": "24f23c7a9c79ea993a1f1605c5d0a69ee7127ff47d50661eeec6792648d9f165",
+      "calibration_by_k.json": "ce0f1b5470570d1cadfb89c6c77477c22bdce1e563ca49f6162caaf74ef92946",
+      "k3_anchor_compatibility.json": "2a3dd1ac058bbdc6d1d53fadaefe6aa0c80e9726644ec103ef61af319f8240a3"
+    },
+    "new_K_true": [
+      1,
+      2,
+      4
+    ],
+    "K3_rerun": false,
+    "new_em_cap": 300,
+    "replicates": [
+      "rep01",
+      "rep02",
+      "rep03",
+      "rep04",
+      "rep05",
+      "rep06",
+      "rep07",
+      "rep08",
+      "rep09",
+      "rep10"
+    ],
+    "not_authorized": [
+      "rerunning K_true=3",
+      "K_true=5",
+      "rep11..rep20",
+      "new signal matching",
+      "per-family ablation",
+      "local theta optimization",
+      "solver tuning",
+      "extra starts"
+    ],
+    "note": "Phase 9W future_protocol.json stays execution_authorized=false; this record is the only Phase 9X authority"
+  }
+}
