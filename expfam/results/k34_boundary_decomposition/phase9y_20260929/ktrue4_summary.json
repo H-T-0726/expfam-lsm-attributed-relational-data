@@ -1,0 +1,221 @@
+{
+  "available": 10,
+  "requested": 10,
+  "components": {
+    "delta34_Lap": {
+      "n": 10,
+      "min": -86.57746220405988,
+      "median": -13.397953481316108,
+      "max": 9.582603721140003,
+      "negative": 8,
+      "positive": 2,
+      "zero": 0
+    },
+    "fit_gain_Lap_34": {
+      "n": 10,
+      "min": 208.16165460841285,
+      "median": 254.75148826000827,
+      "max": 377.1345207644663,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "volume_increment_34": {
+      "n": 10,
+      "min": 178.88686530772645,
+      "median": 203.88102322558518,
+      "max": 251.69966553857898,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "logdet_increment_34": {
+      "n": 10,
+      "min": 111.79199380296257,
+      "median": 127.59704533981204,
+      "max": 178.3279615103409,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "zhat_sq_increment_34": {
+      "n": 10,
+      "min": 67.09487150476389,
+      "median": 72.75840625794676,
+      "max": 77.65926521375286,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "param_increment_Lap": {
+      "n": 10,
+      "min": 38.857393021826766,
+      "median": 38.857393021826766,
+      "max": 38.857393021826766,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "margin_Lap": {
+      "n": 10,
+      "min": -9.582603721140373,
+      "median": 13.397953481316591,
+      "max": 86.57746220406057,
+      "negative": 2,
+      "positive": 8,
+      "zero": 0
+    },
+    "delta34_Q": {
+      "n": 10,
+      "min": -66.307821655937,
+      "median": 87.13304014932055,
+      "max": 100.01313472314177,
+      "negative": 1,
+      "positive": 9,
+      "zero": 0
+    },
+    "fit_gain_Q_34": {
+      "n": 10,
+      "min": 151.6850382793873,
+      "median": 164.56513285320716,
+      "max": 318.00599465846426,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "P_Z_increment_34": {
+      "n": 10,
+      "min": 212.84077998070086,
+      "median": 212.84077998070086,
+      "max": 212.84077998070097,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "param_increment_Q": {
+      "n": 10,
+      "min": 38.857393021826766,
+      "median": 38.857393021826766,
+      "max": 38.857393021826766,
+      "negative": 0,
+      "positive": 10,
+      "zero": 0
+    },
+    "margin_Q": {
+      "n": 10,
+      "min": -100.01313472314033,
+      "median": -87.13304014932046,
+      "max": 66.30782165593664,
+      "negative": 9,
+      "positive": 1,
+      "zero": 0
+    }
+  },
+  "max_residual_Lap": 1.5631940186722204e-12,
+  "max_residual_Q": 1.4495071809506044e-12,
+  "descriptive_groups_exploratory": {
+    "Lap_K3_over_K4": {
+      "n": 2,
+      "replicates": [
+        "rep03",
+        "rep06"
+      ],
+      "component_medians": {
+        "delta34_Lap": 5.354088794708332,
+        "fit_gain_Lap_34": 214.0658686935792,
+        "volume_increment_34": 180.56256446646086,
+        "logdet_increment_34": 113.46627585228379,
+        "zhat_sq_increment_34": 67.09628861417707,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": -5.354088794708417,
+        "delta34_Q": 96.39115991109156,
+        "fit_gain_Q_34": 155.3070130914366,
+        "P_Z_increment_34": 212.84077998070092,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": -96.39115991109108
+      }
+    },
+    "Lap_K4_over_K3": {
+      "n": 8,
+      "replicates": [
+        "rep01",
+        "rep02",
+        "rep04",
+        "rep05",
+        "rep07",
+        "rep08",
+        "rep09",
+        "rep10"
+      ],
+      "component_medians": {
+        "delta34_Lap": -18.087146410649893,
+        "fit_gain_Lap_34": 263.56164663922937,
+        "volume_increment_34": 205.80991492993337,
+        "logdet_increment_34": 132.06340368864917,
+        "zhat_sq_increment_34": 73.89694286194016,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": 18.08714641065066,
+        "delta34_Q": 66.70462189435739,
+        "fit_gain_Q_34": 184.99355110817032,
+        "P_Z_increment_34": 212.84077998070086,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": -66.7046218943573
+      }
+    },
+    "Q_K3_over_K4": {
+      "n": 9,
+      "replicates": [
+        "rep01",
+        "rep02",
+        "rep03",
+        "rep04",
+        "rep05",
+        "rep06",
+        "rep07",
+        "rep08",
+        "rep10"
+      ],
+      "component_medians": {
+        "delta34_Lap": -11.733077016181596,
+        "fit_gain_Lap_34": 250.95570077580442,
+        "volume_increment_34": 203.1349936752365,
+        "logdet_increment_34": 125.47572846148364,
+        "zhat_sq_increment_34": 72.14510848765539,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": 11.733077016181682,
+        "delta34_Q": 88.29996616142944,
+        "fit_gain_Q_34": 163.39820684109782,
+        "P_Z_increment_34": 212.84077998070086,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": -88.29996616142981
+      }
+    },
+    "Q_K4_over_K3": {
+      "n": 1,
+      "replicates": [
+        "rep09"
+      ],
+      "component_medians": {
+        "delta34_Lap": -86.57746220405988,
+        "fit_gain_Lap_34": 377.1345207644663,
+        "volume_increment_34": 251.69966553857898,
+        "logdet_increment_34": 178.3279615103409,
+        "zhat_sq_increment_34": 73.37170402823813,
+        "param_increment_Lap": 38.857393021826766,
+        "margin_Lap": 86.57746220406057,
+        "delta34_Q": -66.307821655937,
+        "fit_gain_Q_34": 318.00599465846426,
+        "P_Z_increment_34": 212.84077998070086,
+        "param_increment_Q": 38.857393021826766,
+        "margin_Q": 66.30782165593664
+      }
+    }
+  },
+  "derived_prior_context": {
+    "P_Z_per_dimension": 212.8407799807009,
+    "P_Z_formula": "P_Z = -2 Q_Z = nK ln(2 pi var_z) + mean_l ||Z_l||^2 / var_z; with var_z = 1 and the scale_Z convention (mean_l ||Z_l||^2 = nK) this is nK (1 + ln 2 pi)",
+    "d_K_3_to_4_loading": 9,
+    "param_increment_ln75": 38.857393021826795
+  },
+  "DECISION": "K34_BOUNDARY_DECOMPOSITION_CHARACTERIZED"
+}
