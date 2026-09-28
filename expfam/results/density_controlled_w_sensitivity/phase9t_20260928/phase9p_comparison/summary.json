@@ -1,0 +1,206 @@
+{
+  "weak_w": {
+    "K_hat_Lap_transitions": {
+      "same": 19,
+      "under->exact": 1
+    },
+    "K_hat_Q_transitions": {
+      "exact->under": 1,
+      "same": 17,
+      "under->exact": 1,
+      "under->under": 1
+    },
+    "true_mean_prob_change": {
+      "n": 20,
+      "min": 0.020682978971052035,
+      "median": 0.021607583815507758,
+      "max": 0.022417425598861174,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "density_change": {
+      "n": 20,
+      "min": 0.016216216216216217,
+      "median": 0.02198198198198198,
+      "max": 0.03279279279279279,
+      "negative": 0,
+      "positive": 20,
+      "zero": 0
+    },
+    "delta_Lap_23_change": {
+      "n": 20,
+      "min": -19.00464193447806,
+      "median": 1.388182955944103,
+      "max": 22.06154259961295,
+      "negative": 8,
+      "positive": 12,
+      "zero": 0
+    },
+    "delta_Q_23_change": {
+      "n": 20,
+      "min": -34.71957179739911,
+      "median": 1.997197740708998,
+      "max": 52.35589181710748,
+      "negative": 9,
+      "positive": 11,
+      "zero": 0
+    },
+    "lap_gap_change": {
+      "n": 20,
+      "min": -22.06154259961295,
+      "median": -0.840905508178821,
+      "max": 19.00464193447806,
+      "negative": 10,
+      "positive": 10,
+      "zero": 0
+    },
+    "q_gap_change": {
+      "n": 20,
+      "min": -48.32202916026654,
+      "median": 3.7244979712631903,
+      "max": 25.852812530846677,
+      "negative": 7,
+      "positive": 13,
+      "zero": 0
+    },
+    "lap_fit_gain_change": {
+      "n": 20,
+      "min": -36.74660087851316,
+      "median": -3.4942413076346384,
+      "max": 35.972649603455466,
+      "negative": 12,
+      "positive": 8,
+      "zero": 0
+    },
+    "lap_volume_increment_change": {
+      "n": 20,
+      "min": -14.685058278900783,
+      "median": -2.6394994235046454,
+      "max": 16.96800766897769,
+      "negative": 11,
+      "positive": 9,
+      "zero": 0
+    },
+    "q_fit_gain_change": {
+      "n": 20,
+      "min": -52.355891817108386,
+      "median": -1.997197740708998,
+      "max": 34.7195717973982,
+      "negative": 11,
+      "positive": 9,
+      "zero": 0
+    },
+    "fit_gain_lap_minus_q_change": {
+      "n": 20,
+      "min": -22.814949471287036,
+      "median": 0.29619809760697535,
+      "max": 15.609290938595223,
+      "negative": 10,
+      "positive": 10,
+      "zero": 0
+    },
+    "sign_change_delta_Lap_23": 1,
+    "sign_change_delta_Q_23": 2
+  },
+  "strong_w": {
+    "K_hat_Lap_transitions": {
+      "same": 20
+    },
+    "K_hat_Q_transitions": {
+      "same": 20
+    },
+    "true_mean_prob_change": {
+      "n": 20,
+      "min": -0.027964280826367482,
+      "median": -0.025712483350405102,
+      "max": -0.023396878364827234,
+      "negative": 20,
+      "positive": 0,
+      "zero": 0
+    },
+    "density_change": {
+      "n": 20,
+      "min": -0.03423423423423427,
+      "median": -0.02486486486486489,
+      "max": -0.01585585585585586,
+      "negative": 20,
+      "positive": 0,
+      "zero": 0
+    },
+    "delta_Lap_23_change": {
+      "n": 20,
+      "min": -35.81728354773895,
+      "median": 7.8332438466395615,
+      "max": 36.104249118753614,
+      "negative": 9,
+      "positive": 11,
+      "zero": 0
+    },
+    "delta_Q_23_change": {
+      "n": 20,
+      "min": -88.861729707025,
+      "median": 6.890863323584199,
+      "max": 36.091822842136025,
+      "negative": 8,
+      "positive": 12,
+      "zero": 0
+    },
+    "lap_gap_change": {
+      "n": 20,
+      "min": -11.293134854503478,
+      "median": -0.920230025688852,
+      "max": 14.28712045105658,
+      "negative": 13,
+      "positive": 7,
+      "zero": 0
+    },
+    "q_gap_change": {
+      "n": 20,
+      "min": -34.43621944705774,
+      "median": 7.105727273531102,
+      "max": 39.88557904597019,
+      "negative": 8,
+      "positive": 12,
+      "zero": 0
+    },
+    "lap_fit_gain_change": {
+      "n": 20,
+      "min": -46.85096556505414,
+      "median": -8.689456161063845,
+      "max": 36.24914721044115,
+      "negative": 11,
+      "positive": 9,
+      "zero": 0
+    },
+    "lap_volume_increment_change": {
+      "n": 20,
+      "min": -11.780566012463737,
+      "median": 0.7047614843195902,
+      "max": 10.194924720944528,
+      "negative": 7,
+      "positive": 13,
+      "zero": 0
+    },
+    "q_fit_gain_change": {
+      "n": 20,
+      "min": -36.091822842136025,
+      "median": -6.890863323584199,
+      "max": 88.8617297070241,
+      "negative": 12,
+      "positive": 8,
+      "zero": 0
+    },
+    "fit_gain_lap_minus_q_change": {
+      "n": 20,
+      "min": -52.612582496582945,
+      "median": -4.257837821652174,
+      "max": 13.115170894177027,
+      "negative": 16,
+      "positive": 4,
+      "zero": 0
+    },
+    "sign_change_delta_Lap_23": 0,
+    "sign_change_delta_Q_23": 0
+  }
+}

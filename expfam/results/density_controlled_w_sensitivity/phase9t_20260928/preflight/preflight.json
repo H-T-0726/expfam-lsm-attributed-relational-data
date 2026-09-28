@@ -1,0 +1,31 @@
+{
+  "wrapper_version": "density-controlled-w-v1",
+  "code_sha": "2ef6ef3f9e82d9b78530dd5499232c97e646f22c",
+  "phase9s2_sha256": {
+    "calibration.json": "93f3ba23f4d01e90d2365a58c645b53876946d37f9ba291820c4fb394cb5d33d",
+    "future_protocol.json": "0346ec8f747e85c8248a1bfeb3dccc85497a29e29570f72a149972bf2222a090"
+  },
+  "phase9s2_calibration_code_sha": "248b11aa03656d6ecf58d5f8f5ab1920ed3d44c2",
+  "phase9s2_decision": "DENSITY_CONTROLLED_W_CALIBRATION_READY",
+  "future_protocol_status": "FROZEN_NOT_EXECUTED",
+  "p_target": 0.33140621213146765,
+  "frozen": {
+    "weak_w": {
+      "w0": -0.8780994405393426,
+      "w": 0.7071067811865475
+    },
+    "baseline": {
+      "w0": -1.0,
+      "w": 1.0
+    },
+    "strong_w": {
+      "w0": -1.1890648128923011,
+      "w": 1.4142135623730951
+    }
+  },
+  "replicates": 20,
+  "zfx_identical_all": true,
+  "zfx_identical_count": 20,
+  "inference_runs": 0,
+  "note": "git_dirty is not recorded here because this directory is itself untracked while it is written"
+}
