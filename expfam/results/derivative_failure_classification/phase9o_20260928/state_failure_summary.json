@@ -1,0 +1,116 @@
+{
+  "classifier_version": "derivative-failure-classification-v1",
+  "states": [
+    {
+      "replicate": "rep04",
+      "k": 2,
+      "phase9n_iterations": 4,
+      "phase9n_status": "DERIVATIVE_UNAVAILABLE",
+      "endpoint_status": "OK",
+      "endpoint_ell": -2535.803897465596,
+      "phase9n_final_ell": -2535.803897465596,
+      "endpoint_abs_diff": 0.0,
+      "horizontal_dimension": 23,
+      "coordinates": 28,
+      "failing_coordinates": 1,
+      "failing_sides": 1,
+      "failures": [
+        {
+          "coordinate_index": 27,
+          "label": "w",
+          "block": "w",
+          "side": "-",
+          "status": "NOT_STATIONARY",
+          "mechanism": "A_NOT_STATIONARY",
+          "grad_inf": 1.0305166553425948e-08,
+          "min_eigenvalue_H": 1.4925788572474445,
+          "logdet_sign": 1.0,
+          "logdet_H": 358.9617406402839,
+          "iterations": 200,
+          "notes": "max|grad Phi|=1.031e-08 > 1.0e-08",
+          "exception_class": "",
+          "exception_message": ""
+        }
+      ],
+      "pattern": "one coordinate, one side"
+    },
+    {
+      "replicate": "rep09",
+      "k": 3,
+      "phase9n_iterations": 14,
+      "phase9n_status": "DERIVATIVE_UNAVAILABLE",
+      "endpoint_status": "OK",
+      "endpoint_ell": -2413.646774278971,
+      "phase9n_final_ell": -2413.646774278971,
+      "endpoint_abs_diff": 0.0,
+      "horizontal_dimension": 33,
+      "coordinates": 38,
+      "failing_coordinates": 1,
+      "failing_sides": 1,
+      "failures": [
+        {
+          "coordinate_index": 37,
+          "label": "w",
+          "block": "w",
+          "side": "+",
+          "status": "NOT_STATIONARY",
+          "mechanism": "A_NOT_STATIONARY",
+          "grad_inf": 1.4818374360903164e-08,
+          "min_eigenvalue_H": 0.7306170112644874,
+          "logdet_sign": 1.0,
+          "logdet_H": 564.5940051034182,
+          "iterations": 200,
+          "notes": "max|grad Phi|=1.482e-08 > 1.0e-08",
+          "exception_class": "",
+          "exception_message": ""
+        }
+      ],
+      "pattern": "one coordinate, one side"
+    },
+    {
+      "replicate": "rep09",
+      "k": 4,
+      "phase9n_iterations": 6,
+      "phase9n_status": "DERIVATIVE_UNAVAILABLE",
+      "endpoint_status": "OK",
+      "endpoint_ell": -2415.2479615247635,
+      "phase9n_final_ell": -2415.2479615247635,
+      "endpoint_abs_diff": 0.0,
+      "horizontal_dimension": 42,
+      "coordinates": 47,
+      "failing_coordinates": 1,
+      "failing_sides": 1,
+      "failures": [
+        {
+          "coordinate_index": 46,
+          "label": "w",
+          "block": "w",
+          "side": "+",
+          "status": "NOT_STATIONARY",
+          "mechanism": "A_NOT_STATIONARY",
+          "grad_inf": 1.388626524878589e-08,
+          "min_eigenvalue_H": 0.5040065126874878,
+          "logdet_sign": 1.0,
+          "logdet_H": 662.2507304670248,
+          "iterations": 200,
+          "notes": "max|grad Phi|=1.389e-08 > 1.0e-08",
+          "exception_class": "",
+          "exception_message": ""
+        }
+      ],
+      "pattern": "one coordinate, one side"
+    }
+  ],
+  "mechanism_counts": {
+    "OK": 223,
+    "A_NOT_STATIONARY": 3,
+    "B_HESSIAN_NOT_PD": 0,
+    "C_EXCEPTION": 0,
+    "D_NONFINITE_OTHER": 0,
+    "E_OTHER_STRUCTURED_NON_OK": 0
+  },
+  "phase9n_one_component_reproduced": true,
+  "DECISION": "FAILURE_MECHANISM_CLASSIFIED",
+  "optimization_steps": 0,
+  "em_executions": 0
+}
