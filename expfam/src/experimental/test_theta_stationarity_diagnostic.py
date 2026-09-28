@@ -127,3 +127,25 @@ def test_pairwise_ordering_labels():
     assert rows[1]["ordering"] == "unavailable"
     s = td.summarize([], [], rows)
     assert s["DECISION"] == "STATIONARITY_DIAGNOSTIC_INCONCLUSIVE"
+
+
+def test_availability_counts_separate_primary_and_sensitivity():
+    grads = [{"primary_unavailable_components": p,
+              "sensitivity_unavailable_components": s}
+             for p, s in [(0, 0), (0, 0), (0, 1), (1, 0)]]
+    assert td.availability_counts(grads) == {
+        "primary_derivative_evaluable": 3,
+        "sensitivity_comparison_evaluable": 2,
+        "sensitivity_partial_states": 1}
+
+
+def test_split_legacy_availability():
+    row = {"replicate": "rep01", "k": "4", "unavailable_components": "1",
+           "grad_L2": "8.4", "h_vs_h2_max_abs": "nan"}
+    assert td.split_legacy_availability(row) == (0, 1)
+    assert td.split_legacy_availability(
+        dict(row, unavailable_components="0", h_vs_h2_max_abs="1e-4")) == (0, 0)
+    with pytest.raises(ValueError):           # primary incomplete: not splittable
+        td.split_legacy_availability(dict(row, grad_L2="nan"))
+    with pytest.raises(ValueError):           # count vs NaN pattern disagree
+        td.split_legacy_availability(dict(row, h_vs_h2_max_abs="1e-4"))

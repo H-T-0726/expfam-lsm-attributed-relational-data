@@ -263,6 +263,10 @@ def diagnose_state(state: SavedState, committed: dict[str, float]
         "h_vs_h2_max_abs": float(np.max(diff)),
         "h_vs_h2_normalized": float(np.linalg.norm(g_h - g)
                                     / max(np.linalg.norm(g), 1e-300)),
+        "primary_unavailable_components": int(un),
+        "sensitivity_unavailable_components": int(un_h),
+        # legacy (primary + sensitivity combined); kept for backward
+        # compatibility only, not used in the summary
         "unavailable_components": int(un + un_h),
         "vertical_score_L2": float(np.linalg.norm(g_v)),
         "horizontal_score_L2": float(np.linalg.norm(gF)),
@@ -322,6 +326,74 @@ def _stats(values):
              "max": max(v)} if v else {"n": 0})
 
 
+def availability_counts(grads) -> dict[str, int]:
+    """Primary (h/2) and sensitivity (h) availability, counted separately."""
+    return {
+        "primary_derivative_evaluable": sum(
+            g["primary_unavailable_components"] == 0 for g in grads),
+        "sensitivity_comparison_evaluable": sum(
+            g["primary_unavailable_components"] == 0
+            and g["sensitivity_unavailable_components"] == 0 for g in grads),
+        "sensitivity_partial_states": sum(
+            g["primary_unavailable_components"] == 0
+            and g["sensitivity_unavailable_components"] > 0 for g in grads),
+    }
+
+
+def split_legacy_availability(row: dict[str, str]) -> tuple[int, int]:
+    """Split a v1 row's combined `unavailable_components` without recomputing.
+
+    A missing primary component leaves NaN in g, so grad_L2 is finite exactly
+    when the primary gradient is complete; the remainder is then h-side only.
+    A missing h component makes h_vs_h2_max_abs NaN, which is cross-checked.
+    """
+    total = int(row["unavailable_components"])
+    if not math.isfinite(float(row["grad_L2"])):
+        raise ValueError(f"{row['replicate']} K={row['k']}: primary gradient "
+                         f"incomplete; the combined count cannot be split")
+    sensitivity = total
+    if (sensitivity > 0) == math.isfinite(float(row["h_vs_h2_max_abs"])):
+        raise ValueError(f"{row['replicate']} K={row['k']}: sensitivity count "
+                         f"inconsistent with h_vs_h2_max_abs")
+    return 0, sensitivity
+
+
+def resummarize_availability(result_dir: Path) -> dict[str, int]:
+    """Post-hoc semantic fix of a v1 result directory (no re-evaluation).
+
+    Adds the split availability columns to per_state_gradient.csv (all
+    existing values kept as written) and replaces the ambiguous
+    `derivative_evaluable` in summary.json with the separated counts.
+    """
+    grad_path = result_dir / "per_state_gradient.csv"
+    rows = _read_csv(grad_path)
+    for row in rows:
+        primary, sensitivity = split_legacy_availability(row)
+        row["primary_unavailable_components"] = str(primary)
+        row["sensitivity_unavailable_components"] = str(sensitivity)
+    counts = availability_counts([
+        {k: int(r[k]) for k in ("primary_unavailable_components",
+                                "sensitivity_unavailable_components")}
+        for r in rows])
+    summary_path = result_dir / "summary.json"
+    summary = json.loads(summary_path.read_text("utf-8"))
+    rebuilt: dict[str, Any] = {}
+    for key, value in summary.items():
+        if key == "derivative_evaluable":
+            rebuilt.update(counts)
+            rebuilt["availability_note"] = (
+                "primary = h/2 gradient (used for all results); sensitivity = "
+                "h gradient (h-vs-h/2 comparison only). Split post hoc from "
+                "the committed per_state_gradient.csv; no re-evaluation. The "
+                "legacy column unavailable_components is primary + "
+                "sensitivity combined and is not used here.")
+        else:
+            rebuilt[key] = value
+    pilot._write_csv(grad_path, rows)
+    pilot._write_json(summary_path, rebuilt)
+    return counts
+
+
 def summarize(grads, steps, pairs) -> dict[str, Any]:
     by_k = lambda rows, key: {                                  # noqa: E731
         k: _stats([r[key] for r in rows if r["k"] == k]) for k in K_SCOPE}
@@ -337,8 +409,7 @@ def summarize(grads, steps, pairs) -> dict[str, Any]:
         "diagnostic_version": DIAGNOSTIC_VERSION,
         "states": len(grads),
         "reconstructed_ok": sum(g["reconstruction_ok"] for g in grads),
-        "derivative_evaluable": sum(g["unavailable_components"] == 0
-                                    for g in grads),
+        **availability_counts(grads),
         "grad_L2_by_k": by_k(grads, "grad_L2"),
         "grad_inf_by_k": by_k(grads, "grad_inf"),
         "gradF_L2_by_k": by_k(grads, "gradF_L2"),
@@ -378,9 +449,19 @@ def _sha256(path: Path) -> str:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--out", type=Path)
     parser.add_argument("--source", type=Path, default=SOURCE_DIR)
+    parser.add_argument("--resummarize-availability", type=Path,
+                        metavar="RESULT_DIR",
+                        help="split availability in an existing v1 result "
+                             "directory from its CSV; evaluates nothing")
     args = parser.parse_args(argv)
+    if args.resummarize_availability is not None:
+        print(json.dumps(resummarize_availability(
+            args.resummarize_availability)))
+        return 0
+    if args.out is None:
+        parser.error("--out is required")
     if args.out.exists():
         raise SystemExit(f"{args.out} exists; a recorded run is never "
                          f"overwritten")

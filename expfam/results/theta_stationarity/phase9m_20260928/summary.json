@@ -2,7 +2,10 @@
   "diagnostic_version": "theta-stationarity-v1",
   "states": 60,
   "reconstructed_ok": 60,
-  "derivative_evaluable": 51,
+  "primary_derivative_evaluable": 60,
+  "sensitivity_comparison_evaluable": 51,
+  "sensitivity_partial_states": 9,
+  "availability_note": "primary = h/2 gradient (used for all results); sensitivity = h gradient (h-vs-h/2 comparison only). Split post hoc from the committed per_state_gradient.csv; no re-evaluation. The legacy column unavailable_components is primary + sensitivity combined and is not used here.",
   "grad_L2_by_k": {
     "2": {
       "n": 20,
