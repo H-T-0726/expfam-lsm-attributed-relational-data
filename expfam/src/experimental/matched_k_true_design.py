@@ -366,6 +366,29 @@ def k1_boundary_audit() -> dict[str, Any]:
     }
 
 
+START_B_ONLY = [{"label": "start_B", "ambiguous_start": "bernoulli"}]
+
+
+def sanitize_future_spec(spec: dict[str, Any]) -> dict[str, Any]:
+    """Fail-closed provenance for a future (not yet authorized) condition.
+
+    JointProtocol.as_json() carries the runner's module-level Issue #75
+    execution authorization and a two-start policy string. Neither applies
+    to a frozen future Phase 9X condition: replace them explicitly.
+    """
+    if spec["starts"] != START_B_ONLY:
+        raise SystemExit("future condition is not start_B only: blocked")
+    return {**spec,
+            "execution_authorization": {
+                "authorized": False, "status": "NOT_AUTHORIZED_YET",
+                "gate": "Phase 9X (future)",
+                "note": "requires a new Human Gate; the Issue #75 "
+                        "authorization inherited from JointProtocol."
+                        "as_json() does not apply"},
+            "start_policy": "start_B only (single start; no start "
+                            "comparison or selection)"}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", required=True, type=Path)
@@ -472,8 +495,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ready:
         conds = {}
         for k in K_TRUES:
-            spec = protocol_for(k, w0[k]).as_json()
-            spec["role"] = ("historical anchor: Phase 9K rep01..rep10 "
+            spec = sanitize_future_spec(protocol_for(k, w0[k]).as_json())
+            spec["role"] =("historical anchor: Phase 9K rep01..rep10 "
                             "results reused read-only (not rerun)"
                             if (k == 3 and reusable) else "new run")
             conds[f"K{k}"] = spec

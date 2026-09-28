@@ -98,3 +98,43 @@ def test_12_em_cap_follows_anchor_decision():
     for reusable, cap in ((True, 300), (False, 400)):
         new_k = [k for k in mk.K_TRUES if not (k == 3 and reusable)]
         assert len(new_k) * mk.FUTURE_REPLICATES * 5 * 2 == cap
+
+
+ARTIFACT = (Path(__file__).resolve().parents[2]
+            / "results/matched_k_true_design/phase9w_20260928")
+
+
+def test_13_sanitize_future_spec_fail_closed():
+    import pytest
+    spec = mk.sanitize_future_spec(mk.protocol_for(1, -0.9).as_json())
+    auth = spec["execution_authorization"]
+    assert auth["authorized"] is False and auth["status"] == "NOT_AUTHORIZED_YET"
+    assert "75" not in auth["gate"]
+    assert spec["starts"] == mk.START_B_ONLY
+    assert spec["start_policy"].startswith("start_B only")
+    bad = dict(mk.protocol_for(1, -0.9).as_json(),
+               starts=mk.START_B_ONLY + [{"label": "start_A",
+                                          "ambiguous_start": "poisson"}])
+    with pytest.raises(SystemExit):
+        mk.sanitize_future_spec(bad)
+
+
+def test_14_future_protocol_artifact():
+    import json
+    fp = json.loads((ARTIFACT / "future_protocol.json").read_text("utf-8"))
+    design = json.loads((ARTIFACT / "design.json").read_text("utf-8"))
+    assert fp["status"] == "FROZEN_NOT_EXECUTED"
+    assert fp["execution_authorized"] is False
+    assert fp["future_new_em_cap"] == 300 and fp["K3_anchor_reusable"] is True
+    for name, c in fp["conditions"].items():
+        auth = c["execution_authorization"]
+        assert auth["authorized"] is False
+        assert auth["status"] == "NOT_AUTHORIZED_YET"
+        assert "Issue #75" not in str(auth.get("authorized_in", ""))
+        assert "75-B" not in str(auth.get("gate", ""))
+        assert c["starts"] == mk.START_B_ONLY
+        assert c["start_policy"].startswith("start_B only")
+        k = int(name[1:])
+        assert c["w0"] == design["w0"][str(k)]
+        assert c["f_scale"] == mk.f_scale(k) and c["w"] == mk.w_of(k)
+    assert fp["p_target"] == design["p_target"]
