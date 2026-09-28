@@ -1,0 +1,45 @@
+{
+  "issue": 122,
+  "authorized": true,
+  "authorized_by": "Human",
+  "authorization_scope": "Phase 9X only",
+  "gate": "Phase 9X matched-signal K_true sensitivity",
+  "authorized_in": "Issue #122 body (bounded authorization)",
+  "phase9w_merge_sha": "ba399d5779375540e3b50aa397d81598fbec736a",
+  "phase9w_artifact_sha256": {
+    "design.json": "cdf15bd25ee37cf10dbd7fdbdd4a4190bd3aa5793aac79ab2be46e8761607581",
+    "future_protocol.json": "24f23c7a9c79ea993a1f1605c5d0a69ee7127ff47d50661eeec6792648d9f165",
+    "calibration_by_k.json": "ce0f1b5470570d1cadfb89c6c77477c22bdce1e563ca49f6162caaf74ef92946",
+    "k3_anchor_compatibility.json": "2a3dd1ac058bbdc6d1d53fadaefe6aa0c80e9726644ec103ef61af319f8240a3"
+  },
+  "new_K_true": [
+    1,
+    2,
+    4
+  ],
+  "K3_rerun": false,
+  "new_em_cap": 300,
+  "replicates": [
+    "rep01",
+    "rep02",
+    "rep03",
+    "rep04",
+    "rep05",
+    "rep06",
+    "rep07",
+    "rep08",
+    "rep09",
+    "rep10"
+  ],
+  "not_authorized": [
+    "rerunning K_true=3",
+    "K_true=5",
+    "rep11..rep20",
+    "new signal matching",
+    "per-family ablation",
+    "local theta optimization",
+    "solver tuning",
+    "extra starts"
+  ],
+  "note": "Phase 9W future_protocol.json stays execution_authorized=false; this record is the only Phase 9X authority"
+}
