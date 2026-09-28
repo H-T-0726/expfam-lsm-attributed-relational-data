@@ -1,0 +1,27 @@
+{
+  "source": "historical_phase9k",
+  "phase9k_dir": "expfam\\results\\lap_vs_cq_20\\phase9k_20260928",
+  "phase9k_sha256": {
+    "laplace_by_k.csv": "aebba7edc621b1b5d0c665930d50d64ff5ca1e316d51b249d6f80206e5b2f56e",
+    "family_by_k.csv": "144ff1e485abfd618984b11e11183748258aa34cca6aa60dbb1bd37fde3c8133",
+    "cq_decomposition.csv": "7f7f6a90139bcaca2e95bb1e6906e2d45a7fca42a06be055789e65abd4ddbc0b",
+    "execution_ledger.csv": "f6d9b28138223f4c4be4457678809f6ad7c5f17a7cc55099baf6b0d74a95b7e1",
+    "summary.json": "8fa74bda67f03e3bb00957669aec564f4f622854373fa7a55cdd449d13715575",
+    "runinfo.json": "761fa66ff7df1969cb144ae075e29824178f37936902bfaa2ef9141597462bee",
+    "fitted_states.json": "114a3f815dc090804f5e513de225d13a54d24b730f4bea2e694ba3498f2bf885"
+  },
+  "replicates": [
+    "rep01",
+    "rep02",
+    "rep03",
+    "rep04",
+    "rep05",
+    "rep06",
+    "rep07",
+    "rep08",
+    "rep09",
+    "rep10"
+  ],
+  "new_em": 0,
+  "note": "derived read-only from Phase 9K rep01..rep10; not mixed with Phase 9K's 20-replicate summaries"
+}
