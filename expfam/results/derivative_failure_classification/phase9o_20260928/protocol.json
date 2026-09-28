@@ -1,0 +1,37 @@
+{
+  "classifier_version": "derivative-failure-classification-v1",
+  "code_sha": "5f3bc24f0f8a0963a038f8dcbb0ff8a2ddab81c6",
+  "git_dirty": false,
+  "source_dir": "expfam\\results\\multistep_local\\phase9n_20260928",
+  "source_sha256": {
+    "final_theta.json": "6fef802bb80d768edc2737aac2105ef9f3cd7f1264a063d56d0f92e1e870c7be",
+    "per_state_final.csv": "5ed26236632b2344684d6dfc49e9500cb14d6b81c131cb6213fd8e242ed6d9d0",
+    "trajectory.csv": "ba50a8775bb4ee34c6f00065852acf604b7c421ad35c5abeb765a741bce550be",
+    "protocol.json": "c297a6114bbd9824eaed0ace06940d0d9e5813a9edc757d16ef3f204ca471236"
+  },
+  "phase9k_fitted_states_sha256": "114a3f815dc090804f5e513de225d13a54d24b730f4bea2e694ba3498f2bf885",
+  "phase9n_code_sha": "c16be84e29ff85e958058ac58c57077a8920115e",
+  "targets": [
+    [
+      "rep04",
+      2,
+      4
+    ],
+    [
+      "rep09",
+      3,
+      14
+    ],
+    [
+      "rep09",
+      4,
+      6
+    ]
+  ],
+  "fd_step": "Phase 9N primary: SavedState.step_sizes()/2 = 5e-5 (F horizontal, log-variance), 5e-5*max(1,|w0|), 5e-5*max(1,|w|) at the endpoint; +h and -h once each",
+  "z_start": "saved Phase 9N final Z mode for every call",
+  "joint_mode": "Phase 9H defaults (grad_tol 1e-8, max_iter 200)",
+  "reconstruction_rtol": 1e-09,
+  "optimization_steps": 0,
+  "em_executions": 0
+}

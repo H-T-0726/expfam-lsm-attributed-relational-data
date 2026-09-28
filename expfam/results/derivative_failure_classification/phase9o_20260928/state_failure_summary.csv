@@ -1,0 +1,4 @@
+replicate,k,phase9n_iterations,phase9n_status,endpoint_status,endpoint_ell,phase9n_final_ell,endpoint_abs_diff,horizontal_dimension,coordinates,failing_coordinates,failing_sides,pattern,failures
+rep04,2,4,DERIVATIVE_UNAVAILABLE,OK,-2535.803897465596,-2535.803897465596,0.0,23,28,1,1,"one coordinate, one side",w - A_NOT_STATIONARY
+rep09,3,14,DERIVATIVE_UNAVAILABLE,OK,-2413.646774278971,-2413.646774278971,0.0,33,38,1,1,"one coordinate, one side",w + A_NOT_STATIONARY
+rep09,4,6,DERIVATIVE_UNAVAILABLE,OK,-2415.2479615247635,-2415.2479615247635,0.0,42,47,1,1,"one coordinate, one side",w + A_NOT_STATIONARY
