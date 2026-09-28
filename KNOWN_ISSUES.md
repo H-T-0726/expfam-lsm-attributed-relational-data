@@ -513,3 +513,24 @@ Gaussian-Y では `K` の情報をもっぱら `w` が運ぶことが判明し�
 - 「人工データの `K_TRUE` が真の潜在次元 `K*` である」（`K* ≤ K_TRUE` で等号は自明でない）
 - 「実データにおいて `K*` を推定している」（M-closed 仮定が成立しない）
 - 「K 選択の一致性を証明した」「n を増やせば必ず `K_TRUE` に収束する」（未解決のまま）
+
+## 2026-09-29 forward update（Phase 9 K 選択研究の統合、Issue #126）
+
+根拠: `reports/k_selection_theory/phase9_k_selection_synthesis_20260929.md`（数値はすべて merge 済みの一次 artifact で確認）。
+Claim ledger は `RESEARCH_MASTER.md` §19。Phase 9 の Candidate B とその比較はすべて **lineage E（本文採用不可・採用は未決定）**。
+
+### Q. Phase 9 で確定した基準の扱い
+
+- 現行 `C_Q` は Q-based complete-data / ICL-type であり Schwarz BIC ではない（KI-010 の再確認）。scale_Z と var_z = 1 のもとで P_Z は 1 次元あたり n(1 + ln 2π)（n = 75 で 212.84）で一定。
+- Candidate B（`C_Lap`）は観測データの evidence の **Laplace 近似**であり厳密な周辺尤度ではない。Phase 9J の IS 補正は重みが強く退化し（相対 ESS 0.4〜12%）、近似誤差は評価できていない。
+- MCEM 8 反復の θ̂ は ℓ_Lap の停留点ではない（Phase 9M）。局所最適化を続けると joint-mode solver が許容値 1e-8 のわずか上で 200 反復止まる失敗（NOT_STATIONARY、H は正定値）が起きる（Phase 9N / 9O / 9R）。
+  C_Lap の値に最適化の誤差が含まれうることは limitation として扱う。
+
+### R. 追加された「まだ主張してはいけないこと」（2026-09-29、Phase 9）
+
+- 「`C_Lap` は一般に `C_Q` より優れている」「K 選択の問題を解決した」「Candidate B は一致性をもつ」
+- 「Phase 9 の選択の数は一般の recovery 確率である」（同じ条件・別 seed で `C_Q` の K=3 は 14/20 と 17/20）
+- 「P_Z が K_true=4 の過小選択の原因」「1 次元あたりの信号の希釈が原因」（Phase 9Y は算術の分解だけ）
+- 「平均 edge 確率を揃えた実験は純粋な関係信号の効果を示した」「loading scale の実験は純粋な属性の情報の効果を示した」
+- 「実データでも正しい K を選べる」
+- 「Phase 9 の Candidate B は本文に採用済み」（MANUSCRIPT_ADOPTION_STATUS: NOT_DECIDED_BY_HUMAN）
