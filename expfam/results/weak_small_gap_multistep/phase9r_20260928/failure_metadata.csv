@@ -1,0 +1,5 @@
+replicate,k,failing_iteration,coordinate_index,block,label,side,status,grad_inf,iterations,min_eigenvalue_H,logdet_sign,logdet_H,notes,exception_class,exception_message
+rep10,2,21,19,F_horizontal,F_horizontal[19],+,NOT_STATIONARY,1.2115201508677842e-08,200,1.889913045565395,1.0,334.40288807691087,max|grad Phi|=1.212e-08 > 1.0e-08,,
+rep11,3,8,30,F_horizontal,F_horizontal[30],-,NOT_STATIONARY,3.629958733597505e-08,200,0.9614355067657309,1.0,445.69936059310675,max|grad Phi|=3.630e-08 > 1.0e-08,,
+rep11,2,18,22,F_horizontal,F_horizontal[22],-,NOT_STATIONARY,1.1222332396698675e-08,200,1.8157416973297558,1.0,316.52704430814583,max|grad Phi|=1.122e-08 > 1.0e-08,,
+rep09,3,21,37,w,w,+,NOT_STATIONARY,1.3841647938939161e-08,200,0.7927500025094097,1.0,457.61569206083624,max|grad Phi|=1.384e-08 > 1.0e-08,,
