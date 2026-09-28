@@ -1060,3 +1060,65 @@ K*  = min { K : P0 ∈ M_K }
 | — | `K_TRUE=1` の下限効果の切り分け（**新しい事前登録が要る**） |
 | — | start 不一致が criterion 由来か最適化由来か |
 | — | X の寄与を分離した測定（今回は X 信号を 1 水準に固定） |
+
+---
+
+## 19. 2026-09-29 Phase 9 K 選択研究の統合と Claim Ledger 追記（Issue #126）
+
+**§14・§16・§18 の ledger はそのまま残す。** 本節は Phase 9（2026-09-23〜29、Issues #72〜#124）の K 選択研究の差分だけを追記する。
+統合の本体（evidence map、数値、根拠、付録の source 一覧）は
+`reports/k_selection_theory/phase9_k_selection_synthesis_20260929.md` にあり、数値はすべて merge 済みの一次 artifact で確認した。
+分類の定義は §14 と同じ。本節の claim はすべて **lineage E**（experimental prototype）。
+
+- **MANUSCRIPT_ADOPTION_STATUS: NOT_DECIDED_BY_HUMAN**。Candidate B（`C_Lap`）とその比較を本文に採用するかは Human が決める。本節はそれを決めない。
+- **Phase 9 の K 選択の research thread: CLOSEABLE**（`DECISION: PHASE9_K_SELECTION_SYNTHESIS_COMPLETE`。close するのは Human）。
+- **基準の呼称**: 現行 `C_Q`（`calc_bic_dual`）は **Q-based complete-data / ICL-type criterion** であり Schwarz BIC ではない（KI-010、§12.6・§17.4 と同じ）。
+  Candidate B は `C_Lap(K) = −2[ℓ_X(Ẑ) + ℓ_Y(Ẑ)] + ‖Ẑ‖² + ln|H(Ẑ)| + d_K ln N`（同時 mode と nK×nK の同時 Hessian による Laplace 近似 + BIC 型の θ 罰則、N = 75 は working convention）であり、**厳密な周辺尤度ではない**。
+- Phase 9 の数は、Phase 7e / 8b の held-out score や §17.5 の S1〜S4 とは**別の基準・別の条件**であり、混ぜない。
+
+### ALLOWED
+
+| claim | evidence | lineage | evidence type |
+|---|---|---|---|
+| 現行 `C_Q` は Schwarz BIC ではなく Q-based complete-data / ICL-type。scale_Z と var_z = 1 のもとで `P_Z = nK(1 + ln 2π)`（n = 75 で 1 次元あたり 212.84） | `cq_decomposition_minimal_check_20260923.md`, `cq_theoretical_clarification_20260927.md` | B/C/E | code audit / theory |
+| 観測データの evidence の Laplace 近似を動機とする Candidate B を定義・実装し、評価関数（勾配・同時 Hessian）は有限差分と ~1e-9 で一致した。本研究の規模で Phase 9 のすべての refit で評価できた | `laplace_evaluator_zero_em_verification_20260928.md`、9I/9K/9P/9T/9V/9X の artifact | **E** | implementation |
+| Phase 9K（20 dataset、n=75, d=12, G3/B6/P3, Y Bernoulli, K_true=3）で、同じ fit の上で `C_Lap` は K=3 を 19/20、`C_Q` は 14/20 選んだ | `expfam/results/lap_vs_cq_20/phase9k_20260928/paired_summary.json` | **E** | synthetic |
+| 信号を揃えた K_true の設計（rep01..rep10）で、exact は `C_Lap` 10/10/10/8、`C_Q` 10/9/7/1（K_true = 1/2/3/4）、過大選択は 0 | `expfam/results/matched_k_true_sensitivity/phase9x_20260928/combined/` | **E** | synthetic |
+| K_true = 4 の K3→K4 の差は commit 済みの成分から 1e-10 以内で再構成でき、閾値に対する余裕は `C_Lap` 8/10、`C_Q` 1/10 が正 | `expfam/results/k34_boundary_decomposition/phase9y_20260929/` | **E** | synthetic（read-only） |
+
+### QUALIFIED ONLY（必須の限定なしに書いてはいけない）
+
+| claim | 必須の限定 | evidence | lineage |
+|---|---|---|---|
+| `C_Lap` は一部の固定人工データ条件で `C_Q` より true K を選んだ dataset が多かった | 固定条件・条件ごと 10〜20 dataset・MCEM 8 反復・start_B のみ。一般の優越性ではない。例外（K_true=4 で 2 件の過小、strong 属性で 1 件の過大）を併記 | synthesis §6〜§9 | **E** |
+| relational w を強めると選択が K=3 に移り、母集団の平均 edge 確率を揃えてもこのパターンはほぼ残った | 揃えたのは平均 edge 確率だけ。確率の分布・飽和は揃っていない。純粋な関係信号の効果ではない | Phase 9P / 9T | **E** |
+| attribute loading を強めると `C_Q` の選択が K=3 に移った | Z と Y を共有した対応設計。strong の 1 dataset は不完全。family ごとの寄与は未分離 | Phase 9U / 9V | **E** |
+| K_true=4 では `C_Lap` も過小選択の境界に近づいた | 信号を揃えた設計の rep01..rep10。θ̂ の最適化誤差との関係は未検討 | Phase 9X / 9Y | **E** |
+
+### NOT ALLOWED（書いてはいけない）
+
+| 書いてはいけない claim | 理由 |
+|---|---|
+| 「`C_Lap` は一般に `C_Q` より優れている」「基準の勝者を決めた」 | 固定条件の有限標本の記述だけ |
+| 「Candidate B は一致性をもつ」「K 選択の問題を解決した」 | 一致性は未検討（Z9-U3） |
+| 「Phase 9 の数は一般の recovery 確率である」 | 同じ条件でも seed の組で `C_Q` は 14/20 と 17/20 のように違う |
+| 「P_Z が過小選択の原因」「信号の希釈が原因」 | Phase 9Y は算術の分解であり原因を識別していない |
+| 「実データでも正しい K を選べる」 | 実データの実験はしていない |
+| 「lineage E は自動的に本文に採用できる」 | MANUSCRIPT_ADOPTION_STATUS は NOT_DECIDED_BY_HUMAN |
+| 「Poisson の列は一般に悪い」 | Phase 9V の 1 件の数値的な失敗からの一般化 |
+| 「`C_Lap` は厳密な周辺尤度」「`C_Q` は Schwarz BIC」 | Phase 9J / KI-010 |
+
+### UNRESOLVED
+
+| # | 未解決 |
+|---|---|
+| Z9-U1 | K3→K4 の fit gain がなぜその大きさになるか |
+| Z9-U2 | 有限回の MCEM と θ̂ が ℓ_Lap の最大化点から離れていることの影響 |
+| Z9-U3 | 漸近・一致性 |
+| Z9-U4 | n / d / K_true / family 構成を変えたときの一般化 |
+| Z9-U5 | 別の信号の揃え方で K_true のパターンが変わるか |
+| Z9-U6 | 実データでの K 選択の妥当性 |
+| Z9-U7 | 実装の ℓ_Lap と厳密な周辺尤度の差（Phase 9J の IS は重みが退化） |
+| Z9-U8 | joint-mode solver の NOT_STATIONARY を評価の定義としてどう扱うか |
+
+いずれも将来の研究課題であり、完了した Phase 9 の実験の解釈を妨げる blocker ではない。

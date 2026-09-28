@@ -433,3 +433,31 @@ S4 は構造診断であり **selected K を作らない**。
 | 同 `F8-3_s3_overselection.png` | S3（plug-in conditional）が candidate K とともに単調改善し罰則が追いつかないこと | 同上 | `fit_results.csv` | **なし** | **S3 は本研究が定義した基準であり原論文 Eq.(26) ではない。** S3 の失敗を原論文 BIC の失敗と読まない |
 | 同 `F8-4_start_disagreement.png` | 2 初期値が別の K を選ぶセルの割合の n 依存 | 同上 | `fit_results.csv` | **なし** | criterion 由来か最適化由来かは**分離できていない** |
 | 同 `F8-5_gram_spectrum.png` | 推定 Poisson-X Gram の固有値スペクトル | 同上 | `gram_spectrum.csv` | **なし** | **全 64 セルで非 PSD、閾値なし階数は常に d=15。rank 閾値は設定していない（U7）。この図は selected K を作らない** |
+
+---
+
+## Phase 9 K 選択研究（2026-09-23〜29、Issues #72〜#124、objective-consistent prototype 使用、append-only 追記）
+
+統合 report: `reports/k_selection_theory/phase9_k_selection_synthesis_20260929.md`（Issue #126、zero-experiment）。claim ledger: `RESEARCH_MASTER.md` §19。
+**すべて lineage E（experimental prototype）・本文採用は未決定（MANUSCRIPT_ADOPTION_STATUS: NOT_DECIDED_BY_HUMAN）。**
+共通条件（特記なし）: n=75、d=12、X = Gaussian×3 / Bernoulli×6 / Poisson×3、Y = Bernoulli、L=5、探索・refit 8/8、候補 K=1..5、start_B のみ、retry / replacement / seed rescue 0。
+**基準の呼称**: `C_Q` = Q-based complete-data / ICL-type（Schwarz BIC ではない、KI-010）、`C_Lap` = Candidate B（Laplace 近似 + d_K ln N、厳密な周辺尤度ではない）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| Phase 9D joint family + K | 3 dataset × 2 start の family + K 同時選択（C_Q） | `expfam/src/experimental/run_joint_family_k_selection.py` | `expfam/results/joint_family_k_selection/gate75b_20260927/` | なし | current_support | ✗ | #75 / PR #80。exact 4/6 path（start は独立 replicate ではない） |
+| Phase 9E K repeatability | 20 dataset（seed 971000+r）の C_Q の K 選択 | `expfam/src/experimental/run_k_repeatability.py` | `expfam/results/k_repeatability/phase9e_20260927/` | なし | current_support | ✗ | #81 / PR #83。C_Q の K=3 17/20。Phase 9K とは別の seed の組 |
+| Phase 9H Candidate B 評価関数 | Laplace 評価関数の zero-EM 検証 | `expfam/src/experimental/laplace_k_criterion.py` とテスト | （テストのみ） | なし | current_support | ✗ | #88 / PR #89。勾配・同時 Hessian が有限差分と ~1e-9 で一致 |
+| Phase 9I Laplace pilot | 3 dataset の C_Lap と C_Q | `expfam/src/experimental/run_laplace_pilot.py` | `expfam/results/laplace_pilot/phase9i_20260928/` | なし | current_support | ✗ | #90 / PR #91。評価可能 15/15、C_Lap K3 3/3、C_Q K3 1/3 |
+| Phase 9J Laplace IS 診断 | K=2,3 の Laplace 近似の IS 補正 | `expfam/src/experimental/run_laplace_is_diagnostic.py`, `expfam/src/experimental/laplace_importance.py` | `expfam/results/laplace_is_diagnostic/phase9j_20260928/` | なし | current_support | ✗ | #92 / PR #93。IS の重みが退化（相対 ESS 0.4〜12%）。厳密な周辺尤度は得られていない |
+| Phase 9K Lap vs Q 20 dataset | 20 dataset（seed 1001000+r）で同じ refit の C_Lap と C_Q | `expfam/src/experimental/run_lap_vs_cq_20.py` | `expfam/results/lap_vs_cq_20/phase9k_20260928/` | なし | current_support | ✗ | #94 / PR #95。C_Lap K3 19/20、C_Q K3 14/20。EM 200/200、Candidate B 100/100 OK |
+| Phase 9M θ̂ 停留性 | 60 保存状態の勾配と 1 ステップ | `expfam/src/experimental/theta_stationarity_diagnostic.py` | `expfam/results/theta_stationarity/phase9m_20260928/` | なし | current_support | ✗ | #98。EM 0。θ̂ は停留点ではない、1 ステップで順序 20/20 保持 |
+| Phase 9N multistep pilot | 最小 5 マージンの 20 ステップ | `expfam/src/experimental/multistep_local_pilot.py` | `expfam/results/multistep_local/phase9n_20260928/` | なし | current_support | ✗ | #100。EM 0。INCONCLUSIVE（3 状態が DERIVATIVE_UNAVAILABLE） |
+| Phase 9O failure 分類 | 9N の失敗の分類 | `expfam/src/experimental/derivative_failure_classification.py` | `expfam/results/derivative_failure_classification/phase9o_20260928/` | なし | current_support | ✗ | #102。EM 0。3/3 が片側 1 座標の NOT_STATIONARY |
+| Phase 9P relational w | w = 1/√2, √2（w0=−1）、baseline は 9K | `expfam/src/experimental/run_w_sensitivity.py` | `expfam/results/relational_w_sensitivity/phase9p_20260928/` | なし | current_support | ✗ | #104。EM 400。平均 edge 密度も変わる（w-sensitivity） |
+| Phase 9Q / 9R weak 小さな差 | weak-w の最小 5 マージンの 1 / 20 ステップ | `expfam/src/experimental/weak_small_gap_one_step.py`, `expfam/src/experimental/weak_small_gap_multistep.py` | `expfam/results/weak_small_gap_one_step/phase9q_20260928/`, `expfam/results/weak_small_gap_multistep/phase9r_20260928/` | なし | current_support | ✗ | #106 / #108。EM 0。9Q STABLE、9R INCONCLUSIVE |
+| Phase 9S / 9S2 w0 較正 | 平均 edge 確率を揃える w0 の較正 | `expfam/src/experimental/density_w_calibration.py`, `expfam/src/experimental/density_w_recalibration.py` | `expfam/results/density_controlled_w_design/phase9s_20260928/`, `expfam/results/density_controlled_w_recalibration/phase9s2_20260928/` | なし | current_support | ✗ | #110 / #112。EM 0。9S NEEDS_REVISION、9S2 READY（1e-12） |
+| Phase 9T density-controlled w | 較正した w0 で weak / strong、baseline は 9K | `expfam/src/experimental/run_density_controlled_w.py` | `expfam/results/density_controlled_w_sensitivity/phase9t_20260928/` | なし | current_support | ✗ | #113。EM 400。揃えたのは母集団の平均 edge 確率だけ |
+| Phase 9U / 9V attribute scale | Z・Y を共有した対応生成器で f_scale = 1, √2, 2 | `expfam/src/experimental/paired_attribute_scale.py`, `expfam/src/experimental/run_attribute_scale_sensitivity.py` | `expfam/results/attribute_scale_design/phase9u_20260928/`, `expfam/results/attribute_scale_sensitivity/phase9v_20260928/` | なし | current_support | ✗ | #116 / #118。EM 593/600 試行、592 成功。strong rep04 不完全。9V PARTIAL |
+| Phase 9W / 9X matched K_true | K_true=1..4 の信号を揃えた設計と実行（rep01..rep10、K3 は 9K を再利用） | `expfam/src/experimental/matched_k_true_design.py`, `expfam/src/experimental/run_matched_k_true.py` | `expfam/results/matched_k_true_design/phase9w_20260928/`, `expfam/results/matched_k_true_sensitivity/phase9x_20260928/` | なし | current_support | ✗ | #120 / #122。EM 300（K3 は 0）。C_Lap exact 10/10/10/8、C_Q 10/9/7/1 |
+| Phase 9Y K3→K4 分解 | 9X の K_true=4 と 9K の K_true=3 の既存の値の分解 | `expfam/src/experimental/k34_boundary_decomposition.py` | `expfam/results/k34_boundary_decomposition/phase9y_20260929/` | なし | current_support | ✗ | #124。EM 0。再構成 ≤ 1.6e-12。原因の証明ではない |
