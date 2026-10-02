@@ -48,16 +48,19 @@
    retry / replacement / seed rescue 0 で最後まで動いた（pilot C2: 12/12、Phase 9 の各 runinfo）。
 2. **開始点非依存**（FACT）: start_P から始めても iteration 1 で Bernoulli に入れ替わり、以後変化しない（pilot C2: 18 件、9D: 90 件）。
    **INTERPRETATION**: 監査 §5 より、これは「どの Z サンプルでも Bernoulli が勝つ」ことから当然に従う。
-3. **margin の大きさが理論の下界と整合**（INTERPRETATION）: `2n g(0) = 46.0`（n = 75）、`24.55`（n = 40）に対し、
-   観測 margin は 43.6 以上（n = 75）、23.9–24.8（n = 40）。
-4. **Phase 9 の K 選択は実質 oracle family のもとで行われた**（FACT + DERIVED）: 全 score 判定行・gate 判定行で真の family と一致し、
-   監査 §5.4 によりそれは構造的に保証される。K 選択の結果に family 誤選択の交絡はない。
+3. **margin の大きさが reference magnitude と整合**（INTERPRETATION）: η ≈ 0 のときの参照値 `2n g(0) = 46.0`（n = 75）、`24.55`（n = 40）に対し、
+   観測 margin は 43.6 以上（n = 75）、23.9–24.8（n = 40）。46.0 は global lower bound ではなく（厳密な下界は fit 済み η に依存する。監査 §5.2・§5.4）、
+   これは大きさの整合であって検証ではない。
+4. **既存 Phase 9 artifact では family 誤割り当てが観測されなかった**（FACT）: 集計した commit 済み artifact では
+   0/1 に見える真 Poisson 列は起きず、実現した割り当ては score 判定行・gate 判定行とも生成時の family と一致した。
+   したがって報告済みの Phase 9 の K 選択の結果は、それらの artifact では観測された family 誤割り当てによって交絡していない
+   （「oracle family」と呼ぶ場合も実現した既存 dataset に限る）。今後のすべての canonical draw に対する保証ではない（監査 §4・§6）。
 
 ### 評価できていないこと
 
 | 項目 | 状態 | 理由 |
 |---|---|---|
-| 0/1 に見える真 Poisson 列での挙動 | UNOBSERVED | no-intercept + n = 75 で構造的に起きない |
+| 0/1 に見える真 Poisson 列での挙動 | UNOBSERVED | no-intercept + n = 75 では構造的に極めて稀（1 列あたり ≤ 1.0e-10、監査 §4） |
 | selector の判別能力（Bernoulli vs Poisson） | **評価不能（現行 score では定義上存在しない）** | 0/1 列では尤度 score は常に Bernoulli |
 | 低 rate count 列・偏った binary 列 | 対象外 | no-intercept model の族に含まれない（Poisson 平均 ≥ 1、Bernoulli 率 = 1/2） |
 | Gaussian vs 離散の比較 | 対象外（設計上 gate） | 測度が違い、尤度比較ができない（design §3.3） |
@@ -70,8 +73,9 @@
 
 - **支持する**: 「凍結 C2 条件（n = 75, d = 12, K = 3, G3/B6/P3, f_scale = √2, 3 dataset × 2 start）で、prototype は
   真 Bernoulli の 0/1 列 36 件（unique 18 列）すべてで Bernoulli を選び、開始点に依らず同じ割り当てに収束した」。
-  これは**実装が理論上の順序（0/1 列で Bernoulli > Poisson）どおりに動いた**ことの確認である。
-- **支持しない**: 「selector が Bernoulli と Poisson を判別できる」「自動 family 選択の精度 100%」
+  これは**理論上の順序（0/1 列で Bernoulli > Poisson）と実装が既存 C2 artifact で一致した**ことの確認である（OBSERVED）。
+  前提となる「最終割り当ては observed support で決まる」は FACT / DERIVED（監査 §5）。
+- **支持しない（NOT SUPPORTED）**: 「selector が Bernoulli と Poisson をデータから判別できる」「一般的な family 判別精度 100%」
   「難しい条件でも正しく選べる」「人手指定と同等以上」。
   真 Poisson の 0/1 列が来ても同じく Bernoulli を選ぶので、36/36 は判別能力について何も言わない。
 - 既存 report（`reports/distribution_selection/phase9c_c2_research_first_pilot_summary_20260925.md` §4–§5）の記述は当時の記録として変更しない。

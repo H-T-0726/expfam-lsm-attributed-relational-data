@@ -58,7 +58,7 @@ oracle の Poisson 割り当てと比べて (a) Z の回復、(b) K の選択（
 
 **条件（案、NUMERICAL は intercept ありの理論値、s² = ‖f‖² = 0.5、n = 75）**:
 
-| 真 Poisson の平均 m | b_P | P(X=1) | P(全 75 観測 ∈ {0,1}) | Poisson の E[A''] | P(X=1) を揃えた Bernoulli の b_B | Bernoulli の E[A''] | margin 下界 2nE[g] |
+| 真 Poisson の平均 m | b_P | P(X=1) | P(全 75 観測 ∈ {0,1}) | Poisson の E[A''] | P(X=1) を揃えた Bernoulli の b_B | Bernoulli の E[A''] | margin の参照値 2nE[g]（下界ではない） |
 |---|---|---|---|---|---|---|---|
 | 0.1 | −2.553 | 0.0855 | 0.592 | 0.100 | −2.570 | 0.0749 | 1.06 |
 | 0.3 | −1.454 | 0.194 | 0.027 | 0.300 | −1.566 | 0.145 | 7.73 |

@@ -63,7 +63,8 @@ E[λ_il] = exp(b_l + s_l²/2)
 - **判別**: 監査 §5 の恒等式は η ごとの式なので `η = b + f^T z` でもそのまま成立し、**0/1 列は必ず Bernoulli が選ばれる**。
   さらに低 rate では `σ(η) ≈ e^η` なので 2 つの family 自体がほぼ同じ分布になる:
   P(X=1) を揃える Bernoulli の切片は Poisson の切片とほぼ一致する（s² = 0.5, m = 0.1 で b_P = −2.553, b_B = −2.570）。
-  margin の下界 `2n E[g(η)]` は m = 0.1, s² = 0.5 で **1.06**（no-intercept の既存条件では ≈ 46–80）。
+  margin の大きさの参照値 `2n E[g(η)]`（真のパラメータでの母集団期待値。fit 済み η での厳密な下界そのものではない）は
+  m = 0.1, s² = 0.5 で **1.06**（no-intercept の既存条件では ≈ 46–80）。
 - **帰結（INTERPRETATION）**: intercept で作れる「controlled hard case」は、**score が Poisson を選べるかではなく、
   (i) gate が 2 以上を観測して Poisson を検出できる確率（= 1 − p^n、解析的に計算できる）と
   (ii) Bernoulli で代用したときに下流（Z の回復・K 選択・予測）がどれだけ悪くなるか**を問う設計にしかならない。
@@ -113,7 +114,7 @@ K 選択の感度（Phase 9V の「X 信号」）と交絡する。
 ### G. family score への影響（DERIVED）
 
 - 各候補が `(b_l, f_l)` を最適化する（K+1 次元）。
-- 0/1 列: 監査 §5 により**常に Bernoulli**。margin の下界は `2 Σ g(b̂ + f̂^T z)`（≥ 0）で、低 rate では 0 に近づく。
+- 0/1 列: 監査 §5 により**常に Bernoulli**。margin の下界は Poisson 候補の fit 値での `(2/L) Σ_s Σ_i g(b̂_P + f̂_P^T z_i^(s))`（> 0）で、低 rate では 0 に近づく。
 - 2 以上を含む列・非整数列: gate が決めるので不変。
 - **Gaussian vs 離散の比較は gate が分けたまま**（測度が違う。design §3.3）。intercept は gate の論理に影響しない。
 
@@ -167,7 +168,7 @@ C_Lap'(K) = −2[ℓ_X(Ẑ; b) + ℓ_Y(Ẑ)] + ‖Ẑ‖² + ln|H(Ẑ)| + d_K' l
 ### Option A：no-intercept model を維持し、family-selection claim を限定する
 
 claim の候補表現（案）: 「現行 3 family と support gate のもとでは、family の割り当ては観測 support によって決まり、
-0/1 列では同じパラメータ数の尤度比較が構造的に Bernoulli を選ぶことを示した。prototype はこの構造どおりに動作した（真 Bernoulli の 0/1 列で全て Bernoulli）」。
+0/1 列では同じパラメータ数の尤度比較が構造的に Bernoulli を選ぶことを示した。既存 C2 artifact では prototype の結果がこの理論的順序と一致した（真 Bernoulli の 0/1 列で全て Bernoulli。一般的な family 判別精度を示すものではない）」。
 
 | 観点 | 評価 |
 |---|---|

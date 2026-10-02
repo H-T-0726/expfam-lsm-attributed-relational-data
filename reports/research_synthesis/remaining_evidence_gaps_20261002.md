@@ -22,9 +22,11 @@
 | Laplace approximation diagnostic | 9H / 9J | 評価関数は有限差分と ~1e-9 で一致。IS の重みは強く退化し、厳密な周辺尤度は得られていない（§5） | 実装の正しさは十分、近似誤差は UNRESOLVED |
 | θ stationarity | 9M / 9N / 9O / 9Q / 9R | θ̂ は ℓ_Lap の停留点でない。1 ステップでは順序保持 20/20、多ステップは inconclusive（§5） | 局所的な順序の安定性まで |
 
-**本監査からの追加（DERIVED + FACT）**: Phase 9 の全 run で family の割り当ては真の family と一致し、
-それは support-determinism（`family_selection_hard_case_audit_20261002.md` §5.4）により構造的に保証される。
-**Phase 9 の K 選択は実質 oracle family assignment のもとでの結果**であり、family 誤選択による交絡はない。
+**本監査からの追加（FACT、既存 artifact に限定）**: 本監査で集計した commit 済みの Phase 9 artifact では、0/1 に見える真 Poisson 列は一度も起きず、実現した family の割り当ては生成時の family と一致した。
+したがって **報告済みの Phase 9 の K 選択の結果は、それらの artifact では、観測された family 誤割り当てによって交絡していない**
+（「oracle family assignment」と呼ぶ場合も、実現した既存 dataset に限る）。
+割り当て規則は observed support の決定論的関数だが、真 Poisson の全観測が {0,1} になる非常に稀な事象（1 列あたり ≤ 1.0×10⁻¹⁰、監査 §4）では
+Bernoulli に割り当てられるので、**今後のすべての canonical draw で真の family と一致することの保証ではない**。
 
 ### 1.2 追加候補の判定
 
@@ -102,7 +104,7 @@ claim を強める場合の優先順位（INTERPRETATION）: EM iteration sensit
    これ以上「正解率」を測る実験は、どの Option でも情報を生まない。
 2. B（intercept 追加）は family selection の問題を解かない（0/1 列は intercept があっても常に Bernoulli）。
    B を選ぶ理由はモデル拡張（低 rate / 偏った属性、KI-018 の分離）であり、その場合 Phase 9 相当の検証のやり直しが必要。
-3. A / C は追加コスト 0 で、Phase 9 の K 選択の結果を「oracle family のもとでの結果」として補強できる。
+3. A / C は追加コスト 0 で、「既存 Phase 9 artifact では観測された family 誤割り当てによる交絡がない」という整理をそのまま使える（今後の draw への保証ではない）。
 
 **DECISION: HUMAN DECISION REQUIRED**（A / B / C）。**recommended next experiment: NONE YET**。
 
@@ -114,8 +116,8 @@ Notion は今回変更していない。以下は提案のみ。
 
 | 何を追加 | どのページ | なぜ |
 |---|---|---|
-| 「分布の自動選択について」の短い節：現行 3 family と support gate では、family の割り当ては観測 support で決まり、0/1 の列は尤度比較で構造的に Bernoulli になる（`log p_Pois = log p_Bern + log P_Pois(X≤1)`）。pilot の 36/36 は判別能力ではなく、この構造どおりに動いたことの確認 | 研究状況ページ（原稿 `reports/notion/research_status_notion_20260906.md`、branch `docs/notion-k-selection-story-20260906`、未 merge）の「8. ここまでで答えられたこと」または「9. まだ切り分けられていないこと」 | 36/36 が「自動選択が機能した」と読まれるのを防ぐ。先生との議論で「難しいケースは試したか」に答えられる |
-| Phase 9 の K 選択は実質 oracle family assignment のもとでの結果であり、family 誤選択の交絡はない、という 1 文 | 同ページの K 選択の節（Phase 9 の結果を説明する箇所） | K 選択の結果の解釈を補強する（肯定的な追加） |
+| 「分布の自動選択について」の短い節：現行 3 family と support gate では、family の割り当ては観測 support で決まり、0/1 の列は尤度比較で構造的に Bernoulli になる（`log p_Pois = log p_Bern + log P_Pois(X≤1)`）。pilot の 36/36 は data から family を判別した能力ではなく、この理論的順序と実装が既存 C2 artifact で一致したことの確認（一般的な family 判別精度 100% は支持されない） | 研究状況ページ（原稿 `reports/notion/research_status_notion_20260906.md`、branch `docs/notion-k-selection-story-20260906`、未 merge）の「8. ここまでで答えられたこと」または「9. まだ切り分けられていないこと」 | 36/36 が「自動選択が機能した」と読まれるのを防ぐ。先生との議論で「難しいケースは試したか」に答えられる |
+| 既存 Phase 9 artifact では 0/1 に見える真 Poisson 列は起きず、実現した family の割り当ては生成時の family と一致したので、報告済みの K 選択の結果は観測された family 誤割り当てによって交絡していない（今後の draw への保証ではない）、という 1 文 | 同ページの K 選択の節（Phase 9 の結果を説明する箇所） | K 選択の結果の解釈を補強する（肯定的な追加） |
 | 「次に先生に相談したいこと」に Option A / B / C（family selection の位置づけと X intercept） | 同ページ「10. 先生に相談したいこと」 | 次の研究判断は Human（指導教員を含む）の判断事項であるため |
 | （任意）現行モデルでは Poisson 列の平均 rate が 1 以上、Bernoulli 列の 1 率が 1/2 に固定されるという限定 | ゼミ用 Notion 原稿（`docs/presentation/seminar_notion_full.md` など、「データ型に応じて分布を選択できる」の箇所の注記） | 「データ型に応じて選択できる」は人手指定の意味で正しいが、低 rate count・偏った binary 属性はモデルの族に入らないことを併記すると誤解を防げる |
 | per-column family の Notion 要約の「自動選択する手続きはない」（2026-07-11 時点の記述）の後継情報 | `reports/per_column_family/notion_per_column_family_summary_20260711.md` に対応する Notion ページ | その後 prototype（#74）ができ、本監査で support-determinism が判明した。過去ページは書き換えず、新しい注記として追加する |

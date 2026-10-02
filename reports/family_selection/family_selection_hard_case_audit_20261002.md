@@ -30,8 +30,9 @@
    Poisson の score を必ず上回る**（データの真の family によらない）（§5）。
    この結果、現行 prototype（3 family + support gate + 完全尤度 score）では
    **family の割り当ては観測 support の決定論的関数**になり、score が結果を変えることはない。
-5. **INTERPRETATION** よって 36/36（および Phase 9 の全 score 判定行）は「selector の判別能力」ではなく、
-   上の不等式と最適化・実装が整合していることの確認である（§6）。
+5. **OBSERVED / INTERPRETATION** pilot の 36/36（および Phase 9 の全 score 判定行）は、
+   上の理論的順序と実装が既存 C2 artifact（Phase 9 artifact）で一致したことの確認である（§6）。
+   データから family を判別した能力の証拠ではなく、**一般的な family 判別精度 100% は支持されない（NOT SUPPORTED）**。
    仮に 0/1 に見える真 Poisson 列が現れても、selector は**必ず Bernoulli を選ぶ**。
 
 ---
@@ -264,11 +265,15 @@ CANDIDATE_PRIORITY（tie rule）が効く場面は存在しない（厳密な不
 という**観測 support の決定論的関数**であり、score は一度も結果を変えない。
 起こりうる唯一の誤りは「真 Poisson なのに全観測が {0,1}」→ Bernoulli であり、その確率は §4 の通り。
 
-**INTERPRETATION（量の整合）** §5.2 の下界は `margin ≥ 2n·mean g(η)` の形をしている。
-`g(0) = 1 − ln 2 = 0.3069` なので η が 0 付近なら `2n g(0)` は n = 75 で 46.0、n = 40 で 24.55。
+**INTERPRETATION（量の整合）** §5.2 で導出済みの下界は
+`margin_neg2 ≥ (2/L) Σ_s Σ_i g(η_i^(s)) > 0`（η は Poisson 候補の fit 値 `f̂_P^T z_i^(s)`）であり、これだけが厳密な結果である。
+参照のため `g(0) = 1 − ln 2 = 0.3069` を使うと `2n g(0)` は n = 75 で 46.0、n = 40 で 24.55 になる。
+**これは任意の fit 済み η に対する global lower bound ではなく、η ≈ 0 のときの reference magnitude である**
+（下界の値は fit 済み η に依存し、実際に全 artifact の最小 margin 43.6 は 46.0 を下回る）。
+「margin は理論上必ず 46 以上」とは読まない。
 artifact の margin は n = 75 の全 score 判定行で最小 43.6（全 artifact）、pilot C2 の最終値 45.69–65.50、
-n = 40 の smoke で 23.9–24.8 であり、**この下界の大きさとよく一致する**。
-fit 済みの η を再計算していないので、一致は大きさの整合であって検証ではない。
+n = 40 の smoke で 23.9–24.8 であり、この reference magnitude と**大きさが整合する**。
+fit 済みの η を再計算していないので、これは大きさの整合であって検証ではない。
 
 ---
 
@@ -286,10 +291,13 @@ fit 済みの η を再計算していないので、一致は大きさの整合
 **「易しい / 難しい」の問題ではなく、score が構造的に Bernoulli を選ぶ**という形に置き換えるべきである
 （過去 report は当時の記録として書き換えない。CLAUDE.md §4）。
 
-**INTERPRETATION（K 選択への含意、肯定的）** Phase 9 の K 選択 runs（9D / 9E / 9I / 9J / 9K / 9P / 9T / 9V / 9X）では、
-family の割り当ては全行で真の family と一致した（score 判定行は全て真 Bernoulli → Bernoulli、gate 判定行は support から自明）。
-§5.4 より、これは偶然ではなく構造的に保証されている。したがって **Phase 9 の K 選択の結果は、
-実質的に oracle family assignment のもとでの K 選択**と読める（family 誤選択による交絡はない）。
+**INTERPRETATION（K 選択への含意、既存 artifact に限定）** 本監査で集計した commit 済みの Phase 9 artifact
+（9D / 9E / 9I / 9J / 9K / 9P / 9T / 9V / 9X）では、0/1 に見える真 Poisson 列は一度も起きず、
+実現した family の割り当ては全行で生成時の family と一致した（score 判定行は全て真 Bernoulli → Bernoulli、gate 判定行は support どおり）。
+したがって **報告済みの Phase 9 の K 選択の結果は、それらの artifact では、観測された family 誤割り当てによって交絡していない**。
+「oracle family assignment」と呼ぶ場合も、**実現した既存 dataset に限れば**という条件つきである。
+割り当て規則（§5.4）は support の決定論的関数だが、真 Poisson の全観測が {0,1} になる事象（§4、1 列あたり ≤ 1.0×10⁻¹⁰）では Bernoulli になるので、
+**今後のすべての canonical draw で真の family と一致することの保証ではない**。
 
 ---
 
