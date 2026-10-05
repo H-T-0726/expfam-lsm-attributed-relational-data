@@ -283,23 +283,36 @@ def main(argv=None) -> int:
         if "figure skipped" in caps.read_text(encoding="utf-8"):
             add("WARNING", "figure_skipped", "at least one figure could not be drawn")
 
-    # git provenance: experiment-path files identical across phases
-    shas = [info["git_sha"]] + [p["git_sha"] for p in info.get("phase_runs", [])]
-    changed = {}
+    # git provenance.  BLOCKER: experiment-path code differs between any two
+    # MAIN-stage phase runs.  WARNING: it differs between the init commit /
+    # technical stages (smoke, pilot) and the main stage -- allowed only for
+    # disclosed numerical fixes found by those technical stages.
     repo = _HERE.parents[2]
-    for s in sorted(set(shas)):
-        if s == info["git_sha"]:
-            continue
-        try:
-            out = subprocess.check_output(["git", "diff", "--name-only", info["git_sha"], s],
-                                          cwd=repo, text=True)
-        except Exception as exc:
-            add("WARNING", "git_diff", f"cannot diff {s}: {exc}")
-            continue
-        hit = [f for f in out.split() if f in EXPERIMENT_PATH_FILES]
-        changed[s] = {"files_changed": out.split(), "experiment_path_files_changed": hit}
-        if hit:
-            add("BLOCKER", "git_sha_experiment_code_changed", {s: hit})
+    runs = info.get("phase_runs", [])
+
+    def diff(a, b):
+        out = subprocess.check_output(["git", "diff", "--name-only", a, b],
+                                      cwd=repo, text=True)
+        return [f for f in out.split() if f in EXPERIMENT_PATH_FILES]
+
+    changed = {}
+    main_shas = sorted({p["git_sha"] for p in runs if PHASES[p["phase"]]["stage"] == "main"})
+    for i in range(len(main_shas)):
+        for j in range(i + 1, len(main_shas)):
+            hit = diff(main_shas[i], main_shas[j])
+            changed[f"main:{main_shas[i][:8]}..{main_shas[j][:8]}"] = hit
+            if hit:
+                add("BLOCKER", "experiment_code_changed_within_main", hit)
+    ref = main_shas[0] if main_shas else None
+    if ref:
+        others = {("init", info["git_sha"])} | {(p["phase"], p["git_sha"]) for p in runs
+                                                if PHASES[p["phase"]]["stage"] != "main"}
+        for label, s_ in sorted(others):
+            hit = diff(s_, ref)
+            changed[f"{label}:{s_[:8]}..main:{ref[:8]}"] = hit
+            if hit:
+                add("WARNING", "experiment_code_changed_before_main",
+                    {"from": f"{label} {s_[:8]}", "to_main": ref[:8], "files": hit})
     checks["init_git_sha"] = info["git_sha"]
     checks["phase_git_shas"] = [(p["phase"], p["git_sha"], p.get("git_dirty_tracked"))
                                 for p in info.get("phase_runs", [])]
