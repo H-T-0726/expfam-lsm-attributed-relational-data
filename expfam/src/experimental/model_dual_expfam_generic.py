@@ -31,7 +31,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from family_specs import FamilySpec, GaussianSpec
+from family_specs import FamilySpec, GaussianSpec, NotEvaluable
 from model_dual_expfam_consistent import DualExpFamLSMPerColumnConsistent
 from em_runner import EMFailFast
 from eval_utils import calc_bic_exp
@@ -85,6 +85,10 @@ class DualExpFamLSMGeneric(DualExpFamLSMPerColumnConsistent):
                              for idx in groups.values()]
         self._suff_src = None
         self._suff = None
+        self._limited_groups = [(spec, idx) for spec, idx in self._spec_groups
+                                if spec.evaluation_range_limited]
+        if not hasattr(self, "estep_backtracks"):
+            self.estep_backtracks = 0
 
     def reassign_specs(self, column_specs: Sequence[FamilySpec]) -> None:
         column_specs = list(column_specs)
@@ -157,6 +161,80 @@ class DualExpFamLSMGeneric(DualExpFamLSMPerColumnConsistent):
 
     # _calc_precision_matrix is inherited unchanged: it already reads A''
     # through _variance_function_x and the 1/sigma^2 weights.
+
+    # ------------------------------------------------------------------
+    # Laplace-Newton E-step with a domain guard for range-limited specs
+    # ------------------------------------------------------------------
+    def _x_evaluable(self, eta_x_i) -> bool:
+        for spec, idx in self._limited_groups:
+            try:
+                spec.mean_statistic(eta_x_i[idx])
+            except NotEvaluable:
+                return False
+        return True
+
+    def calc_eta_newton(self, X, Y, rng=None, max_iter=10, alpha=0.01, tol=1e-4):
+        """The existing Newton/Laplace sampler, plus one guard.
+
+        Without a range-limited spec (every G/B/P configuration) this is the
+        inherited method itself, so nothing changes.  With one (COM-Poisson),
+        a Newton trial point at which that column's series cannot be
+        certified is not taken: the SAME Newton step is halved until the
+        point is evaluable (at most 60 halvings, else NotEvaluable).  The
+        target -- the mode of the same log posterior and the Laplace
+        covariance there -- is unchanged; every halving is counted in
+        ``self.estep_backtracks`` and reported.
+        """
+        if not self._limited_groups:
+            return super().calc_eta_newton(X, Y, rng=rng, max_iter=max_iter,
+                                           alpha=alpha, tol=tol)
+        if rng is None:
+            rng = np.random.default_rng()
+        Z = self.params['Z'].copy()
+        F = self.params['F']
+        sigma = self.params['sigma']
+        var_z = self.params['var_z']
+        w0 = self.params['w0']
+        w = self.params['w']
+        n, k = Z.shape
+        for i in range(n):
+            for iteration in range(max_iter):
+                z_prev = Z[i, :].copy()
+                grad = self._calc_gradient(X, Y, Z, F, sigma, var_z, w0, w, i)
+                A_i = self._calc_precision_matrix(Z, F, sigma, var_z, w0, w, i)
+                A_i = (A_i + A_i.T) / 2.0
+                A_i += 1e-6 * np.eye(k)
+                try:
+                    A_i_inv = np.linalg.inv(A_i)
+                except np.linalg.LinAlgError:
+                    A_i_inv = np.linalg.pinv(A_i)
+                step = alpha * (A_i_inv @ grad)
+                proposal = Z[i, :] - step
+                halvings = 0
+                while not self._x_evaluable(F @ proposal):
+                    halvings += 1
+                    if halvings > 60:
+                        raise NotEvaluable(f"E-step: no evaluable Newton step for "
+                                           f"row {i} after 60 halvings")
+                    step = 0.5 * step
+                    proposal = Z[i, :] - step
+                self.estep_backtracks += halvings
+                Z[i, :] = proposal
+                diff = np.mean(np.abs(Z[i, :] - z_prev))
+                if diff < tol:
+                    break
+                if np.linalg.norm(grad) < tol:
+                    break
+            A_i = self._calc_precision_matrix(Z, F, sigma, var_z, w0, w, i)
+            A_i = (A_i + A_i.T) / 2.0
+            A_i += 1e-6 * np.eye(k)
+            try:
+                A_i_inv = np.linalg.inv(A_i)
+                A_i_inv = (A_i_inv + A_i_inv.T) / 2.0
+                Z[i, :] = rng.multivariate_normal(Z[i, :], A_i_inv)
+            except (np.linalg.LinAlgError, ValueError):
+                pass
+        return Z
 
     # ------------------------------------------------------------------
     # M-step loading update (parent Adam with x replaced by T(x))
@@ -354,6 +432,7 @@ def run_em_generic(X, Y, *, column_specs: Sequence[FamilySpec], family_y: str,
         "failure_policy": "fail_fast",
         "retry_count": 0, "replacement_count": 0, "seed_rescue_count": 0,
         "runtime_s": round(time.perf_counter() - t0, 3),
+        "estep_backtracks": int(getattr(model, "estep_backtracks", 0)),
         "numerics_mode": "consistent",
         "model_version": GENERIC_MODEL_VERSION,
     }

@@ -50,7 +50,7 @@ from family_selection import (
 )
 from family_specs import (
     GROUP_BOUNDED, GROUP_COUNT, GROUP_POSITIVE, GROUP_REAL, FamilySpec,
-    GaussianSpec, SupportViolation,
+    GaussianSpec, NotEvaluable, SupportViolation,
 )
 from model_dual_expfam_generic import (
     DualExpFamLSMGeneric, informed_init, run_em_generic,
@@ -59,6 +59,23 @@ from em_runner import EMFailFast
 
 SELECTOR_VERSION_MS = "multisupport-family-selection-v1"
 LEGACY_FAMILIES = ("gaussian", "bernoulli", "poisson")
+
+# Candidate optimisation routes.
+#   "phase9c"     existing families through the unchanged Phase 9C BFGS
+#                 functions; other families through analytic-gradient BFGS.
+#                 Used to certify that Phase 9C is reproduced.
+#   "trust_exact" every non-Gaussian candidate through a Newton trust region
+#                 with the exact analytic Hessian (scipy 'trust-exact').  The
+#                 canonical candidate objective is concave in the loading, so
+#                 the optimum is the same; the trust region keeps trial points
+#                 near accepted iterates.  A trial point where the COM-Poisson
+#                 series cannot be certified (NotEvaluable) is a rejected step
+#                 (objective +inf); accepted iterates and every reported score
+#                 are always certified.  Used by the multi-support experiment.
+ROUTE_PHASE9C = "phase9c"
+ROUTE_TRUST_EXACT = "trust_exact"
+TRUST_EXACT_MAXITER = 200
+TRUST_EXACT_GTOL = 1e-10
 
 
 # --------------------------------------------------------------------------
@@ -193,14 +210,87 @@ def _generic_mean_score_and_grad(spec: FamilySpec, x: np.ndarray, Tx: np.ndarray
     return score, grad
 
 
+def _trust_exact(spec: FamilySpec, x: np.ndarray, Z_samples: np.ndarray,
+                 start: np.ndarray):
+    Tx = spec.sufficient_statistic(x)
+    cache: dict = {"key": None}
+    counter = {"nonevaluable": 0}
+
+    def evaluate(f):
+        key = np.asarray(f, dtype=np.float64).tobytes()
+        if cache["key"] == key:
+            return cache["val"]
+        f = np.asarray(f, dtype=np.float64)
+        try:
+            eta = np.einsum("nkl,k->nl", Z_samples, f)
+            L = eta.shape[1]
+            score = float(np.sum(spec.log_prob(x[:, None], eta))) / L
+            mean = spec.mean_statistic(eta)
+            var = spec.variance_statistic(eta)
+            grad = np.einsum("nl,nkl->k", Tx[:, None] - mean, Z_samples) / L
+            hess = -np.einsum("nl,nkl,njl->kj", var, Z_samples, Z_samples) / L
+            if not (math.isfinite(score) and np.all(np.isfinite(grad))
+                    and np.all(np.isfinite(hess))):
+                raise FloatingPointError("non-finite candidate objective")
+            val = (score, grad, hess)
+        except NotEvaluable:
+            counter["nonevaluable"] += 1
+            val = None
+        cache["key"], cache["val"] = key, val
+        return val
+
+    def fun(f):
+        v = evaluate(f)
+        return math.inf if v is None else -v[0]
+
+    # scipy builds the local model of a TRIAL point before deciding whether
+    # to accept it.  At a non-evaluable trial point the objective is +inf, so
+    # the actual reduction is -inf and the step is always rejected; the
+    # derivative placeholders below can never enter an accepted iterate (the
+    # returned point is re-evaluated and must be certified).
+    k = Z_samples.shape[1]
+
+    def jac(f):
+        v = evaluate(f)
+        return np.zeros(k) if v is None else -v[1]
+
+    def hess(f):
+        v = evaluate(f)
+        return np.eye(k) if v is None else -v[2]
+
+    if evaluate(start) is None:
+        raise NotEvaluable("the starting loading is not evaluable")
+    res = minimize(fun, start, method="trust-exact", jac=jac, hess=hess,
+                   options={"maxiter": TRUST_EXACT_MAXITER,
+                            "gtol": TRUST_EXACT_GTOL})
+    loading = np.asarray(res.x, dtype=np.float64)
+    final = evaluate(loading)
+    if final is None:
+        raise NotEvaluable("the returned loading is not evaluable")
+    return loading, final, res, counter["nonevaluable"]
+
+
 def score_candidate(x: np.ndarray, Z_samples: np.ndarray, spec: FamilySpec,
-                    loading_init: np.ndarray, column: int) -> CandidateRecordMS:
+                    loading_init: np.ndarray, column: int,
+                    route: str = ROUTE_PHASE9C) -> CandidateRecordMS:
     x = np.asarray(x, dtype=np.float64)
     rec = CandidateRecordMS(column=column, family_name=spec.family_name,
                             candidate_model=spec.candidate_model, status="OK",
                             n_obs=int(x.size))
+    if route not in (ROUTE_PHASE9C, ROUTE_TRUST_EXACT):
+        raise ValueError(f"unknown candidate route {route!r}")
     try:
-        if spec.candidate_model in LEGACY_FAMILIES:
+        if route == ROUTE_TRUST_EXACT and not spec.profiled_variance:
+            loading, (score, grad, _), res, n_bad = _trust_exact(
+                spec, x, Z_samples, np.array(loading_init, dtype=np.float64))
+            ginf = float(np.max(np.abs(grad)))
+            rec.optimizer_route = f"trust_exact(nonevaluable_trials={n_bad})"
+            rec.loading, rec.n_iter = loading, int(res.nit)
+            rec.converged = bool(math.isfinite(ginf) and ginf <= CANDIDATE_GRAD_INF_TOL)
+            rec.gradient_inf = ginf
+            rec.scipy_success, rec.scipy_status = bool(res.success), int(res.status)
+            rec.score = float(score)
+        elif spec.candidate_model in LEGACY_FAMILIES:
             # Existing Phase 9C route, unchanged.
             loading, sigma_sq, nit, conv, prov = optimise_column_loading_bfgs(
                 x, Z_samples, spec.candidate_model, loading_init=loading_init)
@@ -277,15 +367,15 @@ def select_column(records: Sequence[CandidateRecordMS],
 
 def score_columns(X: np.ndarray, Z_samples: np.ndarray,
                   gates: Sequence[ColumnGateMS], registry: dict[str, FamilySpec],
-                  loading_inits: np.ndarray, columns: Sequence[int] | None = None
-                  ) -> list[ColumnSelection]:
+                  loading_inits: np.ndarray, columns: Sequence[int] | None = None,
+                  route: str = ROUTE_PHASE9C) -> list[ColumnSelection]:
     out = []
     cols = [g.column for g in gates] if columns is None else list(columns)
     for g in gates:
         if g.column not in cols:
             continue
         recs = [score_candidate(X[:, g.column], Z_samples, registry[c],
-                                loading_inits[g.column], g.column)
+                                loading_inits[g.column], g.column, route=route)
                 for c in g.admissible]
         out.append(select_column(recs, g.group_candidates))
     return out
@@ -295,7 +385,8 @@ def score_columns(X: np.ndarray, Z_samples: np.ndarray,
 # Experiment A: selector-only on the true Z
 # --------------------------------------------------------------------------
 
-def selector_only(X: np.ndarray, Z_true: np.ndarray, registry, priority
+def selector_only(X: np.ndarray, Z_true: np.ndarray, registry, priority,
+                  route: str = ROUTE_PHASE9C
                   ) -> tuple[list[ColumnGateMS], list[ColumnSelection]]:
     """Every candidate scored on the SAME deterministic true-Z surrogate.
 
@@ -308,7 +399,7 @@ def selector_only(X: np.ndarray, Z_true: np.ndarray, registry, priority
     gates = gate_columns(X, registry, priority)
     Zs = np.asarray(Z_true, dtype=np.float64)[:, :, None]
     inits = np.zeros((X.shape[1], Zs.shape[1]))
-    return gates, score_columns(X, Zs, gates, registry, inits)
+    return gates, score_columns(X, Zs, gates, registry, inits, route=route)
 
 
 # --------------------------------------------------------------------------
@@ -318,10 +409,11 @@ def selector_only(X: np.ndarray, Z_true: np.ndarray, registry, priority
 class FamilySelectingGenericLSM(DualExpFamLSMGeneric):
     """Generic analogue of ``family_selection.FamilySelectingPerColumnLSM``."""
 
-    def __init__(self, *, gates, registry, **kwargs):
+    def __init__(self, *, gates, registry, route=ROUTE_PHASE9C, **kwargs):
         super().__init__(**kwargs)
         self.gates = list(gates)
         self.registry = registry
+        self.route = route
         self.selection_trace: list[dict[str, Any]] = []
         self.last_selections: list[ColumnSelection] = []
         self._iteration = 0
@@ -330,7 +422,8 @@ class FamilySelectingGenericLSM(DualExpFamLSMGeneric):
         self._iteration += 1
         loadings = self.params["F"]
         amb = [g for g in self.gates if g.is_ambiguous]
-        selections = score_columns(X, Z_samples, amb, self.registry, loadings)
+        selections = score_columns(X, Z_samples, amb, self.registry, loadings,
+                                   route=self.route)
         specs = list(self.column_specs)
         winners = {}
         for g, sel in zip(amb, selections):
@@ -378,12 +471,12 @@ class FamilySelectingGenericLSM(DualExpFamLSMGeneric):
 
 def run_generic_exploration(X, Y, *, k, gates, registry, initial_models,
                             family_y="bernoulli", L=5, num_iter=8, seed=42,
-                            newton_alpha=0.5) -> dict[str, Any]:
+                            newton_alpha=0.5, route=ROUTE_PHASE9C) -> dict[str, Any]:
     """Exploration MCEM (A-type updates); mirrors run_family_exploration."""
     n, d = X.shape
     rng = np.random.default_rng(seed)
     model = FamilySelectingGenericLSM(
-        gates=gates, registry=registry, n=n, d=d, k=k, L=L,
+        gates=gates, registry=registry, route=route, n=n, d=d, k=k, L=L,
         column_specs=[registry[c] for c in initial_models], family_y=family_y)
     model.initialize_params(true_params=None, seed=seed)
     informed_init(model, Y, family_y)
@@ -416,27 +509,30 @@ def run_generic_exploration(X, Y, *, k, gates, registry, initial_models,
             "initial_models": list(initial_models),
             "selection_trace": list(model.selection_trace),
             "final_selections": list(model.last_selections),
+            "estep_backtracks": int(getattr(model, "estep_backtracks", 0)),
             "iterations": num_iter}
 
 
 def run_generic_hybrid(X, Y, *, k, registry, priority, start, family_y="bernoulli",
                        L=5, exploration_num_iter=8, refit_num_iter=8,
-                       search_seed=42, refit_seed=43) -> dict[str, Any]:
+                       search_seed=42, refit_seed=43, newton_alpha=0.5,
+                       route=ROUTE_PHASE9C) -> dict[str, Any]:
     """Scheme C: exploration with A-type updates, then a fresh fixed refit."""
     gates = gate_columns(X, registry, priority)
     init = start_assignment(gates, start)
     exploration = run_generic_exploration(
         X, Y, k=k, gates=gates, registry=registry, initial_models=init,
-        family_y=family_y, L=L, num_iter=exploration_num_iter, seed=search_seed)
+        family_y=family_y, L=L, num_iter=exploration_num_iter, seed=search_seed,
+        newton_alpha=newton_alpha, route=route)
     refit = run_em_generic(X, Y, column_specs=[registry[c] for c in
                                                exploration["selected_models"]],
                            family_y=family_y, k=k, L=L, num_iter=refit_num_iter,
-                           seed=refit_seed)
+                           seed=refit_seed, newton_alpha=newton_alpha)
     return {"gates": gates, "start_models": init, "exploration": exploration,
             "refit": refit}
 
 
-__all__ = ["SELECTOR_VERSION_MS", "support_group_of", "ColumnGateMS",
+__all__ = ["SELECTOR_VERSION_MS", "ROUTE_PHASE9C", "ROUTE_TRUST_EXACT", "support_group_of", "ColumnGateMS",
            "gate_columns", "start_assignment", "CandidateRecordMS",
            "score_candidate", "ColumnSelection", "select_column",
            "score_columns", "selector_only", "FamilySelectingGenericLSM",

@@ -68,7 +68,6 @@ LOG_SQRT_2PI = 0.5 * math.log(2.0 * math.pi)
 # geometric tail bound, relative to log Z, is below this value for every eta in
 # the batch; exp(-40) ~ 4e-18 is below double precision relative resolution.
 CMP_LOG_TAIL_TOL = -40.0
-CMP_MAX_TERMS = 2_000_000
 
 # Below these magnitudes the closed forms cancel catastrophically and a series
 # is used instead.  Each threshold is far inside the series' accurate range
@@ -141,6 +140,9 @@ class FamilySpec:
     profiled_variance: bool = False
     T_definition: str = "x"
     eta_domain: str = "R"
+    # True when A, A', A'' exist for every eta but can only be CERTIFIED on a
+    # bounded range here (COM-Poisson: the summation window grows with eta).
+    evaluation_range_limited: bool = False
 
     # ---- support ---------------------------------------------------------
     def support_mask(self, x: np.ndarray) -> np.ndarray:            # pragma: no cover
@@ -357,12 +359,53 @@ class BinomialSpec(FamilySpec):
         return rng.binomial(self.n_trials, bernoulli_mean(eta)).astype(np.float64)
 
 
-def _cmp_series(eta: np.ndarray, nu: float) -> dict[str, Any]:
-    """Adaptive log-sum-exp evaluation of the COM-Poisson series.
+CMP_BLOCK_ELEMENTS = 20_000_000
+CMP_MAX_WINDOW = 4_000_000
 
-    Returns log Z, mean, variance, the number of terms and the largest
-    relative log tail bound.  The tail after term M is bounded by a geometric
-    series because the term ratio exp(eta - nu log(x+1)) decreases in x.
+
+class NotEvaluable(FloatingPointError):
+    """The quantity exists mathematically but cannot be certified here.
+
+    Raised by the COM-Poisson series when the summation window needed to meet
+    the tail bound exceeds ``CMP_MAX_WINDOW``.  It is a FloatingPointError, so
+    every fail-fast path treats it as a failure; only the candidate trust
+    region may treat a NotEvaluable TRIAL point as a rejected step.
+    """
+
+
+_CMP_MEMO: dict = {}
+_CMP_MEMO_ORDER: list = []
+
+
+def _cmp_window(eta: float, nu: float, width_sd: float) -> tuple[int, int]:
+    """Summation window around the mode of the log-concave term sequence."""
+    log_mode = eta / nu
+    if log_mode < math.log(40.0):
+        lo = 0
+        mode = math.exp(log_mode) if log_mode < 700 else math.inf
+        hi = int(max(2.0 * mode + 30.0, 30.0) * (width_sd / 12.0))
+        return lo, max(hi, 30)
+    if log_mode > 40.0:
+        # mode > e^40: the window would exceed any cap by many orders of
+        # magnitude (and math.exp would overflow further out)
+        raise NotEvaluable(f"COM-Poisson series (nu={nu}) at eta={eta}: mode "
+                           f"exp({log_mode:.1f}) is beyond the certifiable range")
+    mode = math.exp(log_mode)
+    sd = math.sqrt(mode / nu) + 1.0
+    lo = int(max(0.0, mode - width_sd * sd))
+    hi = int(mode + width_sd * sd) + 1
+    return lo, hi
+
+
+def _cmp_series(eta: np.ndarray, nu: float) -> dict[str, Any]:
+    """Certified log-sum-exp evaluation of the COM-Poisson series.
+
+    The term sequence t_x = eta x - nu log x! is log-concave in x, so after a
+    window [lo, hi] around the mode both tails are bounded by geometric
+    series: right of hi with ratio exp(eta - nu log(hi+1)) < 1 and left of lo
+    with ratio lo^nu exp(-eta) < 1.  The window is widened until both bounds
+    are below exp(CMP_LOG_TAIL_TOL) relative to Z.  Cost is O(sqrt(mode))
+    per eta instead of O(mode).  Distinct eta values are evaluated once.
     """
 
     eta = _finite(eta, "cmp eta")
@@ -371,40 +414,128 @@ def _cmp_series(eta: np.ndarray, nu: float) -> dict[str, Any]:
         empty = np.empty_like(eta)
         return {"logZ": empty, "mean": empty, "var": empty, "M": 0,
                 "max_log_tail": -np.inf}
-    eta_max = float(np.max(flat))
-    # Mode of the term sequence is ~ exp(eta/nu); start comfortably past it.
-    mode = math.exp(min(eta_max / nu, 700.0))
-    M = int(min(max(2.0 * mode + 30.0, 30.0), CMP_MAX_TERMS))
+    memo_key = (nu, flat.tobytes())
+    hit = _CMP_MEMO.get(memo_key)
+    if hit is not None:
+        return {"logZ": hit["logZ"].reshape(eta.shape).copy(),
+                "mean": hit["mean"].reshape(eta.shape).copy(),
+                "var": hit["var"].reshape(eta.shape).copy(),
+                "M": hit["M"], "max_log_tail": hit["max_log_tail"]}
+    uniq, inverse = np.unique(flat, return_inverse=True)
+    logZ = np.empty_like(uniq)
+    mean = np.empty_like(uniq)
+    var = np.empty_like(uniq)
+    W_max, tail_max = 0, -np.inf
+    # Small modes (window starts at 0) are evaluated together, vectorised;
+    # large modes one at a time with their own window.
+    low = uniq / nu < math.log(40.0)
+    if np.any(low):
+        li = np.nonzero(low)[0]
+        blk = _cmp_series_low(uniq[li], nu)
+        logZ[li], mean[li], var[li] = blk["logZ"], blk["mean"], blk["var"]
+        W_max, tail_max = blk["M"], blk["max_log_tail"]
+    for j in np.nonzero(~low)[0]:
+        block = _cmp_series_one(float(uniq[j]), nu)
+        logZ[j], mean[j], var[j] = block["logZ"], block["mean"], block["var"]
+        W_max = max(W_max, block["M"])
+        tail_max = max(tail_max, block["max_log_tail"])
+    out = {"logZ": _checked(logZ[inverse], "cmp logZ"),
+           "mean": _checked(mean[inverse], "cmp mean"),
+           "var": _checked(var[inverse], "cmp var"),
+           "M": int(W_max), "max_log_tail": float(tail_max)}
+    _CMP_MEMO[memo_key] = out
+    _CMP_MEMO_ORDER.append(memo_key)
+    if len(_CMP_MEMO_ORDER) > 8:
+        _CMP_MEMO.pop(_CMP_MEMO_ORDER.pop(0), None)
+    return {"logZ": out["logZ"].reshape(eta.shape).copy(),
+            "mean": out["mean"].reshape(eta.shape).copy(),
+            "var": out["var"].reshape(eta.shape).copy(),
+            "M": out["M"], "max_log_tail": out["max_log_tail"]}
+
+
+_LOGFACT_CACHE: dict = {}
+
+
+def _cmp_series_low(etas: np.ndarray, nu: float) -> dict[str, Any]:
+    """Vectorised series for etas whose mode is < 40 (window [0, M])."""
+    M = _cmp_window(float(np.max(etas)), nu, 12.0)[1]
     while True:
+        key = (nu, M)
+        lf = _LOGFACT_CACHE.get(key)
+        if lf is None:
+            lf = nu * gammaln(np.arange(M + 1, dtype=np.float64) + 1.0)
+            if len(_LOGFACT_CACHE) > 64:
+                _LOGFACT_CACHE.clear()
+            _LOGFACT_CACHE[key] = lf
         x = np.arange(M + 1, dtype=np.float64)
-        log_terms = flat[:, None] * x[None, :] - nu * gammaln(x + 1.0)[None, :]
+        log_terms = etas[:, None] * x[None, :] - lf[None, :]
         peak = np.max(log_terms, axis=1, keepdims=True)
         weights = np.exp(log_terms - peak)
         total = np.sum(weights, axis=1)
         logZ = peak[:, 0] + np.log(total)
-        # tail bound after the last included term M
-        log_ratio = flat - nu * math.log(M + 1.0)
-        ratio_ok = log_ratio < math.log(0.5)
-        log_last = log_terms[:, -1]
-        with np.errstate(divide="ignore"):
-            log_tail = (log_last + log_ratio
-                        - np.log(-np.expm1(np.minimum(log_ratio, -1e-300))))
-        rel_tail = log_tail - logZ
-        if np.all(ratio_ok) and np.all(rel_tail < CMP_LOG_TAIL_TOL):
-            break
-        if M >= CMP_MAX_TERMS:
-            raise FloatingPointError(
-                f"COM-Poisson series (nu={nu}) cannot meet the tail bound "
-                f"within {CMP_MAX_TERMS} terms (max eta={eta_max})")
-        M = min(2 * M, CMP_MAX_TERMS)
+        log_r = etas - nu * math.log(M + 1.0)
+        if np.all(log_r < 0.0):
+            rel = (log_terms[:, -1] + log_r - np.log(-np.expm1(log_r))) - logZ
+            if np.all(rel < CMP_LOG_TAIL_TOL):
+                break
+        M *= 2
+        if M + 1 > CMP_MAX_WINDOW:
+            raise NotEvaluable(f"COM-Poisson low-mode block exceeded the cap (nu={nu})")
     probs = weights / total[:, None]
     mean = probs @ x
     var = np.sum(probs * (x[None, :] - mean[:, None]) ** 2, axis=1)
-    return {"logZ": _checked(logZ.reshape(eta.shape), "cmp logZ"),
-            "mean": _checked(mean.reshape(eta.shape), "cmp mean"),
-            "var": _checked(var.reshape(eta.shape), "cmp var"),
-            "M": int(M), "max_log_tail": float(np.max(rel_tail)),
-            "probs": probs, "x": x}
+    return {"logZ": logZ, "mean": mean, "var": var, "M": int(M + 1),
+            "max_log_tail": float(np.max(rel))}
+
+
+def _cmp_series_one(eta: float, nu: float, keep_probs: bool = False) -> dict[str, Any]:
+    """One eta: windowed sum with certified two-sided geometric tail bounds."""
+    width_sd = 12.0
+    while True:
+        lo, hi = _cmp_window(eta, nu, width_sd)
+        if hi - lo + 1 > CMP_MAX_WINDOW:
+            raise NotEvaluable(
+                f"COM-Poisson series (nu={nu}) needs a window of {hi - lo + 1} "
+                f"terms at eta={eta} (cap {CMP_MAX_WINDOW})")
+        x = np.arange(lo, hi + 1, dtype=np.float64)
+        log_terms = eta * x - nu * gammaln(x + 1.0)
+        peak = float(np.max(log_terms))
+        weights = np.exp(log_terms - peak)
+        total = float(np.sum(weights))
+        logZ = peak + math.log(total)
+        # geometric bounds need only ratio < 1; the factor r/(1-r) is included
+        log_r_hi = eta - nu * math.log(hi + 1.0)
+        ok = log_r_hi < 0.0
+        tails = []
+        if ok:
+            tails.append(log_terms[-1] + log_r_hi - math.log(-math.expm1(log_r_hi)))
+        if lo > 0:
+            log_r_lo = nu * math.log(lo) - eta
+            if log_r_lo < 0.0:
+                tails.append(log_terms[0] + log_r_lo - math.log(-math.expm1(log_r_lo)))
+            else:
+                ok = False
+        rel = (max(tails) - logZ) if tails else -np.inf
+        if ok and rel < CMP_LOG_TAIL_TOL:
+            break
+        width_sd *= 2.0
+    probs = weights / total
+    m = float(probs @ x)
+    v = float(probs @ (x - m) ** 2)
+    out = {"logZ": logZ, "mean": m, "var": v, "M": int(hi - lo + 1),
+           "max_log_tail": float(rel), "lo": lo}
+    if keep_probs:
+        out["probs"], out["x"] = probs, x
+    return out
+
+
+def _cmp_series_block(flat: np.ndarray, nu: float) -> dict[str, Any]:
+    """Single-eta helper kept for the calibration (returns the pmf window)."""
+    if np.asarray(flat).size != 1:
+        raise ValueError("_cmp_series_block takes exactly one eta")
+    one = _cmp_series_one(float(np.asarray(flat).ravel()[0]), nu, keep_probs=True)
+    return {"x": one["x"], "probs": one["probs"][None, :], "M": one["M"],
+            "logZ": np.array([one["logZ"]]), "lo": one["lo"]}
 
 
 class COMPoissonSpec(FamilySpec):
@@ -417,7 +548,8 @@ class COMPoissonSpec(FamilySpec):
         super().__init__(family_name="com_poisson",
                          candidate_model=f"cmp_nu{tag}",
                          support_group=GROUP_COUNT,
-                         fixed_hyperparameters={"nu": nu})
+                         fixed_hyperparameters={"nu": nu},
+                         evaluation_range_limited=True)
         object.__setattr__(self, "nu", nu)
 
     def support_mask(self, x):
@@ -440,16 +572,20 @@ class COMPoissonSpec(FamilySpec):
         return {"M": out["M"], "max_log_tail": out["max_log_tail"]}
 
     def sample(self, eta, rng):
+        """Inverse-CDF draw; exactly one uniform per observation."""
         eta = _finite(eta, "cmp eta")
-        out = _cmp_series(eta, self.nu)
-        cdf = np.cumsum(out["probs"], axis=1)
-        u = rng.random(eta.size)
-        idx = np.array([np.searchsorted(cdf[i], u[i], side="right")
-                        for i in range(eta.size)], dtype=np.float64)
-        if np.any(idx > out["M"]):
-            raise FloatingPointError("COM-Poisson inverse-CDF ran past the "
-                                     "truncation point")
-        return idx.reshape(eta.shape)
+        flat = eta.ravel()
+        u = rng.random(flat.size)
+        out = np.empty_like(flat)
+        for i in range(flat.size):
+            block = _cmp_series_one(float(flat[i]), self.nu, keep_probs=True)
+            cdf = np.cumsum(block["probs"])
+            j = int(np.searchsorted(cdf, u[i], side="right"))
+            if j >= block["probs"].size:
+                raise FloatingPointError("COM-Poisson inverse-CDF ran past the "
+                                         "summation window")
+            out[i] = float(block["x"][j])
+        return out.reshape(eta.shape)
 
 
 def _ztp_g(lam: np.ndarray) -> np.ndarray:
@@ -912,7 +1048,7 @@ def compatibility_rows(test_status: dict[str, str] | None = None) -> list[dict[s
 __all__ = [
     "FAMILY_SPECS_VERSION", "SUPPORT_GROUPS", "GROUP_COUNT", "GROUP_POSITIVE",
     "GROUP_BOUNDED", "GROUP_REAL", "BASE_MEASURE", "SupportViolation",
-    "FamilySpec", "GaussianSpec", "BernoulliSpec", "PoissonSpec",
+    "NotEvaluable", "FamilySpec", "GaussianSpec", "BernoulliSpec", "PoissonSpec",
     "BinomialSpec", "COMPoissonSpec", "ZeroTruncatedPoissonSpec",
     "LogNormalSpec", "PositiveTruncatedNormalSpec", "ContinuousBernoulliSpec",
     "LogitNormalSpec", "TruncatedNormal01Spec", "build_primary_registry",
