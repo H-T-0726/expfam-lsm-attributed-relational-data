@@ -133,14 +133,13 @@ def main(argv=None) -> int:
     w("")
     w("### 表2b true candidate model 別 recovery（A: selector only, main, score-decided, candidate-model level）")
     w("")
-    w("| true candidate model | family-level | candidate-model level |")
-    w("|---|---|---|")
+    w("| true candidate model | candidate-model recovery |")
+    w("|---|---|")
     for r in pick(cand, scope="score_decided_only", grouping="pooled_difficulty_n",
                   experiment="A", stage="main", method="SELECTOR_ONLY"):
         if r["true_candidate_model"] == "ALL":
             continue
-        famr = None
-        w(f"| {r['true_candidate_model']} ({r['support_group']}) | – | {pct(r)} |")
+        w(f"| {r['true_candidate_model']} ({r['support_group']}) | {pct(r)} |")
     w("")
     w("| true family | family-level recovery (A, score-decided) |")
     w("|---|---|")
