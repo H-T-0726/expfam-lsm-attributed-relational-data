@@ -1,0 +1,97 @@
+{
+  "protocol": {
+    "L": 5,
+    "candidate_k": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "criteria": {
+      "C_Lap": "primary",
+      "C_Q": "primary",
+      "S1": "prediction_reference",
+      "S3": "diagnostic"
+    },
+    "d": 15,
+    "experiment_id": "clap_clean_nsweep_20261006",
+    "failure_policy": [
+      "no_retry",
+      "no_replacement_fit",
+      "no_seed_rescue",
+      "no_tolerance_change",
+      "no_resume"
+    ],
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "historical_experiment": "clean_true_k_asymptotics_20260904",
+    "historical_protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+    "incomplete_rule": "a dataset whose C_Lap is non-OK at any (K, start) has C_Lap selection INCOMPLETE; no imputation",
+    "issue": 128,
+    "k_true_grid": [
+      1,
+      3,
+      5
+    ],
+    "laplace": {
+      "N": "n (working convention)",
+      "Y": "training pairs only (same mask as the fit)",
+      "Z0": "fit Z_est (last E-step sample)",
+      "d_K": "num_params of the fit (= K d - K(K-1)/2)",
+      "grad_tol": 1e-08,
+      "max_iter": 200,
+      "ridge_jitter_restart": false
+    },
+    "manuscript_adoption_status": "NOT_DECIDED_BY_HUMAN",
+    "n_grid": [
+      50,
+      75,
+      100,
+      150
+    ],
+    "npz_checkpoint": 8,
+    "npz_identity_commit": "dad67b1c7b90f1e0297e8b1e95afd394cf9b51db",
+    "npz_match_rule": {
+      "atol": 1e-06,
+      "rtol": 1e-09
+    },
+    "npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "num_iter": 8,
+    "numerics_mode": "consistent",
+    "protocol_version": "clap-clean-nsweep-protocol-v1",
+    "replay_failure_policy": "fail_fast (no retry, no Z_prev substitution)",
+    "replay_match_rule": "exact equality of heldout, q_strict, S2, S3, num_params; nan_occurred False",
+    "replicates_by_k_true": {
+      "1": 4,
+      "3": 4,
+      "5": 8
+    },
+    "seed_rule": "historical data/split/model seed functions, unchanged",
+    "selector": "mean over the two starts per candidate K; best value; ties within 1e-12 -> smallest K (historical rule)",
+    "starts": [
+      1,
+      2
+    ],
+    "state_source": {
+      "npz_readonly": [
+        5
+      ],
+      "replay_exact": [
+        1,
+        3
+      ]
+    },
+    "stop_rules": [
+      "replay mismatch",
+      "npz mismatch beyond tolerance",
+      "any exception",
+      "non-finite C_Q/S1/S3",
+      "decomposition closure beyond tolerance"
+    ],
+    "test_ratio": 0.2
+  },
+  "protocol_hash": "237ff2853009e22a16c73b0095a5b7026d12b2b1b9879df05b872d94105f8859"
+}
