@@ -1,0 +1,593 @@
+{
+  "protocol_name": "multisupport_family_selection_20261006",
+  "task_type": "CHARACTERIZATION (controlled synthetic family-selection experiment; lineage E prototype, not adoptable for the manuscript)",
+  "research_question": "Within one support / base measure, can the continuous-Z candidate score recover the true per-column family among several valid candidates?",
+  "model": {
+    "z": "N(0, I_K)",
+    "eta_x": "f_l^T z_i (no intercept)",
+    "x": "canonical ExpFam_m(eta), dispersion 1 (Gaussian: dispersion form, sigma^2 estimated)",
+    "y": "Bernoulli(sigmoid(w0 + w z_i^T z_j)), i<j"
+  },
+  "K_true": 3,
+  "K_fit": 3,
+  "K_search": false,
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "L": 5,
+  "exploration_num_iter": 8,
+  "refit_num_iter": 8,
+  "newton_alpha": 0.5,
+  "scheme": "Phase 9C hybrid (Scheme C): A-type selection inside an exploration MCEM, then a fresh fixed-assignment refit that is reported",
+  "candidate_route": "trust_exact",
+  "candidate_optimizer": "scipy trust-exact (Newton trust region, exact analytic Hessian), maxiter 200, gtol 1e-10, for every non-Gaussian candidate; a NotEvaluable trial point is a rejected step; start = zero loading (A) or incumbent loading (MCEM exploration)",
+  "candidate_convergence_rule": "grad_inf <= 1e-8 recorded as a DIAGNOSTIC (WARNING), not a blocker",
+  "penalty": "none (equal free-parameter counts within every group; raw complete score; margin recorded)",
+  "registry": {
+    "poisson": {
+      "family_name": "poisson",
+      "candidate_model": "poisson",
+      "support_group": "GROUP_COUNT",
+      "hyperparameters": "",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "binomial_n2": {
+      "family_name": "binomial",
+      "candidate_model": "binomial_n2",
+      "support_group": "GROUP_COUNT",
+      "hyperparameters": "n_trials=2",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "cmp_nu2p0": {
+      "family_name": "com_poisson",
+      "candidate_model": "cmp_nu2p0",
+      "support_group": "GROUP_COUNT",
+      "hyperparameters": "nu=2.0",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "cmp_nu0p5": {
+      "family_name": "com_poisson",
+      "candidate_model": "cmp_nu0p5",
+      "support_group": "GROUP_COUNT",
+      "hyperparameters": "nu=0.5",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "ztp": {
+      "family_name": "zero_truncated_poisson",
+      "candidate_model": "ztp",
+      "support_group": "GROUP_COUNT",
+      "hyperparameters": "",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "lognormal_s1": {
+      "family_name": "lognormal",
+      "candidate_model": "lognormal_s1",
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "hyperparameters": "sigma=1.0",
+      "T_definition": "log x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "ptn_s1": {
+      "family_name": "positive_truncated_normal",
+      "candidate_model": "ptn_s1",
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "hyperparameters": "sigma=1.0",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "logitnormal_s1": {
+      "family_name": "logit_normal",
+      "candidate_model": "logitnormal_s1",
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "hyperparameters": "sigma=1.0",
+      "T_definition": "logit x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "cb": {
+      "family_name": "continuous_bernoulli",
+      "candidate_model": "cb",
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "hyperparameters": "",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "tn01_s0p25_c0p5": {
+      "family_name": "truncated_normal_01",
+      "candidate_model": "tn01_s0p25_c0p5",
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "hyperparameters": "center=0.5;sigma=0.25",
+      "T_definition": "x",
+      "eta_domain": "R",
+      "extra_free_parameters": 0,
+      "implementation_version": "family-specs-v1"
+    },
+    "gaussian": {
+      "family_name": "gaussian",
+      "candidate_model": "gaussian",
+      "support_group": "GROUP_REAL",
+      "hyperparameters": "",
+      "T_definition": "x (dispersion form, sigma^2 estimated)",
+      "eta_domain": "R",
+      "extra_free_parameters": 1,
+      "implementation_version": "family-specs-v1"
+    }
+  },
+  "priority": {
+    "GROUP_COUNT": [
+      "poisson",
+      "binomial_n2",
+      "cmp_nu2p0",
+      "cmp_nu0p5",
+      "ztp"
+    ],
+    "GROUP_POSITIVE_CONTINUOUS": [
+      "lognormal_s1",
+      "ptn_s1"
+    ],
+    "GROUP_BOUNDED_CONTINUOUS": [
+      "logitnormal_s1",
+      "cb",
+      "tn01_s0p25_c0p5"
+    ],
+    "GROUP_REAL": [
+      "gaussian"
+    ]
+  },
+  "priority_rationale": "Frozen before any selector run. Within each support group the conventional default for the data type comes first (Poisson for counts, log-normal for positive measurements, logit-normal for proportions), then the remaining candidates, with the truncated family last. SUPPORT_ONLY uses the first support-admissible candidate; START_FIRST / START_LAST use the first / last admissible candidate; an exact score tie is broken by this order.",
+  "support_only_rule": "first support-admissible candidate in the frozen priority of the column's Level-0 support group",
+  "starts": {
+    "START_FIRST": "first admissible candidate in priority",
+    "START_LAST": "last admissible candidate in priority"
+  },
+  "methods": [
+    "ORACLE",
+    "SUPPORT_ONLY",
+    "AUTO_START_FIRST",
+    "AUTO_START_LAST"
+  ],
+  "seed_rule": {
+    "data_seed": "STAGE_BLOCK*10_000_000 + EXP_BLOCK*1_000_000 + GROUP_INDEX*100_000 + DIFF_INDEX*10_000 + N_INDEX*1_000 + replicate",
+    "STAGE_BLOCK": {
+      "smoke": 1,
+      "pilot": 2,
+      "main": 3
+    },
+    "EXP_BLOCK": {
+      "AB": 0,
+      "C": 1
+    },
+    "GROUP_INDEX": {
+      "COUNT": 0,
+      "POSITIVE": 1,
+      "BOUNDED": 2,
+      "MIXED": 3
+    },
+    "DIFF_INDEX": {
+      "EASY": 0,
+      "HARD": 1
+    },
+    "N_INDEX": {
+      "40": 0,
+      "75": 1,
+      "150": 2
+    },
+    "search_seed": "data_seed*10 + 1 (exploration, shared by both starts)",
+    "refit_seed": "data_seed*10 + 2 (Auto refit, ORACLE and SUPPORT_ONLY)",
+    "selector_only": "deterministic, no RNG",
+    "A_and_B_share_datasets": true
+  },
+  "designs": {
+    "COUNT": {
+      "support_group": "GROUP_COUNT",
+      "columns": [
+        "poisson",
+        "poisson",
+        "poisson",
+        "binomial_n2",
+        "binomial_n2",
+        "binomial_n2",
+        "cmp_nu2p0",
+        "cmp_nu2p0",
+        "cmp_nu2p0",
+        "cmp_nu0p5",
+        "cmp_nu0p5",
+        "cmp_nu0p5",
+        "ztp",
+        "ztp",
+        "ztp"
+      ],
+      "d": 15,
+      "tau_by_difficulty": {
+        "EASY": [
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "HARD": [
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    "POSITIVE": {
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "columns": [
+        "lognormal_s1",
+        "lognormal_s1",
+        "lognormal_s1",
+        "ptn_s1",
+        "ptn_s1",
+        "ptn_s1"
+      ],
+      "d": 6,
+      "tau_by_difficulty": {
+        "EASY": [
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "HARD": [
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    "BOUNDED": {
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "columns": [
+        "logitnormal_s1",
+        "logitnormal_s1",
+        "logitnormal_s1",
+        "cb",
+        "cb",
+        "cb",
+        "tn01_s0p25_c0p5",
+        "tn01_s0p25_c0p5",
+        "tn01_s0p25_c0p5"
+      ],
+      "d": 9,
+      "tau_by_difficulty": {
+        "EASY": [
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        "HARD": [
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ]
+      }
+    },
+    "MIXED": {
+      "support_group": "MIXED",
+      "columns": [
+        "poisson",
+        "poisson",
+        "binomial_n2",
+        "binomial_n2",
+        "cmp_nu2p0",
+        "cmp_nu2p0",
+        "cmp_nu0p5",
+        "cmp_nu0p5",
+        "ztp",
+        "ztp",
+        "lognormal_s1",
+        "lognormal_s1",
+        "ptn_s1",
+        "ptn_s1",
+        "logitnormal_s1",
+        "logitnormal_s1",
+        "cb",
+        "cb",
+        "tn01_s0p25_c0p5",
+        "tn01_s0p25_c0p5",
+        "gaussian",
+        "gaussian"
+      ],
+      "d": 22,
+      "tau_by_difficulty": {
+        "EASY": [
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          1.0,
+          1.0
+        ],
+        "HARD": [
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  },
+  "information_matched_generator": "row l of F scaled by 1/sqrt(A''_{m_l}(0)); E_l||f_l||^2 A''(0) = tau",
+  "tau_real_mixed": 1.0,
+  "difficulty": {
+    "tau_grid": [
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "rule": "EASY = argmax_tau D_g(tau); HARD = argmin_tau D_g(tau); D_g = mean over true candidates of the smallest finite expected pointwise-projection KL to a same-group competitor",
+    "selection": {
+      "GROUP_COUNT": {
+        "EASY": 2.0,
+        "HARD": 0.25
+      },
+      "GROUP_POSITIVE_CONTINUOUS": {
+        "EASY": 2.0,
+        "HARD": 0.25
+      },
+      "GROUP_BOUNDED_CONTINUOUS": {
+        "EASY": 0.25,
+        "HARD": 2.0
+      }
+    },
+    "calibration_version": "difficulty-calibration-v1",
+    "gh_nodes": 10,
+    "note": "computed from distributions only, before any selector run; frozen"
+  },
+  "phases": {
+    "smoke": {
+      "stage": "smoke",
+      "experiments": [
+        "A",
+        "B",
+        "C"
+      ],
+      "n": [
+        40
+      ],
+      "replicates": [
+        1
+      ]
+    },
+    "pilot": {
+      "stage": "pilot",
+      "experiments": [
+        "A",
+        "B",
+        "C"
+      ],
+      "n": [
+        75
+      ],
+      "replicates": [
+        1,
+        2,
+        3
+      ]
+    },
+    "A_main": {
+      "stage": "main",
+      "experiments": [
+        "A"
+      ],
+      "n": [
+        75,
+        150
+      ],
+      "replicates": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
+    },
+    "B_main_r5": {
+      "stage": "main",
+      "experiments": [
+        "B"
+      ],
+      "n": [
+        75,
+        150
+      ],
+      "replicates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "C_main_r5": {
+      "stage": "main",
+      "experiments": [
+        "C"
+      ],
+      "n": [
+        75,
+        150
+      ],
+      "replicates": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "B_main_r10": {
+      "stage": "main",
+      "experiments": [
+        "B"
+      ],
+      "n": [
+        75,
+        150
+      ],
+      "replicates": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "C_main_r10": {
+      "stage": "main",
+      "experiments": [
+        "C"
+      ],
+      "n": [
+        75,
+        150
+      ],
+      "replicates": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  },
+  "extension_rule_r10": "run *_main_r10 only if the matching *_main_r5 phase has 0 UNEXPECTED_EXCEPTION cases and a numerical FAILURE fraction <= 10% of its fits",
+  "mixed_inclusion_rule": "every candidate model of B enters C unless B produced an UNEXPECTED_EXCEPTION attributable to it",
+  "metrics": {
+    "primary": [
+      "family recovery rate",
+      "candidate-model recovery rate",
+      "confusion matrix",
+      "RMSE(Z) after Procrustes (Phase 9C method)",
+      "Auto - Oracle RMSE gap",
+      "Auto - SupportOnly RMSE gap"
+    ],
+    "secondary": [
+      "score margin",
+      "start agreement",
+      "candidate optimiser convergence",
+      "failure rate",
+      "runtime"
+    ],
+    "recovery_scopes": [
+      "all columns (gate + score)",
+      "score-decided columns only"
+    ]
+  },
+  "failure_policy": "fail-fast; failures are completed outcomes; no retry, no reseed, no replacement, no clipping",
+  "claim_boundary": "controlled synthetic experiment with fixed nuisance hyperparameters; not general automatic distribution selection; not real data; K fixed"
+}

@@ -1,0 +1,23 @@
+{
+  "phase": "B_main_r5",
+  "gate": "Gate F (support-group MCEM, rep 1-5)",
+  "checked_utc": "2026-10-05T19:44:41.130459+00:00",
+  "expected_cases": 240,
+  "completed_cases": 240,
+  "missing_cases": [],
+  "failed_cases": [
+    "B__main__COUNT__EASY__n150__rep002__AUTO_START_FIRST",
+    "B__main__COUNT__EASY__n150__rep003__AUTO_START_FIRST",
+    "B__main__COUNT__EASY__n150__rep003__AUTO_START_LAST",
+    "B__main__COUNT__EASY__n150__rep004__AUTO_START_FIRST",
+    "B__main__COUNT__EASY__n150__rep005__AUTO_START_FIRST",
+    "B__main__COUNT__EASY__n150__rep005__AUTO_START_LAST",
+    "B__main__POSITIVE__EASY__n150__rep005__AUTO_START_LAST"
+  ],
+  "unexpected_exception_cases": [],
+  "fit_cases": 240,
+  "fit_failures": 7,
+  "fit_failure_fraction": 0.029166666666666667,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

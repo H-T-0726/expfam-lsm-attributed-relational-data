@@ -1,0 +1,272 @@
+{
+  "case": {
+    "experiment": "C",
+    "stage": "main",
+    "group": "MIXED",
+    "difficulty": "HARD",
+    "n": 150,
+    "replicate": 5,
+    "phase": "C_main_r5",
+    "exp_block": "C",
+    "method": "SUPPORT_ONLY",
+    "case_id": "C__main__MIXED__HARD__n150__rep005__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "C",
+        "stage": "main",
+        "phase": "C_main_r5",
+        "condition": "MIXED|HARD|n150",
+        "group_design": "MIXED",
+        "difficulty": "HARD",
+        "n": 150,
+        "replicate": 5,
+        "method": "SUPPORT_ONLY",
+        "case_id": "C__main__MIXED__HARD__n150__rep005__SUPPORT_ONLY",
+        "data_seed": 31312005,
+        "d": 22,
+        "K": 3,
+        "final_Q": -9020.671519321191,
+        "criterion_field_bic_ICL_type": 18367.034332758638,
+        "num_params": 65,
+        "rmse_Z": 0.3213156188407404,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|gaussian|gaussian",
+        "final_assignment": "poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|poisson|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|gaussian|gaussian",
+        "true_assignment": "poisson|poisson|binomial_n2|binomial_n2|cmp_nu2p0|cmp_nu2p0|cmp_nu0p5|cmp_nu0p5|ztp|ztp|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|logitnormal_s1|logitnormal_s1|cb|cb|tn01_s0p25_c0p5|tn01_s0p25_c0p5|gaussian|gaussian",
+        "n_correct_candidate": 8,
+        "n_correct_family": 8,
+        "fit_seed": 313120052,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -1.0214348067704817,
+        "w_est": 0.8411184700559831,
+        "runtime_seconds": 50.536,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:58:57.996607+00:00",
+  "dataset_key": "C_main_MIXED_HARD_n150_rep005",
+  "dataset_path": "data\\dataset_C_main_MIXED_HARD_n150_rep005.npz",
+  "dataset_created": false,
+  "dataset_sha256": "811600ca4895998ec85f1f196c631e2d1b5a5e99eef3e3e08ff04b9057c5b454",
+  "seeds": {
+    "data_seed": 31312005,
+    "search_seed": 313120051,
+    "refit_seed": 313120052
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "ztp",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "ztp",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 6,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 7,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 8,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5|ztp",
+      "inadmissible": "binomial_n2",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 9,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5|ztp",
+      "inadmissible": "binomial_n2",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 10,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 11,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 12,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 13,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 14,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 15,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 16,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 17,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 18,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 19,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 20,
+      "support_group": "GROUP_REAL",
+      "group_candidates": "gaussian",
+      "admissible": "gaussian",
+      "inadmissible": "",
+      "n_admissible": 1,
+      "decided_by": "gate"
+    },
+    {
+      "column": 21,
+      "support_group": "GROUP_REAL",
+      "group_candidates": "gaussian",
+      "admissible": "gaussian",
+      "inadmissible": "",
+      "n_admissible": 1,
+      "decided_by": "gate"
+    }
+  ],
+  "fit_artifact": "data\\fits\\C__main__MIXED__HARD__n150__rep005__SUPPORT_ONLY.npz",
+  "runtime_seconds": 50.536,
+  "finished_utc": "2026-10-05T19:59:48.532313+00:00"
+}

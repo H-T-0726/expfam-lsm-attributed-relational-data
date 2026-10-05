@@ -1,0 +1,128 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_POSITIVE_CONTINUOUS",
+    "difficulty": "EASY",
+    "n": 150,
+    "replicate": 7,
+    "phase": "B_main_r10",
+    "exp_block": "AB",
+    "method": "ORACLE",
+    "case_id": "B__main__POSITIVE__EASY__n150__rep007__ORACLE"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r10",
+        "condition": "POSITIVE|EASY|n150",
+        "group_design": "POSITIVE",
+        "difficulty": "EASY",
+        "n": 150,
+        "replicate": 7,
+        "method": "ORACLE",
+        "case_id": "B__main__POSITIVE__EASY__n150__rep007__ORACLE",
+        "data_seed": 30102007,
+        "d": 6,
+        "K": 3,
+        "final_Q": -6507.346033642931,
+        "criterion_field_bic_ICL_type": 13089.851596697305,
+        "num_params": 15,
+        "rmse_Z": 0.3017166323987527,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "final_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "true_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "n_correct_candidate": 6,
+        "n_correct_family": 6,
+        "fit_seed": 301020072,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9778355926541279,
+        "w_est": 1.1885679543840877,
+        "runtime_seconds": 48.063,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T20:29:04.955174+00:00",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep007",
+  "dataset_path": "data\\dataset_AB_main_POSITIVE_EASY_n150_rep007.npz",
+  "dataset_created": false,
+  "dataset_sha256": "fe718f58a9b86e23ca23fd13e115fcd2280128bce322dc8240678347f8048f9b",
+  "seeds": {
+    "data_seed": 30102007,
+    "search_seed": 301020071,
+    "refit_seed": 301020072
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__POSITIVE__EASY__n150__rep007__ORACLE.npz",
+  "runtime_seconds": 48.063,
+  "finished_utc": "2026-10-05T20:29:53.018249+00:00"
+}

@@ -1,0 +1,1597 @@
+{
+  "protocol_sha256": "405fc22f6743f86b785df7be44bb2a428101903652d3f5ba37cc21aa72ac376b",
+  "rule": {
+    "data_seed": "STAGE_BLOCK*10_000_000 + EXP_BLOCK*1_000_000 + GROUP_INDEX*100_000 + DIFF_INDEX*10_000 + N_INDEX*1_000 + replicate",
+    "STAGE_BLOCK": {
+      "smoke": 1,
+      "pilot": 2,
+      "main": 3
+    },
+    "EXP_BLOCK": {
+      "AB": 0,
+      "C": 1
+    },
+    "GROUP_INDEX": {
+      "COUNT": 0,
+      "POSITIVE": 1,
+      "BOUNDED": 2,
+      "MIXED": 3
+    },
+    "DIFF_INDEX": {
+      "EASY": 0,
+      "HARD": 1
+    },
+    "N_INDEX": {
+      "40": 0,
+      "75": 1,
+      "150": 2
+    },
+    "search_seed": "data_seed*10 + 1 (exploration, shared by both starts)",
+    "refit_seed": "data_seed*10 + 2 (Auto refit, ORACLE and SUPPORT_ONLY)",
+    "selector_only": "deterministic, no RNG",
+    "A_and_B_share_datasets": true
+  },
+  "datasets": {
+    "AB_smoke_COUNT_EASY_n40_rep001": {
+      "data_seed": 10000001,
+      "search_seed": 100000011,
+      "refit_seed": 100000012
+    },
+    "AB_smoke_COUNT_HARD_n40_rep001": {
+      "data_seed": 10010001,
+      "search_seed": 100100011,
+      "refit_seed": 100100012
+    },
+    "AB_smoke_POSITIVE_EASY_n40_rep001": {
+      "data_seed": 10100001,
+      "search_seed": 101000011,
+      "refit_seed": 101000012
+    },
+    "AB_smoke_POSITIVE_HARD_n40_rep001": {
+      "data_seed": 10110001,
+      "search_seed": 101100011,
+      "refit_seed": 101100012
+    },
+    "AB_smoke_BOUNDED_EASY_n40_rep001": {
+      "data_seed": 10200001,
+      "search_seed": 102000011,
+      "refit_seed": 102000012
+    },
+    "AB_smoke_BOUNDED_HARD_n40_rep001": {
+      "data_seed": 10210001,
+      "search_seed": 102100011,
+      "refit_seed": 102100012
+    },
+    "C_smoke_MIXED_EASY_n40_rep001": {
+      "data_seed": 11300001,
+      "search_seed": 113000011,
+      "refit_seed": 113000012
+    },
+    "C_smoke_MIXED_HARD_n40_rep001": {
+      "data_seed": 11310001,
+      "search_seed": 113100011,
+      "refit_seed": 113100012
+    },
+    "AB_pilot_COUNT_EASY_n75_rep001": {
+      "data_seed": 20001001,
+      "search_seed": 200010011,
+      "refit_seed": 200010012
+    },
+    "AB_pilot_COUNT_EASY_n75_rep002": {
+      "data_seed": 20001002,
+      "search_seed": 200010021,
+      "refit_seed": 200010022
+    },
+    "AB_pilot_COUNT_EASY_n75_rep003": {
+      "data_seed": 20001003,
+      "search_seed": 200010031,
+      "refit_seed": 200010032
+    },
+    "AB_pilot_COUNT_HARD_n75_rep001": {
+      "data_seed": 20011001,
+      "search_seed": 200110011,
+      "refit_seed": 200110012
+    },
+    "AB_pilot_COUNT_HARD_n75_rep002": {
+      "data_seed": 20011002,
+      "search_seed": 200110021,
+      "refit_seed": 200110022
+    },
+    "AB_pilot_COUNT_HARD_n75_rep003": {
+      "data_seed": 20011003,
+      "search_seed": 200110031,
+      "refit_seed": 200110032
+    },
+    "AB_pilot_POSITIVE_EASY_n75_rep001": {
+      "data_seed": 20101001,
+      "search_seed": 201010011,
+      "refit_seed": 201010012
+    },
+    "AB_pilot_POSITIVE_EASY_n75_rep002": {
+      "data_seed": 20101002,
+      "search_seed": 201010021,
+      "refit_seed": 201010022
+    },
+    "AB_pilot_POSITIVE_EASY_n75_rep003": {
+      "data_seed": 20101003,
+      "search_seed": 201010031,
+      "refit_seed": 201010032
+    },
+    "AB_pilot_POSITIVE_HARD_n75_rep001": {
+      "data_seed": 20111001,
+      "search_seed": 201110011,
+      "refit_seed": 201110012
+    },
+    "AB_pilot_POSITIVE_HARD_n75_rep002": {
+      "data_seed": 20111002,
+      "search_seed": 201110021,
+      "refit_seed": 201110022
+    },
+    "AB_pilot_POSITIVE_HARD_n75_rep003": {
+      "data_seed": 20111003,
+      "search_seed": 201110031,
+      "refit_seed": 201110032
+    },
+    "AB_pilot_BOUNDED_EASY_n75_rep001": {
+      "data_seed": 20201001,
+      "search_seed": 202010011,
+      "refit_seed": 202010012
+    },
+    "AB_pilot_BOUNDED_EASY_n75_rep002": {
+      "data_seed": 20201002,
+      "search_seed": 202010021,
+      "refit_seed": 202010022
+    },
+    "AB_pilot_BOUNDED_EASY_n75_rep003": {
+      "data_seed": 20201003,
+      "search_seed": 202010031,
+      "refit_seed": 202010032
+    },
+    "AB_pilot_BOUNDED_HARD_n75_rep001": {
+      "data_seed": 20211001,
+      "search_seed": 202110011,
+      "refit_seed": 202110012
+    },
+    "AB_pilot_BOUNDED_HARD_n75_rep002": {
+      "data_seed": 20211002,
+      "search_seed": 202110021,
+      "refit_seed": 202110022
+    },
+    "AB_pilot_BOUNDED_HARD_n75_rep003": {
+      "data_seed": 20211003,
+      "search_seed": 202110031,
+      "refit_seed": 202110032
+    },
+    "C_pilot_MIXED_EASY_n75_rep001": {
+      "data_seed": 21301001,
+      "search_seed": 213010011,
+      "refit_seed": 213010012
+    },
+    "C_pilot_MIXED_EASY_n75_rep002": {
+      "data_seed": 21301002,
+      "search_seed": 213010021,
+      "refit_seed": 213010022
+    },
+    "C_pilot_MIXED_EASY_n75_rep003": {
+      "data_seed": 21301003,
+      "search_seed": 213010031,
+      "refit_seed": 213010032
+    },
+    "C_pilot_MIXED_HARD_n75_rep001": {
+      "data_seed": 21311001,
+      "search_seed": 213110011,
+      "refit_seed": 213110012
+    },
+    "C_pilot_MIXED_HARD_n75_rep002": {
+      "data_seed": 21311002,
+      "search_seed": 213110021,
+      "refit_seed": 213110022
+    },
+    "C_pilot_MIXED_HARD_n75_rep003": {
+      "data_seed": 21311003,
+      "search_seed": 213110031,
+      "refit_seed": 213110032
+    },
+    "AB_main_COUNT_EASY_n75_rep001": {
+      "data_seed": 30001001,
+      "search_seed": 300010011,
+      "refit_seed": 300010012
+    },
+    "AB_main_COUNT_EASY_n75_rep002": {
+      "data_seed": 30001002,
+      "search_seed": 300010021,
+      "refit_seed": 300010022
+    },
+    "AB_main_COUNT_EASY_n75_rep003": {
+      "data_seed": 30001003,
+      "search_seed": 300010031,
+      "refit_seed": 300010032
+    },
+    "AB_main_COUNT_EASY_n75_rep004": {
+      "data_seed": 30001004,
+      "search_seed": 300010041,
+      "refit_seed": 300010042
+    },
+    "AB_main_COUNT_EASY_n75_rep005": {
+      "data_seed": 30001005,
+      "search_seed": 300010051,
+      "refit_seed": 300010052
+    },
+    "AB_main_COUNT_EASY_n75_rep006": {
+      "data_seed": 30001006,
+      "search_seed": 300010061,
+      "refit_seed": 300010062
+    },
+    "AB_main_COUNT_EASY_n75_rep007": {
+      "data_seed": 30001007,
+      "search_seed": 300010071,
+      "refit_seed": 300010072
+    },
+    "AB_main_COUNT_EASY_n75_rep008": {
+      "data_seed": 30001008,
+      "search_seed": 300010081,
+      "refit_seed": 300010082
+    },
+    "AB_main_COUNT_EASY_n75_rep009": {
+      "data_seed": 30001009,
+      "search_seed": 300010091,
+      "refit_seed": 300010092
+    },
+    "AB_main_COUNT_EASY_n75_rep010": {
+      "data_seed": 30001010,
+      "search_seed": 300010101,
+      "refit_seed": 300010102
+    },
+    "AB_main_COUNT_EASY_n75_rep011": {
+      "data_seed": 30001011,
+      "search_seed": 300010111,
+      "refit_seed": 300010112
+    },
+    "AB_main_COUNT_EASY_n75_rep012": {
+      "data_seed": 30001012,
+      "search_seed": 300010121,
+      "refit_seed": 300010122
+    },
+    "AB_main_COUNT_EASY_n75_rep013": {
+      "data_seed": 30001013,
+      "search_seed": 300010131,
+      "refit_seed": 300010132
+    },
+    "AB_main_COUNT_EASY_n75_rep014": {
+      "data_seed": 30001014,
+      "search_seed": 300010141,
+      "refit_seed": 300010142
+    },
+    "AB_main_COUNT_EASY_n75_rep015": {
+      "data_seed": 30001015,
+      "search_seed": 300010151,
+      "refit_seed": 300010152
+    },
+    "AB_main_COUNT_EASY_n75_rep016": {
+      "data_seed": 30001016,
+      "search_seed": 300010161,
+      "refit_seed": 300010162
+    },
+    "AB_main_COUNT_EASY_n75_rep017": {
+      "data_seed": 30001017,
+      "search_seed": 300010171,
+      "refit_seed": 300010172
+    },
+    "AB_main_COUNT_EASY_n75_rep018": {
+      "data_seed": 30001018,
+      "search_seed": 300010181,
+      "refit_seed": 300010182
+    },
+    "AB_main_COUNT_EASY_n75_rep019": {
+      "data_seed": 30001019,
+      "search_seed": 300010191,
+      "refit_seed": 300010192
+    },
+    "AB_main_COUNT_EASY_n75_rep020": {
+      "data_seed": 30001020,
+      "search_seed": 300010201,
+      "refit_seed": 300010202
+    },
+    "AB_main_COUNT_EASY_n150_rep001": {
+      "data_seed": 30002001,
+      "search_seed": 300020011,
+      "refit_seed": 300020012
+    },
+    "AB_main_COUNT_EASY_n150_rep002": {
+      "data_seed": 30002002,
+      "search_seed": 300020021,
+      "refit_seed": 300020022
+    },
+    "AB_main_COUNT_EASY_n150_rep003": {
+      "data_seed": 30002003,
+      "search_seed": 300020031,
+      "refit_seed": 300020032
+    },
+    "AB_main_COUNT_EASY_n150_rep004": {
+      "data_seed": 30002004,
+      "search_seed": 300020041,
+      "refit_seed": 300020042
+    },
+    "AB_main_COUNT_EASY_n150_rep005": {
+      "data_seed": 30002005,
+      "search_seed": 300020051,
+      "refit_seed": 300020052
+    },
+    "AB_main_COUNT_EASY_n150_rep006": {
+      "data_seed": 30002006,
+      "search_seed": 300020061,
+      "refit_seed": 300020062
+    },
+    "AB_main_COUNT_EASY_n150_rep007": {
+      "data_seed": 30002007,
+      "search_seed": 300020071,
+      "refit_seed": 300020072
+    },
+    "AB_main_COUNT_EASY_n150_rep008": {
+      "data_seed": 30002008,
+      "search_seed": 300020081,
+      "refit_seed": 300020082
+    },
+    "AB_main_COUNT_EASY_n150_rep009": {
+      "data_seed": 30002009,
+      "search_seed": 300020091,
+      "refit_seed": 300020092
+    },
+    "AB_main_COUNT_EASY_n150_rep010": {
+      "data_seed": 30002010,
+      "search_seed": 300020101,
+      "refit_seed": 300020102
+    },
+    "AB_main_COUNT_EASY_n150_rep011": {
+      "data_seed": 30002011,
+      "search_seed": 300020111,
+      "refit_seed": 300020112
+    },
+    "AB_main_COUNT_EASY_n150_rep012": {
+      "data_seed": 30002012,
+      "search_seed": 300020121,
+      "refit_seed": 300020122
+    },
+    "AB_main_COUNT_EASY_n150_rep013": {
+      "data_seed": 30002013,
+      "search_seed": 300020131,
+      "refit_seed": 300020132
+    },
+    "AB_main_COUNT_EASY_n150_rep014": {
+      "data_seed": 30002014,
+      "search_seed": 300020141,
+      "refit_seed": 300020142
+    },
+    "AB_main_COUNT_EASY_n150_rep015": {
+      "data_seed": 30002015,
+      "search_seed": 300020151,
+      "refit_seed": 300020152
+    },
+    "AB_main_COUNT_EASY_n150_rep016": {
+      "data_seed": 30002016,
+      "search_seed": 300020161,
+      "refit_seed": 300020162
+    },
+    "AB_main_COUNT_EASY_n150_rep017": {
+      "data_seed": 30002017,
+      "search_seed": 300020171,
+      "refit_seed": 300020172
+    },
+    "AB_main_COUNT_EASY_n150_rep018": {
+      "data_seed": 30002018,
+      "search_seed": 300020181,
+      "refit_seed": 300020182
+    },
+    "AB_main_COUNT_EASY_n150_rep019": {
+      "data_seed": 30002019,
+      "search_seed": 300020191,
+      "refit_seed": 300020192
+    },
+    "AB_main_COUNT_EASY_n150_rep020": {
+      "data_seed": 30002020,
+      "search_seed": 300020201,
+      "refit_seed": 300020202
+    },
+    "AB_main_COUNT_HARD_n75_rep001": {
+      "data_seed": 30011001,
+      "search_seed": 300110011,
+      "refit_seed": 300110012
+    },
+    "AB_main_COUNT_HARD_n75_rep002": {
+      "data_seed": 30011002,
+      "search_seed": 300110021,
+      "refit_seed": 300110022
+    },
+    "AB_main_COUNT_HARD_n75_rep003": {
+      "data_seed": 30011003,
+      "search_seed": 300110031,
+      "refit_seed": 300110032
+    },
+    "AB_main_COUNT_HARD_n75_rep004": {
+      "data_seed": 30011004,
+      "search_seed": 300110041,
+      "refit_seed": 300110042
+    },
+    "AB_main_COUNT_HARD_n75_rep005": {
+      "data_seed": 30011005,
+      "search_seed": 300110051,
+      "refit_seed": 300110052
+    },
+    "AB_main_COUNT_HARD_n75_rep006": {
+      "data_seed": 30011006,
+      "search_seed": 300110061,
+      "refit_seed": 300110062
+    },
+    "AB_main_COUNT_HARD_n75_rep007": {
+      "data_seed": 30011007,
+      "search_seed": 300110071,
+      "refit_seed": 300110072
+    },
+    "AB_main_COUNT_HARD_n75_rep008": {
+      "data_seed": 30011008,
+      "search_seed": 300110081,
+      "refit_seed": 300110082
+    },
+    "AB_main_COUNT_HARD_n75_rep009": {
+      "data_seed": 30011009,
+      "search_seed": 300110091,
+      "refit_seed": 300110092
+    },
+    "AB_main_COUNT_HARD_n75_rep010": {
+      "data_seed": 30011010,
+      "search_seed": 300110101,
+      "refit_seed": 300110102
+    },
+    "AB_main_COUNT_HARD_n75_rep011": {
+      "data_seed": 30011011,
+      "search_seed": 300110111,
+      "refit_seed": 300110112
+    },
+    "AB_main_COUNT_HARD_n75_rep012": {
+      "data_seed": 30011012,
+      "search_seed": 300110121,
+      "refit_seed": 300110122
+    },
+    "AB_main_COUNT_HARD_n75_rep013": {
+      "data_seed": 30011013,
+      "search_seed": 300110131,
+      "refit_seed": 300110132
+    },
+    "AB_main_COUNT_HARD_n75_rep014": {
+      "data_seed": 30011014,
+      "search_seed": 300110141,
+      "refit_seed": 300110142
+    },
+    "AB_main_COUNT_HARD_n75_rep015": {
+      "data_seed": 30011015,
+      "search_seed": 300110151,
+      "refit_seed": 300110152
+    },
+    "AB_main_COUNT_HARD_n75_rep016": {
+      "data_seed": 30011016,
+      "search_seed": 300110161,
+      "refit_seed": 300110162
+    },
+    "AB_main_COUNT_HARD_n75_rep017": {
+      "data_seed": 30011017,
+      "search_seed": 300110171,
+      "refit_seed": 300110172
+    },
+    "AB_main_COUNT_HARD_n75_rep018": {
+      "data_seed": 30011018,
+      "search_seed": 300110181,
+      "refit_seed": 300110182
+    },
+    "AB_main_COUNT_HARD_n75_rep019": {
+      "data_seed": 30011019,
+      "search_seed": 300110191,
+      "refit_seed": 300110192
+    },
+    "AB_main_COUNT_HARD_n75_rep020": {
+      "data_seed": 30011020,
+      "search_seed": 300110201,
+      "refit_seed": 300110202
+    },
+    "AB_main_COUNT_HARD_n150_rep001": {
+      "data_seed": 30012001,
+      "search_seed": 300120011,
+      "refit_seed": 300120012
+    },
+    "AB_main_COUNT_HARD_n150_rep002": {
+      "data_seed": 30012002,
+      "search_seed": 300120021,
+      "refit_seed": 300120022
+    },
+    "AB_main_COUNT_HARD_n150_rep003": {
+      "data_seed": 30012003,
+      "search_seed": 300120031,
+      "refit_seed": 300120032
+    },
+    "AB_main_COUNT_HARD_n150_rep004": {
+      "data_seed": 30012004,
+      "search_seed": 300120041,
+      "refit_seed": 300120042
+    },
+    "AB_main_COUNT_HARD_n150_rep005": {
+      "data_seed": 30012005,
+      "search_seed": 300120051,
+      "refit_seed": 300120052
+    },
+    "AB_main_COUNT_HARD_n150_rep006": {
+      "data_seed": 30012006,
+      "search_seed": 300120061,
+      "refit_seed": 300120062
+    },
+    "AB_main_COUNT_HARD_n150_rep007": {
+      "data_seed": 30012007,
+      "search_seed": 300120071,
+      "refit_seed": 300120072
+    },
+    "AB_main_COUNT_HARD_n150_rep008": {
+      "data_seed": 30012008,
+      "search_seed": 300120081,
+      "refit_seed": 300120082
+    },
+    "AB_main_COUNT_HARD_n150_rep009": {
+      "data_seed": 30012009,
+      "search_seed": 300120091,
+      "refit_seed": 300120092
+    },
+    "AB_main_COUNT_HARD_n150_rep010": {
+      "data_seed": 30012010,
+      "search_seed": 300120101,
+      "refit_seed": 300120102
+    },
+    "AB_main_COUNT_HARD_n150_rep011": {
+      "data_seed": 30012011,
+      "search_seed": 300120111,
+      "refit_seed": 300120112
+    },
+    "AB_main_COUNT_HARD_n150_rep012": {
+      "data_seed": 30012012,
+      "search_seed": 300120121,
+      "refit_seed": 300120122
+    },
+    "AB_main_COUNT_HARD_n150_rep013": {
+      "data_seed": 30012013,
+      "search_seed": 300120131,
+      "refit_seed": 300120132
+    },
+    "AB_main_COUNT_HARD_n150_rep014": {
+      "data_seed": 30012014,
+      "search_seed": 300120141,
+      "refit_seed": 300120142
+    },
+    "AB_main_COUNT_HARD_n150_rep015": {
+      "data_seed": 30012015,
+      "search_seed": 300120151,
+      "refit_seed": 300120152
+    },
+    "AB_main_COUNT_HARD_n150_rep016": {
+      "data_seed": 30012016,
+      "search_seed": 300120161,
+      "refit_seed": 300120162
+    },
+    "AB_main_COUNT_HARD_n150_rep017": {
+      "data_seed": 30012017,
+      "search_seed": 300120171,
+      "refit_seed": 300120172
+    },
+    "AB_main_COUNT_HARD_n150_rep018": {
+      "data_seed": 30012018,
+      "search_seed": 300120181,
+      "refit_seed": 300120182
+    },
+    "AB_main_COUNT_HARD_n150_rep019": {
+      "data_seed": 30012019,
+      "search_seed": 300120191,
+      "refit_seed": 300120192
+    },
+    "AB_main_COUNT_HARD_n150_rep020": {
+      "data_seed": 30012020,
+      "search_seed": 300120201,
+      "refit_seed": 300120202
+    },
+    "AB_main_POSITIVE_EASY_n75_rep001": {
+      "data_seed": 30101001,
+      "search_seed": 301010011,
+      "refit_seed": 301010012
+    },
+    "AB_main_POSITIVE_EASY_n75_rep002": {
+      "data_seed": 30101002,
+      "search_seed": 301010021,
+      "refit_seed": 301010022
+    },
+    "AB_main_POSITIVE_EASY_n75_rep003": {
+      "data_seed": 30101003,
+      "search_seed": 301010031,
+      "refit_seed": 301010032
+    },
+    "AB_main_POSITIVE_EASY_n75_rep004": {
+      "data_seed": 30101004,
+      "search_seed": 301010041,
+      "refit_seed": 301010042
+    },
+    "AB_main_POSITIVE_EASY_n75_rep005": {
+      "data_seed": 30101005,
+      "search_seed": 301010051,
+      "refit_seed": 301010052
+    },
+    "AB_main_POSITIVE_EASY_n75_rep006": {
+      "data_seed": 30101006,
+      "search_seed": 301010061,
+      "refit_seed": 301010062
+    },
+    "AB_main_POSITIVE_EASY_n75_rep007": {
+      "data_seed": 30101007,
+      "search_seed": 301010071,
+      "refit_seed": 301010072
+    },
+    "AB_main_POSITIVE_EASY_n75_rep008": {
+      "data_seed": 30101008,
+      "search_seed": 301010081,
+      "refit_seed": 301010082
+    },
+    "AB_main_POSITIVE_EASY_n75_rep009": {
+      "data_seed": 30101009,
+      "search_seed": 301010091,
+      "refit_seed": 301010092
+    },
+    "AB_main_POSITIVE_EASY_n75_rep010": {
+      "data_seed": 30101010,
+      "search_seed": 301010101,
+      "refit_seed": 301010102
+    },
+    "AB_main_POSITIVE_EASY_n75_rep011": {
+      "data_seed": 30101011,
+      "search_seed": 301010111,
+      "refit_seed": 301010112
+    },
+    "AB_main_POSITIVE_EASY_n75_rep012": {
+      "data_seed": 30101012,
+      "search_seed": 301010121,
+      "refit_seed": 301010122
+    },
+    "AB_main_POSITIVE_EASY_n75_rep013": {
+      "data_seed": 30101013,
+      "search_seed": 301010131,
+      "refit_seed": 301010132
+    },
+    "AB_main_POSITIVE_EASY_n75_rep014": {
+      "data_seed": 30101014,
+      "search_seed": 301010141,
+      "refit_seed": 301010142
+    },
+    "AB_main_POSITIVE_EASY_n75_rep015": {
+      "data_seed": 30101015,
+      "search_seed": 301010151,
+      "refit_seed": 301010152
+    },
+    "AB_main_POSITIVE_EASY_n75_rep016": {
+      "data_seed": 30101016,
+      "search_seed": 301010161,
+      "refit_seed": 301010162
+    },
+    "AB_main_POSITIVE_EASY_n75_rep017": {
+      "data_seed": 30101017,
+      "search_seed": 301010171,
+      "refit_seed": 301010172
+    },
+    "AB_main_POSITIVE_EASY_n75_rep018": {
+      "data_seed": 30101018,
+      "search_seed": 301010181,
+      "refit_seed": 301010182
+    },
+    "AB_main_POSITIVE_EASY_n75_rep019": {
+      "data_seed": 30101019,
+      "search_seed": 301010191,
+      "refit_seed": 301010192
+    },
+    "AB_main_POSITIVE_EASY_n75_rep020": {
+      "data_seed": 30101020,
+      "search_seed": 301010201,
+      "refit_seed": 301010202
+    },
+    "AB_main_POSITIVE_EASY_n150_rep001": {
+      "data_seed": 30102001,
+      "search_seed": 301020011,
+      "refit_seed": 301020012
+    },
+    "AB_main_POSITIVE_EASY_n150_rep002": {
+      "data_seed": 30102002,
+      "search_seed": 301020021,
+      "refit_seed": 301020022
+    },
+    "AB_main_POSITIVE_EASY_n150_rep003": {
+      "data_seed": 30102003,
+      "search_seed": 301020031,
+      "refit_seed": 301020032
+    },
+    "AB_main_POSITIVE_EASY_n150_rep004": {
+      "data_seed": 30102004,
+      "search_seed": 301020041,
+      "refit_seed": 301020042
+    },
+    "AB_main_POSITIVE_EASY_n150_rep005": {
+      "data_seed": 30102005,
+      "search_seed": 301020051,
+      "refit_seed": 301020052
+    },
+    "AB_main_POSITIVE_EASY_n150_rep006": {
+      "data_seed": 30102006,
+      "search_seed": 301020061,
+      "refit_seed": 301020062
+    },
+    "AB_main_POSITIVE_EASY_n150_rep007": {
+      "data_seed": 30102007,
+      "search_seed": 301020071,
+      "refit_seed": 301020072
+    },
+    "AB_main_POSITIVE_EASY_n150_rep008": {
+      "data_seed": 30102008,
+      "search_seed": 301020081,
+      "refit_seed": 301020082
+    },
+    "AB_main_POSITIVE_EASY_n150_rep009": {
+      "data_seed": 30102009,
+      "search_seed": 301020091,
+      "refit_seed": 301020092
+    },
+    "AB_main_POSITIVE_EASY_n150_rep010": {
+      "data_seed": 30102010,
+      "search_seed": 301020101,
+      "refit_seed": 301020102
+    },
+    "AB_main_POSITIVE_EASY_n150_rep011": {
+      "data_seed": 30102011,
+      "search_seed": 301020111,
+      "refit_seed": 301020112
+    },
+    "AB_main_POSITIVE_EASY_n150_rep012": {
+      "data_seed": 30102012,
+      "search_seed": 301020121,
+      "refit_seed": 301020122
+    },
+    "AB_main_POSITIVE_EASY_n150_rep013": {
+      "data_seed": 30102013,
+      "search_seed": 301020131,
+      "refit_seed": 301020132
+    },
+    "AB_main_POSITIVE_EASY_n150_rep014": {
+      "data_seed": 30102014,
+      "search_seed": 301020141,
+      "refit_seed": 301020142
+    },
+    "AB_main_POSITIVE_EASY_n150_rep015": {
+      "data_seed": 30102015,
+      "search_seed": 301020151,
+      "refit_seed": 301020152
+    },
+    "AB_main_POSITIVE_EASY_n150_rep016": {
+      "data_seed": 30102016,
+      "search_seed": 301020161,
+      "refit_seed": 301020162
+    },
+    "AB_main_POSITIVE_EASY_n150_rep017": {
+      "data_seed": 30102017,
+      "search_seed": 301020171,
+      "refit_seed": 301020172
+    },
+    "AB_main_POSITIVE_EASY_n150_rep018": {
+      "data_seed": 30102018,
+      "search_seed": 301020181,
+      "refit_seed": 301020182
+    },
+    "AB_main_POSITIVE_EASY_n150_rep019": {
+      "data_seed": 30102019,
+      "search_seed": 301020191,
+      "refit_seed": 301020192
+    },
+    "AB_main_POSITIVE_EASY_n150_rep020": {
+      "data_seed": 30102020,
+      "search_seed": 301020201,
+      "refit_seed": 301020202
+    },
+    "AB_main_POSITIVE_HARD_n75_rep001": {
+      "data_seed": 30111001,
+      "search_seed": 301110011,
+      "refit_seed": 301110012
+    },
+    "AB_main_POSITIVE_HARD_n75_rep002": {
+      "data_seed": 30111002,
+      "search_seed": 301110021,
+      "refit_seed": 301110022
+    },
+    "AB_main_POSITIVE_HARD_n75_rep003": {
+      "data_seed": 30111003,
+      "search_seed": 301110031,
+      "refit_seed": 301110032
+    },
+    "AB_main_POSITIVE_HARD_n75_rep004": {
+      "data_seed": 30111004,
+      "search_seed": 301110041,
+      "refit_seed": 301110042
+    },
+    "AB_main_POSITIVE_HARD_n75_rep005": {
+      "data_seed": 30111005,
+      "search_seed": 301110051,
+      "refit_seed": 301110052
+    },
+    "AB_main_POSITIVE_HARD_n75_rep006": {
+      "data_seed": 30111006,
+      "search_seed": 301110061,
+      "refit_seed": 301110062
+    },
+    "AB_main_POSITIVE_HARD_n75_rep007": {
+      "data_seed": 30111007,
+      "search_seed": 301110071,
+      "refit_seed": 301110072
+    },
+    "AB_main_POSITIVE_HARD_n75_rep008": {
+      "data_seed": 30111008,
+      "search_seed": 301110081,
+      "refit_seed": 301110082
+    },
+    "AB_main_POSITIVE_HARD_n75_rep009": {
+      "data_seed": 30111009,
+      "search_seed": 301110091,
+      "refit_seed": 301110092
+    },
+    "AB_main_POSITIVE_HARD_n75_rep010": {
+      "data_seed": 30111010,
+      "search_seed": 301110101,
+      "refit_seed": 301110102
+    },
+    "AB_main_POSITIVE_HARD_n75_rep011": {
+      "data_seed": 30111011,
+      "search_seed": 301110111,
+      "refit_seed": 301110112
+    },
+    "AB_main_POSITIVE_HARD_n75_rep012": {
+      "data_seed": 30111012,
+      "search_seed": 301110121,
+      "refit_seed": 301110122
+    },
+    "AB_main_POSITIVE_HARD_n75_rep013": {
+      "data_seed": 30111013,
+      "search_seed": 301110131,
+      "refit_seed": 301110132
+    },
+    "AB_main_POSITIVE_HARD_n75_rep014": {
+      "data_seed": 30111014,
+      "search_seed": 301110141,
+      "refit_seed": 301110142
+    },
+    "AB_main_POSITIVE_HARD_n75_rep015": {
+      "data_seed": 30111015,
+      "search_seed": 301110151,
+      "refit_seed": 301110152
+    },
+    "AB_main_POSITIVE_HARD_n75_rep016": {
+      "data_seed": 30111016,
+      "search_seed": 301110161,
+      "refit_seed": 301110162
+    },
+    "AB_main_POSITIVE_HARD_n75_rep017": {
+      "data_seed": 30111017,
+      "search_seed": 301110171,
+      "refit_seed": 301110172
+    },
+    "AB_main_POSITIVE_HARD_n75_rep018": {
+      "data_seed": 30111018,
+      "search_seed": 301110181,
+      "refit_seed": 301110182
+    },
+    "AB_main_POSITIVE_HARD_n75_rep019": {
+      "data_seed": 30111019,
+      "search_seed": 301110191,
+      "refit_seed": 301110192
+    },
+    "AB_main_POSITIVE_HARD_n75_rep020": {
+      "data_seed": 30111020,
+      "search_seed": 301110201,
+      "refit_seed": 301110202
+    },
+    "AB_main_POSITIVE_HARD_n150_rep001": {
+      "data_seed": 30112001,
+      "search_seed": 301120011,
+      "refit_seed": 301120012
+    },
+    "AB_main_POSITIVE_HARD_n150_rep002": {
+      "data_seed": 30112002,
+      "search_seed": 301120021,
+      "refit_seed": 301120022
+    },
+    "AB_main_POSITIVE_HARD_n150_rep003": {
+      "data_seed": 30112003,
+      "search_seed": 301120031,
+      "refit_seed": 301120032
+    },
+    "AB_main_POSITIVE_HARD_n150_rep004": {
+      "data_seed": 30112004,
+      "search_seed": 301120041,
+      "refit_seed": 301120042
+    },
+    "AB_main_POSITIVE_HARD_n150_rep005": {
+      "data_seed": 30112005,
+      "search_seed": 301120051,
+      "refit_seed": 301120052
+    },
+    "AB_main_POSITIVE_HARD_n150_rep006": {
+      "data_seed": 30112006,
+      "search_seed": 301120061,
+      "refit_seed": 301120062
+    },
+    "AB_main_POSITIVE_HARD_n150_rep007": {
+      "data_seed": 30112007,
+      "search_seed": 301120071,
+      "refit_seed": 301120072
+    },
+    "AB_main_POSITIVE_HARD_n150_rep008": {
+      "data_seed": 30112008,
+      "search_seed": 301120081,
+      "refit_seed": 301120082
+    },
+    "AB_main_POSITIVE_HARD_n150_rep009": {
+      "data_seed": 30112009,
+      "search_seed": 301120091,
+      "refit_seed": 301120092
+    },
+    "AB_main_POSITIVE_HARD_n150_rep010": {
+      "data_seed": 30112010,
+      "search_seed": 301120101,
+      "refit_seed": 301120102
+    },
+    "AB_main_POSITIVE_HARD_n150_rep011": {
+      "data_seed": 30112011,
+      "search_seed": 301120111,
+      "refit_seed": 301120112
+    },
+    "AB_main_POSITIVE_HARD_n150_rep012": {
+      "data_seed": 30112012,
+      "search_seed": 301120121,
+      "refit_seed": 301120122
+    },
+    "AB_main_POSITIVE_HARD_n150_rep013": {
+      "data_seed": 30112013,
+      "search_seed": 301120131,
+      "refit_seed": 301120132
+    },
+    "AB_main_POSITIVE_HARD_n150_rep014": {
+      "data_seed": 30112014,
+      "search_seed": 301120141,
+      "refit_seed": 301120142
+    },
+    "AB_main_POSITIVE_HARD_n150_rep015": {
+      "data_seed": 30112015,
+      "search_seed": 301120151,
+      "refit_seed": 301120152
+    },
+    "AB_main_POSITIVE_HARD_n150_rep016": {
+      "data_seed": 30112016,
+      "search_seed": 301120161,
+      "refit_seed": 301120162
+    },
+    "AB_main_POSITIVE_HARD_n150_rep017": {
+      "data_seed": 30112017,
+      "search_seed": 301120171,
+      "refit_seed": 301120172
+    },
+    "AB_main_POSITIVE_HARD_n150_rep018": {
+      "data_seed": 30112018,
+      "search_seed": 301120181,
+      "refit_seed": 301120182
+    },
+    "AB_main_POSITIVE_HARD_n150_rep019": {
+      "data_seed": 30112019,
+      "search_seed": 301120191,
+      "refit_seed": 301120192
+    },
+    "AB_main_POSITIVE_HARD_n150_rep020": {
+      "data_seed": 30112020,
+      "search_seed": 301120201,
+      "refit_seed": 301120202
+    },
+    "AB_main_BOUNDED_EASY_n75_rep001": {
+      "data_seed": 30201001,
+      "search_seed": 302010011,
+      "refit_seed": 302010012
+    },
+    "AB_main_BOUNDED_EASY_n75_rep002": {
+      "data_seed": 30201002,
+      "search_seed": 302010021,
+      "refit_seed": 302010022
+    },
+    "AB_main_BOUNDED_EASY_n75_rep003": {
+      "data_seed": 30201003,
+      "search_seed": 302010031,
+      "refit_seed": 302010032
+    },
+    "AB_main_BOUNDED_EASY_n75_rep004": {
+      "data_seed": 30201004,
+      "search_seed": 302010041,
+      "refit_seed": 302010042
+    },
+    "AB_main_BOUNDED_EASY_n75_rep005": {
+      "data_seed": 30201005,
+      "search_seed": 302010051,
+      "refit_seed": 302010052
+    },
+    "AB_main_BOUNDED_EASY_n75_rep006": {
+      "data_seed": 30201006,
+      "search_seed": 302010061,
+      "refit_seed": 302010062
+    },
+    "AB_main_BOUNDED_EASY_n75_rep007": {
+      "data_seed": 30201007,
+      "search_seed": 302010071,
+      "refit_seed": 302010072
+    },
+    "AB_main_BOUNDED_EASY_n75_rep008": {
+      "data_seed": 30201008,
+      "search_seed": 302010081,
+      "refit_seed": 302010082
+    },
+    "AB_main_BOUNDED_EASY_n75_rep009": {
+      "data_seed": 30201009,
+      "search_seed": 302010091,
+      "refit_seed": 302010092
+    },
+    "AB_main_BOUNDED_EASY_n75_rep010": {
+      "data_seed": 30201010,
+      "search_seed": 302010101,
+      "refit_seed": 302010102
+    },
+    "AB_main_BOUNDED_EASY_n75_rep011": {
+      "data_seed": 30201011,
+      "search_seed": 302010111,
+      "refit_seed": 302010112
+    },
+    "AB_main_BOUNDED_EASY_n75_rep012": {
+      "data_seed": 30201012,
+      "search_seed": 302010121,
+      "refit_seed": 302010122
+    },
+    "AB_main_BOUNDED_EASY_n75_rep013": {
+      "data_seed": 30201013,
+      "search_seed": 302010131,
+      "refit_seed": 302010132
+    },
+    "AB_main_BOUNDED_EASY_n75_rep014": {
+      "data_seed": 30201014,
+      "search_seed": 302010141,
+      "refit_seed": 302010142
+    },
+    "AB_main_BOUNDED_EASY_n75_rep015": {
+      "data_seed": 30201015,
+      "search_seed": 302010151,
+      "refit_seed": 302010152
+    },
+    "AB_main_BOUNDED_EASY_n75_rep016": {
+      "data_seed": 30201016,
+      "search_seed": 302010161,
+      "refit_seed": 302010162
+    },
+    "AB_main_BOUNDED_EASY_n75_rep017": {
+      "data_seed": 30201017,
+      "search_seed": 302010171,
+      "refit_seed": 302010172
+    },
+    "AB_main_BOUNDED_EASY_n75_rep018": {
+      "data_seed": 30201018,
+      "search_seed": 302010181,
+      "refit_seed": 302010182
+    },
+    "AB_main_BOUNDED_EASY_n75_rep019": {
+      "data_seed": 30201019,
+      "search_seed": 302010191,
+      "refit_seed": 302010192
+    },
+    "AB_main_BOUNDED_EASY_n75_rep020": {
+      "data_seed": 30201020,
+      "search_seed": 302010201,
+      "refit_seed": 302010202
+    },
+    "AB_main_BOUNDED_EASY_n150_rep001": {
+      "data_seed": 30202001,
+      "search_seed": 302020011,
+      "refit_seed": 302020012
+    },
+    "AB_main_BOUNDED_EASY_n150_rep002": {
+      "data_seed": 30202002,
+      "search_seed": 302020021,
+      "refit_seed": 302020022
+    },
+    "AB_main_BOUNDED_EASY_n150_rep003": {
+      "data_seed": 30202003,
+      "search_seed": 302020031,
+      "refit_seed": 302020032
+    },
+    "AB_main_BOUNDED_EASY_n150_rep004": {
+      "data_seed": 30202004,
+      "search_seed": 302020041,
+      "refit_seed": 302020042
+    },
+    "AB_main_BOUNDED_EASY_n150_rep005": {
+      "data_seed": 30202005,
+      "search_seed": 302020051,
+      "refit_seed": 302020052
+    },
+    "AB_main_BOUNDED_EASY_n150_rep006": {
+      "data_seed": 30202006,
+      "search_seed": 302020061,
+      "refit_seed": 302020062
+    },
+    "AB_main_BOUNDED_EASY_n150_rep007": {
+      "data_seed": 30202007,
+      "search_seed": 302020071,
+      "refit_seed": 302020072
+    },
+    "AB_main_BOUNDED_EASY_n150_rep008": {
+      "data_seed": 30202008,
+      "search_seed": 302020081,
+      "refit_seed": 302020082
+    },
+    "AB_main_BOUNDED_EASY_n150_rep009": {
+      "data_seed": 30202009,
+      "search_seed": 302020091,
+      "refit_seed": 302020092
+    },
+    "AB_main_BOUNDED_EASY_n150_rep010": {
+      "data_seed": 30202010,
+      "search_seed": 302020101,
+      "refit_seed": 302020102
+    },
+    "AB_main_BOUNDED_EASY_n150_rep011": {
+      "data_seed": 30202011,
+      "search_seed": 302020111,
+      "refit_seed": 302020112
+    },
+    "AB_main_BOUNDED_EASY_n150_rep012": {
+      "data_seed": 30202012,
+      "search_seed": 302020121,
+      "refit_seed": 302020122
+    },
+    "AB_main_BOUNDED_EASY_n150_rep013": {
+      "data_seed": 30202013,
+      "search_seed": 302020131,
+      "refit_seed": 302020132
+    },
+    "AB_main_BOUNDED_EASY_n150_rep014": {
+      "data_seed": 30202014,
+      "search_seed": 302020141,
+      "refit_seed": 302020142
+    },
+    "AB_main_BOUNDED_EASY_n150_rep015": {
+      "data_seed": 30202015,
+      "search_seed": 302020151,
+      "refit_seed": 302020152
+    },
+    "AB_main_BOUNDED_EASY_n150_rep016": {
+      "data_seed": 30202016,
+      "search_seed": 302020161,
+      "refit_seed": 302020162
+    },
+    "AB_main_BOUNDED_EASY_n150_rep017": {
+      "data_seed": 30202017,
+      "search_seed": 302020171,
+      "refit_seed": 302020172
+    },
+    "AB_main_BOUNDED_EASY_n150_rep018": {
+      "data_seed": 30202018,
+      "search_seed": 302020181,
+      "refit_seed": 302020182
+    },
+    "AB_main_BOUNDED_EASY_n150_rep019": {
+      "data_seed": 30202019,
+      "search_seed": 302020191,
+      "refit_seed": 302020192
+    },
+    "AB_main_BOUNDED_EASY_n150_rep020": {
+      "data_seed": 30202020,
+      "search_seed": 302020201,
+      "refit_seed": 302020202
+    },
+    "AB_main_BOUNDED_HARD_n75_rep001": {
+      "data_seed": 30211001,
+      "search_seed": 302110011,
+      "refit_seed": 302110012
+    },
+    "AB_main_BOUNDED_HARD_n75_rep002": {
+      "data_seed": 30211002,
+      "search_seed": 302110021,
+      "refit_seed": 302110022
+    },
+    "AB_main_BOUNDED_HARD_n75_rep003": {
+      "data_seed": 30211003,
+      "search_seed": 302110031,
+      "refit_seed": 302110032
+    },
+    "AB_main_BOUNDED_HARD_n75_rep004": {
+      "data_seed": 30211004,
+      "search_seed": 302110041,
+      "refit_seed": 302110042
+    },
+    "AB_main_BOUNDED_HARD_n75_rep005": {
+      "data_seed": 30211005,
+      "search_seed": 302110051,
+      "refit_seed": 302110052
+    },
+    "AB_main_BOUNDED_HARD_n75_rep006": {
+      "data_seed": 30211006,
+      "search_seed": 302110061,
+      "refit_seed": 302110062
+    },
+    "AB_main_BOUNDED_HARD_n75_rep007": {
+      "data_seed": 30211007,
+      "search_seed": 302110071,
+      "refit_seed": 302110072
+    },
+    "AB_main_BOUNDED_HARD_n75_rep008": {
+      "data_seed": 30211008,
+      "search_seed": 302110081,
+      "refit_seed": 302110082
+    },
+    "AB_main_BOUNDED_HARD_n75_rep009": {
+      "data_seed": 30211009,
+      "search_seed": 302110091,
+      "refit_seed": 302110092
+    },
+    "AB_main_BOUNDED_HARD_n75_rep010": {
+      "data_seed": 30211010,
+      "search_seed": 302110101,
+      "refit_seed": 302110102
+    },
+    "AB_main_BOUNDED_HARD_n75_rep011": {
+      "data_seed": 30211011,
+      "search_seed": 302110111,
+      "refit_seed": 302110112
+    },
+    "AB_main_BOUNDED_HARD_n75_rep012": {
+      "data_seed": 30211012,
+      "search_seed": 302110121,
+      "refit_seed": 302110122
+    },
+    "AB_main_BOUNDED_HARD_n75_rep013": {
+      "data_seed": 30211013,
+      "search_seed": 302110131,
+      "refit_seed": 302110132
+    },
+    "AB_main_BOUNDED_HARD_n75_rep014": {
+      "data_seed": 30211014,
+      "search_seed": 302110141,
+      "refit_seed": 302110142
+    },
+    "AB_main_BOUNDED_HARD_n75_rep015": {
+      "data_seed": 30211015,
+      "search_seed": 302110151,
+      "refit_seed": 302110152
+    },
+    "AB_main_BOUNDED_HARD_n75_rep016": {
+      "data_seed": 30211016,
+      "search_seed": 302110161,
+      "refit_seed": 302110162
+    },
+    "AB_main_BOUNDED_HARD_n75_rep017": {
+      "data_seed": 30211017,
+      "search_seed": 302110171,
+      "refit_seed": 302110172
+    },
+    "AB_main_BOUNDED_HARD_n75_rep018": {
+      "data_seed": 30211018,
+      "search_seed": 302110181,
+      "refit_seed": 302110182
+    },
+    "AB_main_BOUNDED_HARD_n75_rep019": {
+      "data_seed": 30211019,
+      "search_seed": 302110191,
+      "refit_seed": 302110192
+    },
+    "AB_main_BOUNDED_HARD_n75_rep020": {
+      "data_seed": 30211020,
+      "search_seed": 302110201,
+      "refit_seed": 302110202
+    },
+    "AB_main_BOUNDED_HARD_n150_rep001": {
+      "data_seed": 30212001,
+      "search_seed": 302120011,
+      "refit_seed": 302120012
+    },
+    "AB_main_BOUNDED_HARD_n150_rep002": {
+      "data_seed": 30212002,
+      "search_seed": 302120021,
+      "refit_seed": 302120022
+    },
+    "AB_main_BOUNDED_HARD_n150_rep003": {
+      "data_seed": 30212003,
+      "search_seed": 302120031,
+      "refit_seed": 302120032
+    },
+    "AB_main_BOUNDED_HARD_n150_rep004": {
+      "data_seed": 30212004,
+      "search_seed": 302120041,
+      "refit_seed": 302120042
+    },
+    "AB_main_BOUNDED_HARD_n150_rep005": {
+      "data_seed": 30212005,
+      "search_seed": 302120051,
+      "refit_seed": 302120052
+    },
+    "AB_main_BOUNDED_HARD_n150_rep006": {
+      "data_seed": 30212006,
+      "search_seed": 302120061,
+      "refit_seed": 302120062
+    },
+    "AB_main_BOUNDED_HARD_n150_rep007": {
+      "data_seed": 30212007,
+      "search_seed": 302120071,
+      "refit_seed": 302120072
+    },
+    "AB_main_BOUNDED_HARD_n150_rep008": {
+      "data_seed": 30212008,
+      "search_seed": 302120081,
+      "refit_seed": 302120082
+    },
+    "AB_main_BOUNDED_HARD_n150_rep009": {
+      "data_seed": 30212009,
+      "search_seed": 302120091,
+      "refit_seed": 302120092
+    },
+    "AB_main_BOUNDED_HARD_n150_rep010": {
+      "data_seed": 30212010,
+      "search_seed": 302120101,
+      "refit_seed": 302120102
+    },
+    "AB_main_BOUNDED_HARD_n150_rep011": {
+      "data_seed": 30212011,
+      "search_seed": 302120111,
+      "refit_seed": 302120112
+    },
+    "AB_main_BOUNDED_HARD_n150_rep012": {
+      "data_seed": 30212012,
+      "search_seed": 302120121,
+      "refit_seed": 302120122
+    },
+    "AB_main_BOUNDED_HARD_n150_rep013": {
+      "data_seed": 30212013,
+      "search_seed": 302120131,
+      "refit_seed": 302120132
+    },
+    "AB_main_BOUNDED_HARD_n150_rep014": {
+      "data_seed": 30212014,
+      "search_seed": 302120141,
+      "refit_seed": 302120142
+    },
+    "AB_main_BOUNDED_HARD_n150_rep015": {
+      "data_seed": 30212015,
+      "search_seed": 302120151,
+      "refit_seed": 302120152
+    },
+    "AB_main_BOUNDED_HARD_n150_rep016": {
+      "data_seed": 30212016,
+      "search_seed": 302120161,
+      "refit_seed": 302120162
+    },
+    "AB_main_BOUNDED_HARD_n150_rep017": {
+      "data_seed": 30212017,
+      "search_seed": 302120171,
+      "refit_seed": 302120172
+    },
+    "AB_main_BOUNDED_HARD_n150_rep018": {
+      "data_seed": 30212018,
+      "search_seed": 302120181,
+      "refit_seed": 302120182
+    },
+    "AB_main_BOUNDED_HARD_n150_rep019": {
+      "data_seed": 30212019,
+      "search_seed": 302120191,
+      "refit_seed": 302120192
+    },
+    "AB_main_BOUNDED_HARD_n150_rep020": {
+      "data_seed": 30212020,
+      "search_seed": 302120201,
+      "refit_seed": 302120202
+    },
+    "C_main_MIXED_EASY_n75_rep001": {
+      "data_seed": 31301001,
+      "search_seed": 313010011,
+      "refit_seed": 313010012
+    },
+    "C_main_MIXED_EASY_n75_rep002": {
+      "data_seed": 31301002,
+      "search_seed": 313010021,
+      "refit_seed": 313010022
+    },
+    "C_main_MIXED_EASY_n75_rep003": {
+      "data_seed": 31301003,
+      "search_seed": 313010031,
+      "refit_seed": 313010032
+    },
+    "C_main_MIXED_EASY_n75_rep004": {
+      "data_seed": 31301004,
+      "search_seed": 313010041,
+      "refit_seed": 313010042
+    },
+    "C_main_MIXED_EASY_n75_rep005": {
+      "data_seed": 31301005,
+      "search_seed": 313010051,
+      "refit_seed": 313010052
+    },
+    "C_main_MIXED_EASY_n150_rep001": {
+      "data_seed": 31302001,
+      "search_seed": 313020011,
+      "refit_seed": 313020012
+    },
+    "C_main_MIXED_EASY_n150_rep002": {
+      "data_seed": 31302002,
+      "search_seed": 313020021,
+      "refit_seed": 313020022
+    },
+    "C_main_MIXED_EASY_n150_rep003": {
+      "data_seed": 31302003,
+      "search_seed": 313020031,
+      "refit_seed": 313020032
+    },
+    "C_main_MIXED_EASY_n150_rep004": {
+      "data_seed": 31302004,
+      "search_seed": 313020041,
+      "refit_seed": 313020042
+    },
+    "C_main_MIXED_EASY_n150_rep005": {
+      "data_seed": 31302005,
+      "search_seed": 313020051,
+      "refit_seed": 313020052
+    },
+    "C_main_MIXED_HARD_n75_rep001": {
+      "data_seed": 31311001,
+      "search_seed": 313110011,
+      "refit_seed": 313110012
+    },
+    "C_main_MIXED_HARD_n75_rep002": {
+      "data_seed": 31311002,
+      "search_seed": 313110021,
+      "refit_seed": 313110022
+    },
+    "C_main_MIXED_HARD_n75_rep003": {
+      "data_seed": 31311003,
+      "search_seed": 313110031,
+      "refit_seed": 313110032
+    },
+    "C_main_MIXED_HARD_n75_rep004": {
+      "data_seed": 31311004,
+      "search_seed": 313110041,
+      "refit_seed": 313110042
+    },
+    "C_main_MIXED_HARD_n75_rep005": {
+      "data_seed": 31311005,
+      "search_seed": 313110051,
+      "refit_seed": 313110052
+    },
+    "C_main_MIXED_HARD_n150_rep001": {
+      "data_seed": 31312001,
+      "search_seed": 313120011,
+      "refit_seed": 313120012
+    },
+    "C_main_MIXED_HARD_n150_rep002": {
+      "data_seed": 31312002,
+      "search_seed": 313120021,
+      "refit_seed": 313120022
+    },
+    "C_main_MIXED_HARD_n150_rep003": {
+      "data_seed": 31312003,
+      "search_seed": 313120031,
+      "refit_seed": 313120032
+    },
+    "C_main_MIXED_HARD_n150_rep004": {
+      "data_seed": 31312004,
+      "search_seed": 313120041,
+      "refit_seed": 313120042
+    },
+    "C_main_MIXED_HARD_n150_rep005": {
+      "data_seed": 31312005,
+      "search_seed": 313120051,
+      "refit_seed": 313120052
+    },
+    "C_main_MIXED_EASY_n75_rep006": {
+      "data_seed": 31301006,
+      "search_seed": 313010061,
+      "refit_seed": 313010062
+    },
+    "C_main_MIXED_EASY_n75_rep007": {
+      "data_seed": 31301007,
+      "search_seed": 313010071,
+      "refit_seed": 313010072
+    },
+    "C_main_MIXED_EASY_n75_rep008": {
+      "data_seed": 31301008,
+      "search_seed": 313010081,
+      "refit_seed": 313010082
+    },
+    "C_main_MIXED_EASY_n75_rep009": {
+      "data_seed": 31301009,
+      "search_seed": 313010091,
+      "refit_seed": 313010092
+    },
+    "C_main_MIXED_EASY_n75_rep010": {
+      "data_seed": 31301010,
+      "search_seed": 313010101,
+      "refit_seed": 313010102
+    },
+    "C_main_MIXED_EASY_n150_rep006": {
+      "data_seed": 31302006,
+      "search_seed": 313020061,
+      "refit_seed": 313020062
+    },
+    "C_main_MIXED_EASY_n150_rep007": {
+      "data_seed": 31302007,
+      "search_seed": 313020071,
+      "refit_seed": 313020072
+    },
+    "C_main_MIXED_EASY_n150_rep008": {
+      "data_seed": 31302008,
+      "search_seed": 313020081,
+      "refit_seed": 313020082
+    },
+    "C_main_MIXED_EASY_n150_rep009": {
+      "data_seed": 31302009,
+      "search_seed": 313020091,
+      "refit_seed": 313020092
+    },
+    "C_main_MIXED_EASY_n150_rep010": {
+      "data_seed": 31302010,
+      "search_seed": 313020101,
+      "refit_seed": 313020102
+    },
+    "C_main_MIXED_HARD_n75_rep006": {
+      "data_seed": 31311006,
+      "search_seed": 313110061,
+      "refit_seed": 313110062
+    },
+    "C_main_MIXED_HARD_n75_rep007": {
+      "data_seed": 31311007,
+      "search_seed": 313110071,
+      "refit_seed": 313110072
+    },
+    "C_main_MIXED_HARD_n75_rep008": {
+      "data_seed": 31311008,
+      "search_seed": 313110081,
+      "refit_seed": 313110082
+    },
+    "C_main_MIXED_HARD_n75_rep009": {
+      "data_seed": 31311009,
+      "search_seed": 313110091,
+      "refit_seed": 313110092
+    },
+    "C_main_MIXED_HARD_n75_rep010": {
+      "data_seed": 31311010,
+      "search_seed": 313110101,
+      "refit_seed": 313110102
+    },
+    "C_main_MIXED_HARD_n150_rep006": {
+      "data_seed": 31312006,
+      "search_seed": 313120061,
+      "refit_seed": 313120062
+    },
+    "C_main_MIXED_HARD_n150_rep007": {
+      "data_seed": 31312007,
+      "search_seed": 313120071,
+      "refit_seed": 313120072
+    },
+    "C_main_MIXED_HARD_n150_rep008": {
+      "data_seed": 31312008,
+      "search_seed": 313120081,
+      "refit_seed": 313120082
+    },
+    "C_main_MIXED_HARD_n150_rep009": {
+      "data_seed": 31312009,
+      "search_seed": 313120091,
+      "refit_seed": 313120092
+    },
+    "C_main_MIXED_HARD_n150_rep010": {
+      "data_seed": 31312010,
+      "search_seed": 313120101,
+      "refit_seed": 313120102
+    }
+  },
+  "n_unique_data_seeds": 312
+}
