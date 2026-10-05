@@ -1,0 +1,392 @@
+{
+  "attempted_fits": 896,
+  "branch": "experiment/128-k-criterion-comparison",
+  "cells": [
+    [
+      1,
+      50,
+      1
+    ],
+    [
+      1,
+      50,
+      2
+    ],
+    [
+      1,
+      50,
+      3
+    ],
+    [
+      1,
+      50,
+      4
+    ],
+    [
+      1,
+      75,
+      1
+    ],
+    [
+      1,
+      75,
+      2
+    ],
+    [
+      1,
+      75,
+      3
+    ],
+    [
+      1,
+      75,
+      4
+    ],
+    [
+      1,
+      100,
+      1
+    ],
+    [
+      1,
+      100,
+      2
+    ],
+    [
+      1,
+      100,
+      3
+    ],
+    [
+      1,
+      100,
+      4
+    ],
+    [
+      1,
+      150,
+      1
+    ],
+    [
+      1,
+      150,
+      2
+    ],
+    [
+      1,
+      150,
+      3
+    ],
+    [
+      1,
+      150,
+      4
+    ],
+    [
+      3,
+      50,
+      1
+    ],
+    [
+      3,
+      50,
+      2
+    ],
+    [
+      3,
+      50,
+      3
+    ],
+    [
+      3,
+      50,
+      4
+    ],
+    [
+      3,
+      75,
+      1
+    ],
+    [
+      3,
+      75,
+      2
+    ],
+    [
+      3,
+      75,
+      3
+    ],
+    [
+      3,
+      75,
+      4
+    ],
+    [
+      3,
+      100,
+      1
+    ],
+    [
+      3,
+      100,
+      2
+    ],
+    [
+      3,
+      100,
+      3
+    ],
+    [
+      3,
+      100,
+      4
+    ],
+    [
+      3,
+      150,
+      1
+    ],
+    [
+      3,
+      150,
+      2
+    ],
+    [
+      3,
+      150,
+      3
+    ],
+    [
+      3,
+      150,
+      4
+    ],
+    [
+      5,
+      50,
+      1
+    ],
+    [
+      5,
+      50,
+      2
+    ],
+    [
+      5,
+      50,
+      3
+    ],
+    [
+      5,
+      50,
+      4
+    ],
+    [
+      5,
+      50,
+      5
+    ],
+    [
+      5,
+      50,
+      6
+    ],
+    [
+      5,
+      50,
+      7
+    ],
+    [
+      5,
+      50,
+      8
+    ],
+    [
+      5,
+      75,
+      1
+    ],
+    [
+      5,
+      75,
+      2
+    ],
+    [
+      5,
+      75,
+      3
+    ],
+    [
+      5,
+      75,
+      4
+    ],
+    [
+      5,
+      75,
+      5
+    ],
+    [
+      5,
+      75,
+      6
+    ],
+    [
+      5,
+      75,
+      7
+    ],
+    [
+      5,
+      75,
+      8
+    ],
+    [
+      5,
+      100,
+      1
+    ],
+    [
+      5,
+      100,
+      2
+    ],
+    [
+      5,
+      100,
+      3
+    ],
+    [
+      5,
+      100,
+      4
+    ],
+    [
+      5,
+      100,
+      5
+    ],
+    [
+      5,
+      100,
+      6
+    ],
+    [
+      5,
+      100,
+      7
+    ],
+    [
+      5,
+      100,
+      8
+    ],
+    [
+      5,
+      150,
+      1
+    ],
+    [
+      5,
+      150,
+      2
+    ],
+    [
+      5,
+      150,
+      3
+    ],
+    [
+      5,
+      150,
+      4
+    ],
+    [
+      5,
+      150,
+      5
+    ],
+    [
+      5,
+      150,
+      6
+    ],
+    [
+      5,
+      150,
+      7
+    ],
+    [
+      5,
+      150,
+      8
+    ]
+  ],
+  "completed_at": 1791220419.598576,
+  "completed_rows": 896,
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "clap_clean_nsweep_20261006",
+  "git_head": "f6ace60c4c3530ec9f8b4a4a285cb17486637741",
+  "historical_hashes_after": {
+    "audit_report.json": "46a30e0d18833ce18b98c4d856bd331c0c1d126b84cedfd7a93f5e636207a992",
+    "fit_results.csv": "ed8805a1e20b415d7610b43ab4d8375b013db7e95fc32e13b73f9cb3e0c4764a",
+    "generator_provenance.csv": "775231f6075a4c33c160664757f83af0394bf2c4738e18f05fc34c5df9a0d5ab",
+    "gram_spectrum.csv": "997d0a0bc9f080b5b530ba047f9e66971a8d233e4310f05c1e3abf6cab1bcfd3",
+    "manifest.csv": "19f15f3414c30d0fbb1c145b01bc16aa4899b99e690b960102ecda6b16b86279",
+    "protocol.json": "139e9267c572a8fccfe9ddbb35ef1ddfb4eb0537f06dc1b63692c59fd41efba9",
+    "runinfo.json": "ede88da5dbde73866e3350ba7ec6dc4c2ba460832df74d2fc419363fa2327b7a",
+    "selection_matrix.csv": "cf7087e3a99f23e8337dc9cd7b8755ed83726766c1731ddb81479381c4e38c10",
+    "summary.json": "e33809bb6114765a8ff01e9556a2300bc4a3d66d82c1e63c91f3fdc4cbbe4756"
+  },
+  "historical_hashes_before": {
+    "audit_report.json": "46a30e0d18833ce18b98c4d856bd331c0c1d126b84cedfd7a93f5e636207a992",
+    "fit_results.csv": "ed8805a1e20b415d7610b43ab4d8375b013db7e95fc32e13b73f9cb3e0c4764a",
+    "generator_provenance.csv": "775231f6075a4c33c160664757f83af0394bf2c4738e18f05fc34c5df9a0d5ab",
+    "gram_spectrum.csv": "997d0a0bc9f080b5b530ba047f9e66971a8d233e4310f05c1e3abf6cab1bcfd3",
+    "manifest.csv": "19f15f3414c30d0fbb1c145b01bc16aa4899b99e690b960102ecda6b16b86279",
+    "protocol.json": "139e9267c572a8fccfe9ddbb35ef1ddfb4eb0537f06dc1b63692c59fd41efba9",
+    "runinfo.json": "ede88da5dbde73866e3350ba7ec6dc4c2ba460832df74d2fc419363fa2327b7a",
+    "selection_matrix.csv": "cf7087e3a99f23e8337dc9cd7b8755ed83726766c1731ddb81479381c4e38c10",
+    "summary.json": "e33809bb6114765a8ff01e9556a2300bc4a3d66d82c1e63c91f3fdc4cbbe4756"
+  },
+  "historical_unchanged": true,
+  "inputs": {
+    "emc_identity": "dad67b1c7b90f1e0297e8b1e95afd394cf9b51db:expfam/results/k_selection/em_convergence_sensitivity_20260905/fit_results.csv",
+    "emc_identity_sha256": "c644e89b14064b743507df91d0a6707ce3d30fb87b606f325951f0ad560ae475",
+    "historical_dir": "expfam\\results\\k_selection\\clean_true_k_asymptotics_20260904",
+    "npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz",
+    "npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84"
+  },
+  "laplace_status_counts": {
+    "NOT_STATIONARY": 4,
+    "OK": 892
+  },
+  "npz_max_absdiff": {
+    "C_Q": 0.0,
+    "S1": 0.0,
+    "S3": 0.0,
+    "q_strict": 0.0
+  },
+  "npz_readonly_fits": 448,
+  "protocol_hash": "237ff2853009e22a16c73b0095a5b7026d12b2b1b9879df05b872d94105f8859",
+  "replacement_fits_executed": 0,
+  "replay_exact_matches": 448,
+  "replayed_fits": 448,
+  "resumed": false,
+  "retry_count": 0,
+  "seed_rescue_count": 0,
+  "stage": "full",
+  "started_at": 1791215554.8000095,
+  "states_file": "D:\\tento\\kennkyu_artifacts\\clap_clean_nsweep_20261006\\full\\states.npz",
+  "states_sha256": "ec3bbc5ed9b60d8cfcb5fe78e8a8378e944a3b366c177005b5e7d76c50dc380f",
+  "status": "COMPLETED",
+  "tolerance_relaxations": 0,
+  "wall_clock_seconds": 4864.8,
+  "working_tree_clean_before_execution": true
+}

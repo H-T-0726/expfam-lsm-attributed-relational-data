@@ -106,20 +106,22 @@ def a_figures(a_dir: Path, out: Path) -> None:
         width = 0.36
         tot = 0
         for j, c in enumerate(prim):
-            ex, tots = [], []
+            ex, tots, incs = [], [], []
             for n in ns:
                 rows = [r for r in sel if r["criterion"] == c
                         and int(r["k_true"]) == t and int(r["n"]) == n]
                 ex.append(sum(r["label"] == "exact" for r in rows))
                 tots.append(len(rows))
+                incs.append(sum(r["status"] == "INCOMPLETE" for r in rows))
             x = np.arange(len(ns)) + (j - 0.5) * width
             ax.bar(x, ex, width=width - 0.04, color=COLOR[c], label=NAME[c])
-            for xi, e, tt in zip(x, ex, tots):
-                ax.text(xi, e + 0.08, f"{e}/{tt}", ha="center", fontsize=8,
+            for xi, e, tt, ic in zip(x, ex, tots, incs):
+                text = f"{e}/{tt}" + (f"\n({ic} inc.)" if ic else "")
+                ax.text(xi, e + 0.08, text, ha="center", fontsize=7.5,
                         color=INK)
             tot = max(tot, max(tots))
         ax.set_xticks(np.arange(len(ns)), [str(n) for n in ns])
-        ax.set_ylim(0, tot + 1)
+        ax.set_ylim(0, tot + 1.6)
         ax.set_xlabel("n")
         ax.set_title(f"K_TRUE = {t} ({tot} datasets per n)", color=INK)
     np.atleast_1d(axes)[0].set_ylabel("datasets selecting K = K_TRUE")

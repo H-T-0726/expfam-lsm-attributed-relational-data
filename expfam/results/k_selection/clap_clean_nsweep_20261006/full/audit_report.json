@@ -1,0 +1,49 @@
+{
+  "auditor": "audit_clap_clean_nsweep.py (artifact-only; imports no runner or model code)",
+  "cells": 64,
+  "checks": 24161,
+  "findings": [],
+  "fit_rows": 896,
+  "laplace_status_counts": {
+    "NOT_STATIONARY": 4,
+    "OK": 892
+  },
+  "npz_max_absdiff_recomputed": {
+    "C_Q": 0.0,
+    "S1": 0.0,
+    "S3": 0.0,
+    "q_strict": 0.0
+  },
+  "recount_totals": {
+    "C_Lap": {
+      "exact": 47,
+      "incomplete": 4,
+      "over": 0,
+      "under": 13
+    },
+    "C_Q": {
+      "exact": 37,
+      "incomplete": 0,
+      "over": 0,
+      "under": 27
+    },
+    "S1": {
+      "exact": 39,
+      "incomplete": 0,
+      "over": 2,
+      "under": 23
+    },
+    "S3": {
+      "exact": 3,
+      "incomplete": 0,
+      "over": 61,
+      "under": 0
+    }
+  },
+  "severity_counts": {
+    "BLOCKER": 0,
+    "HIGH": 0
+  },
+  "stage": "full",
+  "verdict": "PASS"
+}
