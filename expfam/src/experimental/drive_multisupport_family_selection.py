@@ -95,7 +95,7 @@ def write_resume(run_dir: Path, statuses: dict, note: str) -> None:
     tables = sorted(p.name for p in (run_dir / "tables").glob("*.csv"))
     figs = sorted(p.name for p in (run_dir / "figures").glob("*.png"))
     lines += ["", "## Existing tables", "", *(f"- tables/{t}" for t in tables),
-              "", "## Existing figures", "", *(f"- figures/{f}" for f in figs) or ["- (none)"],
+              "", "## Existing figures", "", *([f"- figures/{f}" for f in figs] or ["- (none)"]),
               "", "## How to resume", "",
               "Completed cases are skipped automatically; failed cases are "
               "completed outcomes and are NOT rerun.", "",
