@@ -282,3 +282,51 @@ def test_registry_priority_and_compatibility_rows():
     assert {r["compatibility_status"] for r in rows} == {
         "PASS_STRICT", "PASS_WITH_EXISTING_EXPFAM_GENERALIZATION",
         "BLOCKED_OUTSIDE_CURRENT_MODEL"}
+
+
+def _quad_moments(logp, lo, hi, points=None):
+    from scipy import integrate as it
+    xs = np.linspace(lo, min(hi, lo + 50), 20001)
+    m = np.max(logp(xs))
+    f = lambda k: it.quad(lambda x: x ** k * np.exp(logp(x) - m), lo, hi, points=points,
+                          limit=2000, epsabs=0, epsrel=1e-13)[0]
+    m0 = f(0)
+    mu = f(1) / m0
+    var = it.quad(lambda x: (x - mu) ** 2 * np.exp(logp(x) - m), lo, hi, points=points,
+                  limit=2000, epsabs=0, epsrel=1e-13)[0] / m0
+    return mu, var
+
+
+@pytest.mark.parametrize("eta", [-1e4, -1000.0, -300.0, -100.0, 100.0, 300.0, 1000.0, 1e4])
+def test_tn01_far_tail_moments(eta):
+    tn = TruncatedNormal01Spec(0.25, 0.5)
+    sc = 1 / abs(eta)
+    pts = [p for p in (sc * 1e-3, sc * 1e-1, sc, 10 * sc, 0.5, 1 - 10 * sc, 1 - sc,
+                       1 - sc * 1e-1) if 0 < p < 1]
+    mu, var = _quad_moments(lambda x: eta * x - (x - 0.5) ** 2 / 0.125, 0.0, 1.0, pts)
+    assert abs(tn.mean_statistic(np.array([eta]))[0] / mu - 1) < 1e-9
+    assert abs(tn.variance_statistic(np.array([eta]))[0] / var - 1) < 1e-6
+
+
+@pytest.mark.parametrize("u", [-1e5, -1e4, -1e3, -100.0, -20.0001, -19.9999])
+def test_ptn_far_tail_moments(u):
+    from scipy import integrate as it
+    ptn = PositiveTruncatedNormalSpec(1.0)
+    t = -u
+    f = lambda k: it.quad(lambda w: (w / t) ** k * np.exp(-w - (w / t) ** 2 / 2) / t, 0,
+                          np.inf, epsabs=0, epsrel=1e-13, limit=500)[0]
+    m0 = f(0)
+    mean = f(1) / m0
+    var = it.quad(lambda w: ((w / t) - mean) ** 2 * np.exp(-w - (w / t) ** 2 / 2) / t, 0,
+                  np.inf, epsabs=0, epsrel=1e-13, limit=500)[0] / m0
+    assert abs(ptn.mean_statistic(np.array([u]))[0] / mean - 1) < 1e-9
+    assert abs(ptn.variance_statistic(np.array([u]))[0] / var - 1) < 1e-6
+
+
+def test_ztp_variance_at_large_lambda_and_binomial_curvature_positive():
+    ztp = ZeroTruncatedPoissonSpec()
+    for e in (40.0, 100.0, 700.0):        # var = mu(1 + lam - mu) -> lam
+        assert abs(ztp.variance_statistic(np.array([e]))[0] / math.exp(e) - 1) < 1e-12
+    v = BinomialSpec(2).variance_statistic(np.array([-60.0, 40.0, 60.0]))
+    assert np.all(v > 0)
+    assert abs(v[1] / (2 * math.exp(-40.0)) - 1) < 1e-12

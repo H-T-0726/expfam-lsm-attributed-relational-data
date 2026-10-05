@@ -120,6 +120,38 @@ def _log_phi(u: np.ndarray) -> np.ndarray:
     return -0.5 * u * u - LOG_SQRT_2PI
 
 
+# Far-tail truncated-normal moments.  For a standard normal truncated to a
+# half-line whose endpoint is t >= HALFLINE_T standard deviations beyond the
+# mean, the closed forms 1 - lam(lam - t) cancel catastrophically (relative
+# error ~ eps * t^2, and worse through exp(log phi - log Phi)).  With
+# y = distance from the endpoint the density is  exp(-t y - y^2/2), y > 0, and
+#   int y^k e^{-ty - y^2/2} dy = k!/t^{k+1} * sum_j (-1/2)^j (k+2j)!/(j! k!) t^{-2j}.
+# The series is asymptotic; at t >= 20 the term j = 16 is < 1e-21 relative.
+HALFLINE_T = 20.0
+HALFLINE_TERMS = 17
+
+
+def _halfline_moments(t: np.ndarray):
+    """Mean and variance of y for density prop. to exp(-t y - y^2/2), y > 0."""
+    t = np.asarray(t, dtype=np.float64)
+    if np.any(t < HALFLINE_T):
+        raise ValueError("_halfline_moments needs t >= HALFLINE_T")
+    inv2 = 1.0 / (t * t)
+    S = []
+    for k in (0, 1, 2):
+        total = np.zeros_like(t)
+        for j in range(HALFLINE_TERMS):
+            coef = ((-0.5) ** j * math.factorial(k + 2 * j)
+                    / (math.factorial(j) * math.factorial(k)))
+            total = total + coef * inv2 ** j
+        S.append(total)
+    r1 = S[1] / S[0]
+    r2 = S[2] / S[0]
+    mean = r1 / t
+    var = (2.0 * r2 - r1 * r1) * inv2
+    return mean, var
+
+
 # ==========================================================================
 # base class
 # ==========================================================================
@@ -353,7 +385,11 @@ class BinomialSpec(FamilySpec):
         return self.n_trials * bernoulli_mean(eta)
 
     def variance_statistic(self, eta):
-        return self.n_trials * bernoulli_curvature(eta)
+        # sigma(eta) * sigma(-eta): stays positive where mean*(1-mean) would
+        # round 1-mean to 0 (|eta| > ~37)
+        eta = _finite(eta, "binomial eta")
+        return _checked(self.n_trials * bernoulli_mean(eta) * bernoulli_mean(-eta),
+                        "binomial var")
 
     def sample(self, eta, rng):
         return rng.binomial(self.n_trials, bernoulli_mean(eta)).astype(np.float64)
@@ -606,7 +642,11 @@ def _ztp_one_plus_lam_minus_mean(lam: np.ndarray, mean: np.ndarray) -> np.ndarra
     ls = lam[small]
     # mu = 1 + lam/2 + lam^2/12 - lam^4/720 + lam^6/30240 - ...
     out[small] = ls / 2.0 - ls ** 2 / 12.0 + ls ** 4 / 720.0 - ls ** 6 / 30240.0
-    out[~small] = 1.0 + lam[~small] - mean[~small]
+    # 1 + lam - lam/(1 - e^-lam) = 1 - lam/expm1(lam): no cancellation at
+    # large lam (where 1 + lam - mu would round to 0)
+    lb = lam[~small]
+    with np.errstate(over="ignore"):
+        out[~small] = 1.0 - lb / np.expm1(lb)
     return out
 
 
@@ -723,13 +763,22 @@ class PositiveTruncatedNormalSpec(FamilySpec):
     def mean_statistic(self, eta):
         eta = _finite(eta, "ptn eta")
         u = self.sigma * eta
-        return _checked(self.sigma * (u + self._mills(u)), "ptn mean")
+        out = np.empty_like(u)
+        far = u <= -HALFLINE_T
+        out[~far] = self.sigma * (u[~far] + self._mills(u[~far]))
+        if np.any(far):
+            out[far] = self.sigma * _halfline_moments(-u[far])[0]
+        return _checked(out, "ptn mean")
 
     def variance_statistic(self, eta):
         eta = _finite(eta, "ptn eta")
         u = self.sigma * eta
-        lam = self._mills(u)
-        value = self.sigma ** 2 * (1.0 - lam * (u + lam))
+        value = np.empty_like(u)
+        far = u <= -HALFLINE_T
+        lam = self._mills(u[~far])
+        value[~far] = self.sigma ** 2 * (1.0 - lam * (u[~far] + lam))
+        if np.any(far):
+            value[far] = self.sigma ** 2 * _halfline_moments(-u[far])[1]
         _checked(value, "ptn var")
         if np.any(value <= 0.0):
             raise FloatingPointError("ptn variance lost positivity "
@@ -795,7 +844,8 @@ class ContinuousBernoulliSpec(FamilySpec):
         out[small] = (1.0 / 12.0 - es ** 2 / 240.0 + es ** 4 / 6048.0
                       - es ** 6 / 172800.0)
         e = eta[~small]
-        out[~small] = 1.0 / e ** 2 - 0.25 / np.sinh(e / 2.0) ** 2
+        with np.errstate(over="ignore"):      # sinh -> inf gives the exact limit 0
+            out[~small] = 1.0 / e ** 2 - 0.25 / np.sinh(e / 2.0) ** 2
         return _checked(out, "cb var")
 
     def sample(self, eta, rng):
@@ -895,15 +945,42 @@ class TruncatedNormal01Spec(FamilySpec):
         rb = np.exp(_log_phi(b) - logZ)
         return mu, a, b, ra, rb
 
+    def _far(self, eta):
+        """Masks where (0,1) lies >= HALFLINE_T sd below / above mu.
+
+        Then the distribution is, up to a relative mass < exp(-HALFLINE_T /
+        sigma) at the far endpoint, the half-line problem anchored at the near
+        endpoint (0 when mu << 0, 1 when mu >> 1).
+        """
+        _, a, b = self._ab(eta)
+        return a >= HALFLINE_T, b <= -HALFLINE_T, a, b
+
     def mean_statistic(self, eta):
         eta = _finite(eta, "tn01 eta")
-        mu, _, _, ra, rb = self._ratios(eta)
-        return _checked(mu + self.sigma * (ra - rb), "tn01 mean")
+        low, high, a, b = self._far(eta)
+        mid = ~(low | high)
+        out = np.empty_like(eta)
+        if np.any(mid):
+            mu, _, _, ra, rb = self._ratios(eta[mid])
+            out[mid] = mu + self.sigma * (ra - rb)
+        if np.any(low):
+            out[low] = self.sigma * _halfline_moments(a[low])[0]
+        if np.any(high):
+            out[high] = 1.0 - self.sigma * _halfline_moments(-b[high])[0]
+        return _checked(out, "tn01 mean")
 
     def variance_statistic(self, eta):
         eta = _finite(eta, "tn01 eta")
-        _, a, b, ra, rb = self._ratios(eta)
-        value = self.sigma ** 2 * (1.0 + a * ra - b * rb - (ra - rb) ** 2)
+        low, high, a, b = self._far(eta)
+        mid = ~(low | high)
+        value = np.empty_like(eta)
+        if np.any(mid):
+            _, am, bm, ra, rb = self._ratios(eta[mid])
+            value[mid] = self.sigma ** 2 * (1.0 + am * ra - bm * rb - (ra - rb) ** 2)
+        if np.any(low):
+            value[low] = self.sigma ** 2 * _halfline_moments(a[low])[1]
+        if np.any(high):
+            value[high] = self.sigma ** 2 * _halfline_moments(-b[high])[1]
         _checked(value, "tn01 var")
         if np.any(value <= 0.0):
             raise FloatingPointError("tn01 variance lost positivity")
