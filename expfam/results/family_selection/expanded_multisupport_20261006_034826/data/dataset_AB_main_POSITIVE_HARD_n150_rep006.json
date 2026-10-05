@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 150,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30112006,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    0.7071067811865476,
+    0.7071067811865476,
+    0.7071067811865476,
+    1.17301713412126,
+    1.17301713412126,
+    1.17301713412126
+  ],
+  "f_row_norms_sq": [
+    0.4239701841998093,
+    0.06366633630352574,
+    0.3025119801418903,
+    0.31417469232030476,
+    0.3568028429199818,
+    1.282490059790319
+  ],
+  "eta_min": [
+    -1.8515225772210984,
+    -0.679087668771771,
+    -1.237560231563097,
+    -1.3410059842265827,
+    -1.3614915387449247,
+    -2.71951170993429
+  ],
+  "eta_max": [
+    1.9707191571761493,
+    0.5476692068737341,
+    1.54780322855953,
+    1.9705540770220187,
+    1.3549874997040054,
+    3.4189272517764784
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.33995525727069353,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_HARD_n150_rep006",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "HARD",
+  "replicate": 6
+}

@@ -1,0 +1,17 @@
+{
+  "phase": "B_main_r10",
+  "gate": "Gate F (support-group MCEM, rep 6-10)",
+  "checked_utc": "2026-10-05T20:44:18.470805+00:00",
+  "expected_cases": 240,
+  "completed_cases": 240,
+  "missing_cases": [],
+  "failed_cases": [
+    "B__main__COUNT__EASY__n150__rep006__AUTO_START_FIRST"
+  ],
+  "unexpected_exception_cases": [],
+  "fit_cases": 240,
+  "fit_failures": 1,
+  "fit_failure_fraction": 0.004166666666666667,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

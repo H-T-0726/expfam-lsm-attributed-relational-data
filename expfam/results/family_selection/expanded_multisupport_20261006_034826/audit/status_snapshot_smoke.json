@@ -1,0 +1,15 @@
+{
+  "phase": "smoke",
+  "gate": "Gate D (selector + MCEM smoke)",
+  "checked_utc": "2026-10-05T19:02:10.029838+00:00",
+  "expected_cases": 38,
+  "completed_cases": 38,
+  "missing_cases": [],
+  "failed_cases": [],
+  "unexpected_exception_cases": [],
+  "fit_cases": 32,
+  "fit_failures": 0,
+  "fit_failure_fraction": 0.0,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

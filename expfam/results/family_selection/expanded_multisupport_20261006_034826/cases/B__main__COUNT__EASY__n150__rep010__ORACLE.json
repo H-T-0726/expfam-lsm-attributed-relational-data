@@ -1,0 +1,209 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_COUNT",
+    "difficulty": "EASY",
+    "n": 150,
+    "replicate": 10,
+    "phase": "B_main_r10",
+    "exp_block": "AB",
+    "method": "ORACLE",
+    "case_id": "B__main__COUNT__EASY__n150__rep010__ORACLE"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r10",
+        "condition": "COUNT|EASY|n150",
+        "group_design": "COUNT",
+        "difficulty": "EASY",
+        "n": 150,
+        "replicate": 10,
+        "method": "ORACLE",
+        "case_id": "B__main__COUNT__EASY__n150__rep010__ORACLE",
+        "data_seed": 30002010,
+        "d": 15,
+        "K": 3,
+        "final_Q": -8700.098763025908,
+        "criterion_field_bic_ICL_type": 17610.644208403857,
+        "num_params": 42,
+        "rmse_Z": 0.25726462322566973,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "poisson|poisson|poisson|binomial_n2|binomial_n2|binomial_n2|cmp_nu2p0|cmp_nu2p0|cmp_nu2p0|cmp_nu0p5|cmp_nu0p5|cmp_nu0p5|ztp|ztp|ztp",
+        "final_assignment": "poisson|poisson|poisson|binomial_n2|binomial_n2|binomial_n2|cmp_nu2p0|cmp_nu2p0|cmp_nu2p0|cmp_nu0p5|cmp_nu0p5|cmp_nu0p5|ztp|ztp|ztp",
+        "true_assignment": "poisson|poisson|poisson|binomial_n2|binomial_n2|binomial_n2|cmp_nu2p0|cmp_nu2p0|cmp_nu2p0|cmp_nu0p5|cmp_nu0p5|cmp_nu0p5|ztp|ztp|ztp",
+        "n_correct_candidate": 15,
+        "n_correct_family": 15,
+        "fit_seed": 300020102,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9804458801071867,
+        "w_est": 0.9871375363766832,
+        "runtime_seconds": 142.873,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T20:26:50.392570+00:00",
+  "dataset_key": "AB_main_COUNT_EASY_n150_rep010",
+  "dataset_path": "data\\dataset_AB_main_COUNT_EASY_n150_rep010.npz",
+  "dataset_created": false,
+  "dataset_sha256": "cc18a4f1abcee27b7134e18cf8290d11c35029c5dfca6f53ff04a6181cf86fe1",
+  "seeds": {
+    "data_seed": 30002010,
+    "search_seed": 300020101,
+    "refit_seed": 300020102
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "ztp",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "ztp",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "ztp",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 6,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 7,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 8,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 9,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 10,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 11,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5",
+      "inadmissible": "binomial_n2|ztp",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 12,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5|ztp",
+      "inadmissible": "binomial_n2",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 13,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5|ztp",
+      "inadmissible": "binomial_n2",
+      "n_admissible": 4,
+      "decided_by": "score"
+    },
+    {
+      "column": 14,
+      "support_group": "GROUP_COUNT",
+      "group_candidates": "poisson|binomial_n2|cmp_nu2p0|cmp_nu0p5|ztp",
+      "admissible": "poisson|cmp_nu2p0|cmp_nu0p5|ztp",
+      "inadmissible": "binomial_n2",
+      "n_admissible": 4,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__COUNT__EASY__n150__rep010__ORACLE.npz",
+  "runtime_seconds": 142.873,
+  "finished_utc": "2026-10-05T20:29:13.265974+00:00"
+}

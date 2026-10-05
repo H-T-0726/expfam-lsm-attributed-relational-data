@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 150,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30102010,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    2.0,
+    2.0,
+    2.0,
+    3.3177934799406117,
+    3.3177934799406117,
+    3.3177934799406117
+  ],
+  "f_row_norms_sq": [
+    1.3621139532479227,
+    1.744364899973448,
+    0.8584899076566893,
+    7.13883844682147,
+    10.153545079219647,
+    4.819527436956754
+  ],
+  "eta_min": [
+    -2.796493686638168,
+    -3.7427282134223083,
+    -1.7131021204314667,
+    -6.9934319854946265,
+    -9.813347603762443,
+    -5.838397463715509
+  ],
+  "eta_max": [
+    3.546138618487608,
+    4.002246541310626,
+    2.5580233906345415,
+    6.308256925443683,
+    9.171277482528176,
+    5.573546845640931
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.3359284116331096,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep010",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "EASY",
+  "replicate": 10
+}

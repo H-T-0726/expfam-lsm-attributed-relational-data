@@ -1,0 +1,37 @@
+{
+  "updated_utc": "2026-10-05T21:08:27.937937+00:00",
+  "current_phase": "C_main_r10",
+  "current_phase_expected_cases": 80,
+  "completed_by_phase": {
+    "smoke": {
+      "SUCCESS": 38,
+      "FAILURE": 0
+    },
+    "pilot": {
+      "SUCCESS": 110,
+      "FAILURE": 4
+    },
+    "A_main": {
+      "SUCCESS": 240,
+      "FAILURE": 0
+    },
+    "B_main_r5": {
+      "SUCCESS": 233,
+      "FAILURE": 7
+    },
+    "C_main_r5": {
+      "SUCCESS": 75,
+      "FAILURE": 5
+    },
+    "B_main_r10": {
+      "SUCCESS": 239,
+      "FAILURE": 1
+    },
+    "C_main_r10": {
+      "SUCCESS": 75,
+      "FAILURE": 5
+    }
+  },
+  "note": "phase finished",
+  "protocol_sha256": "405fc22f6743f86b785df7be44bb2a428101903652d3f5ba37cc21aa72ac376b"
+}

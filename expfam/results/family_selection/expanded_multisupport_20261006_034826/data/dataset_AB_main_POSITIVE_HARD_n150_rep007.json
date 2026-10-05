@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 150,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30112007,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    0.7071067811865476,
+    0.7071067811865476,
+    0.7071067811865476,
+    1.17301713412126,
+    1.17301713412126,
+    1.17301713412126
+  ],
+  "f_row_norms_sq": [
+    0.3295554027743668,
+    0.3240568859788895,
+    0.17154551380378705,
+    0.6878681620888556,
+    1.0633256003489095,
+    0.10593039051862699
+  ],
+  "eta_min": [
+    -1.427830140055557,
+    -1.3880800197212064,
+    -1.0869588265329988,
+    -2.3096280534096807,
+    -2.1176265843146447,
+    -0.725038100555697
+  ],
+  "eta_max": [
+    1.4981532538361808,
+    1.3657111829091624,
+    0.963182475711503,
+    1.6897681144019603,
+    2.291157857093691,
+    1.009874296121972
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.33324384787472033,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_HARD_n150_rep007",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "HARD",
+  "replicate": 7
+}

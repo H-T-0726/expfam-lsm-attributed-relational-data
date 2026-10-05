@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 150,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30102016,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    2.0,
+    2.0,
+    2.0,
+    3.3177934799406117,
+    3.3177934799406117,
+    3.3177934799406117
+  ],
+  "f_row_norms_sq": [
+    1.5837895921799456,
+    1.620130710208011,
+    2.5574190708187814,
+    2.7137439578335494,
+    5.741580418441847,
+    8.713085329010076
+  ],
+  "eta_min": [
+    -3.4465682926270875,
+    -3.471153022789446,
+    -4.795832231060669,
+    -4.254512643602456,
+    -5.933241321233958,
+    -7.813563227939003
+  ],
+  "eta_max": [
+    3.296781487837373,
+    4.149677257905872,
+    4.366972490802739,
+    4.554774236309796,
+    5.018762965922539,
+    8.466232639252251
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.32859060402684565,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep016",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "EASY",
+  "replicate": 16
+}

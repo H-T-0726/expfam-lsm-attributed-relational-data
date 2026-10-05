@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 75,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30101014,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    2.0,
+    2.0,
+    2.0,
+    3.3177934799406117,
+    3.3177934799406117,
+    3.3177934799406117
+  ],
+  "f_row_norms_sq": [
+    2.6839851309065104,
+    0.5515397566757395,
+    1.6809763336082808,
+    4.665457253219958,
+    6.700512588597109,
+    8.127382410619912
+  ],
+  "eta_min": [
+    -4.868322512233504,
+    -2.9083536242360144,
+    -4.699017844532652,
+    -5.087318362852391,
+    -4.491941989601197,
+    -9.572811443389709
+  ],
+  "eta_max": [
+    6.29531430374729,
+    1.798645466138723,
+    2.636642947066137,
+    4.320120965079312,
+    5.877605350245956,
+    6.390643713901428
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.32144144144144143,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_EASY_n75_rep014",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "EASY",
+  "replicate": 14
+}

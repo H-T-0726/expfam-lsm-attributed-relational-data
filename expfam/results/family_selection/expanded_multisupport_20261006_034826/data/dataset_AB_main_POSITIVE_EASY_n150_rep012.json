@@ -1,0 +1,98 @@
+{
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "n": 150,
+  "d": 6,
+  "K_true": 3,
+  "seed": 30102012,
+  "rng_consumption_order": [
+    "Z",
+    "F",
+    "X_columns_ascending",
+    "Y"
+  ],
+  "true_candidate_models": [
+    "lognormal_s1",
+    "lognormal_s1",
+    "lognormal_s1",
+    "ptn_s1",
+    "ptn_s1",
+    "ptn_s1"
+  ],
+  "true_family_names": [
+    "lognormal",
+    "lognormal",
+    "lognormal",
+    "positive_truncated_normal",
+    "positive_truncated_normal",
+    "positive_truncated_normal"
+  ],
+  "true_support_groups": [
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS",
+    "GROUP_POSITIVE_CONTINUOUS"
+  ],
+  "tau": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+  ],
+  "info_at_zero": [
+    1.0,
+    1.0,
+    1.0,
+    0.3633802276324186,
+    0.3633802276324186,
+    0.3633802276324186
+  ],
+  "row_scale": [
+    2.0,
+    2.0,
+    2.0,
+    3.3177934799406117,
+    3.3177934799406117,
+    3.3177934799406117
+  ],
+  "f_row_norms_sq": [
+    3.840636177225654,
+    3.9635908005691034,
+    0.03167061931631054,
+    3.2688537384715333,
+    2.5767219603342277,
+    5.613777579769373
+  ],
+  "eta_min": [
+    -6.221820497979568,
+    -5.908609633385151,
+    -0.5386858193927109,
+    -4.8244701655551046,
+    -4.333114324897661,
+    -6.229399872712509
+  ],
+  "eta_max": [
+    5.832317083432598,
+    4.707347710165524,
+    0.5295914477504772,
+    4.706257175676351,
+    4.082678988888105,
+    6.200820722847097
+  ],
+  "family_y": "bernoulli",
+  "w0": -1.0,
+  "w": 1.0,
+  "y_density": 0.33369127516778524,
+  "link_policy": "canonical natural parameter eta = f^T z; no intercept",
+  "normalization_policy": "none",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep012",
+  "stage": "main",
+  "exp_block": "AB",
+  "group": "POSITIVE",
+  "difficulty": "EASY",
+  "replicate": 12
+}

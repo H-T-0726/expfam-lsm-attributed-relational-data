@@ -1,0 +1,132 @@
+{
+  "runner_version": "multisupport-runner-v1",
+  "selector_version": "multisupport-family-selection-v1",
+  "generator_version": "canonical-multisupport-v1",
+  "family_specs_version": "family-specs-v1",
+  "generic_model_version": "generic-percolumn-v1",
+  "calibration_version": "difficulty-calibration-v1",
+  "git_sha": "37a17ac5b13146ffc7b59f9b272549731a06d119",
+  "git_branch": "exp/multisupport-family-selection",
+  "git_dirty_tracked": false,
+  "created_utc": "2026-10-05T18:48:59.558137+00:00",
+  "python_version": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "hostname": "MyComputer",
+  "dependency_versions": {
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "matplotlib": "3.10.7"
+  },
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "405fc22f6743f86b785df7be44bb2a428101903652d3f5ba37cc21aa72ac376b",
+  "lineage": "E (experimental prototype; not adoptable for the manuscript)",
+  "numerics_mode": "consistent",
+  "failure_policy": "fail_fast",
+  "phase_runs": [
+    {
+      "phase": "smoke",
+      "started_utc": "2026-10-05T18:49:59.536557+00:00",
+      "git_sha": "8ba1b677922320b998f6d767c3f15d02c41b487d",
+      "git_dirty_tracked": false,
+      "n_cases": 38,
+      "n_todo": 38,
+      "workers": 10,
+      "finished_utc": "2026-10-05T18:52:21.866232+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 141.8
+    },
+    {
+      "phase": "pilot",
+      "started_utc": "2026-10-05T18:52:26.285159+00:00",
+      "git_sha": "8ba1b677922320b998f6d767c3f15d02c41b487d",
+      "git_dirty_tracked": false,
+      "n_cases": 114,
+      "n_todo": 114,
+      "workers": 10
+    },
+    {
+      "phase": "smoke",
+      "started_utc": "2026-10-05T19:02:09.784449+00:00",
+      "git_sha": "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+      "git_dirty_tracked": false,
+      "n_cases": 38,
+      "n_todo": 0,
+      "workers": 10,
+      "finished_utc": "2026-10-05T19:02:09.932313+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 0.0
+    },
+    {
+      "phase": "pilot",
+      "started_utc": "2026-10-05T19:02:14.590089+00:00",
+      "git_sha": "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+      "git_dirty_tracked": false,
+      "n_cases": 114,
+      "n_todo": 82,
+      "workers": 10,
+      "finished_utc": "2026-10-05T19:09:12.018195+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 417.3
+    },
+    {
+      "phase": "A_main",
+      "started_utc": "2026-10-05T19:09:16.908893+00:00",
+      "git_sha": "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+      "git_dirty_tracked": false,
+      "n_cases": 240,
+      "n_todo": 240,
+      "workers": 10,
+      "finished_utc": "2026-10-05T19:11:16.174709+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 102.0
+    },
+    {
+      "phase": "B_main_r5",
+      "started_utc": "2026-10-05T19:11:22.836031+00:00",
+      "git_sha": "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+      "git_dirty_tracked": false,
+      "n_cases": 240,
+      "n_todo": 240,
+      "workers": 10,
+      "finished_utc": "2026-10-05T19:44:41.016829+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 1997.9
+    },
+    {
+      "phase": "C_main_r5",
+      "started_utc": "2026-10-05T19:44:46.745625+00:00",
+      "git_sha": "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+      "git_dirty_tracked": false,
+      "n_cases": 80,
+      "n_todo": 80,
+      "workers": 10,
+      "finished_utc": "2026-10-05T20:08:39.044018+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 1430.7
+    },
+    {
+      "phase": "B_main_r10",
+      "started_utc": "2026-10-05T20:08:45.246914+00:00",
+      "git_sha": "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+      "git_dirty_tracked": false,
+      "n_cases": 240,
+      "n_todo": 240,
+      "workers": 10,
+      "finished_utc": "2026-10-05T20:44:18.345312+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 2132.9
+    },
+    {
+      "phase": "C_main_r10",
+      "started_utc": "2026-10-05T20:44:24.922034+00:00",
+      "git_sha": "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+      "git_dirty_tracked": false,
+      "n_cases": 80,
+      "n_todo": 80,
+      "workers": 10,
+      "finished_utc": "2026-10-05T21:08:27.893228+00:00",
+      "unexpected_exceptions": 0,
+      "elapsed_seconds": 1441.2
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "run_dir": "expanded_multisupport_20261006_034826",
+  "verdict": "PASS",
+  "n_blocker": 0,
+  "n_warning": 4,
+  "n_diagnostic": 1,
+  "findings": [
+    {
+      "severity": "WARNING",
+      "check": "failed_fits",
+      "detail": "22 failed fits (kept as outcomes)"
+    },
+    {
+      "severity": "DIAGNOSTIC",
+      "check": "estep_guard",
+      "detail": "26 fits used the COM-Poisson E-step domain guard (halvings counted): [('B__smoke__COUNT__EASY__n40__rep001__AUTO_START_LAST', '0', '1'), ('B__pilot__COUNT__EASY__n75__rep003__AUTO_START_LAST', '0', '1'), ('B__pilot__COUNT__EASY__n75__rep002__AUTO_START_FIRST', '6', '2'), ('B__pilot__COUNT__EASY__n75__rep002__AUTO_START_LAST', '6', '5'), ('B__pilot__COUNT__EASY__n75__rep002__ORACLE', '6', '')]"
+    },
+    {
+      "severity": "WARNING",
+      "check": "experiment_code_changed_before_main",
+      "detail": {
+        "from": "init 37a17ac5",
+        "to_main": "11e1355c",
+        "files": [
+          "expfam/src/experimental/family_specs.py"
+        ]
+      }
+    },
+    {
+      "severity": "WARNING",
+      "check": "experiment_code_changed_before_main",
+      "detail": {
+        "from": "pilot 8ba1b677",
+        "to_main": "11e1355c",
+        "files": [
+          "expfam/src/experimental/family_specs.py"
+        ]
+      }
+    },
+    {
+      "severity": "WARNING",
+      "check": "experiment_code_changed_before_main",
+      "detail": {
+        "from": "smoke 8ba1b677",
+        "to_main": "11e1355c",
+        "files": [
+          "expfam/src/experimental/family_specs.py"
+        ]
+      }
+    }
+  ],
+  "checks": {
+    "protocol_hash_unchanged": true,
+    "phases_run": [
+      "A_main",
+      "B_main_r10",
+      "B_main_r5",
+      "C_main_r10",
+      "C_main_r5",
+      "pilot",
+      "smoke"
+    ],
+    "expected_cases": 1032,
+    "completed_cases": 1032,
+    "duplicate_completed": [],
+    "missing_cases": [],
+    "unexpected_case_ids": [],
+    "hidden_retry_cases": [],
+    "case_file_hash_mismatch": [],
+    "datasets_expected": 312,
+    "datasets_in_manifest": 312,
+    "duplicate_manifest_rows": [],
+    "dataset_hash_mismatch": [],
+    "duplicate_data_seeds": [],
+    "seed_manifest_unique": true,
+    "duplicate_fit_rows": [],
+    "missing_fit_rows": [],
+    "retry_or_rescue_fits": [],
+    "nonfinite_successful_fit": [],
+    "failed_fits": [
+      "B__pilot__POSITIVE__EASY__n75__rep003__AUTO_START_FIRST",
+      "B__pilot__POSITIVE__EASY__n75__rep003__AUTO_START_LAST",
+      "C__pilot__MIXED__EASY__n75__rep001__AUTO_START_FIRST",
+      "C__pilot__MIXED__EASY__n75__rep001__AUTO_START_LAST",
+      "B__main__COUNT__EASY__n150__rep005__AUTO_START_FIRST",
+      "B__main__COUNT__EASY__n150__rep004__AUTO_START_FIRST",
+      "B__main__COUNT__EASY__n150__rep003__AUTO_START_FIRST",
+      "B__main__COUNT__EASY__n150__rep003__AUTO_START_LAST",
+      "B__main__COUNT__EASY__n150__rep005__AUTO_START_LAST",
+      "B__main__COUNT__EASY__n150__rep002__AUTO_START_FIRST",
+      "B__main__POSITIVE__EASY__n150__rep005__AUTO_START_LAST",
+      "C__main__MIXED__EASY__n150__rep002__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n150__rep002__AUTO_START_LAST",
+      "C__main__MIXED__EASY__n75__rep001__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n75__rep001__AUTO_START_LAST",
+      "C__main__MIXED__EASY__n75__rep005__AUTO_START_FIRST",
+      "B__main__COUNT__EASY__n150__rep006__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n150__rep010__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n75__rep007__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n75__rep007__AUTO_START_LAST",
+      "C__main__MIXED__EASY__n75__rep008__AUTO_START_FIRST",
+      "C__main__MIXED__EASY__n75__rep010__AUTO_START_FIRST"
+    ],
+    "datasets_with_inconsistent_fit_seed": [],
+    "fits_with_estep_guard_halvings": 26,
+    "duplicate_selection_rows": 0,
+    "selection_cases_without_rows": [],
+    "support_gate_misassigned_columns": 0,
+    "selection_rows_failure": 387,
+    "nonfinite_ok_candidate_scores": 0,
+    "duplicate_candidate_rows": 0,
+    "selected_despite_failed_candidate": 0,
+    "confusion_sum_matches_selection_rows": true,
+    "recovery_denominator_errors": [],
+    "gate_only_columns_in_score_scope": [],
+    "figures": [
+      "01_family_recovery_by_support_group.png",
+      "02_family_confusion_count.png",
+      "03_family_confusion_positive.png",
+      "04_family_confusion_bounded.png",
+      "05_family_recovery_easy_vs_hard.png",
+      "06_family_recovery_n75_vs_n150.png",
+      "07_rmse_z_oracle_auto_supportonly.png",
+      "08_score_margin_by_true_family.png",
+      "09_start_agreement.png",
+      "10_mixed_x_family_recovery.png"
+    ],
+    "figure_sources_missing": [],
+    "init_git_sha": "37a17ac5b13146ffc7b59f9b272549731a06d119",
+    "phase_git_shas": [
+      [
+        "smoke",
+        "8ba1b677922320b998f6d767c3f15d02c41b487d",
+        false
+      ],
+      [
+        "pilot",
+        "8ba1b677922320b998f6d767c3f15d02c41b487d",
+        false
+      ],
+      [
+        "smoke",
+        "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+        false
+      ],
+      [
+        "pilot",
+        "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+        false
+      ],
+      [
+        "A_main",
+        "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+        false
+      ],
+      [
+        "B_main_r5",
+        "39d04c9b1b493fe23fde7af5448b6b5060bdc5f7",
+        false
+      ],
+      [
+        "C_main_r5",
+        "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+        false
+      ],
+      [
+        "B_main_r10",
+        "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+        false
+      ],
+      [
+        "C_main_r10",
+        "11e1355c985ac68853a40c5929b5c4b1549ef3f2",
+        false
+      ]
+    ],
+    "git_changes_after_init": {
+      "main:11e1355c..39d04c9b": [],
+      "init:37a17ac5..main:11e1355c": [
+        "expfam/src/experimental/family_specs.py"
+      ],
+      "pilot:39d04c9b..main:11e1355c": [],
+      "pilot:8ba1b677..main:11e1355c": [
+        "expfam/src/experimental/family_specs.py"
+      ],
+      "smoke:39d04c9b..main:11e1355c": [],
+      "smoke:8ba1b677..main:11e1355c": [
+        "expfam/src/experimental/family_specs.py"
+      ]
+    }
+  }
+}
