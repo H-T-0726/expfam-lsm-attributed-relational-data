@@ -461,3 +461,19 @@ S4 は構造診断であり **selected K を作らない**。
 | Phase 9U / 9V attribute scale | Z・Y を共有した対応生成器で f_scale = 1, √2, 2 | `expfam/src/experimental/paired_attribute_scale.py`, `expfam/src/experimental/run_attribute_scale_sensitivity.py` | `expfam/results/attribute_scale_design/phase9u_20260928/`, `expfam/results/attribute_scale_sensitivity/phase9v_20260928/` | なし | current_support | ✗ | #116 / #118。EM 593/600 試行、592 成功。strong rep04 不完全。9V PARTIAL |
 | Phase 9W / 9X matched K_true | K_true=1..4 の信号を揃えた設計と実行（rep01..rep10、K3 は 9K を再利用） | `expfam/src/experimental/matched_k_true_design.py`, `expfam/src/experimental/run_matched_k_true.py` | `expfam/results/matched_k_true_design/phase9w_20260928/`, `expfam/results/matched_k_true_sensitivity/phase9x_20260928/` | なし | current_support | ✗ | #120 / #122。EM 300（K3 は 0）。C_Lap exact 10/10/10/8、C_Q 10/9/7/1 |
 | Phase 9Y K3→K4 分解 | 9X の K_true=4 と 9K の K_true=3 の既存の値の分解 | `expfam/src/experimental/k34_boundary_decomposition.py` | `expfam/results/k34_boundary_decomposition/phase9y_20260929/` | なし | current_support | ✗ | #124。EM 0。再構成 ≤ 1.6e-12。原因の証明ではない |
+
+---
+
+## Multi-support family selection（2026-10-06、lineage E、append-only 追記）
+
+**lineage E（experimental prototype）・本文採用不可。** controlled synthetic（K=3 固定、nuisance 固定、Y=Bernoulli w0=−1 w=1）。
+報告: `reports/distribution_selection/multisupport_family_selection_report_20261006.md`（結果・FACT/INTERPRETATION/UNRESOLVED）、
+`reports/distribution_selection/multisupport_family_selection_methods_20261006.md`（方法・dry-run 開示）、
+`reports/distribution_selection/family_candidate_compatibility_audit_20261006.md`（数理監査）、
+`reports/distribution_selection/seminar_family_selection_summary_20261006.md`（自動生成の表）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| MS-A selector only | true Z 上の候補 score 比較、COUNT 5 / POSITIVE 2 / BOUNDED 3 candidate model、n∈{75,150}、EASY/HARD、rep 20 | `expfam/src/experimental/run_multisupport_family_selection.py`（phase A_main）, `family_selection_multisupport.py`, `family_specs.py` | `expfam/results/family_selection/expanded_multisupport_20261006_034826/tables/selection_results.csv`（experiment=A） | `figures/01,02,03,04,05,06,08` | current_support | ✗ | recovery COUNT 0.984 / POSITIVE 1.000 / BOUNDED 0.949（score-decided）。nuisance 固定 |
+| MS-B support 群別 MCEM | Phase 9C hybrid（trust-exact 候補最適化）、ORACLE / AUTO×2 start / SUPPORT_ONLY、rep 10 | 同上（phase B_main_r5, B_main_r10）, `model_dual_expfam_generic.py` | 同 run `tables/fit_results.csv`, `selection_results.csv`（experiment=B） | `figures/01,05,06,07,09` | current_support | ✗ | AUTO の失敗 8/320 fit（すべて EASY n=150）。recovery は失敗を含む all-columns 値を併記すること |
+| MS-C mixed-X MCEM | 全 candidate model×2 列 + Gaussian×2（d=22）、同 4 手法、rep 10 | 同上（phase C_main_r5, C_main_r10） | 同 run（experiment=C） | `figures/07,09,10` | current_support | ✗ | AUTO の失敗 10/80 fit（すべて EASY）。失敗の主因は CMP 候補の開始 loading が評価不能 |
