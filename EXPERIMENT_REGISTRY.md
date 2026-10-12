@@ -461,3 +461,11 @@ S4 は構造診断であり **selected K を作らない**。
 | Phase 9U / 9V attribute scale | Z・Y を共有した対応生成器で f_scale = 1, √2, 2 | `expfam/src/experimental/paired_attribute_scale.py`, `expfam/src/experimental/run_attribute_scale_sensitivity.py` | `expfam/results/attribute_scale_design/phase9u_20260928/`, `expfam/results/attribute_scale_sensitivity/phase9v_20260928/` | なし | current_support | ✗ | #116 / #118。EM 593/600 試行、592 成功。strong rep04 不完全。9V PARTIAL |
 | Phase 9W / 9X matched K_true | K_true=1..4 の信号を揃えた設計と実行（rep01..rep10、K3 は 9K を再利用） | `expfam/src/experimental/matched_k_true_design.py`, `expfam/src/experimental/run_matched_k_true.py` | `expfam/results/matched_k_true_design/phase9w_20260928/`, `expfam/results/matched_k_true_sensitivity/phase9x_20260928/` | なし | current_support | ✗ | #120 / #122。EM 300（K3 は 0）。C_Lap exact 10/10/10/8、C_Q 10/9/7/1 |
 | Phase 9Y K3→K4 分解 | 9X の K_true=4 と 9K の K_true=3 の既存の値の分解 | `expfam/src/experimental/k34_boundary_decomposition.py` | `expfam/results/k34_boundary_decomposition/phase9y_20260929/` | なし | current_support | ✗ | #124。EM 0。再構成 ≤ 1.6e-12。原因の証明ではない |
+
+## 分布誤指定 M1（2026-10-13、Issue #134、lineage E-consistent）
+
+Issue #130 の research synthesis で凍結した最小実験。Phase 9K と同じ data（seed 1001001..1001020）で、真の Bernoulli 6 列を Bernoulli（正）または Poisson（誤、support-compatible）として fit。K_fit = 3 固定、family 選択なし。報告: `reports/advisor_feedback/misspecification_m1_bernoulli_to_poisson_20261013.md`。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|------|----|----------|-------|---|----|------|----|
+| M1 Bernoulli→Poisson | 20 replicate × Y 学習観測率 {dense = pool の 100%, sparse = 10%}（test 10% を固定）× {G3/B6/P3, G3/P6/P3}、Procrustes RMSE_Z の対比較 | `expfam/src/experimental/run_misspecification_m1.py`（`31ebcac`）、`test_misspecification_m1.py` | `expfam/results/misspecification_m1/phase_m1_20261013/` | なし | current_support | ✗ | #134。EM 80/80 成功、retry 0。delta（wrong − correct）は dense 平均 +0.020（15/20）、sparse +0.066（17/20）。観測率は mask であり edge 密度ではない。1 つの固定条件 |
