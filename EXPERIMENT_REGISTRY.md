@@ -461,3 +461,15 @@ S4 は構造診断であり **selected K を作らない**。
 | Phase 9U / 9V attribute scale | Z・Y を共有した対応生成器で f_scale = 1, √2, 2 | `expfam/src/experimental/paired_attribute_scale.py`, `expfam/src/experimental/run_attribute_scale_sensitivity.py` | `expfam/results/attribute_scale_design/phase9u_20260928/`, `expfam/results/attribute_scale_sensitivity/phase9v_20260928/` | なし | current_support | ✗ | #116 / #118。EM 593/600 試行、592 成功。strong rep04 不完全。9V PARTIAL |
 | Phase 9W / 9X matched K_true | K_true=1..4 の信号を揃えた設計と実行（rep01..rep10、K3 は 9K を再利用） | `expfam/src/experimental/matched_k_true_design.py`, `expfam/src/experimental/run_matched_k_true.py` | `expfam/results/matched_k_true_design/phase9w_20260928/`, `expfam/results/matched_k_true_sensitivity/phase9x_20260928/` | なし | current_support | ✗ | #120 / #122。EM 300（K3 は 0）。C_Lap exact 10/10/10/8、C_Q 10/9/7/1 |
 | Phase 9Y K3→K4 分解 | 9X の K_true=4 と 9K の K_true=3 の既存の値の分解 | `expfam/src/experimental/k34_boundary_decomposition.py` | `expfam/results/k34_boundary_decomposition/phase9y_20260929/` | なし | current_support | ✗ | #124。EM 0。再構成 ≤ 1.6e-12。原因の証明ではない |
+
+## Issue #128 K 選択基準の同一 fit 比較（2026-10-06〜2026-11-04、objective-consistent prototype 使用、append-only 追記）
+
+report: `reports/k_selection_theory/k_criterion_comparison_report_20261104.md`（計画: `reports/k_selection_theory/k_criterion_same_fit_comparison_plan_20261006.md`）。
+**すべて lineage E・本文採用は未決定（MANUSCRIPT_ADOPTION_STATUS: NOT_DECIDED_BY_HUMAN）。** `C_Q` は Schwarz BIC ではない。`C_Lap` は厳密な周辺尤度ではない。`C_cond_*` は原論文 BIC ではない。
+retry / replacement / seed rescue / resume 0。数はこの固定条件のデータセット数であり率ではない。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| #128 A1 clean n-sweep + C_Lap | canonical clean n-sweep（Poisson-X / Bernoulli-Y, K_TRUE 1,3,5, n 50..150, 候補 K 1..7）の同一 fit に C_Lap を追加 | `tools/research_audit/run_clap_clean_nsweep.py`, `expfam/src/experimental/k_criterion_panel.py`, `tools/research_audit/audit_clap_clean_nsweep.py` | `expfam/results/k_selection/clap_clean_nsweep_20261006/` | `expfam/figures/k_criterion_comparison_20261006/` | current_support | ✗ | EM 再現 448 + npz 448。C_Q exact 37/64、C_Lap 47/64（INCOMPLETE 4）。監査 PASS 24161 checks |
+| #128 B paper-type generator | `set_true_params`（n=150, d=15, K_TRUE 1,3,5,7,9, 候補 K 1..10, Gaussian-X / Bernoulli-Y, L=5, 8 反復, 2 start, R=5）で C_Q / C_Lap / C_cond_* | `tools/research_audit/run_paper_condition_k_criteria.py`, `tools/research_audit/audit_paper_condition_k_criteria.py` | `expfam/results/k_selection/paper_condition_k_criteria_20261006/` | `expfam/figures/k_criterion_comparison_20261104/` | current_support | ✗ | **原論文 Experiment 2 の再現ではない**。EM 520（pilot 20 + full 500）。C_Q 25/25、C_Lap 19/19 完了分（INCOMPLETE 6）、C_cond_* 過大 25/25 完了分。監査 PASS 11305 checks |
+| #128 派生表 | A1 / B の一次 CSV からの集計表・図（EM 0） | `tools/research_audit/analyze_k_criterion_comparison.py` | `expfam/results/k_selection/k_criterion_comparison_analysis_20261104/` | `expfam/figures/k_criterion_comparison_20261104/` | current_support | ✗ | 既存ファイルを上書きしない。分解は算術であり原因の証明ではない |
