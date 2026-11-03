@@ -1,0 +1,38 @@
+{
+  "attempted_fits": 20,
+  "branch": "experiment/128-k-criterion-comparison",
+  "cells": [
+    [
+      3,
+      1
+    ]
+  ],
+  "completed_at": 1793711027.8925757,
+  "completed_rows": 20,
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "paper_condition_k_criteria_20261006",
+  "failed_fits": 0,
+  "generator_sha256": "09e23ec8fb331462473f5226478c366eb1686d50f9d37dfa9e1a2ca401e9396e",
+  "git_head": "031023050e545f6f31e6b2ceb1ad68fffdb4a25d",
+  "laplace_status_counts": {
+    "OK": 20
+  },
+  "protocol_hash": "e095ea9b6cb5f8d9fb0375239fd658b2d9bb556fb782b417ae6206fe8351917f",
+  "replacement_fits_executed": 0,
+  "resumed": false,
+  "retry_count": 0,
+  "seed_rescue_count": 0,
+  "stage": "pilot",
+  "started_at": 1793710680.091287,
+  "states_file": "D:\\tento\\kennkyu_artifacts\\paper_condition_k_criteria_20261006\\pilot\\states.npz",
+  "states_sha256": "c385901d09b7b46a35ef8efc17d84dc3aa83cab9be4f339f7e8f3fe63bcfbcf3",
+  "status": "COMPLETED",
+  "tolerance_relaxations": 0,
+  "wall_clock_seconds": 347.8,
+  "working_tree_clean_before_execution": true
+}
