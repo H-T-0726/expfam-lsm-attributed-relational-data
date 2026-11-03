@@ -473,3 +473,11 @@ retry / replacement / seed rescue / resume 0。数はこの固定条件のデー
 | #128 A1 clean n-sweep + C_Lap | canonical clean n-sweep（Poisson-X / Bernoulli-Y, K_TRUE 1,3,5, n 50..150, 候補 K 1..7）の同一 fit に C_Lap を追加 | `tools/research_audit/run_clap_clean_nsweep.py`, `expfam/src/experimental/k_criterion_panel.py`, `tools/research_audit/audit_clap_clean_nsweep.py` | `expfam/results/k_selection/clap_clean_nsweep_20261006/` | `expfam/figures/k_criterion_comparison_20261006/` | current_support | ✗ | EM 再現 448 + npz 448。C_Q exact 37/64、C_Lap 47/64（INCOMPLETE 4）。監査 PASS 24161 checks |
 | #128 B paper-type generator | `set_true_params`（n=150, d=15, K_TRUE 1,3,5,7,9, 候補 K 1..10, Gaussian-X / Bernoulli-Y, L=5, 8 反復, 2 start, R=5）で C_Q / C_Lap / C_cond_* | `tools/research_audit/run_paper_condition_k_criteria.py`, `tools/research_audit/audit_paper_condition_k_criteria.py` | `expfam/results/k_selection/paper_condition_k_criteria_20261006/` | `expfam/figures/k_criterion_comparison_20261104/` | current_support | ✗ | **原論文 Experiment 2 の再現ではない**。EM 520（pilot 20 + full 500）。C_Q 25/25、C_Lap 19/19 完了分（INCOMPLETE 6）、C_cond_* 過大 25/25 完了分。監査 PASS 11305 checks |
 | #128 派生表 | A1 / B の一次 CSV からの集計表・図（EM 0） | `tools/research_audit/analyze_k_criterion_comparison.py` | `expfam/results/k_selection/k_criterion_comparison_analysis_20261104/` | `expfam/figures/k_criterion_comparison_20261104/` | current_support | ✗ | 既存ファイルを上書きしない。分解は算術であり原因の証明ではない |
+
+## 研究改善サイクル 1：Z の点推定と MC ノイズの診断（2026-11-04、EM 0、append-only 追記）
+
+report: `reports/research_improvement/research_improvement_cycle1_20261104.md`。**事後的な探索診断であり、既存の選択規則・指標・結論を置き換えない。**
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| Cycle1 D1/D2 point-estimator / MC-noise diagnostic | #128 A1 / B の保存状態から、同じ θ̂ で Z の点推定（last / mean5 / mode）を比べ、RMSE_Z と S1 の K 選択を再計算する。EM convergence-sensitivity（commit `dad67b1`）の反復ログから MC ノイズの床を集計する | `tools/research_audit/diagnose_z_point_estimator.py` | `expfam/results/diagnostics/z_point_estimator_20261104/` | なし | exploratory | ✗ | EM 0。S1（last）の再計算は記録と 5.6e-17 以内で一致。A1 の S1 の真値一致は last 39/64、mode 52/64。post-hoc であり、確認は事前登録の実験で行う |
