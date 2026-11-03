@@ -159,12 +159,92 @@ def b_tables(b_dir: Path, out: Path) -> None:
     write(out, "B_start_agreement.csv", agree)
 
 
+def b_figures(b_dir: Path, fig_dir: Path) -> None:
+    """B_selected_vs_true.png and B_boundary_slack.png (descriptive)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt                              # noqa: PLC0415
+
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    for name in ("B_selected_vs_true.png", "B_boundary_slack.png"):
+        if (fig_dir / name).exists():
+            raise SystemExit(f"{fig_dir / name} exists; not overwriting")
+    sel = read(b_dir / "selection.csv")
+    dec = read(b_dir / "increment_decomposition.csv")
+    crits = ["C_Q", "C_Lap", "C_cond_MC", "C_cond_last", "C_cond_mode"]
+    color = {"C_Q": "#2a78d6", "C_Lap": "#eb6834", "C_cond_MC": "#1baf7a",
+             "C_cond_last": "#eda100", "C_cond_mode": "#e87ba4"}
+    fig, ax = plt.subplots(figsize=(6.4, 4.2))
+    offs = {c: (i - 2) * 0.13 for i, c in enumerate(crits)}
+    for c in crits:
+        pts = defaultdict(int)
+        inc = defaultdict(int)
+        for r in sel:
+            if r["criterion"] != c:
+                continue
+            t = int(r["k_true"])
+            if r["status"] == "COMPLETE":
+                pts[(t, int(r["selected_k"]))] += 1
+            else:
+                inc[t] += 1
+        xs = [t + offs[c] for (t, _k) in pts]
+        ys = [k for (_t, k) in pts]
+        ss = [18 * v for v in pts.values()]
+        ax.scatter(xs, ys, s=ss, color=color[c], alpha=0.8, label=c,
+                   edgecolor="white", linewidth=0.5)
+        for t, v in inc.items():
+            ax.text(t + offs[c], 0.35, str(v), color=color[c], fontsize=7,
+                    ha="center")
+    ax.plot([0.5, 9.5], [0.5, 9.5], color="#6b6b6b", lw=0.8, ls="--")
+    ax.set_xticks([1, 3, 5, 7, 9])
+    ax.set_yticks(range(1, 11))
+    ax.set_ylim(0, 10.6)
+    ax.set_xlabel("K_TRUE")
+    ax.set_ylabel("selected K (marker area = # datasets of 5)")
+    ax.set_title("B: selected K vs K_TRUE (numbers at bottom = INCOMPLETE)",
+                 fontsize=9)
+    ax.legend(fontsize=7, loc="upper left")
+    fig.tight_layout()
+    fig.savefig(fig_dir / "B_selected_vs_true.png", dpi=150)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.6), sharey=False)
+    for ax, side, title in ((axes[0], "below", "K_TRUE-1 -> K_TRUE (>0 favours K_TRUE)"),
+                            (axes[1], "above", "K_TRUE -> K_TRUE+1 (<0 favours K_TRUE)")):
+        for c, col, off in (("CQ_slack", "#2a78d6", -0.15),
+                            ("Lap_slack", "#eb6834", 0.15)):
+            for x in dec:
+                t, kf = int(x["k_true"]), int(x["k_from"])
+                if (side == "below" and kf != t - 1) or (side == "above"
+                                                         and kf != t):
+                    continue
+                if x[c] in ("", "nan"):
+                    continue
+                ax.scatter(t + off, float(x[c]), color=col, s=14, alpha=0.8)
+        ax.axhline(0, color="#2b2b2b", lw=0.8)
+        ax.set_xticks([1, 3, 5, 7, 9])
+        ax.set_xlabel("K_TRUE")
+        ax.set_title(title, fontsize=9)
+    axes[0].set_ylabel("slack = fit gain - Δpenalty terms")
+    axes[0].scatter([], [], color="#2a78d6", label="C_Q")
+    axes[0].scatter([], [], color="#eb6834", label="C_Lap")
+    axes[0].legend(fontsize=7)
+    fig.suptitle("B: arithmetic split at the K_TRUE boundary (mean of 2 starts;"
+                 " not a causal decomposition)", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(fig_dir / "B_boundary_slack.png", dpi=150)
+    plt.close(fig)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--a-dir", type=Path)
     ap.add_argument("--b-dir", type=Path)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--fig-dir", type=Path)
     a = ap.parse_args(argv)
+    if a.fig_dir and a.b_dir:
+        b_figures(a.b_dir, a.fig_dir)
     a.out.mkdir(parents=True, exist_ok=True)
     meta = {}
     if a.a_dir:
