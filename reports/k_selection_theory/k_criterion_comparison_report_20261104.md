@@ -387,7 +387,7 @@ python tools/research_audit/plot_k_criterion_comparison.py --b-dir expfam/result
 | `1ae0d6c` | B pilot 結果、B 独立 auditor、派生表スクリプト |
 | `3209b6c` | B full 結果（500 fits）、監査レポート、STATE_ARCHIVE |
 | `9704a06` | 派生表・B 図 |
-| （本レポートの commit） | 本レポート、EXPERIMENT_REGISTRY 追記 |
+| `0a3703a` | 本レポート、EXPERIMENT_REGISTRY 追記 |
 
 ### 成果物
 
