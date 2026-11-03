@@ -1,0 +1,135 @@
+{
+  "attempted_fits": 500,
+  "branch": "experiment/128-k-criterion-comparison",
+  "cells": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      5,
+      1
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      7,
+      1
+    ],
+    [
+      7,
+      2
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      7,
+      4
+    ],
+    [
+      7,
+      5
+    ],
+    [
+      9,
+      1
+    ],
+    [
+      9,
+      2
+    ],
+    [
+      9,
+      3
+    ],
+    [
+      9,
+      4
+    ],
+    [
+      9,
+      5
+    ]
+  ],
+  "completed_at": 1793719453.3037317,
+  "completed_rows": 500,
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "paper_condition_k_criteria_20261006",
+  "failed_fits": 0,
+  "generator_sha256": "09e23ec8fb331462473f5226478c366eb1686d50f9d37dfa9e1a2ca401e9396e",
+  "git_head": "1ae0d6c5db259eb62a801e791b70547cca6d6f4b",
+  "laplace_status_counts": {
+    "NOT_STATIONARY": 8,
+    "OK": 492
+  },
+  "protocol_hash": "e095ea9b6cb5f8d9fb0375239fd658b2d9bb556fb782b417ae6206fe8351917f",
+  "replacement_fits_executed": 0,
+  "resumed": false,
+  "retry_count": 0,
+  "seed_rescue_count": 0,
+  "stage": "full",
+  "started_at": 1793711062.0541372,
+  "states_file": "D:\\tento\\kennkyu_artifacts\\paper_condition_k_criteria_20261006\\full\\states.npz",
+  "states_sha256": "db6a725668d6a55d010e2ea780aeaee2bf0dd11c65246abb80d0aacfee3c4005",
+  "status": "COMPLETED",
+  "tolerance_relaxations": 0,
+  "wall_clock_seconds": 8391.2,
+  "working_tree_clean_before_execution": true
+}

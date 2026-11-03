@@ -1,0 +1,402 @@
+{
+  "C_Lap": {
+    "by_k_true": {
+      "K1": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 4,
+        "incomplete": 1,
+        "over": 0,
+        "selected_k": [
+          1,
+          null,
+          1,
+          1,
+          1
+        ],
+        "under": 0
+      },
+      "K3": {
+        "complete": 2,
+        "datasets": 5,
+        "exact": 2,
+        "incomplete": 3,
+        "over": 0,
+        "selected_k": [
+          3,
+          3,
+          null,
+          null,
+          null
+        ],
+        "under": 0
+      },
+      "K5": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "under": 0
+      },
+      "K7": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 4,
+        "incomplete": 1,
+        "over": 0,
+        "selected_k": [
+          7,
+          7,
+          7,
+          null,
+          7
+        ],
+        "under": 0
+      },
+      "K9": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 4,
+        "incomplete": 1,
+        "over": 0,
+        "selected_k": [
+          9,
+          9,
+          9,
+          9,
+          null
+        ],
+        "under": 0
+      }
+    },
+    "role": "primary"
+  },
+  "C_Q": {
+    "by_k_true": {
+      "K1": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "under": 0
+      },
+      "K3": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "under": 0
+      },
+      "K5": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "under": 0
+      },
+      "K7": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          7,
+          7,
+          7,
+          7,
+          7
+        ],
+        "under": 0
+      },
+      "K9": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 5,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "under": 0
+      }
+    },
+    "role": "primary"
+  },
+  "C_cond_MC": {
+    "by_k_true": {
+      "K1": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          9,
+          9,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K3": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          9,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K5": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K7": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K9": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  },
+  "C_cond_last": {
+    "by_k_true": {
+      "K1": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          9,
+          9
+        ],
+        "under": 0
+      },
+      "K3": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K5": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K7": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          9,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K9": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  },
+  "C_cond_mode": {
+    "by_k_true": {
+      "K1": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 1,
+        "over": 4,
+        "selected_k": [
+          10,
+          null,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K3": {
+        "complete": 2,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 3,
+        "over": 2,
+        "selected_k": [
+          10,
+          10,
+          null,
+          null,
+          null
+        ],
+        "under": 0
+      },
+      "K5": {
+        "complete": 5,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 5,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "under": 0
+      },
+      "K7": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 1,
+        "over": 4,
+        "selected_k": [
+          10,
+          10,
+          10,
+          null,
+          10
+        ],
+        "under": 0
+      },
+      "K9": {
+        "complete": 4,
+        "datasets": 5,
+        "exact": 0,
+        "incomplete": 1,
+        "over": 4,
+        "selected_k": [
+          10,
+          10,
+          10,
+          10,
+          null
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  }
+}
