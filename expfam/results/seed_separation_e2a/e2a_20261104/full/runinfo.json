@@ -1,0 +1,20 @@
+{
+  "issue": 142,
+  "script": "expfam/src/experimental/run_seed_separation_e2a.py",
+  "git_head": "368b938fb8eca87e5f201c9e091ed0d8dbc31538",
+  "git_branch": "experiment/142-seed-separation-e2a",
+  "git_dirty_tracked": false,
+  "started_utc": "2026-11-04T05:35:17.321226+00:00",
+  "finished_utc": "2026-11-04T05:48:55.562481+00:00",
+  "total_runtime_s": 818.2,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "sklearn": "1.8.0",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "attempted_fits": 80,
+  "planned_fits": 80,
+  "states_file": "D:\\tento\\kennkyu_artifacts\\seed_separation_e2a_20261104\\full\\states.npz",
+  "states_sha256": "84749cdb11a1e395b13c7af74e59b66c0a7f631211494127dde82ae71b05cd0d",
+  "reused_cells_max_abs_diff_rmse_vs_e1_csv": 0.0
+}

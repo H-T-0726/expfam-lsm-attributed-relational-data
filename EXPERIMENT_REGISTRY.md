@@ -489,3 +489,19 @@ report: `reports/research_improvement/research_improvement_cycle1_20261104.md`�
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | Cycle1 D1/D2 point-estimator / MC-noise diagnostic | #128 A1 / B の保存状態から、同じ θ̂ で Z の点推定（last / mean5 / mode）を比べ、RMSE_Z と S1 の K 選択を再計算する。EM convergence-sensitivity（commit `dad67b1`）の反復ログから MC ノイズの床を集計する | `tools/research_audit/diagnose_z_point_estimator.py` | `expfam/results/diagnostics/z_point_estimator_20261104/` | なし | exploratory | ✗ | EM 0。S1（last）の再計算は記録と 5.6e-17 以内で一致。A1 の S1 の真値一致は last 39/64、mode 52/64。post-hoc であり、確認は事前登録の実験で行う |
+
+## E1：Z の点推定による M1 の再評価（Issue #141、2026-11-04、lineage E-consistent per-column、append-only 追記）
+
+report: `reports/research_improvement/e1_z_point_estimator_m1_20261104.md`。**M1 の artifact は変更していない。本文採用不可（prototype）。**
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| E1 Z point-estimator re-evaluation of M1 | Part A: M1 の 80 fit の replay（seed `1343000+r`）。Part B: seed `1344000+r` の 80 fit。同じ θ̂ で Z を last / mean5 / joint mode（Z0 = last、#128 の solver）で評価する | `expfam/src/experimental/run_z_point_estimator_e1.py` | `expfam/results/z_point_estimator_e1/e1_20261104/` | なし | current_support | ✗ | 160/160 成功。Part A は M1 の 480 値と abs diff 0.0。mode は 320/320 が OK。mode の Δ_dense +0.015/+0.009（13/20）、Δ_sparse +0.076/+0.087（18/20、20/20）。last の dense は A +0.020 と B +0.002 で再現せず。seed は初期値と MC の両方を決める |
+
+## E2a：初期値と MC 乱数の切り分け（Issue #142、2026-11-04、lineage E-consistent per-column、append-only 追記）
+
+report: `reports/research_improvement/e2a_seed_separation_20261104.md`。**E1・M1 の artifact は変更していない。本文採用不可（prototype）。**
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| E2a seed separation | E1 の sparse-Y 条件で (初期値 seed, MC seed) ∈ {A, B}² の 2×2。AA = E1 Part A、BB = E1 Part B を再利用し、AB / BA の 80 fit を新規実行。`run_em_experimental` に opt-in の `init_seed` / `mc_seed` を追加 | `expfam/src/experimental/run_seed_separation_e2a.py`、`em_runner.py`（`368b938`） | `expfam/results/seed_separation_e2a/e2a_20261104/` | なし | current_support | ✗ | 80/80 成功、retry 0。smoke 4 fit は E1 と完全一致。mode 160/160 OK。mode の Δ 対比は MC 0.042・初期値 0.040（COMPARABLE）。解の位置は初期値でほぼ決まる。水準 2 つの 2×2 で、一般的な分散分解ではない |
