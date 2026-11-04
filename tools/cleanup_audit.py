@@ -65,6 +65,7 @@ IGNORED_DIRS = {
 
 KNOWN_ROOT_FILES = {
     ".gitignore",
+    "AGENTS.md",
     "CLAUDE.md",
     "CLEANUP_MANIFEST.md",
     "EXPERIMENT_REGISTRY.md",
@@ -76,6 +77,7 @@ KNOWN_ROOT_FILES = {
 }
 
 KEEP_GLOBS = [
+    "AGENTS.md",
     "CLAUDE.md",
     "CLEANUP_MANIFEST.md",
     "EXPERIMENT_REGISTRY.md",

@@ -1,6 +1,6 @@
 ---
 name: verify-research-claim
-description: Use when a research claim, number, or ratio from this repository needs to be traced to primary evidence before it goes into a manuscript, slide, report, or answer - resolves claim to canonical docs, then the experiment registry, then the primary CSV/runinfo/code/paper, and reports claimability and evidence status as two separate verdicts.
+description: Use when the researcher asks to verify a research claim, or before a number, ratio, or comparison from this repository goes into the manuscript, slides, or other external-facing material - traces it through canonical docs, the experiment registry, and the primary CSV/runinfo/code/paper, and reports claimability and evidence status as two separate verdicts.
 ---
 
 # Verify a research claim
@@ -11,9 +11,15 @@ stop; the change is a separate, human-approved task.
 
 ## When to use
 
-A claim is being made or repeated: a number ("41.45×"), a comparison ("fixed is
-better"), a property ("BIC selects k=3"), or an attribution ("the original paper
-has no 1/2"). Also use it when asked to check something someone else wrote.
+A claim is headed for the manuscript, slides, or other external-facing material,
+or the researcher asks for it to be checked: a number ("41.45×"), a comparison
+("fixed is better"), a property ("BIC selects k=3"), or an attribution ("the
+original paper has no 1/2"). Also use it when asked to check something someone
+else wrote.
+
+Not needed for routine reporting of a run you just executed: there, stating the
+implementation lineage and conditions next to each number (`AGENTS.md` §3) is
+enough.
 
 ## Workflow
 
@@ -30,11 +36,12 @@ of guessing which experiment was meant.
 
 ### 2. Canonical documents — determine **claimability**
 
-Check `KNOWN_ISSUES.md`, specifically the two lists at the bottom:
-"今すぐ主張してよいこと" and "まだ主張してはいけないこと". Then `RESEARCH_MASTER.md`
-and `CLAUDE.md` for the accepted formulation; `CLAUDE.md` §5 lists claims that
-must carry an explicit qualifier, and a claim that drops its qualifier is not
-the same claim.
+Check `KNOWN_ISSUES.md`: the lists "今すぐ主張してよいこと" and
+"まだ主張してはいけないこと", and the dated forward-update sections after them,
+which take precedence for the current status. Then the latest Claim Ledger
+sections of `RESEARCH_MASTER.md` and `AGENTS.md` for the accepted formulation;
+`AGENTS.md` §5 lists claims that must carry an explicit qualifier, and a claim
+that drops its qualifier is not the same claim.
 
 This step decides **claimability only**:
 
@@ -89,7 +96,7 @@ Decided from the primary evidence chain alone, independently of step 2:
 
 - **Every number carries its implementation lineage.** State whether it came
   from the `0.5`-bearing series, the `fixed` series, or an `experimental/`
-  prototype (`CLAUDE.md` §3, KI-002). A number without a lineage is not
+  prototype (`AGENTS.md` §3, KI-002). A number without a lineage is not
   reportable. Never place numbers from different series in one table or figure.
 - **Never confirm a number from a derived document alone.** `GEMINI_REPORT_*`,
   `docs_for_notebooklm/*`, old handoffs, and previous session summaries are
@@ -105,8 +112,8 @@ Decided from the primary evidence chain alone, independently of step 2:
 - **Preserve terminology.** The model-selection criterion is a Q-based
   complete-data / ICL-type criterion, not a Schwarz BIC, even though the
   function, the CSV column, and past results are all named `BIC` — those names
-  stay unchanged (`CLAUDE.md` §5, KI-010).
-- **The 1/2 coefficient has five distinct lineages** (`CLAUDE.md` §2). Never
+  stay unchanged (`AGENTS.md` §5, KI-010).
+- **The 1/2 coefficient has five distinct lineages** (`AGENTS.md` §2). Never
   collapse them. In particular the baseline paper's printed equations *do*
   carry the 1/2.
 

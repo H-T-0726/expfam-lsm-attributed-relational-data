@@ -1,0 +1,14 @@
+{
+  "issue": 134,
+  "script": "expfam/src/experimental/run_misspecification_m1.py",
+  "git_head": "31ebcacc2af4733d0e6289aa21319b289766c85b",
+  "git_branch": "experiment/134-misspecification-m1",
+  "git_dirty_tracked": false,
+  "started_utc": "2026-10-12T16:23:20+00:00",
+  "finished_utc": "2026-10-12T16:37:51+00:00",
+  "total_runtime_s": 870.7,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "attempted_fits": 80,
+  "successful_fits": 80
+}
