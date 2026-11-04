@@ -9,7 +9,7 @@ disable-model-invocation: true
 Invoked explicitly by the researcher to review an experiment plan before it
 runs. It reviews the plan; it does not run the experiment. It is not a
 precondition for approved work: an experiment already approved under
-`CLAUDE.md` §6 (Approved Task) proceeds without this skill.
+`AGENTS.md` §6 (Approved Task) proceeds without this skill.
 
 Severity follows `docs/research_operating_policy.md` (BLOCKER / WARNING /
 DIAGNOSTIC). Only an item that would make the result uninterpretable or
@@ -23,7 +23,7 @@ unciteable is a BLOCKER; everything else is recorded and does not stop the plan.
 2. Working branch (not `main`). Note any uncommitted or untracked files so they
    are not mixed into the run's commit; their presence alone is not a blocker.
 
-**Model** (`CLAUDE.md` §1, §3)
+**Model** (`AGENTS.md` §1, §3)
 
 3. Implementation lineage — exact model file. Prototypes under `experimental/`
    cannot support manuscript claims.

@@ -1,8 +1,8 @@
 # Research Operating Policy — 研究を主役にする詳細規約
 
-> この文書は root `CLAUDE.md` の **Research-first operating policy** の詳細版。
+> この文書は root `AGENTS.md` §4〜§6（一次証拠・実験と解釈・作業の進め方）の詳細版。
 > 実験設計、gate 設計、severity 判断、結果解釈、multi-stage 実行を行うときに読む。
-> root `CLAUDE.md` と矛盾する場合は root `CLAUDE.md` を優先する。
+> root `AGENTS.md` と矛盾する場合は root `AGENTS.md` を優先する。
 
 ---
 
@@ -23,7 +23,7 @@
 
 #### 研究タスクの mode を最初に決める
 
-作業開始時に、そのタスクの主 mode を次から 1 つ明記する。
+作業開始時に、そのタスクの主 mode を次から 1 つ決め、報告で明記する（そのための文書は作らない）。
 
 - **THEORY / AUDIT** — 数式・仮定・実装対応・既存証拠の確認。新しい科学的結果は作らない
 - **IMPLEMENTATION** — 承認済み数式・設計をコード化する。新しい研究結論は出さない
@@ -32,7 +32,7 @@
 - **REPRODUCTION** — 既存結果・先行研究・既存 artifact の再現。元条件との差を混ぜない
 - **CHARACTERIZATION** — 実データや条件差の性質を記述する。因果・一般性を勝手に主張しない
 
-複数 mode が必要なら phase を分ける。探索で見つけた条件を、そのまま confirmatory evidence として扱わない。
+複数 mode にまたがる場合は、どの結果をどの mode で得たかを報告で区別する。探索で見つけた条件を、そのまま confirmatory evidence として扱わない。
 
 #### 実験前に固定するものは「研究解釈に必要な最小限」にする
 
@@ -222,9 +222,9 @@ feasibility pilot の目的は、完全な数値解析証明ではなく通常�
 
 どの結果でも研究判断が変わらないなら、その実験の優先度は低い。
 
-#### advisor / thesis-ready checkpoint
+#### phase 終了時の要約
 
-主要 phase・pilot・full experiment の終了時は、コード差分より先に次の 6 点をまとめる。
+主要 phase・pilot・full experiment の終了時は、コード差分より先に次の 6 点を報告でまとめる。
 
 1. **研究問い**
 2. **何をしたか**
@@ -234,7 +234,8 @@ feasibility pilot の目的は、完全な数値解析証明ではなく通常�
 6. **次に Human が決めること**
 
 この 6 点が説明できないまま validation stage を増やさない。
-先生へ相談できる evidence が揃った時点では、追加実装より先に研究上の相談材料を作る。
+先生へ相談できる evidence が揃った時点では、追加実装より先にそのことを報告する。
+指導教員向け資料・修論本文・研究方針の提案文書は、依頼された場合だけ作る（`AGENTS.md` §6）。
 
 #### unattended / multi-stage execution
 
