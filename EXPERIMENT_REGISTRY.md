@@ -469,3 +469,11 @@ Issue #130 の research synthesis で凍結した最小実験。Phase 9K と同�
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |------|----|----------|-------|---|----|------|----|
 | M1 Bernoulli→Poisson | 20 replicate × Y 学習観測率 {dense = pool の 100%, sparse = 10%}（test 10% を固定）× {G3/B6/P3, G3/P6/P3}、Procrustes RMSE_Z の対比較 | `expfam/src/experimental/run_misspecification_m1.py`（`31ebcac`）、`test_misspecification_m1.py` | `expfam/results/misspecification_m1/phase_m1_20261013/` | なし | current_support | ✗ | #134。EM 80/80 成功、retry 0。delta（wrong − correct）は dense 平均 +0.020（15/20）、sparse +0.066（17/20）。観測率は mask であり edge 密度ではない。1 つの固定条件 |
+
+## E1：Z の点推定による M1 の再評価（Issue #141、2026-11-04、lineage E-consistent per-column、append-only 追記）
+
+report: `reports/research_improvement/e1_z_point_estimator_m1_20261104.md`。**M1 の artifact は変更していない。本文採用不可（prototype）。**
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| E1 Z point-estimator re-evaluation of M1 | Part A: M1 の 80 fit の replay（seed `1343000+r`）。Part B: seed `1344000+r` の 80 fit。同じ θ̂ で Z を last / mean5 / joint mode（Z0 = last、#128 の solver）で評価する | `expfam/src/experimental/run_z_point_estimator_e1.py` | `expfam/results/z_point_estimator_e1/e1_20261104/` | なし | current_support | ✗ | 160/160 成功。Part A は M1 の 480 値と abs diff 0.0。mode は 320/320 が OK。mode の Δ_dense +0.015/+0.009（13/20）、Δ_sparse +0.076/+0.087（18/20、20/20）。last の dense は A +0.020 と B +0.002 で再現せず。seed は初期値と MC の両方を決める |
