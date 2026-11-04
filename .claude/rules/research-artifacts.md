@@ -49,7 +49,7 @@ Confirm all of the following, and state them alongside the number:
 - **Implementation lineage** — which model file produced it. The `0.5`-bearing
   series, the `fixed` series, and `experimental/` prototypes are different
   models and their numbers do not belong in the same table or figure
-  (`CLAUDE.md` §3, KI-002).
+  (`AGENTS.md` §3, KI-002).
 - **Scenario and families** — scenario A/B/C, and the X-side and Y-side
   distribution families, for both the true and the estimated model.
 - **Seed and trial count** — several comparison CSVs rest on 5 trials.

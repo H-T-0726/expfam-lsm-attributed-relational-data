@@ -1,0 +1,110 @@
+{
+  "C_Lap": {
+    "by_cell": {
+      "K3/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 1,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          3
+        ],
+        "under": 0
+      },
+      "K5/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          2
+        ],
+        "under": 1
+      }
+    },
+    "role": "primary"
+  },
+  "C_Q": {
+    "by_cell": {
+      "K3/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 1,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          3
+        ],
+        "under": 0
+      },
+      "K5/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          2
+        ],
+        "under": 1
+      }
+    },
+    "role": "primary"
+  },
+  "S1": {
+    "by_cell": {
+      "K3/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          2
+        ],
+        "under": 1
+      },
+      "K5/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          2
+        ],
+        "under": 1
+      }
+    },
+    "role": "prediction_reference"
+  },
+  "S3": {
+    "by_cell": {
+      "K3/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 1,
+        "selected_k": [
+          4
+        ],
+        "under": 0
+      },
+      "K5/n50": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 1,
+        "selected_k": [
+          6
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  }
+}

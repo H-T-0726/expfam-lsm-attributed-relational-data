@@ -1,0 +1,20 @@
+{
+  "mode": "EXPLORATORY post-hoc diagnostic; no EM, no refit, no sampling",
+  "emc_source_commit": "dad67b1c7b90f1e0297e8b1e95afd394cf9b51db",
+  "input_paths": {
+    "A1_states": "D:\\tento\\kennkyu_artifacts\\clap_clean_nsweep_20261006\\full\\states.npz",
+    "B_states": "D:\\tento\\kennkyu_artifacts\\paper_condition_k_criteria_20261006\\full\\states.npz",
+    "emc_npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz"
+  },
+  "sha256": {
+    "A1_states": "ec3bbc5ed9b60d8cfcb5fe78e8a8378e944a3b366c177005b5e7d76c50dc380f",
+    "B_states": "db6a725668d6a55d010e2ea780aeaee2bf0dd11c65246abb80d0aacfee3c4005",
+    "A1_fit_criteria": "7f4aca8407f64a009a96e44e8a5d67b2e43630a622fb53aad14864f9abb6508a",
+    "A1_generator_provenance": "775231f6075a4c33c160664757f83af0394bf2c4738e18f05fc34c5df9a0d5ab",
+    "B_dataset_provenance": "3c9a360f58d47f584c739744506d3eb10608eac435b9e486ce7f9081a3f6395a",
+    "emc_checkpoint_states": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "emc_iteration_diagnostics": "44f825a7c20549424587eee0737186951f02e3e3f5ec789af3e6f146c248b1ff",
+    "emc_checkpoint_results": "78d405ddc5e94da5ff69a0798ad28a9abad406301e16d222243a785234bd6af8"
+  },
+  "s1_reproduction_max_abs_diff": 5.551115123125783e-17
+}

@@ -1,0 +1,49 @@
+{
+  "auditor": "audit_paper_condition_k_criteria.py (artifact-only; imports no runner, model or generator code)",
+  "cells": 1,
+  "checks": 495,
+  "failed_fits": 0,
+  "findings": [],
+  "fit_rows": 20,
+  "laplace_status_counts": {
+    "OK": 20
+  },
+  "recount_totals": {
+    "C_Lap": {
+      "exact": 1,
+      "incomplete": 0,
+      "over": 0,
+      "under": 0
+    },
+    "C_Q": {
+      "exact": 1,
+      "incomplete": 0,
+      "over": 0,
+      "under": 0
+    },
+    "C_cond_MC": {
+      "exact": 0,
+      "incomplete": 0,
+      "over": 1,
+      "under": 0
+    },
+    "C_cond_last": {
+      "exact": 0,
+      "incomplete": 0,
+      "over": 1,
+      "under": 0
+    },
+    "C_cond_mode": {
+      "exact": 0,
+      "incomplete": 0,
+      "over": 1,
+      "under": 0
+    }
+  },
+  "severity_counts": {
+    "BLOCKER": 0,
+    "HIGH": 0
+  },
+  "stage": "pilot",
+  "verdict": "PASS"
+}
