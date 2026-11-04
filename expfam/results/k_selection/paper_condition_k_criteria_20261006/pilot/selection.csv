@@ -1,0 +1,6 @@
+criterion,k_true,replicate,status,selected_k,label,tie_candidates,margin,best_value,selected_start1,selected_start2
+C_Q,3,1,COMPLETE,3,exact,[3],337.8819792883078,16542.210869487913,3,3
+C_Lap,3,1,COMPLETE,3,exact,[3],74.21683304830003,17038.97429248542,3,3
+C_cond_MC,3,1,COMPLETE,9,over,[9],9.492634746293334,14794.20754949829,9,10
+C_cond_last,3,1,COMPLETE,10,over,[10],48.744974942919725,14760.367864520491,10,9
+C_cond_mode,3,1,COMPLETE,10,over,[10],171.13018851782545,13325.147897940178,10,10

@@ -1,0 +1,82 @@
+{
+  "C_Lap": {
+    "by_k_true": {
+      "K3": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 1,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          3
+        ],
+        "under": 0
+      }
+    },
+    "role": "primary"
+  },
+  "C_Q": {
+    "by_k_true": {
+      "K3": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 1,
+        "incomplete": 0,
+        "over": 0,
+        "selected_k": [
+          3
+        ],
+        "under": 0
+      }
+    },
+    "role": "primary"
+  },
+  "C_cond_MC": {
+    "by_k_true": {
+      "K3": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 1,
+        "selected_k": [
+          9
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  },
+  "C_cond_last": {
+    "by_k_true": {
+      "K3": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 1,
+        "selected_k": [
+          10
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  },
+  "C_cond_mode": {
+    "by_k_true": {
+      "K3": {
+        "complete": 1,
+        "datasets": 1,
+        "exact": 0,
+        "incomplete": 0,
+        "over": 1,
+        "selected_k": [
+          10
+        ],
+        "under": 0
+      }
+    },
+    "role": "diagnostic"
+  }
+}
