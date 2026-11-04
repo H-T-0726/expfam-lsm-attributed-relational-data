@@ -229,9 +229,17 @@ def run_fit(fit, ds, masks) -> tuple[dict[str, Any], list[dict[str, Any]], dict[
 
 # ── reproduction check (Part A vs recorded M1) ────────────────────────────
 
-def reproduction(runs, est_rows) -> dict[str, Any]:
+def reproduction(runs, est_rows, only_present: bool = False) -> dict[str, Any]:
+    """Compare Part A last-sample metrics with M1.
+
+    ``only_present`` restricts the comparison to the fits that were run (smoke);
+    the full run compares all 80 and treats a missing fit as NOT_REPRODUCED.
+    """
     with M1_FIT_RESULTS.open(encoding="utf-8") as fh:
         m1rows = {(r["replicate"], r["regime"], r["arm"]): r for r in csv.DictReader(fh)}
+    if only_present:
+        ran = {(r["replicate"], r["regime"], r["arm"]) for r in runs if r["part"] == "A"}
+        m1rows = {k: v for k, v in m1rows.items() if k in ran}
     last = {(e["replicate"], e["regime"], e["arm"]): e for e in est_rows
             if e["part"] == "A" and e["estimator"] == "last"}
     runs_a = {(r["replicate"], r["regime"], r["arm"]): r for r in runs if r["part"] == "A"}
@@ -250,6 +258,9 @@ def reproduction(runs, est_rows) -> dict[str, Any]:
     sign_flip = False
     for rep in {k[0] for k in m1rows}:
         for regime in m1.REGIMES:
+            if only_present and not ((rep, regime, "wrong") in m1rows
+                                     and (rep, regime, "correct") in m1rows):
+                continue
             try:
                 old = float(m1rows[(rep, regime, "wrong")]["rmse_Z"]) - float(m1rows[(rep, regime, "correct")]["rmse_Z"])
                 new = last[(rep, regime, "wrong")]["rmse_Z"] - last[(rep, regime, "correct")]["rmse_Z"]
@@ -478,9 +489,8 @@ def main(argv=None) -> int:
               + "/".join(f"{r['rmse_Z']:.4f}" for r in rows), flush=True)
 
     if args.smoke:
-        rep = reproduction(runs, est_rows)
+        rep = reproduction(runs, est_rows, only_present=True)
         rep["note"] = "smoke compares only the fits it ran (rep01 dense)"
-        rep["missing"] = []
         write_csv(out / "reproduction_diffs.csv", rep.pop("diffs"))
         (out / "reproduction.json").write_text(json.dumps(rep, indent=2), encoding="utf-8")
 

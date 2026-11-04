@@ -104,3 +104,23 @@ def test_outputs_refuse_to_overwrite(tmp_path):
     with pytest.raises(SystemExit):
         e1.main(["--execute", "--out-dir", str(tmp_path), "--state-dir",
                  str(tmp_path / "states")])
+
+
+def test_reproduction_scope_for_smoke_and_full():
+    import csv
+    with e1.M1_FIT_RESULTS.open(encoding="utf-8") as fh:
+        ref = [r for r in csv.DictReader(fh)
+               if r["replicate"] == "rep01" and r["regime"] == "dense"]
+    runs = [{"part": "A", "replicate": r["replicate"], "regime": r["regime"],
+             "arm": r["arm"], "w0_hat": float(r["w0_hat"]), "w_hat": float(r["w_hat"])}
+            for r in ref]
+    rows = [{"part": "A", "replicate": r["replicate"], "regime": r["regime"],
+             "arm": r["arm"], "estimator": "last",
+             **{m: float(r[m]) for m in ("rmse_Z", "gram_corr",
+                                         "heldout_mean_log_score", "heldout_auc")}}
+            for r in ref]
+    smoke = e1.reproduction(runs, rows, only_present=True)
+    assert smoke["verdict"] == "REPRODUCED" and smoke["max_abs_diff"] == 0.0
+    assert not smoke["paired_sign_flip"] and smoke["missing"] == []
+    full = e1.reproduction(runs, rows)
+    assert full["verdict"] == "NOT_REPRODUCED" and len(full["missing"]) == 78
