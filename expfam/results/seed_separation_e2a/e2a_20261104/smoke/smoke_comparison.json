@@ -1,0 +1,22 @@
+{
+  "verdict": "MATCH",
+  "max_abs_diff": 0.0,
+  "n_fits": 4,
+  "n_compared": 84,
+  "rule": {
+    "tolerance": 1e-12,
+    "compared": [
+      "Z_samples",
+      "Z_est",
+      "F",
+      "w0",
+      "w",
+      "rmse_Z",
+      "gram_corr",
+      "heldout_mean_log_score",
+      "heldout_auc",
+      "z_est_norm_ratio"
+    ],
+    "rule": "MATCH if every compared quantity of the 4 smoke fits equals the E1 artifact within 1e-12; otherwise MISMATCH and the full run is refused"
+  }
+}

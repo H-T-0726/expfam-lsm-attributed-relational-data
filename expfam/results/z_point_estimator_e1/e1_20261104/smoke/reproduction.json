@@ -1,0 +1,21 @@
+{
+  "verdict": "NOT_REPRODUCED",
+  "max_abs_diff": 0.0,
+  "n_compared": 12,
+  "missing": [],
+  "paired_sign_flip": true,
+  "rule": {
+    "metrics": [
+      "rmse_Z",
+      "gram_corr",
+      "heldout_mean_log_score",
+      "heldout_auc",
+      "w0_hat",
+      "w_hat"
+    ],
+    "exact_tolerance": 1e-12,
+    "fp_tolerance": 1e-06,
+    "rule": "REPRODUCED if every metric of every Part A fit is within 1e-12 of M1; REPRODUCED_WITH_FP_DIFFERENCE if within 1e-6 and no paired delta changes sign (investigate and record, continue); otherwise NOT_REPRODUCED: Part B and the comparison are not run"
+  },
+  "note": "smoke compares only the fits it ran (rep01 dense)"
+}

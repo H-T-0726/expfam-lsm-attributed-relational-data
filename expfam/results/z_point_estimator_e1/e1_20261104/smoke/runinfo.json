@@ -1,0 +1,20 @@
+{
+  "issue": 141,
+  "script": "expfam/src/experimental/run_z_point_estimator_e1.py",
+  "git_head": "8a39ecf1720d88f0abeafaffbf4c23fbaa659c53",
+  "git_branch": "experiment/141-z-point-estimator-e1",
+  "git_dirty_tracked": false,
+  "started_utc": "2026-11-04T00:22:17.582238+00:00",
+  "finished_utc": "2026-11-04T00:22:47.369345+00:00",
+  "total_runtime_s": 29.8,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "sklearn": "1.8.0",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "attempted_fits": 2,
+  "planned_fits": 2,
+  "reproduction_verdict": null,
+  "states_file": "D:\\tento\\kennkyu_artifacts\\z_point_estimator_e1_20261104\\smoke\\states.npz",
+  "states_sha256": "3a336bba606a9cc10fb4f4f4024e7a2262796dd46e629a438d0dbad67ec198f3"
+}

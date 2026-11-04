@@ -1,0 +1,194 @@
+{
+  "issue": 142,
+  "mode": "CHARACTERIZATION (attribution of E1 sparse-Y variation)",
+  "base": "E1 (Issue #141, PR #145) commit 568b4db; M1 frozen design",
+  "m1_frozen_design": {
+    "issue": 134,
+    "experiment": "M1 Bernoulli->Poisson X misspecification",
+    "lineage": "E-consistent per-column (experimental prototype; not adoptable for the manuscript)",
+    "generator": "canonical-clean-mixed-v1 (data_generator_canonical_mixed.generate_canonical_mixed_data)",
+    "n": 75,
+    "d": 12,
+    "K_true": 3,
+    "K_fit": 3,
+    "family_x_true": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "poisson",
+      "poisson",
+      "poisson"
+    ],
+    "family_y": "bernoulli",
+    "sigma_x_var": 1.0,
+    "f_scale": 1.4142135623730951,
+    "w0_true": -1.0,
+    "w_true": 1.0,
+    "data_seeds": [
+      1001001,
+      1001002,
+      1001003,
+      1001004,
+      1001005,
+      1001006,
+      1001007,
+      1001008,
+      1001009,
+      1001010,
+      1001011,
+      1001012,
+      1001013,
+      1001014,
+      1001015,
+      1001016,
+      1001017,
+      1001018,
+      1001019,
+      1001020
+    ],
+    "arms": {
+      "correct": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "wrong": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson"
+      ]
+    },
+    "regimes_share_of_training_candidate_pool": {
+      "dense": 1.0,
+      "sparse": 0.1
+    },
+    "test_ratio_of_all_upper_pairs": 0.1,
+    "seeds": {
+      "split_seed_base": 1341000,
+      "thin_seed_base": 1342000,
+      "model_seed_base": 1343000,
+      "rule": "split = base + r; thin = base + 10 r + regime_index; model = base + r (shared by all four fits of replicate r)"
+    },
+    "em": {
+      "runner": "em_runner.run_em_experimental",
+      "numerics_mode": "consistent",
+      "failure_policy": "fail_fast",
+      "L": 5,
+      "num_iter": 8,
+      "compute_strict_Q": false,
+      "validate_support": true,
+      "allow_support_mismatch": false
+    },
+    "expected_fits": 80,
+    "primary": "Procrustes RMSE_Z (rotation only); delta_RMSE_Z = wrong - correct",
+    "interaction": "interaction_delta = delta_RMSE_Z_sparse - delta_RMSE_Z_dense",
+    "secondary": [
+      "held-out Bernoulli plug-in mean log score (run_heldout_k_selection_pilot.heldout_bernoulli_mean_log_score)",
+      "held-out AUC / AP (sklearn)",
+      "|w_hat - 1|",
+      "|w0_hat + 1|",
+      "Gram correlation",
+      "status / warnings / runtime"
+    ],
+    "x_metric": "not computed (no cross-family raw likelihood ranking)",
+    "forbidden": [
+      "K sweep",
+      "family auto-selection",
+      "extra Y rates",
+      "extra arms",
+      "extra seeds / replacement",
+      "retry",
+      "result-dependent metrics"
+    ],
+    "success_criterion": "none on the sign of delta; any direction is a valid result"
+  },
+  "regime": "sparse",
+  "seed_base": {
+    "A": 1343000,
+    "B": 1344000
+  },
+  "cells": {
+    "AA": {
+      "init": "A",
+      "mc": "A"
+    },
+    "AB": {
+      "init": "A",
+      "mc": "B"
+    },
+    "BA": {
+      "init": "B",
+      "mc": "A"
+    },
+    "BB": {
+      "init": "B",
+      "mc": "B"
+    }
+  },
+  "reused": {
+    "AA": "E1 Part A",
+    "BB": "E1 Part B",
+    "e1_states": "D:\\tento\\kennkyu_artifacts\\z_point_estimator_e1_20261104\\full\\states.npz",
+    "e1_states_sha256": "393a6d31af60a51ddf691716632650c1f72538f7da3dce15c7b544b860df9cd2"
+  },
+  "new_cells": [
+    "AB",
+    "BA"
+  ],
+  "planned_new_fits": 80,
+  "seed_separation": "em_runner.run_em_experimental(init_seed, mc_seed): init_seed -> initialize_params only, mc_seed -> E-step rng only; defaults to seed (unchanged behaviour)",
+  "arms_share": "data, masks, init seed, MC seed (EM paths differ by likelihood)",
+  "smoke_rule": {
+    "tolerance": 1e-12,
+    "compared": [
+      "Z_samples",
+      "Z_est",
+      "F",
+      "w0",
+      "w",
+      "rmse_Z",
+      "gram_corr",
+      "heldout_mean_log_score",
+      "heldout_auc",
+      "z_est_norm_ratio"
+    ],
+    "rule": "MATCH if every compared quantity of the 4 smoke fits equals the E1 artifact within 1e-12; otherwise MISMATCH and the full run is refused"
+  },
+  "primary": "mode paired delta RMSE_Z per cell; MC / init contrasts and interaction",
+  "estimators": "last / mean5 / mode as E1 (mode Z0 = last, grad_tol 1e-8, max_iter 200)",
+  "mode_non_ok_policy": "never imputed; a replicate is complete only if all 8 fits are usable",
+  "interpretation_guide": {
+    "quantities": "mc = median over replicates of mean(|D_AB-D_AA|, |D_BB-D_BA|); init = median of mean(|D_BA-D_AA|, |D_BB-D_AB|); mode estimator",
+    "small": "both mc and init < 0.01 (about 1/8 of the E1 sparse effect ~0.08)",
+    "dominant": "one is >= 2x the other",
+    "comparable": "otherwise",
+    "note": "descriptive guide only; not a test and not a general decomposition"
+  },
+  "limitation": "two levels per factor, 20 replicates: no general variance decomposition or causal claim",
+  "state_dir": "D:\\tento\\kennkyu_artifacts\\seed_separation_e2a_20261104",
+  "no_new_gate_or_auditor": true
+}
