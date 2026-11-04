@@ -108,6 +108,8 @@ def run_em_experimental(
     compute_clip_diagnostic: bool = False,
     numerics_mode: str = "legacy",
     failure_policy: str = "legacy",
+    init_seed: int = None,
+    mc_seed: int = None,
 ) -> dict:
     """
     MCEM 実行（NaN ガード + 最大 2 回リトライ、リトライ毎に newton_alpha 半減）。
@@ -138,6 +140,11 @@ def run_em_experimental(
         ``seed_rescue_count`` はこのとき構造的に 0 になる。
         retry・置換・seed 変更が 0 であること自体を integrity 条件に持つ
         protocol（Issue #74 の family-selection pilot など）はこれを使う。
+    init_seed, mc_seed : opt-in の seed 分離（Issue #142 E2a）。既定 None は
+        ``seed`` を使い、従来と完全に同じ挙動になる。``init_seed`` は
+        ``initialize_params`` の乱数（Z・F の初期値）だけに、``mc_seed`` は
+        E-step の MC 乱数（``rng``）だけに使う。retry 時の ``+ retry * 1000``
+        は両方に同じく加える。それ以外の計算は変えない。
     numerics_mode : 'legacy'（既定）または 'consistent'。consistent は
         新規の明示 opt-in で、Bernoulli/Poisson の objective・score・curvature
         を canonical な同一目的関数に揃える。NB は明示的に reject する。
@@ -185,12 +192,14 @@ def run_em_experimental(
         retry_count = retry
         newton_alpha = 0.5 / (2 ** retry)
 
-        rng = np.random.default_rng(seed + retry * 1000)
+        _init_seed = seed if init_seed is None else init_seed
+        _mc_seed = seed if mc_seed is None else mc_seed
+        rng = np.random.default_rng(_mc_seed + retry * 1000)
         model = build_model(n, d, k, L, family_x, family_y,
                             nb_r=nb_r, train_mask=train_mask,
                             family_x_list=family_x_list,
                             numerics_mode=numerics_mode)
-        model.initialize_params(true_params=None, seed=seed + retry * 1000)
+        model.initialize_params(true_params=None, seed=_init_seed + retry * 1000)
 
         # ── Informed init: Y 側（観測ペアのみで統計をとる） ──────────
         obs_upper = np.triu(model.train_mask, k=1)
