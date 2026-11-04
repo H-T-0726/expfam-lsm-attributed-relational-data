@@ -110,6 +110,7 @@ def run_em_experimental(
     failure_policy: str = "legacy",
     init_seed: int = None,
     mc_seed: int = None,
+    checkpoint_iters=None,
 ) -> dict:
     """
     MCEM 実行（NaN ガード + 最大 2 回リトライ、リトライ毎に newton_alpha 半減）。
@@ -145,6 +146,12 @@ def run_em_experimental(
         ``initialize_params`` の乱数（Z・F の初期値）だけに、``mc_seed`` は
         E-step の MC 乱数（``rng``）だけに使う。retry 時の ``+ retry * 1000``
         は両方に同じく加える。それ以外の計算は変えない。
+    checkpoint_iters : opt-in の途中記録（Issue #142 E2c）。既定 None では何も
+        記録せず、返り値のキーも従来どおり。反復の集合を渡すと、各反復の
+        M-step 後の θ（F, sigma, w0, w, sigma_y）を ``theta_history`` に、
+        指定反復ではさらにその反復の Z_samples を ``checkpoints`` に複製して
+        返す。複製のみで乱数を消費せず、推定経路・数値結果は変わらない。
+        retry した場合は最終 retry の記録だけが残る。
     numerics_mode : 'legacy'（既定）または 'consistent'。consistent は
         新規の明示 opt-in で、Bernoulli/Poisson の objective・score・curvature
         を canonical な同一目的関数に揃える。NB は明示的に reject する。
@@ -243,6 +250,7 @@ def run_em_experimental(
         Z_prev = Z.copy()
         nan_count = 0
         mstep_q_history = []   # retry ごとにリセット（最終 retry の履歴のみ返す）
+        theta_history, checkpoints = [], {}
 
         for iteration in range(1, num_iter + 1):
             # ── E-step ───────────────────────────────────────────────
@@ -321,6 +329,17 @@ def run_em_experimental(
                     "decreased": bool(np.isfinite(_diff) and _diff < 0.0),
                 })
 
+            if checkpoint_iters is not None:
+                _snap = {"iteration": iteration, "F": np.array(F, copy=True),
+                         "sigma": np.array(sigma, copy=True),
+                         "w0": float(w0), "w": float(w),
+                         "var_z": float(var_z),
+                         "sigma_y": float(model.sigma_y)}
+                theta_history.append(_snap)
+                if iteration in checkpoint_iters:
+                    checkpoints[iteration] = {
+                        **_snap, "Z_samples": np.array(Z_samples, copy=True)}
+
             if verbose:
                 print(f"    iter={iteration:2d} w0={w0:.4f} w={w:.4f}")
 
@@ -379,7 +398,7 @@ def run_em_experimental(
                     f"({type(exc).__name__}: {exc})", RuntimeWarning,
                     stacklevel=2)
 
-    return {
+    out = {
         "Z_est": Z_samples[:, :, -1].copy(),
         "Z_samples": Z_samples,
         "F": F, "sigma": sigma,
@@ -403,6 +422,10 @@ def run_em_experimental(
         "mstep_q_history": mstep_q_history,
         "numerics_mode": numerics_mode,
     }
+    if checkpoint_iters is not None:
+        out["theta_history"] = theta_history
+        out["checkpoints"] = checkpoints
+    return out
 
 
 def predict_mu_y(result: dict, clip_max: float = 1e5) -> np.ndarray:
