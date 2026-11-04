@@ -1,0 +1,21 @@
+family_name,support_group,compatibility_status,reason,T_definition,eta_domain,free_parameter_count,fixed_hyperparameters,implemented,test_status
+gaussian,GROUP_REAL,PASS_STRICT,existing control; dispersion form with estimated sigma^2; no competing scalar-natural-parameter family on R,x,R,K+1,,True,PASS(12 tests)
+bernoulli,GROUP_COUNT,PASS_STRICT,"existing; equals Binomial(1); kept for regression, not in the primary candidate set",x,R,K+0,,True,PASS(15 tests)
+poisson,GROUP_COUNT,PASS_STRICT,existing,x,R,K+0,,True,PASS(18 tests)
+binomial,GROUP_COUNT,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,"regular 1-parameter EF for fixed N; needs log h = log C(N,x) and support {0..N}",x,R,K+0,n_trials=2,True,PASS(5 tests)
+com_poisson,GROUP_COUNT,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,nu>0 fixed: series converges for all eta; A by adaptive truncated series with tail bound; nu=1 is Poisson,x,R,K+0,"nu in {0.5, 2.0} (separate candidate models)",True,PASS(10 tests)
+zero_truncated_poisson,GROUP_COUNT,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,"A = log(exp(e^eta) - 1) finite for all eta; support {1,2,...}",x,R,K+0,,True,PASS(6 tests)
+lognormal,GROUP_POSITIVE_CONTINUOUS,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,sigma fixed: scalar natural parameter; T = log x; raw-x density with the 1/x Jacobian,log x,R,K+0,sigma=1,True,PASS(5 tests)
+positive_truncated_normal,GROUP_POSITIVE_CONTINUOUS,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,sigma fixed; A includes log Phi(sigma eta),x,R,K+0,sigma=1,True,PASS(5 tests)
+continuous_bernoulli,GROUP_BOUNDED_CONTINUOUS,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,"exp(eta x) on (0,1) normalisable for all eta; series near eta=0",x,R,K+0,,True,PASS(6 tests)
+logit_normal,GROUP_BOUNDED_CONTINUOUS,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,sigma fixed; T = logit x; Jacobian 1/[x(1-x)],logit x,R,K+0,sigma=1,True,PASS(5 tests)
+truncated_normal_01,GROUP_BOUNDED_CONTINUOUS,PASS_WITH_EXISTING_EXPFAM_GENERALIZATION,sigma and centre fixed; A includes log[Phi(b)-Phi(a)] (stable form),x,R,K+0,sigma=0.25;center=0.5,True,PASS(5 tests)
+geometric,GROUP_COUNT,BLOCKED_OUTSIDE_CURRENT_MODEL,"natural parameter log p in (-inf,0); eta = f^T z is not always legal without a new link",,restricted,,,False,NOT_APPLICABLE
+negative_binomial,GROUP_COUNT,BLOCKED_OUTSIDE_CURRENT_MODEL,"fixed r: natural parameter log(mu/(mu+r)) in (-inf,0); existing NB is Y-side NB2 with a non-canonical log link and may not be copied to X",,restricted,,,False,NOT_APPLICABLE
+gamma,GROUP_POSITIVE_CONTINUOUS,BLOCKED_OUTSIDE_CURRENT_MODEL,fixed shape: natural parameter -rate < 0,,restricted,,,False,NOT_APPLICABLE
+exponential,GROUP_POSITIVE_CONTINUOUS,BLOCKED_OUTSIDE_CURRENT_MODEL,"natural parameter -lambda < 0 (the (0,1)-truncated exponential is the Continuous Bernoulli, PASS)",,restricted,,,False,NOT_APPLICABLE
+beta,GROUP_BOUNDED_CONTINUOUS,BLOCKED_OUTSIDE_CURRENT_MODEL,"two natural parameters; fixing one leaves domain (-1, inf)",,restricted,,,False,NOT_APPLICABLE
+weibull,GROUP_POSITIVE_CONTINUOUS,BLOCKED_OUTSIDE_CURRENT_MODEL,fixed shape: natural parameter -lambda^-k < 0; free shape is not an EF,,restricted,,,False,NOT_APPLICABLE
+student_t,GROUP_REAL,BLOCKED_OUTSIDE_CURRENT_MODEL,not an exponential family in location,,n/a,,,False,NOT_APPLICABLE
+categorical,NONE,BLOCKED_OUTSIDE_CURRENT_MODEL,vector natural parameter / non-scalar observation (KI-005),,restricted,,,False,NOT_APPLICABLE
+inverse_gaussian,GROUP_POSITIVE_CONTINUOUS,BLOCKED_OUTSIDE_CURRENT_MODEL,both natural parameters restricted to negative half-lines,,restricted,,,False,NOT_APPLICABLE

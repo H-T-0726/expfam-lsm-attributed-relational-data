@@ -1,0 +1,20 @@
+{
+  "phase": "pilot",
+  "gate": "Gate D' (small pilot)",
+  "checked_utc": "2026-10-05T19:09:12.128081+00:00",
+  "expected_cases": 114,
+  "completed_cases": 114,
+  "missing_cases": [],
+  "failed_cases": [
+    "B__pilot__POSITIVE__EASY__n75__rep003__AUTO_START_FIRST",
+    "B__pilot__POSITIVE__EASY__n75__rep003__AUTO_START_LAST",
+    "C__pilot__MIXED__EASY__n75__rep001__AUTO_START_FIRST",
+    "C__pilot__MIXED__EASY__n75__rep001__AUTO_START_LAST"
+  ],
+  "unexpected_exception_cases": [],
+  "fit_cases": 96,
+  "fit_failures": 4,
+  "fit_failure_fraction": 0.041666666666666664,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

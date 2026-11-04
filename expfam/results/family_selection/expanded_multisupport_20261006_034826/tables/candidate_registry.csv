@@ -1,0 +1,12 @@
+family_name,candidate_model,support_group,hyperparameters,T_definition,eta_domain,extra_free_parameters,implementation_version,candidate_priority,in_primary_candidate_set
+poisson,poisson,GROUP_COUNT,,x,R,0,family-specs-v1,1,True
+binomial,binomial_n2,GROUP_COUNT,n_trials=2,x,R,0,family-specs-v1,2,True
+com_poisson,cmp_nu2p0,GROUP_COUNT,nu=2.0,x,R,0,family-specs-v1,3,True
+com_poisson,cmp_nu0p5,GROUP_COUNT,nu=0.5,x,R,0,family-specs-v1,4,True
+zero_truncated_poisson,ztp,GROUP_COUNT,,x,R,0,family-specs-v1,5,True
+lognormal,lognormal_s1,GROUP_POSITIVE_CONTINUOUS,sigma=1.0,log x,R,0,family-specs-v1,1,True
+positive_truncated_normal,ptn_s1,GROUP_POSITIVE_CONTINUOUS,sigma=1.0,x,R,0,family-specs-v1,2,True
+logit_normal,logitnormal_s1,GROUP_BOUNDED_CONTINUOUS,sigma=1.0,logit x,R,0,family-specs-v1,1,True
+continuous_bernoulli,cb,GROUP_BOUNDED_CONTINUOUS,,x,R,0,family-specs-v1,2,True
+truncated_normal_01,tn01_s0p25_c0p5,GROUP_BOUNDED_CONTINUOUS,center=0.5;sigma=0.25,x,R,0,family-specs-v1,3,True
+gaussian,gaussian,GROUP_REAL,,"x (dispersion form, sigma^2 estimated)",R,1,family-specs-v1,1,True

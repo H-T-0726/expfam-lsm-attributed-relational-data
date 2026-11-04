@@ -1,0 +1,15 @@
+{
+  "phase": "A_main",
+  "gate": "Gate E (selector-only main)",
+  "checked_utc": "2026-10-05T19:11:16.326315+00:00",
+  "expected_cases": 240,
+  "completed_cases": 240,
+  "missing_cases": [],
+  "failed_cases": [],
+  "unexpected_exception_cases": [],
+  "fit_cases": 0,
+  "fit_failures": 0,
+  "fit_failure_fraction": 0.0,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

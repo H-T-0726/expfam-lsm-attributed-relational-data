@@ -1,0 +1,128 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_POSITIVE_CONTINUOUS",
+    "difficulty": "EASY",
+    "n": 150,
+    "replicate": 3,
+    "phase": "B_main_r5",
+    "exp_block": "AB",
+    "method": "SUPPORT_ONLY",
+    "case_id": "B__main__POSITIVE__EASY__n150__rep003__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r5",
+        "condition": "POSITIVE|EASY|n150",
+        "group_design": "POSITIVE",
+        "difficulty": "EASY",
+        "n": 150,
+        "replicate": 3,
+        "method": "SUPPORT_ONLY",
+        "case_id": "B__main__POSITIVE__EASY__n150__rep003__SUPPORT_ONLY",
+        "data_seed": 30102003,
+        "d": 6,
+        "K": 3,
+        "final_Q": -7166.117432612086,
+        "criterion_field_bic_ICL_type": 14407.394394635616,
+        "num_params": 15,
+        "rmse_Z": 0.3352368160338733,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "final_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "true_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "n_correct_candidate": 3,
+        "n_correct_family": 3,
+        "fit_seed": 301020032,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9672119706050598,
+        "w_est": 0.9478975932714506,
+        "runtime_seconds": 38.438,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:29:32.574950+00:00",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep003",
+  "dataset_path": "data\\dataset_AB_main_POSITIVE_EASY_n150_rep003.npz",
+  "dataset_created": false,
+  "dataset_sha256": "a95bf06abec4bcc094d2077ea535f7f64e85de5b7de4c1b8ff56617df38d6a96",
+  "seeds": {
+    "data_seed": 30102003,
+    "search_seed": 301020031,
+    "refit_seed": 301020032
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__POSITIVE__EASY__n150__rep003__SUPPORT_ONLY.npz",
+  "runtime_seconds": 38.438,
+  "finished_utc": "2026-10-05T19:30:11.013049+00:00"
+}

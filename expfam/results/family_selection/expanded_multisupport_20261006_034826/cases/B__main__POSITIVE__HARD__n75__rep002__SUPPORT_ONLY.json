@@ -1,0 +1,128 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_POSITIVE_CONTINUOUS",
+    "difficulty": "HARD",
+    "n": 75,
+    "replicate": 2,
+    "phase": "B_main_r5",
+    "exp_block": "AB",
+    "method": "SUPPORT_ONLY",
+    "case_id": "B__main__POSITIVE__HARD__n75__rep002__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r5",
+        "condition": "POSITIVE|HARD|n75",
+        "group_design": "POSITIVE",
+        "difficulty": "HARD",
+        "n": 75,
+        "replicate": 2,
+        "method": "SUPPORT_ONLY",
+        "case_id": "B__main__POSITIVE__HARD__n75__rep002__SUPPORT_ONLY",
+        "data_seed": 30111002,
+        "d": 6,
+        "K": 3,
+        "final_Q": -2232.318138664511,
+        "criterion_field_bic_ICL_type": 4529.398599032067,
+        "num_params": 15,
+        "rmse_Z": 0.46910167698900734,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "final_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "true_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "n_correct_candidate": 3,
+        "n_correct_family": 3,
+        "fit_seed": 301110022,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9577415169020139,
+        "w_est": 0.9885054109471736,
+        "runtime_seconds": 15.702,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:43:16.267101+00:00",
+  "dataset_key": "AB_main_POSITIVE_HARD_n75_rep002",
+  "dataset_path": "data\\dataset_AB_main_POSITIVE_HARD_n75_rep002.npz",
+  "dataset_created": false,
+  "dataset_sha256": "25091ec43d75413f211a0743a96c76cfc5570a5a8475cd31d380bdd0092e4c30",
+  "seeds": {
+    "data_seed": 30111002,
+    "search_seed": 301110021,
+    "refit_seed": 301110022
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__POSITIVE__HARD__n75__rep002__SUPPORT_ONLY.npz",
+  "runtime_seconds": 15.702,
+  "finished_utc": "2026-10-05T19:43:31.969496+00:00"
+}

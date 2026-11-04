@@ -1,0 +1,128 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "pilot",
+    "group": "GROUP_POSITIVE_CONTINUOUS",
+    "difficulty": "EASY",
+    "n": 75,
+    "replicate": 3,
+    "phase": "pilot",
+    "exp_block": "AB",
+    "method": "SUPPORT_ONLY",
+    "case_id": "B__pilot__POSITIVE__EASY__n75__rep003__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "pilot",
+        "phase": "pilot",
+        "condition": "POSITIVE|EASY|n75",
+        "group_design": "POSITIVE",
+        "difficulty": "EASY",
+        "n": 75,
+        "replicate": 3,
+        "method": "SUPPORT_ONLY",
+        "case_id": "B__pilot__POSITIVE__EASY__n75__rep003__SUPPORT_ONLY",
+        "data_seed": 20101003,
+        "d": 6,
+        "K": 3,
+        "final_Q": -2155.3879797492045,
+        "criterion_field_bic_ICL_type": 4375.538281201454,
+        "num_params": 15,
+        "rmse_Z": 0.4257952279384734,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "final_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "true_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "n_correct_candidate": 3,
+        "n_correct_family": 3,
+        "fit_seed": 201010032,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9554989701025927,
+        "w_est": 1.0219301520187867,
+        "runtime_seconds": 16.238,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:06:46.092778+00:00",
+  "dataset_key": "AB_pilot_POSITIVE_EASY_n75_rep003",
+  "dataset_path": "data\\dataset_AB_pilot_POSITIVE_EASY_n75_rep003.npz",
+  "dataset_created": false,
+  "dataset_sha256": "9daeb638824a5805acdd46fb299f0d008354f656e897616b684721beb23e76d8",
+  "seeds": {
+    "data_seed": 20101003,
+    "search_seed": 201010031,
+    "refit_seed": 201010032
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__pilot__POSITIVE__EASY__n75__rep003__SUPPORT_ONLY.npz",
+  "runtime_seconds": 16.238,
+  "finished_utc": "2026-10-05T19:07:02.330792+00:00"
+}

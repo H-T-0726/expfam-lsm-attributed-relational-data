@@ -1,0 +1,155 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_BOUNDED_CONTINUOUS",
+    "difficulty": "EASY",
+    "n": 75,
+    "replicate": 4,
+    "phase": "B_main_r5",
+    "exp_block": "AB",
+    "method": "SUPPORT_ONLY",
+    "case_id": "B__main__BOUNDED__EASY__n75__rep004__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r5",
+        "condition": "BOUNDED|EASY|n75",
+        "group_design": "BOUNDED",
+        "difficulty": "EASY",
+        "n": 75,
+        "replicate": 4,
+        "method": "SUPPORT_ONLY",
+        "case_id": "B__main__BOUNDED__EASY__n75__rep004__SUPPORT_ONLY",
+        "data_seed": 30201004,
+        "d": 9,
+        "K": 3,
+        "final_Q": -1640.649353133959,
+        "criterion_field_bic_ICL_type": 3384.9184209927894,
+        "num_params": 24,
+        "rmse_Z": 0.5683269219365232,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1",
+        "final_assignment": "logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1|logitnormal_s1",
+        "true_assignment": "logitnormal_s1|logitnormal_s1|logitnormal_s1|cb|cb|cb|tn01_s0p25_c0p5|tn01_s0p25_c0p5|tn01_s0p25_c0p5",
+        "n_correct_candidate": 3,
+        "n_correct_family": 3,
+        "fit_seed": 302010042,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -0.9764244972903899,
+        "w_est": 0.732559247262104,
+        "runtime_seconds": 15.275,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:43:43.671710+00:00",
+  "dataset_key": "AB_main_BOUNDED_EASY_n75_rep004",
+  "dataset_path": "data\\dataset_AB_main_BOUNDED_EASY_n75_rep004.npz",
+  "dataset_created": false,
+  "dataset_sha256": "4f4396a33cb47b2fd880fbff0cd40e31e8f6862f62cf1b951a0377cf63b3f926",
+  "seeds": {
+    "data_seed": 30201004,
+    "search_seed": 302010041,
+    "refit_seed": 302010042
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 6,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 7,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    },
+    {
+      "column": 8,
+      "support_group": "GROUP_BOUNDED_CONTINUOUS",
+      "group_candidates": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "admissible": "logitnormal_s1|cb|tn01_s0p25_c0p5",
+      "inadmissible": "",
+      "n_admissible": 3,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__BOUNDED__EASY__n75__rep004__SUPPORT_ONLY.npz",
+  "runtime_seconds": 15.275,
+  "finished_utc": "2026-10-05T19:43:58.946396+00:00"
+}

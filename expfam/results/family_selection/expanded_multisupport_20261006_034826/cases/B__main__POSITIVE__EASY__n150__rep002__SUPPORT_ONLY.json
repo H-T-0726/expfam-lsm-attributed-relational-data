@@ -1,0 +1,128 @@
+{
+  "case": {
+    "experiment": "B",
+    "stage": "main",
+    "group": "GROUP_POSITIVE_CONTINUOUS",
+    "difficulty": "EASY",
+    "n": 150,
+    "replicate": 2,
+    "phase": "B_main_r5",
+    "exp_block": "AB",
+    "method": "SUPPORT_ONLY",
+    "case_id": "B__main__POSITIVE__EASY__n150__rep002__SUPPORT_ONLY"
+  },
+  "status": "SUCCESS",
+  "error_class": "",
+  "failure_reason": "",
+  "rows": {
+    "fit_results": [
+      {
+        "experiment": "B",
+        "stage": "main",
+        "phase": "B_main_r5",
+        "condition": "POSITIVE|EASY|n150",
+        "group_design": "POSITIVE",
+        "difficulty": "EASY",
+        "n": 150,
+        "replicate": 2,
+        "method": "SUPPORT_ONLY",
+        "case_id": "B__main__POSITIVE__EASY__n150__rep002__SUPPORT_ONLY",
+        "data_seed": 30102002,
+        "d": 6,
+        "K": 3,
+        "final_Q": -6924.927951461526,
+        "criterion_field_bic_ICL_type": 13925.015432334496,
+        "num_params": 15,
+        "rmse_Z": 0.32295039802022235,
+        "converged": "fixed_iterations",
+        "iterations": 8,
+        "start_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "final_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1|lognormal_s1",
+        "true_assignment": "lognormal_s1|lognormal_s1|lognormal_s1|ptn_s1|ptn_s1|ptn_s1",
+        "n_correct_candidate": 3,
+        "n_correct_family": 3,
+        "fit_seed": 301020022,
+        "search_seed": "",
+        "refit_estep_backtracks": 0,
+        "exploration_estep_backtracks": "",
+        "w0_est": -1.0016752182473379,
+        "w_est": 1.0437660397811281,
+        "runtime_seconds": 38.516,
+        "status": "SUCCESS",
+        "failure_reason": "",
+        "retry_count": 0,
+        "replacement_count": 0,
+        "seed_rescue_count": 0
+      }
+    ]
+  },
+  "started_utc": "2026-10-05T19:29:23.974599+00:00",
+  "dataset_key": "AB_main_POSITIVE_EASY_n150_rep002",
+  "dataset_path": "data\\dataset_AB_main_POSITIVE_EASY_n150_rep002.npz",
+  "dataset_created": false,
+  "dataset_sha256": "a4f432b1d5b5e16ab5e64776eae44e981187cf3016c363a8232ccbd8664c3a1f",
+  "seeds": {
+    "data_seed": 30102002,
+    "search_seed": 301020021,
+    "refit_seed": 301020022
+  },
+  "gates": [
+    {
+      "column": 0,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 1,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 2,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 3,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 4,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    },
+    {
+      "column": 5,
+      "support_group": "GROUP_POSITIVE_CONTINUOUS",
+      "group_candidates": "lognormal_s1|ptn_s1",
+      "admissible": "lognormal_s1|ptn_s1",
+      "inadmissible": "",
+      "n_admissible": 2,
+      "decided_by": "score"
+    }
+  ],
+  "fit_artifact": "data\\fits\\B__main__POSITIVE__EASY__n150__rep002__SUPPORT_ONLY.npz",
+  "runtime_seconds": 38.516,
+  "finished_utc": "2026-10-05T19:30:02.490834+00:00"
+}

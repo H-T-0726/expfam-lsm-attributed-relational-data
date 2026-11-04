@@ -1,0 +1,21 @@
+{
+  "phase": "C_main_r10",
+  "gate": "Gate G (mixed-X MCEM, rep 6-10)",
+  "checked_utc": "2026-10-05T21:08:27.994116+00:00",
+  "expected_cases": 80,
+  "completed_cases": 80,
+  "missing_cases": [],
+  "failed_cases": [
+    "C__main__MIXED__EASY__n150__rep010__AUTO_START_FIRST",
+    "C__main__MIXED__EASY__n75__rep007__AUTO_START_FIRST",
+    "C__main__MIXED__EASY__n75__rep007__AUTO_START_LAST",
+    "C__main__MIXED__EASY__n75__rep008__AUTO_START_FIRST",
+    "C__main__MIXED__EASY__n75__rep010__AUTO_START_FIRST"
+  ],
+  "unexpected_exception_cases": [],
+  "fit_cases": 80,
+  "fit_failures": 5,
+  "fit_failure_fraction": 0.0625,
+  "column_selection_failures_in_successful_cases": 0,
+  "technical_gate": "PASS"
+}

@@ -5,3 +5,5 @@ expfam/results/k_selection/k_true_robustness_smoke_20260901/* -text
 # their bytes must survive checkout unchanged on every platform.
 expfam/results/k_selection/k_true_robustness_full_20260902/* -text
 expfam/results/k_selection/k_true_robustness_full_attempt2_20260904/* -text
+# multi-support family selection run: case files are verified by SHA-256 (completed_cases.csv)
+expfam/results/family_selection/expanded_multisupport_20261006_034826/** -text
