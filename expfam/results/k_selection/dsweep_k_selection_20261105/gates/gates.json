@@ -1,0 +1,34 @@
+{
+  "branch": "experiment/dsweep-k-selection",
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "dsweep_k_selection_20261105",
+  "gates": {
+    "G1_d15_data_mask_seed_emc_identity": "PASS",
+    "G1b_d15_reevaluation_equals_experiment1": "PASS (112 states)",
+    "G2_replication_fits": "PASS (2 fits; reproducibility only, not counted)",
+    "G3_original_columns_Z_Y_mask_unchanged": "PASS",
+    "G4_added_columns_match_plan": "PASS",
+    "G5_seeds_unique_rate_gate_finite": "PASS",
+    "G6_implementation_frozen": "PASS (clean tree c3a9a088163180f2b6f9b03d78498f31301f4c71, prereg a6f84ab2639f5b669bace22a80f572839117af9b9df603e66a4366549f197b57)",
+    "max_gate_fail_prob_union_bound": 1.7713385230271213e-33
+  },
+  "git_head": "c3a9a088163180f2b6f9b03d78498f31301f4c71",
+  "inputs": {
+    "emc_fit_results_sha256": "c644e89b14064b743507df91d0a6707ce3d30fb87b606f325951f0ad560ae475",
+    "emc_npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz",
+    "emc_npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "exp1_fit_criteria_sha256": "e566c270d970f336f9c6db32ffda6e4f065925a3c4a94a2c5ee718d9dc6a7ffb"
+  },
+  "instrumented_blob": "5b3f7baa1d16bdb32686ac615cdc39c56d4018cf",
+  "instrumented_runner": "em-instrumented-v3",
+  "prereg_sha256": "a6f84ab2639f5b669bace22a80f572839117af9b9df603e66a4366549f197b57",
+  "replication_states": "D:\\tento\\kennkyu_artifacts\\dsweep_k_selection_20261105\\replication_states.npz",
+  "replication_states_sha256": "2ae8aee0987eee98ca887369931da000af25d1de650039e054e205c4f8af7ca1",
+  "status": "PASSED",
+  "working_tree_clean": true
+}
