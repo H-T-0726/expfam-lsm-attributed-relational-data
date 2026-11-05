@@ -1,0 +1,3 @@
+replicate,k_est,start,model_seed,emc_state_key,bic_new,C_Q_reference,match,maxabs_Zsamples,maxabs_F,maxabs_sigma,maxabs_scalars,runtime_s
+1,5,1,1405151,0121_it008,6400.082997909503,6400.082997909503,True,0.0,0.0,0.0,0.0,8.533
+1,4,1,1405141,0119_it008,6241.881141882283,6241.881141882283,True,0.0,0.0,0.0,0.0,7.549

@@ -1,0 +1,107 @@
+{
+  "accounting": "slack_Q = slack_Lap - 2 dH_Lap - d resid,  d resid = resid(5) - resid(4) (exact identity)",
+  "conditions": {
+    "K_GEN": 5,
+    "L": 5,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "d": [
+      15,
+      30,
+      60
+    ],
+    "em_iterations": 8,
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "generator": "canonical-clean (canonical-clean-v1) + appended blocks",
+    "n": 75,
+    "numerics_mode": "consistent",
+    "replicates": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "row_norm_sq_target": 0.5,
+    "starts": [
+      1,
+      2
+    ],
+    "w0": -1.0,
+    "w_rule": "w_for_matched_y_signal(W_REF=1, K_REF=3)"
+  },
+  "experiment_id": "dsweep_k_selection_20261105",
+  "failure_rules": [
+    "data gate failure -> stop before any fit",
+    "replication mismatch beyond NPZ_RTOL/NPZ_ATOL -> stop",
+    "NaN restart request (RetryDetected) -> stop the run (frozen EMC rule)",
+    "Laplace not OK -> C_Lap INCOMPLETE for that dataset and d; no imputation",
+    "paired comparisons across d use only replicates complete at the compared d",
+    "no retry, no reseed, no tolerance change, no resume"
+  ],
+  "frozen_before": "any d=30/60 fit; written by --gates and re-verified by --full",
+  "hypotheses": {
+    "H1": {
+      "otherwise": "partial (non-monotone but m60 > m15)",
+      "refute": "m60 <= m15",
+      "statement": "median over replicates of C_Q slack_45 increases with d",
+      "support": "m15 < m30 < m60"
+    },
+    "H2": {
+      "H2a_refute": "median 2dH_Lap at d=60 >= at d=15",
+      "H2b_refute": "median 2dH_Lap at d=60 <= 0",
+      "H2c_refute": "at some d, median |d resid| > median |2 dH_Lap|",
+      "note": "positivity at d=60 is a prediction from oracle curvature, not a theorem",
+      "statement": "2 dH_Lap(4->5) decreases with d, stays positive at d=60 (C_Q remains stricter than C_Lap), and accounts for the C_Lap - C_Q slack difference"
+    },
+    "H3": {
+      "refute": "fixed-penalty median slack at d=60 <= at d=15",
+      "statement": "with P_theta held at its d=15 count (diagnostic selector, not a criterion) the C_Q slack_45 increases with d",
+      "support": "fixed-penalty median slack m15 < m30 < m60"
+    },
+    "not_predicted": "exact counts of the real (penalised) criteria; C_Lap direction",
+    "scope": "Gaussian-X thresholds (2.84, 2*pi*e) are NOT used as predictions for this Poisson-X / Bernoulli-Y model"
+  },
+  "mechanism": [
+    "F^T F (truth)",
+    "X Fisher at truth and at (theta_hat, Z_hat)",
+    "ln|H| = ln|P_X+prior| + ln|I + P^-1 H_Y| (exact split)",
+    "2 dH_Lap(4->5) = n(1+ln 2pi) - d ln|H|",
+    "termA, R3, residual by K",
+    "gram_rel_change / eta changes at iteration 8"
+  ],
+  "primary": [
+    "exact counts per d and criterion",
+    "slack_45 = C(4) - C(5) (mean over starts)",
+    "C_Q: fit gain D_K(4)-D_K(5), dP_Z, dP_theta",
+    "C_Lap: fit_mode gain, d volume, dP_theta",
+    "number of datasets where C_Q and C_Lap select different K"
+  ],
+  "replication_fits": [
+    [
+      1,
+      5,
+      1
+    ],
+    [
+      1,
+      4,
+      1
+    ]
+  ],
+  "replication_role": "reproducibility check only; never counted as data",
+  "selection": "mean of the criterion over the 2 starts, argmin; C_Lap INCOMPLETE if any fit not OK",
+  "sha256": "a6f84ab2639f5b669bace22a80f572839117af9b9df603e66a4366549f197b57",
+  "target": "K* = 5 (minimal representation dimension; derivation for canonical Poisson-X with rank F = K, unconditional law; NOT K0 uniqueness). Under- and over-selection are both errors relative to K*."
+}
