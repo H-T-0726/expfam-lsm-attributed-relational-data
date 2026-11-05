@@ -1,0 +1,149 @@
+{
+  "R1": {
+    "L": 10,
+    "checkpoints": [
+      8,
+      16
+    ],
+    "comparability": "same data, mask, model seed and initialisation (gated); the MC stream differs with L, so trajectories are NOT assumed identical",
+    "comparisons": {
+      "L_effect": "(L5, it8) vs (L10, it8)",
+      "auxiliary": "(L5, it8) vs (L5, it16) at d=15 only (EMC checkpoint 16)",
+      "iteration_effect": "(L10, it8) vs (L10, it16)"
+    },
+    "d": [
+      15,
+      30,
+      60
+    ],
+    "hypotheses": {
+      "R1-H1": {
+        "refute": "median slack_45 at d=60 <= at d=15 at either checkpoint",
+        "statement": "under (L10,it8) and (L10,it16) the median C_Q slack_45 is larger at d=60 than at d=15"
+      },
+      "R1-H2": {
+        "refute": "median at d=60 >= at d=15, or median at d=60 <= 0, at either checkpoint",
+        "statement": "under (L10,it8) and (L10,it16) the median 2dH_Lap(4->5) is smaller at d=60 than at d=15 and positive at d=60"
+      },
+      "R1-H3": {
+        "refute": "fewer than 5 of the complete d=15 datasets are under-selected by C_Q",
+        "statement": "C_Q under-selects in the majority of d=15 datasets under (L10,it16)"
+      },
+      "reported_not_predicted": [
+        "exact counts per condition",
+        "per-dataset agreement of selected K",
+        "paired slack changes",
+        "termA, R3, residual by K",
+        "Gram / eta changes",
+        "Laplace status"
+      ]
+    },
+    "max_iter": 16,
+    "n": 75
+  },
+  "R2": {
+    "L": 5,
+    "checkpoints": [
+      8
+    ],
+    "d": 30,
+    "datasets_across_n": "independent (A1 data seeds depend on n); same replicate number is NOT a repeated measurement",
+    "hypotheses": {
+      "R2-H1": {
+        "refute": "median at d=30 <= at d=15 at some completed n",
+        "statement": "at each n, median C_Q slack_45 is larger at d=30 than at d=15 (paired, same data)"
+      },
+      "R2-H2": {
+        "refute": "median at d=30 >= at d=15 at some completed n",
+        "statement": "at each n, median 2dH_Lap(4->5) is smaller at d=30 than at d=15"
+      },
+      "R2-H3": {
+        "caution": "n changes more than Y information (estimation, penalty ln n, P_Z per node); not attributed to Y alone",
+        "refute": "median at the largest completed n >= at n=50",
+        "statement": "at d=15, median 2dH_Lap(4->5)/n decreases from n=50 to n=150 (the per-node log-det increment grows with n)"
+      },
+      "reported_not_predicted": [
+        "exact counts per n and d",
+        "X / Y split of dln|H|",
+        "fit gain vs penalties",
+        "Gram / eta changes",
+        "margins"
+      ]
+    },
+    "max_iter": 8,
+    "n": [
+      50,
+      100,
+      150
+    ],
+    "reuse": {
+      "d15_all_n": "EMC checkpoint-8 states re-evaluated (no MCEM)",
+      "n75_d30": "d-sweep"
+    },
+    "staging": {
+      "projection": "112 x (pilot EM seconds + pilot evaluation seconds) x 1.25",
+      "requires": [
+        "R2 n=50 and n=100 production runs COMPLETED",
+        "projected n=150 wall time from the n=150 pilot fit <= 3 h",
+        "free space on D: >= 10 GB",
+        "free RAM >= 2 GB"
+      ]
+    }
+  },
+  "common": {
+    "K_GEN": 5,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "generator": "canonical-clean + d-sweep block rule",
+    "model_seed": "A1 formula (paired across conditions)",
+    "numerics_mode": "consistent",
+    "replicates": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "runner": "em_runner_instrumented (blob 5b3f7baa)",
+    "selection": "mean over starts, argmin",
+    "starts": [
+      1,
+      2
+    ],
+    "target": "K* = 5 (minimal representation; not K0 uniqueness); under and over are errors"
+  },
+  "experiment_id": "k_selection_robustness_20261105",
+  "failure_rules": [
+    "data / replication / init gate failure -> stop before production",
+    "RetryDetected -> fit FAILED_NAN, no retry, dataset INCOMPLETE for both criteria",
+    "other exception -> stop run, write partial rows",
+    "Laplace not OK -> C_Lap INCOMPLETE; no imputation",
+    "no seed change, no tolerance change, no resume over existing output"
+  ],
+  "fit_cap": 700,
+  "frozen_before": "any production fit (committed before --r1 / --r2)",
+  "sha256": "487cc56105c3d5ad488a6d31fd43d728db51686e0922a62a11a5b85cfd673d62",
+  "smoke_fits": {
+    "R1": [
+      "replication: d=30 rep1 K5 s1 at L5/it8 vs d-sweep state",
+      "pilot: d=60 rep1 K7 s1 at L10/it16"
+    ],
+    "R2": [
+      "replication: n=50 d=15 rep1 K5 s1 vs EMC checkpoint 8",
+      "pilot: n=150 d=30 rep1 K7 s1"
+    ],
+    "role": "gates only; never counted as data"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "prereg_sha256": "487cc56105c3d5ad488a6d31fd43d728db51686e0922a62a11a5b85cfd673d62",
+  "verdicts": {
+    "R1-H1": "SUPPORTED",
+    "R1-H2": "SUPPORTED",
+    "R1-H3": "SUPPORTED",
+    "R2-H1": "SUPPORTED",
+    "R2-H2": "SUPPORTED",
+    "R2-H3": "SUPPORTED",
+    "R2_completed_n": [
+      50,
+      75,
+      100,
+      150
+    ]
+  },
+  "conditions": [
+    "n75_d15_L5it8",
+    "n75_d30_L5it8",
+    "n75_d60_L5it8",
+    "n75_d15_L5it16",
+    "n75_d15_L10it8",
+    "n75_d15_L10it16",
+    "n75_d30_L10it8",
+    "n75_d30_L10it16",
+    "n75_d60_L10it8",
+    "n75_d60_L10it16",
+    "n50_d15_L5it8",
+    "n50_d30_L5it8",
+    "n100_d15_L5it8",
+    "n100_d30_L5it8",
+    "n150_d15_L5it8",
+    "n150_d30_L5it8"
+  ]
+}
