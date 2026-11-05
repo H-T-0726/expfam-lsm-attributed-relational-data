@@ -537,3 +537,13 @@ EM 収束感度実験（`dad67b1`）の保存状態を再評価した。**新し
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | dsweep_k_selection_20261105 | n=75、K_GEN=5、Poisson-X / Bernoulli-Y、d ∈ {15,30,60}、8 rep、K 1..7、2 start、L=5、8 反復。d=15 は EM 収束感度実験の checkpoint 8 の状態を再評価した。d=30/60 では Z・Y・マスク・元の X 15 列をビット単位で保ったまま、元と同じ QR 構成の Poisson ブロックを追加した（新規 224 fit） | `tools/research_audit/run_dsweep_k_selection.py`、`tools/research_audit/analyze_dsweep_k_selection.py`、`expfam/src/experimental/em_runner_instrumented.py`（dad67b1 と同じ blob） | `expfam/results/k_selection/dsweep_k_selection_20261105/` | なし | current_support | ✗ | 224/224 成功、Laplace は 336/336 が OK。再現確認の 2 fit は保存状態とビット単位で一致した（集計には入れていない）。fit の状態は外部の npz（sha256 `471ac490…d02d7`）。正解数は C_Q 0/3/5、C_Lap 3/3/6（/8、d=15/30/60）。H1〜H3 は事前登録した規則で支持された。限界：8 データセット、n=75 だけ、MCEM は収束していない |
+
+
+## 実験 R1/R2：MCEM 推定条件の頑健性と n×d（2026-11-05、lineage E、append-only 追記）
+
+事前登録（`e33f90f`、`prereg.json` sha256 `487cc561…3d62`）。R1 ゲート `5637377`、R2 ゲート `2a67c82`、n=150 実行判定 `2e11917`。判定は、選択結果を見る前に固定した資源基準だけで行った。
+A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変更していない。本文採用不可（prototype）。**未マージ**（作業ブランチ `experiment/k-selection-robustness-r1-r2`）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| k_selection_robustness_20261105 | R1：d-sweep と同じデータ（n=75、K_GEN=5、d ∈ {15,30,60}、8 rep、K 1..7、2 start）を L=10、16 反復で再推定し、checkpoint 8 と 16 を評価した（新規 336 fit）。R2：L=5、8 反復、d=30 で n ∈ {50,100,150} を新規に fit した（各 112 fit）。d=30 の拡張は d-sweep と同じ規則で、各 n の A1 データに適用した。d=15 と n=75・d=30 は既存の状態を再評価した | `tools/research_audit/run_k_selection_robustness.py`、`tools/research_audit/analyze_k_selection_robustness.py` | `expfam/results/k_selection/k_selection_robustness_20261105/` | なし | current_support | ✗ | 新規 672 fit と smoke 4 fit は、いずれも非有限値による失敗 0。Laplace は n=150・d=30・rep1 の K=3（start 1）だけ NOT_STATIONARY（max\|∇Φ\| = 3.9e−8、許容値 1e−8）で、事前規則によりそのデータセットの C_Lap を INCOMPLETE とした（補完なし）。外部の npz の sha256：r1 `50aebf21…3267`、n50 `8583d501…bba1`、n100 `cacf488c…147c`、n150 `f4428bec…a6a8`。異なる n のデータは入れ子ではなく、独立な条件として扱う。MCEM は収束していない（K=5 の Gram 相対変化の中央値は 6〜14%） |
