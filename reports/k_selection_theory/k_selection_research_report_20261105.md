@@ -5,7 +5,7 @@
   - 0.5 系列（学会予稿）の結果とは混ぜていない。
 - **根拠の区別**：**FACT**（一次資料で確認）／**DERIVED**（数式の導出）／**OBSERVED**（実験結果）／**INTERPRETATION**／**HYPOTHESIS**。
 - **数値の出所**：すべて `expfam/results/k_selection/` 以下の CSV・runinfo・summary.json から再集計した。
-- **統合状態**：EM 収束感度実験・checkpoint 再評価・d-sweep（PR #150〜#152）と R1/R2（このブランチの PR）は、**どれも main にはまだマージされていない**。
+- **統合状態**：EM 収束感度実験・checkpoint 再評価・d-sweep（PR #150〜#152）と R1/R2（PR #153）は、**どれも main にはまだマージされていない**。
 - **「正解」の意味**：「正解」「exact」は、選ばれた K が K\*=5（§5.4）と一致したことをいう。過小選択（under）も過大選択（over）も誤りとして数える。
 
 ---
