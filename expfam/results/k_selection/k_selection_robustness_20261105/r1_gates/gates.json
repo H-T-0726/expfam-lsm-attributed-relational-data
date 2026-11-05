@@ -1,0 +1,39 @@
+{
+  "branch": "experiment/k-selection-robustness-r1-r2",
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "k_selection_robustness_20261105",
+  "gates": {
+    "G_data_equals_dsweep": "PASS",
+    "G_init_identical_L5_L10": "PASS",
+    "G_pilot_d60_k7_L10_it16": {
+      "em_seconds": 31.5,
+      "eval_seconds": 1.1,
+      "lap_status": [
+        "OK",
+        "OK"
+      ],
+      "projected_hours_upper": 3.04
+    },
+    "G_replication_dsweep_d30_r1_k5_s1": "PASS bitwise state {'Zsamples': 0.0, 'Z': 0.0, 'F': 0.0, 'sigma': 0.0, 'scalars': 0.0}; evaluation equal"
+  },
+  "git_head": "e33f90fddbe6c1548c0f4c83fe1b3140ac0dab85",
+  "inputs": {
+    "dsweep_fit_criteria_sha256": "c180e4a5593f5f2aac02193b36064a715e10dfce6500a7010fe8e54e51db7241",
+    "emc_fit_results_sha256": "c644e89b14064b743507df91d0a6707ce3d30fb87b606f325951f0ad560ae475",
+    "emc_npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "exp1_fit_criteria_sha256": "e566c270d970f336f9c6db32ffda6e4f065925a3c4a94a2c5ee718d9dc6a7ffb"
+  },
+  "prereg_sha256": "487cc56105c3d5ad488a6d31fd43d728db51686e0922a62a11a5b85cfd673d62",
+  "resources": {
+    "free_disk_D_GB": 897.46,
+    "free_ram_GB": 6.91
+  },
+  "smoke_fits": 2,
+  "status": "PASSED",
+  "working_tree_clean": true
+}
