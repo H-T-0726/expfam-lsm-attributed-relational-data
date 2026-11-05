@@ -1,0 +1,15 @@
+hypothesis,statement,prereg_rule,verdict,evidence
+P1_primary,n=75: F-strong increases the C_Q 4->5 slack (paired B-A),support: median>0 and >=6/8 positive; refute: median<=0,SUPPORTED,"median=78.58 [order-stat CI 51.40,107.93; cov 0.930], positive 8/8, Wilcoxon exact p=0.0078"
+P1_mechanism:fit_gain_x,B-A change of fit_gain_x (4->5),"reported, not tested",DESCRIPTIVE,"median=45.59 [order-stat CI 33.15,91.74; cov 0.930], positive 8/8, Wilcoxon exact p=0.0078"
+P1_mechanism:fit_gain_y,B-A change of fit_gain_y (4->5),"reported, not tested",DESCRIPTIVE,"median=18.76 [order-stat CI 12.86,30.74; cov 0.930], positive 8/8, Wilcoxon exact p=0.0078"
+P1_mechanism:prior_cost,B-A change of prior_cost (4->5),"reported, not tested",DESCRIPTIVE,"median=0.00 [order-stat CI 0.00,0.00; cov 0.930], positive 0/8, Wilcoxon exact p=1.0000"
+P1_mechanism:parameter_penalty,B-A change of parameter_penalty (4->5),"reported, not tested",DESCRIPTIVE,"median=0.00 [order-stat CI 0.00,0.00; cov 0.930], positive 0/8, Wilcoxon exact p=1.0000"
+S1_w,n=75: w-strong increases fit_gain_y(4->5) and the C_Q slack (paired C-A),support: both medians>0 and >=6/8 positive; refute: slack median<=0,SUPPORTED,"fit_gain_y: median=41.66 [order-stat CI -1.72,79.53; cov 0.930], positive 6/8, Wilcoxon exact p=0.0391 | slack: median=35.27 [order-stat CI 8.43,73.66; cov 0.930], positive 7/8, Wilcoxon exact p=0.0156"
+S2_interaction,"interaction I = slack_D - slack_B - slack_C + slack_A (C_Q, n=75)","descriptive, two-sided",DESCRIPTIVE,"median=6.27 [order-stat CI -27.26,29.03; cov 0.930], positive 5/8, Wilcoxon exact p=0.7422; median D-A=129.10, B-A=78.58, C-A=35.27"
+S3_positivity,2 dH_Lap(4->5) > 0 in every start-mean pair,refute: any pair <= 0,SUPPORTED,47/47 pairs positive; min=26.45
+S3_decrease:n75:B,median 2dH_Lap(4->5) lower in B than in A (n=75),refute: median(strong) >= median(A),SUPPORTED,"median A=120.58, B=98.71"
+S3_decrease:n75:C,median 2dH_Lap(4->5) lower in C than in A (n=75),refute: median(strong) >= median(A),SUPPORTED,"median A=120.58, C=84.13"
+S3_decrease:n75:D,median 2dH_Lap(4->5) lower in D than in A (n=75),refute: median(strong) >= median(A),SUPPORTED,"median A=120.58, D=73.08"
+S3_decrease:n150:B,median 2dH_Lap(4->5) lower in B than in A (n=150),refute: median(strong) >= median(A),SUPPORTED,"median A=91.83, B=75.49"
+S3_identity,slack_Lap - slack_Q = 2dH_Lap + d resid (algebraic identity),max |error| (numerical),DERIVED+VERIFIED,max abs accounting error 5.46e-12
+P2_n150,n=150: paired B-A C_Q slack difference > 0,support: median>0 and >=6/8; refute: median<=0,SUPPORTED,"median=211.12 [order-stat CI 150.94,243.86; cov 0.930], positive 8/8, Wilcoxon exact p=0.0078"

@@ -1,0 +1,617 @@
+n,criterion,contrast,replicate,metric,value,status
+75,C_Q,B-A,1,selection_slack,28.1273178334,OK
+75,C_Q,B-A,1,fit_gain_x,27.4355868715,OK
+75,C_Q,B-A,1,fit_gain_y,0.69173096196,OK
+75,C_Q,B-A,1,fit_gain_total,28.1273178334,OK
+75,C_Q,B-A,1,prior_cost,0,OK
+75,C_Q,B-A,1,parameter_penalty,0,OK
+75,C_Q,B-A,2,selection_slack,51.4019240382,OK
+75,C_Q,B-A,2,fit_gain_x,33.1515651217,OK
+75,C_Q,B-A,2,fit_gain_y,18.2503589166,OK
+75,C_Q,B-A,2,fit_gain_total,51.4019240382,OK
+75,C_Q,B-A,2,prior_cost,0,OK
+75,C_Q,B-A,2,parameter_penalty,0,OK
+75,C_Q,B-A,3,selection_slack,90.0761507748,OK
+75,C_Q,B-A,3,fit_gain_x,46.9830082968,OK
+75,C_Q,B-A,3,fit_gain_y,43.0931424779,OK
+75,C_Q,B-A,3,fit_gain_total,90.0761507748,OK
+75,C_Q,B-A,3,prior_cost,0,OK
+75,C_Q,B-A,3,parameter_penalty,0,OK
+75,C_Q,B-A,4,selection_slack,57.0711335736,OK
+75,C_Q,B-A,4,fit_gain_x,44.2063449066,OK
+75,C_Q,B-A,4,fit_gain_y,12.864788667,OK
+75,C_Q,B-A,4,fit_gain_total,57.0711335736,OK
+75,C_Q,B-A,4,prior_cost,0,OK
+75,C_Q,B-A,4,parameter_penalty,0,OK
+75,C_Q,B-A,5,selection_slack,94.0972647315,OK
+75,C_Q,B-A,5,fit_gain_x,63.3595716854,OK
+75,C_Q,B-A,5,fit_gain_y,30.7376930461,OK
+75,C_Q,B-A,5,fit_gain_total,94.0972647315,OK
+75,C_Q,B-A,5,prior_cost,0,OK
+75,C_Q,B-A,5,parameter_penalty,0,OK
+75,C_Q,B-A,6,selection_slack,107.932594004,OK
+75,C_Q,B-A,6,fit_gain_x,91.7368238073,OK
+75,C_Q,B-A,6,fit_gain_y,16.1957701962,OK
+75,C_Q,B-A,6,fit_gain_total,107.932594004,OK
+75,C_Q,B-A,6,prior_cost,0,OK
+75,C_Q,B-A,6,parameter_penalty,0,OK
+75,C_Q,B-A,7,selection_slack,67.0804682,OK
+75,C_Q,B-A,7,fit_gain_x,41.6897126944,OK
+75,C_Q,B-A,7,fit_gain_y,25.3907555056,OK
+75,C_Q,B-A,7,fit_gain_total,67.0804682,OK
+75,C_Q,B-A,7,prior_cost,0,OK
+75,C_Q,B-A,7,parameter_penalty,0,OK
+75,C_Q,B-A,8,selection_slack,137.653534859,OK
+75,C_Q,B-A,8,fit_gain_x,118.388806149,OK
+75,C_Q,B-A,8,fit_gain_y,19.2647287103,OK
+75,C_Q,B-A,8,fit_gain_total,137.653534859,OK
+75,C_Q,B-A,8,prior_cost,0,OK
+75,C_Q,B-A,8,parameter_penalty,0,OK
+75,C_Q,C-A,1,selection_slack,-8.12178124981,OK
+75,C_Q,C-A,1,fit_gain_x,-2.64408228468,OK
+75,C_Q,C-A,1,fit_gain_y,-5.47769896513,OK
+75,C_Q,C-A,1,fit_gain_total,-8.12178124981,OK
+75,C_Q,C-A,1,prior_cost,0,OK
+75,C_Q,C-A,1,parameter_penalty,0,OK
+75,C_Q,C-A,2,selection_slack,84.1236514155,OK
+75,C_Q,C-A,2,fit_gain_x,-5.99621301168,OK
+75,C_Q,C-A,2,fit_gain_y,90.1198644272,OK
+75,C_Q,C-A,2,fit_gain_total,84.1236514155,OK
+75,C_Q,C-A,2,prior_cost,0,OK
+75,C_Q,C-A,2,parameter_penalty,0,OK
+75,C_Q,C-A,3,selection_slack,73.6640690203,OK
+75,C_Q,C-A,3,fit_gain_x,-5.86204604,OK
+75,C_Q,C-A,3,fit_gain_y,79.5261150603,OK
+75,C_Q,C-A,3,fit_gain_total,73.6640690203,OK
+75,C_Q,C-A,3,prior_cost,0,OK
+75,C_Q,C-A,3,parameter_penalty,0,OK
+75,C_Q,C-A,4,selection_slack,32.3734448542,OK
+75,C_Q,C-A,4,fit_gain_x,1.96631187241,OK
+75,C_Q,C-A,4,fit_gain_y,30.4071329818,OK
+75,C_Q,C-A,4,fit_gain_total,32.3734448542,OK
+75,C_Q,C-A,4,prior_cost,0,OK
+75,C_Q,C-A,4,parameter_penalty,0,OK
+75,C_Q,C-A,5,selection_slack,61.4337246388,OK
+75,C_Q,C-A,5,fit_gain_x,19.2917933229,OK
+75,C_Q,C-A,5,fit_gain_y,42.141931316,OK
+75,C_Q,C-A,5,fit_gain_total,61.4337246388,OK
+75,C_Q,C-A,5,prior_cost,0,OK
+75,C_Q,C-A,5,parameter_penalty,0,OK
+75,C_Q,C-A,6,selection_slack,30.1924546778,OK
+75,C_Q,C-A,6,fit_gain_x,-13.8453707053,OK
+75,C_Q,C-A,6,fit_gain_y,44.0378253831,OK
+75,C_Q,C-A,6,fit_gain_total,30.1924546778,OK
+75,C_Q,C-A,6,prior_cost,0,OK
+75,C_Q,C-A,6,parameter_penalty,0,OK
+75,C_Q,C-A,7,selection_slack,38.16270201,OK
+75,C_Q,C-A,7,fit_gain_x,-3.01556909887,OK
+75,C_Q,C-A,7,fit_gain_y,41.1782711089,OK
+75,C_Q,C-A,7,fit_gain_total,38.16270201,OK
+75,C_Q,C-A,7,prior_cost,0,OK
+75,C_Q,C-A,7,parameter_penalty,0,OK
+75,C_Q,C-A,8,selection_slack,8.42925034435,OK
+75,C_Q,C-A,8,fit_gain_x,10.1513297033,OK
+75,C_Q,C-A,8,fit_gain_y,-1.72207935895,OK
+75,C_Q,C-A,8,fit_gain_total,8.42925034435,OK
+75,C_Q,C-A,8,prior_cost,0,OK
+75,C_Q,C-A,8,parameter_penalty,0,OK
+75,C_Q,D-A,1,selection_slack,49.0388266202,OK
+75,C_Q,D-A,1,fit_gain_x,46.9303706717,OK
+75,C_Q,D-A,1,fit_gain_y,2.10845594859,OK
+75,C_Q,D-A,1,fit_gain_total,49.0388266202,OK
+75,C_Q,D-A,1,prior_cost,0,OK
+75,C_Q,D-A,1,parameter_penalty,0,OK
+75,C_Q,D-A,2,selection_slack,108.267897993,OK
+75,C_Q,D-A,2,fit_gain_x,44.2848353885,OK
+75,C_Q,D-A,2,fit_gain_y,63.9830626049,OK
+75,C_Q,D-A,2,fit_gain_total,108.267897993,OK
+75,C_Q,D-A,2,prior_cost,0,OK
+75,C_Q,D-A,2,parameter_penalty,0,OK
+75,C_Q,D-A,3,selection_slack,149.924919206,OK
+75,C_Q,D-A,3,fit_gain_x,42.1106957849,OK
+75,C_Q,D-A,3,fit_gain_y,107.814223421,OK
+75,C_Q,D-A,3,fit_gain_total,149.924919206,OK
+75,C_Q,D-A,3,prior_cost,0,OK
+75,C_Q,D-A,3,parameter_penalty,0,OK
+75,C_Q,D-A,4,selection_slack,101.258570991,OK
+75,C_Q,D-A,4,fit_gain_x,63.7198612227,OK
+75,C_Q,D-A,4,fit_gain_y,37.5387097688,OK
+75,C_Q,D-A,4,fit_gain_total,101.258570991,OK
+75,C_Q,D-A,4,prior_cost,0,OK
+75,C_Q,D-A,4,parameter_penalty,0,OK
+75,C_Q,D-A,5,selection_slack,156.247718785,OK
+75,C_Q,D-A,5,fit_gain_x,83.7773359512,OK
+75,C_Q,D-A,5,fit_gain_y,72.4703828339,OK
+75,C_Q,D-A,5,fit_gain_total,156.247718785,OK
+75,C_Q,D-A,5,prior_cost,0,OK
+75,C_Q,D-A,5,parameter_penalty,0,OK
+75,C_Q,D-A,6,selection_slack,174.613910752,OK
+75,C_Q,D-A,6,fit_gain_x,94.6752120792,OK
+75,C_Q,D-A,6,fit_gain_y,79.9386986731,OK
+75,C_Q,D-A,6,fit_gain_total,174.613910752,OK
+75,C_Q,D-A,6,prior_cost,0,OK
+75,C_Q,D-A,6,parameter_penalty,0,OK
+75,C_Q,D-A,7,selection_slack,75.9754431611,OK
+75,C_Q,D-A,7,fit_gain_x,33.3070908854,OK
+75,C_Q,D-A,7,fit_gain_y,42.6683522757,OK
+75,C_Q,D-A,7,fit_gain_total,75.9754431611,OK
+75,C_Q,D-A,7,prior_cost,0,OK
+75,C_Q,D-A,7,parameter_penalty,0,OK
+75,C_Q,D-A,8,selection_slack,173.251092231,OK
+75,C_Q,D-A,8,fit_gain_x,106.711939728,OK
+75,C_Q,D-A,8,fit_gain_y,66.5391525025,OK
+75,C_Q,D-A,8,fit_gain_total,173.251092231,OK
+75,C_Q,D-A,8,prior_cost,0,OK
+75,C_Q,D-A,8,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,1,selection_slack,29.0332900366,OK
+75,C_Q,interaction D-B-C+A,1,fit_gain_x,22.1388660849,OK
+75,C_Q,interaction D-B-C+A,1,fit_gain_y,6.89442395176,OK
+75,C_Q,interaction D-B-C+A,1,fit_gain_total,29.0332900366,OK
+75,C_Q,interaction D-B-C+A,1,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,1,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,2,selection_slack,-27.2576774603,OK
+75,C_Q,interaction D-B-C+A,2,fit_gain_x,17.1294832785,OK
+75,C_Q,interaction D-B-C+A,2,fit_gain_y,-44.3871607388,OK
+75,C_Q,interaction D-B-C+A,2,fit_gain_total,-27.2576774603,OK
+75,C_Q,interaction D-B-C+A,2,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,2,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,3,selection_slack,-13.8153005888,OK
+75,C_Q,interaction D-B-C+A,3,fit_gain_x,0.989733528036,OK
+75,C_Q,interaction D-B-C+A,3,fit_gain_y,-14.8050341168,OK
+75,C_Q,interaction D-B-C+A,3,fit_gain_total,-13.8153005888,OK
+75,C_Q,interaction D-B-C+A,3,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,3,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,4,selection_slack,11.8139925636,OK
+75,C_Q,interaction D-B-C+A,4,fit_gain_x,17.5472044436,OK
+75,C_Q,interaction D-B-C+A,4,fit_gain_y,-5.73321188003,OK
+75,C_Q,interaction D-B-C+A,4,fit_gain_total,11.8139925636,OK
+75,C_Q,interaction D-B-C+A,4,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,4,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,5,selection_slack,0.716729414756,OK
+75,C_Q,interaction D-B-C+A,5,fit_gain_x,1.12597094294,OK
+75,C_Q,interaction D-B-C+A,5,fit_gain_y,-0.409241528183,OK
+75,C_Q,interaction D-B-C+A,5,fit_gain_total,0.716729414754,OK
+75,C_Q,interaction D-B-C+A,5,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,5,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,6,selection_slack,36.488862071,OK
+75,C_Q,interaction D-B-C+A,6,fit_gain_x,16.7837589772,OK
+75,C_Q,interaction D-B-C+A,6,fit_gain_y,19.7051030938,OK
+75,C_Q,interaction D-B-C+A,6,fit_gain_total,36.488862071,OK
+75,C_Q,interaction D-B-C+A,6,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,6,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,7,selection_slack,-29.2677270489,OK
+75,C_Q,interaction D-B-C+A,7,fit_gain_x,-5.36705271016,OK
+75,C_Q,interaction D-B-C+A,7,fit_gain_y,-23.9006743387,OK
+75,C_Q,interaction D-B-C+A,7,fit_gain_total,-29.2677270489,OK
+75,C_Q,interaction D-B-C+A,7,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,7,parameter_penalty,0,OK
+75,C_Q,interaction D-B-C+A,8,selection_slack,27.168307027,OK
+75,C_Q,interaction D-B-C+A,8,fit_gain_x,-21.8281961241,OK
+75,C_Q,interaction D-B-C+A,8,fit_gain_y,48.9965031511,OK
+75,C_Q,interaction D-B-C+A,8,fit_gain_total,27.168307027,OK
+75,C_Q,interaction D-B-C+A,8,prior_cost,0,OK
+75,C_Q,interaction D-B-C+A,8,parameter_penalty,0,OK
+75,C_Lap,B-A,1,selection_slack,22.8048987864,OK
+75,C_Lap,B-A,1,fit_gain_x,29.5206879551,OK
+75,C_Lap,B-A,1,fit_gain_y,5.90043091662,OK
+75,C_Lap,B-A,1,laplace_volume_term,12.6162200853,OK
+75,C_Lap,B-A,1,two_dH_Lap,-11.9813003399,OK
+75,C_Lap,B-A,1,d_residual,6.65888129293,OK
+75,C_Lap,B-A,1,dlogdet_prior_X,12.735929351,OK
+75,C_Lap,B-A,1,dlogdet_Y_increment,-0.754629011062,OK
+75,C_Lap,B-A,2,selection_slack,36.6638255661,OK
+75,C_Lap,B-A,2,fit_gain_x,38.6765873502,OK
+75,C_Lap,B-A,2,fit_gain_y,15.9655286249,OK
+75,C_Lap,B-A,2,laplace_volume_term,17.9782904091,OK
+75,C_Lap,B-A,2,two_dH_Lap,-16.6149638649,OK
+75,C_Lap,B-A,2,d_residual,1.87686539273,OK
+75,C_Lap,B-A,2,dlogdet_prior_X,10.7356982715,OK
+75,C_Lap,B-A,2,dlogdet_Y_increment,5.87926559334,OK
+75,C_Lap,B-A,3,selection_slack,70.8704070657,OK
+75,C_Lap,B-A,3,fit_gain_x,66.9888465503,OK
+75,C_Lap,B-A,3,fit_gain_y,26.4594844036,OK
+75,C_Lap,B-A,3,laplace_volume_term,22.5779238882,OK
+75,C_Lap,B-A,3,two_dH_Lap,-23.5680265415,OK
+75,C_Lap,B-A,3,d_residual,4.36228283237,OK
+75,C_Lap,B-A,3,dlogdet_prior_X,15.8237583597,OK
+75,C_Lap,B-A,3,dlogdet_Y_increment,7.74426818179,OK
+75,C_Lap,B-A,4,selection_slack,35.1685381356,OK
+75,C_Lap,B-A,4,fit_gain_x,56.6616804717,OK
+75,C_Lap,B-A,4,fit_gain_y,6.24376108442,OK
+75,C_Lap,B-A,4,laplace_volume_term,27.7369034205,OK
+75,C_Lap,B-A,4,two_dH_Lap,-27.478756546,OK
+75,C_Lap,B-A,4,d_residual,5.57616110798,OK
+75,C_Lap,B-A,4,dlogdet_prior_X,32.6403324914,OK
+75,C_Lap,B-A,4,dlogdet_Y_increment,-5.16157594537,OK
+75,C_Lap,B-A,5,selection_slack,60.9482457483,OK
+75,C_Lap,B-A,5,fit_gain_x,79.3703852589,OK
+75,C_Lap,B-A,5,fit_gain_y,10.7206932912,OK
+75,C_Lap,B-A,5,laplace_volume_term,29.1428328018,OK
+75,C_Lap,B-A,5,two_dH_Lap,-27.2614249632,OK
+75,C_Lap,B-A,5,d_residual,-5.88759401993,OK
+75,C_Lap,B-A,5,dlogdet_prior_X,32.5529790207,OK
+75,C_Lap,B-A,5,dlogdet_Y_increment,-5.29155405744,OK
+75,C_Lap,B-A,6,selection_slack,99.3471527315,OK
+75,C_Lap,B-A,6,fit_gain_x,96.5603346651,OK
+75,C_Lap,B-A,6,fit_gain_y,15.2076721977,OK
+75,C_Lap,B-A,6,laplace_volume_term,12.4208541312,OK
+75,C_Lap,B-A,6,two_dH_Lap,-11.380678957,OK
+75,C_Lap,B-A,6,d_residual,2.79523768505,OK
+75,C_Lap,B-A,6,dlogdet_prior_X,10.3276004381,OK
+75,C_Lap,B-A,6,dlogdet_Y_increment,1.05307851895,OK
+75,C_Lap,B-A,7,selection_slack,44.9845271533,OK
+75,C_Lap,B-A,7,fit_gain_x,38.8577752328,OK
+75,C_Lap,B-A,7,fit_gain_y,25.5098832425,OK
+75,C_Lap,B-A,7,laplace_volume_term,19.383131322,OK
+75,C_Lap,B-A,7,two_dH_Lap,-18.2079049824,OK
+75,C_Lap,B-A,7,d_residual,-3.8880360643,OK
+75,C_Lap,B-A,7,dlogdet_prior_X,10.4912604678,OK
+75,C_Lap,B-A,7,dlogdet_Y_increment,7.71664451464,OK
+75,C_Lap,B-A,8,selection_slack,112.622455062,OK
+75,C_Lap,B-A,8,fit_gain_x,116.971871001,OK
+75,C_Lap,B-A,8,fit_gain_y,21.2550271308,OK
+75,C_Lap,B-A,8,laplace_volume_term,25.6044430694,OK
+75,C_Lap,B-A,8,two_dH_Lap,-26.4300033862,OK
+75,C_Lap,B-A,8,d_residual,1.39892358868,OK
+75,C_Lap,B-A,8,dlogdet_prior_X,36.1719889093,OK
+75,C_Lap,B-A,8,dlogdet_Y_increment,-9.74198552304,OK
+75,C_Lap,C-A,1,selection_slack,-4.07359809445,OK
+75,C_Lap,C-A,1,fit_gain_x,-0.860545421845,OK
+75,C_Lap,C-A,1,fit_gain_y,-0.219206984659,OK
+75,C_Lap,C-A,1,laplace_volume_term,2.99384568795,OK
+75,C_Lap,C-A,1,two_dH_Lap,-2.7409681374,OK
+75,C_Lap,C-A,1,d_residual,6.78915129276,OK
+75,C_Lap,C-A,1,dlogdet_prior_X,-0.762130107022,OK
+75,C_Lap,C-A,1,dlogdet_Y_increment,3.50309824443,OK
+75,C_Lap,C-A,2,selection_slack,28.8702238907,OK
+75,C_Lap,C-A,2,fit_gain_x,-5.79056353873,OK
+75,C_Lap,C-A,2,fit_gain_y,72.685950366,OK
+75,C_Lap,C-A,2,laplace_volume_term,38.0251629366,OK
+75,C_Lap,C-A,2,two_dH_Lap,-42.5813654225,OK
+75,C_Lap,C-A,2,d_residual,-12.6720621023,OK
+75,C_Lap,C-A,2,dlogdet_prior_X,-1.84658011845,OK
+75,C_Lap,C-A,2,dlogdet_Y_increment,44.4279455409,OK
+75,C_Lap,C-A,3,selection_slack,31.3481983342,OK
+75,C_Lap,C-A,3,fit_gain_x,-6.08674402318,OK
+75,C_Lap,C-A,3,fit_gain_y,65.5903951471,OK
+75,C_Lap,C-A,3,laplace_volume_term,28.1554527897,OK
+75,C_Lap,C-A,3,two_dH_Lap,-32.7124362739,OK
+75,C_Lap,C-A,3,d_residual,-9.60343441219,OK
+75,C_Lap,C-A,3,dlogdet_prior_X,0.384700196016,OK
+75,C_Lap,C-A,3,dlogdet_Y_increment,32.3277360779,OK
+75,C_Lap,C-A,4,selection_slack,14.1147805881,OK
+75,C_Lap,C-A,4,fit_gain_x,3.19518420608,OK
+75,C_Lap,C-A,4,fit_gain_y,41.6028074274,OK
+75,C_Lap,C-A,4,laplace_volume_term,30.6832110454,OK
+75,C_Lap,C-A,4,two_dH_Lap,-26.9090474482,OK
+75,C_Lap,C-A,4,d_residual,8.65038318211,OK
+75,C_Lap,C-A,4,dlogdet_prior_X,10.169416888,OK
+75,C_Lap,C-A,4,dlogdet_Y_increment,16.7396305602,OK
+75,C_Lap,C-A,5,selection_slack,35.4473088869,OK
+75,C_Lap,C-A,5,fit_gain_x,8.85086378195,OK
+75,C_Lap,C-A,5,fit_gain_y,61.1420710095,OK
+75,C_Lap,C-A,5,laplace_volume_term,34.5456259046,OK
+75,C_Lap,C-A,5,two_dH_Lap,-30.4584468821,OK
+75,C_Lap,C-A,5,d_residual,4.47203113022,OK
+75,C_Lap,C-A,5,dlogdet_prior_X,10.2274190388,OK
+75,C_Lap,C-A,5,dlogdet_Y_increment,20.2310278434,OK
+75,C_Lap,C-A,6,selection_slack,27.5436013087,OK
+75,C_Lap,C-A,6,fit_gain_x,-1.62652482191,OK
+75,C_Lap,C-A,6,fit_gain_y,48.3661365388,OK
+75,C_Lap,C-A,6,laplace_volume_term,19.1960104082,OK
+75,C_Lap,C-A,6,two_dH_Lap,-18.3684484668,OK
+75,C_Lap,C-A,6,d_residual,15.7195950977,OK
+75,C_Lap,C-A,6,dlogdet_prior_X,-3.67734001746,OK
+75,C_Lap,C-A,6,dlogdet_Y_increment,22.0457884842,OK
+75,C_Lap,C-A,7,selection_slack,11.4835930678,OK
+75,C_Lap,C-A,7,fit_gain_x,-24.2814563066,OK
+75,C_Lap,C-A,7,fit_gain_y,65.3795228499,OK
+75,C_Lap,C-A,7,laplace_volume_term,29.6144734756,OK
+75,C_Lap,C-A,7,two_dH_Lap,-29.2631925666,OK
+75,C_Lap,C-A,7,d_residual,2.58408362437,OK
+75,C_Lap,C-A,7,dlogdet_prior_X,-6.74000058635,OK
+75,C_Lap,C-A,7,dlogdet_Y_increment,36.0031931529,OK
+75,C_Lap,C-A,8,selection_slack,9.67033699197,OK
+75,C_Lap,C-A,8,fit_gain_x,18.1129517266,OK
+75,C_Lap,C-A,8,fit_gain_y,-1.7262317889,OK
+75,C_Lap,C-A,8,laplace_volume_term,6.7163829457,OK
+75,C_Lap,C-A,8,two_dH_Lap,-7.77138552254,OK
+75,C_Lap,C-A,8,d_residual,9.01247217017,OK
+75,C_Lap,C-A,8,dlogdet_prior_X,6.87686266275,OK
+75,C_Lap,C-A,8,dlogdet_Y_increment,0.894522859798,OK
+75,C_Lap,D-A,1,selection_slack,22.4117554294,OK
+75,C_Lap,D-A,1,fit_gain_x,31.8374698603,OK
+75,C_Lap,D-A,1,fit_gain_y,18.8852546477,OK
+75,C_Lap,D-A,1,laplace_volume_term,28.3109690786,OK
+75,C_Lap,D-A,1,two_dH_Lap,-25.7990354157,OK
+75,C_Lap,D-A,1,d_residual,-0.828035775116,OK
+75,C_Lap,D-A,1,dlogdet_prior_X,10.2382805375,OK
+75,C_Lap,D-A,1,dlogdet_Y_increment,15.5607548782,OK
+75,C_Lap,D-A,2,selection_slack,64.6521688752,OK
+75,C_Lap,D-A,2,fit_gain_x,42.916989123,OK
+75,C_Lap,D-A,2,fit_gain_y,64.745751789,OK
+75,C_Lap,D-A,2,laplace_volume_term,43.0105720368,OK
+75,C_Lap,D-A,2,two_dH_Lap,-41.8275534866,OK
+75,C_Lap,D-A,2,d_residual,-1.78817563163,OK
+75,C_Lap,D-A,2,dlogdet_prior_X,14.001855041,OK
+75,C_Lap,D-A,2,dlogdet_Y_increment,27.8256984456,OK
+75,C_Lap,D-A,3,selection_slack,102.169716128,OK
+75,C_Lap,D-A,3,fit_gain_x,62.3624931113,OK
+75,C_Lap,D-A,3,fit_gain_y,79.3546840657,OK
+75,C_Lap,D-A,3,laplace_volume_term,39.5474610492,OK
+75,C_Lap,D-A,3,two_dH_Lap,-44.64480918,OK
+75,C_Lap,D-A,3,d_residual,-3.11039389857,OK
+75,C_Lap,D-A,3,dlogdet_prior_X,17.5033028142,OK
+75,C_Lap,D-A,3,dlogdet_Y_increment,27.1415063658,OK
+75,C_Lap,D-A,4,selection_slack,51.8243052197,OK
+75,C_Lap,D-A,4,fit_gain_x,58.1971494364,OK
+75,C_Lap,D-A,4,fit_gain_y,44.1090251554,OK
+75,C_Lap,D-A,4,laplace_volume_term,50.481869372,OK
+75,C_Lap,D-A,4,two_dH_Lap,-46.5812952706,OK
+75,C_Lap,D-A,4,d_residual,-2.85297050112,OK
+75,C_Lap,D-A,4,dlogdet_prior_X,32.8431499883,OK
+75,C_Lap,D-A,4,dlogdet_Y_increment,13.7381452823,OK
+75,C_Lap,D-A,5,selection_slack,92.7375947448,OK
+75,C_Lap,D-A,5,fit_gain_x,78.146809007,OK
+75,C_Lap,D-A,5,fit_gain_y,71.8603529752,OK
+75,C_Lap,D-A,5,laplace_volume_term,57.2695672374,OK
+75,C_Lap,D-A,5,two_dH_Lap,-53.3123538805,OK
+75,C_Lap,D-A,5,d_residual,-10.1977701598,OK
+75,C_Lap,D-A,5,dlogdet_prior_X,38.5804326042,OK
+75,C_Lap,D-A,5,dlogdet_Y_increment,14.7319212763,OK
+75,C_Lap,D-A,6,selection_slack,144.749284407,OK
+75,C_Lap,D-A,6,fit_gain_x,100.225705729,OK
+75,C_Lap,D-A,6,fit_gain_y,80.4688168688,OK
+75,C_Lap,D-A,6,laplace_volume_term,35.9452381913,OK
+75,C_Lap,D-A,6,two_dH_Lap,-38.7090544462,OK
+75,C_Lap,D-A,6,d_residual,8.84442810039,OK
+75,C_Lap,D-A,6,dlogdet_prior_X,12.9440703924,OK
+75,C_Lap,D-A,6,dlogdet_Y_increment,25.7649840537,OK
+75,C_Lap,D-A,7,selection_slack,53.2949461202,OK
+75,C_Lap,D-A,7,fit_gain_x,23.1187562915,OK
+75,C_Lap,D-A,7,fit_gain_y,67.6091472682,OK
+75,C_Lap,D-A,7,laplace_volume_term,37.4329574394,OK
+75,C_Lap,D-A,7,two_dH_Lap,-29.7968585402,OK
+75,C_Lap,D-A,7,d_residual,7.11636149935,OK
+75,C_Lap,D-A,7,dlogdet_prior_X,4.42112432268,OK
+75,C_Lap,D-A,7,dlogdet_Y_increment,25.3757342176,OK
+75,C_Lap,D-A,8,selection_slack,141.599823666,OK
+75,C_Lap,D-A,8,fit_gain_x,122.771936762,OK
+75,C_Lap,D-A,8,fit_gain_y,68.0814364322,OK
+75,C_Lap,D-A,8,laplace_volume_term,49.2535495275,OK
+75,C_Lap,D-A,8,two_dH_Lap,-47.676770907,OK
+75,C_Lap,D-A,8,d_residual,16.0255023427,OK
+75,C_Lap,D-A,8,dlogdet_prior_X,32.1662020489,OK
+75,C_Lap,D-A,8,dlogdet_Y_increment,15.5105688581,OK
+75,C_Lap,interaction D-B-C+A,1,selection_slack,3.68045473743,OK
+75,C_Lap,interaction D-B-C+A,1,fit_gain_x,3.177327327,OK
+75,C_Lap,interaction D-B-C+A,1,fit_gain_y,13.2040307158,OK
+75,C_Lap,interaction D-B-C+A,1,laplace_volume_term,12.7009033053,OK
+75,C_Lap,interaction D-B-C+A,1,two_dH_Lap,-11.0767669384,OK
+75,C_Lap,interaction D-B-C+A,1,d_residual,-14.2760683608,OK
+75,C_Lap,interaction D-B-C+A,1,dlogdet_prior_X,-1.73551870651,OK
+75,C_Lap,interaction D-B-C+A,1,dlogdet_Y_increment,12.8122856449,OK
+75,C_Lap,interaction D-B-C+A,2,selection_slack,-0.881880581605,OK
+75,C_Lap,interaction D-B-C+A,2,fit_gain_x,10.0309653115,OK
+75,C_Lap,interaction D-B-C+A,2,fit_gain_y,-23.9057272019,OK
+75,C_Lap,interaction D-B-C+A,2,laplace_volume_term,-12.9928813088,OK
+75,C_Lap,interaction D-B-C+A,2,two_dH_Lap,17.3687758007,OK
+75,C_Lap,interaction D-B-C+A,2,d_residual,9.00702107797,OK
+75,C_Lap,interaction D-B-C+A,2,dlogdet_prior_X,5.11273688795,OK
+75,C_Lap,interaction D-B-C+A,2,dlogdet_Y_increment,-22.4815126887,OK
+75,C_Lap,interaction D-B-C+A,3,selection_slack,-0.0488892721387,OK
+75,C_Lap,interaction D-B-C+A,3,fit_gain_x,1.46039058417,OK
+75,C_Lap,interaction D-B-C+A,3,fit_gain_y,-12.695195485,OK
+75,C_Lap,interaction D-B-C+A,3,laplace_volume_term,-11.1859156287,OK
+75,C_Lap,interaction D-B-C+A,3,two_dH_Lap,11.6356536354,OK
+75,C_Lap,interaction D-B-C+A,3,d_residual,2.13075768125,OK
+75,C_Lap,interaction D-B-C+A,3,dlogdet_prior_X,1.29484425848,OK
+75,C_Lap,interaction D-B-C+A,3,dlogdet_Y_increment,-12.9304978939,OK
+75,C_Lap,interaction D-B-C+A,4,selection_slack,2.54098649603,OK
+75,C_Lap,interaction D-B-C+A,4,fit_gain_x,-1.65971524139,OK
+75,C_Lap,interaction D-B-C+A,4,fit_gain_y,-3.73754335646,OK
+75,C_Lap,interaction D-B-C+A,4,laplace_volume_term,-7.93824509388,OK
+75,C_Lap,interaction D-B-C+A,4,two_dH_Lap,7.80650872361,OK
+75,C_Lap,interaction D-B-C+A,4,d_residual,-17.0795147912,OK
+75,C_Lap,interaction D-B-C+A,4,dlogdet_prior_X,-9.96659939108,OK
+75,C_Lap,interaction D-B-C+A,4,dlogdet_Y_increment,2.16009066748,OK
+75,C_Lap,interaction D-B-C+A,5,selection_slack,-3.65795989041,OK
+75,C_Lap,interaction D-B-C+A,5,fit_gain_x,-10.0744400339,OK
+75,C_Lap,interaction D-B-C+A,5,fit_gain_y,-0.00241132547876,OK
+75,C_Lap,interaction D-B-C+A,5,laplace_volume_term,-6.41889146896,OK
+75,C_Lap,interaction D-B-C+A,5,two_dH_Lap,4.40751796491,OK
+75,C_Lap,interaction D-B-C+A,5,d_residual,-8.78220727007,OK
+75,C_Lap,interaction D-B-C+A,5,dlogdet_prior_X,-4.1999654553,OK
+75,C_Lap,interaction D-B-C+A,5,dlogdet_Y_increment,-0.207552509608,OK
+75,C_Lap,interaction D-B-C+A,6,selection_slack,17.8585303662,OK
+75,C_Lap,interaction D-B-C+A,6,fit_gain_x,5.29189588591,OK
+75,C_Lap,interaction D-B-C+A,6,fit_gain_y,16.8950081323,OK
+75,C_Lap,interaction D-B-C+A,6,laplace_volume_term,4.32837365195,OK
+75,C_Lap,interaction D-B-C+A,6,two_dH_Lap,-8.95992702238,OK
+75,C_Lap,interaction D-B-C+A,6,d_residual,-9.67040468234,OK
+75,C_Lap,interaction D-B-C+A,6,dlogdet_prior_X,6.29380997182,OK
+75,C_Lap,interaction D-B-C+A,6,dlogdet_Y_increment,2.66611705056,OK
+75,C_Lap,interaction D-B-C+A,7,selection_slack,-3.17317410084,OK
+75,C_Lap,interaction D-B-C+A,7,fit_gain_x,8.54243736531,OK
+75,C_Lap,interaction D-B-C+A,7,fit_gain_y,-23.2802588242,OK
+75,C_Lap,interaction D-B-C+A,7,laplace_volume_term,-11.5646473581,OK
+75,C_Lap,interaction D-B-C+A,7,two_dH_Lap,17.6742390088,OK
+75,C_Lap,interaction D-B-C+A,7,d_residual,8.42031393928,OK
+75,C_Lap,interaction D-B-C+A,7,dlogdet_prior_X,0.669864441239,OK
+75,C_Lap,interaction D-B-C+A,7,dlogdet_Y_increment,-18.34410345,OK
+75,C_Lap,interaction D-B-C+A,8,selection_slack,19.3070316126,OK
+75,C_Lap,interaction D-B-C+A,8,fit_gain_x,-12.3128859654,OK
+75,C_Lap,interaction D-B-C+A,8,fit_gain_y,48.5526410903,OK
+75,C_Lap,interaction D-B-C+A,8,laplace_volume_term,16.9327235123,OK
+75,C_Lap,interaction D-B-C+A,8,two_dH_Lap,-13.4753819982,OK
+75,C_Lap,interaction D-B-C+A,8,d_residual,5.61410658382,OK
+75,C_Lap,interaction D-B-C+A,8,dlogdet_prior_X,-10.8826495231,OK
+75,C_Lap,interaction D-B-C+A,8,dlogdet_Y_increment,24.3580315213,OK
+150,C_Q,B-A,1,selection_slack,230.957910658,OK
+150,C_Q,B-A,1,fit_gain_x,193.50117714,OK
+150,C_Q,B-A,1,fit_gain_y,37.4567335186,OK
+150,C_Q,B-A,1,fit_gain_total,230.957910658,OK
+150,C_Q,B-A,1,prior_cost,0,OK
+150,C_Q,B-A,1,parameter_penalty,0,OK
+150,C_Q,B-A,2,selection_slack,184.549441216,OK
+150,C_Q,B-A,2,fit_gain_x,158.576591997,OK
+150,C_Q,B-A,2,fit_gain_y,25.972849219,OK
+150,C_Q,B-A,2,fit_gain_total,184.549441216,OK
+150,C_Q,B-A,2,prior_cost,6.8212102633e-13,OK
+150,C_Q,B-A,2,parameter_penalty,0,OK
+150,C_Q,B-A,3,selection_slack,280.486666732,OK
+150,C_Q,B-A,3,fit_gain_x,196.370587437,OK
+150,C_Q,B-A,3,fit_gain_y,84.1160792949,OK
+150,C_Q,B-A,3,fit_gain_total,280.486666732,OK
+150,C_Q,B-A,3,prior_cost,0,OK
+150,C_Q,B-A,3,parameter_penalty,0,OK
+150,C_Q,B-A,4,selection_slack,150.420459062,OK
+150,C_Q,B-A,4,fit_gain_x,138.780677751,OK
+150,C_Q,B-A,4,fit_gain_y,11.639781311,OK
+150,C_Q,B-A,4,fit_gain_total,150.420459062,OK
+150,C_Q,B-A,4,prior_cost,2.27373675443e-13,OK
+150,C_Q,B-A,4,parameter_penalty,0,OK
+150,C_Q,B-A,5,selection_slack,235.032968307,OK
+150,C_Q,B-A,5,fit_gain_x,191.927049422,OK
+150,C_Q,B-A,5,fit_gain_y,43.105918885,OK
+150,C_Q,B-A,5,fit_gain_total,235.032968307,OK
+150,C_Q,B-A,5,prior_cost,0,OK
+150,C_Q,B-A,5,parameter_penalty,0,OK
+150,C_Q,B-A,6,selection_slack,243.85682942,OK
+150,C_Q,B-A,6,fit_gain_x,232.919979693,OK
+150,C_Q,B-A,6,fit_gain_y,10.9368497275,OK
+150,C_Q,B-A,6,fit_gain_total,243.85682942,OK
+150,C_Q,B-A,6,prior_cost,0,OK
+150,C_Q,B-A,6,parameter_penalty,0,OK
+150,C_Q,B-A,7,selection_slack,191.275873683,OK
+150,C_Q,B-A,7,fit_gain_x,158.282714602,OK
+150,C_Q,B-A,7,fit_gain_y,32.9931590809,OK
+150,C_Q,B-A,7,fit_gain_total,191.275873683,OK
+150,C_Q,B-A,7,prior_cost,0,OK
+150,C_Q,B-A,7,parameter_penalty,0,OK
+150,C_Q,B-A,8,selection_slack,150.943820508,OK
+150,C_Q,B-A,8,fit_gain_x,104.49113794,OK
+150,C_Q,B-A,8,fit_gain_y,46.4526825673,OK
+150,C_Q,B-A,8,fit_gain_total,150.943820508,OK
+150,C_Q,B-A,8,prior_cost,0,OK
+150,C_Q,B-A,8,parameter_penalty,0,OK
+150,C_Lap,B-A,1,selection_slack,189.241224471,OK
+150,C_Lap,B-A,1,fit_gain_x,187.991500126,OK
+150,C_Lap,B-A,1,fit_gain_y,30.4691098979,OK
+150,C_Lap,B-A,1,laplace_volume_term,29.2193855527,OK
+150,C_Lap,B-A,1,two_dH_Lap,-30.5508755689,OK
+150,C_Lap,B-A,1,d_residual,-11.1658106183,OK
+150,C_Lap,B-A,1,dlogdet_prior_X,51.4079054024,OK
+150,C_Lap,B-A,1,dlogdet_Y_increment,-20.8570298335,OK
+150,C_Lap,B-A,2,selection_slack,175.847704061,OK
+150,C_Lap,B-A,2,fit_gain_x,161.906863686,OK
+150,C_Lap,B-A,2,fit_gain_y,31.4008517723,OK
+150,C_Lap,B-A,2,laplace_volume_term,17.4600113979,OK
+150,C_Lap,B-A,2,two_dH_Lap,-12.8066955289,OK
+150,C_Lap,B-A,2,d_residual,4.10495837301,OK
+150,C_Lap,B-A,2,dlogdet_prior_X,18.2626330889,OK
+150,C_Lap,B-A,2,dlogdet_Y_increment,-5.45593756006,OK
+150,C_Lap,B-A,3,selection_slack,246.314229295,OK
+150,C_Lap,B-A,3,fit_gain_x,193.918014456,OK
+150,C_Lap,B-A,3,fit_gain_y,84.9420544765,OK
+150,C_Lap,B-A,3,laplace_volume_term,32.5458396377,OK
+150,C_Lap,B-A,3,two_dH_Lap,-33.0653669334,OK
+150,C_Lap,B-A,3,d_residual,-1.10707050396,OK
+150,C_Lap,B-A,3,dlogdet_prior_X,47.5667835186,OK
+150,C_Lap,B-A,3,dlogdet_Y_increment,-14.5014165852,OK
+150,C_Lap,B-A,4,selection_slack,135.132688711,OK
+150,C_Lap,B-A,4,fit_gain_x,157.945295912,OK
+150,C_Lap,B-A,4,fit_gain_y,-4.32328107088,OK
+150,C_Lap,B-A,4,laplace_volume_term,18.4893261303,OK
+150,C_Lap,B-A,4,two_dH_Lap,-19.9061008622,OK
+150,C_Lap,B-A,4,d_residual,4.61833051114,OK
+150,C_Lap,B-A,4,dlogdet_prior_X,58.0950886118,OK
+150,C_Lap,B-A,4,dlogdet_Y_increment,-38.1889877495,OK
+150,C_Lap,B-A,5,ALL,,INCOMPLETE
+150,C_Lap,B-A,6,selection_slack,222.160718227,OK
+150,C_Lap,B-A,6,fit_gain_x,227.064157193,OK
+150,C_Lap,B-A,6,fit_gain_y,11.2798321836,OK
+150,C_Lap,B-A,6,laplace_volume_term,16.1832711495,OK
+150,C_Lap,B-A,6,two_dH_Lap,-11.0930166113,OK
+150,C_Lap,B-A,6,d_residual,-10.6030945819,OK
+150,C_Lap,B-A,6,dlogdet_prior_X,52.2716530069,OK
+150,C_Lap,B-A,6,dlogdet_Y_increment,-41.1786363956,OK
+150,C_Lap,B-A,7,selection_slack,181.729018478,OK
+150,C_Lap,B-A,7,fit_gain_x,178.652795597,OK
+150,C_Lap,B-A,7,fit_gain_y,26.9272013082,OK
+150,C_Lap,B-A,7,laplace_volume_term,23.8509784268,OK
+150,C_Lap,B-A,7,two_dH_Lap,-15.8094854284,OK
+150,C_Lap,B-A,7,d_residual,6.26263022362,OK
+150,C_Lap,B-A,7,dlogdet_prior_X,33.5057115143,OK
+150,C_Lap,B-A,7,dlogdet_Y_increment,-17.6962260859,OK
+150,C_Lap,B-A,8,selection_slack,147.344936312,OK
+150,C_Lap,B-A,8,fit_gain_x,114.17938953,OK
+150,C_Lap,B-A,8,fit_gain_y,48.756387945,OK
+150,C_Lap,B-A,8,laplace_volume_term,15.5908411627,OK
+150,C_Lap,B-A,8,two_dH_Lap,-12.6679780353,OK
+150,C_Lap,B-A,8,d_residual,9.06909383957,OK
+150,C_Lap,B-A,8,dlogdet_prior_X,13.066948655,OK
+150,C_Lap,B-A,8,dlogdet_Y_increment,-0.398970619712,OK
+75,C_Q,B-A,1,selected_k_change,2,OK
+75,C_Lap,B-A,1,selected_k_change,0,OK
+75,C_Q,B-A,2,selected_k_change,0,OK
+75,C_Lap,B-A,2,selected_k_change,1,OK
+75,C_Q,B-A,3,selected_k_change,1,OK
+75,C_Lap,B-A,3,selected_k_change,0,OK
+75,C_Q,B-A,4,selected_k_change,1,OK
+75,C_Lap,B-A,4,selected_k_change,0,OK
+75,C_Q,B-A,5,selected_k_change,0,OK
+75,C_Lap,B-A,5,selected_k_change,1,OK
+75,C_Q,B-A,6,selected_k_change,1,OK
+75,C_Lap,B-A,6,selected_k_change,0,OK
+75,C_Q,B-A,7,selected_k_change,2,OK
+75,C_Lap,B-A,7,selected_k_change,1,OK
+75,C_Q,B-A,8,selected_k_change,2,OK
+75,C_Lap,B-A,8,selected_k_change,0,OK
+75,C_Q,C-A,1,selected_k_change,2,OK
+75,C_Lap,C-A,1,selected_k_change,0,OK
+75,C_Q,C-A,2,selected_k_change,0,OK
+75,C_Lap,C-A,2,selected_k_change,1,OK
+75,C_Q,C-A,3,selected_k_change,1,OK
+75,C_Lap,C-A,3,selected_k_change,0,OK
+75,C_Q,C-A,4,selected_k_change,1,OK
+75,C_Lap,C-A,4,selected_k_change,0,OK
+75,C_Q,C-A,5,selected_k_change,0,OK
+75,C_Lap,C-A,5,selected_k_change,0,OK
+75,C_Q,C-A,6,selected_k_change,1,OK
+75,C_Lap,C-A,6,selected_k_change,0,OK
+75,C_Q,C-A,7,selected_k_change,1,OK
+75,C_Lap,C-A,7,selected_k_change,0,OK
+75,C_Q,C-A,8,selected_k_change,0,OK
+75,C_Lap,C-A,8,selected_k_change,0,OK
+75,C_Q,D-A,1,selected_k_change,2,OK
+75,C_Lap,D-A,1,selected_k_change,0,OK
+75,C_Q,D-A,2,selected_k_change,0,OK
+75,C_Lap,D-A,2,selected_k_change,1,OK
+75,C_Q,D-A,3,selected_k_change,1,OK
+75,C_Lap,D-A,3,selected_k_change,0,OK
+75,C_Q,D-A,4,selected_k_change,1,OK
+75,C_Lap,D-A,4,selected_k_change,1,OK
+75,C_Q,D-A,5,selected_k_change,0,OK
+75,C_Lap,D-A,5,selected_k_change,1,OK
+75,C_Q,D-A,6,selected_k_change,1,OK
+75,C_Lap,D-A,6,selected_k_change,0,OK
+75,C_Q,D-A,7,selected_k_change,2,OK
+75,C_Lap,D-A,7,selected_k_change,1,OK
+75,C_Q,D-A,8,selected_k_change,2,OK
+75,C_Lap,D-A,8,selected_k_change,0,OK
+150,C_Q,B-A,1,selected_k_change,0,OK
+150,C_Lap,B-A,1,selected_k_change,0,OK
+150,C_Q,B-A,2,selected_k_change,0,OK
+150,C_Lap,B-A,2,selected_k_change,0,OK
+150,C_Q,B-A,3,selected_k_change,0,OK
+150,C_Lap,B-A,3,selected_k_change,0,OK
+150,C_Q,B-A,4,selected_k_change,1,OK
+150,C_Lap,B-A,4,selected_k_change,0,OK
+150,C_Q,B-A,5,selected_k_change,0,OK
+150,C_Q,B-A,6,selected_k_change,0,OK
+150,C_Lap,B-A,6,selected_k_change,0,OK
+150,C_Q,B-A,7,selected_k_change,0,OK
+150,C_Lap,B-A,7,selected_k_change,0,OK
+150,C_Q,B-A,8,selected_k_change,0,OK
+150,C_Lap,B-A,8,selected_k_change,0,OK
