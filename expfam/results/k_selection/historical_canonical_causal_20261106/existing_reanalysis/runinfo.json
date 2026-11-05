@@ -1,0 +1,25 @@
+{
+ "script": "tools/research_audit/analyze_k_causal_existing.py",
+ "git_head": "1b5030b2417a314927fb3a60d4d9016307f28d3b",
+ "mcem_fits": 0,
+ "fit_states_evaluated": 1008,
+ "max_abs_P_Z_minus_formula": 4.547473508864641e-13,
+ "max_abs_increment_closure": 8.185452315956354e-12,
+ "inputs_sha256": {
+  "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+  "D:\\tento\\kennkyu_artifacts\\dsweep_k_selection_20261105\\fit_states.npz": "471ac4901cc7d3b170b6a2bc0f299c219a04f55dd228391ea2e5a0746d4d02d7",
+  "D:\\tento\\kennkyu_artifacts\\k_selection_robustness_20261105\\r2_n50_fit_states.npz": "8583d5013b46bd8e6e149c0bb0fe0f87ff6b172e838f1498096960f2eb18bba1",
+  "D:\\tento\\kennkyu_artifacts\\k_selection_robustness_20261105\\r2_n100_fit_states.npz": "cacf488c6a98ac1e9c3d2497ba711252fee93f0e6b75c0bc46261272913a147c",
+  "D:\\tento\\kennkyu_artifacts\\k_selection_robustness_20261105\\r2_n150_fit_states.npz": "f4428bec2047d915a19f4a9d86562bdd9ac268c6ce23e34608f054406153a6a8"
+ },
+ "outputs_sha256": {
+  "canonical_k_selection_frequency.csv": "0790c89c664be0c9ae5abead33f7f94a4f3d8263133cb8acbb80afe6d2058ab0",
+  "canonical_k_selection_summary.csv": "441bbcce254f39e49d42cd6858028950f28f616455ef820d5e717f950be8e0a8",
+  "criterion_paired_comparison.csv": "cc4fa4bba7cad615b0f112ff0733e3139993b40664ff1157f2ccb2b920e1c007",
+  "fit_level_q_split.csv": "1bea5ba9f5df2ae5c6543310cf85d81850831e522a30952c759db9941f90e61a",
+  "historical_canonical_condition_matrix.csv": "af1bdc3cd35080eda159a5931a643eee8d32eac0ab2382c1273150bc5153d98a",
+  "historical_k_selection_frequency.csv": "609db03891c3e36ec2b280f39166aa03d4e25ebbab1b3da240e97dff73b3145b",
+  "historical_k_selection_summary.csv": "a8fdf40d0d2097f23d94e55788646f7883129a003d3d34de9d08e152ddc173ca",
+  "k_increment_decomposition.csv": "d147be8967803f3a3e92d6708c84e38722f168540d23befdf4ad2091f9defc53"
+ }
+}

@@ -1,0 +1,159 @@
+{
+ "script": "tools/research_audit/audit_k_signal_strength.py",
+ "independence": "own numpy/scipy log-likelihoods; selection/frequency/paired medians recomputed from fit_results",
+ "n_checks": 30,
+ "n_pass": 30,
+ "n_fail": 0,
+ "checks": [
+  {
+   "check": "prereg file hash == code PREREG hash",
+   "result": "PASS",
+   "detail": "4eaa54f056cf"
+  },
+  {
+   "check": "prereg file body == code PREREG",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=75 runinfo prereg == gates prereg",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=75 run COMPLETED",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=75 state npz sha256 matches runinfo",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=150 runinfo prereg == gates prereg",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=150 run COMPLETED",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "n=150 state npz sha256 matches runinfo",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "gates PASSED",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "no duplicate fit keys",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "fit rows == preregistered plan",
+   "result": "PASS",
+   "detail": "{(75, 'A'): 112, (75, 'B'): 112, (75, 'C'): 112, (75, 'D'): 112, (150, 'A'): 112, (150, 'B'): 112}"
+  },
+  {
+   "check": "new fits within cap 480 (incl. 5 gate fits)",
+   "result": "PASS",
+   "detail": "453"
+  },
+  {
+   "check": "ledger production rows == new fits",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "no retries recorded",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "failed fits recorded, not dropped",
+   "result": "PASS",
+   "detail": "0"
+  },
+  {
+   "check": "regenerated X/Y/Z/mask hashes == provenance",
+   "result": "PASS",
+   "detail": "mismatches=0"
+  },
+  {
+   "check": "sharing rule (Z, mask shared; Y_B=Y_A; X_C=X_A)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "no seed rescue / dataset replacement flags",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "independent Q_X/Q_Y/Q_Z/C_Q recomputation (672 states)",
+   "result": "PASS",
+   "detail": "{'Q_X': '3.49e-12', 'Q_Y': '4.91e-12', 'Q_Z': '3.29e-12', 'C_Q': '2.98e-12'}"
+  },
+  {
+   "check": "P_Z == nK(1+ln 2pi) for every state (var_z=1)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "identity C_Q - C_Lap - 2H_Lap = termA + 2R3 (recomputed)",
+   "result": "PASS",
+   "detail": "8.81e-08"
+  },
+  {
+   "check": "C_Lap = fit_mode + volume + penalty",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "selection recomputed == selection_by_replicate",
+   "result": "PASS",
+   "detail": "mismatches=0"
+  },
+  {
+   "check": "selection_frequency recomputed",
+   "result": "PASS",
+   "detail": "mismatches=0"
+  },
+  {
+   "check": "paired C_Q slack medians / sign counts recomputed",
+   "result": "PASS",
+   "detail": "mismatches=0"
+  },
+  {
+   "check": "analysis CSV hashes == manifest",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "9 figure groups present (png+pdf)",
+   "result": "PASS",
+   "detail": "10"
+  },
+  {
+   "check": "figure hashes == manifest",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "no existing file modified except append-only registry",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "check": "EXPERIMENT_REGISTRY.md append-only (no removed lines)",
+   "result": "PASS",
+   "detail": "0"
+  }
+ ]
+}

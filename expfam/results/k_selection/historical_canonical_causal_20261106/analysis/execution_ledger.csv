@@ -1,0 +1,678 @@
+condition,n,replicate,k_est,start,fit_id,model_seed,source,checkpoint,status,attempts,retry,runtime_s,exception,role
+B,75,1,1,1,750001,1405111,new_fit,8,FIT,1,0,6.898,,production
+B,75,1,1,2,750002,1405112,new_fit,8,FIT,1,0,6.713,,production
+B,75,1,2,1,750003,1405121,new_fit,8,FIT,1,0,7.421,,production
+B,75,1,2,2,750004,1405122,new_fit,8,FIT,1,0,7.242,,production
+B,75,1,3,1,750005,1405131,new_fit,8,FIT,1,0,7.432,,production
+B,75,1,3,2,750006,1405132,new_fit,8,FIT,1,0,7.334,,production
+B,75,1,4,1,750007,1405141,new_fit,8,FIT,1,0,7.37,,production
+B,75,1,4,2,750008,1405142,new_fit,8,FIT,1,0,7.432,,production
+B,75,1,5,1,750009,1405151,new_fit,8,FIT,1,0,7.623,,production
+B,75,1,5,2,750010,1405152,new_fit,8,FIT,1,0,7.586,,production
+B,75,1,6,1,750011,1405161,new_fit,8,FIT,1,0,7.659,,production
+B,75,1,6,2,750012,1405162,new_fit,8,FIT,1,0,7.782,,production
+B,75,1,7,1,750013,1405171,new_fit,8,FIT,1,0,8.263,,production
+B,75,1,7,2,750014,1405172,new_fit,8,FIT,1,0,8.268,,production
+B,75,2,1,1,750015,1405211,new_fit,8,FIT,1,0,6.533,,production
+B,75,2,1,2,750016,1405212,new_fit,8,FIT,1,0,6.481,,production
+B,75,2,2,1,750017,1405221,new_fit,8,FIT,1,0,7.113,,production
+B,75,2,2,2,750018,1405222,new_fit,8,FIT,1,0,7.132,,production
+B,75,2,3,1,750019,1405231,new_fit,8,FIT,1,0,7.268,,production
+B,75,2,3,2,750020,1405232,new_fit,8,FIT,1,0,7.333,,production
+B,75,2,4,1,750021,1405241,new_fit,8,FIT,1,0,7.659,,production
+B,75,2,4,2,750022,1405242,new_fit,8,FIT,1,0,8.167,,production
+B,75,2,5,1,750023,1405251,new_fit,8,FIT,1,0,7.976,,production
+B,75,2,5,2,750024,1405252,new_fit,8,FIT,1,0,7.871,,production
+B,75,2,6,1,750025,1405261,new_fit,8,FIT,1,0,8.092,,production
+B,75,2,6,2,750026,1405262,new_fit,8,FIT,1,0,8.382,,production
+B,75,2,7,1,750027,1405271,new_fit,8,FIT,1,0,8.301,,production
+B,75,2,7,2,750028,1405272,new_fit,8,FIT,1,0,8.489,,production
+B,75,3,1,1,750029,1405311,new_fit,8,FIT,1,0,6.504,,production
+B,75,3,1,2,750030,1405312,new_fit,8,FIT,1,0,6.56,,production
+B,75,3,2,1,750031,1405321,new_fit,8,FIT,1,0,7.114,,production
+B,75,3,2,2,750032,1405322,new_fit,8,FIT,1,0,7.291,,production
+B,75,3,3,1,750033,1405331,new_fit,8,FIT,1,0,7.609,,production
+B,75,3,3,2,750034,1405332,new_fit,8,FIT,1,0,7.482,,production
+B,75,3,4,1,750035,1405341,new_fit,8,FIT,1,0,7.52,,production
+B,75,3,4,2,750036,1405342,new_fit,8,FIT,1,0,7.579,,production
+B,75,3,5,1,750037,1405351,new_fit,8,FIT,1,0,8.313,,production
+B,75,3,5,2,750038,1405352,new_fit,8,FIT,1,0,7.779,,production
+B,75,3,6,1,750039,1405361,new_fit,8,FIT,1,0,7.75,,production
+B,75,3,6,2,750040,1405362,new_fit,8,FIT,1,0,7.828,,production
+B,75,3,7,1,750041,1405371,new_fit,8,FIT,1,0,8.331,,production
+B,75,3,7,2,750042,1405372,new_fit,8,FIT,1,0,8.366,,production
+B,75,4,1,1,750043,1405411,new_fit,8,FIT,1,0,6.765,,production
+B,75,4,1,2,750044,1405412,new_fit,8,FIT,1,0,6.567,,production
+B,75,4,2,1,750045,1405421,new_fit,8,FIT,1,0,7.846,,production
+B,75,4,2,2,750046,1405422,new_fit,8,FIT,1,0,9.174,,production
+B,75,4,3,1,750047,1405431,new_fit,8,FIT,1,0,8.832,,production
+B,75,4,3,2,750048,1405432,new_fit,8,FIT,1,0,8.101,,production
+B,75,4,4,1,750049,1405441,new_fit,8,FIT,1,0,9.966,,production
+B,75,4,4,2,750050,1405442,new_fit,8,FIT,1,0,8.408,,production
+B,75,4,5,1,750051,1405451,new_fit,8,FIT,1,0,7.906,,production
+B,75,4,5,2,750052,1405452,new_fit,8,FIT,1,0,8.162,,production
+B,75,4,6,1,750053,1405461,new_fit,8,FIT,1,0,7.96,,production
+B,75,4,6,2,750054,1405462,new_fit,8,FIT,1,0,7.939,,production
+B,75,4,7,1,750055,1405471,new_fit,8,FIT,1,0,8.445,,production
+B,75,4,7,2,750056,1405472,new_fit,8,FIT,1,0,8.387,,production
+B,75,5,1,1,750057,1405511,new_fit,8,FIT,1,0,6.819,,production
+B,75,5,1,2,750058,1405512,new_fit,8,FIT,1,0,6.711,,production
+B,75,5,2,1,750059,1405521,new_fit,8,FIT,1,0,7.273,,production
+B,75,5,2,2,750060,1405522,new_fit,8,FIT,1,0,7.441,,production
+B,75,5,3,1,750061,1405531,new_fit,8,FIT,1,0,7.481,,production
+B,75,5,3,2,750062,1405532,new_fit,8,FIT,1,0,7.476,,production
+B,75,5,4,1,750063,1405541,new_fit,8,FIT,1,0,7.522,,production
+B,75,5,4,2,750064,1405542,new_fit,8,FIT,1,0,7.499,,production
+B,75,5,5,1,750065,1405551,new_fit,8,FIT,1,0,7.741,,production
+B,75,5,5,2,750066,1405552,new_fit,8,FIT,1,0,7.734,,production
+B,75,5,6,1,750067,1405561,new_fit,8,FIT,1,0,7.746,,production
+B,75,5,6,2,750068,1405562,new_fit,8,FIT,1,0,7.879,,production
+B,75,5,7,1,750069,1405571,new_fit,8,FIT,1,0,8.362,,production
+B,75,5,7,2,750070,1405572,new_fit,8,FIT,1,0,8.384,,production
+B,75,6,1,1,750071,1405611,new_fit,8,FIT,1,0,6.557,,production
+B,75,6,1,2,750072,1405612,new_fit,8,FIT,1,0,6.741,,production
+B,75,6,2,1,750073,1405621,new_fit,8,FIT,1,0,7.178,,production
+B,75,6,2,2,750074,1405622,new_fit,8,FIT,1,0,7.172,,production
+B,75,6,3,1,750075,1405631,new_fit,8,FIT,1,0,7.373,,production
+B,75,6,3,2,750076,1405632,new_fit,8,FIT,1,0,7.419,,production
+B,75,6,4,1,750077,1405641,new_fit,8,FIT,1,0,7.558,,production
+B,75,6,4,2,750078,1405642,new_fit,8,FIT,1,0,7.522,,production
+B,75,6,5,1,750079,1405651,new_fit,8,FIT,1,0,7.741,,production
+B,75,6,5,2,750080,1405652,new_fit,8,FIT,1,0,7.661,,production
+B,75,6,6,1,750081,1405661,new_fit,8,FIT,1,0,7.882,,production
+B,75,6,6,2,750082,1405662,new_fit,8,FIT,1,0,7.911,,production
+B,75,6,7,1,750083,1405671,new_fit,8,FIT,1,0,8.478,,production
+B,75,6,7,2,750084,1405672,new_fit,8,FIT,1,0,8.495,,production
+B,75,7,1,1,750085,1405711,new_fit,8,FIT,1,0,6.661,,production
+B,75,7,1,2,750086,1405712,new_fit,8,FIT,1,0,6.601,,production
+B,75,7,2,1,750087,1405721,new_fit,8,FIT,1,0,7.213,,production
+B,75,7,2,2,750088,1405722,new_fit,8,FIT,1,0,7.218,,production
+B,75,7,3,1,750089,1405731,new_fit,8,FIT,1,0,7.37,,production
+B,75,7,3,2,750090,1405732,new_fit,8,FIT,1,0,7.392,,production
+B,75,7,4,1,750091,1405741,new_fit,8,FIT,1,0,7.444,,production
+B,75,7,4,2,750092,1405742,new_fit,8,FIT,1,0,7.483,,production
+B,75,7,5,1,750093,1405751,new_fit,8,FIT,1,0,7.671,,production
+B,75,7,5,2,750094,1405752,new_fit,8,FIT,1,0,7.61,,production
+B,75,7,6,1,750095,1405761,new_fit,8,FIT,1,0,7.845,,production
+B,75,7,6,2,750096,1405762,new_fit,8,FIT,1,0,7.854,,production
+B,75,7,7,1,750097,1405771,new_fit,8,FIT,1,0,9.008,,production
+B,75,7,7,2,750098,1405772,new_fit,8,FIT,1,0,8.313,,production
+B,75,8,1,1,750099,1405811,new_fit,8,FIT,1,0,6.628,,production
+B,75,8,1,2,750100,1405812,new_fit,8,FIT,1,0,6.622,,production
+B,75,8,2,1,750101,1405821,new_fit,8,FIT,1,0,7.345,,production
+B,75,8,2,2,750102,1405822,new_fit,8,FIT,1,0,7.276,,production
+B,75,8,3,1,750103,1405831,new_fit,8,FIT,1,0,7.496,,production
+B,75,8,3,2,750104,1405832,new_fit,8,FIT,1,0,7.399,,production
+B,75,8,4,1,750105,1405841,new_fit,8,FIT,1,0,7.595,,production
+B,75,8,4,2,750106,1405842,new_fit,8,FIT,1,0,7.582,,production
+B,75,8,5,1,750107,1405851,new_fit,8,FIT,1,0,7.726,,production
+B,75,8,5,2,750108,1405852,new_fit,8,FIT,1,0,7.853,,production
+B,75,8,6,1,750109,1405861,new_fit,8,FIT,1,0,7.989,,production
+B,75,8,6,2,750110,1405862,new_fit,8,FIT,1,0,7.829,,production
+B,75,8,7,1,750111,1405871,new_fit,8,FIT,1,0,8.398,,production
+B,75,8,7,2,750112,1405872,new_fit,8,FIT,1,0,8.518,,production
+C,75,1,1,1,750113,1405111,new_fit,8,FIT,1,0,6.695,,production
+C,75,1,1,2,750114,1405112,new_fit,8,FIT,1,0,6.65,,production
+C,75,1,2,1,750115,1405121,new_fit,8,FIT,1,0,7.28,,production
+C,75,1,2,2,750116,1405122,new_fit,8,FIT,1,0,7.914,,production
+C,75,1,3,1,750117,1405131,new_fit,8,FIT,1,0,7.539,,production
+C,75,1,3,2,750118,1405132,new_fit,8,FIT,1,0,7.503,,production
+C,75,1,4,1,750119,1405141,new_fit,8,FIT,1,0,7.619,,production
+C,75,1,4,2,750120,1405142,new_fit,8,FIT,1,0,7.799,,production
+C,75,1,5,1,750121,1405151,new_fit,8,FIT,1,0,7.873,,production
+C,75,1,5,2,750122,1405152,new_fit,8,FIT,1,0,7.81,,production
+C,75,1,6,1,750123,1405161,new_fit,8,FIT,1,0,7.921,,production
+C,75,1,6,2,750124,1405162,new_fit,8,FIT,1,0,7.826,,production
+C,75,1,7,1,750125,1405171,new_fit,8,FIT,1,0,8.408,,production
+C,75,1,7,2,750126,1405172,new_fit,8,FIT,1,0,8.429,,production
+C,75,2,1,1,750127,1405211,new_fit,8,FIT,1,0,6.642,,production
+C,75,2,1,2,750128,1405212,new_fit,8,FIT,1,0,6.647,,production
+C,75,2,2,1,750129,1405221,new_fit,8,FIT,1,0,7.269,,production
+C,75,2,2,2,750130,1405222,new_fit,8,FIT,1,0,7.428,,production
+C,75,2,3,1,750131,1405231,new_fit,8,FIT,1,0,7.45,,production
+C,75,2,3,2,750132,1405232,new_fit,8,FIT,1,0,7.537,,production
+C,75,2,4,1,750133,1405241,new_fit,8,FIT,1,0,7.825,,production
+C,75,2,4,2,750134,1405242,new_fit,8,FIT,1,0,7.199,,production
+C,75,2,5,1,750135,1405251,new_fit,8,FIT,1,0,7.457,,production
+C,75,2,5,2,750136,1405252,new_fit,8,FIT,1,0,7.342,,production
+C,75,2,6,1,750137,1405261,new_fit,8,FIT,1,0,7.5,,production
+C,75,2,6,2,750138,1405262,new_fit,8,FIT,1,0,7.484,,production
+C,75,2,7,1,750139,1405271,new_fit,8,FIT,1,0,8.055,,production
+C,75,2,7,2,750140,1405272,new_fit,8,FIT,1,0,7.96,,production
+C,75,3,1,1,750141,1405311,new_fit,8,FIT,1,0,6.268,,production
+C,75,3,1,2,750142,1405312,new_fit,8,FIT,1,0,6.286,,production
+C,75,3,2,1,750143,1405321,new_fit,8,FIT,1,0,6.97,,production
+C,75,3,2,2,750144,1405322,new_fit,8,FIT,1,0,6.849,,production
+C,75,3,3,1,750145,1405331,new_fit,8,FIT,1,0,7.288,,production
+C,75,3,3,2,750146,1405332,new_fit,8,FIT,1,0,7.142,,production
+C,75,3,4,1,750147,1405341,new_fit,8,FIT,1,0,7.195,,production
+C,75,3,4,2,750148,1405342,new_fit,8,FIT,1,0,7.25,,production
+C,75,3,5,1,750149,1405351,new_fit,8,FIT,1,0,7.399,,production
+C,75,3,5,2,750150,1405352,new_fit,8,FIT,1,0,7.338,,production
+C,75,3,6,1,750151,1405361,new_fit,8,FIT,1,0,7.562,,production
+C,75,3,6,2,750152,1405362,new_fit,8,FIT,1,0,7.542,,production
+C,75,3,7,1,750153,1405371,new_fit,8,FIT,1,0,7.997,,production
+C,75,3,7,2,750154,1405372,new_fit,8,FIT,1,0,8.013,,production
+C,75,4,1,1,750155,1405411,new_fit,8,FIT,1,0,6.288,,production
+C,75,4,1,2,750156,1405412,new_fit,8,FIT,1,0,6.195,,production
+C,75,4,2,1,750157,1405421,new_fit,8,FIT,1,0,6.85,,production
+C,75,4,2,2,750158,1405422,new_fit,8,FIT,1,0,6.799,,production
+C,75,4,3,1,750159,1405431,new_fit,8,FIT,1,0,7.118,,production
+C,75,4,3,2,750160,1405432,new_fit,8,FIT,1,0,7.077,,production
+C,75,4,4,1,750161,1405441,new_fit,8,FIT,1,0,7.138,,production
+C,75,4,4,2,750162,1405442,new_fit,8,FIT,1,0,7.134,,production
+C,75,4,5,1,750163,1405451,new_fit,8,FIT,1,0,7.457,,production
+C,75,4,5,2,750164,1405452,new_fit,8,FIT,1,0,7.322,,production
+C,75,4,6,1,750165,1405461,new_fit,8,FIT,1,0,7.435,,production
+C,75,4,6,2,750166,1405462,new_fit,8,FIT,1,0,7.391,,production
+C,75,4,7,1,750167,1405471,new_fit,8,FIT,1,0,7.996,,production
+C,75,4,7,2,750168,1405472,new_fit,8,FIT,1,0,7.942,,production
+C,75,5,1,1,750169,1405511,new_fit,8,FIT,1,0,6.275,,production
+C,75,5,1,2,750170,1405512,new_fit,8,FIT,1,0,6.486,,production
+C,75,5,2,1,750171,1405521,new_fit,8,FIT,1,0,6.974,,production
+C,75,5,2,2,750172,1405522,new_fit,8,FIT,1,0,6.948,,production
+C,75,5,3,1,750173,1405531,new_fit,8,FIT,1,0,7.139,,production
+C,75,5,3,2,750174,1405532,new_fit,8,FIT,1,0,7.18,,production
+C,75,5,4,1,750175,1405541,new_fit,8,FIT,1,0,7.216,,production
+C,75,5,4,2,750176,1405542,new_fit,8,FIT,1,0,7.232,,production
+C,75,5,5,1,750177,1405551,new_fit,8,FIT,1,0,7.385,,production
+C,75,5,5,2,750178,1405552,new_fit,8,FIT,1,0,7.356,,production
+C,75,5,6,1,750179,1405561,new_fit,8,FIT,1,0,7.556,,production
+C,75,5,6,2,750180,1405562,new_fit,8,FIT,1,0,7.825,,production
+C,75,5,7,1,750181,1405571,new_fit,8,FIT,1,0,8.111,,production
+C,75,5,7,2,750182,1405572,new_fit,8,FIT,1,0,8.146,,production
+C,75,6,1,1,750183,1405611,new_fit,8,FIT,1,0,6.332,,production
+C,75,6,1,2,750184,1405612,new_fit,8,FIT,1,0,6.312,,production
+C,75,6,2,1,750185,1405621,new_fit,8,FIT,1,0,6.934,,production
+C,75,6,2,2,750186,1405622,new_fit,8,FIT,1,0,6.887,,production
+C,75,6,3,1,750187,1405631,new_fit,8,FIT,1,0,7.07,,production
+C,75,6,3,2,750188,1405632,new_fit,8,FIT,1,0,7.114,,production
+C,75,6,4,1,750189,1405641,new_fit,8,FIT,1,0,7.12,,production
+C,75,6,4,2,750190,1405642,new_fit,8,FIT,1,0,7.171,,production
+C,75,6,5,1,750191,1405651,new_fit,8,FIT,1,0,7.304,,production
+C,75,6,5,2,750192,1405652,new_fit,8,FIT,1,0,7.552,,production
+C,75,6,6,1,750193,1405661,new_fit,8,FIT,1,0,7.572,,production
+C,75,6,6,2,750194,1405662,new_fit,8,FIT,1,0,7.534,,production
+C,75,6,7,1,750195,1405671,new_fit,8,FIT,1,0,8.376,,production
+C,75,6,7,2,750196,1405672,new_fit,8,FIT,1,0,8.042,,production
+C,75,7,1,1,750197,1405711,new_fit,8,FIT,1,0,6.257,,production
+C,75,7,1,2,750198,1405712,new_fit,8,FIT,1,0,6.213,,production
+C,75,7,2,1,750199,1405721,new_fit,8,FIT,1,0,6.851,,production
+C,75,7,2,2,750200,1405722,new_fit,8,FIT,1,0,6.83,,production
+C,75,7,3,1,750201,1405731,new_fit,8,FIT,1,0,7,,production
+C,75,7,3,2,750202,1405732,new_fit,8,FIT,1,0,7.077,,production
+C,75,7,4,1,750203,1405741,new_fit,8,FIT,1,0,7.1,,production
+C,75,7,4,2,750204,1405742,new_fit,8,FIT,1,0,7.132,,production
+C,75,7,5,1,750205,1405751,new_fit,8,FIT,1,0,7.244,,production
+C,75,7,5,2,750206,1405752,new_fit,8,FIT,1,0,7.31,,production
+C,75,7,6,1,750207,1405761,new_fit,8,FIT,1,0,7.442,,production
+C,75,7,6,2,750208,1405762,new_fit,8,FIT,1,0,7.41,,production
+C,75,7,7,1,750209,1405771,new_fit,8,FIT,1,0,7.853,,production
+C,75,7,7,2,750210,1405772,new_fit,8,FIT,1,0,7.935,,production
+C,75,8,1,1,750211,1405811,new_fit,8,FIT,1,0,6.266,,production
+C,75,8,1,2,750212,1405812,new_fit,8,FIT,1,0,6.354,,production
+C,75,8,2,1,750213,1405821,new_fit,8,FIT,1,0,7.015,,production
+C,75,8,2,2,750214,1405822,new_fit,8,FIT,1,0,6.97,,production
+C,75,8,3,1,750215,1405831,new_fit,8,FIT,1,0,7.13,,production
+C,75,8,3,2,750216,1405832,new_fit,8,FIT,1,0,7.237,,production
+C,75,8,4,1,750217,1405841,new_fit,8,FIT,1,0,7.249,,production
+C,75,8,4,2,750218,1405842,new_fit,8,FIT,1,0,7.234,,production
+C,75,8,5,1,750219,1405851,new_fit,8,FIT,1,0,7.367,,production
+C,75,8,5,2,750220,1405852,new_fit,8,FIT,1,0,7.578,,production
+C,75,8,6,1,750221,1405861,new_fit,8,FIT,1,0,7.586,,production
+C,75,8,6,2,750222,1405862,new_fit,8,FIT,1,0,7.527,,production
+C,75,8,7,1,750223,1405871,new_fit,8,FIT,1,0,7.967,,production
+C,75,8,7,2,750224,1405872,new_fit,8,FIT,1,0,7.988,,production
+D,75,1,1,1,750225,1405111,new_fit,8,FIT,1,0,6.261,,production
+D,75,1,1,2,750226,1405112,new_fit,8,FIT,1,0,6.196,,production
+D,75,1,2,1,750227,1405121,new_fit,8,FIT,1,0,6.88,,production
+D,75,1,2,2,750228,1405122,new_fit,8,FIT,1,0,6.88,,production
+D,75,1,3,1,750229,1405131,new_fit,8,FIT,1,0,7.073,,production
+D,75,1,3,2,750230,1405132,new_fit,8,FIT,1,0,7.104,,production
+D,75,1,4,1,750231,1405141,new_fit,8,FIT,1,0,7.121,,production
+D,75,1,4,2,750232,1405142,new_fit,8,FIT,1,0,7.252,,production
+D,75,1,5,1,750233,1405151,new_fit,8,FIT,1,0,7.318,,production
+D,75,1,5,2,750234,1405152,new_fit,8,FIT,1,0,7.308,,production
+D,75,1,6,1,750235,1405161,new_fit,8,FIT,1,0,7.475,,production
+D,75,1,6,2,750236,1405162,new_fit,8,FIT,1,0,7.55,,production
+D,75,1,7,1,750237,1405171,new_fit,8,FIT,1,0,7.868,,production
+D,75,1,7,2,750238,1405172,new_fit,8,FIT,1,0,7.996,,production
+D,75,2,1,1,750239,1405211,new_fit,8,FIT,1,0,6.239,,production
+D,75,2,1,2,750240,1405212,new_fit,8,FIT,1,0,6.145,,production
+D,75,2,2,1,750241,1405221,new_fit,8,FIT,1,0,6.794,,production
+D,75,2,2,2,750242,1405222,new_fit,8,FIT,1,0,6.792,,production
+D,75,2,3,1,750243,1405231,new_fit,8,FIT,1,0,7.047,,production
+D,75,2,3,2,750244,1405232,new_fit,8,FIT,1,0,7.067,,production
+D,75,2,4,1,750245,1405241,new_fit,8,FIT,1,0,7.159,,production
+D,75,2,4,2,750246,1405242,new_fit,8,FIT,1,0,7.35,,production
+D,75,2,5,1,750247,1405251,new_fit,8,FIT,1,0,7.406,,production
+D,75,2,5,2,750248,1405252,new_fit,8,FIT,1,0,7.344,,production
+D,75,2,6,1,750249,1405261,new_fit,8,FIT,1,0,7.489,,production
+D,75,2,6,2,750250,1405262,new_fit,8,FIT,1,0,7.48,,production
+D,75,2,7,1,750251,1405271,new_fit,8,FIT,1,0,7.984,,production
+D,75,2,7,2,750252,1405272,new_fit,8,FIT,1,0,7.971,,production
+D,75,3,1,1,750253,1405311,new_fit,8,FIT,1,0,6.318,,production
+D,75,3,1,2,750254,1405312,new_fit,8,FIT,1,0,6.237,,production
+D,75,3,2,1,750255,1405321,new_fit,8,FIT,1,0,6.964,,production
+D,75,3,2,2,750256,1405322,new_fit,8,FIT,1,0,6.834,,production
+D,75,3,3,1,750257,1405331,new_fit,8,FIT,1,0,7.078,,production
+D,75,3,3,2,750258,1405332,new_fit,8,FIT,1,0,7.074,,production
+D,75,3,4,1,750259,1405341,new_fit,8,FIT,1,0,7.186,,production
+D,75,3,4,2,750260,1405342,new_fit,8,FIT,1,0,7.262,,production
+D,75,3,5,1,750261,1405351,new_fit,8,FIT,1,0,7.348,,production
+D,75,3,5,2,750262,1405352,new_fit,8,FIT,1,0,7.548,,production
+D,75,3,6,1,750263,1405361,new_fit,8,FIT,1,0,7.454,,production
+D,75,3,6,2,750264,1405362,new_fit,8,FIT,1,0,7.383,,production
+D,75,3,7,1,750265,1405371,new_fit,8,FIT,1,0,7.897,,production
+D,75,3,7,2,750266,1405372,new_fit,8,FIT,1,0,7.94,,production
+D,75,4,1,1,750267,1405411,new_fit,8,FIT,1,0,6.244,,production
+D,75,4,1,2,750268,1405412,new_fit,8,FIT,1,0,6.283,,production
+D,75,4,2,1,750269,1405421,new_fit,8,FIT,1,0,6.892,,production
+D,75,4,2,2,750270,1405422,new_fit,8,FIT,1,0,6.836,,production
+D,75,4,3,1,750271,1405431,new_fit,8,FIT,1,0,7.265,,production
+D,75,4,3,2,750272,1405432,new_fit,8,FIT,1,0,7.121,,production
+D,75,4,4,1,750273,1405441,new_fit,8,FIT,1,0,7.089,,production
+D,75,4,4,2,750274,1405442,new_fit,8,FIT,1,0,7.146,,production
+D,75,4,5,1,750275,1405451,new_fit,8,FIT,1,0,7.352,,production
+D,75,4,5,2,750276,1405452,new_fit,8,FIT,1,0,7.316,,production
+D,75,4,6,1,750277,1405461,new_fit,8,FIT,1,0,7.465,,production
+D,75,4,6,2,750278,1405462,new_fit,8,FIT,1,0,7.364,,production
+D,75,4,7,1,750279,1405471,new_fit,8,FIT,1,0,7.885,,production
+D,75,4,7,2,750280,1405472,new_fit,8,FIT,1,0,7.89,,production
+D,75,5,1,1,750281,1405511,new_fit,8,FIT,1,0,6.15,,production
+D,75,5,1,2,750282,1405512,new_fit,8,FIT,1,0,6.224,,production
+D,75,5,2,1,750283,1405521,new_fit,8,FIT,1,0,6.861,,production
+D,75,5,2,2,750284,1405522,new_fit,8,FIT,1,0,6.858,,production
+D,75,5,3,1,750285,1405531,new_fit,8,FIT,1,0,7.133,,production
+D,75,5,3,2,750286,1405532,new_fit,8,FIT,1,0,7.112,,production
+D,75,5,4,1,750287,1405541,new_fit,8,FIT,1,0,7.18,,production
+D,75,5,4,2,750288,1405542,new_fit,8,FIT,1,0,7.229,,production
+D,75,5,5,1,750289,1405551,new_fit,8,FIT,1,0,7.437,,production
+D,75,5,5,2,750290,1405552,new_fit,8,FIT,1,0,7.364,,production
+D,75,5,6,1,750291,1405561,new_fit,8,FIT,1,0,7.415,,production
+D,75,5,6,2,750292,1405562,new_fit,8,FIT,1,0,7.404,,production
+D,75,5,7,1,750293,1405571,new_fit,8,FIT,1,0,7.874,,production
+D,75,5,7,2,750294,1405572,new_fit,8,FIT,1,0,7.891,,production
+D,75,6,1,1,750295,1405611,new_fit,8,FIT,1,0,6.376,,production
+D,75,6,1,2,750296,1405612,new_fit,8,FIT,1,0,6.384,,production
+D,75,6,2,1,750297,1405621,new_fit,8,FIT,1,0,6.757,,production
+D,75,6,2,2,750298,1405622,new_fit,8,FIT,1,0,6.746,,production
+D,75,6,3,1,750299,1405631,new_fit,8,FIT,1,0,6.953,,production
+D,75,6,3,2,750300,1405632,new_fit,8,FIT,1,0,7.099,,production
+D,75,6,4,1,750301,1405641,new_fit,8,FIT,1,0,7.069,,production
+D,75,6,4,2,750302,1405642,new_fit,8,FIT,1,0,7.131,,production
+D,75,6,5,1,750303,1405651,new_fit,8,FIT,1,0,7.398,,production
+D,75,6,5,2,750304,1405652,new_fit,8,FIT,1,0,7.341,,production
+D,75,6,6,1,750305,1405661,new_fit,8,FIT,1,0,7.649,,production
+D,75,6,6,2,750306,1405662,new_fit,8,FIT,1,0,7.457,,production
+D,75,6,7,1,750307,1405671,new_fit,8,FIT,1,0,7.963,,production
+D,75,6,7,2,750308,1405672,new_fit,8,FIT,1,0,8.111,,production
+D,75,7,1,1,750309,1405711,new_fit,8,FIT,1,0,6.28,,production
+D,75,7,1,2,750310,1405712,new_fit,8,FIT,1,0,6.133,,production
+D,75,7,2,1,750311,1405721,new_fit,8,FIT,1,0,6.836,,production
+D,75,7,2,2,750312,1405722,new_fit,8,FIT,1,0,6.7,,production
+D,75,7,3,1,750313,1405731,new_fit,8,FIT,1,0,6.997,,production
+D,75,7,3,2,750314,1405732,new_fit,8,FIT,1,0,6.988,,production
+D,75,7,4,1,750315,1405741,new_fit,8,FIT,1,0,7.053,,production
+D,75,7,4,2,750316,1405742,new_fit,8,FIT,1,0,7.112,,production
+D,75,7,5,1,750317,1405751,new_fit,8,FIT,1,0,7.383,,production
+D,75,7,5,2,750318,1405752,new_fit,8,FIT,1,0,7.301,,production
+D,75,7,6,1,750319,1405761,new_fit,8,FIT,1,0,7.483,,production
+D,75,7,6,2,750320,1405762,new_fit,8,FIT,1,0,7.449,,production
+D,75,7,7,1,750321,1405771,new_fit,8,FIT,1,0,8.137,,production
+D,75,7,7,2,750322,1405772,new_fit,8,FIT,1,0,8.102,,production
+D,75,8,1,1,750323,1405811,new_fit,8,FIT,1,0,6.293,,production
+D,75,8,1,2,750324,1405812,new_fit,8,FIT,1,0,6.218,,production
+D,75,8,2,1,750325,1405821,new_fit,8,FIT,1,0,6.913,,production
+D,75,8,2,2,750326,1405822,new_fit,8,FIT,1,0,6.879,,production
+D,75,8,3,1,750327,1405831,new_fit,8,FIT,1,0,7.107,,production
+D,75,8,3,2,750328,1405832,new_fit,8,FIT,1,0,7.129,,production
+D,75,8,4,1,750329,1405841,new_fit,8,FIT,1,0,7.142,,production
+D,75,8,4,2,750330,1405842,new_fit,8,FIT,1,0,7.487,,production
+D,75,8,5,1,750331,1405851,new_fit,8,FIT,1,0,8.452,,production
+D,75,8,5,2,750332,1405852,new_fit,8,FIT,1,0,7.612,,production
+D,75,8,6,1,750333,1405861,new_fit,8,FIT,1,0,7.553,,production
+D,75,8,6,2,750334,1405862,new_fit,8,FIT,1,0,7.457,,production
+D,75,8,7,1,750335,1405871,new_fit,8,FIT,1,0,8.046,,production
+D,75,8,7,2,750336,1405872,new_fit,8,FIT,1,0,8.791,,production
+B,150,1,1,1,1500001,1480111,new_fit,8,FIT,1,0,13.984,,production
+B,150,1,1,2,1500002,1480112,new_fit,8,FIT,1,0,14.527,,production
+B,150,1,2,1,1500003,1480121,new_fit,8,FIT,1,0,16.772,,production
+B,150,1,2,2,1500004,1480122,new_fit,8,FIT,1,0,18.229,,production
+B,150,1,3,1,1500005,1480131,new_fit,8,FIT,1,0,17.896,,production
+B,150,1,3,2,1500006,1480132,new_fit,8,FIT,1,0,17.573,,production
+B,150,1,4,1,1500007,1480141,new_fit,8,FIT,1,0,17.721,,production
+B,150,1,4,2,1500008,1480142,new_fit,8,FIT,1,0,17.983,,production
+B,150,1,5,1,1500009,1480151,new_fit,8,FIT,1,0,18.921,,production
+B,150,1,5,2,1500010,1480152,new_fit,8,FIT,1,0,18.502,,production
+B,150,1,6,1,1500011,1480161,new_fit,8,FIT,1,0,18.928,,production
+B,150,1,6,2,1500012,1480162,new_fit,8,FIT,1,0,19.304,,production
+B,150,1,7,1,1500013,1480171,new_fit,8,FIT,1,0,20.11,,production
+B,150,1,7,2,1500014,1480172,new_fit,8,FIT,1,0,19.903,,production
+B,150,2,1,1,1500015,1480211,new_fit,8,FIT,1,0,14.724,,production
+B,150,2,1,2,1500016,1480212,new_fit,8,FIT,1,0,14.171,,production
+B,150,2,2,1,1500017,1480221,new_fit,8,FIT,1,0,16.123,,production
+B,150,2,2,2,1500018,1480222,new_fit,8,FIT,1,0,16.416,,production
+B,150,2,3,1,1500019,1480231,new_fit,8,FIT,1,0,17.122,,production
+B,150,2,3,2,1500020,1480232,new_fit,8,FIT,1,0,17.108,,production
+B,150,2,4,1,1500021,1480241,new_fit,8,FIT,1,0,16.984,,production
+B,150,2,4,2,1500022,1480242,new_fit,8,FIT,1,0,16.699,,production
+B,150,2,5,1,1500023,1480251,new_fit,8,FIT,1,0,17.439,,production
+B,150,2,5,2,1500024,1480252,new_fit,8,FIT,1,0,17.307,,production
+B,150,2,6,1,1500025,1480261,new_fit,8,FIT,1,0,17.863,,production
+B,150,2,6,2,1500026,1480262,new_fit,8,FIT,1,0,17.827,,production
+B,150,2,7,1,1500027,1480271,new_fit,8,FIT,1,0,18.591,,production
+B,150,2,7,2,1500028,1480272,new_fit,8,FIT,1,0,18.391,,production
+B,150,3,1,1,1500029,1480311,new_fit,8,FIT,1,0,13.559,,production
+B,150,3,1,2,1500030,1480312,new_fit,8,FIT,1,0,13.583,,production
+B,150,3,2,1,1500031,1480321,new_fit,8,FIT,1,0,15.442,,production
+B,150,3,2,2,1500032,1480322,new_fit,8,FIT,1,0,15.65,,production
+B,150,3,3,1,1500033,1480331,new_fit,8,FIT,1,0,17.275,,production
+B,150,3,3,2,1500034,1480332,new_fit,8,FIT,1,0,16.208,,production
+B,150,3,4,1,1500035,1480341,new_fit,8,FIT,1,0,16.653,,production
+B,150,3,4,2,1500036,1480342,new_fit,8,FIT,1,0,16.633,,production
+B,150,3,5,1,1500037,1480351,new_fit,8,FIT,1,0,17.526,,production
+B,150,3,5,2,1500038,1480352,new_fit,8,FIT,1,0,17.371,,production
+B,150,3,6,1,1500039,1480361,new_fit,8,FIT,1,0,17.92,,production
+B,150,3,6,2,1500040,1480362,new_fit,8,FIT,1,0,17.96,,production
+B,150,3,7,1,1500041,1480371,new_fit,8,FIT,1,0,18.569,,production
+B,150,3,7,2,1500042,1480372,new_fit,8,FIT,1,0,18.717,,production
+B,150,4,1,1,1500043,1480411,new_fit,8,FIT,1,0,13.699,,production
+B,150,4,1,2,1500044,1480412,new_fit,8,FIT,1,0,13.511,,production
+B,150,4,2,1,1500045,1480421,new_fit,8,FIT,1,0,15.399,,production
+B,150,4,2,2,1500046,1480422,new_fit,8,FIT,1,0,15.355,,production
+B,150,4,3,1,1500047,1480431,new_fit,8,FIT,1,0,16.162,,production
+B,150,4,3,2,1500048,1480432,new_fit,8,FIT,1,0,16.071,,production
+B,150,4,4,1,1500049,1480441,new_fit,8,FIT,1,0,16.522,,production
+B,150,4,4,2,1500050,1480442,new_fit,8,FIT,1,0,16.881,,production
+B,150,4,5,1,1500051,1480451,new_fit,8,FIT,1,0,17.132,,production
+B,150,4,5,2,1500052,1480452,new_fit,8,FIT,1,0,17.281,,production
+B,150,4,6,1,1500053,1480461,new_fit,8,FIT,1,0,18.538,,production
+B,150,4,6,2,1500054,1480462,new_fit,8,FIT,1,0,17.713,,production
+B,150,4,7,1,1500055,1480471,new_fit,8,FIT,1,0,18.649,,production
+B,150,4,7,2,1500056,1480472,new_fit,8,FIT,1,0,18.506,,production
+B,150,5,1,1,1500057,1480511,new_fit,8,FIT,1,0,13.72,,production
+B,150,5,1,2,1500058,1480512,new_fit,8,FIT,1,0,13.585,,production
+B,150,5,2,1,1500059,1480521,new_fit,8,FIT,1,0,15.434,,production
+B,150,5,2,2,1500060,1480522,new_fit,8,FIT,1,0,15.432,,production
+B,150,5,3,1,1500061,1480531,new_fit,8,FIT,1,0,16.268,,production
+B,150,5,3,2,1500062,1480532,new_fit,8,FIT,1,0,16.325,,production
+B,150,5,4,1,1500063,1480541,new_fit,8,FIT,1,0,23.46,,production
+B,150,5,4,2,1500064,1480542,new_fit,8,FIT,1,0,16.793,,production
+B,150,5,5,1,1500065,1480551,new_fit,8,FIT,1,0,17.383,,production
+B,150,5,5,2,1500066,1480552,new_fit,8,FIT,1,0,18.092,,production
+B,150,5,6,1,1500067,1480561,new_fit,8,FIT,1,0,18.069,,production
+B,150,5,6,2,1500068,1480562,new_fit,8,FIT,1,0,17.898,,production
+B,150,5,7,1,1500069,1480571,new_fit,8,FIT,1,0,18.75,,production
+B,150,5,7,2,1500070,1480572,new_fit,8,FIT,1,0,18.768,,production
+B,150,6,1,1,1500071,1480611,new_fit,8,FIT,1,0,13.595,,production
+B,150,6,1,2,1500072,1480612,new_fit,8,FIT,1,0,13.62,,production
+B,150,6,2,1,1500073,1480621,new_fit,8,FIT,1,0,15.822,,production
+B,150,6,2,2,1500074,1480622,new_fit,8,FIT,1,0,15.512,,production
+B,150,6,3,1,1500075,1480631,new_fit,8,FIT,1,0,16.492,,production
+B,150,6,3,2,1500076,1480632,new_fit,8,FIT,1,0,16.154,,production
+B,150,6,4,1,1500077,1480641,new_fit,8,FIT,1,0,16.773,,production
+B,150,6,4,2,1500078,1480642,new_fit,8,FIT,1,0,17.245,,production
+B,150,6,5,1,1500079,1480651,new_fit,8,FIT,1,0,17.521,,production
+B,150,6,5,2,1500080,1480652,new_fit,8,FIT,1,0,17.447,,production
+B,150,6,6,1,1500081,1480661,new_fit,8,FIT,1,0,18.11,,production
+B,150,6,6,2,1500082,1480662,new_fit,8,FIT,1,0,18.028,,production
+B,150,6,7,1,1500083,1480671,new_fit,8,FIT,1,0,18.704,,production
+B,150,6,7,2,1500084,1480672,new_fit,8,FIT,1,0,18.778,,production
+B,150,7,1,1,1500085,1480711,new_fit,8,FIT,1,0,13.727,,production
+B,150,7,1,2,1500086,1480712,new_fit,8,FIT,1,0,14.247,,production
+B,150,7,2,1,1500087,1480721,new_fit,8,FIT,1,0,15.803,,production
+B,150,7,2,2,1500088,1480722,new_fit,8,FIT,1,0,15.53,,production
+B,150,7,3,1,1500089,1480731,new_fit,8,FIT,1,0,16.471,,production
+B,150,7,3,2,1500090,1480732,new_fit,8,FIT,1,0,16.378,,production
+B,150,7,4,1,1500091,1480741,new_fit,8,FIT,1,0,16.739,,production
+B,150,7,4,2,1500092,1480742,new_fit,8,FIT,1,0,16.711,,production
+B,150,7,5,1,1500093,1480751,new_fit,8,FIT,1,0,17.426,,production
+B,150,7,5,2,1500094,1480752,new_fit,8,FIT,1,0,17.403,,production
+B,150,7,6,1,1500095,1480761,new_fit,8,FIT,1,0,18.083,,production
+B,150,7,6,2,1500096,1480762,new_fit,8,FIT,1,0,18.636,,production
+B,150,7,7,1,1500097,1480771,new_fit,8,FIT,1,0,18.882,,production
+B,150,7,7,2,1500098,1480772,new_fit,8,FIT,1,0,18.893,,production
+B,150,8,1,1,1500099,1480811,new_fit,8,FIT,1,0,13.526,,production
+B,150,8,1,2,1500100,1480812,new_fit,8,FIT,1,0,13.5,,production
+B,150,8,2,1,1500101,1480821,new_fit,8,FIT,1,0,15.468,,production
+B,150,8,2,2,1500102,1480822,new_fit,8,FIT,1,0,15.458,,production
+B,150,8,3,1,1500103,1480831,new_fit,8,FIT,1,0,16.361,,production
+B,150,8,3,2,1500104,1480832,new_fit,8,FIT,1,0,16.264,,production
+B,150,8,4,1,1500105,1480841,new_fit,8,FIT,1,0,17.117,,production
+B,150,8,4,2,1500106,1480842,new_fit,8,FIT,1,0,16.708,,production
+B,150,8,5,1,1500107,1480851,new_fit,8,FIT,1,0,17.392,,production
+B,150,8,5,2,1500108,1480852,new_fit,8,FIT,1,0,17.597,,production
+B,150,8,6,1,1500109,1480861,new_fit,8,FIT,1,0,17.955,,production
+B,150,8,6,2,1500110,1480862,new_fit,8,FIT,1,0,17.938,,production
+B,150,8,7,1,1500111,1480871,new_fit,8,FIT,1,0,18.737,,production
+B,150,8,7,2,1500112,1480872,new_fit,8,FIT,1,0,18.589,,production
+A,75,1,1,1,113,1405111,emc_state:0113_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,1,2,114,1405112,emc_state:0114_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,2,1,115,1405121,emc_state:0115_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,2,2,116,1405122,emc_state:0116_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,3,1,117,1405131,emc_state:0117_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,3,2,118,1405132,emc_state:0118_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,4,1,119,1405141,emc_state:0119_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,4,2,120,1405142,emc_state:0120_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,5,1,121,1405151,emc_state:0121_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,5,2,122,1405152,emc_state:0122_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,6,1,123,1405161,emc_state:0123_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,6,2,124,1405162,emc_state:0124_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,7,1,125,1405171,emc_state:0125_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,1,7,2,126,1405172,emc_state:0126_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,1,1,127,1405211,emc_state:0127_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,1,2,128,1405212,emc_state:0128_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,2,1,129,1405221,emc_state:0129_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,2,2,130,1405222,emc_state:0130_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,3,1,131,1405231,emc_state:0131_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,3,2,132,1405232,emc_state:0132_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,4,1,133,1405241,emc_state:0133_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,4,2,134,1405242,emc_state:0134_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,5,1,135,1405251,emc_state:0135_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,5,2,136,1405252,emc_state:0136_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,6,1,137,1405261,emc_state:0137_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,6,2,138,1405262,emc_state:0138_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,7,1,139,1405271,emc_state:0139_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,2,7,2,140,1405272,emc_state:0140_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,1,1,141,1405311,emc_state:0141_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,1,2,142,1405312,emc_state:0142_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,2,1,143,1405321,emc_state:0143_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,2,2,144,1405322,emc_state:0144_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,3,1,145,1405331,emc_state:0145_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,3,2,146,1405332,emc_state:0146_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,4,1,147,1405341,emc_state:0147_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,4,2,148,1405342,emc_state:0148_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,5,1,149,1405351,emc_state:0149_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,5,2,150,1405352,emc_state:0150_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,6,1,151,1405361,emc_state:0151_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,6,2,152,1405362,emc_state:0152_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,7,1,153,1405371,emc_state:0153_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,3,7,2,154,1405372,emc_state:0154_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,1,1,155,1405411,emc_state:0155_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,1,2,156,1405412,emc_state:0156_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,2,1,157,1405421,emc_state:0157_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,2,2,158,1405422,emc_state:0158_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,3,1,159,1405431,emc_state:0159_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,3,2,160,1405432,emc_state:0160_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,4,1,161,1405441,emc_state:0161_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,4,2,162,1405442,emc_state:0162_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,5,1,163,1405451,emc_state:0163_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,5,2,164,1405452,emc_state:0164_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,6,1,165,1405461,emc_state:0165_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,6,2,166,1405462,emc_state:0166_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,7,1,167,1405471,emc_state:0167_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,4,7,2,168,1405472,emc_state:0168_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,1,1,169,1405511,emc_state:0169_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,1,2,170,1405512,emc_state:0170_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,2,1,171,1405521,emc_state:0171_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,2,2,172,1405522,emc_state:0172_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,3,1,173,1405531,emc_state:0173_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,3,2,174,1405532,emc_state:0174_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,4,1,175,1405541,emc_state:0175_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,4,2,176,1405542,emc_state:0176_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,5,1,177,1405551,emc_state:0177_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,5,2,178,1405552,emc_state:0178_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,6,1,179,1405561,emc_state:0179_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,6,2,180,1405562,emc_state:0180_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,7,1,181,1405571,emc_state:0181_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,5,7,2,182,1405572,emc_state:0182_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,1,1,183,1405611,emc_state:0183_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,1,2,184,1405612,emc_state:0184_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,2,1,185,1405621,emc_state:0185_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,2,2,186,1405622,emc_state:0186_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,3,1,187,1405631,emc_state:0187_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,3,2,188,1405632,emc_state:0188_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,4,1,189,1405641,emc_state:0189_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,4,2,190,1405642,emc_state:0190_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,5,1,191,1405651,emc_state:0191_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,5,2,192,1405652,emc_state:0192_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,6,1,193,1405661,emc_state:0193_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,6,2,194,1405662,emc_state:0194_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,7,1,195,1405671,emc_state:0195_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,6,7,2,196,1405672,emc_state:0196_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,1,1,197,1405711,emc_state:0197_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,1,2,198,1405712,emc_state:0198_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,2,1,199,1405721,emc_state:0199_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,2,2,200,1405722,emc_state:0200_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,3,1,201,1405731,emc_state:0201_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,3,2,202,1405732,emc_state:0202_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,4,1,203,1405741,emc_state:0203_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,4,2,204,1405742,emc_state:0204_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,5,1,205,1405751,emc_state:0205_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,5,2,206,1405752,emc_state:0206_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,6,1,207,1405761,emc_state:0207_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,6,2,208,1405762,emc_state:0208_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,7,1,209,1405771,emc_state:0209_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,7,7,2,210,1405772,emc_state:0210_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,1,1,211,1405811,emc_state:0211_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,1,2,212,1405812,emc_state:0212_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,2,1,213,1405821,emc_state:0213_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,2,2,214,1405822,emc_state:0214_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,3,1,215,1405831,emc_state:0215_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,3,2,216,1405832,emc_state:0216_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,4,1,217,1405841,emc_state:0217_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,4,2,218,1405842,emc_state:0218_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,5,1,219,1405851,emc_state:0219_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,5,2,220,1405852,emc_state:0220_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,6,1,221,1405861,emc_state:0221_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,6,2,222,1405862,emc_state:0222_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,7,1,223,1405871,emc_state:0223_it008,,REUSED,,,,,baseline A (no MCEM)
+A,75,8,7,2,224,1405872,emc_state:0224_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,1,1,337,1480111,emc_state:0337_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,1,2,338,1480112,emc_state:0338_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,2,1,339,1480121,emc_state:0339_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,2,2,340,1480122,emc_state:0340_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,3,1,341,1480131,emc_state:0341_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,3,2,342,1480132,emc_state:0342_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,4,1,343,1480141,emc_state:0343_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,4,2,344,1480142,emc_state:0344_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,5,1,345,1480151,emc_state:0345_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,5,2,346,1480152,emc_state:0346_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,6,1,347,1480161,emc_state:0347_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,6,2,348,1480162,emc_state:0348_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,7,1,349,1480171,emc_state:0349_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,1,7,2,350,1480172,emc_state:0350_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,1,1,351,1480211,emc_state:0351_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,1,2,352,1480212,emc_state:0352_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,2,1,353,1480221,emc_state:0353_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,2,2,354,1480222,emc_state:0354_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,3,1,355,1480231,emc_state:0355_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,3,2,356,1480232,emc_state:0356_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,4,1,357,1480241,emc_state:0357_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,4,2,358,1480242,emc_state:0358_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,5,1,359,1480251,emc_state:0359_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,5,2,360,1480252,emc_state:0360_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,6,1,361,1480261,emc_state:0361_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,6,2,362,1480262,emc_state:0362_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,7,1,363,1480271,emc_state:0363_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,2,7,2,364,1480272,emc_state:0364_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,1,1,365,1480311,emc_state:0365_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,1,2,366,1480312,emc_state:0366_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,2,1,367,1480321,emc_state:0367_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,2,2,368,1480322,emc_state:0368_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,3,1,369,1480331,emc_state:0369_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,3,2,370,1480332,emc_state:0370_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,4,1,371,1480341,emc_state:0371_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,4,2,372,1480342,emc_state:0372_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,5,1,373,1480351,emc_state:0373_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,5,2,374,1480352,emc_state:0374_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,6,1,375,1480361,emc_state:0375_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,6,2,376,1480362,emc_state:0376_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,7,1,377,1480371,emc_state:0377_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,3,7,2,378,1480372,emc_state:0378_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,1,1,379,1480411,emc_state:0379_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,1,2,380,1480412,emc_state:0380_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,2,1,381,1480421,emc_state:0381_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,2,2,382,1480422,emc_state:0382_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,3,1,383,1480431,emc_state:0383_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,3,2,384,1480432,emc_state:0384_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,4,1,385,1480441,emc_state:0385_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,4,2,386,1480442,emc_state:0386_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,5,1,387,1480451,emc_state:0387_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,5,2,388,1480452,emc_state:0388_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,6,1,389,1480461,emc_state:0389_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,6,2,390,1480462,emc_state:0390_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,7,1,391,1480471,emc_state:0391_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,4,7,2,392,1480472,emc_state:0392_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,1,1,393,1480511,emc_state:0393_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,1,2,394,1480512,emc_state:0394_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,2,1,395,1480521,emc_state:0395_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,2,2,396,1480522,emc_state:0396_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,3,1,397,1480531,emc_state:0397_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,3,2,398,1480532,emc_state:0398_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,4,1,399,1480541,emc_state:0399_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,4,2,400,1480542,emc_state:0400_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,5,1,401,1480551,emc_state:0401_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,5,2,402,1480552,emc_state:0402_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,6,1,403,1480561,emc_state:0403_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,6,2,404,1480562,emc_state:0404_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,7,1,405,1480571,emc_state:0405_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,5,7,2,406,1480572,emc_state:0406_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,1,1,407,1480611,emc_state:0407_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,1,2,408,1480612,emc_state:0408_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,2,1,409,1480621,emc_state:0409_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,2,2,410,1480622,emc_state:0410_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,3,1,411,1480631,emc_state:0411_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,3,2,412,1480632,emc_state:0412_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,4,1,413,1480641,emc_state:0413_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,4,2,414,1480642,emc_state:0414_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,5,1,415,1480651,emc_state:0415_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,5,2,416,1480652,emc_state:0416_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,6,1,417,1480661,emc_state:0417_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,6,2,418,1480662,emc_state:0418_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,7,1,419,1480671,emc_state:0419_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,6,7,2,420,1480672,emc_state:0420_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,1,1,421,1480711,emc_state:0421_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,1,2,422,1480712,emc_state:0422_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,2,1,423,1480721,emc_state:0423_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,2,2,424,1480722,emc_state:0424_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,3,1,425,1480731,emc_state:0425_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,3,2,426,1480732,emc_state:0426_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,4,1,427,1480741,emc_state:0427_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,4,2,428,1480742,emc_state:0428_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,5,1,429,1480751,emc_state:0429_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,5,2,430,1480752,emc_state:0430_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,6,1,431,1480761,emc_state:0431_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,6,2,432,1480762,emc_state:0432_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,7,1,433,1480771,emc_state:0433_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,7,7,2,434,1480772,emc_state:0434_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,1,1,435,1480811,emc_state:0435_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,1,2,436,1480812,emc_state:0436_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,2,1,437,1480821,emc_state:0437_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,2,2,438,1480822,emc_state:0438_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,3,1,439,1480831,emc_state:0439_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,3,2,440,1480832,emc_state:0440_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,4,1,441,1480841,emc_state:0441_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,4,2,442,1480842,emc_state:0442_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,5,1,443,1480851,emc_state:0443_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,5,2,444,1480852,emc_state:0444_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,6,1,445,1480861,emc_state:0445_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,6,2,446,1480862,emc_state:0446_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,7,1,447,1480871,emc_state:0447_it008,,REUSED,,,,,baseline A (no MCEM)
+A,150,8,7,2,448,1480872,emc_state:0448_it008,,REUSED,,,,,baseline A (no MCEM)
+B,75,1,5,1,,1405151,,,FIT,,,7.93,,pilot (not counted as data)
+C,75,1,5,1,,1405151,,,FIT,,,7.72,,pilot (not counted as data)
+D,75,1,5,1,,1405151,,,FIT,,,7.72,,pilot (not counted as data)
+B,150,1,5,1,,1480151,,,FIT,,,18.51,,pilot (not counted as data)
+A,75,1,5,1,,,,,FIT,,,,,replication gate (not counted as data)

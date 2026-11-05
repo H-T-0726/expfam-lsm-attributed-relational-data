@@ -547,3 +547,13 @@ A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変�
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | k_selection_robustness_20261105 | R1：d-sweep と同じデータ（n=75、K_GEN=5、d ∈ {15,30,60}、8 rep、K 1..7、2 start）を L=10、16 反復で再推定し、checkpoint 8 と 16 を評価した（新規 336 fit）。R2：L=5、8 反復、d=30 で n ∈ {50,100,150} を新規に fit した（各 112 fit）。d=30 の拡張は d-sweep と同じ規則で、各 n の A1 データに適用した。d=15 と n=75・d=30 は既存の状態を再評価した | `tools/research_audit/run_k_selection_robustness.py`、`tools/research_audit/analyze_k_selection_robustness.py` | `expfam/results/k_selection/k_selection_robustness_20261105/` | なし | current_support | ✗ | 新規 672 fit と smoke 4 fit は、いずれも非有限値による失敗 0。Laplace は n=150・d=30・rep1 の K=3（start 1）だけ NOT_STATIONARY（max\|∇Φ\| = 3.9e−8、許容値 1e−8）で、事前規則によりそのデータセットの C_Lap を INCOMPLETE とした（補完なし）。外部の npz の sha256：r1 `50aebf21…3267`、n50 `8583d501…bba1`、n100 `cacf488c…147c`、n150 `f4428bec…a6a8`。異なる n のデータは入れ子ではなく、独立な条件として扱う。MCEM は収束していない（K=5 の Gram 相対変化の中央値は 6〜14%） |
+
+
+## 信号強度の統制実験と歴史的条件との比較（2026-11-06、lineage E、append-only 追記）
+
+事前登録（`68cf0c9`、`signal_strength/gates/prereg.json` 内容 hash `4eaa54f0…a86f9ee6`）。ゲート・複製 fit・pilot は本番前に PASS。A1・EMC・checkpoint 再評価・d-sweep・R1/R2 の artifact は変更していない。本文採用不可（prototype）。作業ブランチ `research/k-selection-causal-analysis-20261106`（Draft PR、未マージ）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| historical_canonical_causal_20261106 (existing_reanalysis) | 既存 1,008 状態（A1 n=50..150・d-sweep・R2）の Q_MC を Q_X/Q_Y/Q_Z に分解（MCEM 0 件）。歴史的照合点を一次 CSV から再計算 | `tools/research_audit/analyze_k_causal_existing.py` | `expfam/results/k_selection/historical_canonical_causal_20261106/existing_reanalysis/` | — | 完了 | 不可（prototype） | X/Y 分割は Q の項の分割で、情報源の因果的分割ではない |
+| historical_canonical_causal_20261106 (signal_strength) | K_GEN=5、d=15、Poisson-X/Bernoulli-Y。A=A1 データ・状態を再利用、B=F を √1.8 倍、C=w を √1.8 倍（w0 で母集団密度を較正）、D=両方。B/C/D は厳密な Poisson/Bernoulli カップリングで Z・マスク・非介入側を共有。n=75 で B/C/D、n=150 で B（新規 448 fit＋ゲート 5 fit） | `tools/research_audit/run_k_signal_strength.py`、`analyze_k_signal_strength.py`、`audit_k_signal_strength.py` | `.../historical_canonical_causal_20261106/{signal_strength,analysis,audit}/` | `.../historical_canonical_causal_20261106/figures/` | 完了（失敗 0、Laplace 非 OK 1 件 → 該当データの C_Lap は INCOMPLETE） | 不可（prototype） | n=150 の C/D と K_GEN=3 の再 fit は上限 480 のため事前に除外。MCEM 未収束（8 反復）。各条件 8 データ |
