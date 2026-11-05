@@ -1,0 +1,2 @@
+experiment_id,rq,condition,replicate,k_fit,start,checkpoint,kind,detail
+mcem_stability_signal_matched_20261106,RQ1,A,6,4,1,16,LAPLACE_NOT_STATIONARY,grad_inf=2.0656445025302173e-07

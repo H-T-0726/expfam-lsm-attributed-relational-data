@@ -1,0 +1,48 @@
+{
+  "branch": "research/k-selection-mcem-stability-20261106",
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "mcem_stability_signal_matched_20261106",
+  "gates": {
+    "G1_rq1_data_equal_pr155": "PASS (32 condition-datasets, X/Y/Z hashes)",
+    "G2_rq2_data": "PASS (rank, eigenvalues 2.5, rate, support, density calibration)",
+    "G3a_pilot_replicates_emc_8_16_24_32": "PASS (emc:0121_it008:0.00e+00;emc:0121_it016:0.00e+00;emc:0121_it024:0.00e+00;emc:0121_it032:0.00e+00)",
+    "G3b_independent_eval_isolated": "PASS (iteration-16 state bit-identical with and without evaluation)",
+    "G3c_pilot_eval": {
+      "lap_status": [
+        "OK",
+        "OK",
+        "OK",
+        "OK",
+        "OK",
+        "OK"
+      ],
+      "max_identity_error": 5.684341886080801e-13,
+      "note": "technical only; values not used to change the plan"
+    },
+    "G4_timing": {
+      "cap": 12000,
+      "fit_iterations_planned": 11344,
+      "pilot_eval_s": 1.1,
+      "pilot_fit_s": 85.4,
+      "projected_hours_rq1_2proc": 1.54,
+      "projected_hours_rq2": 1.33,
+      "rq2_allowed": true,
+      "seconds_per_fit_iteration_incl_eval": 1.353
+    }
+  },
+  "git_head": "a60a13f3c13e2550ff21f65fef8eb67459dba41e",
+  "inputs": {
+    "emc_npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz",
+    "emc_npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "pr155_states": "D:\\tento\\kennkyu_artifacts\\historical_canonical_causal_20261106\\fit_states_n75.npz",
+    "pr155_states_sha256": "09b791148bf69c305aa392bec13eda9842c834a3944c21d7b4ad11f4038f154e"
+  },
+  "instrumented_runner": "em-instrumented-v3",
+  "prereg_sha256": "4059f06408db6be438d54e6054eaa19d3689bb15e46952380398c94c1ad510bd",
+  "status": "PASSED"
+}

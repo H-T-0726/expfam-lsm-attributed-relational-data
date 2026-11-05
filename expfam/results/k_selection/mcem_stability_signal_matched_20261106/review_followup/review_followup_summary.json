@@ -1,0 +1,37 @@
+{
+ "experiment_id": "mcem_stability_signal_matched_20261106",
+ "note": "not pre-registered; technical checks and descriptive tables",
+ "T1": {
+  "fits": 128,
+  "missing": 0,
+  "max_abs_diff": 0.0
+ },
+ "T2": {
+  "fit": "RQ1_A_r1_k5_s1_it64",
+  "fit_iterations": 64,
+  "runtime_s": 60.6,
+  "max_abs_diff": {
+   "Zsamples": 0.0,
+   "Z": 0.0,
+   "F": 0.0,
+   "sigma": 0.0,
+   "scalars": 0.0
+  },
+  "identical": true
+ },
+ "E1": {
+  "datasets": 32,
+  "eval_within_2se": 31,
+  "median_abs_dS_fit": 13.869249121349998,
+  "median_abs_dS_eval": 5.788092994999996,
+  "median_two_se_diff_eval": 16.868778084957125
+ },
+ "git_head": "93b91e1dd1602583b47a57d6f115fec70fc02042",
+ "files": {
+  "e1_eval_slack_change_48_64.csv": "2e758d63d215dc73e927c3f2d5ea7ed2dcccba26038ca659755d885679abaa24",
+  "e2_fit_vs_eval_slack.csv": "a07e3c272e22d0b4fe891f4464b3c2d1982a6698610afd3c40d7a32f3482dac3",
+  "e3_rq2_data_statistics.csv": "4624bb71535f8166ae91c927dbb399818685dbd27e543e9f12e3c37d8ac6bb70",
+  "e4_rq2_total_gain.csv": "f45f0309091d0890e2d24a5c3f6e08361a7e124351416ee870e4afcef8c18d8e",
+  "t1_cq_iter8_vs_pr155.csv": "26114dfbf33a0a08b16a2c2dc931ff164edd39147701ed46cb4a0dc7ae65f6f4"
+ }
+}
