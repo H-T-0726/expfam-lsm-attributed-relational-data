@@ -28,6 +28,7 @@
 
 - すべての checkpoint で MAINTAINED（C_Lap の 16 反復は INCOMPLETE 1 件を除いた 7 対）。
 - 独立 MC 評価（推定とは別の乱数、L_EVAL=20）でも同じ大きさの効果が出る。**効果は、推定に使った 5 標本の偶然に依存した値ではない**（OBSERVED）。
+- 記述的な補足（事前登録外、`expfam/results/k_selection/mcem_stability_signal_matched_20261106/review_followup/`（`tools/research_audit/review_followup_mcem_stability.py`、事前登録外） の `e2_fit_vs_eval_slack.csv`）：fit 自身の S_Q は独立評価の S_Q_eval より大きい傾向がある（64 反復の中央値の差：A +13.9、B +9.3、C +2.3、D +4.1）。θ を推定に使った同じ 5 標本で Q を評価することによる楽観（K が大きいほうに有利）と整合する（HYPOTHESIS）。条件間の対応差への影響は小さい（C_Q と C_Q_eval の対応差の中央値は近い）。
 
 ## 3. Q の分解（中央値、2ΔQ の単位）
 

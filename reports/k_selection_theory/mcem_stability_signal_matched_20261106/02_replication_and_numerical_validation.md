@@ -27,6 +27,9 @@
 
 - fit の失敗（例外・NaN による再開要求）：**0 件**。リトライも seed の取り直しもない。
 - **8 反復時点の再現**：RQ1 の 128 fit すべてで、8 反復時点の状態が保存状態と一致した（**128/128 MATCH**、REPLICATION_FAIL 0）。A は EMC の状態、B/C/D は PR #155 の状態と照合した。したがって、RQ1 の 64 反復の軌跡は、PR #155 で評価した fit そのものの継続である（同じ seed で 1 反復目から再実行。最初の 8 反復は同じ乱数 prefix を消費する）。
+- 事前登録では 8 反復時点の **C_Q の一致**も確認対象としていたが、本番のコードは状態の配列だけを照合していた。独立レビューの指摘を受けて追加で照合し、128/128 fit で C_Q が PR #155 の `fit_criteria.csv` の値と**完全に一致**した（差の最大 0.0）。
+- ゲート G3b は 16 反復時点の状態だけを比べていた（8 反復時点の評価の影響しか排除しない）。追加で、A rep1 K5 s1 を独立評価**なし**で 64 反復まで再実行し、本番（評価あり）の 64 反復時点の状態と比べた。Z 標本・F・σ・スカラーのすべてで差は 0.0（64 fit-iteration を追加。合計 11,408 ≤ 12,000）。
+- 上の 2 つの追加確認の出力：`expfam/results/k_selection/mcem_stability_signal_matched_20261106/review_followup/`（`tools/research_audit/review_followup_mcem_stability.py`、事前登録外）。
 - RQ2 は新しいデータなので照合対象がない（NOT_APPLICABLE）。
 
 ## 3. 数値的な検証（OBSERVED）
