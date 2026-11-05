@@ -1,0 +1,34 @@
+{
+  "branch": "experiment/k-selection-robustness-r1-r2",
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "k_selection_robustness_20261105",
+  "failed_nan_fits": 0,
+  "fit_states": "D:\\tento\\kennkyu_artifacts\\k_selection_robustness_20261105\\r1_fit_states.npz",
+  "fit_states_sha256": "50aebf2174d45a505d335bd0c472ab3bec8eccb3db7b6b8e2a23fb630c5f3267",
+  "git_head": "5637377dc45b9ae4b22abce68eb260514e50c471",
+  "inputs": {
+    "dsweep_fit_criteria_sha256": "c180e4a5593f5f2aac02193b36064a715e10dfce6500a7010fe8e54e51db7241",
+    "emc_fit_results_sha256": "c644e89b14064b743507df91d0a6707ce3d30fb87b606f325951f0ad560ae475",
+    "emc_npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "exp1_fit_criteria_sha256": "e566c270d970f336f9c6db32ffda6e4f065925a3c4a94a2c5ee718d9dc6a7ffb"
+  },
+  "new_fits": 336,
+  "prereg_sha256": "487cc56105c3d5ad488a6d31fd43d728db51686e0922a62a11a5b85cfd673d62",
+  "rows": 672,
+  "status": "COMPLETED",
+  "status_counts": {
+    "d15:cp16:FIT:OK": 112,
+    "d15:cp8:FIT:OK": 112,
+    "d30:cp16:FIT:OK": 112,
+    "d30:cp8:FIT:OK": 112,
+    "d60:cp16:FIT:OK": 112,
+    "d60:cp8:FIT:OK": 112
+  },
+  "wall_clock_seconds": 9533.4,
+  "working_tree_clean": true
+}
