@@ -206,14 +206,14 @@ def main() -> int:
     check("figure hashes == manifest", fh == 0)
 
     # 7. historical artifacts untouched
-    out = subprocess.run(["git", "diff", "--name-status", "origin/main...HEAD"], cwd=ROOT, capture_output=True, text=True).stdout
+    out = subprocess.run(["git", "diff", "--name-status", "origin/main...HEAD"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8").stdout
     non_add = [ln for ln in out.splitlines() if ln and not ln.startswith("A\t")]
     allowed = ("EXPERIMENT_REGISTRY.md",)
     bad_mod = [ln for ln in non_add if not ln.split("\t")[-1].endswith(allowed)]
     check("no existing file modified except append-only registry", not bad_mod, bad_mod[:5])
     if any(ln.endswith("EXPERIMENT_REGISTRY.md") for ln in non_add):
         d = subprocess.run(["git", "diff", "origin/main...HEAD", "--", "EXPERIMENT_REGISTRY.md"], cwd=ROOT,
-                           capture_output=True, text=True).stdout
+                           capture_output=True, text=True, encoding="utf-8").stdout
         removed = [ln for ln in d.splitlines() if ln.startswith("-") and not ln.startswith("---")]
         check("EXPERIMENT_REGISTRY.md append-only (no removed lines)", not removed, len(removed))
 
