@@ -1,0 +1,118 @@
+{
+  "conditions": {
+    "A": {
+      "data": "#139 A1, bit-identical; states reused",
+      "row_norm_sq_mean": 0.5,
+      "w": 0.7745966692414834,
+      "w0": -1.0
+    },
+    "B": {
+      "X": "exact Poisson coupling of X_A",
+      "c_F": 1.3416407864998738,
+      "row_norm_sq_mean": 0.9,
+      "w": 0.7745966692414834,
+      "w0": -1.0
+    },
+    "C": {
+      "Y": "exact Bernoulli coupling of Y_A",
+      "c_w": 1.3416407864998738,
+      "row_norm_sq_mean": 0.5,
+      "w": 1.0392304845413265,
+      "w0": "population-density calibrated (Gauss quadrature)"
+    },
+    "D": {
+      "X": "X_B",
+      "Y": "Y_C"
+    },
+    "K_GEN": 5,
+    "L": 5,
+    "candidate_K": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "d": 15,
+    "em_iterations": 8,
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "new_fits": {
+      "n=150": "B (112)",
+      "n=75": "B, C, D (336)"
+    },
+    "numerics_mode": "consistent",
+    "replicates": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "resource_rule": "fixed BEFORE results: cap 480 new MCEM fits (448 production + 1 replication + 4 pilot = 453); Priority 1 n=75 B/C/D, Priority 2 n=150 B; Priority 3 (K_GEN=3) is NOT refit: the A1 K_TRUE=3 results are used descriptively; n=150 C/D are NOT run (would exceed the cap)",
+    "starts": [
+      1,
+      2
+    ],
+    "test_ratio": 0.2
+  },
+  "experiment_id": "historical_canonical_causal_20261106",
+  "failure_rules": [
+    "data / calibration / coupling gate failure -> stop before any production fit",
+    "replication mismatch beyond NPZ_RTOL/NPZ_ATOL -> stop",
+    "RetryDetected or exception in a fit -> record FAILED, dataset INCOMPLETE, continue (no retry, no reseed)",
+    "Laplace not OK -> C_Lap INCOMPLETE for that dataset; no imputation",
+    "no tolerance change, no seed rescue, no dataset replacement, no resume after results"
+  ],
+  "frozen_before": "any production fit; written by --gates and re-verified by --full",
+  "hypotheses": {
+    "P1_mechanism": "the B-A change of the C_Q slack is carried by fit_gain_x (prior cost is identical by construction; reported, not tested)",
+    "P1_primary": {
+      "otherwise": "inconclusive",
+      "refute": "median paired difference <= 0",
+      "statement": "n=75: F-strong increases the C_Q 4->5 slack (paired B-A)",
+      "support": "median paired difference > 0 AND >= 6/8 replicates positive"
+    },
+    "P2_n150": {
+      "refute": "median <= 0",
+      "statement": "n=150: paired B-A C_Q slack difference > 0",
+      "support": "median > 0 AND >= 6/8 positive"
+    },
+    "P3_k3": "descriptive only: per-direction energy in D at K=5 (X 2.7, Y w^2 1.08) vs A1 K_TRUE=3 baseline (X 2.5, Y w^2 1.0); different datasets, not paired",
+    "S1_w": {
+      "otherwise": "inconclusive",
+      "refute": "median paired slack difference <= 0",
+      "statement": "n=75: w-strong increases fit_gain_y(4->5) and the C_Q slack (paired C-A)",
+      "support": "both medians > 0 AND >= 6/8 positive for each"
+    },
+    "S2_interaction": {
+      "rule": "descriptive, two-sided: report median, sign counts, and whether D-A exceeds both B-A and C-A; no directional prediction",
+      "statement": "interaction I = slack_D - slack_B - slack_C + slack_A (C_Q, n=75)"
+    },
+    "S3_criteria": {
+      "refute_decrease": "median 2 dH_Lap of a strong condition >= that of A",
+      "refute_positivity": "any 4->5 pair (start mean) with 2 dH_Lap <= 0",
+      "statement": "at the same fits, slack_Lap - slack_Q = 2 dH_Lap + d resid (identity); 2 dH_Lap(4->5) > 0 in every fit pair and its median is lower in B, C, D than in A"
+    },
+    "exploratory": [
+      "start agreement",
+      "Poisson max rate",
+      "Bernoulli saturation (mean p(1-p))",
+      "gram_rel_change",
+      "Laplace status",
+      "MC standard error of the slack"
+    ],
+    "not_claimed": "exact counts are reported but are NOT the success criterion; no causal claim beyond the paired intervention on this design"
+  },
+  "part": "signal_strength",
+  "pilot_role": "technical check only; never counted as data; does not change the plan",
+  "selection": "mean of the criterion over the 2 starts, argmin, ties -> smallest K; C_Lap INCOMPLETE if any fit of the dataset is not OK; a FAILED fit makes the dataset INCOMPLETE for both criteria",
+  "sha256": "4eaa54f056cf8b1dd494352584acaa573118993046422d150e4d7a32a86f9ee6",
+  "slack": "slack_45 = C(4) - C(5) on start-means (positive favours K=5)",
+  "target": "K* = 5 (canonical Poisson-X, rank F = 5; unconditional law). NOT K0 uniqueness."
+}

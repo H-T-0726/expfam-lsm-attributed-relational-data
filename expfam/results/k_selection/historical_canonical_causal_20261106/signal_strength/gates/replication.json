@@ -1,0 +1,18 @@
+{
+  "checkpoints_used": "1..8 (Q only) vs EMC 8..40",
+  "fit": [
+    75,
+    1,
+    5,
+    1
+  ],
+  "match": true,
+  "maxabs": {
+    "F": 0.0,
+    "Zsamples": 0.0,
+    "scalars": 0.0,
+    "sigma": 0.0
+  },
+  "model_seed": 1405151,
+  "runtime_s": 7.793
+}
