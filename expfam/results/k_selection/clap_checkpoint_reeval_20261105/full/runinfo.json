@@ -1,0 +1,240 @@
+{
+  "branch": "experiment/clap-checkpoint-reeval",
+  "cells": [
+    [
+      5,
+      50,
+      1
+    ],
+    [
+      5,
+      50,
+      2
+    ],
+    [
+      5,
+      50,
+      3
+    ],
+    [
+      5,
+      50,
+      4
+    ],
+    [
+      5,
+      50,
+      5
+    ],
+    [
+      5,
+      50,
+      6
+    ],
+    [
+      5,
+      50,
+      7
+    ],
+    [
+      5,
+      50,
+      8
+    ],
+    [
+      5,
+      75,
+      1
+    ],
+    [
+      5,
+      75,
+      2
+    ],
+    [
+      5,
+      75,
+      3
+    ],
+    [
+      5,
+      75,
+      4
+    ],
+    [
+      5,
+      75,
+      5
+    ],
+    [
+      5,
+      75,
+      6
+    ],
+    [
+      5,
+      75,
+      7
+    ],
+    [
+      5,
+      75,
+      8
+    ],
+    [
+      5,
+      100,
+      1
+    ],
+    [
+      5,
+      100,
+      2
+    ],
+    [
+      5,
+      100,
+      3
+    ],
+    [
+      5,
+      100,
+      4
+    ],
+    [
+      5,
+      100,
+      5
+    ],
+    [
+      5,
+      100,
+      6
+    ],
+    [
+      5,
+      100,
+      7
+    ],
+    [
+      5,
+      100,
+      8
+    ],
+    [
+      5,
+      150,
+      1
+    ],
+    [
+      5,
+      150,
+      2
+    ],
+    [
+      5,
+      150,
+      3
+    ],
+    [
+      5,
+      150,
+      4
+    ],
+    [
+      5,
+      150,
+      5
+    ],
+    [
+      5,
+      150,
+      6
+    ],
+    [
+      5,
+      150,
+      7
+    ],
+    [
+      5,
+      150,
+      8
+    ]
+  ],
+  "checkpoints": [
+    8,
+    12,
+    16,
+    24,
+    32,
+    40
+  ],
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "clap_checkpoint_reeval_20261105",
+  "failure_policy": [
+    "no_mcem",
+    "no_retry",
+    "no_imputation",
+    "no_tolerance_change",
+    "no_resume"
+  ],
+  "gates": {
+    "C_Q_vs_emc": {
+      "atol": 1e-06,
+      "rtol": 1e-09
+    },
+    "cp8_vs_A1": {
+      "rtol": 1e-09,
+      "status": "equal"
+    }
+  },
+  "git_head": "eb8d733d219a57c0f4921db31279e4c38e90b218",
+  "inputs": {
+    "a1_fit_criteria": "expfam\\results\\k_selection\\clap_clean_nsweep_20261006\\full\\fit_criteria.csv",
+    "a1_fit_criteria_sha256": "7f4aca8407f64a009a96e44e8a5d67b2e43630a622fb53aad14864f9abb6508a",
+    "emc_checkpoint_results": "dad67b1c7b90f1e0297e8b1e95afd394cf9b51db:expfam/results/k_selection/em_convergence_sensitivity_20260905/checkpoint_results.csv",
+    "emc_checkpoint_results_sha256": "78d405ddc5e94da5ff69a0798ad28a9abad406301e16d222243a785234bd6af8",
+    "emc_fit_results": "dad67b1c7b90f1e0297e8b1e95afd394cf9b51db:expfam/results/k_selection/em_convergence_sensitivity_20260905/fit_results.csv",
+    "emc_fit_results_sha256": "c644e89b14064b743507df91d0a6707ce3d30fb87b606f325951f0ad560ae475",
+    "npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz",
+    "npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84"
+  },
+  "laplace": {
+    "Z0": "last E-step sample of the checkpoint (as A1)",
+    "grad_tol": 1e-08,
+    "max_iter": 200
+  },
+  "laplace_status_counts": {
+    "cp12:NOT_STATIONARY": 2,
+    "cp12:OK": 446,
+    "cp16:NOT_STATIONARY": 1,
+    "cp16:OK": 447,
+    "cp24:OK": 448,
+    "cp32:NOT_STATIONARY": 1,
+    "cp32:OK": 447,
+    "cp40:OK": 448,
+    "cp8:OK": 448
+  },
+  "max_absdiff_C_Lap_cp8_vs_A1": 0.0,
+  "max_absdiff_C_Q_vs_emc": 0.0,
+  "mcem_fits_run": 0,
+  "qlap": {
+    "checkpoints": [
+      8,
+      40
+    ],
+    "chunk": 20,
+    "draws": 200,
+    "seed": "QLAP_SEED_BASE + 1000*fit_index + checkpoint"
+  },
+  "rows": 2688,
+  "stage": "full",
+  "status": "COMPLETED",
+  "wall_clock_seconds": 549.0
+}
