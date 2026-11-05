@@ -1165,7 +1165,7 @@ K*  = min { K : P0 ∈ M_K }
 - 対象：`dsweep_k_selection_20261105`（系列 E、prototype）。事前登録 `prereg.json`（sha256 `a6f84ab2…7b57`）。
 - **統合状態**：統合 PR（3/4）で追加した。main にマージされるまでは「未統合」として扱う。
 - **目標とする K**：K\*=5（最小表現次元）。canonical Poisson-X で rank F=K、clip なし、条件を付けない法則についての導出による。K0 の一意性は示していない。
-  - rate 上限ゲートを通過したデータの分布は、条件を付けない canonical 分布と厳密には異なる。両者の差は、ゲートに掛かる確率の上界（union bound）で抑えられ、その値はデータセットごとに最大でも 3×10⁻³⁶ だった。
+  - rate 上限ゲートを通過したデータの分布は、条件を付けない canonical 分布と厳密には異なる。両者の差は、ゲートに掛かる確率の上界（union bound）で抑えられ、その値はデータセットごとに最大でも 1.8×10⁻³³ だった（`gates/gates.json` の `max_gate_fail_prob_union_bound`）。
   - `KNOWN_ISSUES.md` の「人工データの K_TRUE が真の潜在次元 K\* である」の制限は**解除しない**。上の扱いは、この設定に限った作業上の前提である。
 
 ### QUALIFIED ONLY（必須の限定なしに書いてはいけない）
