@@ -1,0 +1,28 @@
+{
+  "branch": "research/k-selection-mcem-stability-20261106",
+  "environment": {
+    "numpy_version": "2.3.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python_version": "3.13.14",
+    "scipy_version": "1.16.3"
+  },
+  "experiment_id": "mcem_stability_signal_matched_20261106",
+  "fit_status_counts": {
+    "FIT": 96
+  },
+  "fits": 96,
+  "git_head": "6104f768e2ae843b2cfad33d1aa3390c1270524d",
+  "inputs": {
+    "emc_npz": "D:\\tento\\kennkyu_artifacts\\em_convergence_sensitivity_20260905\\checkpoint_states.npz",
+    "emc_npz_sha256": "5e4390f1c61edba63acd3b5e055816331fd63758a46642b200b923e93d40af84",
+    "pr155_states": "D:\\tento\\kennkyu_artifacts\\historical_canonical_causal_20261106\\fit_states_n75.npz",
+    "pr155_states_sha256": "09b791148bf69c305aa392bec13eda9842c834a3944c21d7b4ad11f4038f154e"
+  },
+  "instrumented_runner": "em-instrumented-v3",
+  "prereg_sha256": "4059f06408db6be438d54e6054eaa19d3689bb15e46952380398c94c1ad510bd",
+  "stage": "rq2",
+  "states": "D:\\tento\\kennkyu_artifacts\\mcem_stability_signal_matched_20261106\\rq2_states.npz",
+  "states_sha256": "61a1a7ea79ac53eb8bf9ef3b972dd313002df41a01f02ab4f68da75cad42f65d",
+  "status": "COMPLETED",
+  "wall_clock_seconds": 4644.0
+}
