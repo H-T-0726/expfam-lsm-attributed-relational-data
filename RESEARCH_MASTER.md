@@ -1122,3 +1122,39 @@ K*  = min { K : P0 ∈ M_K }
 | Z9-U8 | joint-mode solver の NOT_STATIONARY を評価の定義としてどう扱うか |
 
 いずれも将来の研究課題であり、完了した Phase 9 の実験の解釈を妨げる blocker ではない。
+
+
+## 20. 2026-11-05 EM 収束感度実験と C_Lap の checkpoint 再評価の Claim Ledger 追記
+
+- 対象：EM 収束感度実験（`dad67b1`、448 fit）と、その保存状態での C_Lap の再評価（`clap_checkpoint_reeval_20261105`、MCEM 0）。系列 E（prototype）、本文採用は未決定（NOT_DECIDED_BY_HUMAN）。
+- **統合状態**：この節は統合 PR（EM 収束 → checkpoint 再評価）で追加した。PR が main にマージされるまでは「未統合」として扱う。
+- **基準の呼称**は §19 と同じである。C_Q は ICL 型の基準で、Schwarz BIC ではない。C_Lap はラプラス近似による基準で、厳密な周辺尤度ではない。
+
+### 代数的な分解（DERIVED。数値でも確認した）
+
+θ を固定し、q_Lap = N(Ẑ, H⁻¹) とおく。H_Lap = (nK/2)(1+ln 2π) − ½ ln|H| である。このとき
+
+`C_Q − C_Lap − 2H_Lap = termA + 2R3`
+
+が代数的に厳密に成り立つ。
+
+- termA = −2(Q_MC − Q(q_Lap))：E-step のサンプル（L=5、scale_Z 後）と q_Lap の差、および MC 誤差。
+- R3 = Φ(Ẑ) − nK/2 − E_{q_Lap}Φ：Φ が Z について 2 次式でない部分。
+- 448 状態で、この分解は数値誤差 5×10⁻¹² 以内で閉じた。
+- 残差（termA + 2R3）の合計では Q(q_Lap) が打ち消し合うので、残差に q_Lap の MC 誤差は入らない。
+- **C_Q − C_Lap ≈ 2H_Lap は近似である。** termA と R3 はどちらも K とともに大きくなる（K=7 で約 −90 と約 +80）。残差が小さく見えるのは両者が打ち消し合うためで、これを保証する理論はない。
+
+### QUALIFIED ONLY（必須の限定なしに書いてはいけない）
+
+| claim | 必須の限定 | evidence |
+|---|---|---|
+| K_TRUE=5 で、C_Q の過小選択のパターンは checkpoint 8〜40 の同じ MCEM 軌道上で持続した（正解は n=50/75/100/150 で 0 / 0 / 0〜1 / 7 /8） | L=5 の MCEM で 40 反復まで。固定点には達していない。収束後の推定値や MLE についての主張ではない | `em_convergence_sensitivity_20260905/`, `clap_checkpoint_reeval_20261105/full/selection.csv` |
+| n=100 で、C_Lap は checkpoint 8〜40 のすべてで 8/8 正解した | 同じ軌道・同じ条件での結果。C_Lap も n ≤ 75 では過小選択した（n=50 で 0/8） | 同上 |
+| 残差を取り除いた C_Lap + 2H_Lap と C_Q の選択が食い違ったのは 9/188 件 | 9 件はすべて C_Q の余裕が約 20 以下だった。食い違う向きに偏りはない | 同上 |
+
+### NOT ALLOWED（書いてはいけない）
+
+| 書いてはいけない claim | 理由 |
+|---|---|
+| 「過小選択の原因は推定不足ではない」「十分に収束させても結果は変わらない」 | MCEM は収束していない（Gram の変化が反復あたり約 9%）。L も変えていない |
+| 「C_Q − C_Lap = 2H_Lap は恒等式である」 | termA と R3 の打ち消し合いによる近似である |
