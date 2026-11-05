@@ -1,0 +1,44 @@
+{
+  "adaptive_stopping": false,
+  "artifact_version": "em-convergence-artifact-v3",
+  "attempted_fit_count": 448,
+  "checkpoint_row_count": 2688,
+  "completed_fit_count": 448,
+  "environment": {
+    "blas": {
+      "blas": "scipy-openblas/0.3.30",
+      "lapack": "scipy-openblas/0.3.30"
+    },
+    "machine": "AMD64",
+    "numpy": "2.3.5",
+    "platform": "Windows",
+    "platform_release": "11",
+    "python": "3.13.14",
+    "scipy": "1.16.3",
+    "threads": {
+      "MKL_NUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "VECLIB_MAXIMUM_THREADS": null
+    }
+  },
+  "environment_key": "{\"blas\":{\"blas\":\"scipy-openblas/0.3.30\",\"lapack\":\"scipy-openblas/0.3.30\"},\"machine\":\"AMD64\",\"numpy\":\"2.3.5\",\"platform\":\"Windows\",\"python\":\"3.13.14\",\"scipy\":\"1.16.3\",\"threads\":{\"MKL_NUM_THREADS\":null,\"NUMEXPR_NUM_THREADS\":null,\"OMP_NUM_THREADS\":null,\"OPENBLAS_NUM_THREADS\":null,\"VECLIB_MAXIMUM_THREADS\":null}}",
+  "expected_checkpoint_rows": 2688,
+  "expected_fit_count": 448,
+  "expected_iteration_rows": 17920,
+  "experiment_id": "em_convergence_sensitivity_20260905",
+  "fits_with_retries": 0,
+  "iteration_row_count": 17920,
+  "protocol_hash": "bd7b02df61afba32c7e2bc6ead2dcc0c46c0e8a1382724f89a41ad040fb4151c",
+  "protocol_source": "em_convergence_sensitivity_20260905_protocol.DRAFT.json",
+  "run_code_sha": "1affe0cbd9c79ab7c6677cf35659d60666d8827a",
+  "runner_version": "em-convergence-runner-v4",
+  "runtime_abort_rule": "none",
+  "stopping_reasons": [
+    "fixed_budget"
+  ],
+  "wall_clock_seconds": 21009.0,
+  "working_tree_clean_after": true,
+  "working_tree_clean_before": true
+}
