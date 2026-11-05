@@ -1,0 +1,92 @@
+{
+  "prereg_sha256": "a6f84ab2639f5b669bace22a80f572839117af9b9df603e66a4366549f197b57",
+  "verdicts": {
+    "H1": "SUPPORTED",
+    "H2a": "SUPPORTED",
+    "H2b": "SUPPORTED",
+    "H2c": "SUPPORTED",
+    "H3": "SUPPORTED"
+  },
+  "medians": {
+    "15": {
+      "slack_Q": -128.6591275315659,
+      "two_dH_Lap": 120.58082339605798,
+      "slack_Q_fixed_penalty": -128.6591275315659,
+      "med_abs_d_resid": 5.734169864723668
+    },
+    "30": {
+      "slack_Q": -95.5640356378317,
+      "two_dH_Lap": 87.21062849821911,
+      "slack_Q_fixed_penalty": -30.801713934787003,
+      "med_abs_d_resid": 10.501486325298373
+    },
+    "60": {
+      "slack_Q": 40.741529165888096,
+      "two_dH_Lap": 45.80987390950102,
+      "slack_Q_fixed_penalty": 235.028494275022,
+      "med_abs_d_resid": 8.918871698111133
+    }
+  },
+  "paired": {
+    "slack_Q:15->30": {
+      "n": 8,
+      "increase": 7,
+      "median_change": 49.21490214963751
+    },
+    "slack_Q:30->60": {
+      "n": 8,
+      "increase": 6,
+      "median_change": 84.06006835396329
+    },
+    "slack_Q:15->60": {
+      "n": 8,
+      "increase": 7,
+      "median_change": 124.94176185826473
+    },
+    "two_dH_Lap:15->30": {
+      "n": 8,
+      "increase": 0,
+      "median_change": -27.64375520473766
+    },
+    "two_dH_Lap:30->60": {
+      "n": 8,
+      "increase": 0,
+      "median_change": -30.67723138754468
+    },
+    "two_dH_Lap:15->60": {
+      "n": 8,
+      "increase": 0,
+      "median_change": -67.3676540996845
+    },
+    "slack_Q_fixed_penalty:15->30": {
+      "n": 8,
+      "increase": 8,
+      "median_change": 113.97722385268222
+    },
+    "slack_Q_fixed_penalty:30->60": {
+      "n": 8,
+      "increase": 8,
+      "median_change": 213.58471176005253
+    },
+    "slack_Q_fixed_penalty:15->60": {
+      "n": 8,
+      "increase": 8,
+      "median_change": 319.22872696739864
+    },
+    "slack_Lap:15->30": {
+      "n": 8,
+      "increase": 5,
+      "median_change": 7.617499864289584
+    },
+    "slack_Lap:30->60": {
+      "n": 8,
+      "increase": 6,
+      "median_change": 55.62146093115189
+    },
+    "slack_Lap:15->60": {
+      "n": 8,
+      "increase": 6,
+      "median_change": 66.17690493391274
+    }
+  }
+}

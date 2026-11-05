@@ -528,3 +528,12 @@ EM 収束感度実験（`dad67b1`）の保存状態を再評価した。**新し
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | clap_checkpoint_reeval_20261105 | K_TRUE=5、n ∈ {50,75,100,150}、8 rep、K 1..7、2 start の 448 fit について、checkpoint {8,12,16,24,32,40} の保存状態（2,688 件）で C_Q を再計算し、C_Lap を評価した。checkpoint 8/40 では q_Lap=N(Ẑ,H⁻¹) の 200 draw で termA と R3 も計算した | `tools/research_audit/run_clap_checkpoint_reeval.py` | `expfam/results/k_selection/clap_checkpoint_reeval_20261105/` | なし | current_support | ✗ | C_Q は記録値と完全一致（差 0.0）。checkpoint 8 の C_Lap も A1 と完全一致（差 0.0）。Laplace は OK 2,684 件、NOT_STATIONARY 4 件（補完なし）。npz の sha256 は `5e4390f1…af84`。MCEM は収束していない（1% の基準で 0/448）。L は変えていない |
+
+
+## 実験2：d-sweep（2026-11-05、lineage E、append-only 追記）
+
+事前登録した設計（`c3a9a08`）。fit を始める前にゲート（`4832e97`）を通過した。A1、EM 収束感度実験、checkpoint 再評価の artifact は変更していない。本文採用不可（prototype）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| dsweep_k_selection_20261105 | n=75、K_GEN=5、Poisson-X / Bernoulli-Y、d ∈ {15,30,60}、8 rep、K 1..7、2 start、L=5、8 反復。d=15 は EM 収束感度実験の checkpoint 8 の状態を再評価した。d=30/60 では Z・Y・マスク・元の X 15 列をビット単位で保ったまま、元と同じ QR 構成の Poisson ブロックを追加した（新規 224 fit） | `tools/research_audit/run_dsweep_k_selection.py`、`tools/research_audit/analyze_dsweep_k_selection.py`、`expfam/src/experimental/em_runner_instrumented.py`（dad67b1 と同じ blob） | `expfam/results/k_selection/dsweep_k_selection_20261105/` | なし | current_support | ✗ | 224/224 成功、Laplace は 336/336 が OK。再現確認の 2 fit は保存状態とビット単位で一致した（集計には入れていない）。fit の状態は外部の npz（sha256 `471ac490…d02d7`）。正解数は C_Q 0/3/5、C_Lap 3/3/6（/8、d=15/30/60）。H1〜H3 は事前登録した規則で支持された。限界：8 データセット、n=75 だけ、MCEM は収束していない |
