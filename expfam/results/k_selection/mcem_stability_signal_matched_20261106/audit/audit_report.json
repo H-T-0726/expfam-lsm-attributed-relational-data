@@ -1,0 +1,188 @@
+{
+ "script": "tools/research_audit/audit_mcem_stability.py",
+ "n_checks": 36,
+ "n_pass": 36,
+ "n_fail": 0,
+ "checks": [
+  {
+   "check": "prereg file hash == code PREREG hash",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "prereg body == code PREREG",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "gates PASSED",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq1_AB: prereg hash == gates",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq1_AB: states npz sha256",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq1_AB: status COMPLETED",
+   "result": "PASS",
+   "detail": "COMPLETED"
+  },
+  {
+   "check": "rq1_CD: prereg hash == gates",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq1_CD: states npz sha256",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq1_CD: status COMPLETED",
+   "result": "PASS",
+   "detail": "COMPLETED"
+  },
+  {
+   "check": "rq2: prereg hash == gates",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq2: states npz sha256",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "rq2: status COMPLETED",
+   "result": "PASS",
+   "detail": "COMPLETED"
+  },
+  {
+   "check": "prereg committed before production results",
+   "result": "PASS",
+   "detail": "6104f768e2ae843b2cfad33d1aa3390c1270524d experiment: record "
+  },
+  {
+   "check": "RQ1: ledger fits == plan (128)",
+   "result": "PASS",
+   "detail": "128"
+  },
+  {
+   "check": "RQ2: ledger fits == plan (96)",
+   "result": "PASS",
+   "detail": "96"
+  },
+  {
+   "check": "fit-iterations within 12,000 cap",
+   "result": "PASS",
+   "detail": "11344"
+  },
+  {
+   "check": "no duplicate checkpoint keys",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "checkpoint rows == fits x checkpoints (FIT fits)",
+   "result": "PASS",
+   "detail": "RQ1 768, RQ2 384"
+  },
+  {
+   "check": "failed fits are listed, not dropped",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "non-OK Laplace rows listed",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "RQ1 data == PR #155 data (hashes)",
+   "result": "PASS",
+   "detail": "0"
+  },
+  {
+   "check": "RQ2 data hashes, eigenvalues 2.5, shared Z directions",
+   "result": "PASS",
+   "detail": "0"
+  },
+  {
+   "check": "iteration-8 states == archived states (independent re-check)",
+   "result": "PASS",
+   "detail": "128 fits, mismatches 0, flagged 0"
+  },
+  {
+   "check": "independent Q_X/Q_Y/Q_Z/C_Q at every checkpoint state (1152)",
+   "result": "PASS",
+   "detail": "{'Q_X': '3.5e-12', 'Q_Y': '4.9e-12', 'Q_Z': '1.4e-12', 'C_Q': '8.5e-13'}"
+  },
+  {
+   "check": "C_Q - C_Lap - 2H_Lap = termA + 2R3 (CSV)",
+   "result": "PASS",
+   "detail": "1.4e-10"
+  },
+  {
+   "check": "min eigenvalue of H > 0 for every OK Laplace",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "Laplace OK rows satisfy grad tolerance 1e-8",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "S_Q(4->5) recomputed from scores (start means)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "C_Q paired medians / sign counts / verdicts recomputed",
+   "result": "PASS",
+   "detail": "0"
+  },
+  {
+   "check": "stability flags recomputed with the pre-registered 0.01 rule",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "fit labels at 64 == metrics",
+   "result": "PASS",
+   "detail": "STABLE 0/128"
+  },
+  {
+   "check": "RQ2 primary delta / verdict recomputed",
+   "result": "PASS",
+   "detail": "median -59.51 K_HARDER"
+  },
+  {
+   "check": "analysis CSV hashes == manifest",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "figure hashes == manifest",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "PR #155 artifacts untouched (only additions + append-only registry)",
+   "result": "PASS",
+   "detail": "['M\\tEXPERIMENT_REGISTRY.md']"
+  },
+  {
+   "check": "EXPERIMENT_REGISTRY.md append-only",
+   "result": "PASS",
+   "detail": ""
+  }
+ ]
+}

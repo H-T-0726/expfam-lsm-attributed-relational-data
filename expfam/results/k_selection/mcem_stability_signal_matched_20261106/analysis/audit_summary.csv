@@ -1,0 +1,37 @@
+check,result,detail,experiment_id
+prereg file hash == code PREREG hash,PASS,,mcem_stability_signal_matched_20261106
+prereg body == code PREREG,PASS,,mcem_stability_signal_matched_20261106
+gates PASSED,PASS,,mcem_stability_signal_matched_20261106
+rq1_AB: prereg hash == gates,PASS,,mcem_stability_signal_matched_20261106
+rq1_AB: states npz sha256,PASS,,mcem_stability_signal_matched_20261106
+rq1_AB: status COMPLETED,PASS,COMPLETED,mcem_stability_signal_matched_20261106
+rq1_CD: prereg hash == gates,PASS,,mcem_stability_signal_matched_20261106
+rq1_CD: states npz sha256,PASS,,mcem_stability_signal_matched_20261106
+rq1_CD: status COMPLETED,PASS,COMPLETED,mcem_stability_signal_matched_20261106
+rq2: prereg hash == gates,PASS,,mcem_stability_signal_matched_20261106
+rq2: states npz sha256,PASS,,mcem_stability_signal_matched_20261106
+rq2: status COMPLETED,PASS,COMPLETED,mcem_stability_signal_matched_20261106
+prereg committed before production results,PASS,6104f768e2ae843b2cfad33d1aa3390c1270524d experiment: record ,mcem_stability_signal_matched_20261106
+RQ1: ledger fits == plan (128),PASS,128,mcem_stability_signal_matched_20261106
+RQ2: ledger fits == plan (96),PASS,96,mcem_stability_signal_matched_20261106
+"fit-iterations within 12,000 cap",PASS,11344,mcem_stability_signal_matched_20261106
+no duplicate checkpoint keys,PASS,,mcem_stability_signal_matched_20261106
+checkpoint rows == fits x checkpoints (FIT fits),PASS,"RQ1 768, RQ2 384",mcem_stability_signal_matched_20261106
+"failed fits are listed, not dropped",PASS,,mcem_stability_signal_matched_20261106
+non-OK Laplace rows listed,PASS,,mcem_stability_signal_matched_20261106
+RQ1 data == PR #155 data (hashes),PASS,0,mcem_stability_signal_matched_20261106
+"RQ2 data hashes, eigenvalues 2.5, shared Z directions",PASS,0,mcem_stability_signal_matched_20261106
+iteration-8 states == archived states (independent re-check),PASS,"128 fits, mismatches 0, flagged 0",mcem_stability_signal_matched_20261106
+independent Q_X/Q_Y/Q_Z/C_Q at every checkpoint state (1152),PASS,"{'Q_X': '3.5e-12', 'Q_Y': '4.9e-12', 'Q_Z': '1.4e-12', 'C_Q': '8.5e-13'}",mcem_stability_signal_matched_20261106
+C_Q - C_Lap - 2H_Lap = termA + 2R3 (CSV),PASS,1.4e-10,mcem_stability_signal_matched_20261106
+min eigenvalue of H > 0 for every OK Laplace,PASS,,mcem_stability_signal_matched_20261106
+Laplace OK rows satisfy grad tolerance 1e-8,PASS,,mcem_stability_signal_matched_20261106
+S_Q(4->5) recomputed from scores (start means),PASS,,mcem_stability_signal_matched_20261106
+C_Q paired medians / sign counts / verdicts recomputed,PASS,0,mcem_stability_signal_matched_20261106
+stability flags recomputed with the pre-registered 0.01 rule,PASS,,mcem_stability_signal_matched_20261106
+fit labels at 64 == metrics,PASS,STABLE 0/128,mcem_stability_signal_matched_20261106
+RQ2 primary delta / verdict recomputed,PASS,median -59.51 K_HARDER,mcem_stability_signal_matched_20261106
+analysis CSV hashes == manifest,PASS,,mcem_stability_signal_matched_20261106
+figure hashes == manifest,PASS,,mcem_stability_signal_matched_20261106
+PR #155 artifacts untouched (only additions + append-only registry),PASS,['M\tEXPERIMENT_REGISTRY.md'],mcem_stability_signal_matched_20261106
+EXPERIMENT_REGISTRY.md append-only,PASS,,mcem_stability_signal_matched_20261106
