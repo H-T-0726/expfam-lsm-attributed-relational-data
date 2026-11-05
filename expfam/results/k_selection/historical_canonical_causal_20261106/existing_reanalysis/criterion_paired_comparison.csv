@@ -1,0 +1,81 @@
+experiment_id,k_gen,n,d,replicate,selected_k_C_Q,selected_k_C_Lap,C_Lap_status,relation,source_path
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,1,2,2,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,2,1,2,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,3,1,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,4,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,5,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,6,2,3,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,7,2,3,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,50,15,8,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,1,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,2,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,3,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,4,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,5,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,6,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,7,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,75,15,8,3,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,1,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,2,3,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,3,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,4,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,5,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,6,3,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,7,2,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,100,15,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,1,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,2,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,3,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,4,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,5,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,6,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,7,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+clap_clean_nsweep_20261006 (#139 A1),5,150,15,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/clap_clean_nsweep_20261006/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,1,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,2,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,3,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,4,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,5,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,6,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,7,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,15,8,3,5,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,1,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,2,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,3,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,4,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,5,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,6,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,7,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,30,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,1,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,2,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,3,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,4,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,5,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,6,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,7,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+dsweep_k_selection_20261105,5,75,60,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/dsweep_k_selection_20261105/full/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,1,2,4,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,2,3,3,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,3,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,4,4,4,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,5,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,6,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,7,2,3,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,50,30,8,3,4,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n50/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,1,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,2,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,3,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,4,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,5,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,6,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,7,4,5,COMPLETE,Q<Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,100,30,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n100/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,1,5,,INCOMPLETE,,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,2,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,3,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,4,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,5,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,6,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,7,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv
+k_selection_robustness_20261105 (R2),5,150,30,8,5,5,COMPLETE,Q=Lap,expfam/results/k_selection/k_selection_robustness_20261105/r2_n150/selection.csv

@@ -1,0 +1,17 @@
+experiment_id,criterion,k_gen,datasets,complete,exact,under,over,incomplete
+initial_dual_expfam_scenario_A_exp1,C_Q (CSV column BIC),3,10,10,10,0,0,0
+initial_dual_expfam_scenario_B_exp1,C_Q (CSV column BIC),3,10,10,9,0,1,0
+initial_dual_expfam_scenario_C_exp1,C_Q (CSV column BIC),3,10,10,10,0,0,0
+fixed_official_exp1_k1to9_scenario_A,C_Q (CSV column BIC),3,10,10,10,0,0,0
+fixed_official_exp1_k1to9_scenario_B,C_Q (CSV column BIC),3,10,10,10,0,0,0
+fixed_official_exp1_k1to9_scenario_C,C_Q (CSV column BIC),3,10,10,10,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Q,1,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Lap,1,5,4,4,0,0,1
+paper_condition_k_criteria_20261006 (#139 B),C_Q,3,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Lap,3,5,2,2,0,0,3
+paper_condition_k_criteria_20261006 (#139 B),C_Q,5,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Lap,5,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Q,7,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Lap,7,5,4,4,0,0,1
+paper_condition_k_criteria_20261006 (#139 B),C_Q,9,5,5,5,0,0,0
+paper_condition_k_criteria_20261006 (#139 B),C_Lap,9,5,4,4,0,0,1

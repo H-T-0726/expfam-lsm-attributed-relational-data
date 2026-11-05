@@ -1,0 +1,37 @@
+experiment_id,criterion,k_gen,n,d,datasets,complete,exact,under,over,incomplete
+clap_clean_nsweep_20261006 (#139 A1),C_Q,1,50,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,1,50,15,4,2,2,0,0,2
+clap_clean_nsweep_20261006 (#139 A1),C_Q,1,75,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,1,75,15,4,3,3,0,0,1
+clap_clean_nsweep_20261006 (#139 A1),C_Q,1,100,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,1,100,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,1,150,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,1,150,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,3,50,15,4,4,2,2,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,3,50,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,3,75,15,4,4,3,1,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,3,75,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,3,100,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,3,100,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,3,150,15,4,4,4,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,3,150,15,4,3,3,0,0,1
+clap_clean_nsweep_20261006 (#139 A1),C_Q,5,50,15,8,8,0,8,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,5,50,15,8,8,0,8,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,5,75,15,8,8,0,8,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,5,75,15,8,8,3,5,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,5,100,15,8,8,1,7,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,5,100,15,8,8,8,0,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Q,5,150,15,8,8,7,1,0,0
+clap_clean_nsweep_20261006 (#139 A1),C_Lap,5,150,15,8,8,8,0,0,0
+dsweep_k_selection_20261105,C_Q,5,75,15,8,8,0,8,0,0
+dsweep_k_selection_20261105,C_Lap,5,75,15,8,8,3,5,0,0
+dsweep_k_selection_20261105,C_Q,5,75,30,8,8,3,5,0,0
+dsweep_k_selection_20261105,C_Lap,5,75,30,8,8,3,5,0,0
+dsweep_k_selection_20261105,C_Q,5,75,60,8,8,5,3,0,0
+dsweep_k_selection_20261105,C_Lap,5,75,60,8,8,6,2,0,0
+k_selection_robustness_20261105 (R2),C_Q,5,50,30,8,8,0,8,0,0
+k_selection_robustness_20261105 (R2),C_Lap,5,50,30,8,8,0,8,0,0
+k_selection_robustness_20261105 (R2),C_Q,5,100,30,8,8,4,4,0,0
+k_selection_robustness_20261105 (R2),C_Lap,5,100,30,8,8,8,0,0,0
+k_selection_robustness_20261105 (R2),C_Q,5,150,30,8,8,8,0,0,0
+k_selection_robustness_20261105 (R2),C_Lap,5,150,30,8,7,7,0,0,1
