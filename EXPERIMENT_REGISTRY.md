@@ -542,7 +542,7 @@ EM 収束感度実験（`dad67b1`）の保存状態を再評価した。**新し
 ## 実験 R1/R2：MCEM 推定条件の頑健性と n×d（2026-11-05、lineage E、append-only 追記）
 
 事前登録（`e33f90f`、`prereg.json` sha256 `487cc561…3d62`）。R1 ゲート `5637377`、R2 ゲート `2a67c82`、n=150 実行判定 `2e11917`。判定は、選択結果を見る前に固定した資源基準だけで行った。
-A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変更していない。本文採用不可（prototype）。**未マージ**（作業ブランチ `experiment/k-selection-robustness-r1-r2`）。
+A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変更していない。本文採用不可（prototype）。統合経路：作業ブランチ `experiment/k-selection-robustness-r1-r2` → PR #153 で `integration/dsweep-on-reeval` へ → 最終統合 PR（`integration/dsweep-on-reeval` → `main`） で main へ。main に入るのは最終統合 PR のマージ時である。
 
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|

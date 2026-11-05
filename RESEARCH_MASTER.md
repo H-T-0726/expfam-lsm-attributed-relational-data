@@ -1127,7 +1127,7 @@ K*  = min { K : P0 ∈ M_K }
 ## 20. 2026-11-05 EM 収束感度実験と C_Lap の checkpoint 再評価の Claim Ledger 追記
 
 - 対象：EM 収束感度実験（`dad67b1`、448 fit）と、その保存状態での C_Lap の再評価（`clap_checkpoint_reeval_20261105`、MCEM 0）。系列 E（prototype）、本文採用は未決定（NOT_DECIDED_BY_HUMAN）。
-- **統合状態**：この節は統合 PR（EM 収束 → checkpoint 再評価）で追加した。PR が main にマージされるまでは「未統合」として扱う。
+- **統合状態**：EM 収束感度実験は PR #150 で main にマージ済み（2026-11-06 確認）。checkpoint 再評価は PR #151 で統合ブランチにマージされ、最終統合 PR（`integration/dsweep-on-reeval` → `main`） で main に入る。
 - **基準の呼称**は §19 と同じである。C_Q は ICL 型の基準で、Schwarz BIC ではない。C_Lap はラプラス近似による基準で、厳密な周辺尤度ではない。
 
 ### 代数的な分解（DERIVED。数値でも確認した）
@@ -1163,7 +1163,7 @@ K*  = min { K : P0 ∈ M_K }
 ## 21. 2026-11-05 d-sweep（実験2）の Claim Ledger 追記
 
 - 対象：`dsweep_k_selection_20261105`（系列 E、prototype）。事前登録 `prereg.json`（sha256 `a6f84ab2…7b57`）。
-- **統合状態**：統合 PR（3/4）で追加した。main にマージされるまでは「未統合」として扱う。
+- **統合状態**：PR #152 で統合ブランチにマージされ、最終統合 PR（`integration/dsweep-on-reeval` → `main`） で main に入る。
 - **目標とする K**：K\*=5（最小表現次元）。canonical Poisson-X で rank F=K、clip なし、条件を付けない法則についての導出による。K0 の一意性は示していない。
   - rate 上限ゲートを通過したデータの分布は、条件を付けない canonical 分布と厳密には異なる。両者の差は、ゲートに掛かる確率の上界（union bound）で抑えられ、その値はデータセットごとに最大でも 1.77×10⁻³³ だった（`gates/gates.json` の `max_gate_fail_prob_union_bound`）。
   - `KNOWN_ISSUES.md` の「人工データの K_TRUE が真の潜在次元 K\* である」の制限は**解除しない**。上の扱いは、この設定に限った作業上の前提である。
@@ -1187,7 +1187,7 @@ K*  = min { K : P0 ∈ M_K }
 ## 22. 2026-11-05 R1/R2（推定条件の頑健性と n×d）の Claim Ledger 追記
 
 - 対象：`k_selection_robustness_20261105`（系列 E、prototype）。事前登録 `prereg.json`（sha256 `487cc561…3d62`）。
-- **統合状態**：作業ブランチ `experiment/k-selection-robustness-r1-r2` の PR で追加した。§20・§21 の統合 PR（#150〜#152）も含めて、main にマージされるまでは「未統合」として扱う。
+- **統合状態**：PR #153 で統合ブランチにマージされ、§20（checkpoint 再評価）・§21 とともに 最終統合 PR（`integration/dsweep-on-reeval` → `main`） で main に入る。
 - 目標とする K は §21 と同じ K\*=5 である（作業上の前提）。`KNOWN_ISSUES.md` の K_TRUE=K\* の制限は**解除しない**。
 - 事前登録した 6 つの仮説（R1-H1〜H3、R2-H1〜H3）は、すべて事前の規則で支持された。
 
