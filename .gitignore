@@ -50,3 +50,13 @@ CLAUDE.local.md
 
 # pytest
 .pytest_cache/
+
+# Runtime research areas: results a script leaves for a human to read, and
+# the staging directory a long run writes into until it finishes.  Neither is
+# source, and a leftover staging directory is deleted by hand.
+.local/
+expfam/results/k_selection/*.partial/
+
+# Large state archives kept outside the repository
+# (see the run directory's STATE_ARCHIVE.md for the location and sha256)
+expfam/results/**/checkpoint_states.npz

@@ -1,0 +1,154 @@
+{
+  "experiment_id": "em_convergence_sensitivity_20260905",
+  "protocol": {
+    "L": 5,
+    "adaptive_stopping": false,
+    "all_fit_checkpoint8_replication": true,
+    "baseline_checkpoint": 8,
+    "baseline_protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+    "baseline_run": "clean_true_k_asymptotics_20260904",
+    "candidate_k": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "checkpoints": [
+      8,
+      12,
+      16,
+      24,
+      32,
+      40
+    ],
+    "criteria": [
+      "S1_heldout_predictive",
+      "S2_q_based",
+      "S3_plugin_conditional"
+    ],
+    "d": 15,
+    "data_seed_base": 810000,
+    "data_seed_formula": "data_seed_base + k_true*10000 + n*10 + replicate",
+    "diagnostic_keys": [
+      "gram_rel_change",
+      "f_raw_change",
+      "w_change",
+      "w0_change",
+      "eta_x_rel_change",
+      "eta_y_rel_change"
+    ],
+    "estimand": "under identical data, masks, initialization and first-eight-iteration RNG prefix, how does continuing the same L=5 stochastic MCEM procedure from iteration 8 to iteration 40 change selected K",
+    "expected_checkpoint_rows": 2688,
+    "expected_iteration_rows": 17920,
+    "expected_long_runs": 448,
+    "experiment_id": "em_convergence_sensitivity_20260905",
+    "family_x": "poisson",
+    "family_y": "bernoulli",
+    "forbidden_claims": [
+      "deterministic optimization effect",
+      "8 iterations caused the under-selection",
+      "the criterion is exonerated",
+      "convergence",
+      "consistency"
+    ],
+    "gate_cell": {
+      "k_true": 5,
+      "n": 50,
+      "replicate": 1
+    },
+    "gate_cell_selection_rule": "the first replicate of the smallest scoped n, derived as min(n_grid); fixed by rule, not chosen by inspection",
+    "gate_expected_fits": 14,
+    "generator_version": "canonical-clean-v1",
+    "k_ref": 3,
+    "k_true": 5,
+    "max_iter": 40,
+    "model_seed_base": 830000,
+    "model_seed_formula": "model_seed_base + k_true*100000 + n*1000 + replicate*100 + k_est*10 + start",
+    "n_grid": [
+      50,
+      75,
+      100,
+      150
+    ],
+    "numerics_mode": "consistent",
+    "on_nan": "fail",
+    "poisson_lambda_max": 1000000.0,
+    "primary_checkpoint": 40,
+    "primary_outcomes": {
+      "P1": {
+        "comparison": "checkpoint 8 versus checkpoint 40, paired within replicate",
+        "definition": "for each (n, replicate) and each checkpoint: average S1 over the two starts for every candidate K, take the K with the largest average; tie tolerance 1e-12, ties resolved to the smallest K",
+        "name": "selected K by budget",
+        "reported": [
+          "replicate-level K8 -> K40 transition",
+          "exact / under / over counts at each checkpoint",
+          "transition counts by n"
+        ],
+        "start_disagreement": "select K INDEPENDENTLY within start 1 and within start 2, then compare the two selected K. It is NOT 'the raw scores differ'"
+      },
+      "P2": {
+        "definition": "delta(n, r, K) = 0.5 * sum over start in {1,2} of [ S1(n, r, K, start, 40) - S1(n, r, K, start, 8) ]",
+        "inference": "DESCRIPTIVE ONLY. No formal test. Starts are NOT replicates. Spearman between K and the mean delta may be shown as a diagnostic; the 7 candidate K are not independent samples and no p-value is reported",
+        "name": "per-candidate-K S1 change from continuing the procedure",
+        "replicate_rows_expected": 224,
+        "reported": [
+          "replicate-level table: n, replicate, K, delta (224 rows)",
+          "summary: n, K, mean delta over the 8 replicates (28 rows)"
+        ],
+        "summary_rows_expected": 28
+      },
+      "secondary": [
+        "winning margin (best minus runner-up in selector space) by checkpoint",
+        "start disagreement by checkpoint",
+        "budget-stability rates by candidate K and n at every tau",
+        "S2 and S3 versions of P1 and P2",
+        "cumulative runtime by checkpoint"
+      ],
+      "wording": "no materiality threshold is defined, so the question says CHANGES and the word 'materially' is not used"
+    },
+    "protocol_version": "em-convergence-protocol-draft-3",
+    "replicates": 8,
+    "replication_fields": [
+      "data_seed",
+      "split_seed",
+      "model_seed",
+      "num_params",
+      "heldout_mean_log_score",
+      "q_strict",
+      "s2_q_based",
+      "s3_plugin_conditional"
+    ],
+    "residual_confound": "continuing the procedure redraws L=5 latent samples every further iteration, so additional optimization and additional Monte-Carlo variation are not separable by this design",
+    "row_norm_sq_target": 0.5,
+    "runner_contract_version": "em-convergence-runner-contract-v1",
+    "runtime_abort_rule": "none",
+    "runtime_estimate_hours": 6.14,
+    "runtime_estimate_note": "operational estimate only. There is NO automatic runtime abort: runtime is not part of the estimand and must never include or exclude an individual fit. A run that is interrupted produces no final artifact and is not analysed in part",
+    "selector": "unweighted_mean_over_starts_then_argmax_in_selector_space",
+    "split_rule": "deterministic_dyad_holdout_from_split_seed",
+    "split_seed_base": 820000,
+    "split_seed_formula": "split_seed_base + k_true*10000 + n*10 + replicate",
+    "stability_window": 4,
+    "starts": [
+      1,
+      2
+    ],
+    "stopping_reason_expected": "fixed_budget",
+    "tau_ladder": [
+      0.01,
+      0.001,
+      0.0001
+    ],
+    "test_ratio": 0.2,
+    "tie_rule": "smallest_k_among_ties",
+    "tie_tolerance": 1e-12,
+    "w0_true": -1.0,
+    "w_ref": 1.0
+  },
+  "protocol_hash": "bd7b02df61afba32c7e2bc6ead2dcc0c46c0e8a1382724f89a41ad040fb4151c",
+  "protocol_source": "em_convergence_sensitivity_20260905_protocol.DRAFT.json",
+  "protocol_source_status": "DRAFT"
+}

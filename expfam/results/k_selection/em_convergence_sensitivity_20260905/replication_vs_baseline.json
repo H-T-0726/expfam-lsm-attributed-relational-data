@@ -1,0 +1,10 @@
+{
+  "baseline_protocol_hash": "547880a16aef6530cfdf7903c4e32f16062397e0bacc0c109d5c77fb9892ccc0",
+  "baseline_run": "clean_true_k_asymptotics_20260904",
+  "checkpoint": 8,
+  "compared_rows": 448,
+  "enforced_inside_the_callback": true,
+  "match": true,
+  "mismatch_count": 0,
+  "scope": "ALL fits, not only the gate cell"
+}
