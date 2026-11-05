@@ -1,0 +1,18 @@
+{
+  "decision": "RUN",
+  "n50_n100_completed": true,
+  "projected_hours": 0.79,
+  "resources": {
+    "free_disk_D_GB": 897.45,
+    "free_ram_GB": 6.7
+  },
+  "rule": {
+    "projection": "112 x (pilot EM seconds + pilot evaluation seconds) x 1.25",
+    "requires": [
+      "R2 n=50 and n=100 production runs COMPLETED",
+      "projected n=150 wall time from the n=150 pilot fit <= 3 h",
+      "free space on D: >= 10 GB",
+      "free RAM >= 2 GB"
+    ]
+  }
+}
