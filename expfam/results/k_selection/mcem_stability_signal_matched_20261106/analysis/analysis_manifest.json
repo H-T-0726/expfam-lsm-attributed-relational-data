@@ -1,0 +1,80 @@
+{
+ "script": "tools/research_audit/analyze_mcem_stability.py",
+ "mcem_fits": 0,
+ "prereg_sha256": "4059f06408db6be438d54e6054eaa19d3689bb15e46952380398c94c1ad510bd",
+ "gates_status": "PASSED",
+ "runs": {
+  "rq1_AB": {
+   "status": "COMPLETED",
+   "fits": 64,
+   "fit_status_counts": {
+    "FIT": 64
+   },
+   "wall_clock_seconds": 5676.5,
+   "git_head": "6104f768e2ae843b2cfad33d1aa3390c1270524d",
+   "states_sha256": "9652f0827767c2c703e355a28df7860cfb410eb130a7c8ea1426a2b069c54b81"
+  },
+  "rq1_CD": {
+   "status": "COMPLETED",
+   "fits": 64,
+   "fit_status_counts": {
+    "FIT": 64
+   },
+   "wall_clock_seconds": 5699.1,
+   "git_head": "6104f768e2ae843b2cfad33d1aa3390c1270524d",
+   "states_sha256": "d2f1d90962c1489cde72a96f273952ea268528df57324acc524dd1d049ae9408"
+  },
+  "rq2": {
+   "status": "COMPLETED",
+   "fits": 96,
+   "fit_status_counts": {
+    "FIT": 96
+   },
+   "wall_clock_seconds": 4644.0,
+   "git_head": "6104f768e2ae843b2cfad33d1aa3390c1270524d",
+   "states_sha256": "61a1a7ea79ac53eb8bf9ef3b972dd313002df41a01f02ab4f68da75cad42f65d"
+  }
+ },
+ "integrity": {
+  "duplicate_keys": 0,
+  "fit_failed": 0,
+  "laplace_not_ok": 1,
+  "replication_fail_fits": 0,
+  "max_abs_closure": 2.2168933355715126e-12,
+  "max_abs_accounting": 1.3642420526593924e-12,
+  "max_abs_identity_error_fit": 1.5916157281026244e-12
+ },
+ "outputs_sha256": {
+  "checkpoint_criterion_scores.csv": "b51b63c67e0fada183b143580a7bb2296733c0e93046f89c4612994f2f87a82d",
+  "checkpoint_metrics.csv": "bb9d9c8aa0887221b6558c14ac4f5a4c080a726c5fc9a36df0a94efae0d55947",
+  "checkpoint_q_decomposition.csv": "f84557153617026d29fc0e839e72046028a42d0a39630d8ffa95a69f48871c08",
+  "dataset_provenance.csv": "009b2fc7dae53ecda2576d4579dbea326c9ccdc1424ae3f45628250def65cc75",
+  "experiment_protocol.csv": "7065db448922287e3cd52e053bca1f6b96f3c858faa5861e8439467b002e45a2",
+  "failure_and_incomplete.csv": "263c08006e9582e5fea81d5b988f7d6712d4cee9c5a9d9278f35388bba3d5ae0",
+  "fit_execution_ledger.csv": "b6538f14f857863b2e540ff67e7a1c6e3a7f8acf95f098a03d635ed53b0c9453",
+  "full_k_selection.csv": "1d2914ee74284b6a9def7adffe56a00bc9354926b8d7fd9cba8a505f745093ba",
+  "iteration_trajectories.csv": "396d65e46c864a388d8c99732b5d927bda8e139c459ce0080c9f996af620d9ab",
+  "local_k4_k5_comparison.csv": "dba5a35b631a944ea6a4969d87858c7b533b24bb0fbaae5c72ba346ec21a6a0b",
+  "paired_slack_changes.csv": "ebcd45c6dd75a6c06871350211231c10ec3759cea469039815f0074b99a26148",
+  "signal_matched_k3_k5.csv": "29c152289e6efb6b91fc97ba773d1aaf219fdcfd277e085bf5910de5a2b8b959",
+  "stability_diagnostics.csv": "bd588a0ff2976d3f33bed2346273002f7aa2944f0fbb7890b42c64a6e3c4f97b"
+ },
+ "figures_sha256": {
+  "fig1_cq_slack_vs_iteration.pdf": "c24659183d9c6ea35886fa1fe58701588eb99ebb07d3c5815eec74fc5ae9c878",
+  "fig1_cq_slack_vs_iteration.png": "7bc1b93547dbc73b737b6942bf292fc99866637508d549e9d061d7bc6efab18c",
+  "fig2_clap_slack_vs_checkpoint.pdf": "856658049385a7eed4d2d9c7d656dd5dfd42cf04ee67114a4ba9d5c7101bc211",
+  "fig2_clap_slack_vs_checkpoint.png": "313ae7c973b0b34265d0a61003509000f2b4638a97a378a4d046e687b0b005e3",
+  "fig3_paired_differences.pdf": "4542e0eb5e393df0f228b705c9968ae62f7f6d524fb1aecf11f69f9fc0f6e960",
+  "fig3_paired_differences.png": "d033858e3fed229bf1aea3d99d4efd8640cbc26b1a33858ba667171ac081e7b3",
+  "fig4_gram_eta_changes.pdf": "e82bd93f4f3c54b0df867e48ac227f0fae4a40b5a30ebd7a9b9450b2d4660e54",
+  "fig4_gram_eta_changes.png": "6d5f7ab34bf9335572204342e15650c9ba99630cf78110da7cad12a59360d99d",
+  "fig5_q_decomposition.pdf": "2f829ad0e88bd48a8ec1efd632e98b89c760c691c1c9c56d15497a90a85fc673",
+  "fig5_q_decomposition.png": "4b8cc1630eb7ce6a4ef0c315a48779c6f8f6dbb929a1325c43f75662f9d7ffea",
+  "fig6_start_differences.pdf": "b28afe9b5c78f41dc82fd84c051c40134723254fea85f593c375abde560978e8",
+  "fig6_start_differences.png": "248cfbdcb4ee29b79bde2458e666c14cf34c1bb5e070a650fe0f54ae5397562c",
+  "fig7_stability_vs_selection.pdf": "fdcf70ff4f19df8bea24e6b98dbc7e011c7b897d001c87bacf394e51dbc5a9bc",
+  "fig7_stability_vs_selection.png": "7a8d2f7797102e943f0555748ca51e2239ba27dff25c415d9d9ce7f2f5c77473",
+  "fig8_signal_matched_k3_k5.pdf": "376b4b38e3bc295884c432daa158032dcf54554460336ad5fcdccce17fced181",
+  "fig8_signal_matched_k3_k5.png": "44157360e241938d6ea3e6781a964b9c81b4dfd361b83807895d929c3ea3fcb4"
+ }
+}

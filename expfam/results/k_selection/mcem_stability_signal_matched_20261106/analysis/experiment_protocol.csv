@@ -1,0 +1,42 @@
+experiment_id,key,value
+mcem_stability_signal_matched_20261106,RQ1.checkpoints_C_Q_trajectory,every iteration 1..64
+mcem_stability_signal_matched_20261106,RQ1.checkpoints_full,"[8, 16, 24, 32, 48, 64]"
+mcem_stability_signal_matched_20261106,RQ1.continuation,"re-run from iteration 1 with the same seed (archived states carry no RNG state, so exact resume is impossible); iteration-8 state must match the archived PR #155 / EMC state within NPZ_RTOL=1e-9, NPZ_ATOL=1e-6 and C_Q must match; a non-matching fit is flagged REPLICATION_FAIL and excluded from continuation claims (kept in all CSVs)"
+mcem_stability_signal_matched_20261106,RQ1.data,"PR #155 conditions A/B/C/D, n=75, K_GEN=5, d=15, replicates 1..8 (regenerated; hashes checked against PR #155 provenance)"
+mcem_stability_signal_matched_20261106,RQ1.fits,"K_fit in {4,5} x starts {1,2} x 4 conditions x 8 replicates = 128 fits, max_iter 64, L=5, same model seeds as PR #155 (A1 formula)"
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.RQ1-B,paired slack difference B-A (C_Q) at checkpoint 64 > 0
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.RQ1-C,paired slack difference C-A (C_Q) at checkpoint 64 > 0
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.RQ1-D,paired slack difference D-A (C_Q) at checkpoint 64 > 0
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.criteria_gap,descriptive: S_Lap - S_Q = 2dH_Lap + d resid at each checkpoint; number of datasets where sign(S_Q) != sign(S_Lap) at 8 and at 64
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.rule,MAINTAINED: median > 0 and >= 6/8 positive; NOT_MAINTAINED: median <= 0; otherwise INCONCLUSIVE.  Same rule reported for C_Lap (secondary) and at every checkpoint (descriptive).  Datasets with a REPLICATION_FAIL fit or a non-OK Laplace (C_Lap only) are excluded from that contrast and counted.
+mcem_stability_signal_matched_20261106,RQ1.hypotheses.sign_change,"descriptive: per condition and criterion, number of datasets whose S(4->5) sign at 64 differs from at 8"
+mcem_stability_signal_matched_20261106,RQ1.independent_MC,"L_EVAL=20 E-step draws from a deep copy with SeedSequence([7600000, model_seed, checkpoint]); C_Q_eval and its MC SE; the estimation RNG is untouched (gate G3)"
+mcem_stability_signal_matched_20261106,RQ1.local_comparison,"S(4->5) = mean_s C(4,s) - mean_s C(5,s) for C in {C_Q, C_Lap}; this is a LOCAL 4-vs-5 comparison, not a K_hat over 1..7"
+mcem_stability_signal_matched_20261106,RQ1.question,Is the PR #155 signal-strength effect on the C_Q / C_Lap 4->5 slack maintained when the same MCEM fits continue from 8 to 64 iterations?
+mcem_stability_signal_matched_20261106,RQ1.stability_rules.dataset_SIGN_STABLE,"sign of S(4->5) identical at checkpoints 32, 48 and 64"
+mcem_stability_signal_matched_20261106,RQ1.stability_rules.dataset_SLACK_STABLE,"|S(64) - S(48)| <= 2 * se, se = MC standard error of S from the independent evaluation at 64"
+mcem_stability_signal_matched_20261106,RQ1.stability_rules.fit_STABLE_at_c,"max over the last 8 iterations up to c of gram_rel_change, eta_x_rel_change and eta_y_rel_change all <= 0.01; label at 64 is STABLE or NOT_STABLE (never relaxed)"
+mcem_stability_signal_matched_20261106,RQ1.stability_rules.note,"L=5 stochastic MCEM never converges in the deterministic EM sense; STABLE is a numerical-stability label, not convergence and not consistency"
+mcem_stability_signal_matched_20261106,RQ2.caveat,costs differ slightly: parameter penalty (d-K) ln n is 13 ln 75 for 2->3 and 11 ln 75 for 4->5; Z prior cost identical (n(1+ln 2pi))
+mcem_stability_signal_matched_20261106,RQ2.checkpoints_full,"[8, 16, 24, 32]"
+mcem_stability_signal_matched_20261106,RQ2.data,"per replicate: Z5 ~ N(0, I5); F5 = Q diag(2.5^0.5) (reduced QR, all F^T F eigenvalues 2.5); Z3 = Z5[:, :3], F3 = F5[:, :3] (eigenvalues 2.5); X5 ~ Pois(exp(Z5 F5^T)), X3 exact coupling of X5; w = 1.0 for both, w0_K calibrated so the population density equals the canonical A density; Y5 ~ Bern, Y3 exact coupling of Y5; one train/test mask shared; total signal is NOT matched (K=5 carries 5/3 of K=3)"
+mcem_stability_signal_matched_20261106,RQ2.fits,"K_GEN in {3,5} x K_fit in {K_GEN-1, K_GEN, K_GEN+1} x starts {1,2} x 8 replicates = 96 fits, 32 iterations, L=5"
+mcem_stability_signal_matched_20261106,RQ2.primary,paired (by replicate) Delta = S_Q(4->5 | K_GEN=5) - S_Q(2->3 | K_GEN=3) at checkpoint 32
+mcem_stability_signal_matched_20261106,RQ2.question,"With per-direction signal matched, is K_GEN=5 still harder to select (locally) than K_GEN=3?"
+mcem_stability_signal_matched_20261106,RQ2.rule,"K_HARDER: median Delta < 0 and >= 6/8 negative; NOT_HARDER: median Delta >= 0; otherwise INCONCLUSIVE.  Also per node fit gains X / Y of the last dimension, the over-fit side S(K_GEN -> K_GEN+1), local correctness (S(K-1->K) > 0 and S(K->K+1) < 0), C_Lap analogues."
+mcem_stability_signal_matched_20261106,RQ2.seeds.data,"SeedSequence([7300000, rep])"
+mcem_stability_signal_matched_20261106,RQ2.seeds.model,7500000 + 100*rep + 10*K_fit + start (shared across K_GEN for equal K_fit)
+mcem_stability_signal_matched_20261106,RQ2.seeds.split,7400000 + rep
+mcem_stability_signal_matched_20261106,base,PR #155 head 72f33cf (research/k-selection-causal-analysis-20261106)
+mcem_stability_signal_matched_20261106,budget.excluded_before_results,"full-candidate K (1..7) supplement for B/C/D at 64 iterations needs 15,360 fit-iterations alone; not run. A has full-K up to 40 iterations in the EMC / checkpoint re-evaluation experiments (prior evidence)."
+mcem_stability_signal_matched_20261106,budget.fit_iterations_cap,12000
+mcem_stability_signal_matched_20261106,budget.gates,80
+mcem_stability_signal_matched_20261106,budget.phase_cut_rule,"if the gate timing projects RQ1+RQ2 wall clock > 6 h with 3 parallel processes, RQ2 is not started (RQ1 first); any stage exceeding the 7 h cap stops and is recorded PARTIAL"
+mcem_stability_signal_matched_20261106,budget.rq1,8192
+mcem_stability_signal_matched_20261106,budget.rq2,3072
+mcem_stability_signal_matched_20261106,budget.wall_clock_cap_hours,7.0
+mcem_stability_signal_matched_20261106,experiment_id,mcem_stability_signal_matched_20261106
+mcem_stability_signal_matched_20261106,failure_rules,"[""RetryDetected / exception in a fit -> FAILED row, no retry, no reseed"", ""Laplace not OK -> C_Lap INCOMPLETE for that dataset/checkpoint, not imputed"", ""no threshold relaxation, no seed selection, no condition change after results""]"
+mcem_stability_signal_matched_20261106,lineage,"E (numerics_mode=consistent), prototype; manuscript adoption NOT decided"
+mcem_stability_signal_matched_20261106,required_csvs,"[""experiment_protocol.csv"", ""dataset_provenance.csv"", ""fit_execution_ledger.csv"", ""checkpoint_metrics.csv"", ""checkpoint_criterion_scores.csv"", ""checkpoint_q_decomposition.csv"", ""stability_diagnostics.csv"", ""paired_slack_changes.csv"", ""local_k4_k5_comparison.csv"", ""full_k_selection.csv (not produced: not in scope)"", ""signal_matched_k3_k5.csv"", ""failure_and_incomplete.csv"", ""audit_summary.csv""]"
+mcem_stability_signal_matched_20261106,sha256,4059f06408db6be438d54e6054eaa19d3689bb15e46952380398c94c1ad510bd

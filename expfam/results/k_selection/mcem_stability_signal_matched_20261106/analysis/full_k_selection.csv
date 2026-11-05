@@ -1,0 +1,2 @@
+experiment_id,status,reason
+mcem_stability_signal_matched_20261106,NOT_PRODUCED,full-candidate K (1..7) evaluation was excluded before results by the pre-registered budget rule; RQ1 is a LOCAL 4-vs-5 comparison
