@@ -1,0 +1,210 @@
+{
+ "stage": "phase3",
+ "conds": [
+  "B"
+ ],
+ "counts": {
+  "OK": 32,
+  "FAILED": 0,
+  "INCOMPLETE": 0,
+  "NOT_RUN": 0
+ },
+ "complete": true,
+ "fits": [
+  {
+   "fit_key": "B_r1_k4_s1",
+   "fit_id": 11141,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r1_k4_s2",
+   "fit_id": 11142,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r1_k5_s1",
+   "fit_id": 11151,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r1_k5_s2",
+   "fit_id": 11152,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r2_k4_s1",
+   "fit_id": 11241,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r2_k4_s2",
+   "fit_id": 11242,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r2_k5_s1",
+   "fit_id": 11251,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r2_k5_s2",
+   "fit_id": 11252,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r3_k4_s1",
+   "fit_id": 11341,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r3_k4_s2",
+   "fit_id": 11342,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r3_k5_s1",
+   "fit_id": 11351,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r3_k5_s2",
+   "fit_id": 11352,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r4_k4_s1",
+   "fit_id": 11441,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r4_k4_s2",
+   "fit_id": 11442,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r4_k5_s1",
+   "fit_id": 11451,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r4_k5_s2",
+   "fit_id": 11452,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r5_k4_s1",
+   "fit_id": 11541,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r5_k4_s2",
+   "fit_id": 11542,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r5_k5_s1",
+   "fit_id": 11551,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r5_k5_s2",
+   "fit_id": 11552,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r6_k4_s1",
+   "fit_id": 11641,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r6_k4_s2",
+   "fit_id": 11642,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r6_k5_s1",
+   "fit_id": 11651,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r6_k5_s2",
+   "fit_id": 11652,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r7_k4_s1",
+   "fit_id": 11741,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r7_k4_s2",
+   "fit_id": 11742,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r7_k5_s1",
+   "fit_id": 11751,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r7_k5_s2",
+   "fit_id": 11752,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r8_k4_s1",
+   "fit_id": 11841,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r8_k4_s2",
+   "fit_id": 11842,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r8_k5_s1",
+   "fit_id": 11851,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "B_r8_k5_s2",
+   "fit_id": 11852,
+   "state": "OK",
+   "reason": ""
+  }
+ ],
+ "run_id": "20261106T122025-13104",
+ "stop_reason": "ALL_ATTEMPTED",
+ "fits_run_this_session": 32
+}

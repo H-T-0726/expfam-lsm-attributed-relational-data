@@ -1,0 +1,18 @@
+13:37:17 start phase4_L50 conds=['A', 'D'] prereg=f2f49e5d9b5b code=2133c76f1b0c threads=1 mem_min_gb=3.0
+13:43:49 OK L50_A_r1_k4_s1 -> validated OK  (avail 8.65 GB, 391s)
+13:50:17 OK L50_A_r1_k5_s1 -> validated OK  (avail 8.66 GB, 780s)
+13:56:38 OK L50_A_r2_k4_s1 -> validated OK  (avail 8.67 GB, 1160s)
+14:03:07 OK L50_A_r2_k5_s1 -> validated OK  (avail 8.52 GB, 1549s)
+14:09:27 OK L50_A_r3_k4_s1 -> validated OK  (avail 8.53 GB, 1929s)
+14:15:55 OK L50_A_r3_k5_s1 -> validated OK  (avail 8.50 GB, 2318s)
+14:22:26 OK L50_A_r4_k4_s1 -> validated OK  (avail 8.30 GB, 2709s)
+14:28:54 OK L50_A_r4_k5_s1 -> validated OK  (avail 8.51 GB, 3097s)
+14:35:20 OK L50_D_r1_k4_s1 -> validated OK  (avail 8.22 GB, 3483s)
+14:41:48 OK L50_D_r1_k5_s1 -> validated OK  (avail 8.42 GB, 3871s)
+14:48:09 OK L50_D_r2_k4_s1 -> validated OK  (avail 8.51 GB, 4252s)
+14:54:39 OK L50_D_r2_k5_s1 -> validated OK  (avail 8.51 GB, 4642s)
+15:01:00 OK L50_D_r3_k4_s1 -> validated OK  (avail 8.50 GB, 5023s)
+15:07:29 OK L50_D_r3_k5_s1 -> validated OK  (avail 8.49 GB, 5411s)
+15:13:50 OK L50_D_r4_k4_s1 -> validated OK  (avail 8.54 GB, 5792s)
+15:20:18 OK L50_D_r4_k5_s1 -> validated OK  (avail 8.50 GB, 6181s)
+15:20:18 end phase4_L50: {'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} stop_reason=ALL_ATTEMPTED

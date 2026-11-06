@@ -1,0 +1,39 @@
+{
+ "addendum": "operational-addendum-v2",
+ "experiment_id": "mcem_noise_separation_20261106",
+ "date": "2026-11-06",
+ "prereg_sha256_unchanged": "f2f49e5d9b5bd75423ae69c1c28924283a867708fedd74749f19a7249e3f6c34",
+ "prereg_commit": "87cee59",
+ "gates_commit": "a2bf055",
+ "scope": "execution, saving, resuming and resource control only. No change to conditions, L, seeds, replicates, evaluation or decision rules (PREREG hash unchanged).",
+ "incident": {
+  "what": "first execution (8 processes: Phase 3 A/B/C/D + Phase 4 L20/L50 x A/D in parallel) was stopped by Claude Code after ~1,000 s because the system was critically low on memory; stage outputs were written only at the end, so nothing was saved",
+  "measured_cause": "OpenBLAS without a thread limit (12 threads/process here): private memory 811 MB per process vs 104 MB with 1 thread (RSS ~110 MB either way); 8 processes x ~0.8 GB committed plus 96 BLAS threads on 6 cores",
+  "thread_limit_effect": "one Phase 3 fit (A rep1 K5 s1) with 1 vs 12 threads: identical C_Q_L80 and drift_share (bitwise), 31.5 s vs 31.6 s",
+  "old_dirs": "the 8 empty stage directories phase3_*/phase4_* (0 files each) are kept as a record and not used"
+ },
+ "changes": {
+  "runner": "tools/research_audit/run_mcem_noise_separation_v2.py (orchestration only); per-fit computation is still run_mcem_noise_separation.phase3_fit / phase4_fit",
+  "code_changes_in_compute_module": [
+   "probe() additionally returns eval_chains, G_onestep, w0_onestep, w_onestep for persistence (no computation or RNG change)",
+   "phase3_fit() additionally stores theta_F per probe checkpoint",
+   "the Phase 4 per-fit body moved verbatim into phase4_fit() (same seeds, fit_id, tags, order)"
+  ],
+  "persistence": "results/<stage>/fits/<fit_key>/{csv, manifest.json} + artifacts/<stage>/<fit_key>.npz; temp file + fsync + os.replace; manifest last with sha256 of every file, config hash (prereg, code hash of the compute files, spec incl. seed/K/start/L/max_iter, input data hashes, thread vars), status, seconds, peak RSS",
+  "validation_on_resume": "OK/FAILED with matching config hash and checksums are skipped (FAILED never retried or reseeded); anything else INCOMPLETE -> renamed aside (*.incomplete-<time>, never deleted) and rerun from iteration 1 (no mid-fit resume: the MCEM RNG state is not checkpointed)",
+  "states": "OK, FAILED, INCOMPLETE, NOT_RUN",
+  "execution_dirs": {
+   "results": "expfam/results/k_selection/mcem_noise_separation_20261106/exec_v2/",
+   "artifacts": "D:\\tento\\kennkyu_artifacts\\mcem_noise_separation_20261106\\exec_v2"
+  },
+  "threads": "OPENBLAS/OMP/MKL/NUMEXPR/VECLIB threads = 1 inside the experiment processes only"
+ },
+ "resource_rules": {
+  "memory_guard": "before each fit: if available physical memory < 3.0 GB wait (30 s polling) up to 10 min, then stop launching fits (stop_reason LOW_MEMORY, stage PARTIAL); memory logged every 30 s",
+  "phase3_parallelism": "start with 1 process; increase to at most 3 processes only if the first process's peak RSS < 500 MB and available memory > 6 GB after its first 2 fits; never 4 or more",
+  "phase4": "only after Phase 3 is completely saved; L=20 first with 1 process; L=50 afterwards with 1 process and no other heavy experiment running",
+  "deadline": "stop launching new fits after 6 h per stage invocation; unfinished fits stay NOT_RUN and the stage is reported PARTIAL; no condition is dropped after seeing results",
+  "user_processes": "no other user process is terminated"
+ },
+ "tests_required_before_production": "tools/research_audit/test_resume_mcem_noise_separation.py must report all PASS (exec_v2/resilience_tests/report.json)"
+}

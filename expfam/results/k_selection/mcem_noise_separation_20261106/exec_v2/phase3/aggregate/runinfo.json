@@ -1,0 +1,31 @@
+{
+ "experiment_id": "mcem_noise_separation_20261106",
+ "stage": "phase3",
+ "git_head": "7340ef05a41256c2c44e9cc3c25e0817dae3976f",
+ "branch": "research/mcem-noise-separation-20261106",
+ "prereg_sha256": "f2f49e5d9b5bd75423ae69c1c28924283a867708fedd74749f19a7249e3f6c34",
+ "lineage": "E (numerics_mode=consistent), prototype",
+ "environment": {
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0"
+ },
+ "addendum": "operational-addendum-v2",
+ "status": "COMPLETED",
+ "counts": {
+  "OK": 128,
+  "FAILED": 0,
+  "INCOMPLETE": 0,
+  "NOT_RUN": 0
+ },
+ "code_sha256": "2133c76f1b0c02876250b5bda63eb0a42c83633215694bf95a5e31ba91e51c09",
+ "artifact_root": "D:\\tento\\kennkyu_artifacts\\mcem_noise_separation_20261106\\exec_v2\\phase3",
+ "thread_vars": {
+  "OPENBLAS_NUM_THREADS": "1",
+  "OMP_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "NUMEXPR_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1"
+ }
+}

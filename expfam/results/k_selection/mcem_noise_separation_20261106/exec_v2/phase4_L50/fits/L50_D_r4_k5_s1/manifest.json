@@ -1,0 +1,61 @@
+{
+ "addendum": "operational-addendum-v2",
+ "experiment_id": "mcem_noise_separation_20261106",
+ "stage": "phase4_L50",
+ "fit_key": "L50_D_r4_k5_s1",
+ "condition": "D",
+ "replicate": 4,
+ "k_fit": 5,
+ "start": 1,
+ "L_fit": 50,
+ "fit_id": 41345,
+ "model_seed": 1405451,
+ "max_iter": 32,
+ "probe_seed": "[7750000, fit_id, 32, r]; eval [7710000, fit_id, 32, r]",
+ "status": "OK",
+ "exception": "",
+ "config_hash": "6accef7dbdbc61879100c20ae94d764c85414d270d4f004ec1352ee35e540bbe",
+ "config": {
+  "prereg_sha256": "f2f49e5d9b5bd75423ae69c1c28924283a867708fedd74749f19a7249e3f6c34",
+  "code_sha256": "2133c76f1b0c02876250b5bda63eb0a42c83633215694bf95a5e31ba91e51c09",
+  "spec": {
+   "stage": "phase4_L50",
+   "fit_key": "L50_D_r4_k5_s1",
+   "condition": "D",
+   "replicate": 4,
+   "k_fit": 5,
+   "start": 1,
+   "L_fit": 50,
+   "fit_id": 41345,
+   "model_seed": 1405451,
+   "max_iter": 32,
+   "probe_seed": "[7750000, fit_id, 32, r]; eval [7710000, fit_id, 32, r]"
+  },
+  "inputs": {
+   "X": "e64da40d79ad011e0c7e19803d4ffa79e0a77f6cc292770464ece5401c37a004",
+   "Y": "7653b6e3224c9aed1d2eedd934a88693b6d4a8f426b8ded1168ad5c6ec7cb936",
+   "train": "7608d74bdb4897f1f841453224e98fe7c9518accb3aa78cdc004865ae374dbef"
+  },
+  "thread_vars": {
+   "OPENBLAS_NUM_THREADS": "1",
+   "OMP_NUM_THREADS": "1",
+   "MKL_NUM_THREADS": "1",
+   "NUMEXPR_NUM_THREADS": "1",
+   "VECLIB_MAXIMUM_THREADS": "1"
+  }
+ },
+ "files": {
+  "__npz__": "5898c36a3a12167da01dabdaab124c2427410e3f6f446126d53cb03a0d58844c",
+  "checkpoint_rows.csv": "78edd097cc50fcca4cb848c547a35d2172e8b77515c53fe49464f75ba2173ce9",
+  "probe_rows.csv": "d0329112b77f3c68a786497addb210c633c13925ebe417b2865d814512a24d25",
+  "replicate_rows.csv": "4412f1a6499c076c2dde9987f3d183622264da8c3a5a44fc5c300971249b7ce7",
+  "iteration_rows.csv": "d6d381e56497a4f75471b271b3b8e88ebb59d4e340e1d59e47d77ac637da02c2"
+ },
+ "npz_path": "D:\\tento\\kennkyu_artifacts\\mcem_noise_separation_20261106\\exec_v2\\phase4_L50\\L50_D_r4_k5_s1.npz",
+ "seconds": 388.5,
+ "peak_rss_mb": 115.3,
+ "available_mb_after": 8707,
+ "pid": 9708,
+ "git_head": "6526cf82d7109d40ce9006051796079a4abc98e1",
+ "finished_at": "2026-11-06T15:20:18"
+}

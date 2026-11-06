@@ -1,0 +1,18 @@
+12:53:17 start phase4_L20 conds=['A', 'D'] prereg=f2f49e5d9b5b code=2133c76f1b0c threads=1 mem_min_gb=3.0
+12:55:59 OK L20_A_r1_k4_s1 -> validated OK  (avail 8.73 GB, 162s)
+12:58:43 OK L20_A_r1_k5_s1 -> validated OK  (avail 8.70 GB, 326s)
+13:01:26 OK L20_A_r2_k4_s1 -> validated OK  (avail 8.70 GB, 489s)
+13:04:10 OK L20_A_r2_k5_s1 -> validated OK  (avail 8.72 GB, 653s)
+13:06:51 OK L20_A_r3_k4_s1 -> validated OK  (avail 8.72 GB, 814s)
+13:09:36 OK L20_A_r3_k5_s1 -> validated OK  (avail 8.65 GB, 980s)
+13:12:19 OK L20_A_r4_k4_s1 -> validated OK  (avail 8.63 GB, 1142s)
+13:15:03 OK L20_A_r4_k5_s1 -> validated OK  (avail 8.69 GB, 1306s)
+13:17:45 OK L20_D_r1_k4_s1 -> validated OK  (avail 8.70 GB, 1468s)
+13:20:29 OK L20_D_r1_k5_s1 -> validated OK  (avail 8.69 GB, 1632s)
+13:23:10 OK L20_D_r2_k4_s1 -> validated OK  (avail 8.70 GB, 1793s)
+13:25:54 OK L20_D_r2_k5_s1 -> validated OK  (avail 8.71 GB, 1957s)
+13:28:34 OK L20_D_r3_k4_s1 -> validated OK  (avail 8.68 GB, 2118s)
+13:31:21 OK L20_D_r3_k5_s1 -> validated OK  (avail 8.67 GB, 2284s)
+13:34:02 OK L20_D_r4_k4_s1 -> validated OK  (avail 8.68 GB, 2446s)
+13:36:46 OK L20_D_r4_k5_s1 -> validated OK  (avail 8.67 GB, 2610s)
+13:36:47 end phase4_L20: {'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} stop_reason=ALL_ATTEMPTED

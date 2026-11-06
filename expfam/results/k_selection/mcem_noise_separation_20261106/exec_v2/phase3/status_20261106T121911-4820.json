@@ -1,0 +1,403 @@
+{
+ "stage": "phase3",
+ "conds": [
+  "A",
+  "D"
+ ],
+ "counts": {
+  "OK": 64,
+  "FAILED": 0,
+  "INCOMPLETE": 0,
+  "NOT_RUN": 0
+ },
+ "complete": true,
+ "fits": [
+  {
+   "fit_key": "A_r1_k4_s1",
+   "fit_id": 10141,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r1_k4_s2",
+   "fit_id": 10142,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r1_k5_s1",
+   "fit_id": 10151,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r1_k5_s2",
+   "fit_id": 10152,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r2_k4_s1",
+   "fit_id": 10241,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r2_k4_s2",
+   "fit_id": 10242,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r2_k5_s1",
+   "fit_id": 10251,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r2_k5_s2",
+   "fit_id": 10252,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r3_k4_s1",
+   "fit_id": 10341,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r3_k4_s2",
+   "fit_id": 10342,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r3_k5_s1",
+   "fit_id": 10351,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r3_k5_s2",
+   "fit_id": 10352,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r4_k4_s1",
+   "fit_id": 10441,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r4_k4_s2",
+   "fit_id": 10442,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r4_k5_s1",
+   "fit_id": 10451,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r4_k5_s2",
+   "fit_id": 10452,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r5_k4_s1",
+   "fit_id": 10541,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r5_k4_s2",
+   "fit_id": 10542,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r5_k5_s1",
+   "fit_id": 10551,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r5_k5_s2",
+   "fit_id": 10552,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r6_k4_s1",
+   "fit_id": 10641,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r6_k4_s2",
+   "fit_id": 10642,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r6_k5_s1",
+   "fit_id": 10651,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r6_k5_s2",
+   "fit_id": 10652,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r7_k4_s1",
+   "fit_id": 10741,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r7_k4_s2",
+   "fit_id": 10742,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r7_k5_s1",
+   "fit_id": 10751,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r7_k5_s2",
+   "fit_id": 10752,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r8_k4_s1",
+   "fit_id": 10841,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r8_k4_s2",
+   "fit_id": 10842,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r8_k5_s1",
+   "fit_id": 10851,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "A_r8_k5_s2",
+   "fit_id": 10852,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r1_k4_s1",
+   "fit_id": 13141,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r1_k4_s2",
+   "fit_id": 13142,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r1_k5_s1",
+   "fit_id": 13151,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r1_k5_s2",
+   "fit_id": 13152,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r2_k4_s1",
+   "fit_id": 13241,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r2_k4_s2",
+   "fit_id": 13242,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r2_k5_s1",
+   "fit_id": 13251,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r2_k5_s2",
+   "fit_id": 13252,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r3_k4_s1",
+   "fit_id": 13341,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r3_k4_s2",
+   "fit_id": 13342,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r3_k5_s1",
+   "fit_id": 13351,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r3_k5_s2",
+   "fit_id": 13352,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r4_k4_s1",
+   "fit_id": 13441,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r4_k4_s2",
+   "fit_id": 13442,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r4_k5_s1",
+   "fit_id": 13451,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r4_k5_s2",
+   "fit_id": 13452,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r5_k4_s1",
+   "fit_id": 13541,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r5_k4_s2",
+   "fit_id": 13542,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r5_k5_s1",
+   "fit_id": 13551,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r5_k5_s2",
+   "fit_id": 13552,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r6_k4_s1",
+   "fit_id": 13641,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r6_k4_s2",
+   "fit_id": 13642,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r6_k5_s1",
+   "fit_id": 13651,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r6_k5_s2",
+   "fit_id": 13652,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r7_k4_s1",
+   "fit_id": 13741,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r7_k4_s2",
+   "fit_id": 13742,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r7_k5_s1",
+   "fit_id": 13751,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r7_k5_s2",
+   "fit_id": 13752,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r8_k4_s1",
+   "fit_id": 13841,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r8_k4_s2",
+   "fit_id": 13842,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r8_k5_s1",
+   "fit_id": 13851,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "D_r8_k5_s2",
+   "fit_id": 13852,
+   "state": "OK",
+   "reason": ""
+  }
+ ],
+ "run_id": "20261106T121911-4820",
+ "stop_reason": "ALL_ATTEMPTED",
+ "fits_run_this_session": 64
+}

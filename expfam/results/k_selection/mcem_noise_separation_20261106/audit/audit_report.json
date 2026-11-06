@@ -1,0 +1,153 @@
+{
+ "experiment_id": "mcem_noise_separation_20261106",
+ "git_head": "46664fbad6fe7b817ebd86928fa0d74ee07370c2",
+ "passed": 29,
+ "total": 29,
+ "checks": [
+  {
+   "check": "prereg.json == code PREREG",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "gates PASSED with the same prereg hash",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "prereg committed before Phase 3 results",
+   "status": "PASS",
+   "detail": "87cee590e75f696f9fcb41a1db3b9020228c43ed prereg: MCEM noise separation study (fixed-theta probes, L pilot)"
+  },
+  {
+   "check": "operational addendum v2 committed before exec_v2 results",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "save/resume tests all PASS before production",
+   "status": "PASS",
+   "detail": "9/9"
+  },
+  {
+   "check": "phase3: per-fit validation (manifest + config hash + sha256 of every file incl. external npz)",
+   "status": "PASS",
+   "detail": "{'OK': 128, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+  },
+  {
+   "check": "phase3: aggregate ledger == validation, unique fit_id",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "phase4_L20: per-fit validation (manifest + config hash + sha256 of every file incl. external npz)",
+   "status": "PASS",
+   "detail": "{'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+  },
+  {
+   "check": "phase4_L20: aggregate ledger == validation, unique fit_id",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "phase4_L50: per-fit validation (manifest + config hash + sha256 of every file incl. external npz)",
+   "status": "PASS",
+   "detail": "{'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+  },
+  {
+   "check": "phase4_L50: aggregate ledger == validation, unique fit_id",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "Phase 3 ledger: 128 fits, no duplicates",
+   "status": "PASS",
+   "detail": "{'OK': 128}"
+  },
+  {
+   "check": "Phase 3 row counts match OK fits (6 states, 2 probes, 32 replicate rows per fit)",
+   "status": "PASS",
+   "detail": "(768, 256, 4096)"
+  },
+  {
+   "check": "C_Lap at all OK archived states == PR #156 (deterministic recompute)",
+   "status": "PASS",
+   "detail": "767 states, max diff 1.8e-12; lap status mismatches 0"
+  },
+  {
+   "check": "C_Q(L=80) == mean of the 16 C_Q(L=5) (pooled chains)",
+   "status": "PASS",
+   "detail": "max diff 3.6e-12"
+  },
+  {
+   "check": "C_Q(L=80) == mean of the four C_Q(L=20)",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "Q_Z is constant for a given K (global scale_Z)",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "posterior-mean eta_x change 32->64 recomputed from archived Zbar and PR #156 F",
+   "status": "PASS",
+   "detail": "max diff 7.4e-15"
+  },
+  {
+   "check": "re-execution of A rep8 K4 s2 reproduces probe rows",
+   "status": "PASS",
+   "detail": "max diff 9.1e-13"
+  },
+  {
+   "check": "re-execution of D rep3 K5 s1 reproduces probe rows",
+   "status": "PASS",
+   "detail": "max diff 9.1e-13"
+  },
+  {
+   "check": "R1 labels recomputed",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "R1 drift share recomputed from the persisted one-step G stacks (rep 2, start 2, all conditions/K/checkpoints)",
+   "status": "PASS",
+   "detail": "max diff 5.6e-17"
+  },
+  {
+   "check": "R2 gram ratio recomputed from PR #156 iteration rows",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "R5 counts, p-values and verdicts recomputed",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "L=80 slack recomputed",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "R6 paired medians, counts and verdicts recomputed",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "check": "analysis/figure hashes == manifest",
+   "status": "PASS",
+   "detail": "[]"
+  },
+  {
+   "check": "only additions vs PR #156 branch (except append-only registry)",
+   "status": "PASS",
+   "detail": "['M\\tEXPERIMENT_REGISTRY.md']"
+  },
+  {
+   "check": "EXPERIMENT_REGISTRY.md append-only",
+   "status": "PASS",
+   "detail": ""
+  }
+ ]
+}
