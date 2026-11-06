@@ -1,0 +1,565 @@
+experiment,cell,dataset,criterion,k_gen,side,k_from,k_to,slack
+E1,G_canon | K_GEN=5 | E,1,A_CQ,5,under_side,4,5,1749.2838911585604
+E1,G_canon | K_GEN=5 | E,1,A_CQ,5,over_side,5,6,-342.4927401898876
+E1,G_canon | K_GEN=5 | E,1,B_CQ_minus_PZ,5,under_side,4,5,2174.9654511199587
+E1,G_canon | K_GEN=5 | E,1,B_CQ_minus_PZ,5,over_side,5,6,83.18881977151614
+E1,G_canon | K_GEN=5 | E,1,C_cond_last,5,under_side,4,5,2181.4722537011876
+E1,G_canon | K_GEN=5 | E,1,C_cond_last,5,over_side,5,6,87.6129779512903
+E1,G_canon | K_GEN=5 | E,1,D_cond_mode,5,under_side,4,5,2324.624335704946
+E1,G_canon | K_GEN=5 | E,1,D_cond_mode,5,over_side,5,6,255.7341569167038
+E1,G_canon | K_GEN=5 | E,1,E_CLap,5,under_side,4,5,1461.6748923938721
+E1,G_canon | K_GEN=5 | E,1,E_CLap,5,over_side,5,6,-106.57669490261287
+E1,G_canon | K_GEN=5 | E,2,A_CQ,5,under_side,4,5,1889.8005397803408
+E1,G_canon | K_GEN=5 | E,2,A_CQ,5,over_side,5,6,-312.2691388068797
+E1,G_canon | K_GEN=5 | E,2,B_CQ_minus_PZ,5,under_side,4,5,2315.482099741741
+E1,G_canon | K_GEN=5 | E,2,B_CQ_minus_PZ,5,over_side,5,6,113.41242115452224
+E1,G_canon | K_GEN=5 | E,2,C_cond_last,5,under_side,4,5,2291.2755210816504
+E1,G_canon | K_GEN=5 | E,2,C_cond_last,5,over_side,5,6,110.62185261656305
+E1,G_canon | K_GEN=5 | E,2,D_cond_mode,5,under_side,4,5,2481.459000091345
+E1,G_canon | K_GEN=5 | E,2,D_cond_mode,5,over_side,5,6,251.50394541287096
+E1,G_canon | K_GEN=5 | E,2,E_CLap,5,under_side,4,5,1635.967372933599
+E1,G_canon | K_GEN=5 | E,2,E_CLap,5,over_side,5,6,-113.83913531990765
+E1,G_canon | K_GEN=5 | OLD,1,A_CQ,5,under_side,4,5,1759.7221671619736
+E1,G_canon | K_GEN=5 | OLD,1,A_CQ,5,over_side,5,6,-479.8203496610622
+E1,G_canon | K_GEN=5 | OLD,1,B_CQ_minus_PZ,5,under_side,4,5,2185.4037271233756
+E1,G_canon | K_GEN=5 | OLD,1,B_CQ_minus_PZ,5,over_side,5,6,-54.138789699660265
+E1,G_canon | K_GEN=5 | OLD,1,C_cond_last,5,under_side,4,5,2210.839271609717
+E1,G_canon | K_GEN=5 | OLD,1,C_cond_last,5,over_side,5,6,-59.28037740520267
+E1,G_canon | K_GEN=5 | OLD,1,D_cond_mode,5,under_side,4,5,2324.2292871143472
+E1,G_canon | K_GEN=5 | OLD,1,D_cond_mode,5,over_side,5,6,238.15584223873338
+E1,G_canon | K_GEN=5 | OLD,1,E_CLap,5,under_side,4,5,1462.2816974490615
+E1,G_canon | K_GEN=5 | OLD,1,E_CLap,5,over_side,5,6,-112.1286147697956
+E1,G_canon | K_GEN=5 | OLD,1,PY_hist,5,under_side,4,5,1785.0930101982412
+E1,G_canon | K_GEN=5 | OLD,1,PY_hist,5,over_side,5,6,-441.9511232856603
+E1,G_canon | K_GEN=5 | OLD,2,A_CQ,5,under_side,4,5,2083.6187196695464
+E1,G_canon | K_GEN=5 | OLD,2,A_CQ,5,over_side,5,6,-440.1449459514861
+E1,G_canon | K_GEN=5 | OLD,2,B_CQ_minus_PZ,5,under_side,4,5,2509.3002796309484
+E1,G_canon | K_GEN=5 | OLD,2,B_CQ_minus_PZ,5,over_side,5,6,-14.463385990085953
+E1,G_canon | K_GEN=5 | OLD,2,C_cond_last,5,under_side,4,5,2498.6760041101443
+E1,G_canon | K_GEN=5 | OLD,2,C_cond_last,5,over_side,5,6,-33.125647865270366
+E1,G_canon | K_GEN=5 | OLD,2,D_cond_mode,5,under_side,4,5,2661.861002716132
+E1,G_canon | K_GEN=5 | OLD,2,D_cond_mode,5,over_side,5,6,228.75823704633876
+E1,G_canon | K_GEN=5 | OLD,2,E_CLap,5,under_side,4,5,1776.675990696007
+E1,G_canon | K_GEN=5 | OLD,2,E_CLap,5,over_side,5,6,-121.3615505483831
+E1,G_canon | K_GEN=5 | OLD,2,PY_hist,5,under_side,4,5,2041.4802292725508
+E1,G_canon | K_GEN=5 | OLD,2,PY_hist,5,over_side,5,6,-409.3054383116905
+E1,G_canon | K_GEN=9 | E,1,A_CQ,9,under_side,8,9,733.9590788467831
+E1,G_canon | K_GEN=9 | E,1,A_CQ,9,over_side,9,10,-247.9669023780607
+E1,G_canon | K_GEN=9 | E,1,B_CQ_minus_PZ,9,under_side,8,9,1159.640638808185
+E1,G_canon | K_GEN=9 | E,1,B_CQ_minus_PZ,9,over_side,9,10,177.71465758334307
+E1,G_canon | K_GEN=9 | E,1,C_cond_last,9,under_side,8,9,1182.1540437187323
+E1,G_canon | K_GEN=9 | E,1,C_cond_last,9,over_side,9,10,151.00029604888914
+E1,G_canon | K_GEN=9 | E,1,D_cond_mode,9,under_side,8,9,1310.160929414982
+E1,G_canon | K_GEN=9 | E,1,D_cond_mode,9,over_side,9,10,310.2077391922976
+E1,G_canon | K_GEN=9 | E,1,E_CLap,9,under_side,8,9,549.7495091137025
+E1,G_canon | K_GEN=9 | E,1,E_CLap,9,over_side,9,10,-64.86488392344472
+E1,G_canon | K_GEN=9 | E,2,A_CQ,9,under_side,8,9,950.280083814283
+E1,G_canon | K_GEN=9 | E,2,A_CQ,9,over_side,9,10,-251.21847360695028
+E1,G_canon | K_GEN=9 | E,2,B_CQ_minus_PZ,9,under_side,8,9,1375.9616437756813
+E1,G_canon | K_GEN=9 | E,2,B_CQ_minus_PZ,9,over_side,9,10,174.4630863544553
+E1,G_canon | K_GEN=9 | E,2,C_cond_last,9,under_side,8,9,1452.0682804764401
+E1,G_canon | K_GEN=9 | E,2,C_cond_last,9,over_side,9,10,193.5555468194725
+E1,G_canon | K_GEN=9 | E,2,D_cond_mode,9,under_side,8,9,1536.8299611230104
+E1,G_canon | K_GEN=9 | E,2,D_cond_mode,9,over_side,9,10,302.0992241178683
+E1,G_canon | K_GEN=9 | E,2,E_CLap,9,under_side,8,9,685.8554084722255
+E1,G_canon | K_GEN=9 | E,2,E_CLap,9,over_side,9,10,-66.36281455743483
+E1,G_canon | K_GEN=9 | OLD,1,A_CQ,9,under_side,8,9,829.8615507279792
+E1,G_canon | K_GEN=9 | OLD,1,A_CQ,9,over_side,9,10,-450.75431727836985
+E1,G_canon | K_GEN=9 | OLD,1,B_CQ_minus_PZ,9,under_side,8,9,1255.5431106893775
+E1,G_canon | K_GEN=9 | OLD,1,B_CQ_minus_PZ,9,over_side,9,10,-25.07275731696427
+E1,G_canon | K_GEN=9 | OLD,1,C_cond_last,9,under_side,8,9,1251.8795765649375
+E1,G_canon | K_GEN=9 | OLD,1,C_cond_last,9,over_side,9,10,-20.199542658996506
+E1,G_canon | K_GEN=9 | OLD,1,D_cond_mode,9,under_side,8,9,1385.4687602075592
+E1,G_canon | K_GEN=9 | OLD,1,D_cond_mode,9,over_side,9,10,225.9199446131006
+E1,G_canon | K_GEN=9 | OLD,1,E_CLap,9,under_side,8,9,592.1361799088663
+E1,G_canon | K_GEN=9 | OLD,1,E_CLap,9,over_side,9,10,-83.215925988874
+E1,G_canon | K_GEN=9 | OLD,1,PY_hist,9,under_side,8,9,802.9697473734432
+E1,G_canon | K_GEN=9 | OLD,1,PY_hist,9,over_side,9,10,-452.96570725268975
+E1,G_canon | K_GEN=9 | OLD,2,A_CQ,9,under_side,8,9,1200.552217911476
+E1,G_canon | K_GEN=9 | OLD,2,A_CQ,9,over_side,9,10,-452.4781929378514
+E1,G_canon | K_GEN=9 | OLD,2,B_CQ_minus_PZ,9,under_side,8,9,1626.2337778728797
+E1,G_canon | K_GEN=9 | OLD,2,B_CQ_minus_PZ,9,over_side,9,10,-26.796632976449473
+E1,G_canon | K_GEN=9 | OLD,2,C_cond_last,9,under_side,8,9,1669.92188883384
+E1,G_canon | K_GEN=9 | OLD,2,C_cond_last,9,over_side,9,10,44.256046926217095
+E1,G_canon | K_GEN=9 | OLD,2,D_cond_mode,9,under_side,8,9,1685.7729442559648
+E1,G_canon | K_GEN=9 | OLD,2,D_cond_mode,9,over_side,9,10,236.81828645097266
+E1,G_canon | K_GEN=9 | OLD,2,E_CLap,9,under_side,8,9,786.7977944022241
+E1,G_canon | K_GEN=9 | OLD,2,E_CLap,9,over_side,9,10,-92.41246783044335
+E1,G_canon | K_GEN=9 | OLD,2,PY_hist,9,under_side,8,9,1223.0852663375008
+E1,G_canon | K_GEN=9 | OLD,2,PY_hist,9,over_side,9,10,-377.24027163649225
+E1,G_old | K_GEN=5 | E,1,A_CQ,5,under_side,4,5,3386.262763570614
+E1,G_old | K_GEN=5 | E,1,A_CQ,5,over_side,5,6,-216.95398236981327
+E1,G_old | K_GEN=5 | E,1,B_CQ_minus_PZ,5,under_side,4,5,3811.944323532016
+E1,G_old | K_GEN=5 | E,1,B_CQ_minus_PZ,5,over_side,5,6,208.72757759158776
+E1,G_old | K_GEN=5 | E,1,C_cond_last,5,under_side,4,5,3857.003287920229
+E1,G_old | K_GEN=5 | E,1,C_cond_last,5,over_side,5,6,192.17591329319384
+E1,G_old | K_GEN=5 | E,1,D_cond_mode,5,under_side,4,5,4004.8975716631853
+E1,G_old | K_GEN=5 | E,1,D_cond_mode,5,over_side,5,6,364.69718993409697
+E1,G_old | K_GEN=5 | E,1,E_CLap,5,under_side,4,5,3027.9083795211427
+E1,G_old | K_GEN=5 | E,1,E_CLap,5,over_side,5,6,-135.23911168587074
+E1,G_old | K_GEN=5 | E,2,A_CQ,5,under_side,4,5,2922.563798707961
+E1,G_old | K_GEN=5 | E,2,A_CQ,5,over_side,5,6,-181.63516127807998
+E1,G_old | K_GEN=5 | E,2,B_CQ_minus_PZ,5,under_side,4,5,3348.2453586693628
+E1,G_old | K_GEN=5 | E,2,B_CQ_minus_PZ,5,over_side,5,6,244.04639868332015
+E1,G_old | K_GEN=5 | E,2,C_cond_last,5,under_side,4,5,3400.738194652082
+E1,G_old | K_GEN=5 | E,2,C_cond_last,5,over_side,5,6,131.09949917771155
+E1,G_old | K_GEN=5 | E,2,D_cond_mode,5,under_side,4,5,3555.218618562102
+E1,G_old | K_GEN=5 | E,2,D_cond_mode,5,over_side,5,6,372.3525425296475
+E1,G_old | K_GEN=5 | E,2,E_CLap,5,under_side,4,5,2681.228236336712
+E1,G_old | K_GEN=5 | E,2,E_CLap,5,over_side,5,6,-143.06178406908293
+E1,G_old | K_GEN=5 | OLD,1,A_CQ,5,under_side,4,5,3268.6546530307687
+E1,G_old | K_GEN=5 | OLD,1,A_CQ,5,over_side,5,6,-373.74658830937733
+E1,G_old | K_GEN=5 | OLD,1,B_CQ_minus_PZ,5,under_side,4,5,3694.3362129921697
+E1,G_old | K_GEN=5 | OLD,1,B_CQ_minus_PZ,5,over_side,5,6,51.934971652024615
+E1,G_old | K_GEN=5 | OLD,1,C_cond_last,5,under_side,4,5,3796.224049624134
+E1,G_old | K_GEN=5 | OLD,1,C_cond_last,5,over_side,5,6,-40.2317117154962
+E1,G_old | K_GEN=5 | OLD,1,PY_hist,5,under_side,4,5,3326.2844803350026
+E1,G_old | K_GEN=5 | OLD,1,PY_hist,5,over_side,5,6,-453.2804576106673
+E1,G_old | K_GEN=5 | OLD,2,A_CQ,5,under_side,4,5,2999.7602234677997
+E1,G_old | K_GEN=5 | OLD,2,A_CQ,5,over_side,5,6,-333.8467986724245
+E1,G_old | K_GEN=5 | OLD,2,B_CQ_minus_PZ,5,under_side,4,5,3425.4417834292
+E1,G_old | K_GEN=5 | OLD,2,B_CQ_minus_PZ,5,over_side,5,6,91.83476128897928
+E1,G_old | K_GEN=5 | OLD,2,C_cond_last,5,under_side,4,5,3495.6305092848033
+E1,G_old | K_GEN=5 | OLD,2,C_cond_last,5,over_side,5,6,-101.97312308305209
+E1,G_old | K_GEN=5 | OLD,2,D_cond_mode,5,under_side,4,5,3712.1169762064246
+E1,G_old | K_GEN=5 | OLD,2,D_cond_mode,5,over_side,5,6,333.4564912708138
+E1,G_old | K_GEN=5 | OLD,2,E_CLap,5,under_side,4,5,2802.5698126188545
+E1,G_old | K_GEN=5 | OLD,2,E_CLap,5,over_side,5,6,-114.88407673666006
+E1,G_old | K_GEN=5 | OLD,2,PY_hist,5,under_side,4,5,3063.1087313917305
+E1,G_old | K_GEN=5 | OLD,2,PY_hist,5,over_side,5,6,-519.0985675304019
+E1,G_old | K_GEN=9 | E,1,A_CQ,9,under_side,8,9,1839.189776661182
+E1,G_old | K_GEN=9 | E,1,A_CQ,9,over_side,9,10,-357.2954302108228
+E1,G_old | K_GEN=9 | E,1,B_CQ_minus_PZ,9,under_side,8,9,2264.8713366225866
+E1,G_old | K_GEN=9 | E,1,B_CQ_minus_PZ,9,over_side,9,10,68.38612975057731
+E1,G_old | K_GEN=9 | E,1,C_cond_last,9,under_side,8,9,2209.8008823540677
+E1,G_old | K_GEN=9 | E,1,C_cond_last,9,over_side,9,10,82.16012712136944
+E1,G_old | K_GEN=9 | E,1,D_cond_mode,9,under_side,8,9,2477.233846843752
+E1,G_old | K_GEN=9 | E,1,E_CLap,9,under_side,8,9,1512.3414798372178
+E1,G_old | K_GEN=9 | E,2,A_CQ,9,under_side,8,9,2114.749990934233
+E1,G_old | K_GEN=9 | E,2,A_CQ,9,over_side,9,10,-359.5568950629786
+E1,G_old | K_GEN=9 | E,2,B_CQ_minus_PZ,9,under_side,8,9,2540.4315508956342
+E1,G_old | K_GEN=9 | E,2,B_CQ_minus_PZ,9,over_side,9,10,66.12466489842518
+E1,G_old | K_GEN=9 | E,2,C_cond_last,9,under_side,8,9,2550.9505381743556
+E1,G_old | K_GEN=9 | E,2,C_cond_last,9,over_side,9,10,32.69292799834784
+E1,G_old | K_GEN=9 | E,2,D_cond_mode,9,under_side,8,9,2709.9601561345526
+E1,G_old | K_GEN=9 | E,2,D_cond_mode,9,over_side,9,10,250.1966505856758
+E1,G_old | K_GEN=9 | E,2,E_CLap,9,under_side,8,9,1732.9091854443468
+E1,G_old | K_GEN=9 | E,2,E_CLap,9,over_side,9,10,-153.48287402664937
+E1,G_old | K_GEN=9 | OLD,1,A_CQ,9,under_side,8,9,1746.13842010207
+E1,G_old | K_GEN=9 | OLD,1,A_CQ,9,over_side,9,10,-513.1485617420403
+E1,G_old | K_GEN=9 | OLD,1,B_CQ_minus_PZ,9,under_side,8,9,2171.819980063471
+E1,G_old | K_GEN=9 | OLD,1,B_CQ_minus_PZ,9,over_side,9,10,-87.4670017806393
+E1,G_old | K_GEN=9 | OLD,1,C_cond_last,9,under_side,8,9,2028.7153482005078
+E1,G_old | K_GEN=9 | OLD,1,C_cond_last,9,over_side,9,10,-30.580971744843737
+E1,G_old | K_GEN=9 | OLD,1,D_cond_mode,9,under_side,8,9,2368.5858137590285
+E1,G_old | K_GEN=9 | OLD,1,D_cond_mode,9,over_side,9,10,160.18428845659855
+E1,G_old | K_GEN=9 | OLD,1,E_CLap,9,under_side,8,9,1470.0556486787282
+E1,G_old | K_GEN=9 | OLD,1,E_CLap,9,over_side,9,10,-160.50626306593767
+E1,G_old | K_GEN=9 | OLD,1,PY_hist,9,under_side,8,9,1598.395812374405
+E1,G_old | K_GEN=9 | OLD,1,PY_hist,9,over_side,9,10,-446.9661969280114
+E1,G_old | K_GEN=9 | OLD,2,A_CQ,9,under_side,8,9,2234.604475410817
+E1,G_old | K_GEN=9 | OLD,2,A_CQ,9,over_side,9,10,-561.7656044701162
+E1,G_old | K_GEN=9 | OLD,2,B_CQ_minus_PZ,9,under_side,8,9,2660.2860353722217
+E1,G_old | K_GEN=9 | OLD,2,B_CQ_minus_PZ,9,over_side,9,10,-136.08404450871694
+E1,G_old | K_GEN=9 | OLD,2,C_cond_last,9,under_side,8,9,2765.886684397975
+E1,G_old | K_GEN=9 | OLD,2,C_cond_last,9,over_side,9,10,-282.8661049371749
+E1,G_old | K_GEN=9 | OLD,2,D_cond_mode,9,under_side,8,9,2958.79428780906
+E1,G_old | K_GEN=9 | OLD,2,D_cond_mode,9,over_side,9,10,137.65716281935238
+E1,G_old | K_GEN=9 | OLD,2,E_CLap,9,under_side,8,9,1961.45890436232
+E1,G_old | K_GEN=9 | OLD,2,E_CLap,9,over_side,9,10,-194.6640857424718
+E1,G_old | K_GEN=9 | OLD,2,PY_hist,9,under_side,8,9,2314.8451421569116
+E1,G_old | K_GEN=9 | OLD,2,PY_hist,9,over_side,9,10,-691.3828910234297
+E2,gaussian | n=150 | strong,1,A_CQ,5,under_side,4,5,550.7313406753929
+E2,gaussian | n=150 | strong,1,A_CQ,5,over_side,5,6,-312.99684219088886
+E2,gaussian | n=150 | strong,1,B_CQ_minus_PZ,5,under_side,4,5,976.4129006367912
+E2,gaussian | n=150 | strong,1,B_CQ_minus_PZ,5,over_side,5,6,112.68471777050945
+E2,gaussian | n=150 | strong,1,C_cond_last,5,under_side,4,5,1001.7956823174009
+E2,gaussian | n=150 | strong,1,C_cond_last,5,over_side,5,6,180.43981770669416
+E2,gaussian | n=150 | strong,1,D_cond_mode,5,under_side,4,5,1105.5374854030888
+E2,gaussian | n=150 | strong,1,D_cond_mode,5,over_side,5,6,275.8909901764473
+E2,gaussian | n=150 | strong,1,E_CLap,5,under_side,4,5,517.8358453939072
+E2,gaussian | n=150 | strong,1,E_CLap,5,over_side,5,6,-85.63026160643858
+E2,gaussian | n=150 | strong,2,A_CQ,5,under_side,4,5,623.0155918452583
+E2,gaussian | n=150 | strong,2,A_CQ,5,over_side,5,6,-319.75968190992717
+E2,gaussian | n=150 | strong,2,B_CQ_minus_PZ,5,under_side,4,5,1048.6971518066603
+E2,gaussian | n=150 | strong,2,B_CQ_minus_PZ,5,over_side,5,6,105.92187805147296
+E2,gaussian | n=150 | strong,2,C_cond_last,5,under_side,4,5,1032.1757362958997
+E2,gaussian | n=150 | strong,2,C_cond_last,5,over_side,5,6,113.90017738839379
+E2,gaussian | n=150 | strong,2,D_cond_mode,5,under_side,4,5,1183.5169167552904
+E2,gaussian | n=150 | strong,2,D_cond_mode,5,over_side,5,6,240.02913451264067
+E2,gaussian | n=150 | strong,2,E_CLap,5,under_side,4,5,584.89643214844
+E2,gaussian | n=150 | strong,2,E_CLap,5,over_side,5,6,-98.12620536222857
+E2,gaussian | n=150 | strong,3,A_CQ,5,under_side,4,5,727.9235445895611
+E2,gaussian | n=150 | strong,3,A_CQ,5,over_side,5,6,-370.65166036711344
+E2,gaussian | n=150 | strong,3,B_CQ_minus_PZ,5,under_side,4,5,1153.605104550963
+E2,gaussian | n=150 | strong,3,B_CQ_minus_PZ,5,over_side,5,6,55.02989959428669
+E2,gaussian | n=150 | strong,3,C_cond_last,5,under_side,4,5,1108.7661924277036
+E2,gaussian | n=150 | strong,3,C_cond_last,5,over_side,5,6,86.35478074527055
+E2,gaussian | n=150 | strong,3,D_cond_mode,5,under_side,4,5,1298.0033814626622
+E2,gaussian | n=150 | strong,3,D_cond_mode,5,over_side,5,6,213.0648431753798
+E2,gaussian | n=150 | strong,3,E_CLap,5,under_side,4,5,664.3674781269383
+E2,gaussian | n=150 | strong,3,E_CLap,5,over_side,5,6,-111.76153706513651
+E2,gaussian | n=150 | strong,4,A_CQ,5,under_side,4,5,223.58527548017992
+E2,gaussian | n=150 | strong,4,A_CQ,5,over_side,5,6,-345.397150392022
+E2,gaussian | n=150 | strong,4,B_CQ_minus_PZ,5,under_side,4,5,649.26683544158
+E2,gaussian | n=150 | strong,4,B_CQ_minus_PZ,5,over_side,5,6,80.28440956938175
+E2,gaussian | n=150 | strong,4,C_cond_last,5,under_side,4,5,657.1737694179246
+E2,gaussian | n=150 | strong,4,C_cond_last,5,over_side,5,6,80.15694866013291
+E2,gaussian | n=150 | strong,4,D_cond_mode,5,under_side,4,5,798.92591213571
+E2,gaussian | n=150 | strong,4,D_cond_mode,5,over_side,5,6,243.7529007898138
+E2,gaussian | n=150 | strong,4,E_CLap,5,under_side,4,5,291.9825097666708
+E2,gaussian | n=150 | strong,4,E_CLap,5,over_side,5,6,-87.56638999768074
+E2,gaussian | n=150 | weak,1,A_CQ,5,under_side,4,5,164.57336026326448
+E2,gaussian | n=150 | weak,1,A_CQ,5,over_side,5,6,-329.77251158465515
+E2,gaussian | n=150 | weak,1,B_CQ_minus_PZ,5,under_side,4,5,590.2549202246664
+E2,gaussian | n=150 | weak,1,B_CQ_minus_PZ,5,over_side,5,6,95.90904837674316
+E2,gaussian | n=150 | weak,1,C_cond_last,5,under_side,4,5,621.4295009915168
+E2,gaussian | n=150 | weak,1,C_cond_last,5,over_side,5,6,114.49020339553681
+E2,gaussian | n=150 | weak,1,D_cond_mode,5,under_side,4,5,709.468138144668
+E2,gaussian | n=150 | weak,1,D_cond_mode,5,over_side,5,6,249.33692454744778
+E2,gaussian | n=150 | weak,1,E_CLap,5,under_side,4,5,215.32615568972506
+E2,gaussian | n=150 | weak,1,E_CLap,5,over_side,5,6,-77.72381999126628
+E2,gaussian | n=150 | weak,2,A_CQ,5,under_side,4,5,186.77596583952982
+E2,gaussian | n=150 | weak,2,A_CQ,5,over_side,5,6,-354.65463002001707
+E2,gaussian | n=150 | weak,2,B_CQ_minus_PZ,5,under_side,4,5,612.45752580093
+E2,gaussian | n=150 | weak,2,B_CQ_minus_PZ,5,over_side,5,6,71.0269299413867
+E2,gaussian | n=150 | weak,2,C_cond_last,5,under_side,4,5,576.40732882663
+E2,gaussian | n=150 | weak,2,C_cond_last,5,over_side,5,6,142.68700875476497
+E2,gaussian | n=150 | weak,2,D_cond_mode,5,under_side,4,5,748.0629687014261
+E2,gaussian | n=150 | weak,2,D_cond_mode,5,over_side,5,6,230.37443790077668
+E2,gaussian | n=150 | weak,2,E_CLap,5,under_side,4,5,253.26777667558417
+E2,gaussian | n=150 | weak,2,E_CLap,5,over_side,5,6,-84.1240201022265
+E2,gaussian | n=150 | weak,3,A_CQ,5,under_side,4,5,302.2617548510243
+E2,gaussian | n=150 | weak,3,A_CQ,5,over_side,5,6,-360.1073404796771
+E2,gaussian | n=150 | weak,3,B_CQ_minus_PZ,5,under_side,4,5,727.9433148124317
+E2,gaussian | n=150 | weak,3,B_CQ_minus_PZ,5,over_side,5,6,65.57421948172305
+E2,gaussian | n=150 | weak,3,C_cond_last,5,under_side,4,5,688.5510683806788
+E2,gaussian | n=150 | weak,3,C_cond_last,5,over_side,5,6,108.70582531883338
+E2,gaussian | n=150 | weak,3,D_cond_mode,5,under_side,4,5,860.3486610085401
+E2,gaussian | n=150 | weak,3,D_cond_mode,5,over_side,5,6,237.27024811707088
+E2,gaussian | n=150 | weak,3,E_CLap,5,under_side,4,5,330.0888948102802
+E2,gaussian | n=150 | weak,3,E_CLap,5,over_side,5,6,-78.0486998938868
+E2,gaussian | n=150 | weak,4,A_CQ,5,under_side,4,5,-86.03180627253096
+E2,gaussian | n=150 | weak,4,A_CQ,5,over_side,5,6,-337.69141216501885
+E2,gaussian | n=150 | weak,4,B_CQ_minus_PZ,5,under_side,4,5,339.6497536888728
+E2,gaussian | n=150 | weak,4,B_CQ_minus_PZ,5,over_side,5,6,87.99014779637946
+E2,gaussian | n=150 | weak,4,C_cond_last,5,under_side,4,5,366.77703229901635
+E2,gaussian | n=150 | weak,4,C_cond_last,5,over_side,5,6,98.46822442617668
+E2,gaussian | n=150 | weak,4,D_cond_mode,5,under_side,4,5,493.2177157867045
+E2,gaussian | n=150 | weak,4,D_cond_mode,5,over_side,5,6,222.49057832744256
+E2,gaussian | n=150 | weak,4,E_CLap,5,under_side,4,5,83.09761318908204
+E2,gaussian | n=150 | weak,4,E_CLap,5,over_side,5,6,-75.02476080416818
+E2,gaussian | n=75 | strong,1,A_CQ,5,under_side,4,5,-64.04000425147387
+E2,gaussian | n=75 | strong,1,A_CQ,5,over_side,5,6,-159.82199374866195
+E2,gaussian | n=75 | strong,1,B_CQ_minus_PZ,5,under_side,4,5,148.800775729228
+E2,gaussian | n=75 | strong,1,B_CQ_minus_PZ,5,over_side,5,6,53.01878623203811
+E2,gaussian | n=75 | strong,1,C_cond_last,5,under_side,4,5,118.66333235553611
+E2,gaussian | n=75 | strong,1,C_cond_last,5,over_side,5,6,74.50168555912023
+E2,gaussian | n=75 | strong,1,D_cond_mode,5,under_side,4,5,227.66985119479614
+E2,gaussian | n=75 | strong,1,D_cond_mode,5,over_side,5,6,118.33973143086314
+E2,gaussian | n=75 | strong,1,E_CLap,5,under_side,4,5,12.122777423684056
+E2,gaussian | n=75 | strong,1,E_CLap,5,over_side,5,6,-46.251835679961914
+E2,gaussian | n=75 | strong,2,A_CQ,5,under_side,4,5,52.35880957472182
+E2,gaussian | n=75 | strong,2,A_CQ,5,over_side,5,6,-158.8984479433302
+E2,gaussian | n=75 | strong,2,B_CQ_minus_PZ,5,under_side,4,5,265.19958955542097
+E2,gaussian | n=75 | strong,2,B_CQ_minus_PZ,5,over_side,5,6,53.94233203737167
+E2,gaussian | n=75 | strong,2,C_cond_last,5,under_side,4,5,248.38371589725557
+E2,gaussian | n=75 | strong,2,C_cond_last,5,over_side,5,6,44.56226432000312
+E2,gaussian | n=75 | strong,2,D_cond_mode,5,under_side,4,5,344.4707380667087
+E2,gaussian | n=75 | strong,2,D_cond_mode,5,over_side,5,6,94.44117577328507
+E2,gaussian | n=75 | strong,2,E_CLap,5,under_side,4,5,88.62644245675983
+E2,gaussian | n=75 | strong,2,E_CLap,5,over_side,5,6,-53.54859839309756
+E2,gaussian | n=75 | strong,3,A_CQ,5,under_side,4,5,141.67802846428367
+E2,gaussian | n=75 | strong,3,A_CQ,5,over_side,5,6,-152.37678879610849
+E2,gaussian | n=75 | strong,3,B_CQ_minus_PZ,5,under_side,4,5,354.5188084449828
+E2,gaussian | n=75 | strong,3,B_CQ_minus_PZ,5,over_side,5,6,60.4639911845934
+E2,gaussian | n=75 | strong,3,C_cond_last,5,under_side,4,5,340.6346784234338
+E2,gaussian | n=75 | strong,3,C_cond_last,5,over_side,5,6,66.24980636998771
+E2,gaussian | n=75 | strong,3,D_cond_mode,5,under_side,4,5,427.81169159235105
+E2,gaussian | n=75 | strong,3,E_CLap,5,under_side,4,5,150.77025059099196
+E2,gaussian | n=75 | strong,4,A_CQ,5,under_side,4,5,-14.204722328115167
+E2,gaussian | n=75 | strong,4,A_CQ,5,over_side,5,6,-194.51739436157004
+E2,gaussian | n=75 | strong,4,B_CQ_minus_PZ,5,under_side,4,5,198.6360576525858
+E2,gaussian | n=75 | strong,4,B_CQ_minus_PZ,5,over_side,5,6,18.32338561913093
+E2,gaussian | n=75 | strong,4,C_cond_last,5,under_side,4,5,212.02542438519868
+E2,gaussian | n=75 | strong,4,C_cond_last,5,over_side,5,6,22.204551264292604
+E2,gaussian | n=75 | strong,4,D_cond_mode,5,under_side,4,5,249.2396919476978
+E2,gaussian | n=75 | strong,4,D_cond_mode,5,over_side,5,6,109.67836471759256
+E2,gaussian | n=75 | strong,4,E_CLap,5,under_side,4,5,24.804633094090605
+E2,gaussian | n=75 | strong,4,E_CLap,5,over_side,5,6,-49.507619536199854
+E2,gaussian | n=75 | weak,1,A_CQ,5,under_side,4,5,-177.1679235749216
+E2,gaussian | n=75 | weak,1,A_CQ,5,over_side,5,6,-156.77327849187895
+E2,gaussian | n=75 | weak,1,B_CQ_minus_PZ,5,under_side,4,5,35.672856405779385
+E2,gaussian | n=75 | weak,1,B_CQ_minus_PZ,5,over_side,5,6,56.06750148882202
+E2,gaussian | n=75 | weak,1,C_cond_last,5,under_side,4,5,-10.241118874645508
+E2,gaussian | n=75 | weak,1,C_cond_last,5,over_side,5,6,76.18570330409875
+E2,gaussian | n=75 | weak,1,D_cond_mode,5,under_side,4,5,104.23702012829017
+E2,gaussian | n=75 | weak,1,D_cond_mode,5,over_side,5,6,132.0879952265741
+E2,gaussian | n=75 | weak,1,E_CLap,5,under_side,4,5,-42.33142796995162
+E2,gaussian | n=75 | weak,1,E_CLap,5,over_side,5,6,-33.47084766585249
+E2,gaussian | n=75 | weak,2,A_CQ,5,under_side,4,5,-80.36191141206382
+E2,gaussian | n=75 | weak,2,A_CQ,5,over_side,5,6,-159.82976789246004
+E2,gaussian | n=75 | weak,2,B_CQ_minus_PZ,5,under_side,4,5,132.47886856863715
+E2,gaussian | n=75 | weak,2,B_CQ_minus_PZ,5,over_side,5,6,53.01101208824093
+E2,gaussian | n=75 | weak,2,C_cond_last,5,under_side,4,5,86.64529835137728
+E2,gaussian | n=75 | weak,2,C_cond_last,5,over_side,5,6,50.736058786035755
+E2,gaussian | n=75 | weak,2,D_cond_mode,5,under_side,4,5,200.05924255021455
+E2,gaussian | n=75 | weak,2,D_cond_mode,5,over_side,5,6,94.40218461239874
+E2,gaussian | n=75 | weak,2,E_CLap,5,under_side,4,5,-0.13489874043807504
+E2,gaussian | n=75 | weak,2,E_CLap,5,over_side,5,6,-47.26381231296273
+E2,gaussian | n=75 | weak,3,A_CQ,5,under_side,4,5,-27.420774186665767
+E2,gaussian | n=75 | weak,3,A_CQ,5,over_side,5,6,-148.90752973988583
+E2,gaussian | n=75 | weak,3,B_CQ_minus_PZ,5,under_side,4,5,185.4200057940343
+E2,gaussian | n=75 | weak,3,B_CQ_minus_PZ,5,over_side,5,6,63.93325024081605
+E2,gaussian | n=75 | weak,3,C_cond_last,5,under_side,4,5,188.7301402733383
+E2,gaussian | n=75 | weak,3,C_cond_last,5,over_side,5,6,89.31808376225308
+E2,gaussian | n=75 | weak,3,D_cond_mode,5,under_side,4,5,257.1131470574783
+E2,gaussian | n=75 | weak,3,D_cond_mode,5,over_side,5,6,121.11136439506572
+E2,gaussian | n=75 | weak,3,E_CLap,5,under_side,4,5,42.48521128001266
+E2,gaussian | n=75 | weak,3,E_CLap,5,over_side,5,6,-38.47734511206818
+E2,gaussian | n=75 | weak,4,A_CQ,5,under_side,4,5,-127.30819729419272
+E2,gaussian | n=75 | weak,4,A_CQ,5,over_side,5,6,-191.28391066102722
+E2,gaussian | n=75 | weak,4,B_CQ_minus_PZ,5,under_side,4,5,85.53258268650825
+E2,gaussian | n=75 | weak,4,B_CQ_minus_PZ,5,over_side,5,6,21.55686931967375
+E2,gaussian | n=75 | weak,4,C_cond_last,5,under_side,4,5,95.20230064524276
+E2,gaussian | n=75 | weak,4,C_cond_last,5,over_side,5,6,-3.2888554222699895
+E2,gaussian | n=75 | weak,4,D_cond_mode,5,under_side,4,5,132.7048561672509
+E2,gaussian | n=75 | weak,4,D_cond_mode,5,over_side,5,6,97.70214481046969
+E2,gaussian | n=75 | weak,4,E_CLap,5,under_side,4,5,-32.69684208038052
+E2,gaussian | n=75 | weak,4,E_CLap,5,over_side,5,6,-46.33571338866932
+E2,poisson | n=150 | strong,1,A_CQ,5,under_side,4,5,522.2922303402829
+E2,poisson | n=150 | strong,1,A_CQ,5,over_side,5,6,-348.92519700800585
+E2,poisson | n=150 | strong,1,B_CQ_minus_PZ,5,under_side,4,5,947.9737903016849
+E2,poisson | n=150 | strong,1,B_CQ_minus_PZ,5,over_side,5,6,76.75636295339609
+E2,poisson | n=150 | strong,1,C_cond_last,5,under_side,4,5,968.3344171902772
+E2,poisson | n=150 | strong,1,C_cond_last,5,over_side,5,6,124.35716044919172
+E2,poisson | n=150 | strong,1,D_cond_mode,5,under_side,4,5,1068.7124857077451
+E2,poisson | n=150 | strong,1,D_cond_mode,5,over_side,5,6,246.19015308097914
+E2,poisson | n=150 | strong,1,E_CLap,5,under_side,4,5,508.29827471981844
+E2,poisson | n=150 | strong,1,E_CLap,5,over_side,5,6,-103.21216422632278
+E2,poisson | n=150 | strong,2,A_CQ,5,under_side,4,5,580.8740045437662
+E2,poisson | n=150 | strong,2,A_CQ,5,over_side,5,6,-322.813489363647
+E2,poisson | n=150 | strong,2,B_CQ_minus_PZ,5,under_side,4,5,1006.5555645051681
+E2,poisson | n=150 | strong,2,B_CQ_minus_PZ,5,over_side,5,6,102.86807059775128
+E2,poisson | n=150 | strong,2,C_cond_last,5,under_side,4,5,964.3920396765625
+E2,poisson | n=150 | strong,2,C_cond_last,5,over_side,5,6,147.4017250949364
+E2,poisson | n=150 | strong,2,D_cond_mode,5,under_side,4,5,1176.4532744768348
+E2,poisson | n=150 | strong,2,D_cond_mode,5,over_side,5,6,244.1396041029475
+E2,poisson | n=150 | strong,2,E_CLap,5,under_side,4,5,614.0815488977241
+E2,poisson | n=150 | strong,2,E_CLap,5,over_side,5,6,-86.10106692619229
+E2,poisson | n=150 | strong,3,A_CQ,5,under_side,4,5,768.7528528412404
+E2,poisson | n=150 | strong,3,A_CQ,5,over_side,5,6,-331.6050194282998
+E2,poisson | n=150 | strong,3,B_CQ_minus_PZ,5,under_side,4,5,1194.4344128026423
+E2,poisson | n=150 | strong,3,B_CQ_minus_PZ,5,over_side,5,6,94.07654053310216
+E2,poisson | n=150 | strong,3,C_cond_last,5,under_side,4,5,1164.0270855497256
+E2,poisson | n=150 | strong,3,C_cond_last,5,over_side,5,6,120.21832944386915
+E2,poisson | n=150 | strong,3,D_cond_mode,5,under_side,4,5,1332.0679136074068
+E2,poisson | n=150 | strong,3,D_cond_mode,5,over_side,5,6,256.37904360802713
+E2,poisson | n=150 | strong,3,E_CLap,5,under_side,4,5,746.818795521016
+E2,poisson | n=150 | strong,3,E_CLap,5,over_side,5,6,-102.26164245271138
+E2,poisson | n=150 | strong,4,A_CQ,5,under_side,4,5,211.85376142835958
+E2,poisson | n=150 | strong,4,A_CQ,5,over_side,5,6,-364.34066756199536
+E2,poisson | n=150 | strong,4,B_CQ_minus_PZ,5,under_side,4,5,637.5353213897615
+E2,poisson | n=150 | strong,4,B_CQ_minus_PZ,5,over_side,5,6,61.340892399406584
+E2,poisson | n=150 | strong,4,C_cond_last,5,under_side,4,5,623.545667149323
+E2,poisson | n=150 | strong,4,C_cond_last,5,over_side,5,6,95.31833199120229
+E2,poisson | n=150 | weak,1,A_CQ,5,under_side,4,5,90.8573455450387
+E2,poisson | n=150 | weak,1,A_CQ,5,over_side,5,6,-347.39436476123956
+E2,poisson | n=150 | weak,1,B_CQ_minus_PZ,5,under_side,4,5,516.5389055064406
+E2,poisson | n=150 | weak,1,B_CQ_minus_PZ,5,over_side,5,6,78.28719520016057
+E2,poisson | n=150 | weak,1,C_cond_last,5,under_side,4,5,536.6998332758103
+E2,poisson | n=150 | weak,1,C_cond_last,5,over_side,5,6,109.84810466867202
+E2,poisson | n=150 | weak,1,D_cond_mode,5,under_side,4,5,651.8040832307452
+E2,poisson | n=150 | weak,1,D_cond_mode,5,over_side,5,6,228.4788342524771
+E2,poisson | n=150 | weak,1,E_CLap,5,under_side,4,5,184.18611068958307
+E2,poisson | n=150 | weak,1,E_CLap,5,over_side,5,6,-80.19053308459297
+E2,poisson | n=150 | weak,2,A_CQ,5,under_side,4,5,150.91148692704155
+E2,poisson | n=150 | weak,2,A_CQ,5,over_side,5,6,-339.149790444113
+E2,poisson | n=150 | weak,2,B_CQ_minus_PZ,5,under_side,4,5,576.5930468884435
+E2,poisson | n=150 | weak,2,B_CQ_minus_PZ,5,over_side,5,6,86.53176951729256
+E2,poisson | n=150 | weak,2,C_cond_last,5,under_side,4,5,548.7755671879604
+E2,poisson | n=150 | weak,2,C_cond_last,5,over_side,5,6,75.15136943465222
+E2,poisson | n=150 | weak,2,D_cond_mode,5,under_side,4,5,726.3491661565586
+E2,poisson | n=150 | weak,2,D_cond_mode,5,over_side,5,6,232.53158912582512
+E2,poisson | n=150 | weak,2,E_CLap,5,under_side,4,5,246.82327650826846
+E2,poisson | n=150 | weak,2,E_CLap,5,over_side,5,6,-83.51168831246468
+E2,poisson | n=150 | weak,3,A_CQ,5,under_side,4,5,301.64736428453034
+E2,poisson | n=150 | weak,3,A_CQ,5,over_side,5,6,-367.12942849980755
+E2,poisson | n=150 | weak,3,B_CQ_minus_PZ,5,under_side,4,5,727.3289242459323
+E2,poisson | n=150 | weak,3,B_CQ_minus_PZ,5,over_side,5,6,58.55213146159258
+E2,poisson | n=150 | weak,3,C_cond_last,5,under_side,4,5,733.4387316925859
+E2,poisson | n=150 | weak,3,C_cond_last,5,over_side,5,6,70.1296411739495
+E2,poisson | n=150 | weak,3,D_cond_mode,5,under_side,4,5,852.5932085853183
+E2,poisson | n=150 | weak,3,D_cond_mode,5,over_side,5,6,247.5496507390726
+E2,poisson | n=150 | weak,3,E_CLap,5,under_side,4,5,343.65023890078373
+E2,poisson | n=150 | weak,3,E_CLap,5,over_side,5,6,-79.017144689009
+E2,poisson | n=150 | weak,4,A_CQ,5,under_side,4,5,-89.80376594362315
+E2,poisson | n=150 | weak,4,A_CQ,5,over_side,5,6,-383.5041397649329
+E2,poisson | n=150 | weak,4,B_CQ_minus_PZ,5,under_side,4,5,335.8777940177788
+E2,poisson | n=150 | weak,4,B_CQ_minus_PZ,5,over_side,5,6,42.17742019646539
+E2,poisson | n=150 | weak,4,C_cond_last,5,under_side,4,5,368.3564704876226
+E2,poisson | n=150 | weak,4,C_cond_last,5,over_side,5,6,68.37217716215855
+E2,poisson | n=150 | weak,4,D_cond_mode,5,under_side,4,5,478.41671772332666
+E2,poisson | n=150 | weak,4,D_cond_mode,5,over_side,5,6,214.41669339335567
+E2,poisson | n=150 | weak,4,E_CLap,5,under_side,4,5,79.51251449887059
+E2,poisson | n=150 | weak,4,E_CLap,5,over_side,5,6,-79.7318198321882
+E2,poisson | n=75 | strong,1,A_CQ,5,under_side,4,5,-100.87316461304727
+E2,poisson | n=75 | strong,1,A_CQ,5,over_side,5,6,-190.24637034110765
+E2,poisson | n=75 | strong,1,B_CQ_minus_PZ,5,under_side,4,5,111.9676153676537
+E2,poisson | n=75 | strong,1,B_CQ_minus_PZ,5,over_side,5,6,22.594409639593323
+E2,poisson | n=75 | strong,1,C_cond_last,5,under_side,4,5,89.2312539502218
+E2,poisson | n=75 | strong,1,C_cond_last,5,over_side,5,6,27.730702832828683
+E2,poisson | n=75 | strong,1,D_cond_mode,5,under_side,4,5,180.43374652085186
+E2,poisson | n=75 | strong,1,D_cond_mode,5,over_side,5,6,88.09982928746285
+E2,poisson | n=75 | strong,1,E_CLap,5,under_side,4,5,-11.172618824513847
+E2,poisson | n=75 | strong,1,E_CLap,5,over_side,5,6,-56.16573210489332
+E2,poisson | n=75 | strong,2,A_CQ,5,under_side,4,5,-18.37633283586092
+E2,poisson | n=75 | strong,2,A_CQ,5,over_side,5,6,-173.31610078003814
+E2,poisson | n=75 | strong,2,B_CQ_minus_PZ,5,under_side,4,5,194.46444714484005
+E2,poisson | n=75 | strong,2,B_CQ_minus_PZ,5,over_side,5,6,39.52467920066283
+E2,poisson | n=75 | strong,2,C_cond_last,5,under_side,4,5,160.7037188772074
+E2,poisson | n=75 | strong,2,C_cond_last,5,over_side,5,6,22.430082908210352
+E2,poisson | n=75 | strong,2,D_cond_mode,5,under_side,4,5,259.9863575776726
+E2,poisson | n=75 | strong,2,D_cond_mode,5,over_side,5,6,90.44117098248171
+E2,poisson | n=75 | strong,2,E_CLap,5,under_side,4,5,55.08333909269368
+E2,poisson | n=75 | strong,2,E_CLap,5,over_side,5,6,-57.366440199500175
+E2,poisson | n=75 | strong,3,A_CQ,5,under_side,4,5,79.40924191313024
+E2,poisson | n=75 | strong,3,A_CQ,5,over_side,5,6,-160.65723163863913
+E2,poisson | n=75 | strong,3,B_CQ_minus_PZ,5,under_side,4,5,292.2500218938312
+E2,poisson | n=75 | strong,3,B_CQ_minus_PZ,5,over_side,5,6,52.18354834206184
+E2,poisson | n=75 | strong,3,C_cond_last,5,under_side,4,5,298.87768814123774
+E2,poisson | n=75 | strong,3,C_cond_last,5,over_side,5,6,40.16319988164378
+E2,poisson | n=75 | strong,3,D_cond_mode,5,under_side,4,5,360.49723736276246
+E2,poisson | n=75 | strong,3,D_cond_mode,5,over_side,5,6,129.3542151451602
+E2,poisson | n=75 | strong,3,E_CLap,5,under_side,4,5,130.43170073354122
+E2,poisson | n=75 | strong,3,E_CLap,5,over_side,5,6,-49.47193704259553
+E2,poisson | n=75 | strong,4,A_CQ,5,under_side,4,5,-62.82707980682062
+E2,poisson | n=75 | strong,4,A_CQ,5,over_side,5,6,-207.0401775821756
+E2,poisson | n=75 | strong,4,B_CQ_minus_PZ,5,under_side,4,5,150.01370017388035
+E2,poisson | n=75 | strong,4,B_CQ_minus_PZ,5,over_side,5,6,5.8006023985253705
+E2,poisson | n=75 | strong,4,C_cond_last,5,under_side,4,5,153.86227056522966
+E2,poisson | n=75 | strong,4,C_cond_last,5,over_side,5,6,17.60282554670266
+E2,poisson | n=75 | strong,4,D_cond_mode,5,under_side,4,5,198.01758338725995
+E2,poisson | n=75 | strong,4,D_cond_mode,5,over_side,5,6,98.81588984409154
+E2,poisson | n=75 | strong,4,E_CLap,5,under_side,4,5,8.894715434962563
+E2,poisson | n=75 | strong,4,E_CLap,5,over_side,5,6,-52.20075680991795
+E2,poisson | n=75 | weak,1,A_CQ,5,under_side,4,5,-149.91199123328988
+E2,poisson | n=75 | weak,1,A_CQ,5,over_side,5,6,-213.97944144999656
+E2,poisson | n=75 | weak,1,B_CQ_minus_PZ,5,under_side,4,5,62.92878874741109
+E2,poisson | n=75 | weak,1,B_CQ_minus_PZ,5,over_side,5,6,-1.138661469296494
+E2,poisson | n=75 | weak,1,C_cond_last,5,under_side,4,5,46.4623328301268
+E2,poisson | n=75 | weak,1,C_cond_last,5,over_side,5,6,-1.8384550298642353
+E2,poisson | n=75 | weak,1,D_cond_mode,5,under_side,4,5,129.71102201285612
+E2,poisson | n=75 | weak,1,D_cond_mode,5,over_side,5,6,88.54053519694207
+E2,poisson | n=75 | weak,1,E_CLap,5,under_side,4,5,-33.58437425393549
+E2,poisson | n=75 | weak,1,E_CLap,5,over_side,5,6,-47.7538316759119
+E2,poisson | n=75 | weak,2,A_CQ,5,under_side,4,5,-126.64423082927533
+E2,poisson | n=75 | weak,2,A_CQ,5,over_side,5,6,-155.7916859208708
+E2,poisson | n=75 | weak,2,B_CQ_minus_PZ,5,under_side,4,5,86.19654915142473
+E2,poisson | n=75 | weak,2,B_CQ_minus_PZ,5,over_side,5,6,57.04909405983017
+E2,poisson | n=75 | weak,2,C_cond_last,5,under_side,4,5,40.924035282801924
+E2,poisson | n=75 | weak,2,C_cond_last,5,over_side,5,6,75.86302784476356
+E2,poisson | n=75 | weak,2,D_cond_mode,5,under_side,4,5,152.32361666568886
+E2,poisson | n=75 | weak,2,D_cond_mode,5,over_side,5,6,107.10948100638961
+E2,poisson | n=75 | weak,2,E_CLap,5,under_side,4,5,-9.568829782470857
+E2,poisson | n=75 | weak,2,E_CLap,5,over_side,5,6,-46.35006226995574
+E2,poisson | n=75 | weak,3,A_CQ,5,under_side,4,5,-70.51567729318595
+E2,poisson | n=75 | weak,3,A_CQ,5,over_side,5,6,-183.33869422846328
+E2,poisson | n=75 | weak,3,B_CQ_minus_PZ,5,under_side,4,5,142.32510268751503
+E2,poisson | n=75 | weak,3,B_CQ_minus_PZ,5,over_side,5,6,29.50208575223769
+E2,poisson | n=75 | weak,3,C_cond_last,5,under_side,4,5,149.0845390454433
+E2,poisson | n=75 | weak,3,C_cond_last,5,over_side,5,6,51.680374126730385
+E2,poisson | n=75 | weak,3,D_cond_mode,5,under_side,4,5,218.78006018575616
+E2,poisson | n=75 | weak,3,D_cond_mode,5,over_side,5,6,112.88790164342481
+E2,poisson | n=75 | weak,3,E_CLap,5,under_side,4,5,28.261984605748694
+E2,poisson | n=75 | weak,3,E_CLap,5,over_side,5,6,-48.60823044245717
+E2,poisson | n=75 | weak,4,A_CQ,5,under_side,4,5,-164.08565079829077
+E2,poisson | n=75 | weak,4,A_CQ,5,over_side,5,6,-199.49121146678408
+E2,poisson | n=75 | weak,4,B_CQ_minus_PZ,5,under_side,4,5,48.75512918240929
+E2,poisson | n=75 | weak,4,B_CQ_minus_PZ,5,over_side,5,6,13.349568513916893
+E2,poisson | n=75 | weak,4,C_cond_last,5,under_side,4,5,47.22458079326316
+E2,poisson | n=75 | weak,4,C_cond_last,5,over_side,5,6,18.99662831905971
+E2,poisson | n=75 | weak,4,D_cond_mode,5,under_side,4,5,95.71140879547056
+E2,poisson | n=75 | weak,4,D_cond_mode,5,over_side,5,6,105.3987464300144
+E2,poisson | n=75 | weak,4,E_CLap,5,under_side,4,5,-42.929589784780546
+E2,poisson | n=75 | weak,4,E_CLap,5,over_side,5,6,-45.29871905807704
+E3,train fraction 0.8,1,A_CQ,5,under_side,4,5,-181.0262303114505
+E3,train fraction 0.8,1,A_CQ,5,over_side,5,6,-198.2975480850364
+E3,train fraction 0.8,1,B_CQ_minus_PZ,5,under_side,4,5,31.81454966925139
+E3,train fraction 0.8,1,B_CQ_minus_PZ,5,over_side,5,6,14.543231895664576
+E3,train fraction 0.8,1,C_cond_last,5,under_side,4,5,8.638703535169952
+E3,train fraction 0.8,1,C_cond_last,5,over_side,5,6,41.38633668280727
+E3,train fraction 0.8,1,D_cond_mode,5,under_side,4,5,98.31623268120347
+E3,train fraction 0.8,1,D_cond_mode,5,over_side,5,6,95.28045665623813
+E3,train fraction 0.8,1,E_CLap,5,under_side,4,5,-38.715350357993884
+E3,train fraction 0.8,1,E_CLap,5,over_side,5,6,-43.31343303361518
+E3,train fraction 0.8,2,A_CQ,5,under_side,4,5,-151.57069840371878
+E3,train fraction 0.8,2,A_CQ,5,over_side,5,6,-165.12668809294973
+E3,train fraction 0.8,2,B_CQ_minus_PZ,5,under_side,4,5,61.27008157698219
+E3,train fraction 0.8,2,B_CQ_minus_PZ,5,over_side,5,6,47.71409188775033
+E3,train fraction 0.8,2,C_cond_last,5,under_side,4,5,67.2444351384438
+E3,train fraction 0.8,2,C_cond_last,5,over_side,5,6,38.66510980126168
+E3,train fraction 0.8,2,D_cond_mode,5,under_side,4,5,119.29974135209977
+E3,train fraction 0.8,2,D_cond_mode,5,over_side,5,6,94.1973522658327
+E3,train fraction 0.8,2,E_CLap,5,under_side,4,5,-19.22826879245622
+E3,train fraction 0.8,2,E_CLap,5,over_side,5,6,-45.54897632211032
+E3,train fraction 0.8,3,A_CQ,5,under_side,4,5,-86.69711726952028
+E3,train fraction 0.8,3,A_CQ,5,over_side,5,6,-197.03109821173075
+E3,train fraction 0.8,3,B_CQ_minus_PZ,5,under_side,4,5,126.14366271117979
+E3,train fraction 0.8,3,B_CQ_minus_PZ,5,over_side,5,6,15.809681768971132
+E3,train fraction 0.8,3,C_cond_last,5,under_side,4,5,123.99618798572556
+E3,train fraction 0.8,3,C_cond_last,5,over_side,5,6,19.014111509208306
+E3,train fraction 0.8,3,D_cond_mode,5,under_side,4,5,186.6382583857703
+E3,train fraction 0.8,3,D_cond_mode,5,over_side,5,6,87.02792761802539
+E3,train fraction 0.8,3,E_CLap,5,under_side,4,5,11.597037185105364
+E3,train fraction 0.8,3,E_CLap,5,over_side,5,6,-47.315864790221895
+E3,train fraction 0.8,4,A_CQ,5,under_side,4,5,-154.50372327984587
+E3,train fraction 0.8,4,A_CQ,5,over_side,5,6,-216.748998023917
+E3,train fraction 0.8,4,B_CQ_minus_PZ,5,under_side,4,5,58.3370567008551
+E3,train fraction 0.8,4,B_CQ_minus_PZ,5,over_side,5,6,-3.9082180432160385
+E3,train fraction 0.8,4,C_cond_last,5,under_side,4,5,49.558728908918965
+E3,train fraction 0.8,4,C_cond_last,5,over_side,5,6,-6.979994006595916
+E3,train fraction 0.8,4,D_cond_mode,5,under_side,4,5,105.33840932322892
+E3,train fraction 0.8,4,D_cond_mode,5,over_side,5,6,98.29820548147381
+E3,train fraction 0.8,4,E_CLap,5,under_side,4,5,-35.50703178660842
+E3,train fraction 0.8,4,E_CLap,5,over_side,5,6,-43.97247761147992
+E3,train fraction 1.0,1,A_CQ,5,under_side,4,5,-149.91199123328988
+E3,train fraction 1.0,1,A_CQ,5,over_side,5,6,-213.97944144999656
+E3,train fraction 1.0,1,B_CQ_minus_PZ,5,under_side,4,5,62.92878874741109
+E3,train fraction 1.0,1,B_CQ_minus_PZ,5,over_side,5,6,-1.138661469296494
+E3,train fraction 1.0,1,C_cond_last,5,under_side,4,5,46.4623328301268
+E3,train fraction 1.0,1,C_cond_last,5,over_side,5,6,-1.8384550298642353
+E3,train fraction 1.0,1,D_cond_mode,5,under_side,4,5,129.71102201285612
+E3,train fraction 1.0,1,D_cond_mode,5,over_side,5,6,88.54053519694207
+E3,train fraction 1.0,1,E_CLap,5,under_side,4,5,-33.58437425393549
+E3,train fraction 1.0,1,E_CLap,5,over_side,5,6,-47.7538316759119
+E3,train fraction 1.0,2,A_CQ,5,under_side,4,5,-126.64423082927533
+E3,train fraction 1.0,2,A_CQ,5,over_side,5,6,-155.7916859208708
+E3,train fraction 1.0,2,B_CQ_minus_PZ,5,under_side,4,5,86.19654915142473
+E3,train fraction 1.0,2,B_CQ_minus_PZ,5,over_side,5,6,57.04909405983017
+E3,train fraction 1.0,2,C_cond_last,5,under_side,4,5,40.924035282801924
+E3,train fraction 1.0,2,C_cond_last,5,over_side,5,6,75.86302784476356
+E3,train fraction 1.0,2,D_cond_mode,5,under_side,4,5,152.32361666568886
+E3,train fraction 1.0,2,D_cond_mode,5,over_side,5,6,107.10948100638961
+E3,train fraction 1.0,2,E_CLap,5,under_side,4,5,-9.568829782470857
+E3,train fraction 1.0,2,E_CLap,5,over_side,5,6,-46.35006226995574
+E3,train fraction 1.0,3,A_CQ,5,under_side,4,5,-70.51567729318595
+E3,train fraction 1.0,3,A_CQ,5,over_side,5,6,-183.33869422846328
+E3,train fraction 1.0,3,B_CQ_minus_PZ,5,under_side,4,5,142.32510268751503
+E3,train fraction 1.0,3,B_CQ_minus_PZ,5,over_side,5,6,29.50208575223769
+E3,train fraction 1.0,3,C_cond_last,5,under_side,4,5,149.0845390454433
+E3,train fraction 1.0,3,C_cond_last,5,over_side,5,6,51.680374126730385
+E3,train fraction 1.0,3,D_cond_mode,5,under_side,4,5,218.78006018575616
+E3,train fraction 1.0,3,D_cond_mode,5,over_side,5,6,112.88790164342481
+E3,train fraction 1.0,3,E_CLap,5,under_side,4,5,28.261984605748694
+E3,train fraction 1.0,3,E_CLap,5,over_side,5,6,-48.60823044245717
+E3,train fraction 1.0,4,A_CQ,5,under_side,4,5,-164.08565079829077
+E3,train fraction 1.0,4,A_CQ,5,over_side,5,6,-199.49121146678408
+E3,train fraction 1.0,4,B_CQ_minus_PZ,5,under_side,4,5,48.75512918240929
+E3,train fraction 1.0,4,B_CQ_minus_PZ,5,over_side,5,6,13.349568513916893
+E3,train fraction 1.0,4,C_cond_last,5,under_side,4,5,47.22458079326316
+E3,train fraction 1.0,4,C_cond_last,5,over_side,5,6,18.99662831905971
+E3,train fraction 1.0,4,D_cond_mode,5,under_side,4,5,95.71140879547056
+E3,train fraction 1.0,4,D_cond_mode,5,over_side,5,6,105.3987464300144
+E3,train fraction 1.0,4,E_CLap,5,under_side,4,5,-42.929589784780546
+E3,train fraction 1.0,4,E_CLap,5,over_side,5,6,-45.29871905807704
