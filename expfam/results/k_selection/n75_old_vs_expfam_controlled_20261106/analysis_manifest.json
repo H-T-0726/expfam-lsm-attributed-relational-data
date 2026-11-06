@@ -1,0 +1,26 @@
+{
+ "git_head": "42b5e501ed08cd243690615e3249a1ed73d05cc6",
+ "protocol_hash": "318aa52f6657806604bcd82842813aa1af946c979b7eb0770bb2aa2b509ca79b",
+ "files": {
+  "criterion_scores.csv": "c9ce51537c96d3658033cf7bcd2d4d884504126ebd50862ccc1ab82baa9c3f13",
+  "dataset_and_initialization_hashes.csv": "abb84a71df0e277ffd39fba1726f7e3a5a419e91952d59811321b8cfcb8da4a7",
+  "estep_nodes.csv": "f153d7824e63f6395ee63b37750559ac1dcacb8b89c0e0f6081fd742f732d709",
+  "estep_same_state.csv": "2b03d26c3bbe9095c5d5f6ebce3d21507f149e20448f9df7756931c06ef54cda",
+  "estimator_comparison.csv": "48353c80b79aa785f5cfffb3b7f79df53b3d6f118a2249fe7f29ef101b7cc291",
+  "figures/fig1_n75_selection_curves_old_vs_E.png": "309735fdf90fdd4d5de87e4a2f78d536bddbed9ad7b194c5d5519a28bfc19e67",
+  "figures/fig2_n75_vs_n150_khat.png": "ee0c8d028e61b2c6db7f3521f7e2c360b294025d7bb1f89821770e4a8a0035cc",
+  "figures/fig3_khat_distribution_by_estimator.png": "2e9e6e97711f1e77bb1c8877988e1c14db44e3a25e47d94ae75deb95685465d9",
+  "figures/fig4_cq_vs_clap_slack.png": "50a48becf954f612598769f5e1301a65540882773b1601eaed98119f37edf667",
+  "figures/fig5_mask_effect.png": "5b4fd1fef2e0bf0b3afb161ece2998e166a1d4213e3f4cfcbaed2b1593fff0d0",
+  "figures/fig6_estep_covariance.png": "413e2002c083c388c7c7e221fd60af4eac115ee6a6fb6c524e715cb2abc2ac08",
+  "figures/fig7_selection_vs_recovery.png": "ee5abac37720117445fdeeb0c7dec0912703294d4b6e563d8c68df38760effce",
+  "fit_results.csv": "2cf935cf24aff3a68630c1a4e1d6f8753a2cf06c7690dc0bc989bd9d00951ee6",
+  "full_k_selection.csv": "d90aec0edab961c180cda8565166ef63a5dbc78ae54b8280cb4963fa0a57bd9f",
+  "incomplete_and_invalid_runs.csv": "e758c66ce194cb8952a69e63c23073d2b0a6b8bcceea7972f9dc28cfec601866",
+  "parameter_recovery.csv": "f01c9fd047b55f85ec1d905c2d0b8b74af141fcfe6ff477154f2b5cea954c7a4",
+  "predictive_metrics.csv": "3e0cdffa7513a3d8cbb1f2edf679fa8d32f2ac27076f5a73a570f327783480e4",
+  "reuse_crosscheck.csv": "98e340f3a88451793877ae5e3ca2438fc307c7cedcd01b923ca4f8ee6b8c6abe",
+  "selection_margins.csv": "54c4eccd7c580ad53433c0305f5646981f76380e7ed4a1769be4410e79f81ba0",
+  "selection_summary.csv": "4dd61793dfdf2ec811eb324e4160931dfc014522f581d1e4eb97508c2a387ab7"
+ }
+}

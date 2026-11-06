@@ -1,0 +1,145 @@
+experiment,cell,dataset,criterion,k_gen,candidate_k,k_hat,label,best_minus_second,n_ok_fits,condition,estimator
+B,G_canon | n=75 | all pairs | E,1,A_CQ,5,1..10,5.0,exact,131.88673696316073,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,1,B_CQ_minus_PZ,5,1..10,10.0,over,60.6623152587631,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,1,C_cond_last,5,1..10,10.0,over,38.139458568698046,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,1,D_cond_mode,5,1..10,10.0,over,126.30155671913803,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,1,E_CLap,5,1..10,5.0,exact,36.29041152046102,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,1,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,A_CQ,5,1..10,5.0,exact,161.87560656671758,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,B_CQ_minus_PZ,5,1..10,10.0,over,58.676194274818045,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,C_cond_last,5,1..10,10.0,over,58.23946739078838,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,D_cond_mode,5,1..10,10.0,over,112.7697034943858,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,E_CLap,5,1..10,5.0,exact,59.42760494704453,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,2,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,A_CQ,5,1..10,5.0,exact,186.4103626145734,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,B_CQ_minus_PZ,5,1..10,10.0,over,68.1498796418714,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,C_cond_last,5,1..10,10.0,over,66.1386556964253,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,D_cond_mode,5,1..10,10.0,over,126.13576844217368,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,E_CLap,5,1..10,5.0,exact,56.04184059670115,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,3,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,A_CQ,5,1..10,5.0,exact,154.97202199824096,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,B_CQ_minus_PZ,5,1..10,10.0,over,59.20310673943777,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,C_cond_last,5,1..10,10.0,over,54.9895695837331,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,D_cond_mode,5,1..10,10.0,over,111.66179979534854,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,E_CLap,5,1..10,5.0,exact,59.311447103223145,20,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | E,4,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | all pairs,E
+B,G_canon | n=75 | all pairs | OLD,1,A_CQ,5,1..10,5.0,exact,187.33286523965035,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,1,B_CQ_minus_PZ,5,1..10,7.0,over,14.27596218314784,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,1,C_cond_last,5,1..10,7.0,over,13.902786777435722,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,1,D_cond_mode,5,1..10,10.0,over,59.22367730447013,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,1,E_CLap,5,1..10,5.0,exact,38.941678502687864,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,1,PY_type,5,1..10,5.0,exact,173.10300651128,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,A_CQ,5,1..10,5.0,exact,199.91040669418544,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,B_CQ_minus_PZ,5,1..10,7.0,over,12.208550941267276,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,C_cond_last,5,1..10,5.0,exact,0.06650789360264753,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,D_cond_mode,5,1..10,10.0,over,92.9428789304452,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,E_CLap,5,1..10,5.0,exact,50.120620518115174,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,2,PY_type,5,1..10,5.0,exact,191.24846373869696,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,A_CQ,5,1..10,5.0,exact,260.48093151344074,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,B_CQ_minus_PZ,5,1..10,5.0,exact,0.10246486085816287,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,C_cond_last,5,1..10,8.0,over,10.694375962861614,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,D_cond_mode,5,1..10,10.0,over,117.11316825899485,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,E_CLap,5,1..10,5.0,exact,67.2773485650414,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,3,PY_type,5,1..10,5.0,exact,253.9014918916364,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,A_CQ,5,1..10,5.0,exact,175.77171725516746,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,B_CQ_minus_PZ,5,1..10,10.0,over,20.51191136278385,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,C_cond_last,5,1..10,9.0,over,12.014966018204632,20,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,D_cond_mode,5,1..10,,INCOMPLETE,,19,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,E_CLap,5,1..10,,INCOMPLETE,,19,G_canon | n=75 | all pairs,OLD
+B,G_canon | n=75 | all pairs | OLD,4,PY_type,5,1..10,5.0,exact,213.1004762558896,20,G_canon | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | E,1,A_CQ,5,1..10,5.0,exact,148.08298682551595,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,1,B_CQ_minus_PZ,5,1..10,9.0,over,19.073826277527587,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,1,C_cond_last,5,1..10,9.0,over,0.1274817883427204,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,1,D_cond_mode,5,1..10,10.0,over,71.52554477945478,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,1,E_CLap,5,1..10,5.0,exact,44.76635021203674,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,1,PY_type,5,1..10,,INCOMPLETE,,0,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,A_CQ,5,1..10,5.0,exact,170.72462135077467,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,B_CQ_minus_PZ,5,1..10,9.0,over,22.11820493251389,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,C_cond_last,5,1..10,8.0,over,9.57649803568279,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,D_cond_mode,5,1..10,10.0,over,45.83298882514737,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,E_CLap,5,1..10,5.0,exact,78.2848865730839,20,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | E,2,PY_type,5,1..10,,INCOMPLETE,,0,G_old | n=75 | all pairs,E
+C,G_old | n=75 | all pairs | OLD,1,A_CQ,5,1..10,5.0,exact,218.8430892129163,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,1,B_CQ_minus_PZ,5,1..10,8.0,over,11.877178275456572,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,1,C_cond_last,5,1..10,8.0,over,50.97801366878684,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,1,D_cond_mode,5,1..10,10.0,over,62.16740610893521,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,1,E_CLap,5,1..10,5.0,exact,54.137356997705865,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,1,PY_type,5,1..10,5.0,exact,236.249788586857,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,A_CQ,5,1..10,5.0,exact,230.51365248300317,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,B_CQ_minus_PZ,5,1..10,5.0,exact,17.672872502302198,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,C_cond_last,5,1..10,5.0,exact,45.83622405713527,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,D_cond_mode,5,1..10,10.0,over,23.30679120576599,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,E_CLap,5,1..10,5.0,exact,74.84889254034124,20,G_old | n=75 | all pairs,OLD
+C,G_old | n=75 | all pairs | OLD,2,PY_type,5,1..10,5.0,exact,274.8160539072701,20,G_old | n=75 | all pairs,OLD
+D,G_canon | n=75 | 80% pairs | E,1,A_CQ,5,1..10,5.0,exact,123.94028057107971,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,1,B_CQ_minus_PZ,5,1..10,10.0,over,68.2019630954519,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,1,C_cond_last,5,1..10,10.0,over,44.14687456920274,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,1,D_cond_mode,5,1..10,,INCOMPLETE,,19,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,1,E_CLap,5,1..10,,INCOMPLETE,,19,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,1,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,A_CQ,5,1..10,5.0,exact,171.04412002578556,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,B_CQ_minus_PZ,5,1..10,10.0,over,59.422794443953535,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,C_cond_last,5,1..10,10.0,over,42.56035617258249,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,D_cond_mode,5,1..10,10.0,over,114.45151644806174,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,E_CLap,5,1..10,5.0,exact,53.637150993535215,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,2,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,A_CQ,5,1..10,5.0,exact,188.15385090809832,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,B_CQ_minus_PZ,5,1..10,10.0,over,64.52523002791759,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,C_cond_last,5,1..10,10.0,over,64.70955124440115,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,D_cond_mode,5,1..10,10.0,over,104.13719072115873,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,E_CLap,5,1..10,5.0,exact,51.6691307752053,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,3,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,A_CQ,5,1..10,5.0,exact,143.52494203340075,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,B_CQ_minus_PZ,5,1..10,10.0,over,70.86336033788302,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,C_cond_last,5,1..10,10.0,over,32.711957835492285,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,D_cond_mode,5,1..10,10.0,over,129.10216435152256,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,E_CLap,5,1..10,5.0,exact,46.60330557434827,20,G_canon | n=75 | 80% pairs,E
+D,G_canon | n=75 | 80% pairs | E,4,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=75 | 80% pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,A_CQ,5,1..10,5.0,exact,342.4927401898876,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,B_CQ_minus_PZ,5,1..10,10.0,over,63.12443745197561,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,C_cond_last,5,1..10,10.0,over,110.44456631746289,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,D_cond_mode,5,1..10,10.0,over,239.11742554865123,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,E_CLap,5,1..10,5.0,exact,106.57669490261287,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,1,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,A_CQ,5,1..10,5.0,exact,312.2691388068797,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,B_CQ_minus_PZ,5,1..10,10.0,over,99.80135668813091,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,C_cond_last,5,1..10,10.0,over,128.37035406800896,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,D_cond_mode,5,1..10,10.0,over,266.9713929033096,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,E_CLap,5,1..10,5.0,exact,113.83913531990765,20,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | E,2,PY_type,5,1..10,,INCOMPLETE,,0,G_canon | n=150 | all pairs,E
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,A_CQ,5,1..10,5.0,exact,479.8203496610622,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,B_CQ_minus_PZ,5,1..10,5.0,exact,39.31673967304232,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,C_cond_last,5,1..10,5.0,exact,48.36628955684864,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,D_cond_mode,5,1..10,10.0,over,182.50707910998062,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,E_CLap,5,1..10,5.0,exact,112.1286147697956,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,1,PY_type,5,1..10,5.0,exact,441.9511232856603,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,A_CQ,5,1..10,5.0,exact,440.1449459514861,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,B_CQ_minus_PZ,5,1..10,9.0,over,4.6549178129353095,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,C_cond_last,5,1..10,9.0,over,6.922668657458416,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,D_cond_mode,5,1..10,10.0,over,184.17879491952954,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,E_CLap,5,1..10,5.0,exact,121.3615505483831,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_canon | n=150 | all pairs | OLD,2,PY_type,5,1..10,5.0,exact,409.3054383116905,20,G_canon | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | E,1,A_CQ,5,1..10,5.0,exact,216.95398236981327,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,1,B_CQ_minus_PZ,5,1..10,10.0,over,135.96835835034926,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,1,C_cond_last,5,1..10,10.0,over,77.3118021336486,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,1,D_cond_mode,5,1..10,10.0,over,248.54642238581528,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,1,E_CLap,5,1..10,5.0,exact,135.23911168587074,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,1,PY_type,5,1..10,,INCOMPLETE,,0,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,A_CQ,5,1..10,5.0,exact,181.63516127807998,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,B_CQ_minus_PZ,5,1..10,10.0,over,105.52931600361626,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,C_cond_last,5,1..10,10.0,over,119.40468430282908,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,D_cond_mode,5,1..10,10.0,over,239.09866303607032,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,E_CLap,5,1..10,5.0,exact,143.06178406908293,20,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | E,2,PY_type,5,1..10,,INCOMPLETE,,0,G_old | n=150 | all pairs,E
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,A_CQ,5,1..10,5.0,exact,373.74658830937733,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,B_CQ_minus_PZ,5,1..10,6.0,over,51.934971652024615,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,C_cond_last,5,1..10,5.0,exact,40.2317117154962,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,D_cond_mode,5,1..10,,INCOMPLETE,,19,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,E_CLap,5,1..10,,INCOMPLETE,,19,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,PY_type,5,1..10,5.0,exact,453.2804576106673,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,A_CQ,5,1..10,5.0,exact,333.8467986724245,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,B_CQ_minus_PZ,5,1..10,6.0,over,41.73690458547844,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,C_cond_last,5,1..10,5.0,exact,41.49867541521053,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,D_cond_mode,5,1..10,10.0,over,126.7350751478657,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,E_CLap,5,1..10,5.0,exact,114.88407673666006,20,G_old | n=150 | all pairs,OLD
+n150 (PR #160),G_old | n=150 | all pairs | OLD,2,PY_type,5,1..10,5.0,exact,519.0985675304019,20,G_old | n=150 | all pairs,OLD
