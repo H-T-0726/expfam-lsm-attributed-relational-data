@@ -269,7 +269,7 @@ def main():
 
     # 7. selection vs recovery
     fig, axs = plt.subplots(1, 2, figsize=(11, 4.2))
-    r5 = rec[rec.at == "K_GEN=5"]
+    r5 = rec[rec["at"] == "K_GEN=5"]
     for ax, cr in zip(axs, ("A_CQ", "E_CLap")):
         mm = marg[(marg.side == "under_side") & (marg.criterion == cr)]
         j = mm.merge(r5, on=["condition", "estimator", "dataset"])
