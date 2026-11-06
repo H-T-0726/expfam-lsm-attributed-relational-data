@@ -284,7 +284,7 @@ def selection(scores: pd.DataFrame):
             full.append({**info, "criterion": crit, "candidate_k": f"1..{kmax}", "k_hat": kh, "label": lab,
                          "best_minus_second": gap})
             kg = info["k_gen"]
-            for a, b in ((kg - 1, kg), (kg, kg + 1), (4, 5), (5, 6), (6, 7)):
+            for a, b in sorted({(kg - 1, kg), (kg, kg + 1), (4, 5), (5, 6), (6, 7)}):
                 if a < 1 or b > kmax or a not in mean.index or b not in mean.index:
                     continue
                 ok = not (crit in ("E_CLap", "D_cond_mode") and
@@ -301,7 +301,19 @@ def selection(scores: pd.DataFrame):
     return pd.DataFrame(full), pd.DataFrame(local)
 
 
+def reselect():
+    """Rebuild full / local selection from the stored criterion_scores.csv (no re-scoring)."""
+    sc = pd.read_csv(OUT / "criterion_scores.csv")
+    full, local = selection(sc)
+    full.to_csv(OUT / "full_k_selection.csv", index=False, lineterminator="\n")
+    local.to_csv(OUT / "local_selection_saved_states.csv", index=False, lineterminator="\n")
+
+
 def main():
+    if "--reselect" in sys.argv:
+        need(not (OUT / "full_k_selection.csv").exists(), "remove the derived selection files first")
+        reselect()
+        return
     OUT.mkdir(parents=True, exist_ok=True)
     target = OUT / "criterion_scores.csv"
     need(not target.exists(), f"refusing to overwrite {target}")
