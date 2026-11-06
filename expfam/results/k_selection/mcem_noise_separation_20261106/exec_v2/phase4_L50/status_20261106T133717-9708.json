@@ -1,0 +1,115 @@
+{
+ "stage": "phase4_L50",
+ "conds": [
+  "A",
+  "D"
+ ],
+ "counts": {
+  "OK": 16,
+  "FAILED": 0,
+  "INCOMPLETE": 0,
+  "NOT_RUN": 0
+ },
+ "complete": true,
+ "fits": [
+  {
+   "fit_key": "L50_A_r1_k4_s1",
+   "fit_id": 41014,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r1_k5_s1",
+   "fit_id": 41015,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r2_k4_s1",
+   "fit_id": 41024,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r2_k5_s1",
+   "fit_id": 41025,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r3_k4_s1",
+   "fit_id": 41034,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r3_k5_s1",
+   "fit_id": 41035,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r4_k4_s1",
+   "fit_id": 41044,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_A_r4_k5_s1",
+   "fit_id": 41045,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r1_k4_s1",
+   "fit_id": 41314,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r1_k5_s1",
+   "fit_id": 41315,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r2_k4_s1",
+   "fit_id": 41324,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r2_k5_s1",
+   "fit_id": 41325,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r3_k4_s1",
+   "fit_id": 41334,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r3_k5_s1",
+   "fit_id": 41335,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r4_k4_s1",
+   "fit_id": 41344,
+   "state": "OK",
+   "reason": ""
+  },
+  {
+   "fit_key": "L50_D_r4_k5_s1",
+   "fit_id": 41345,
+   "state": "OK",
+   "reason": ""
+  }
+ ],
+ "run_id": "20261106T133717-9708",
+ "stop_reason": "ALL_ATTEMPTED",
+ "fits_run_this_session": 16
+}
