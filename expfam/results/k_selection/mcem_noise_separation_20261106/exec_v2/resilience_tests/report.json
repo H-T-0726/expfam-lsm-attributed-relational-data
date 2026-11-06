@@ -1,0 +1,54 @@
+{
+ "experiment_id": "mcem_noise_separation_20261106",
+ "git_head": "a2bf055146f30fb2eb575040e8d655c63eb5a0a1",
+ "scratch": "C:\\Users\\tento\\AppData\\Local\\Temp\\claude\\a9e2f02814b52f8b\\06951587-407f-4b3a-9c1b-039f31b42565\\scratchpad\\resume_test1",
+ "passed": 9,
+ "total": 9,
+ "tests": [
+  {
+   "test": "T1 one completed fit leaves CSVs, state npz and a valid manifest",
+   "status": "PASS",
+   "detail": "rc=0 state=OK "
+  },
+  {
+   "test": "T2 forced kill: completed fits remain valid, the interrupted fit is INCOMPLETE (not complete)",
+   "status": "PASS",
+   "detail": "('OK', 'OK', 'INCOMPLETE')"
+  },
+  {
+   "test": "T3 resume: validated fits skipped, incomplete fit set aside (renamed, not deleted) and rerun",
+   "status": "PASS",
+   "detail": "aside=1"
+  },
+  {
+   "test": "T4 stray .tmp ignored; checksum mismatch, truncated manifest and stale config are INCOMPLETE",
+   "status": "PASS",
+   "detail": "checksum mismatch probe_rows.csv | manifest unreadable: JSONDecod | config hash mismatch (stale)"
+  },
+  {
+   "test": "T5 rerun with the same seeds reproduces the saved rows and arrays exactly",
+   "status": "PASS",
+   "detail": "state/replicate rows equal=True, probe rows equal (excluding wall-time probe_seconds)=True, arrays equal=True"
+  },
+  {
+   "test": "T6 per-iteration snapshots + saving leave the MCEM path unchanged (bit-identical state at iteration 8)",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "test": "T7 Phase 4 fit saved via the runner; C_Q recomputed from the saved state equals the saved C_Q",
+   "status": "PASS",
+   "detail": "diff 0.0e+00; L=20 fit 151.0 s, peak RSS 99.3 MB"
+  },
+  {
+   "test": "T8 Phase 3: C_Q(L=80) recomputed from the saved evaluation chains equals the saved value",
+   "status": "PASS",
+   "detail": "diff 0.0e+00"
+  },
+  {
+   "test": "T9 aggregation: no duplicate rows, exactly the validated fits included, the rest NOT_RUN",
+   "status": "PASS",
+   "detail": "{'NOT_RUN': 29, 'OK': 3}"
+  }
+ ]
+}

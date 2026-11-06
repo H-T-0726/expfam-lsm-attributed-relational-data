@@ -335,7 +335,9 @@ def probe(m, X, Y, train, th: dict, Zc, k: int, *, tag: int, fit_id: int, cp: in
     summ["eta_y_plugin_minus_pm_rel"] = rel(ey_plug, ey_pm)
     summ["eta_y_plugin_minus_pm_mean"] = float(np.mean(ey_plug - ey_pm))
     arrays = {"Zbar": zbar, "eta_y_pm": ey_pm, "G_onestep_mean": np.mean(np.array(Gs), axis=0),
-              "w0_onestep_mean": np.array(np.mean(w0s)), "w_onestep_mean": np.array(np.mean(ws))}
+              "w0_onestep_mean": np.array(np.mean(w0s)), "w_onestep_mean": np.array(np.mean(ws)),
+              # persisted for re-analysis / audit only (operational addendum v2); no effect on any computation
+              "eval_chains": S_all, "G_onestep": np.array(Gs), "w0_onestep": np.array(w0s), "w_onestep": np.array(ws)}
     return summ, reps, arrays
 
 
@@ -405,6 +407,7 @@ def phase3_fit(data, npz, cond, rep, k, s) -> tuple[list[dict], list[dict], list
                 rep_rows.append({**base, "checkpoint": cp, **x})
             for nm, a in arr.items():
                 arrays[f"{key}_{nm}"] = a
+            arrays[f"{key}_theta_F"] = th["F"]
             Q[cp]["eta_x_pm"] = arr["Zbar"] @ th["F"].T
             Q[cp]["eta_y_pm"] = arr["eta_y_pm"]
     # ---- distances to checkpoint 64 ----------------------------------------
@@ -438,6 +441,7 @@ def phase3_fit(data, npz, cond, rep, k, s) -> tuple[list[dict], list[dict], list
 
 
 def run_phase3(conds) -> int:
+    """SUPERSEDED by run_mcem_noise_separation_v2.py (per-fit persistence); kept for the record."""
     stage = "phase3_" + "".join(conds)
     out = OUT_ROOT / stage
     need(tree_clean(), "working tree not clean (outside this experiment's output dir)")
@@ -501,7 +505,66 @@ def run_p4_fit(X, Y, train, k, seed, L):
     return res, snaps, traj
 
 
+def phase4_fit_id(L: int, cond: str, rep: int, k: int) -> int:
+    return 40000 + 1000 * P4_LS.index(L) + 100 * "ABCD".index(cond) + 10 * rep + k
+
+
+def phase4_fit(data, cond: str, rep: int, k: int, L: int, *, max_iter: int = P4_MAX_ITER):
+    """One Phase 4 fit + Laplace at every checkpoint + probe at the last checkpoint.
+    ``max_iter`` other than P4_MAX_ITER is for tests only.  Returns (base, C, P, R, IT, arrays)."""
+    s = P4_START
+    cps = tuple(c for c in P4_CPS if c <= max_iter)
+    b = data[rep]; v = b["cond"][cond]
+    X, Y, train = v["X"], v["Y"], b["train"]
+    seed = hist.model_seed(5, N, rep, k, s)
+    fid = phase4_fit_id(L, cond, rep, k)
+    base = {"experiment_id": EXPERIMENT_ID, "phase": 4, "condition": cond, "replicate": rep, "k_fit": k,
+            "start": s, "fit_id": fid, "L_fit": L, "model_seed": seed}
+    C, P, Rr, IT, arrays = [], [], [], [], {}
+    snaps, traj = {}, {}
+
+    def cb(rec):
+        it = int(rec["iteration"])
+        traj[it] = (float(rec["q_strict"]), float(rec["bic"]))
+        if it in cps:
+            snaps[it] = {"Zs": np.array(rec["Z_samples"]), "Z": np.array(rec["Z_est"]),
+                         "th": {"F": np.array(rec["F"]), "sigma": np.array(rec["sigma"]), "w0": float(rec["w0"]),
+                                "w": float(rec["w"]), "var_z": float(rec["var_z"])}, "bic": float(rec["bic"])}
+    res = run_em_instrumented(X, Y, family_x=hist.FAMILY_X, family_y=hist.FAMILY_Y, k=k, L=L, max_iter=max_iter,
+                              checkpoints=tuple(range(1, max_iter + 1)), seed=seed, train_mask=train,
+                              numerics_mode=hist.NUMERICS_MODE, stability_window=rm.STAB_WINDOW, on_nan="fail",
+                              on_checkpoint=cb)
+    need(res["retry_count"] == 0 and not res["nan_detected"], "unexpected retry")
+    m = new_model(k, L, train)
+    for cp in cps:
+        sn = snaps[cp]
+        lap = laplace_at(m, X, Y, sn["th"], sn["Z"], k)
+        zhat = lap.pop("Z_hat")
+        C.append({**base, "checkpoint": cp, "C_Q_fit": sn["bic"], "w0": sn["th"]["w0"], "w": sn["th"]["w"],
+                  "lap_status": lap["lap_status"],
+                  "C_Lap": lap["C_Lap"] if lap["lap_status"] == "OK" else float("nan"),
+                  "lap_grad_inf": lap["lap_grad_inf"]})
+        key = f"P4_L{L}_{cond}_r{rep}_k{k}_s{s}_it{cp}"
+        for nm, a in (("Zsamples", sn["Zs"]), ("Z", sn["Z"]), ("F", sn["th"]["F"]),
+                      ("sigma", sn["th"]["sigma"]), ("Zhat", zhat)):
+            arrays[f"{key}_{nm}"] = a
+        arrays[f"{key}_scalars"] = np.array([sn["th"]["w0"], sn["th"]["w"], sn["th"]["var_z"]])
+    last = cps[-1]
+    sn = snaps[last]
+    summ, reps, arr = probe(m, X, Y, train, sn["th"], sn["Z"], k, tag=TAG_PROBE + 1000 * L, fit_id=fid,
+                            cp=last, L_step=L, R_step=P4_R_STEP, eval_tag=TAG_P4_EVAL)
+    P.append({**base, "checkpoint": last, **summ})
+    for x in reps:
+        Rr.append({**base, "checkpoint": last, **x})
+    for nm, a in arr.items():
+        arrays[f"P4_L{L}_{cond}_r{rep}_k{k}_s{s}_it{last}_{nm}"] = a
+    for it, dg in enumerate(res["iteration_diagnostics"], start=1):
+        IT.append({**base, "iteration": it, "C_Q_fit": traj[it][1], **{kk: float(vv) for kk, vv in dg.items()}})
+    return base, C, P, Rr, IT, arrays
+
+
 def run_phase4(L: int, conds) -> int:
+    """SUPERSEDED by run_mcem_noise_separation_v2.py (per-fit persistence); kept for the record."""
     need(L in P4_LS, "L not pre-registered")
     stage = f"phase4_L{L}_" + "".join(conds)
     out = OUT_ROOT / stage
