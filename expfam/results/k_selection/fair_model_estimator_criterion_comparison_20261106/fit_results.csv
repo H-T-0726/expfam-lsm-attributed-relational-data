@@ -1,0 +1,881 @@
+experiment,cell,dataset,stage,key,estimator,k,s,seed,status,runtime_s,exception,lap_status,lap_seconds
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k1_s1_OLD,OLD,1,1,7751011,OK,11.5,,OK,0.02
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k1_s1_E,E,1,1,7751011,OK,12.66,,OK,0.02
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k1_s2_OLD,OLD,1,2,7751012,OK,11.41,,OK,0.03
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k1_s2_E,E,1,2,7751012,OK,12.76,,OK,0.03
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k2_s1_OLD,OLD,2,1,7751021,OK,12.35,,OK,0.04
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k2_s1_E,E,2,1,7751021,OK,15.1,,OK,0.05
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k2_s2_OLD,OLD,2,2,7751022,OK,13.33,,OK,0.05
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k2_s2_E,E,2,2,7751022,OK,15.32,,OK,0.05
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k3_s1_OLD,OLD,3,1,7751031,OK,13.6,,OK,0.07
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k3_s1_E,E,3,1,7751031,OK,15.94,,OK,0.06
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k3_s2_OLD,OLD,3,2,7751032,OK,13.05,,OK,0.07
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k3_s2_E,E,3,2,7751032,OK,15.26,,OK,0.07
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k4_s1_OLD,OLD,4,1,7751041,OK,12.94,,OK,0.1
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k4_s1_E,E,4,1,7751041,OK,16.54,,OK,0.1
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k4_s2_OLD,OLD,4,2,7751042,OK,13.31,,OK,0.1
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k4_s2_E,E,4,2,7751042,OK,15.49,,OK,0.1
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k5_s1_OLD,OLD,5,1,7751051,OK,13.42,,NOT_STATIONARY,8.35
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k5_s1_E,E,5,1,7751051,OK,16.03,,OK,0.15
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k5_s2_OLD,OLD,5,2,7751052,OK,13.22,,OK,0.15
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k5_s2_E,E,5,2,7751052,OK,15.63,,OK,0.15
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k6_s1_OLD,OLD,6,1,7751061,OK,13.19,,OK,0.33
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k6_s1_E,E,6,1,7751061,OK,16.67,,OK,0.44
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k6_s2_OLD,OLD,6,2,7751062,OK,14.33,,OK,0.32
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k6_s2_E,E,6,2,7751062,OK,16.13,,OK,0.5
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k7_s1_OLD,OLD,7,1,7751071,OK,13.82,,OK,1.42
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k7_s1_E,E,7,1,7751071,OK,16.77,,OK,1.14
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k7_s2_OLD,OLD,7,2,7751072,OK,13.76,,OK,1.01
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k7_s2_E,E,7,2,7751072,OK,17.24,,OK,1.1
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k8_s1_OLD,OLD,8,1,7751081,OK,13.38,,OK,2.18
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k8_s1_E,E,8,1,7751081,OK,16.12,,OK,1.38
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k8_s2_OLD,OLD,8,2,7751082,OK,13.34,,OK,1.38
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k8_s2_E,E,8,2,7751082,OK,16.99,,OK,1.29
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k9_s1_OLD,OLD,9,1,7751091,OK,13.23,,OK,2.95
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k9_s1_E,E,9,1,7751091,OK,16.01,,OK,2.6
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k9_s2_OLD,OLD,9,2,7751092,OK,13.01,,OK,2.59
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k9_s2_E,E,9,2,7751092,OK,15.7,,OK,2.26
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k10_s1_OLD,OLD,10,1,7751101,OK,13.17,,OK,2.77
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k10_s1_E,E,10,1,7751101,OK,16.0,,OK,4.08
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k10_s2_OLD,OLD,10,2,7751102,OK,13.23,,OK,3.51
+E1,G_old | K_GEN=5 | E,1,e1,e1_Gold_K5_r1_k10_s2_E,E,10,2,7751102,OK,16.02,,OK,3.2
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k1_s1_OLD,OLD,1,1,7752011,OK,10.44,,OK,0.02
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k1_s1_E,E,1,1,7752011,OK,11.88,,OK,0.02
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k1_s2_OLD,OLD,1,2,7752012,OK,10.47,,OK,0.02
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k1_s2_E,E,1,2,7752012,OK,11.94,,OK,0.02
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k2_s1_OLD,OLD,2,1,7752021,OK,11.66,,OK,0.04
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k2_s1_E,E,2,1,7752021,OK,13.84,,OK,0.04
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k2_s2_OLD,OLD,2,2,7752022,OK,11.76,,OK,0.03
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k2_s2_E,E,2,2,7752022,OK,14.2,,OK,0.04
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k3_s1_OLD,OLD,3,1,7752031,OK,12.04,,OK,0.07
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k3_s1_E,E,3,1,7752031,OK,14.58,,OK,0.06
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k3_s2_OLD,OLD,3,2,7752032,OK,11.97,,OK,0.06
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k3_s2_E,E,3,2,7752032,OK,14.74,,OK,0.08
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k4_s1_OLD,OLD,4,1,7752041,OK,12.0,,OK,0.11
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k4_s1_E,E,4,1,7752041,OK,14.68,,OK,0.11
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k4_s2_OLD,OLD,4,2,7752042,OK,11.98,,OK,0.1
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k4_s2_E,E,4,2,7752042,OK,14.72,,OK,0.1
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k5_s1_OLD,OLD,5,1,7752051,OK,12.45,,OK,0.17
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k5_s1_E,E,5,1,7752051,OK,15.15,,OK,0.16
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k5_s2_OLD,OLD,5,2,7752052,OK,12.31,,OK,0.18
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k5_s2_E,E,5,2,7752052,OK,15.11,,OK,0.15
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k6_s1_OLD,OLD,6,1,7752061,OK,13.78,,OK,0.91
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k6_s1_E,E,6,1,7752061,OK,15.47,,OK,0.48
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k6_s2_OLD,OLD,6,2,7752062,OK,12.67,,OK,2.11
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k6_s2_E,E,6,2,7752062,OK,15.46,,OK,0.44
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k7_s1_OLD,OLD,7,1,7752071,OK,13.01,,OK,1.13
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k7_s1_E,E,7,1,7752071,OK,15.82,,OK,0.58
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k7_s2_OLD,OLD,7,2,7752072,OK,12.95,,OK,0.8
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k7_s2_E,E,7,2,7752072,OK,15.8,,OK,0.62
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k8_s1_OLD,OLD,8,1,7752081,OK,12.34,,OK,1.66
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k8_s1_E,E,8,1,7752081,OK,15.29,,OK,1.5
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k8_s2_OLD,OLD,8,2,7752082,OK,12.41,,OK,1.32
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k8_s2_E,E,8,2,7752082,OK,15.37,,OK,1.52
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k9_s1_OLD,OLD,9,1,7752091,OK,12.88,,OK,2.83
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k9_s1_E,E,9,1,7752091,OK,16.09,,OK,3.28
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k9_s2_OLD,OLD,9,2,7752092,OK,12.91,,OK,2.1
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k9_s2_E,E,9,2,7752092,OK,15.76,,OK,2.49
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k10_s1_OLD,OLD,10,1,7752101,OK,13.24,,OK,3.36
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k10_s1_E,E,10,1,7752101,OK,16.19,,OK,2.56
+E1,G_old | K_GEN=5 | OLD,2,e1,e1_Gold_K5_r2_k10_s2_OLD,OLD,10,2,7752102,OK,13.24,,OK,5.62
+E1,G_old | K_GEN=5 | E,2,e1,e1_Gold_K5_r2_k10_s2_E,E,10,2,7752102,OK,16.04,,OK,2.62
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k1_s1_OLD,OLD,1,1,7791011,OK,10.46,,OK,0.02
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k1_s1_E,E,1,1,7791011,OK,11.85,,OK,0.02
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k1_s2_OLD,OLD,1,2,7791012,OK,10.46,,OK,0.02
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k1_s2_E,E,1,2,7791012,OK,11.86,,OK,0.02
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k2_s1_OLD,OLD,2,1,7791021,OK,11.75,,OK,0.05
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k2_s1_E,E,2,1,7791021,OK,13.52,,OK,0.05
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k2_s2_OLD,OLD,2,2,7791022,OK,11.86,,OK,0.05
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k2_s2_E,E,2,2,7791022,OK,13.85,,OK,0.04
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k3_s1_OLD,OLD,3,1,7791031,OK,12.07,,OK,0.08
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k3_s1_E,E,3,1,7791031,OK,14.36,,OK,0.06
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k3_s2_OLD,OLD,3,2,7791032,OK,12.07,,OK,0.06
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k3_s2_E,E,3,2,7791032,OK,14.37,,OK,0.06
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k4_s1_OLD,OLD,4,1,7791041,OK,12.03,,OK,0.11
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k4_s1_E,E,4,1,7791041,OK,14.35,,OK,0.09
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k4_s2_OLD,OLD,4,2,7791042,OK,12.01,,OK,0.11
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k4_s2_E,E,4,2,7791042,OK,14.32,,OK,0.08
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k5_s1_OLD,OLD,5,1,7791051,OK,12.46,,OK,0.21
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k5_s1_E,E,5,1,7791051,OK,14.81,,OK,0.19
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k5_s2_OLD,OLD,5,2,7791052,OK,12.34,,OK,0.22
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k5_s2_E,E,5,2,7791052,OK,14.81,,OK,0.18
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k6_s1_OLD,OLD,6,1,7791061,OK,13.05,,OK,0.23
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k6_s1_E,E,6,1,7791061,OK,15.18,,OK,0.25
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k6_s2_OLD,OLD,6,2,7791062,OK,12.72,,OK,0.24
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k6_s2_E,E,6,2,7791062,OK,15.03,,OK,0.23
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k7_s1_OLD,OLD,7,1,7791071,OK,13.01,,OK,0.35
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k7_s1_E,E,7,1,7791071,OK,15.58,,OK,0.35
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k7_s2_OLD,OLD,7,2,7791072,OK,13.03,,OK,0.34
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k7_s2_E,E,7,2,7791072,OK,15.65,,OK,0.45
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k8_s1_OLD,OLD,8,1,7791081,OK,12.48,,OK,0.62
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k8_s1_E,E,8,1,7791081,OK,15.02,,OK,0.62
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k8_s2_OLD,OLD,8,2,7791082,OK,12.72,,OK,0.51
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k8_s2_E,E,8,2,7791082,OK,15.0,,OK,0.5
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k9_s1_OLD,OLD,9,1,7791091,OK,12.95,,OK,0.77
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k9_s1_E,E,9,1,7791091,OK,15.75,,OK,0.68
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k9_s2_OLD,OLD,9,2,7791092,OK,12.99,,OK,0.81
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k9_s2_E,E,9,2,7791092,OK,15.5,,OK,0.91
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k10_s1_OLD,OLD,10,1,7791101,OK,13.18,,OK,1.54
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k10_s1_E,E,10,1,7791101,OK,15.84,,NOT_STATIONARY,26.18
+E1,G_old | K_GEN=9 | OLD,1,e1,e1_Gold_K9_r1_k10_s2_OLD,OLD,10,2,7791102,OK,13.15,,OK,1.89
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k10_s2_E,E,10,2,7791102,OK,15.79,,OK,1.24
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k1_s1_OLD,OLD,1,1,7792011,OK,10.52,,OK,0.02
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k1_s1_E,E,1,1,7792011,OK,11.99,,OK,0.02
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k1_s2_OLD,OLD,1,2,7792012,OK,10.46,,OK,0.02
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k1_s2_E,E,1,2,7792012,OK,11.89,,OK,0.02
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k2_s1_OLD,OLD,2,1,7792021,OK,11.63,,OK,0.03
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k2_s1_E,E,2,1,7792021,OK,13.89,,OK,0.04
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k2_s2_OLD,OLD,2,2,7792022,OK,11.59,,OK,0.04
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k2_s2_E,E,2,2,7792022,OK,14.17,,OK,0.04
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k3_s1_OLD,OLD,3,1,7792031,OK,12.04,,OK,0.06
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k3_s1_E,E,3,1,7792031,OK,14.63,,OK,0.06
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k3_s2_OLD,OLD,3,2,7792032,OK,12.01,,OK,0.06
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k3_s2_E,E,3,2,7792032,OK,14.53,,OK,0.05
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k4_s1_OLD,OLD,4,1,7792041,OK,11.93,,OK,0.1
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k4_s1_E,E,4,1,7792041,OK,14.7,,OK,0.09
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k4_s2_OLD,OLD,4,2,7792042,OK,11.93,,OK,0.1
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k4_s2_E,E,4,2,7792042,OK,14.7,,OK,0.09
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k5_s1_OLD,OLD,5,1,7792051,OK,12.37,,OK,0.15
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k5_s1_E,E,5,1,7792051,OK,15.13,,OK,0.18
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k5_s2_OLD,OLD,5,2,7792052,OK,12.34,,OK,0.18
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k5_s2_E,E,5,2,7792052,OK,15.03,,OK,0.17
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k6_s1_OLD,OLD,6,1,7792061,OK,12.69,,OK,0.28
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k6_s1_E,E,6,1,7792061,OK,15.81,,OK,0.23
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k6_s2_OLD,OLD,6,2,7792062,OK,12.68,,OK,0.24
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k6_s2_E,E,6,2,7792062,OK,15.41,,OK,0.21
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k7_s1_OLD,OLD,7,1,7792071,OK,12.99,,OK,0.37
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k7_s1_E,E,7,1,7792071,OK,15.82,,OK,0.33
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k7_s2_OLD,OLD,7,2,7792072,OK,13.05,,OK,0.33
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k7_s2_E,E,7,2,7792072,OK,15.85,,OK,0.36
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k8_s1_OLD,OLD,8,1,7792081,OK,12.54,,OK,0.59
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k8_s1_E,E,8,1,7792081,OK,15.22,,OK,0.59
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k8_s2_OLD,OLD,8,2,7792082,OK,12.41,,OK,0.57
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k8_s2_E,E,8,2,7792082,OK,15.36,,OK,0.52
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k9_s1_OLD,OLD,9,1,7792091,OK,12.95,,OK,0.7
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k9_s1_E,E,9,1,7792091,OK,16.05,,OK,0.76
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k9_s2_OLD,OLD,9,2,7792092,OK,12.97,,OK,0.75
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k9_s2_E,E,9,2,7792092,OK,15.69,,OK,0.9
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k10_s1_OLD,OLD,10,1,7792101,OK,13.24,,OK,1.51
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k10_s1_E,E,10,1,7792101,OK,16.13,,OK,2.56
+E1,G_old | K_GEN=9 | OLD,2,e1,e1_Gold_K9_r2_k10_s2_OLD,OLD,10,2,7792102,OK,13.29,,OK,1.43
+E1,G_old | K_GEN=9 | E,2,e1,e1_Gold_K9_r2_k10_s2_E,E,10,2,7792102,OK,16.09,,OK,1.53
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k1_s1_OLD,OLD,1,1,8751011,OK,10.46,,OK,0.02
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k1_s1_E,E,1,1,8751011,OK,11.55,,OK,0.02
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k1_s2_OLD,OLD,1,2,8751012,OK,10.51,,OK,0.02
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k1_s2_E,E,1,2,8751012,OK,11.61,,OK,0.02
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k2_s1_OLD,OLD,2,1,8751021,OK,11.68,,OK,0.03
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k2_s1_E,E,2,1,8751021,OK,13.39,,OK,0.03
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k2_s2_OLD,OLD,2,2,8751022,OK,11.73,,OK,0.03
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k2_s2_E,E,2,2,8751022,OK,13.68,,OK,0.03
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k3_s1_OLD,OLD,3,1,8751031,OK,12.09,,OK,0.05
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k3_s1_E,E,3,1,8751031,OK,14.39,,OK,0.07
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k3_s2_OLD,OLD,3,2,8751032,OK,12.72,,OK,0.05
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k3_s2_E,E,3,2,8751032,OK,14.1,,OK,0.05
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k4_s1_OLD,OLD,4,1,8751041,OK,12.06,,OK,0.08
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k4_s1_E,E,4,1,8751041,OK,14.2,,OK,0.08
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k4_s2_OLD,OLD,4,2,8751042,OK,11.91,,OK,0.08
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k4_s2_E,E,4,2,8751042,OK,14.13,,OK,0.08
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k5_s1_OLD,OLD,5,1,8751051,OK,12.28,,OK,0.13
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k5_s1_E,E,5,1,8751051,OK,14.68,,OK,0.71
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k5_s2_OLD,OLD,5,2,8751052,OK,12.36,,OK,0.12
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k5_s2_E,E,5,2,8751052,OK,14.81,,OK,0.12
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k6_s1_OLD,OLD,6,1,8751061,OK,12.72,,OK,0.34
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k6_s1_E,E,6,1,8751061,OK,15.24,,OK,0.34
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k6_s2_OLD,OLD,6,2,8751062,OK,12.61,,OK,0.36
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k6_s2_E,E,6,2,8751062,OK,15.02,,OK,0.31
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k7_s1_OLD,OLD,7,1,8751071,OK,13.44,,OK,0.54
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k7_s1_E,E,7,1,8751071,OK,15.36,,OK,0.66
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k7_s2_OLD,OLD,7,2,8751072,OK,13.1,,OK,0.56
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k7_s2_E,E,7,2,8751072,OK,15.48,,OK,0.49
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k8_s1_OLD,OLD,8,1,8751081,OK,12.44,,OK,1.17
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k8_s1_E,E,8,1,8751081,OK,14.89,,OK,1.0
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k8_s2_OLD,OLD,8,2,8751082,OK,12.42,,OK,0.95
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k8_s2_E,E,8,2,8751082,OK,15.06,,OK,0.9
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k9_s1_OLD,OLD,9,1,8751091,OK,12.95,,OK,1.42
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k9_s1_E,E,9,1,8751091,OK,15.45,,OK,1.48
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k9_s2_OLD,OLD,9,2,8751092,OK,13.26,,OK,1.91
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k9_s2_E,E,9,2,8751092,OK,15.4,,OK,1.43
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k10_s1_OLD,OLD,10,1,8751101,OK,13.27,,OK,2.35
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k10_s1_E,E,10,1,8751101,OK,15.77,,OK,1.67
+E1,G_canon | K_GEN=5 | OLD,1,e1,e1_Gcanon_K5_r1_k10_s2_OLD,OLD,10,2,8751102,OK,13.7,,OK,2.34
+E1,G_canon | K_GEN=5 | E,1,e1,e1_Gcanon_K5_r1_k10_s2_E,E,10,2,8751102,OK,16.07,,OK,1.93
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k1_s1_OLD,OLD,1,1,8752011,OK,10.5,,OK,0.02
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k1_s1_E,E,1,1,8752011,OK,11.63,,OK,0.02
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k1_s2_OLD,OLD,1,2,8752012,OK,10.44,,OK,0.02
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k1_s2_E,E,1,2,8752012,OK,11.69,,OK,0.02
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k2_s1_OLD,OLD,2,1,8752021,OK,11.66,,OK,0.03
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k2_s1_E,E,2,1,8752021,OK,13.41,,OK,0.03
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k2_s2_OLD,OLD,2,2,8752022,OK,11.63,,OK,0.03
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k2_s2_E,E,2,2,8752022,OK,13.54,,OK,0.03
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k3_s1_OLD,OLD,3,1,8752031,OK,12.36,,OK,0.06
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k3_s1_E,E,3,1,8752031,OK,14.29,,OK,0.05
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k3_s2_OLD,OLD,3,2,8752032,OK,12.08,,OK,0.06
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k3_s2_E,E,3,2,8752032,OK,14.59,,OK,0.05
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k4_s1_OLD,OLD,4,1,8752041,OK,12.09,,OK,0.08
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k4_s1_E,E,4,1,8752041,OK,14.34,,OK,0.08
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k4_s2_OLD,OLD,4,2,8752042,OK,11.98,,OK,0.08
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k4_s2_E,E,4,2,8752042,OK,14.35,,OK,0.08
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k5_s1_OLD,OLD,5,1,8752051,OK,12.42,,OK,0.12
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k5_s1_E,E,5,1,8752051,OK,14.72,,OK,0.13
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k5_s2_OLD,OLD,5,2,8752052,OK,12.39,,OK,0.41
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k5_s2_E,E,5,2,8752052,OK,14.66,,OK,0.13
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k6_s1_OLD,OLD,6,1,8752061,OK,12.63,,OK,0.28
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k6_s1_E,E,6,1,8752061,OK,15.33,,OK,0.28
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k6_s2_OLD,OLD,6,2,8752062,OK,12.63,,OK,0.38
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k6_s2_E,E,6,2,8752062,OK,15.01,,OK,0.38
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k7_s1_OLD,OLD,7,1,8752071,OK,12.99,,OK,0.57
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k7_s1_E,E,7,1,8752071,OK,15.47,,OK,0.5
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k7_s2_OLD,OLD,7,2,8752072,OK,13.02,,OK,0.86
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k7_s2_E,E,7,2,8752072,OK,15.46,,OK,0.49
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k8_s1_OLD,OLD,8,1,8752081,OK,12.37,,OK,0.9
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k8_s1_E,E,8,1,8752081,OK,14.85,,OK,0.91
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k8_s2_OLD,OLD,8,2,8752082,OK,12.46,,OK,1.02
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k8_s2_E,E,8,2,8752082,OK,14.94,,OK,0.84
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k9_s1_OLD,OLD,9,1,8752091,OK,12.97,,OK,1.34
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k9_s1_E,E,9,1,8752091,OK,15.55,,OK,1.5
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k9_s2_OLD,OLD,9,2,8752092,OK,13.52,,OK,1.67
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k9_s2_E,E,9,2,8752092,OK,15.71,,OK,1.15
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k10_s1_OLD,OLD,10,1,8752101,OK,13.22,,OK,2.06
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k10_s1_E,E,10,1,8752101,OK,15.69,,OK,1.49
+E1,G_canon | K_GEN=5 | OLD,2,e1,e1_Gcanon_K5_r2_k10_s2_OLD,OLD,10,2,8752102,OK,13.18,,OK,2.76
+E1,G_canon | K_GEN=5 | E,2,e1,e1_Gcanon_K5_r2_k10_s2_E,E,10,2,8752102,OK,15.69,,OK,1.23
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k1_s1_OLD,OLD,1,1,8791011,OK,10.56,,OK,0.02
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k1_s1_E,E,1,1,8791011,OK,11.73,,OK,0.02
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k1_s2_OLD,OLD,1,2,8791012,OK,11.27,,OK,0.02
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k1_s2_E,E,1,2,8791012,OK,14.38,,OK,0.02
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k2_s1_OLD,OLD,2,1,8791021,OK,11.86,,OK,0.04
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k2_s1_E,E,2,1,8791021,OK,13.39,,OK,0.03
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k2_s2_OLD,OLD,2,2,8791022,OK,11.88,,OK,0.04
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k2_s2_E,E,2,2,8791022,OK,13.56,,OK,0.03
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k3_s1_OLD,OLD,3,1,8791031,OK,12.15,,OK,0.06
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k3_s1_E,E,3,1,8791031,OK,14.26,,OK,0.05
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k3_s2_OLD,OLD,3,2,8791032,OK,12.18,,OK,0.05
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k3_s2_E,E,3,2,8791032,OK,14.21,,OK,0.05
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k4_s1_OLD,OLD,4,1,8791041,OK,12.15,,OK,0.09
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k4_s1_E,E,4,1,8791041,OK,14.29,,OK,0.08
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k4_s2_OLD,OLD,4,2,8791042,OK,12.12,,OK,0.08
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k4_s2_E,E,4,2,8791042,OK,14.52,,OK,0.08
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k5_s1_OLD,OLD,5,1,8791051,OK,12.38,,OK,0.13
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k5_s1_E,E,5,1,8791051,OK,14.8,,OK,0.12
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k5_s2_OLD,OLD,5,2,8791052,OK,12.49,,OK,0.12
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k5_s2_E,E,5,2,8791052,OK,14.63,,OK,0.12
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k6_s1_OLD,OLD,6,1,8791061,OK,12.78,,OK,0.18
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k6_s1_E,E,6,1,8791061,OK,15.33,,OK,0.18
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k6_s2_OLD,OLD,6,2,8791062,OK,12.81,,OK,0.2
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k6_s2_E,E,6,2,8791062,OK,15.1,,OK,0.21
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k7_s1_OLD,OLD,7,1,8791071,OK,13.23,,OK,0.29
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k7_s1_E,E,7,1,8791071,OK,15.9,,OK,0.29
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k7_s2_OLD,OLD,7,2,8791072,OK,13.68,,OK,0.29
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k7_s2_E,E,7,2,8791072,OK,16.04,,OK,0.28
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k8_s1_OLD,OLD,8,1,8791081,OK,12.54,,OK,0.4
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k8_s1_E,E,8,1,8791081,OK,14.99,,OK,0.4
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k8_s2_OLD,OLD,8,2,8791082,OK,13.38,,OK,0.41
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k8_s2_E,E,8,2,8791082,OK,16.74,,OK,0.41
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k9_s1_OLD,OLD,9,1,8791091,OK,14.17,,OK,0.56
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k9_s1_E,E,9,1,8791091,OK,16.84,,OK,0.56
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k9_s2_OLD,OLD,9,2,8791092,OK,14.21,,OK,0.56
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k9_s2_E,E,9,2,8791092,OK,16.94,,OK,0.55
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k10_s1_OLD,OLD,10,1,8791101,OK,13.75,,OK,1.37
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k10_s1_E,E,10,1,8791101,OK,15.79,,OK,0.99
+E1,G_canon | K_GEN=9 | OLD,1,e1,e1_Gcanon_K9_r1_k10_s2_OLD,OLD,10,2,8791102,OK,13.31,,OK,1.35
+E1,G_canon | K_GEN=9 | E,1,e1,e1_Gcanon_K9_r1_k10_s2_E,E,10,2,8791102,OK,15.85,,OK,1.15
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k1_s1_OLD,OLD,1,1,8792011,OK,10.8,,OK,0.02
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k1_s1_E,E,1,1,8792011,OK,11.93,,OK,0.02
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k1_s2_OLD,OLD,1,2,8792012,OK,10.62,,OK,0.02
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k1_s2_E,E,1,2,8792012,OK,11.98,,OK,0.02
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k2_s1_OLD,OLD,2,1,8792021,OK,11.88,,OK,0.03
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k2_s1_E,E,2,1,8792021,OK,13.46,,OK,0.03
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k2_s2_OLD,OLD,2,2,8792022,OK,11.71,,OK,0.04
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k2_s2_E,E,2,2,8792022,OK,13.56,,OK,0.03
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k3_s1_OLD,OLD,3,1,8792031,OK,12.51,,OK,0.06
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k3_s1_E,E,3,1,8792031,OK,14.27,,OK,0.05
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k3_s2_OLD,OLD,3,2,8792032,OK,12.14,,OK,0.06
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k3_s2_E,E,3,2,8792032,OK,14.2,,OK,0.05
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k4_s1_OLD,OLD,4,1,8792041,OK,12.05,,OK,0.08
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k4_s1_E,E,4,1,8792041,OK,14.39,,OK,0.08
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k4_s2_OLD,OLD,4,2,8792042,OK,12.05,,OK,0.09
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k4_s2_E,E,4,2,8792042,OK,14.34,,OK,0.08
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k5_s1_OLD,OLD,5,1,8792051,OK,12.44,,OK,0.14
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k5_s1_E,E,5,1,8792051,OK,14.85,,OK,0.12
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k5_s2_OLD,OLD,5,2,8792052,OK,12.4,,OK,0.13
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k5_s2_E,E,5,2,8792052,OK,15.83,,OK,0.12
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k6_s1_OLD,OLD,6,1,8792061,OK,12.78,,OK,0.18
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k6_s1_E,E,6,1,8792061,OK,15.69,,OK,0.19
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k6_s2_OLD,OLD,6,2,8792062,OK,12.68,,OK,0.18
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k6_s2_E,E,6,2,8792062,OK,15.29,,OK,0.18
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k7_s1_OLD,OLD,7,1,8792071,OK,13.16,,OK,0.28
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k7_s1_E,E,7,1,8792071,OK,15.68,,OK,0.29
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k7_s2_OLD,OLD,7,2,8792072,OK,13.18,,OK,0.32
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k7_s2_E,E,7,2,8792072,OK,15.58,,OK,0.29
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k8_s1_OLD,OLD,8,1,8792081,OK,12.54,,OK,0.4
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k8_s1_E,E,8,1,8792081,OK,15.09,,OK,0.4
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k8_s2_OLD,OLD,8,2,8792082,OK,12.52,,OK,0.4
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k8_s2_E,E,8,2,8792082,OK,15.71,,OK,0.4
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k9_s1_OLD,OLD,9,1,8792091,OK,15.05,,OK,0.54
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k9_s1_E,E,9,1,8792091,OK,19.08,,OK,0.54
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k9_s2_OLD,OLD,9,2,8792092,OK,13.18,,OK,0.54
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k9_s2_E,E,9,2,8792092,OK,15.81,,OK,0.54
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k10_s1_OLD,OLD,10,1,8792101,OK,13.43,,OK,1.33
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k10_s1_E,E,10,1,8792101,OK,16.17,,OK,0.98
+E1,G_canon | K_GEN=9 | OLD,2,e1,e1_Gcanon_K9_r2_k10_s2_OLD,OLD,10,2,8792102,OK,13.3,,OK,1.24
+E1,G_canon | K_GEN=9 | E,2,e1,e1_Gcanon_K9_r2_k10_s2_E,E,10,2,8792102,OK,15.94,,OK,1.14
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k1_s1,E,1,1,1405111,OK,5.24,,OK,0.01
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k1_s2,E,1,2,1405112,OK,5.23,,OK,0.01
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k2_s1,E,2,1,1405121,OK,5.74,,OK,0.01
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k2_s2,E,2,2,1405122,OK,5.77,,OK,0.01
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k3_s1,E,3,1,1405131,OK,5.92,,OK,0.02
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k3_s2,E,3,2,1405132,OK,5.89,,OK,0.01
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k4_s1,E,4,1,1405141,OK,5.98,,OK,0.02
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k4_s2,E,4,2,1405142,OK,5.94,,OK,0.02
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k5_s1,E,5,1,1405151,OK,6.14,,OK,0.03
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k5_s2,E,5,2,1405152,OK,6.06,,OK,0.04
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k6_s1,E,6,1,1405161,OK,6.25,,OK,0.06
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k6_s2,E,6,2,1405162,OK,6.22,,OK,0.04
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k7_s1,E,7,1,1405171,OK,6.31,,OK,0.06
+E2,gaussian | n=75 | weak,1,e2,e2_gaussian_weak_n75_r1_k7_s2,E,7,2,1405172,OK,6.33,,OK,0.09
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k1_s1,E,1,1,1405211,OK,5.21,,OK,0.01
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k1_s2,E,1,2,1405212,OK,5.25,,OK,0.01
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k2_s1,E,2,1,1405221,OK,5.83,,OK,0.01
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k2_s2,E,2,2,1405222,OK,5.78,,NOT_STATIONARY,1.88
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k3_s1,E,3,1,1405231,OK,5.92,,OK,0.02
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k3_s2,E,3,2,1405232,OK,5.9,,OK,0.02
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k4_s1,E,4,1,1405241,OK,5.98,,OK,0.02
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k4_s2,E,4,2,1405242,OK,6.06,,OK,0.02
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k5_s1,E,5,1,1405251,OK,6.13,,OK,0.03
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k5_s2,E,5,2,1405252,OK,6.23,,OK,0.03
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k6_s1,E,6,1,1405261,OK,6.2,,OK,0.05
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k6_s2,E,6,2,1405262,OK,6.22,,OK,0.05
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k7_s1,E,7,1,1405271,OK,6.36,,OK,0.07
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k7_s2,E,7,2,1405272,OK,6.32,,OK,0.06
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k1_s1,E,1,1,1405311,OK,5.19,,OK,0.01
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k1_s2,E,1,2,1405312,OK,5.21,,OK,0.01
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k2_s1,E,2,1,1405321,OK,5.75,,OK,0.01
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k2_s2,E,2,2,1405322,OK,5.75,,OK,0.01
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k3_s1,E,3,1,1405331,OK,5.92,,OK,0.02
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k3_s2,E,3,2,1405332,OK,5.9,,OK,0.01
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k4_s1,E,4,1,1405341,OK,5.96,,OK,0.02
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k4_s2,E,4,2,1405342,OK,5.94,,OK,0.02
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k5_s1,E,5,1,1405351,OK,6.14,,OK,0.03
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k5_s2,E,5,2,1405352,OK,6.12,,OK,0.03
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k6_s1,E,6,1,1405361,OK,6.19,,OK,0.06
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k6_s2,E,6,2,1405362,OK,6.19,,OK,0.04
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k7_s1,E,7,1,1405371,OK,6.34,,OK,0.06
+E2,gaussian | n=75 | weak,3,e2,e2_gaussian_weak_n75_r3_k7_s2,E,7,2,1405372,OK,6.33,,OK,0.08
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k1_s1,E,1,1,1405411,OK,5.18,,OK,0.01
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k1_s2,E,1,2,1405412,OK,5.18,,OK,0.01
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k2_s1,E,2,1,1405421,OK,5.72,,OK,0.01
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k2_s2,E,2,2,1405422,OK,5.74,,OK,0.01
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k3_s1,E,3,1,1405431,OK,5.89,,OK,0.02
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k3_s2,E,3,2,1405432,OK,5.89,,OK,0.02
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k4_s1,E,4,1,1405441,OK,5.94,,OK,0.02
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k4_s2,E,4,2,1405442,OK,5.98,,OK,0.02
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k5_s1,E,5,1,1405451,OK,6.46,,OK,0.03
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k5_s2,E,5,2,1405452,OK,6.15,,OK,0.03
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k6_s1,E,6,1,1405461,OK,6.19,,OK,0.05
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k6_s2,E,6,2,1405462,OK,6.21,,OK,0.07
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k7_s1,E,7,1,1405471,OK,6.37,,OK,0.06
+E2,gaussian | n=75 | weak,4,e2,e2_gaussian_weak_n75_r4_k7_s2,E,7,2,1405472,OK,6.35,,OK,0.06
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k1_s1,E,1,1,1405111,OK,5.21,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k1_s2,E,1,2,1405112,OK,5.23,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k2_s1,E,2,1,1405121,OK,5.95,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k2_s2,E,2,2,1405122,OK,5.79,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k3_s1,E,3,1,1405131,OK,5.97,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k3_s2,E,3,2,1405132,OK,6.06,,OK,0.01
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k4_s1,E,4,1,1405141,OK,6.0,,OK,0.02
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k4_s2,E,4,2,1405142,OK,6.06,,OK,0.03
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k5_s1,E,5,1,1405151,OK,6.14,,OK,0.04
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k5_s2,E,5,2,1405152,OK,6.16,,OK,0.03
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k6_s1,E,6,1,1405161,OK,6.21,,OK,0.05
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k6_s2,E,6,2,1405162,OK,6.21,,OK,0.04
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k7_s1,E,7,1,1405171,OK,6.39,,OK,0.06
+E2,gaussian | n=75 | strong,1,e2,e2_gaussian_strong_n75_r1_k7_s2,E,7,2,1405172,OK,6.43,,OK,0.06
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k1_s1,E,1,1,1405211,OK,5.2,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k1_s2,E,1,2,1405212,OK,5.23,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k2_s1,E,2,1,1405221,OK,5.76,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k2_s2,E,2,2,1405222,OK,5.78,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k3_s1,E,3,1,1405231,OK,5.99,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k3_s2,E,3,2,1405232,OK,5.91,,OK,0.01
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k4_s1,E,4,1,1405241,OK,6.04,,OK,0.02
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k4_s2,E,4,2,1405242,OK,6.67,,OK,0.02
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k5_s1,E,5,1,1405251,OK,6.26,,OK,0.03
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k5_s2,E,5,2,1405252,OK,6.14,,OK,0.03
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k6_s1,E,6,1,1405261,OK,6.21,,OK,0.05
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k6_s2,E,6,2,1405262,OK,6.23,,OK,0.06
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k7_s1,E,7,1,1405271,OK,6.36,,OK,0.07
+E2,gaussian | n=75 | strong,2,e2,e2_gaussian_strong_n75_r2_k7_s2,E,7,2,1405272,OK,6.34,,OK,0.07
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k1_s1,E,1,1,1405311,OK,5.2,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k1_s2,E,1,2,1405312,OK,5.22,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k2_s1,E,2,1,1405321,OK,5.77,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k2_s2,E,2,2,1405322,OK,5.74,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k3_s1,E,3,1,1405331,OK,6.11,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k3_s2,E,3,2,1405332,OK,6.09,,OK,0.01
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k4_s1,E,4,1,1405341,OK,6.04,,OK,0.02
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k4_s2,E,4,2,1405342,OK,6.04,,OK,0.02
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k5_s1,E,5,1,1405351,OK,6.11,,OK,0.03
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k5_s2,E,5,2,1405352,OK,6.17,,OK,0.02
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k6_s1,E,6,1,1405361,OK,6.22,,NOT_STATIONARY,3.06
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k6_s2,E,6,2,1405362,OK,6.25,,OK,0.09
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k7_s1,E,7,1,1405371,OK,6.34,,OK,0.08
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k7_s2,E,7,2,1405372,OK,6.37,,OK,0.07
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k1_s1,E,1,1,1405411,OK,5.2,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k1_s2,E,1,2,1405412,OK,5.2,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k2_s1,E,2,1,1405421,OK,6.01,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k2_s2,E,2,2,1405422,OK,5.85,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k3_s1,E,3,1,1405431,OK,5.97,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k3_s2,E,3,2,1405432,OK,5.94,,OK,0.01
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k4_s1,E,4,1,1405441,OK,6.04,,OK,0.02
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k4_s2,E,4,2,1405442,OK,6.05,,OK,0.02
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k5_s1,E,5,1,1405451,OK,6.07,,OK,0.03
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k5_s2,E,5,2,1405452,OK,6.16,,OK,0.03
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k6_s1,E,6,1,1405461,OK,6.17,,OK,0.06
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k6_s2,E,6,2,1405462,OK,6.22,,OK,0.06
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k7_s1,E,7,1,1405471,OK,6.38,,OK,0.06
+E2,gaussian | n=75 | strong,4,e2,e2_gaussian_strong_n75_r4_k7_s2,E,7,2,1405472,OK,6.4,,OK,0.08
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k1_s1,E,1,1,1480111,OK,11.73,,OK,0.02
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k1_s2,E,1,2,1480112,OK,11.75,,OK,0.02
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k2_s1,E,2,1,1480121,OK,13.52,,OK,0.03
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k2_s2,E,2,2,1480122,OK,13.5,,OK,0.03
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k3_s1,E,3,1,1480131,OK,14.14,,OK,0.05
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k3_s2,E,3,2,1480132,OK,14.39,,OK,0.06
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k4_s1,E,4,1,1480141,OK,14.17,,OK,0.09
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k4_s2,E,4,2,1480142,OK,14.38,,OK,0.09
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k5_s1,E,5,1,1480151,OK,14.78,,OK,0.14
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k5_s2,E,5,2,1480152,OK,14.73,,OK,0.14
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k6_s1,E,6,1,1480161,OK,15.11,,OK,0.28
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k6_s2,E,6,2,1480162,OK,15.01,,OK,0.32
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k7_s1,E,7,1,1480171,OK,15.49,,OK,0.86
+E2,gaussian | n=150 | weak,1,e2,e2_gaussian_weak_n150_r1_k7_s2,E,7,2,1480172,OK,15.48,,OK,0.53
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k1_s1,E,1,1,1480211,OK,11.7,,OK,0.02
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k1_s2,E,1,2,1480212,OK,11.65,,OK,0.02
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k2_s1,E,2,1,1480221,OK,13.64,,OK,0.04
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k2_s2,E,2,2,1480222,OK,13.37,,OK,0.04
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k3_s1,E,3,1,1480231,OK,14.15,,OK,0.06
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k3_s2,E,3,2,1480232,OK,14.11,,OK,0.07
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k4_s1,E,4,1,1480241,OK,14.23,,OK,0.09
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k4_s2,E,4,2,1480242,OK,14.17,,OK,0.09
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k5_s1,E,5,1,1480251,OK,14.75,,OK,0.13
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k5_s2,E,5,2,1480252,OK,14.63,,OK,0.13
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k6_s1,E,6,1,1480261,OK,15.27,,OK,0.29
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k6_s2,E,6,2,1480262,OK,14.98,,OK,0.29
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k7_s1,E,7,1,1480271,OK,15.44,,OK,0.47
+E2,gaussian | n=150 | weak,2,e2,e2_gaussian_weak_n150_r2_k7_s2,E,7,2,1480272,OK,15.41,,OK,0.59
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k1_s1,E,1,1,1480311,OK,11.8,,OK,0.02
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k1_s2,E,1,2,1480312,OK,11.83,,OK,0.02
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k2_s1,E,2,1,1480321,OK,13.45,,OK,0.04
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k2_s2,E,2,2,1480322,OK,13.44,,OK,0.04
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k3_s1,E,3,1,1480331,OK,14.08,,OK,0.05
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k3_s2,E,3,2,1480332,OK,14.19,,OK,0.05
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k4_s1,E,4,1,1480341,OK,14.16,,OK,0.09
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k4_s2,E,4,2,1480342,OK,14.19,,OK,0.09
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k5_s1,E,5,1,1480351,OK,14.68,,OK,0.13
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k5_s2,E,5,2,1480352,OK,14.86,,OK,0.14
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k6_s1,E,6,1,1480361,OK,15.01,,OK,0.29
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k6_s2,E,6,2,1480362,OK,15.0,,OK,0.29
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k7_s1,E,7,1,1480371,OK,15.45,,OK,0.48
+E2,gaussian | n=150 | weak,3,e2,e2_gaussian_weak_n150_r3_k7_s2,E,7,2,1480372,OK,15.43,,OK,0.49
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k1_s1,E,1,1,1480411,OK,11.68,,OK,0.02
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k1_s2,E,1,2,1480412,OK,11.67,,OK,0.02
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k2_s1,E,2,1,1480421,OK,13.37,,OK,0.03
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k2_s2,E,2,2,1480422,OK,13.36,,OK,0.03
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k3_s1,E,3,1,1480431,OK,14.08,,OK,0.06
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k3_s2,E,3,2,1480432,OK,14.16,,OK,0.06
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k4_s1,E,4,1,1480441,OK,14.08,,OK,0.09
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k4_s2,E,4,2,1480442,OK,14.11,,OK,0.1
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k5_s1,E,5,1,1480451,OK,14.48,,OK,0.14
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k5_s2,E,5,2,1480452,OK,14.79,,OK,0.14
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k6_s1,E,6,1,1480461,OK,14.99,,OK,0.34
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k6_s2,E,6,2,1480462,OK,14.91,,OK,0.3
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k7_s1,E,7,1,1480471,OK,15.36,,OK,0.48
+E2,gaussian | n=150 | weak,4,e2,e2_gaussian_weak_n150_r4_k7_s2,E,7,2,1480472,OK,15.32,,OK,0.56
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k1_s1,E,1,1,1480111,OK,11.81,,OK,0.02
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k1_s2,E,1,2,1480112,OK,11.8,,OK,0.02
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k2_s1,E,2,1,1480121,OK,13.6,,OK,0.03
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k2_s2,E,2,2,1480122,OK,15.86,,OK,0.03
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k3_s1,E,3,1,1480131,OK,14.7,,OK,0.05
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k3_s2,E,3,2,1480132,OK,14.74,,OK,0.05
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k4_s1,E,4,1,1480141,OK,14.26,,OK,0.1
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k4_s2,E,4,2,1480142,OK,14.36,,OK,0.08
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k5_s1,E,5,1,1480151,OK,14.81,,OK,0.14
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k5_s2,E,5,2,1480152,OK,14.92,,OK,0.2
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k6_s1,E,6,1,1480161,OK,15.19,,OK,0.28
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k6_s2,E,6,2,1480162,OK,15.15,,OK,0.31
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k7_s1,E,7,1,1480171,OK,15.73,,OK,0.48
+E2,gaussian | n=150 | strong,1,e2,e2_gaussian_strong_n150_r1_k7_s2,E,7,2,1480172,OK,16.17,,OK,0.56
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k1_s1,E,1,1,1480211,OK,11.8,,NOT_STATIONARY,4.36
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k1_s2,E,1,2,1480212,OK,11.73,,OK,0.02
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k2_s1,E,2,1,1480221,OK,13.53,,OK,0.03
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k2_s2,E,2,2,1480222,OK,13.53,,OK,0.03
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k3_s1,E,3,1,1480231,OK,14.35,,OK,0.09
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k3_s2,E,3,2,1480232,OK,15.0,,OK,0.06
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k4_s1,E,4,1,1480241,OK,14.45,,OK,0.09
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k4_s2,E,4,2,1480242,OK,14.36,,OK,0.09
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k5_s1,E,5,1,1480251,OK,14.82,,OK,0.12
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k5_s2,E,5,2,1480252,OK,14.97,,OK,0.15
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k6_s1,E,6,1,1480261,OK,15.12,,OK,0.33
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k6_s2,E,6,2,1480262,OK,15.16,,OK,0.31
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k7_s1,E,7,1,1480271,OK,15.6,,OK,0.93
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k7_s2,E,7,2,1480272,OK,15.59,,OK,0.7
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k1_s1,E,1,1,1480311,OK,11.97,,OK,0.02
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k1_s2,E,1,2,1480312,OK,12.13,,OK,0.02
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k2_s1,E,2,1,1480321,OK,13.57,,OK,0.03
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k2_s2,E,2,2,1480322,OK,13.51,,OK,0.05
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k3_s1,E,3,1,1480331,OK,14.68,,NOT_STATIONARY,5.96
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k3_s2,E,3,2,1480332,OK,14.26,,OK,0.05
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k4_s1,E,4,1,1480341,OK,14.39,,OK,0.08
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k4_s2,E,4,2,1480342,OK,14.53,,OK,0.09
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k5_s1,E,5,1,1480351,OK,14.96,,OK,0.13
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k5_s2,E,5,2,1480352,OK,14.83,,OK,0.13
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k6_s1,E,6,1,1480361,OK,15.38,,OK,0.34
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k6_s2,E,6,2,1480362,OK,15.15,,OK,0.36
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k7_s1,E,7,1,1480371,OK,15.71,,OK,0.53
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k7_s2,E,7,2,1480372,OK,15.66,,OK,0.44
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k1_s1,E,1,1,1480411,OK,11.73,,OK,0.02
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k1_s2,E,1,2,1480412,OK,11.74,,OK,0.02
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k2_s1,E,2,1,1480421,OK,13.68,,OK,0.03
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k2_s2,E,2,2,1480422,OK,13.6,,OK,0.03
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k3_s1,E,3,1,1480431,OK,14.24,,OK,0.05
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k3_s2,E,3,2,1480432,OK,14.21,,OK,0.05
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k4_s1,E,4,1,1480441,OK,14.29,,OK,0.08
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k4_s2,E,4,2,1480442,OK,14.33,,OK,0.09
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k5_s1,E,5,1,1480451,OK,14.64,,OK,0.13
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k5_s2,E,5,2,1480452,OK,14.67,,OK,0.12
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k6_s1,E,6,1,1480461,OK,15.03,,OK,0.3
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k6_s2,E,6,2,1480462,OK,15.12,,OK,0.28
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k7_s1,E,7,1,1480471,OK,15.36,,OK,0.82
+E2,gaussian | n=150 | strong,4,e2,e2_gaussian_strong_n150_r4_k7_s2,E,7,2,1480472,OK,15.51,,OK,0.52
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k1_s1,E,1,1,1480111,OK,13.86,,OK,0.02
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k1_s2,E,1,2,1480112,OK,13.84,,OK,0.02
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k2_s1,E,2,1,1480121,OK,15.8,,OK,0.04
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k2_s2,E,2,2,1480122,OK,15.86,,OK,0.03
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k3_s1,E,3,1,1480131,OK,16.65,,OK,0.06
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k3_s2,E,3,2,1480132,OK,16.62,,OK,0.06
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k4_s1,E,4,1,1480141,OK,16.55,,OK,0.09
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k4_s2,E,4,2,1480142,OK,16.54,,OK,0.09
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k5_s1,E,5,1,1480151,OK,17.39,,OK,0.14
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k5_s2,E,5,2,1480152,OK,17.16,,OK,0.14
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k6_s1,E,6,1,1480161,OK,17.44,,OK,0.33
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k6_s2,E,6,2,1480162,OK,17.49,,OK,0.28
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k7_s1,E,7,1,1480171,OK,17.89,,OK,0.61
+E2,poisson | n=150 | strong,1,e2,e2_poisson_strong_n150_r1_k7_s2,E,7,2,1480172,OK,17.82,,OK,0.65
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k1_s1,E,1,1,1480211,OK,13.82,,OK,0.02
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k1_s2,E,1,2,1480212,OK,13.81,,OK,0.02
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k2_s1,E,2,1,1480221,OK,15.68,,OK,0.03
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k2_s2,E,2,2,1480222,OK,15.66,,OK,0.03
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k3_s1,E,3,1,1480231,OK,16.59,,OK,0.05
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k3_s2,E,3,2,1480232,OK,16.46,,OK,0.05
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k4_s1,E,4,1,1480241,OK,16.48,,OK,0.08
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k4_s2,E,4,2,1480242,OK,16.46,,OK,0.22
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k5_s1,E,5,1,1480251,OK,16.98,,OK,0.14
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k5_s2,E,5,2,1480252,OK,17.09,,OK,0.14
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k6_s1,E,6,1,1480261,OK,17.35,,OK,0.32
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k6_s2,E,6,2,1480262,OK,17.4,,OK,0.37
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k7_s1,E,7,1,1480271,OK,17.96,,OK,0.5
+E2,poisson | n=150 | strong,2,e2,e2_poisson_strong_n150_r2_k7_s2,E,7,2,1480272,OK,17.76,,OK,0.49
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k1_s1,E,1,1,1480311,OK,13.77,,OK,0.02
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k1_s2,E,1,2,1480312,OK,13.83,,OK,0.02
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k2_s1,E,2,1,1480321,OK,15.72,,OK,0.03
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k2_s2,E,2,2,1480322,OK,15.85,,OK,0.03
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k3_s1,E,3,1,1480331,OK,16.56,,OK,0.05
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k3_s2,E,3,2,1480332,OK,16.56,,OK,0.05
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k4_s1,E,4,1,1480341,OK,17.03,,OK,0.08
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k4_s2,E,4,2,1480342,OK,16.68,,OK,0.08
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k5_s1,E,5,1,1480351,OK,17.12,,OK,0.14
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k5_s2,E,5,2,1480352,OK,17.14,,OK,0.13
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k6_s1,E,6,1,1480361,OK,17.39,,OK,0.3
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k6_s2,E,6,2,1480362,OK,17.44,,OK,0.29
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k7_s1,E,7,1,1480371,OK,17.94,,OK,0.95
+E2,poisson | n=150 | strong,3,e2,e2_poisson_strong_n150_r3_k7_s2,E,7,2,1480372,OK,17.84,,OK,0.63
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k1_s1,E,1,1,1480411,OK,13.71,,OK,0.02
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k1_s2,E,1,2,1480412,OK,13.68,,OK,0.02
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k2_s1,E,2,1,1480421,OK,15.64,,OK,0.03
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k2_s2,E,2,2,1480422,OK,15.88,,OK,0.03
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k3_s1,E,3,1,1480431,OK,16.36,,OK,0.05
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k3_s2,E,3,2,1480432,OK,16.36,,OK,0.05
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k4_s1,E,4,1,1480441,OK,16.49,,OK,0.1
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k4_s2,E,4,2,1480442,OK,16.45,,OK,0.08
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k5_s1,E,5,1,1480451,OK,16.96,,OK,0.14
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k5_s2,E,5,2,1480452,OK,17.07,,NOT_STATIONARY,7.91
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k6_s1,E,6,1,1480461,OK,17.22,,OK,0.27
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k6_s2,E,6,2,1480462,OK,17.33,,OK,0.33
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k7_s1,E,7,1,1480471,OK,17.68,,OK,0.77
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k7_s2,E,7,2,1480472,OK,17.75,,OK,0.6
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k1_s1,E,1,1,1405111,OK,6.35,,OK,0.01
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k1_s2,E,1,2,1405112,OK,6.28,,OK,0.01
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k2_s1,E,2,1,1405121,OK,6.9,,OK,0.01
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k2_s2,E,2,2,1405122,OK,6.84,,OK,0.01
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k3_s1,E,3,1,1405131,OK,7.02,,OK,0.02
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k3_s2,E,3,2,1405132,OK,7.01,,OK,0.02
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k4_s1,E,4,1,1405141,OK,7.05,,OK,0.02
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k4_s2,E,4,2,1405142,OK,7.12,,OK,0.02
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k5_s1,E,5,1,1405151,OK,7.25,,OK,0.03
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k5_s2,E,5,2,1405152,OK,7.31,,OK,0.03
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k6_s1,E,6,1,1405161,OK,7.43,,OK,0.05
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k6_s2,E,6,2,1405162,OK,7.3,,OK,0.05
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k7_s1,E,7,1,1405171,OK,7.67,,OK,0.08
+E3,train fraction 0.8,1,e3,e3_frac080_r1_k7_s2,E,7,2,1405172,OK,7.42,,OK,0.09
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k1_s1,E,1,1,1405211,OK,6.27,,OK,0.01
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k1_s2,E,1,2,1405212,OK,6.25,,OK,0.01
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k2_s1,E,2,1,1405221,OK,7.14,,OK,0.01
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k2_s2,E,2,2,1405222,OK,6.91,,OK,0.01
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k3_s1,E,3,1,1405231,OK,7.12,,OK,0.02
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k3_s2,E,3,2,1405232,OK,7.05,,OK,0.02
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k4_s1,E,4,1,1405241,OK,7.14,,OK,0.02
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k4_s2,E,4,2,1405242,OK,7.14,,OK,0.02
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k5_s1,E,5,1,1405251,OK,7.25,,OK,0.03
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k5_s2,E,5,2,1405252,OK,7.28,,OK,0.04
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k6_s1,E,6,1,1405261,OK,7.31,,OK,0.05
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k6_s2,E,6,2,1405262,OK,7.35,,OK,0.08
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k7_s1,E,7,1,1405271,OK,7.69,,OK,0.14
+E3,train fraction 0.8,2,e3,e3_frac080_r2_k7_s2,E,7,2,1405272,OK,7.51,,OK,0.18
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k1_s1,E,1,1,1405311,OK,6.27,,OK,0.01
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k1_s2,E,1,2,1405312,OK,6.54,,OK,0.01
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k2_s1,E,2,1,1405321,OK,6.94,,OK,0.01
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k2_s2,E,2,2,1405322,OK,6.86,,OK,0.01
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k3_s1,E,3,1,1405331,OK,7.01,,OK,0.02
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k3_s2,E,3,2,1405332,OK,7.05,,OK,0.02
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k4_s1,E,4,1,1405341,OK,7.1,,OK,0.02
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k4_s2,E,4,2,1405342,OK,7.15,,OK,0.02
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k5_s1,E,5,1,1405351,OK,7.31,,OK,0.03
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k5_s2,E,5,2,1405352,OK,7.24,,OK,0.03
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k6_s1,E,6,1,1405361,OK,7.33,,OK,0.07
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k6_s2,E,6,2,1405362,OK,7.4,,OK,0.08
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k7_s1,E,7,1,1405371,OK,7.54,,OK,0.1
+E3,train fraction 0.8,3,e3,e3_frac080_r3_k7_s2,E,7,2,1405372,OK,7.48,,OK,0.08
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k1_s1,E,1,1,1405411,OK,6.28,,OK,0.01
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k1_s2,E,1,2,1405412,OK,6.28,,OK,0.01
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k2_s1,E,2,1,1405421,OK,6.82,,OK,0.01
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k2_s2,E,2,2,1405422,OK,6.9,,OK,0.02
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k3_s1,E,3,1,1405431,OK,7.05,,OK,0.03
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k3_s2,E,3,2,1405432,OK,7.01,,OK,0.03
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k4_s1,E,4,1,1405441,OK,7.09,,OK,0.02
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k4_s2,E,4,2,1405442,OK,7.2,,OK,0.02
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k5_s1,E,5,1,1405451,OK,7.29,,OK,0.04
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k5_s2,E,5,2,1405452,OK,7.31,,OK,0.04
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k6_s1,E,6,1,1405461,OK,7.34,,OK,0.06
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k6_s2,E,6,2,1405462,OK,7.37,,OK,0.06
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k7_s1,E,7,1,1405471,OK,7.5,,OK,0.08
+E3,train fraction 0.8,4,e3,e3_frac080_r4_k7_s2,E,7,2,1405472,OK,7.43,,OK,0.09
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k1_s1,E,1,1,1405111,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k1_s1,E,1,1,1405111,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k1_s2,E,1,2,1405112,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k1_s2,E,1,2,1405112,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k2_s1,E,2,1,1405121,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k2_s1,E,2,1,1405121,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k2_s2,E,2,2,1405122,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k2_s2,E,2,2,1405122,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k3_s1,E,3,1,1405131,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k3_s1,E,3,1,1405131,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k3_s2,E,3,2,1405132,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k3_s2,E,3,2,1405132,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k4_s1,E,4,1,1405141,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k4_s1,E,4,1,1405141,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k4_s2,E,4,2,1405142,"OK (reused, gate PASS)",,,OK,0.03
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k4_s2,E,4,2,1405142,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k5_s1,E,5,1,1405151,"OK (reused, gate PASS)",,,OK,0.05
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k5_s1,E,5,1,1405151,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k5_s2,E,5,2,1405152,"OK (reused, gate PASS)",,,OK,0.05
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k5_s2,E,5,2,1405152,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k6_s1,E,6,1,1405161,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k6_s1,E,6,1,1405161,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k6_s2,E,6,2,1405162,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k6_s2,E,6,2,1405162,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k7_s1,E,7,1,1405171,"OK (reused, gate PASS)",,,OK,0.08
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k7_s1,E,7,1,1405171,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=75 | weak,1,reuse,reuse_A1emc_n75_r1_k7_s2,E,7,2,1405172,"OK (reused, gate PASS)",,,OK,0.07
+E3,train fraction 1.0,1,reuse,reuse_A1emc_n75_r1_k7_s2,E,7,2,1405172,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k1_s1,E,1,1,1405211,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k1_s1,E,1,1,1405211,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k1_s2,E,1,2,1405212,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k1_s2,E,1,2,1405212,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k2_s1,E,2,1,1405221,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k2_s1,E,2,1,1405221,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k2_s2,E,2,2,1405222,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k2_s2,E,2,2,1405222,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k3_s1,E,3,1,1405231,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k3_s1,E,3,1,1405231,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k3_s2,E,3,2,1405232,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k3_s2,E,3,2,1405232,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k4_s1,E,4,1,1405241,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k4_s1,E,4,1,1405241,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k4_s2,E,4,2,1405242,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k4_s2,E,4,2,1405242,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k5_s1,E,5,1,1405251,"OK (reused, gate PASS)",,,OK,0.03
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k5_s1,E,5,1,1405251,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k5_s2,E,5,2,1405252,"OK (reused, gate PASS)",,,OK,0.03
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k5_s2,E,5,2,1405252,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k6_s1,E,6,1,1405261,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k6_s1,E,6,1,1405261,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k6_s2,E,6,2,1405262,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k6_s2,E,6,2,1405262,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k7_s1,E,7,1,1405271,"OK (reused, gate PASS)",,,OK,0.08
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k7_s1,E,7,1,1405271,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=75 | weak,2,reuse,reuse_A1emc_n75_r2_k7_s2,E,7,2,1405272,"OK (reused, gate PASS)",,,OK,0.09
+E3,train fraction 1.0,2,reuse,reuse_A1emc_n75_r2_k7_s2,E,7,2,1405272,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k1_s1,E,1,1,1405311,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k1_s1,E,1,1,1405311,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k1_s2,E,1,2,1405312,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k1_s2,E,1,2,1405312,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k2_s1,E,2,1,1405321,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k2_s1,E,2,1,1405321,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k2_s2,E,2,2,1405322,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k2_s2,E,2,2,1405322,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k3_s1,E,3,1,1405331,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k3_s1,E,3,1,1405331,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k3_s2,E,3,2,1405332,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k3_s2,E,3,2,1405332,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k4_s1,E,4,1,1405341,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k4_s1,E,4,1,1405341,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k4_s2,E,4,2,1405342,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k4_s2,E,4,2,1405342,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k5_s1,E,5,1,1405351,"OK (reused, gate PASS)",,,OK,0.03
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k5_s1,E,5,1,1405351,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k5_s2,E,5,2,1405352,"OK (reused, gate PASS)",,,OK,0.03
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k5_s2,E,5,2,1405352,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k6_s1,E,6,1,1405361,"OK (reused, gate PASS)",,,OK,0.07
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k6_s1,E,6,1,1405361,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k6_s2,E,6,2,1405362,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k6_s2,E,6,2,1405362,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k7_s1,E,7,1,1405371,"OK (reused, gate PASS)",,,OK,0.08
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k7_s1,E,7,1,1405371,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=75 | weak,3,reuse,reuse_A1emc_n75_r3_k7_s2,E,7,2,1405372,"OK (reused, gate PASS)",,,OK,0.09
+E3,train fraction 1.0,3,reuse,reuse_A1emc_n75_r3_k7_s2,E,7,2,1405372,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k1_s1,E,1,1,1405411,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k1_s1,E,1,1,1405411,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k1_s2,E,1,2,1405412,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k1_s2,E,1,2,1405412,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k2_s1,E,2,1,1405421,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k2_s1,E,2,1,1405421,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k2_s2,E,2,2,1405422,"OK (reused, gate PASS)",,,OK,0.01
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k2_s2,E,2,2,1405422,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k3_s1,E,3,1,1405431,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k3_s1,E,3,1,1405431,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k3_s2,E,3,2,1405432,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k3_s2,E,3,2,1405432,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k4_s1,E,4,1,1405441,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k4_s1,E,4,1,1405441,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k4_s2,E,4,2,1405442,"OK (reused, gate PASS)",,,OK,0.02
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k4_s2,E,4,2,1405442,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k5_s1,E,5,1,1405451,"OK (reused, gate PASS)",,,OK,0.04
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k5_s1,E,5,1,1405451,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k5_s2,E,5,2,1405452,"OK (reused, gate PASS)",,,OK,0.04
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k5_s2,E,5,2,1405452,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k6_s1,E,6,1,1405461,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k6_s1,E,6,1,1405461,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k6_s2,E,6,2,1405462,"OK (reused, gate PASS)",,,OK,0.06
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k6_s2,E,6,2,1405462,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k7_s1,E,7,1,1405471,"OK (reused, gate PASS)",,,OK,0.08
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k7_s1,E,7,1,1405471,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=75 | weak,4,reuse,reuse_A1emc_n75_r4_k7_s2,E,7,2,1405472,"OK (reused, gate PASS)",,,OK,0.08
+E3,train fraction 1.0,4,reuse,reuse_A1emc_n75_r4_k7_s2,E,7,2,1405472,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k1_s1,E,1,1,1480111,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k1_s2,E,1,2,1480112,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k2_s1,E,2,1,1480121,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k2_s2,E,2,2,1480122,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k3_s1,E,3,1,1480131,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k3_s2,E,3,2,1480132,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k4_s1,E,4,1,1480141,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k4_s2,E,4,2,1480142,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k5_s1,E,5,1,1480151,"OK (reused, gate PASS)",,,OK,0.16
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k5_s2,E,5,2,1480152,"OK (reused, gate PASS)",,,OK,0.15
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k6_s1,E,6,1,1480161,"OK (reused, gate PASS)",,,OK,0.32
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k6_s2,E,6,2,1480162,"OK (reused, gate PASS)",,,OK,0.29
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k7_s1,E,7,1,1480171,"OK (reused, gate PASS)",,,OK,0.56
+E2,poisson | n=150 | weak,1,reuse,reuse_A1emc_n150_r1_k7_s2,E,7,2,1480172,"OK (reused, gate PASS)",,,OK,0.5
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k1_s1,E,1,1,1480211,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k1_s2,E,1,2,1480212,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k2_s1,E,2,1,1480221,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k2_s2,E,2,2,1480222,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k3_s1,E,3,1,1480231,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k3_s2,E,3,2,1480232,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k4_s1,E,4,1,1480241,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k4_s2,E,4,2,1480242,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k5_s1,E,5,1,1480251,"OK (reused, gate PASS)",,,OK,0.15
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k5_s2,E,5,2,1480252,"OK (reused, gate PASS)",,,OK,0.15
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k6_s1,E,6,1,1480261,"OK (reused, gate PASS)",,,OK,0.31
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k6_s2,E,6,2,1480262,"OK (reused, gate PASS)",,,OK,0.3
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k7_s1,E,7,1,1480271,"OK (reused, gate PASS)",,,OK,0.52
+E2,poisson | n=150 | weak,2,reuse,reuse_A1emc_n150_r2_k7_s2,E,7,2,1480272,"OK (reused, gate PASS)",,,OK,0.61
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k1_s1,E,1,1,1480311,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k1_s2,E,1,2,1480312,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k2_s1,E,2,1,1480321,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k2_s2,E,2,2,1480322,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k3_s1,E,3,1,1480331,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k3_s2,E,3,2,1480332,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k4_s1,E,4,1,1480341,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k4_s2,E,4,2,1480342,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k5_s1,E,5,1,1480351,"OK (reused, gate PASS)",,,OK,0.15
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k5_s2,E,5,2,1480352,"OK (reused, gate PASS)",,,OK,0.15
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k6_s1,E,6,1,1480361,"OK (reused, gate PASS)",,,OK,0.29
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k6_s2,E,6,2,1480362,"OK (reused, gate PASS)",,,OK,0.28
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k7_s1,E,7,1,1480371,"OK (reused, gate PASS)",,,OK,0.53
+E2,poisson | n=150 | weak,3,reuse,reuse_A1emc_n150_r3_k7_s2,E,7,2,1480372,"OK (reused, gate PASS)",,,OK,0.49
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k1_s1,E,1,1,1480411,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k1_s2,E,1,2,1480412,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k2_s1,E,2,1,1480421,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k2_s2,E,2,2,1480422,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k3_s1,E,3,1,1480431,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k3_s2,E,3,2,1480432,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k4_s1,E,4,1,1480441,"OK (reused, gate PASS)",,,OK,0.1
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k4_s2,E,4,2,1480442,"OK (reused, gate PASS)",,,OK,0.1
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k5_s1,E,5,1,1480451,"OK (reused, gate PASS)",,,OK,0.18
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k5_s2,E,5,2,1480452,"OK (reused, gate PASS)",,,OK,0.16
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k6_s1,E,6,1,1480461,"OK (reused, gate PASS)",,,OK,0.36
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k6_s2,E,6,2,1480462,"OK (reused, gate PASS)",,,OK,0.33
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k7_s1,E,7,1,1480471,"OK (reused, gate PASS)",,,OK,0.66
+E2,poisson | n=150 | weak,4,reuse,reuse_A1emc_n150_r4_k7_s2,E,7,2,1480472,"OK (reused, gate PASS)",,,OK,0.98
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k1_s1,E,1,1,1405111,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k1_s2,E,1,2,1405112,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k2_s1,E,2,1,1405121,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k2_s2,E,2,2,1405122,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k3_s1,E,3,1,1405131,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k3_s2,E,3,2,1405132,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k4_s1,E,4,1,1405141,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k4_s2,E,4,2,1405142,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k5_s1,E,5,1,1405151,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k5_s2,E,5,2,1405152,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k6_s1,E,6,1,1405161,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k6_s2,E,6,2,1405162,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k7_s1,E,7,1,1405171,"OK (reused, gate PASS)",,,OK,0.08
+E2,poisson | n=75 | strong,1,reuse,reuse_pr155D_n75_r1_k7_s2,E,7,2,1405172,"OK (reused, gate PASS)",,,OK,0.11
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k1_s1,E,1,1,1405211,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k1_s2,E,1,2,1405212,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k2_s1,E,2,1,1405221,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k2_s2,E,2,2,1405222,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k3_s1,E,3,1,1405231,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k3_s2,E,3,2,1405232,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k4_s1,E,4,1,1405241,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k4_s2,E,4,2,1405242,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k5_s1,E,5,1,1405251,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k5_s2,E,5,2,1405252,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k6_s1,E,6,1,1405261,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k6_s2,E,6,2,1405262,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k7_s1,E,7,1,1405271,"OK (reused, gate PASS)",,,OK,0.12
+E2,poisson | n=75 | strong,2,reuse,reuse_pr155D_n75_r2_k7_s2,E,7,2,1405272,"OK (reused, gate PASS)",,,OK,0.09
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k1_s1,E,1,1,1405311,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k1_s2,E,1,2,1405312,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k2_s1,E,2,1,1405321,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k2_s2,E,2,2,1405322,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k3_s1,E,3,1,1405331,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k3_s2,E,3,2,1405332,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k4_s1,E,4,1,1405341,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k4_s2,E,4,2,1405342,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k5_s1,E,5,1,1405351,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k5_s2,E,5,2,1405352,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k6_s1,E,6,1,1405361,"OK (reused, gate PASS)",,,OK,0.06
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k6_s2,E,6,2,1405362,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k7_s1,E,7,1,1405371,"OK (reused, gate PASS)",,,OK,0.1
+E2,poisson | n=75 | strong,3,reuse,reuse_pr155D_n75_r3_k7_s2,E,7,2,1405372,"OK (reused, gate PASS)",,,OK,0.1
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k1_s1,E,1,1,1405411,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k1_s2,E,1,2,1405412,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k2_s1,E,2,1,1405421,"OK (reused, gate PASS)",,,OK,0.01
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k2_s2,E,2,2,1405422,"OK (reused, gate PASS)",,,OK,0.02
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k3_s1,E,3,1,1405431,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k3_s2,E,3,2,1405432,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k4_s1,E,4,1,1405441,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k4_s2,E,4,2,1405442,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k5_s1,E,5,1,1405451,"OK (reused, gate PASS)",,,OK,0.04
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k5_s2,E,5,2,1405452,"OK (reused, gate PASS)",,,OK,0.03
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k6_s1,E,6,1,1405461,"OK (reused, gate PASS)",,,OK,0.07
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k6_s2,E,6,2,1405462,"OK (reused, gate PASS)",,,OK,0.05
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k7_s1,E,7,1,1405471,"OK (reused, gate PASS)",,,OK,0.12
+E2,poisson | n=75 | strong,4,reuse,reuse_pr155D_n75_r4_k7_s2,E,7,2,1405472,"OK (reused, gate PASS)",,,OK,0.1

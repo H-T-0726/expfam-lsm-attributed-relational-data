@@ -1,0 +1,15 @@
+step,python_reproduction_OLD,lineage_E,comparison
+"initial Z, F, Sigma",LatentStructuralModel.initialize_params(seed) (reproduction/src/model.py:63-130),same method inherited (em_runner.py: model.initialize_params(seed)),identical for the same seed
+"initial w0, w","experiment_paper_2.py:186-190: logit(mean(Y)) incl. diagonal, w=0.5","em_runner.py: logit(upper-triangle density), w=0.5",adapter uses E's definition (documented)
+posterior target,"Laplace-conditional per node, Y term with 1/2 (model.py:213-345)","same scheme, no extra 1/2, mask (model_dual_expfam_masked.py:93-140)",different target for w != 0
+Newton gradient / precision,"model.py:276-283 (0.5 w), 337-353 (0.5 w^2), ridge 1e-6",masked.py:93-140; consistent sigmoid,FD: OLD rel err 0.33 / 0.093; E 2e-9 / 2e-8
+Newton step,"alpha 0.5, max 10 (experiment_paper_2.py:215)","alpha 0.5 (em_runner newton_alpha), max 10",same settings
+Laplace centre / covariance,"sample z_i ~ N(eta_i, A_i^-1) after the Newton steps",same,same scheme
+Gibbs order,"nodes i = 1..n sequentially, L draws chained",same,same
+"L, iterations","10, 30 in the original Exp.2 script; 5, 8 here (adapter)","5, 8",matched in E1
+scale_Z,model.py:468-505 (joint over L),inherited,same
+RNG,default_rng(seed) for the E-step,default_rng(seed) (em_runner),same seed; consumption order may differ
+F update,model.py:506-547 (closed form),model_dual_expfam.py:208 (closed form),same formula
+Sigma update,model.py:548-588,model_dual_expfam.py:274,same formula
+"w0, w update","Adam lr 0.01, 50 steps (model.py:589-760), unmasked","Adam lr 0.01, 50 steps (masked.py:142-200), masked, /phi",same optimiser; mask differs only when not all pairs are used
+true values used,var_f scale only (model.py:101-104),none,no leakage

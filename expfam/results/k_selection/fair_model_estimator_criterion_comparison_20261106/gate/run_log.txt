@@ -1,0 +1,5 @@
+17:45:30 start gate fits=3 head=7a90d933da13174f2bd58cb7e5814f724d32a9ff protocol=648aece07baf
+17:45:38 OK gate_A_n75_r1_k5_s1 7.75s avail=8.46GB
+17:45:46 OK gate_D_n75_r1_k5_s1 7.79s avail=8.36GB
+17:46:04 OK gate_A_n150_r1_k5_s1 18.09s avail=8.24GB
+17:46:04 end gate new=3

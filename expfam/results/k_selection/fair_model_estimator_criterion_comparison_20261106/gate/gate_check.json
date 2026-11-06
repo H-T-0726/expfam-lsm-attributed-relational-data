@@ -1,0 +1,71 @@
+{
+ "gate": {
+  "A_n75": {
+   "Zsamples": [
+    0.0,
+    true
+   ],
+   "Z": [
+    0.0,
+    true
+   ],
+   "F": [
+    0.0,
+    true
+   ],
+   "sigma": [
+    0.0,
+    true
+   ],
+   "scalars": [
+    0.0,
+    true
+   ]
+  },
+  "D_n75": {
+   "Zsamples": [
+    0.0,
+    true
+   ],
+   "Z": [
+    0.0,
+    true
+   ],
+   "F": [
+    0.0,
+    true
+   ],
+   "sigma": [
+    0.0,
+    true
+   ],
+   "scalars": [
+    0.0,
+    true
+   ]
+  },
+  "A_n150": {
+   "Zsamples": [
+    0.0,
+    true
+   ],
+   "Z": [
+    0.0,
+    true
+   ],
+   "F": [
+    0.0,
+    true
+   ],
+   "sigma": [
+    0.0,
+    true
+   ],
+   "scalars": [
+    0.0,
+    true
+   ]
+  }
+ },
+ "verdict": "PASS"
+}

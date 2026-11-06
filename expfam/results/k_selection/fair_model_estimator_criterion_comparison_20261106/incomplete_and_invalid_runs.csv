@@ -1,0 +1,8 @@
+experiment,cell,dataset,stage,key,estimator,k,s,seed,status,runtime_s,exception,lap_status,lap_seconds
+E1,G_old | K_GEN=5 | OLD,1,e1,e1_Gold_K5_r1_k5_s1_OLD,OLD,5,1,7751051,OK,13.42,,NOT_STATIONARY,8.35
+E1,G_old | K_GEN=9 | E,1,e1,e1_Gold_K9_r1_k10_s1_E,E,10,1,7791101,OK,15.84,,NOT_STATIONARY,26.18
+E2,gaussian | n=75 | weak,2,e2,e2_gaussian_weak_n75_r2_k2_s2,E,2,2,1405222,OK,5.78,,NOT_STATIONARY,1.88
+E2,gaussian | n=75 | strong,3,e2,e2_gaussian_strong_n75_r3_k6_s1,E,6,1,1405361,OK,6.22,,NOT_STATIONARY,3.06
+E2,gaussian | n=150 | strong,2,e2,e2_gaussian_strong_n150_r2_k1_s1,E,1,1,1480211,OK,11.8,,NOT_STATIONARY,4.36
+E2,gaussian | n=150 | strong,3,e2,e2_gaussian_strong_n150_r3_k3_s1,E,3,1,1480331,OK,14.68,,NOT_STATIONARY,5.96
+E2,poisson | n=150 | strong,4,e2,e2_poisson_strong_n150_r4_k5_s2,E,5,2,1480452,OK,17.07,,NOT_STATIONARY,7.91

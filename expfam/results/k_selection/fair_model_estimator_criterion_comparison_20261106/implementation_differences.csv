@@ -1,0 +1,9 @@
+id,difference,where,file_lines,consequence
+I1,Y factor 1/2 in E-step score and curvature,OLD,"model.py:283, 353",targets a tempered conditional posterior (Y information halved)
+I2,ridge 1e-6 on A_i,OLD,"model.py:426, 450",negligible
+I3,sigmoid evaluation,both,OLD clips logits; E uses the stable branch,only for extreme eta
+I4,observation mask,E,masked.py:57-63,none in E1 (all pairs)
+I5,w0 initial value,adapter,experiment_paper_2.py:187-188 vs em_runner,aligned in E1
+I6,best iteration / best of 3 inits,original Python Exp.2,"experiment_paper_2.py:234-245, 289-297",not used by the adapter; recorded as PY_hist reference
+I7,strict Q reads model.params['sigma'],E evaluator,eval_utils.calc_Q_dual_strict_exp,latent hazard; the fair evaluator is independent
+I8,"MATLAB: gradient lacks w, alpha 0.01, diff not reset",MATLAB,"calcEtaNewton.m:3-22, 43-49",not run (no MATLAB); see PR #158

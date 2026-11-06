@@ -1,0 +1,109 @@
+comparison,item,match,must_match,effect,label
+"E1 OLD vs E (same generator, K_GEN, dataset)",observed data,match,depends,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)","n, d",match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",generating model,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",K_GEN,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",K candidates,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",seed,match,depends,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",initial values,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",estimator,differ,yes,intended contrast or documented,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",optimisation budget,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",observation mask,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",criterion,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+"E1 OLD vs E (same generator, K_GEN, dataset)",parameter penalty,match,yes,,"MATCHED_MODEL; MATCHED_CRITERION; ONE_FACTOR_COMPARISON (estimator implementation; the estimator differs in several internal details I1-I5, so 'one factor' = estimator as a whole)"
+E1 G_old vs G_canon (same estimator),observed data,differ,depends,intended contrast or documented,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),"n, d",match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),generating model,differ,yes,intended contrast or documented,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),K_GEN,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),K candidates,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),seed,differ,depends,intended contrast or documented,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),initial values,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),estimator,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),optimisation budget,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),observation mask,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),criterion,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 G_old vs G_canon (same estimator),parameter penalty,match,yes,,"MULTI_FACTOR_COMPARISON (generator family: F law, Z/X standardisation, w law all differ)"
+E1 K_GEN 5 vs 9,observed data,differ,depends,intended contrast or documented,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,"n, d",match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,generating model,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,K_GEN,differ,yes,intended contrast or documented,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,K candidates,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,seed,differ,depends,intended contrast or documented,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,initial values,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,estimator,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,optimisation budget,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,observation mask,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,criterion,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+E1 K_GEN 5 vs 9,parameter penalty,match,yes,,MULTI_FACTOR_COMPARISON (different datasets; per-direction signal changes with K under both generators)
+"same state, criteria A-E",observed data,match,depends,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E","n, d",match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",generating model,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",K_GEN,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",K candidates,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",seed,match,depends,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",initial values,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",estimator,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",optimisation budget,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",observation mask,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",criterion,differ,yes,intended contrast or documented,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",parameter penalty,match,yes,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+E2 weak vs strong,observed data,differ,depends,intended contrast or documented,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,"n, d",match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,generating model,differ,yes,intended contrast or documented,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,K_GEN,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,K candidates,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,seed,match,depends,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,initial values,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,estimator,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,optimisation budget,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,observation mask,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,criterion,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 weak vs strong,parameter penalty,match,yes,,MULTI_FACTOR_COMPARISON within signal (F and w together; same Z)
+E2 n=75 vs 150,observed data,differ,depends,intended contrast or documented,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,"n, d",differ,yes,intended contrast or documented,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,generating model,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,K_GEN,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,K candidates,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,seed,differ,depends,intended contrast or documented,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,initial values,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,estimator,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,optimisation budget,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,observation mask,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,criterion,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 n=75 vs 150,parameter penalty,match,yes,,ONE_FACTOR_COMPARISON in design (n); datasets differ by construction
+E2 Gaussian vs Poisson X,observed data,differ,depends,intended contrast or documented,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,"n, d",match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,generating model,differ,yes,intended contrast or documented,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,K_GEN,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,K candidates,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,seed,match,depends,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,initial values,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,estimator,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,optimisation budget,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,observation mask,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,criterion,match,yes,,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E2 Gaussian vs Poisson X,parameter penalty,differ,yes,intended contrast or documented,MULTI_FACTOR_COMPARISON (family; expected Fisher information matched; Gaussian adds d variance parameters)
+E3 train 80% vs 100%,observed data,match,depends,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,"n, d",match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,generating model,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,K_GEN,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,K candidates,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,seed,match,depends,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,initial values,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,estimator,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,optimisation budget,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,observation mask,differ,yes,intended contrast or documented,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,criterion,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+E3 train 80% vs 100%,parameter penalty,match,yes,,ONE_FACTOR_COMPARISON (observation mask; holdout identical)
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",observed data,differ,depends,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical","n, d",differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",generating model,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",K_GEN,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",K candidates,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",seed,differ,depends,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",initial values,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",estimator,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",optimisation budget,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",observation mask,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",criterion,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (paper Fig.3, Python repro, early ExpFam) vs canonical",parameter penalty,differ,yes,intended contrast or documented,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
