@@ -253,6 +253,37 @@ def main():
         fig.savefig(FIG / "fig_E2_slack_vs_signal.pdf")
         plt.close(fig)
 
+    # criterion comparison: C(K) - C(K_GEN) per criterion, median over datasets (mean over starts first)
+    ok = df[df.status.astype(str).str.startswith("OK")]
+    cl_all = sorted(ok.groupby(["experiment", "cell"]).groups.keys())
+    ncol = 4
+    nrow = int(np.ceil(len(cl_all) / ncol))
+    fig, axs = plt.subplots(nrow, ncol, figsize=(3.4 * ncol, 2.7 * nrow), squeeze=False)
+    for ax, (e, cl) in zip(axs.flat, cl_all):
+        g = ok[(ok.experiment == e) & (ok.cell == cl)]
+        kg = int(g.k_gen.iloc[0])
+        for c in CRITS:
+            gg = g if c not in ("D_cond_mode", "E_CLap") else g[g.lap_status == "OK"]
+            m = gg.groupby(["dataset", "k"])[c].mean().unstack("k")
+            if kg not in m:
+                continue
+            rel = m.sub(m[kg], axis=0)
+            ax.plot(rel.columns, rel.median(axis=0), marker="o", ms=3, lw=1.5, color=COL[c], label=LAB[c])
+        ax.axhline(0, color="0.4", lw=0.8)
+        ax.axvline(kg, color="0.6", lw=0.8, ls=":")
+        ax.set_yscale("symlog", linthresh=10)
+        ax.set_title(f"{e} | {cl}", fontsize=7)
+        ax.tick_params(labelsize=6)
+        ax.grid(alpha=0.3)
+    for ax in list(axs.flat)[len(cl_all):]:
+        ax.axis("off")
+    axs[0][0].legend(fontsize=6)
+    fig.suptitle("Criterion comparison on the same states: median over datasets of C(K) - C(K_GEN) (< 0 at K != K_GEN = wrong pick)", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(FIG / "fig_criterion_comparison.png", dpi=140)
+    fig.savefig(FIG / "fig_criterion_comparison.pdf")
+    plt.close(fig)
+
     # success map heatmap (exact share), untested cells explicit
     piv = summ[summ.criterion.isin(["A_CQ", "E_CLap", "B_CQ_minus_PZ"])].copy()
     piv["share"] = piv.exact / (piv.datasets - piv.incomplete).replace(0, np.nan)
