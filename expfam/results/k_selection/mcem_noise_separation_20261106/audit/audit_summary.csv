@@ -1,0 +1,30 @@
+check,status,detail
+prereg.json == code PREREG,PASS,
+gates PASSED with the same prereg hash,PASS,
+prereg committed before Phase 3 results,PASS,"87cee590e75f696f9fcb41a1db3b9020228c43ed prereg: MCEM noise separation study (fixed-theta probes, L pilot)"
+operational addendum v2 committed before exec_v2 results,PASS,
+save/resume tests all PASS before production,PASS,9/9
+phase3: per-fit validation (manifest + config hash + sha256 of every file incl. external npz),PASS,"{'OK': 128, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+"phase3: aggregate ledger == validation, unique fit_id",PASS,
+phase4_L20: per-fit validation (manifest + config hash + sha256 of every file incl. external npz),PASS,"{'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+"phase4_L20: aggregate ledger == validation, unique fit_id",PASS,
+phase4_L50: per-fit validation (manifest + config hash + sha256 of every file incl. external npz),PASS,"{'OK': 16, 'FAILED': 0, 'INCOMPLETE': 0, 'NOT_RUN': 0} aggregate=COMPLETED"
+"phase4_L50: aggregate ledger == validation, unique fit_id",PASS,
+"Phase 3 ledger: 128 fits, no duplicates",PASS,{'OK': 128}
+"Phase 3 row counts match OK fits (6 states, 2 probes, 32 replicate rows per fit)",PASS,"(768, 256, 4096)"
+C_Lap at all OK archived states == PR #156 (deterministic recompute),PASS,"767 states, max diff 1.8e-12; lap status mismatches 0"
+C_Q(L=80) == mean of the 16 C_Q(L=5) (pooled chains),PASS,max diff 3.6e-12
+C_Q(L=80) == mean of the four C_Q(L=20),PASS,
+Q_Z is constant for a given K (global scale_Z),PASS,
+posterior-mean eta_x change 32->64 recomputed from archived Zbar and PR #156 F,PASS,max diff 7.4e-15
+re-execution of A rep8 K4 s2 reproduces probe rows,PASS,max diff 9.1e-13
+re-execution of D rep3 K5 s1 reproduces probe rows,PASS,max diff 9.1e-13
+R1 labels recomputed,PASS,
+"R1 drift share recomputed from the persisted one-step G stacks (rep 2, start 2, all conditions/K/checkpoints)",PASS,max diff 5.6e-17
+R2 gram ratio recomputed from PR #156 iteration rows,PASS,
+"R5 counts, p-values and verdicts recomputed",PASS,
+L=80 slack recomputed,PASS,
+"R6 paired medians, counts and verdicts recomputed",PASS,
+analysis/figure hashes == manifest,PASS,[]
+only additions vs PR #156 branch (except append-only registry),PASS,['M\tEXPERIMENT_REGISTRY.md']
+EXPERIMENT_REGISTRY.md append-only,PASS,
