@@ -1,0 +1,33 @@
+{
+ "experiment_id": "mcem_noise_separation_20261106",
+ "stage": "gates",
+ "git_head": "946a2e7c1d17e89cb02abd6fb6894f70b80bc393",
+ "branch": "research/mcem-noise-separation-20261106",
+ "prereg_sha256": "f2f49e5d9b5bd75423ae69c1c28924283a867708fedd74749f19a7249e3f6c34",
+ "lineage": "E (numerics_mode=consistent), prototype",
+ "environment": {
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0"
+ },
+ "status": "PASSED",
+ "gates": {
+  "G1_one_step_reproduces_runner": "PASS (state diff 0.0, diagnostic diff 0.0)",
+  "G2_archived_state_recompute": "PASS (C_Q diff 0.0e+00, C_Lap diff 0.0e+00; Laplace deterministic given theta, Z_c)",
+  "G3_timing": {
+   "probe_seconds": 19.8,
+   "seconds_per_draw": 0.216,
+   "phase3_projected_h_4procs": 0.37,
+   "phase4_projected_h_parallel": {
+    "20": 0.43,
+    "50": 1.01
+   },
+   "note": "technical only; probe values not used"
+  }
+ },
+ "phase4_L_allowed": [
+  20,
+  50
+ ]
+}

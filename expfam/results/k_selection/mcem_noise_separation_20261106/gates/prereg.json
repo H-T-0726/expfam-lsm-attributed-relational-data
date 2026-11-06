@@ -1,0 +1,96 @@
+{
+ "experiment_id": "mcem_noise_separation_20261106",
+ "parent": "mcem_stability_signal_matched_20261106 (PR #156); its pre-registered verdicts are NOT changed",
+ "lineage": "E (numerics_mode=consistent), prototype",
+ "phase3": {
+  "states": "PR #156 RQ1 archived states: A/B/C/D x rep 1..8 x K 4,5 x start 1,2 at checkpoints 8,16,24,32,48,64",
+  "no_new_fits": true,
+  "laplace_at": [
+   8,
+   16,
+   24,
+   32,
+   48,
+   64
+  ],
+  "probe_at": [
+   32,
+   64
+  ],
+  "R_chains": 16,
+  "chain_length": 5,
+  "chain_seed": "default_rng([7700000, fit_id, checkpoint, r]), r=0..15",
+  "chain_start": "archived theta_c and archived last draw Z_c (exactly the state the next E-step starts from)",
+  "evaluation_sizes": {
+   "L5": "each chain (16 values)",
+   "L20": "chains 4g..4g+3 (4 values)",
+   "L80": "all chains (1 value)"
+  }
+ },
+ "phase4": {
+  "why": "Phase 3 holds theta fixed and therefore cannot show whether a larger E-step sample size changes the estimates themselves (the MCEM fixed point / slack).  Decided before any Phase 3 result.",
+  "L": [
+   20,
+   50
+  ],
+  "conditions": [
+   "A",
+   "D"
+  ],
+  "replicates": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "K_fit": [
+   4,
+   5
+  ],
+  "start": 1,
+  "model_seed": "same as PR #156 (hist.model_seed(5, 75, rep, k, s))",
+  "max_iter": 32,
+  "checkpoints": [
+   8,
+   16,
+   24,
+   32
+  ],
+  "probe_at_32": "one-step replicates R=8 with the fit's own L; evaluation draws 16 chains x 5 with default_rng([7710000, fit_id, 32, r])",
+  "comparison": "L=5 = PR #156 archived state of the same data/K/start/seed at checkpoint 32 (Phase 3 probe)",
+  "fallback": "if the gate projection for Phase 4 exceeds 4 h wall clock with 4 processes, drop L=20 (keep L=50)"
+ },
+ "definitions": {
+  "G": "F F^T (d x d), rotation invariant",
+  "rel_change(a,b)": "||a - b||_F / (1e-12 + ||b||_F)",
+  "one_step_replicate": "theta' = M-step(E-step chain of length L from (theta_c, Z_c)); g_r = rel_change(G'_r, G_c)",
+  "drift_noise_decomposition": "m = mean_r G'_r; s2 = sum_r ||G'_r - m||^2/(R-1); drift2 = max(||m - G_c||^2 - s2/R, 0); drift_share = drift2/(drift2 + s2); same for w0, w (scalars)",
+  "eta_diag_runner": "eta_x = Z_last F^T, eta_y = w0 + w z_i^T z_j on the train dyads (the PR #156 diagnostic)",
+  "eta_single_draw_noise": "theta fixed at theta_c: rel_change(Z_a F^T, Z_b F^T) for the last draws of independent chains (pairs (0,1),(2,3),...,(14,15)); same for eta_y",
+  "eta_posterior_mean": "eta_x_pm = Zbar F^T with Zbar the mean of the 80 fixed-theta draws (= E[eta_x] estimate, linear); eta_y_pm = mean over draws of w0 + w z_i^T z_j (NOT the plug-in w0 + w Zbar_i^T Zbar_j, which is also reported)",
+  "eta_pm_mc_error": "e = ||eta_pm(half1) - eta_pm(half2)||/(2 ||eta_pm||), halves = chains 0-7 and 8-15",
+  "eta_mode": "Laplace joint mode Z_hat(theta) from lk.laplace_log_observed initialised at Z_c; eta_x_mode = Z_hat F^T",
+  "slack": "S(4->5) = mean over starts of C(4) - C(5); for L=5 the r-th chains of all four fits are paired"
+ },
+ "rules": {
+  "R1_one_step_decomposition": "per fit at checkpoint 64: drift_share <= 0.2 -> ONE_STEP_NOISE_DOMINATED; >= 0.5 -> ONE_STEP_SYSTEMATIC_DOMINATED; else MIXED (G, w0, w). The systematic one-step component includes mean reversion of a fluctuating state and is NOT by itself evidence of long-run drift (long-run movement is judged only by R5)",
+  "R1b_mean_reversion": "cosine between (mean one-step G' - G_c) and (center - G_c), center = mean of G at the other checkpoints among 16,24,32,48,64; same sign check for w0 and w (descriptive)",
+  "R2_observed_vs_fixed_theta": "ratio = median observed PR#156 diagnostic over iterations 57..64 / median of the 16 one-step replicate values at checkpoint 64; 0.67 <= ratio <= 1.5 -> CONSISTENT_WITH_ONE_STEP_NOISE, > 1.5 -> EXCESS_MOVEMENT, < 0.67 -> LESS_THAN_ONE_STEP (gram, eta_x, eta_y)",
+  "R3_eta_diagnostic": "share = median single-draw eta noise at theta_64 / median observed eta diagnostic over 57..64; >= 0.8 -> ETA_DIAGNOSTIC_SAMPLING_DOMINATED (x and y separately)",
+  "R4_posterior_mean_change": "ratio = rel_change(eta_pm(64), eta_pm(32)) / sqrt(e32^2 + e64^2); > 2 -> PARAMETER_CHANGE_DETECTED",
+  "R5_systematic_movement": "per quantity Q in {G, w0, w, eta_x_mode, eta_y_mode}: D(c) = rel_change(Q_64, Q_c). Count fits with D(16) > D(48); SYSTEMATIC_MOVEMENT if two-sided exact binomial p < 0.01 with proportion > 0.5 AND median D(16)/D(48) > 1.1; otherwise NO_DETECTABLE_SYSTEMATIC_MOVEMENT. Fits share datasets (32 datasets) -- reported as a caveat, rule not changed",
+  "R6_effect_with_better_evaluation": "paired B-A, C-A, D-A of the L=80 fixed-theta slack at 32 and 64: MAINTAINED if median > 0 and >= 6/8 positive; NOT_MAINTAINED if median <= 0; else INCONCLUSIVE",
+  "R7_slack_mc_noise": "sd of the L=5 fixed-theta slack (16 paired values) vs PR #156 |S_fit(64) - S_fit(48)| (descriptive)",
+  "R8_phase4": "descriptive pilot, no confirmatory verdict. Prediction (DERIVED, MC scaling): plateau gram_rel_change ~ 1/sqrt(L) (ratio L50/L5 ~ 0.32); eta single-draw diagnostic does not shrink with L. Slack: L_CHANGES_SLACK only if all 4 reps move in the same direction by more than 2 x the combined L=80 MC se; else NO_CLEAR_L_EFFECT"
+ },
+ "failure_rules": "exceptions / non-finite draws -> FAILED row, no retry, no reseed; Laplace not OK -> C_Lap / mode quantities INCOMPLETE, no imputation",
+ "disclosure": "Before this registration one technical smoke run of the Phase 3 code (fit A rep1 K5 s1, checkpoints 8..64) was executed to check that the code runs and to time it. Its values were seen. After it the R1 labels were renamed (thresholds unchanged) and R1b was added. No other result was seen.",
+ "budget": {
+  "wall_clock_h": 6.0,
+  "phase3_e_step_draws": 20480,
+  "phase4_fit_iterations": {
+   "L20": 512,
+   "L50": 512
+  }
+ }
+}
