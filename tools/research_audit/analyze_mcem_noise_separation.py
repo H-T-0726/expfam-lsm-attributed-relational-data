@@ -78,6 +78,12 @@ def observed_diag():
     return pd.concat(out, ignore_index=True), it
 
 
+def with_eid(df):
+    if "experiment_id" not in df.columns:
+        df.insert(0, "experiment_id", EID)
+    return df
+
+
 def r1_label(x):
     if not np.isfinite(x):
         return "NA"
@@ -107,6 +113,9 @@ def savefig(fig, name, made):
 
 
 def main() -> int:
+    global AN, FIG
+    if len(sys.argv) > 1:                      # test output root (scratch); default = the experiment's analysis/figures
+        AN, FIG = Path(sys.argv[1]) / "analysis", Path(sys.argv[1]) / "figures"
     for d in (AN, FIG):
         if d.exists():
             print(f"refusing to overwrite {d}")
@@ -152,7 +161,7 @@ def main() -> int:
         ft[f"R3_eta_{q}"] = np.where(ft[f"R3_share_eta_{q}"] >= 0.8, "ETA_DIAGNOSTIC_SAMPLING_DOMINATED", "NOT_DOMINATED")
     for nm in ("G", "w0", "w"):
         ft[f"R1_{nm}"] = ft[f"{nm}_drift_share"].map(r1_label)
-    ft.insert(0, "experiment_id", EID)
+    ft = with_eid(ft)
     ft.to_csv(AN / "fixed_theta_noise.csv", index=False)
 
     rows = []
@@ -274,7 +283,7 @@ def main() -> int:
     sl = sl.merge(l20[["S_L20_sd"]].reset_index(), on=["condition", "replicate", "checkpoint"], how="left")
     sl["S_L80_se"] = sl.S_L5_sd / math.sqrt(ns.R_CHAINS)
     sl["S_Lap_recompute_diff"] = sl.S_Lap_recomputed - sl.S_Lap_pr156
-    sl.insert(0, "experiment_id", EID)
+    sl = with_eid(sl)
     sl.to_csv(AN / "slack_by_checkpoint.csv", index=False)
     w = sl.pivot_table(index=["condition", "replicate"], columns="checkpoint",
                        values=["S_fit_pr156", "S_L80", "S_L80_se", "S_Lap_recomputed", "S_L5_sd"])
@@ -288,7 +297,7 @@ def main() -> int:
         "sign_L80_32": np.sign(w[("S_L80", 32)]), "sign_L80_64": np.sign(w[("S_L80", 64)]),
     }).reset_index()
     r7["z_dS_L80_32_64"] = r7.abs_dS_L80_32_64 / r7.se_dS_L80_32_64
-    r7.insert(0, "experiment_id", EID)
+    r7 = with_eid(r7)
     r7.to_csv(AN / "slack_mc_noise.csv", index=False)
 
     eff = []
@@ -332,7 +341,7 @@ def main() -> int:
                 "median_one_step_gram", "median_single_draw_eta_x", "median_single_draw_eta_y", "plateau_gram_rel_change",
                 "plateau_eta_x_rel_change", "plateau_eta_y_rel_change", "eta_x_pm_mc_error"]
         allp = pd.concat([base5[cols], pr4[cols]], ignore_index=True)
-        allp.insert(0, "experiment_id", EID)
+        allp = with_eid(allp)
         allp.to_csv(AN / "phase4_L_pilot_fits.csv", index=False)
         wide = allp.pivot_table(index=["L_fit", "condition", "replicate"], columns="k_fit", values=["C_Q_L80", "C_Q_L5_eval_sd", "C_Lap"])
         sl4 = pd.DataFrame({"S_L80_start1": wide[("C_Q_L80", 4)] - wide[("C_Q_L80", 5)],
@@ -440,8 +449,8 @@ def main() -> int:
             q = hh[hh.checkpoint.isin([32, 64])]
             ax.errorbar(q.checkpoint + (rep - 4.5) * 0.6, q.S_L80, yerr=2 * q.S_L80_se, fmt="o", ms=3, color="#222", lw=0.8)
         ax.axhline(0, color="#555", lw=0.8); ax.set_title(LABEL[c]); ax.set_xlabel("checkpoint")
-    axes[0].set_ylabel("4->5 slack (thin: fit's own C_Q; dots: L=80 fixed theta, ±2 se)")
-    fig.suptitle("Fit's own C_Q slack vs fixed-theta L=80 evaluation of the same states")
+    axes[0].set_ylabel("C_Q slack 4->5")
+    fig.suptitle("Thin lines: fit's own C_Q slack (PR #156, L=5 draws). Dots: L=80 fixed-theta evaluation of the same states, ±2 se")
     savefig(fig, "fig5_slack_fit_vs_L80", made)
 
     # fig6: paired effects
@@ -483,7 +492,7 @@ def main() -> int:
 
     files = sorted(AN.glob("*.csv")) + made
     manifest = {"experiment_id": EID, "prereg_sha256": ns.prereg_hash(), "git_head": ns.git_head(),
-                "files": {str(p.relative_to(OUT)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
+                "files": {str(p.relative_to(AN.parent)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
     (AN / "analysis_manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf-8")
     print(json.dumps({"phase3_status": p3["status"], "phase4_status": p4["status"], "phase3_fits": len(LG), "phase3_failed": int((LG.status != "OK").sum()),
                       "laplace_not_ok": int((S.lap_status != "OK").sum()), "phase4_fits": len(p4["ledger"]),
