@@ -87,8 +87,11 @@ def main():
     sc["se_A"] = sc.mcse_B
     sc["se_C"] = sc.sd_single_sample_C
     keys = ["series", "condition", "k_gen", "n", "d", "replicate"]
-    se_k = sc.groupby(keys + ["k_est"]).agg(seA=("se_A", lambda v: 0.5 * math.sqrt(float((v ** 2).sum()))),
-                                           seC=("se_C", lambda v: 0.5 * math.sqrt(float((v ** 2).sum())))).reset_index()
+    def _se(v):
+        v = np.asarray(v, float)
+        return float("nan") if np.isnan(v).any() else 0.5 * math.sqrt(float((v ** 2).sum()))
+
+    se_k = sc.groupby(keys + ["k_est"]).agg(seA=("se_A", _se), seC=("se_C", _se)).reset_index()
     rows = []
     for _, r in full.iterrows():
         if r.label == "INCOMPLETE" or r.criterion not in ("A_CQ", "B_CQ_minus_PZ", "C_cond_last"):
@@ -101,7 +104,8 @@ def main():
         s = se_k[(se_k.series == r.series) & (se_k.condition == r.condition) & (se_k.k_gen == r.k_gen) & (se_k.n == r.n)
                  & (se_k.d == r.d) & (se_k.replicate == r.replicate)].set_index("k_est")
         col = "seC" if r.criterion == "C_cond_last" else "seA"
-        se = math.sqrt(s.loc[kb, col] ** 2 + s.loc[k2, col] ** 2) if not s[col].isna().any() else np.nan
+        a_, b_ = s.loc[kb, col], s.loc[k2, col]
+        se = math.sqrt(a_ ** 2 + b_ ** 2) if pd.notna(a_) and pd.notna(b_) else np.nan
         rows.append(se)
     full["gap_mc_se_approx"] = rows
     full["mc_close"] = (full.best_minus_second < 2 * full.gap_mc_se_approx).astype(object)
@@ -124,7 +128,7 @@ def main():
                         k_hat_at_max_candidate=int((kh == g.candidate_k.str.split("..", regex=False).str[1].astype(int).iloc[0]).sum()),
                         median_slack_under=float(under.median()) if len(under) else np.nan,
                         median_slack_over=float(over.median()) if len(over) else np.nan,
-                        mc_close=int(g.mc_close.fillna(False).astype(bool).sum())))
+                        mc_close=(int(g.mc_close.dropna().astype(bool).sum()) if g.mc_close.notna().any() else np.nan)))
     eff = pd.DataFrame(eff)
     write("criterion_effect_by_condition.csv", eff)
 
@@ -146,7 +150,9 @@ def main():
                                   slack_per_node=v / int(g.n.iloc[0]) if pd.notna(v) else np.nan,
                                   status="OK" if pd.notna(v) else "INCOMPLETE (Laplace not OK or missing)",
                                   note="K = 4, 5 only: LOCAL comparison, no K_hat. C_cond_last not computed (states not re-scored)"))
-    loc2 = pd.concat([loc.assign(checkpoint=8), pd.DataFrame(pr156)], ignore_index=True)
+    cp = loc.series.str.extract(r"it=(\d+)")[0].astype(float).fillna(8.0)
+    cp[loc.series.str.startswith("paper-type")] = 8.0   # #139: 8 iterations
+    loc2 = pd.concat([loc.assign(checkpoint=cp), pd.DataFrame(pr156)], ignore_index=True)
     write("local_selection_comparisons.csv", loc2)
 
     # ---- available saved states ----------------------------------------------------

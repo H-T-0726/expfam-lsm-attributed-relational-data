@@ -13,7 +13,7 @@
 | R1（L=10、8・16 反復） | Pois/Bern | 5 | 75 | 15, 30, 60 | 1..7 | 同上 | 同上 |
 | #139 paper-type | Gauss/Bern | 1, 3, 5, 7, 9 | 150 | 15 | 1..10 | 5 標本、F、σ、Ẑ | 同じ panel コードで保存済みの値（再計算はしていない） |
 
-- 再計算した状態の数：n-sweep 896、PR #155 448、d-sweep・R2 672、R1 1,344（合計 3,360 fit）。paper-type は保存値 500 fit。
+- 再計算した状態の数：n-sweep 896、PR #155 448、d-sweep・R2 560、R1 672（合計 2,576 fit）。paper-type は保存値 500 fit（総計 3,076 fit。`fits_scored_by_series.csv`）。
 - 各状態の data（X、Y、学習用ペアのマスク）は、元の実験と同じ生成関数と seed で作り直した。元の実験が保存したハッシュとの照合は、各生成関数の中で行われる（`run_clap_clean_nsweep.make_cell` など）。
 - すべての canonical の状態で、保存されている Z_last は Z_samples[:, :, −1] と一致した（`integrity_checks.json`）。
 

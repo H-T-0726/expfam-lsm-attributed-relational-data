@@ -76,7 +76,7 @@ def score_state(model, X, Y, Zs, Z_last, Z_hat, npar, n):
     p = cq["P_theta"]
     k = Zs.shape[1]
     return {"num_params": npar, "P_theta": p, "Q_X": cq["Q_X"], "Q_Y": cq["Q_Y"], "Q_Z": cq["Q_Z"],
-            "P_Z": cq["P_Z"], "P_Z_formula": n * k * C2 + n * k * math.log(t["var_z"]),
+            "P_Z": cq["P_Z"], "P_Z_formula": n * k * math.log(2.0 * math.pi * t["var_z"]) + n * k / t["var_z"],  # valid under scale_Z (mean z^2 = 1)
             "var_z": t["var_z"], "mean_z_sq": float(np.mean(Zs ** 2)),
             "A_CQ": cq["C_Q"], "B_CQ_minus_PZ": cq["C_Q"] - cq["P_Z"],
             "B_via_cond_MC": -2.0 * float(ll.mean()) + p,
@@ -252,7 +252,7 @@ def src_paper_type(rows):
                          n=150, d=15, replicate=int(r.replicate), k_est=int(r.k_est), start=int(r.start),
                          state_source="paper_condition_k_criteria_20261006/full/fit_criteria.csv (stored)",
                          num_params=int(r.num_params), P_theta=r.P_theta, Q_X=r.Q_X, Q_Y=r.Q_Y, Q_Z=r.Q_Z,
-                         P_Z=r.P_Z, P_Z_formula=150 * int(r.k_est) * C2 + 150 * int(r.k_est) * math.log(r.var_z),
+                         P_Z=r.P_Z, P_Z_formula=150 * int(r.k_est) * math.log(2.0 * math.pi * r.var_z) + 150 * int(r.k_est) / r.var_z,
                          var_z=r.var_z, A_CQ=r.C_Q, B_CQ_minus_PZ=r.C_Q - r.P_Z, B_via_cond_MC=r.C_cond_MC,
                          C_cond_last=r.C_cond_last, D_cond_mode=r.C_cond_mode, E_CLap=r.C_Lap,
                          lap_status=r.lap_status, stored_C_Q=r.C_Q, stored_lap_fit_mode=r.lap_fit_mode,
@@ -268,7 +268,7 @@ def selection(scores: pd.DataFrame):
     full, local = [], []
     for g_key, g in scores.groupby(keys):
         info = dict(zip(keys, g_key))
-        kmax = int(g.k_est.max())
+        kmax = 10 if info["series"].startswith("paper-type") else max(hist.CANDIDATE_K)   # expected candidate set
         for crit in CRITS:
             sub = g[["k_est", "start", crit] + (["lap_status"] if crit in ("E_CLap", "D_cond_mode") else [])]
             bad = sub[crit].isna().any() or (crit in ("E_CLap", "D_cond_mode") and (sub.lap_status != "OK").any())
