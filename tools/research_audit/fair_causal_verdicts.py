@@ -1,7 +1,7 @@
 """causal_hypothesis_verdicts.csv: candidate -> predicted phenomenon -> falsifying comparison -> result -> verdict.
 
-Results are computed from the analysis CSVs (no hand-entered numbers); the candidate, prediction,
-comparison and fairness label are fixed text.  Verdict vocabulary:
+The result column is computed from the analysis CSVs (no hand-entered numbers); the candidate, prediction,
+comparison, fairness label and verdict are fixed text written after the results were seen (INTERPRETATION).  Verdict vocabulary:
 SUPPORTED / PARTIALLY_SUPPORTED / NOT_SUPPORTED / REJECTED / INCONCLUSIVE / UNRESOLVED.
 Refuses to overwrite.
 """
@@ -59,14 +59,17 @@ def main():
     # H2 estimator
     a = ag.groupby("criterion").same_k_hat.agg(["sum", "count"])
     res2 = ("same K_HAT OLD vs E: " + ", ".join(f"{c} {int(a.loc[c, 'sum'])}/{int(a.loc[c, 'count'])}" for c in a.index)
-            + f"; C_Q exact: OLD and E 8/8 datasets each; same-state E-step: median covariance trace ratio OLD/E "
+            + "; C_Q exact: " + ", ".join(
+                f"{e} {int(s[(s.experiment == 'E1') & s.cell.str.endswith('| ' + e) & (s.criterion == 'A_CQ')].exact.sum())}/"
+                f"{int(s[(s.experiment == 'E1') & s.cell.str.endswith('| ' + e) & (s.criterion == 'A_CQ')].datasets.sum())}"
+                for e in ("OLD", "E")) + f"; same-state E-step: median covariance trace ratio OLD/E "
             f"{es.median_cov_trace_ratio_old_over_E.min():.2f}-{es.median_cov_trace_ratio_old_over_E.max():.2f}, "
             f"median relative mode difference {es.median_rel_mode_diff.min():.3f}-{es.median_rel_mode_diff.max():.3f}")
     add("H2", "the old Python estimator (1/2 on the Y score/curvature) is what made the historical K selection succeed",
         "with matched data/init/seed/budget, OLD selects K_GEN with C_Q while E does not",
         "E1 OLD vs E (n=150, Gaussian-X, all pairs, K_GEN 5 and 9, two generators)",
         "ONE_FACTOR_COMPARISON (estimator as a whole; 2 datasets per cell)", res2,
-        "NOT_SUPPORTED for C_Q selection in the tested cells (both estimators exact); the E-step target differs (wider posterior)")
+        "NOT_SUPPORTED for C_Q selection in the tested cells only (n=150, Gaussian-X, all pairs; not tested at n=75); the E-step target differs (larger posterior covariance trace)")
 
     # H3 criterion: Q_Z / Occam term
     e1B = [c + ": " + cnt("E1", c, "B_CQ_minus_PZ") for c in sorted(s[s.experiment == "E1"].cell.unique())]
@@ -92,7 +95,7 @@ def main():
     add("H5", "weak signal (F row norm^2 0.5, w^2 0.6) is a cause of under-selection",
         "strong signal raises the exact share at fixed n",
         "E2 weak vs strong (F and w changed together)", "MULTI_FACTOR_COMPARISON within signal", res5,
-        "PARTIALLY_SUPPORTED (improves at n=75 but does not reach K_GEN reliably; F and w not separated here, see PR #155)")
+        "PARTIALLY_SUPPORTED (direction as predicted; MULTI_FACTOR: F and w changed together, two levels only; no causal ranking against n)")
 
     # H6 X family
     res6 = "; ".join(f"n={n} {sig}: gaussian {e2('gaussian', n, sig, 'A_CQ')} vs poisson {e2('poisson', n, sig, 'A_CQ')}"
@@ -100,7 +103,7 @@ def main():
     add("H6", "Poisson-X (vs Gaussian-X) is a cause of the failures",
         "Gaussian-X with matched expected Fisher information succeeds where Poisson-X fails",
         "E2 Gaussian vs Poisson X (same Z, F, Y, mask)", "MULTI_FACTOR_COMPARISON (family; Fisher information matched)", res6,
-        "NOT_SUPPORTED (same pattern in both families)")
+        "NOT_SUPPORTED as a difference within the tested cells (MULTI_FACTOR; at most 1 dataset apart; not a causal claim)")
 
     # H7 observation mask
     f08 = s[(s.experiment == "E3") & (s.cell == "train fraction 0.8") & (s.criterion == "A_CQ")].iloc[0]
@@ -111,14 +114,14 @@ def main():
     add("H7", "the 80% relation mask (fewer observed pairs) is a cause of under-selection",
         "fewer training pairs lowers the exact share / under-side slack",
         "E3 train fraction 1.0 vs 0.8 of the PR #155 training pairs (holdout identical)", "ONE_FACTOR_COMPARISON (mask)", res7,
-        "INCONCLUSIVE (both 0/4 at n=75 weak: floor effect; slack moves in the predicted direction)")
+        "INCONCLUSIVE (both 0/4 at n=75 weak: floor effect; median slack moves in the predicted direction but not every dataset)")
 
     # H8 generator (historical vs canonical)
     res8 = "; ".join(f"{c}: {cnt('E1', c, 'A_CQ')}" for c in sorted(s[s.experiment == "E1"].cell.unique()))
     add("H8", "the old MATLAB-type generator (z-scored Z and X) is what made K=9 selectable",
         "at n=150, C_Q selects K_GEN=9 under G_old but not under G_canon",
         "E1 G_old vs G_canon (same estimator)", "MULTI_FACTOR_COMPARISON (generator family)", res8,
-        "NOT_SUPPORTED as a necessary condition (both generators exact at n=150, 2 datasets each)")
+        "NOT_SUPPORTED as a necessary condition at n=150 (both generators exact, 2 datasets each; MULTI_FACTOR; not tested at n=75)")
 
     # H9 Laplace approximation accuracy
     ok = li[li.lap_status == "OK"]
@@ -132,15 +135,15 @@ def main():
 
     # H10 prediction vs selection
     m = hk.merge(pm, on=["experiment", "cell", "dataset"], suffixes=("_khat", "_kgen"))
-    m = m[m.y_heldout_mean_logscore_khat.notna()]
+    m = m[m.y_heldout_mean_logscore_khat.notna() & (m.cell != "train fraction 1.0")]   # E3 1.0 = E2 Poisson n=75 weak states
     m["d"] = m.y_heldout_mean_logscore_khat - m.y_heldout_mean_logscore_kgen
     wrong = m[(m.k_hat != 5) & m.criterion.isin(["A_CQ", "E_CLap"])]
     res10 = (f"held-out Y log score at K_HAT minus at K_GEN when K_HAT != K_GEN (A, E; E2/E3): median {wrong.d.median():.4f}, "
-             f"max {wrong.d.max():.4f}, n={len(wrong)}")
+             f"max {wrong.d.max():.4f}, worse in {int((wrong.d < 0).sum())}/{len(wrong)} (dataset x criterion, states counted once)")
     add("H10", "a wrong K_HAT predicts held-out relations as well as K_GEN (selection failure is harmless for prediction)",
         "held-out Y log score at K_HAT is not lower than at K_GEN",
         "same dataset, states at K_HAT vs K_GEN", "MATCHED_ESTIMATOR", res10,
-        "NOT_SUPPORTED (wrong K_HAT is mostly slightly worse; differences are small)")
+        "NOT_SUPPORTED (descriptive: wrong K_HAT is usually slightly worse; differences small, no uncertainty quantified)")
 
     pd.DataFrame(rows).to_csv(out, index=False, lineterminator="\n")
     print(pd.DataFrame(rows)[["id", "verdict"]].to_string())
