@@ -1,0 +1,8 @@
+quantity,n_states,n_both_nan,n_nan_mismatch,max_abs_diff,pass_1e6
+A_CQ,56,0,0,9.094947017729282e-13,True
+B_CQ_minus_PZ,56,0,0,9.094947017729282e-13,True
+C_cond_last,56,0,0,9.094947017729282e-13,True
+D_cond_mode,55,1,0,9.094947017729282e-13,True
+E_CLap,55,1,0,9.094947017729282e-13,True
+w_hat,56,0,0,0.0,True
+zzT_corr,56,0,0,5.551115123125783e-17,True

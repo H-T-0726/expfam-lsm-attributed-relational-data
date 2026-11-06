@@ -1,0 +1,11 @@
+criterion,dataset,label_OLD,label_E,pair
+A_CQ,1,under,under,OLD under / E under
+A_CQ,2,under,under,OLD under / E under
+A_CQ,3,under,under,OLD under / E under
+A_CQ,4,under,under,OLD under / E under
+A_CQ,overall,,,case B (4 complete datasets)
+E_CLap,1,under,under,OLD under / E under
+E_CLap,2,exact,exact,OLD exact / E exact
+E_CLap,3,exact,INCOMPLETE,OLD exact / E INCOMPLETE
+E_CLap,4,under,under,OLD under / E under
+E_CLap,overall,,,case D (3 complete datasets)

@@ -1,0 +1,169 @@
+cell,dataset,stage,key,estimator,mask,k,s,seed,status,runtime_s,exception,lap_status,lap_seconds,src
+all pairs | OLD,1,W,W_r1_k1_s1_OLD,OLD,all_pairs,1,1,1405111,OK,4.83,,OK,0.01,new
+all pairs | E,1,W,W_r1_k1_s1_E,E,all_pairs,1,1,1405111,OK,5.55,,OK,0.01,new
+all pairs | OLD,1,W,W_r1_k1_s2_OLD,OLD,all_pairs,1,2,1405112,OK,4.83,,OK,0.01,new
+all pairs | E,1,W,W_r1_k1_s2_E,E,all_pairs,1,2,1405112,OK,5.58,,OK,0.01,new
+all pairs | OLD,1,W,W_r1_k2_s1_OLD,OLD,all_pairs,2,1,1405121,OK,5.43,,OK,0.01,new
+all pairs | E,1,W,W_r1_k2_s1_E,E,all_pairs,2,1,1405121,OK,6.03,,OK,0.01,new
+all pairs | OLD,1,W,W_r1_k2_s2_OLD,OLD,all_pairs,2,2,1405122,OK,5.18,,OK,0.02,new
+all pairs | E,1,W,W_r1_k2_s2_E,E,all_pairs,2,2,1405122,OK,6.02,,OK,0.01,new
+all pairs | OLD,1,W,W_r1_k3_s1_OLD,OLD,all_pairs,3,1,1405131,OK,5.66,,OK,0.02,new
+all pairs | E,1,W,W_r1_k3_s1_E,E,all_pairs,3,1,1405131,OK,6.28,,OK,0.01,new
+all pairs | OLD,1,W,W_r1_k3_s2_OLD,OLD,all_pairs,3,2,1405132,OK,5.27,,OK,0.02,new
+all pairs | E,1,W,W_r1_k3_s2_E,E,all_pairs,3,2,1405132,OK,6.22,,OK,0.02,new
+all pairs | OLD,1,W,W_r1_k4_s1_OLD,OLD,all_pairs,4,1,1405141,OK,5.27,,OK,0.02,new
+all pairs | E,1,W,W_r1_k4_s1_E,E,all_pairs,4,1,1405141,OK,6.38,,OK,0.04,new
+all pairs | OLD,1,W,W_r1_k4_s2_OLD,OLD,all_pairs,4,2,1405142,OK,5.75,,OK,0.02,new
+all pairs | E,1,W,W_r1_k4_s2_E,E,all_pairs,4,2,1405142,OK,6.3,,OK,0.02,new
+all pairs | OLD,1,W,W_r1_k5_s1_OLD,OLD,all_pairs,5,1,1405151,OK,5.76,,OK,0.05,new
+all pairs | E,1,W,W_r1_k5_s1_E,E,all_pairs,5,1,1405151,OK,6.58,,OK,0.04,new
+all pairs | OLD,1,W,W_r1_k5_s2_OLD,OLD,all_pairs,5,2,1405152,OK,5.96,,OK,0.04,new
+all pairs | E,1,W,W_r1_k5_s2_E,E,all_pairs,5,2,1405152,OK,6.76,,OK,0.03,new
+all pairs | OLD,1,W,W_r1_k6_s1_OLD,OLD,all_pairs,6,1,1405161,OK,5.12,,OK,0.06,new
+all pairs | E,1,W,W_r1_k6_s1_E,E,all_pairs,6,1,1405161,OK,6.13,,OK,0.07,new
+all pairs | OLD,1,W,W_r1_k6_s2_OLD,OLD,all_pairs,6,2,1405162,OK,5.17,,OK,0.07,new
+all pairs | E,1,W,W_r1_k6_s2_E,E,all_pairs,6,2,1405162,OK,6.16,,OK,0.06,new
+all pairs | OLD,1,W,W_r1_k7_s1_OLD,OLD,all_pairs,7,1,1405171,OK,5.22,,OK,0.08,new
+all pairs | E,1,W,W_r1_k7_s1_E,E,all_pairs,7,1,1405171,OK,6.47,,OK,0.12,new
+all pairs | OLD,1,W,W_r1_k7_s2_OLD,OLD,all_pairs,7,2,1405172,OK,5.2,,OK,0.07,new
+all pairs | E,1,W,W_r1_k7_s2_E,E,all_pairs,7,2,1405172,OK,6.23,,OK,0.19,new
+all pairs | OLD,2,W,W_r2_k1_s1_OLD,OLD,all_pairs,1,1,1405211,OK,4.88,,OK,0.02,new
+all pairs | E,2,W,W_r2_k1_s1_E,E,all_pairs,1,1,1405211,OK,6.19,,OK,0.01,new
+all pairs | OLD,2,W,W_r2_k1_s2_OLD,OLD,all_pairs,1,2,1405212,OK,4.52,,OK,0.01,new
+all pairs | E,2,W,W_r2_k1_s2_E,E,all_pairs,1,2,1405212,OK,5.16,,OK,0.01,new
+all pairs | OLD,2,W,W_r2_k2_s1_OLD,OLD,all_pairs,2,1,1405221,OK,5.0,,OK,0.01,new
+all pairs | E,2,W,W_r2_k2_s1_E,E,all_pairs,2,1,1405221,OK,6.31,,OK,0.01,new
+all pairs | OLD,2,W,W_r2_k2_s2_OLD,OLD,all_pairs,2,2,1405222,OK,6.04,,OK,0.01,new
+all pairs | E,2,W,W_r2_k2_s2_E,E,all_pairs,2,2,1405222,OK,6.18,,OK,0.02,new
+all pairs | OLD,2,W,W_r2_k3_s1_OLD,OLD,all_pairs,3,1,1405231,OK,6.79,,OK,0.02,new
+all pairs | E,2,W,W_r2_k3_s1_E,E,all_pairs,3,1,1405231,OK,8.08,,OK,0.02,new
+all pairs | OLD,2,W,W_r2_k3_s2_OLD,OLD,all_pairs,3,2,1405232,OK,6.79,,OK,0.02,new
+all pairs | E,2,W,W_r2_k3_s2_E,E,all_pairs,3,2,1405232,OK,5.78,,OK,0.02,new
+all pairs | OLD,2,W,W_r2_k4_s1_OLD,OLD,all_pairs,4,1,1405241,OK,5.87,,OK,0.02,new
+all pairs | E,2,W,W_r2_k4_s1_E,E,all_pairs,4,1,1405241,OK,6.27,,OK,0.02,new
+all pairs | OLD,2,W,W_r2_k4_s2_OLD,OLD,all_pairs,4,2,1405242,OK,4.99,,OK,0.02,new
+all pairs | E,2,W,W_r2_k4_s2_E,E,all_pairs,4,2,1405242,OK,5.98,,OK,0.02,new
+all pairs | OLD,2,W,W_r2_k5_s1_OLD,OLD,all_pairs,5,1,1405251,OK,5.0,,OK,0.03,new
+all pairs | E,2,W,W_r2_k5_s1_E,E,all_pairs,5,1,1405251,OK,6.11,,OK,0.04,new
+all pairs | OLD,2,W,W_r2_k5_s2_OLD,OLD,all_pairs,5,2,1405252,OK,5.07,,OK,0.05,new
+all pairs | E,2,W,W_r2_k5_s2_E,E,all_pairs,5,2,1405252,OK,6.06,,OK,0.04,new
+all pairs | OLD,2,W,W_r2_k6_s1_OLD,OLD,all_pairs,6,1,1405261,OK,5.07,,OK,0.05,new
+all pairs | E,2,W,W_r2_k6_s1_E,E,all_pairs,6,1,1405261,OK,6.11,,OK,0.06,new
+all pairs | OLD,2,W,W_r2_k6_s2_OLD,OLD,all_pairs,6,2,1405262,OK,5.14,,OK,0.05,new
+all pairs | E,2,W,W_r2_k6_s2_E,E,all_pairs,6,2,1405262,OK,6.3,,OK,0.07,new
+all pairs | OLD,2,W,W_r2_k7_s1_OLD,OLD,all_pairs,7,1,1405271,OK,5.2,,OK,0.08,new
+all pairs | E,2,W,W_r2_k7_s1_E,E,all_pairs,7,1,1405271,OK,6.3,,OK,0.07,new
+all pairs | OLD,2,W,W_r2_k7_s2_OLD,OLD,all_pairs,7,2,1405272,OK,5.14,,OK,0.08,new
+all pairs | E,2,W,W_r2_k7_s2_E,E,all_pairs,7,2,1405272,OK,6.2,,OK,0.08,new
+all pairs | OLD,3,W,W_r3_k1_s1_OLD,OLD,all_pairs,1,1,1405311,OK,4.5,,OK,0.01,new
+all pairs | E,3,W,W_r3_k1_s1_E,E,all_pairs,1,1,1405311,OK,5.11,,OK,0.01,new
+all pairs | OLD,3,W,W_r3_k1_s2_OLD,OLD,all_pairs,1,2,1405312,OK,4.48,,OK,0.01,new
+all pairs | E,3,W,W_r3_k1_s2_E,E,all_pairs,1,2,1405312,OK,5.13,,OK,0.01,new
+all pairs | OLD,3,W,W_r3_k2_s1_OLD,OLD,all_pairs,2,1,1405321,OK,4.81,,OK,0.01,new
+all pairs | E,3,W,W_r3_k2_s1_E,E,all_pairs,2,1,1405321,OK,5.7,,OK,0.01,new
+all pairs | OLD,3,W,W_r3_k2_s2_OLD,OLD,all_pairs,2,2,1405322,OK,4.86,,OK,0.01,new
+all pairs | E,3,W,W_r3_k2_s2_E,E,all_pairs,2,2,1405322,OK,5.72,,OK,0.01,new
+all pairs | OLD,3,W,W_r3_k3_s1_OLD,OLD,all_pairs,3,1,1405331,OK,4.91,,OK,0.02,new
+all pairs | E,3,W,W_r3_k3_s1_E,E,all_pairs,3,1,1405331,OK,5.78,,OK,0.02,new
+all pairs | OLD,3,W,W_r3_k3_s2_OLD,OLD,all_pairs,3,2,1405332,OK,4.98,,OK,0.02,new
+all pairs | E,3,W,W_r3_k3_s2_E,E,all_pairs,3,2,1405332,OK,6.17,,OK,0.02,new
+all pairs | OLD,3,W,W_r3_k4_s1_OLD,OLD,all_pairs,4,1,1405341,OK,4.92,,OK,0.04,new
+all pairs | E,3,W,W_r3_k4_s1_E,E,all_pairs,4,1,1405341,OK,5.86,,OK,0.03,new
+all pairs | OLD,3,W,W_r3_k4_s2_OLD,OLD,all_pairs,4,2,1405342,OK,4.9,,OK,0.03,new
+all pairs | E,3,W,W_r3_k4_s2_E,E,all_pairs,4,2,1405342,OK,5.84,,NOT_STATIONARY,2.41,new
+all pairs | OLD,3,W,W_r3_k5_s1_OLD,OLD,all_pairs,5,1,1405351,OK,4.99,,OK,0.03,new
+all pairs | E,3,W,W_r3_k5_s1_E,E,all_pairs,5,1,1405351,OK,5.99,,OK,0.06,new
+all pairs | OLD,3,W,W_r3_k5_s2_OLD,OLD,all_pairs,5,2,1405352,OK,5.07,,OK,0.03,new
+all pairs | E,3,W,W_r3_k5_s2_E,E,all_pairs,5,2,1405352,OK,6.04,,OK,0.04,new
+all pairs | OLD,3,W,W_r3_k6_s1_OLD,OLD,all_pairs,6,1,1405361,OK,5.03,,OK,0.05,new
+all pairs | E,3,W,W_r3_k6_s1_E,E,all_pairs,6,1,1405361,OK,6.09,,OK,0.05,new
+all pairs | OLD,3,W,W_r3_k6_s2_OLD,OLD,all_pairs,6,2,1405362,OK,5.1,,OK,0.07,new
+all pairs | E,3,W,W_r3_k6_s2_E,E,all_pairs,6,2,1405362,OK,6.37,,OK,0.05,new
+all pairs | OLD,3,W,W_r3_k7_s1_OLD,OLD,all_pairs,7,1,1405371,OK,5.15,,OK,0.08,new
+all pairs | E,3,W,W_r3_k7_s1_E,E,all_pairs,7,1,1405371,OK,6.2,,OK,0.09,new
+all pairs | OLD,3,W,W_r3_k7_s2_OLD,OLD,all_pairs,7,2,1405372,OK,5.19,,OK,0.09,new
+all pairs | E,3,W,W_r3_k7_s2_E,E,all_pairs,7,2,1405372,OK,6.34,,OK,0.08,new
+all pairs | OLD,4,W,W_r4_k1_s1_OLD,OLD,all_pairs,1,1,1405411,OK,4.63,,OK,0.01,new
+all pairs | E,4,W,W_r4_k1_s1_E,E,all_pairs,1,1,1405411,OK,5.23,,OK,0.01,new
+all pairs | OLD,4,W,W_r4_k1_s2_OLD,OLD,all_pairs,1,2,1405412,OK,4.47,,OK,0.01,new
+all pairs | E,4,W,W_r4_k1_s2_E,E,all_pairs,1,2,1405412,OK,5.08,,OK,0.01,new
+all pairs | OLD,4,W,W_r4_k2_s1_OLD,OLD,all_pairs,2,1,1405421,OK,4.82,,OK,0.01,new
+all pairs | E,4,W,W_r4_k2_s1_E,E,all_pairs,2,1,1405421,OK,5.63,,OK,0.01,new
+all pairs | OLD,4,W,W_r4_k2_s2_OLD,OLD,all_pairs,2,2,1405422,OK,4.83,,OK,0.01,new
+all pairs | E,4,W,W_r4_k2_s2_E,E,all_pairs,2,2,1405422,OK,5.6,,OK,0.01,new
+all pairs | OLD,4,W,W_r4_k3_s1_OLD,OLD,all_pairs,3,1,1405431,OK,4.89,,OK,0.02,new
+all pairs | E,4,W,W_r4_k3_s1_E,E,all_pairs,3,1,1405431,OK,5.84,,OK,0.03,new
+all pairs | OLD,4,W,W_r4_k3_s2_OLD,OLD,all_pairs,3,2,1405432,OK,4.93,,OK,0.02,new
+all pairs | E,4,W,W_r4_k3_s2_E,E,all_pairs,3,2,1405432,OK,6.54,,OK,0.02,new
+all pairs | OLD,4,W,W_r4_k4_s1_OLD,OLD,all_pairs,4,1,1405441,OK,4.92,,OK,0.02,new
+all pairs | E,4,W,W_r4_k4_s1_E,E,all_pairs,4,1,1405441,OK,5.91,,OK,0.02,new
+all pairs | OLD,4,W,W_r4_k4_s2_OLD,OLD,all_pairs,4,2,1405442,OK,6.07,,OK,0.02,new
+all pairs | E,4,W,W_r4_k4_s2_E,E,all_pairs,4,2,1405442,OK,7.06,,OK,0.03,new
+all pairs | OLD,4,W,W_r4_k5_s1_OLD,OLD,all_pairs,5,1,1405451,OK,5.96,,OK,0.04,new
+all pairs | E,4,W,W_r4_k5_s1_E,E,all_pairs,5,1,1405451,OK,6.38,,OK,0.03,new
+all pairs | OLD,4,W,W_r4_k5_s2_OLD,OLD,all_pairs,5,2,1405452,OK,5.46,,OK,0.03,new
+all pairs | E,4,W,W_r4_k5_s2_E,E,all_pairs,5,2,1405452,OK,6.41,,OK,0.03,new
+all pairs | OLD,4,W,W_r4_k6_s1_OLD,OLD,all_pairs,6,1,1405461,OK,5.46,,OK,0.04,new
+all pairs | E,4,W,W_r4_k6_s1_E,E,all_pairs,6,1,1405461,OK,6.54,,OK,0.06,new
+all pairs | OLD,4,W,W_r4_k6_s2_OLD,OLD,all_pairs,6,2,1405462,OK,5.63,,OK,0.04,new
+all pairs | E,4,W,W_r4_k6_s2_E,E,all_pairs,6,2,1405462,OK,6.12,,OK,0.04,new
+all pairs | OLD,4,W,W_r4_k7_s1_OLD,OLD,all_pairs,7,1,1405471,OK,5.54,,OK,0.07,new
+all pairs | E,4,W,W_r4_k7_s1_E,E,all_pairs,7,1,1405471,OK,6.9,,OK,0.08,new
+all pairs | OLD,4,W,W_r4_k7_s2_OLD,OLD,all_pairs,7,2,1405472,OK,5.83,,OK,0.08,new
+all pairs | E,4,W,W_r4_k7_s2_E,E,all_pairs,7,2,1405472,OK,6.24,,OK,0.08,new
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k1_s1,E,mask_80,1,1,1405111,OK,5.24,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k1_s2,E,mask_80,1,2,1405112,OK,5.23,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k2_s1,E,mask_80,2,1,1405121,OK,5.74,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k2_s2,E,mask_80,2,2,1405122,OK,5.77,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k3_s1,E,mask_80,3,1,1405131,OK,5.92,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k3_s2,E,mask_80,3,2,1405132,OK,5.89,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k4_s1,E,mask_80,4,1,1405141,OK,5.98,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k4_s2,E,mask_80,4,2,1405142,OK,5.94,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k5_s1,E,mask_80,5,1,1405151,OK,6.14,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k5_s2,E,mask_80,5,2,1405152,OK,6.06,,OK,0.05,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k6_s1,E,mask_80,6,1,1405161,OK,6.25,,OK,0.06,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k6_s2,E,mask_80,6,2,1405162,OK,6.22,,OK,0.05,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k7_s1,E,mask_80,7,1,1405171,OK,6.31,,OK,0.07,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,1,P160_80,e2_gaussian_weak_n75_r1_k7_s2,E,mask_80,7,2,1405172,OK,6.33,,OK,0.09,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k1_s1,E,mask_80,1,1,1405211,OK,5.21,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k1_s2,E,mask_80,1,2,1405212,OK,5.25,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k2_s1,E,mask_80,2,1,1405221,OK,5.83,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k2_s2,E,mask_80,2,2,1405222,OK,5.78,,NOT_STATIONARY,2.09,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k3_s1,E,mask_80,3,1,1405231,OK,5.92,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k3_s2,E,mask_80,3,2,1405232,OK,5.9,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k4_s1,E,mask_80,4,1,1405241,OK,5.98,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k4_s2,E,mask_80,4,2,1405242,OK,6.06,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k5_s1,E,mask_80,5,1,1405251,OK,6.13,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k5_s2,E,mask_80,5,2,1405252,OK,6.23,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k6_s1,E,mask_80,6,1,1405261,OK,6.2,,OK,0.06,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k6_s2,E,mask_80,6,2,1405262,OK,6.22,,OK,0.07,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k7_s1,E,mask_80,7,1,1405271,OK,6.36,,OK,0.08,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k7_s2,E,mask_80,7,2,1405272,OK,6.32,,OK,0.07,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k1_s1,E,mask_80,1,1,1405311,OK,5.19,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k1_s2,E,mask_80,1,2,1405312,OK,5.21,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k2_s1,E,mask_80,2,1,1405321,OK,5.75,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k2_s2,E,mask_80,2,2,1405322,OK,5.75,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k3_s1,E,mask_80,3,1,1405331,OK,5.92,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k3_s2,E,mask_80,3,2,1405332,OK,5.9,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k4_s1,E,mask_80,4,1,1405341,OK,5.96,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k4_s2,E,mask_80,4,2,1405342,OK,5.94,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k5_s1,E,mask_80,5,1,1405351,OK,6.14,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k5_s2,E,mask_80,5,2,1405352,OK,6.12,,OK,0.04,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k6_s1,E,mask_80,6,1,1405361,OK,6.19,,OK,0.07,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k6_s2,E,mask_80,6,2,1405362,OK,6.19,,OK,0.06,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k7_s1,E,mask_80,7,1,1405371,OK,6.34,,OK,0.13,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,3,P160_80,e2_gaussian_weak_n75_r3_k7_s2,E,mask_80,7,2,1405372,OK,6.33,,OK,0.11,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k1_s1,E,mask_80,1,1,1405411,OK,5.18,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k1_s2,E,mask_80,1,2,1405412,OK,5.18,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k2_s1,E,mask_80,2,1,1405421,OK,5.72,,OK,0.01,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k2_s2,E,mask_80,2,2,1405422,OK,5.74,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k3_s1,E,mask_80,3,1,1405431,OK,5.89,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k3_s2,E,mask_80,3,2,1405432,OK,5.89,,OK,0.02,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k4_s1,E,mask_80,4,1,1405441,OK,5.94,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k4_s2,E,mask_80,4,2,1405442,OK,5.98,,OK,0.03,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k5_s1,E,mask_80,5,1,1405451,OK,6.46,,OK,0.05,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k5_s2,E,mask_80,5,2,1405452,OK,6.15,,OK,0.04,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k6_s1,E,mask_80,6,1,1405461,OK,6.19,,OK,0.07,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k6_s2,E,mask_80,6,2,1405462,OK,6.21,,OK,0.09,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k7_s1,E,mask_80,7,1,1405471,OK,6.37,,OK,0.08,"PR #160 E2 (reused, read-only)"
+80% (PR #160) | E,4,P160_80,e2_gaussian_weak_n75_r4_k7_s2,E,mask_80,7,2,1405472,OK,6.35,,OK,0.08,"PR #160 E2 (reused, read-only)"

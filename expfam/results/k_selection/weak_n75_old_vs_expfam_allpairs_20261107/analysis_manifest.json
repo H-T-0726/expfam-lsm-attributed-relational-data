@@ -1,0 +1,27 @@
+{
+ "experiment_id": "weak_n75_old_vs_expfam_allpairs_20261107",
+ "git_head": "94ff891b16b44e47baace87dc652eb3286ede7e6",
+ "protocol_hash": "3bbf0b77efc444e6d51a53029674b6bd8d30977adf7ae394537a2eb8cdc7e017",
+ "inputs": {
+  "criterion_scores.csv": "2f79393eacdeee8a21082a9d4bbc8b8130b4a2830caae1ce43d50428d73ecbc4",
+  "dataset_and_initialization_hashes.csv": "0ad668ed8a9b820988b9cd47e0128ad9b3652dbbaee7a08a43111efe669cbbfb",
+  "estep_same_state.csv": "37f77ca2c986279b5fcc8670f67dc679660676dbd31355dda03f734f3e89f077"
+ },
+ "outputs": [
+  "fit_results.csv",
+  "incomplete_and_invalid_runs.csv",
+  "full_k_selection.csv",
+  "selection_margins.csv",
+  "selection_summary.csv",
+  "estimator_comparison.csv",
+  "mask_condition_comparison.csv",
+  "case_classification.csv",
+  "parameter_recovery.csv",
+  "predictive_metrics.csv",
+  "metrics_by_k.csv",
+  "figures/fig1_cq_curves.png",
+  "figures/fig2_under_slack.png",
+  "figures/fig3_recovery_k5.png",
+  "figures/fig4_estep_covariance.png"
+ ]
+}
