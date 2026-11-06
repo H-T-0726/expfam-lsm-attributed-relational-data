@@ -132,7 +132,7 @@ def main():
     pr156 = []
     for part in ("rq1_AB", "rq1_CD"):
         cr = pd.read_csv(KSEL / f"mcem_stability_signal_matched_20261106/{part}/checkpoint_rows.csv")
-        cr = cr[cr.status == "OK"] if "status" in cr else cr
+        cr = cr[cr.status == "FIT"]  # PR #156 marks every saved checkpoint row "FIT"
         for (c, rep, cp), g in cr.groupby(["condition", "replicate", "checkpoint"]):
             vals = {}
             for crit, f in (("A_CQ", lambda d: d.C_Q), ("B_CQ_minus_PZ", lambda d: d.C_Q - d.P_Z),
