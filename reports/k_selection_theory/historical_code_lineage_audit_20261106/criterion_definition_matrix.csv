@@ -1,0 +1,8 @@
+score,fit_term,includes_ln_p_Z,z_handling,observed_scale,penalty,source,note
+paper Eq.(26),"ln p(X, Y | Z, theta) (Eq.16; Y with power 1/2 over ordered pairs)",no,not stated,"not stated (Fig.3 values imply -2lnL in [2, 192] at k >= k*)",(k+1)d - k(k-1)/2,"paper p.338,343",called BIC in the paper; not the observed-data marginal likelihood
+MATLAB calcdescmetric_ver4 Q,"(1/L) sum_l ln p(Z^(l), X, Y | theta)",yes,MC mean over L draws of the last iteration,"printed Q/L about -6,500 at d=15 (NOLTA_exp_ver5 PDF)",none (no BIC),calcdescmetric_ver4.m:37-47,Q2; not used for K selection in repository code
+MATLAB DecideNumFactor,factoran loglike on X only,no (X marginal of FA),n/a,-,(i+1)d - i(i-1)/2 with -2*n*loglike,DecideNumFactor.m:11-14,X-only factor analysis; never called
+Python reproduction,ln p(Z) + ln p(X|Z) + ln p(Y|Z) at one Z (last draw of an iteration),yes,"plug-in, max over 30 iterations, min over 3 inits","-2lnL 6,000-20,000",(k+1)d - k(k-1)/2,"experiment_paper_2.py:124-170, 234-245",Q2 plug-in with selection over iterations
+early ExpFam calc_bic_dual,Q_strict = Q2 MC mean (with Poisson -ln y! correction),yes,MC mean over L of final iteration,-,"kd - k(k-1)/2 (+d Gauss-X, +1 Gauss-Y)","utils_expfam.py:80-105, 386-404",same family as C_Q
+lineage E C_Q,Q2 MC mean at the final state,yes,"MC mean, mean over 2 starts",-,kd - k(k-1)/2 (+d Gauss-X),k_criterion_panel.py,Q-based complete-data / ICL-type; not Schwarz BIC
+lineage E C_Lap,"Laplace approximation of ln p(X,Y|theta) at the fit's Z mode",integrated (approx.),deterministic given theta,-,same count,laplace_k_criterion.py,Laplace approximation; not the exact marginal likelihood

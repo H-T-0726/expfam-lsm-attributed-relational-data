@@ -1,0 +1,36 @@
+{
+ "script": "tools/research_audit/historical_code_lineage_audit.py",
+ "git_head": "aea2a813b416cd2f68272c8eed7d1ffd5c81d8cb",
+ "python": "3.13.14",
+ "numpy": "2.3.5",
+ "pandas": "2.3.3",
+ "inputs": {
+  "reproduction/results/results_exp2_bic.csv": "053cb9989aebec2a78244a84cba2ddd5d902fa48df39359f87b09db08fe5dafb",
+  "expfam/results/exp2_bic_A.csv": "3f8f38d4660a0f7825a3dcfc90bf0a2e3863725f07ff7fd2783f2e4b80377e61",
+  "expfam/results/exp2_bic_B.csv": "8c24bf3a35e9547f1da2e2d70fd6154c4ff8a502ac64c3ac5e815aac77c5cf26",
+  "expfam/results/exp2_bic_C.csv": "55c853da9f29411dce9673fb6b2e647c6ec147ef15f8952954a59e9c8a4c5835",
+  "expfam/results/k_selection/paper_condition_k_criteria_20261006/full/criterion_curves.csv": "c5e9bdf9c524768469fec3926dc3d513791cceeb00d0af907030f4f5474a39d8",
+  "expfam/results/k_selection/historical_canonical_causal_20261106/existing_reanalysis/k_increment_decomposition.csv": "d147be8967803f3a3e92d6708c84e38722f168540d23befdf4ad2091f9defc53",
+  "reports/k_selection_theory/historical_code_lineage_audit_20261106/paper_fig3_vector_vertices.csv": "080ff92bf4ab870fddb035eb7f8f4062b26890d496f1a57d7c4b1ad90fcce726",
+  "paper/A_study_on_latent_structural_models_for_binary_rel.pdf": "c990146402ab2202adf42ec61edb3cd7325568b5ae5aee8d79a04935313d96ec"
+ },
+ "mcem_fits": 0,
+ "outputs": {
+  "causal_hypotheses.csv": "e3c19523f0d35128d2c359263a567a4b6755695e484817850f50f53b002c7cb3",
+  "code_lineage_inventory.csv": "6d1db25615bc3c618f0493cb43ed6c9aff3b4b9d28750c83e8dd83960d7fe514",
+  "criterion_definition_matrix.csv": "0257e26aaddeffaa6718d64db681fa018bda38d9d56512a44dc710b2516a7743",
+  "estep_finite_difference_check.csv": "7ef4997da28c4373136f5f8cfaca5d5e254e43129dd11aaff93e5e7fee3bf486",
+  "historical_k_selection_recomputed.csv": "5431e04ad7f2263120bf5b6492625e2be2baad204542117f19d3e8300d3165aa",
+  "historical_k_selection_summary.csv": "2c501edf84cad47154f3c6811893b83f2fd7440476f2f902786c0ca556e40eb3",
+  "historical_vs_expfam.csv": "16f231f490dc6e34ea9b9717c12cd8529a1405d368eb28b728d0abb3ae99e5a2",
+  "implementation_discrepancies.csv": "dd4cb31d5146ca7ac40865e9378b2eada4ba97a24bf78daac5ff96193bc44655",
+  "paper_fig3_implied_lnL.csv": "3ae48bb5c2eb076e812a18358912025c68672f40fc6cda7d688395b36c1d21e7",
+  "paper_fig3_vector_vertices.csv": "080ff92bf4ab870fddb035eb7f8f4062b26890d496f1a57d7c4b1ad90fcce726",
+  "paper_vs_matlab.csv": "7b8b9ab0a6b2ac2d5b6190355afd95d6e85d7cae61f121b8bf0072b395a25cf7",
+  "paper_vs_python.csv": "83f252b3787a2eeb85f3a0195e158d11b3dd6b58de0a1519690f54ac96e5ca6a",
+  "proposed_controlled_experiments.csv": "67afa43eff8dbf29f02dadfe2b48aa609eb5cebf3f7fb268d2712e6d3860bdf5",
+  "python_reproduction_bic_decomposition.csv": "437aceaf881d59aff6d98acc85603fa387d5ed3651293d5eb2b72b9cdf8e2b07",
+  "signal_strength_comparison.csv": "2f2ae292e5e8c912dd74b712909eeaff5bf2059a11c5eb3328b7a64b3bea5e11",
+  "signal_strength_summary.csv": "c6a92161df81e9ee96808ca9247028aaa20d8a81e707c82cf97be661d7a06d73"
+ }
+}
