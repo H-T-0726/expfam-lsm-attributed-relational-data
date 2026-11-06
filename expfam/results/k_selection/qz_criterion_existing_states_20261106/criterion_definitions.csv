@@ -1,0 +1,7 @@
+criterion,formula,evaluates,includes_ln_p_Z,implementation,note
+A_CQ,-2(Q_X+Q_Y+Q_Z) + p_K ln n,Q2 MC mean (L=5 final E-step samples),yes,k_criterion_panel.cq_terms,C_Q; Q-based complete-data / ICL-type; not Schwarz BIC
+B_CQ_minus_PZ,-2(Q_X+Q_Y) + p_K ln n = C_cond_MC,Q1 MC mean over the same samples,no,C_Q - P_Z (identity checked),Eq.(16)-type at the MC mean; not the paper's BIC
+C_cond_last,"-2 ln p(X,Y_train|Z_last,theta) + p_K ln n",Q1 plug-in,no,"k_criterion_panel.data_loglik(Z_samples[:,:,-1])",Eq.(16)-type at the last E-step sample
+D_cond_mode,"-2 ln p(X,Y_train|Z_hat,theta) + p_K ln n",Q1 plug-in,no,lap_fit_mode + P_theta (Z_hat = joint mode of Q2),Eq.(16)-type at the Laplace joint mode
+E_CLap,-2[Q2(Z_hat) + nK/2 ln 2pi - 1/2 ln|H|] + p_K ln n,Laplace approximation of Q3,integrated,laplace_k_criterion.calc_C_Lap,not an exact marginal likelihood
+penalty Eq.(26),((k+1)d - k(k-1)/2) ln n,-,-,paper p.343,differs from kd - k(k-1)/2 by the constant d ln n: no effect on K_hat or slack (Poisson-X); identical for Gaussian-X

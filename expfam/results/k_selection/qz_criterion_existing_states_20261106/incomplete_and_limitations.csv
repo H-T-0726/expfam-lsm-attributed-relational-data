@@ -1,0 +1,15 @@
+scope,criterion,datasets,reason
+canonical A1 n-sweep,D_cond_mode,4,"Laplace mode not OK at some (K, start); not imputed"
+canonical A1 n-sweep,E_CLap,4,"Laplace mode not OK at some (K, start); not imputed"
+canonical d-sweep / R2 (d=30),D_cond_mode,1,"Laplace mode not OK at some (K, start); not imputed"
+canonical d-sweep / R2 (d=30),E_CLap,1,"Laplace mode not OK at some (K, start); not imputed"
+canonical signal-strength (PR #155),D_cond_mode,1,"Laplace mode not OK at some (K, start); not imputed"
+canonical signal-strength (PR #155),E_CLap,1,"Laplace mode not OK at some (K, start); not imputed"
+paper-type #139 (Gaussian-X),D_cond_mode,6,"Laplace mode not OK at some (K, start); not imputed"
+paper-type #139 (Gaussian-X),E_CLap,6,"Laplace mode not OK at some (K, start); not imputed"
+all,all,-,"B, C, D are Eq.(16)-type; none is the paper's BIC (evaluation point, aggregation, generator and normalisation of the paper are unknown)"
+D_cond_mode,D_cond_mode,-,"Z_hat is the joint (Q2) mode, not the maximiser of Q1; for PR #155, d-sweep, R1/R2 D comes from stored lap_fit_mode (Z_hat not saved)"
+C_cond_last,C_cond_last,-,one E-step sample: MC error is the single-sample sd (not reduced by L)
+all,all,-,states are from short MCEM (8 or 16 iterations; PR #156: up to 64) with an approximate Gibbs E-step
+PR #156,PR #156,-,"K = 4, 5 only: local comparison, no K_hat"
+paper-type,paper-type,-,"values taken from the #139 panel CSV (same code), not re-scored from states"

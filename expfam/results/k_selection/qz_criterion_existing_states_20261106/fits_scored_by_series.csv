@@ -1,0 +1,12 @@
+series,fits_scored
+canonical A1 n-sweep,896
+"canonical R1 (L=10, it=16, d=15)",112
+"canonical R1 (L=10, it=16, d=30)",112
+"canonical R1 (L=10, it=16, d=60)",112
+"canonical R1 (L=10, it=8, d=15)",112
+"canonical R1 (L=10, it=8, d=30)",112
+"canonical R1 (L=10, it=8, d=60)",112
+canonical d-sweep / R2 (d=30),448
+canonical d-sweep / R2 (d=60),112
+canonical signal-strength (PR #155),448
+paper-type #139 (Gaussian-X),500
