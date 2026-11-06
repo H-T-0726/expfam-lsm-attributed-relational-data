@@ -1,6 +1,6 @@
 {
  "script": "tools/research_audit/historical_code_lineage_audit.py",
- "git_head": "b1683392cb03661409a1da9e8b8b708658122e3d",
+ "git_head": "aea2a813b416cd2f68272c8eed7d1ffd5c81d8cb",
  "python": "3.13.14",
  "numpy": "2.3.5",
  "pandas": "2.3.3",
@@ -16,7 +16,7 @@
  },
  "mcem_fits": 0,
  "outputs": {
-  "causal_hypotheses.csv": "f08915cbb94365994e57d872bb4819cb25c3d40e332254cd8625b1be39835d05",
+  "causal_hypotheses.csv": "e3c19523f0d35128d2c359263a567a4b6755695e484817850f50f53b002c7cb3",
   "code_lineage_inventory.csv": "6d1db25615bc3c618f0493cb43ed6c9aff3b4b9d28750c83e8dd83960d7fe514",
   "criterion_definition_matrix.csv": "0257e26aaddeffaa6718d64db681fa018bda38d9d56512a44dc710b2516a7743",
   "estep_finite_difference_check.csv": "7ef4997da28c4373136f5f8cfaca5d5e254e43129dd11aaff93e5e7fee3bf486",
