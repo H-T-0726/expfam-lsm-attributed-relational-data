@@ -1,0 +1,4 @@
+experiment,cell,dataset,stage,key,estimator,k,s,seed,status,runtime_s,exception,lap_status,lap_seconds,src
+B,G_canon | n=75 | all pairs | OLD,4,B,B_r4_k6_s1_OLD,OLD,6,1,8804061,OK,5.21,,NOT_STATIONARY,2.72,new
+D,G_canon | n=75 | 80% pairs | E,1,D,D_r1_k8_s1_E,E,8,1,8801081,OK,6.12,,NOT_STATIONARY,1.91,new
+n150 (PR #160),G_old | n=150 | all pairs | OLD,1,P160,e1_Gold_K5_r1_k5_s1_OLD,OLD,5,1,7751051,OK,13.42,,NOT_STATIONARY,7.61,"PR #160 E1 (reused, read-only)"

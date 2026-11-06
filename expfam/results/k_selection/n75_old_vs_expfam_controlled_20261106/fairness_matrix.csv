@@ -1,0 +1,100 @@
+comparison,item,status,reason_and_effect,label
+B: OLD vs E (G_canon n=75 all pairs),model,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),generator,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),observed data,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),"n, d",same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),K_GEN,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),K candidates,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),initial state,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),estimation budget,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),observation mask,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),criterion,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+B: OLD vs E (G_canon n=75 all pairs),aggregation rule,same,,"ONE_FACTOR_COMPARISON (estimator as a whole: 1/2 on Y, ridge, sigmoid evaluation, E-step RNG consumption); MATCHED_CRITERION"
+C: OLD vs E (G_old n=75 all pairs),model,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),generator,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),observed data,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),"n, d",same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),K_GEN,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),K candidates,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),initial state,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),estimation budget,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),observation mask,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),criterion,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+C: OLD vs E (G_old n=75 all pairs),aggregation rule,same,,ONE_FACTOR_COMPARISON (estimator as a whole); MATCHED_CRITERION
+"same state, criteria A-E",model,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",generator,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",observed data,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E","n, d",same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",K_GEN,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",K candidates,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",initial state,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",estimation budget,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",observation mask,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",criterion,differ,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+"same state, criteria A-E",aggregation rule,same,,MATCHED_ESTIMATOR; ONE_FACTOR_COMPARISON (criterion)
+D vs B: 80% vs all pairs (lineage E),model,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),generator,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),observed data,differ,"observed data: 20% of Y pairs not used for training; initial w0 uses the training density (Z, F, sigma, w identical)",ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),"n, d",same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),K_GEN,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),K candidates,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),initial state,differ,"observed data: 20% of Y pairs not used for training; initial w0 uses the training density (Z, F, sigma, w identical)",ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),estimation budget,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),observation mask,differ,"observed data: 20% of Y pairs not used for training; initial w0 uses the training density (Z, F, sigma, w identical)",ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),criterion,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+D vs B: 80% vs all pairs (lineage E),aggregation rule,same,,ONE_FACTOR_COMPARISON (observation mask; the w0 init follows the mask by design)
+"G_canon n=75 vs n=150 (reps 1, 2)",model,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",generator,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",observed data,differ,"n=75 data are the first 75 nodes of the n=150 data (same F, w0, w); initial states come from different seeds; criteria penalty uses ln n","ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)","n, d",differ,"n=75 data are the first 75 nodes of the n=150 data (same F, w0, w); initial states come from different seeds; criteria penalty uses ln n","ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",K_GEN,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",K candidates,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",initial state,differ,"n=75 data are the first 75 nodes of the n=150 data (same F, w0, w); initial states come from different seeds; criteria penalty uses ln n","ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",estimation budget,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",observation mask,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",criterion,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+"G_canon n=75 vs n=150 (reps 1, 2)",aggregation rule,same,,"ONE_FACTOR_COMPARISON in design (n, nested subsample); seeds of the model differ by construction"
+G_old n=75 vs n=150,model,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,generator,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,observed data,differ,"G_old z-scores over the n nodes and draws F, w after Z, so F and w differ between n=75 and n=150 (true w: 0.58 / -8.06 vs 5.03 / -5.93)","MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,"n, d",differ,"G_old z-scores over the n nodes and draws F, w after Z, so F and w differ between n=75 and n=150 (true w: 0.58 / -8.06 vs 5.03 / -5.93)","MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,K_GEN,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,K candidates,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,initial state,differ,"G_old z-scores over the n nodes and draws F, w after Z, so F and w differ between n=75 and n=150 (true w: 0.58 / -8.06 vs 5.03 / -5.93)","MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,estimation budget,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,observation mask,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,criterion,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_old n=75 vs n=150,aggregation rule,same,,"MULTI_FACTOR_COMPARISON (n, F, w)"
+G_canon vs G_old at n=75,model,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,generator,differ,"z-scoring, F law, w law",MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,observed data,differ,"z-scoring, F law, w law",MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,"n, d",same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,K_GEN,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,K candidates,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,initial state,differ,"z-scoring, F law, w law",MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,estimation budget,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,observation mask,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,criterion,same,,MULTI_FACTOR_COMPARISON
+G_canon vs G_old at n=75,aggregation rule,same,,MULTI_FACTOR_COMPARISON
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,model,same,,MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,generator,differ,"X noise variance (0.1 vs exp(-||f||^2/2)), F row norm^2 (0.9 vs 0.5/0.9), w (1.16 vs 0.77/1.04), Z, mask (all vs 80%), K candidates (1..10 vs 1..7)",MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,observed data,differ,"X noise variance (0.1 vs exp(-||f||^2/2)), F row norm^2 (0.9 vs 0.5/0.9), w (1.16 vs 0.77/1.04), Z, mask (all vs 80%), K candidates (1..10 vs 1..7)",MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,"n, d",same,,MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,K_GEN,same,,MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,K candidates,differ,"X noise variance (0.1 vs exp(-||f||^2/2)), F row norm^2 (0.9 vs 0.5/0.9), w (1.16 vs 0.77/1.04), Z, mask (all vs 80%), K candidates (1..10 vs 1..7)",MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,initial state,differ,"X noise variance (0.1 vs exp(-||f||^2/2)), F row norm^2 (0.9 vs 0.5/0.9), w (1.16 vs 0.77/1.04), Z, mask (all vs 80%), K candidates (1..10 vs 1..7)",MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,estimation budget,same,,MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,observation mask,differ,"X noise variance (0.1 vs exp(-||f||^2/2)), F row norm^2 (0.9 vs 0.5/0.9), w (1.16 vs 0.77/1.04), Z, mask (all vs 80%), K candidates (1..10 vs 1..7)",MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,criterion,same,,MULTI_FACTOR_COMPARISON (descriptive only)
+this study (G_canon n=75) vs PR #160 E2 Gaussian n=75,aggregation rule,same,,MULTI_FACTOR_COMPARISON (descriptive only)
+"historical (Python 5/5, paper Fig. 3)",model,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",generator,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",observed data,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)","n, d",differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",K_GEN,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",K candidates,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",initial state,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",estimation budget,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",observation mask,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",criterion,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
+"historical (Python 5/5, paper Fig. 3)",aggregation rule,differ,,HISTORICAL_REFERENCE / NOT_DIRECTLY_COMPARABLE
