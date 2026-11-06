@@ -8,7 +8,7 @@ PR #160 の Phase A（`reports/k_selection_theory/fair_model_estimator_criterion
 |---|---|---|---|
 | モデルの同等性 | 原論文 Eq.(1)(2)(16) と ExpFam（Gaussian-X/Bernoulli-Y） | μ_x = 0、σ_z² = 1 で同等（DERIVED） | PR #160 02 §3・§5 |
 | 完全データ対数密度 | 同じ (Z, θ) での差 | 0（OBSERVED）。論文型、ExpFam、共通評価器、Python 再現の `calc_log_likelihood` で一致 | `equivalence_numeric_checks.csv` 0〜6 行 |
-| 無向ペアの数え方 | {∏_{i≠j}}^{1/2} と i<j の積 | 対称な Y では同じ（差 0）。n=75 の全データで Y は対称、対角は 0（precheck） | 同 2 行、`run_n75.py precheck` |
+| 無向ペアの数え方 | {∏_{i≠j}}^{1/2} と i<j の積 | 対称な Y では同じ（差 0）。G_canon n=75 では、precheck で Y が対称・対角 0 であることを確認した。G_old は生成器の構成上対称（`data_generator.py`）で、precheck の確認からは外れている | 同 2 行、`run_n75.py precheck` |
 | OLD の E-step | Y の勾配と曲率に 1/2（印刷式 Eq.(22)(23) に従う） | 完全な目的関数に対する有限差分との相対誤差は、勾配 0.33、精度行列 0.093。Y の score は真値のちょうど 0.5 倍 | 同 12〜14 行 |
 | 系列 E の E-step | 1/2 なし（採用式） | 有限差分と 1.7e−9・2.3e−8 で一致 | 同 10・11 行 |
 | 初期値 | `initialize_params(seed)`、w0 = logit（学習ペアの密度）、w = 0.5 | **計画した 320 fit のうち B・C の 240 件で、OLD と E の初期の Z・F・σ・w0・w のハッシュが一致**。D は w0 だけが違う（学習ペアの密度を使うため） | `dataset_and_initialization_hashes.csv` |
@@ -36,7 +36,7 @@ PR #160 の Phase A（`reports/k_selection_theory/fair_model_estimator_criterion
 ## 3. 1/2 の扱い
 
 - 原論文の印刷式 Eq.(22)(23) には 1/2 がある（2026-08-18 に確認、AGENTS.md §2）。
-- 本研究の採用式（1/2 なし）は、Eq.(20) の z_i による微分と有限差分で一致する、独立に再導出・検証した式である（DERIVED + OBSERVED）。
+- 本研究の採用式（1/2 なし）は、無向ペアごとに 1 回数える完全な条件付き分布（ln p(x_i|z_i) + Σ_{j≠i} ln p(y_ij|z_i,z_j) + ln p(z_i)）の、z_i による微分と有限差分で一致する。独立に再導出・検証した式である（DERIVED + OBSERVED）。印刷された Eq.(20) の 1/2 の扱いと Eq.(22)(23) との関係については、判定しない。
 - 印刷式との差は意図的な差として扱い（KI-001）、印刷式の正誤は判定しない。
 - OLD は目的関数として「Y の対数尤度を 1/2 倍した条件付き分布」を目標にしている。OLD の勾配が、その目的関数の有限差分と一致するかは 06 で確認する。
 

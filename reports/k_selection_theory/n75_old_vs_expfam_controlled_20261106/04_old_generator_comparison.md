@@ -1,5 +1,7 @@
 # 04 旧生成器（G_old）での n=75 比較（Phase C、2026-11-06）
 
+**系列**：OLD は 0.5 系列（KI-001：Newton 方向が全体として正しいとは断定できない）。E は系列 E（prototype）。
+
 **公平性**
 - OLD vs E は `ONE_FACTOR_COMPARISON`。
 - G_old vs G_canon と、G_old の n=75 vs n=150 は `MULTI_FACTOR_COMPARISON`（`fairness_matrix.csv`）。

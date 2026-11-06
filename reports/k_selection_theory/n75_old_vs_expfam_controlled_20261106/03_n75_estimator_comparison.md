@@ -9,11 +9,13 @@
 ## 1. 実行の健全性
 
 - 新しい fit：B 160 件、C 80 件、D 80 件。すべて OK、FAILED 0、再試行 0。予備の 20 件は使っていない。
-- 3 つのステージとも、runner・protocol・推定コードのハッシュは同じ（`run_log.txt`）。B と C・D の間で git head が違うが、これは解析スクリプトを新規に追加しただけで、runner・protocol・`expfam/src`・`reproduction/src` の差分はない（`git diff --quiet ecf2e2a 729a04f -- …`）。
+- `run_log.txt` に記録したハッシュは、`run_n75.py`・`run_fair_comparison.py`・`n75_protocol.py` の 3 ファイルで、3 ステージとも同じ。B と C・D の間で git head が違う（ecf2e2a・729a04f）。
+  - 差分は解析スクリプト 3 本の新規追加だけ（`git diff --stat ecf2e2a 729a04f`）。
+  - `git diff --quiet ecf2e2a 729a04f -- expfam/src reproduction/src tools/research_audit/{fair_protocol,run_fair_comparison,run_n75,n75_protocol}.py` は差分なし（監査の後に確認）。
 - 共通評価器での採点は 480 状態（新規 320 ＋ PR #160 の n=150 の 160）。
   - Laplace の NOT_STATIONARY は 3 状態。補完せず INCOMPLETE とした。
   - PR #160 の状態の再採点は、PR #160 の値と最大 3.6e−12 で一致（`reuse_crosscheck.csv`）。
-- 解析スクリプトは 1 回目に pandas の名前の衝突（`rec.at`）で途中停止した。修正し、途中まで書かれた出力を削除して再実行した。選択の規則・数値の計算は変えていない（commit 履歴に記録）。
+- 解析スクリプトは 1 回目に pandas の名前の衝突（`rec.at`）で途中停止した。修正し、途中まで書かれた出力（commit していない）を削除して再実行した。修正は 1 行（`rec["at"]`）だけで、選択の規則・数値の計算は変えていない（commit 42b5e50）。
 
 ## 2. K の選択（G_canon、n=75、全ペア、データ 4 つ）
 

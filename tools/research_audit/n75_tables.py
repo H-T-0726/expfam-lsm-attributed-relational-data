@@ -84,17 +84,23 @@ def main():
         f"C_Q: G_canon OLD {cnt(c75, 'OLD', 'A_CQ')}, E {cnt(c75, 'E', 'A_CQ')}; G_old OLD {cnt(o75, 'OLD', 'A_CQ')}, E {cnt(o75, 'E', 'A_CQ')}; "
         + "same K_HAT: " + ", ".join(f"{c} {int(a.loc[c, 'sum'])}/{int(a.loc[c, 'count'])}" for c in a.index),
         "NOT_SUPPORTED in the tested conditions (both estimators exact on every dataset with C_Q)")
-    add("N2", "n=75 by itself makes C_Q under-select",
+    p160 = pd.read_csv(ROOT / npc.PR160_REL / "success_failure_conditions.csv")
+    p160 = p160[(p160.experiment == "E2") & (p160.criterion == "A_CQ") & p160.cell.str.startswith("gaussian")]
+    p160txt = "; ".join(f"PR #160 E2 {r.cell}: C_Q {r.exact}/{r.datasets - r.incomplete}" for _, r in p160.iterrows())
+    add("N2", "n=75 is sufficient on its own to make C_Q under-select",
         "C_Q under-selects in every n=75 condition",
         "this study's n=75 conditions", "within-study observation",
-        f"G_canon all pairs E {cnt(c75, 'E', 'A_CQ')}; G_canon 80% pairs {cnt(m75, 'E', 'A_CQ')}; G_old {cnt(o75, 'E', 'A_CQ')}",
-        "REJECTED as a general statement: at n=75 with these generators C_Q selects K_GEN; the PR #160 n=75 failures are condition-specific")
+        f"G_canon all pairs E {cnt(c75, 'E', 'A_CQ')}; G_canon 80% pairs {cnt(m75, 'E', 'A_CQ')}; G_old {cnt(o75, 'E', 'A_CQ')} | " + p160txt,
+        "REJECTED as 'n=75 is sufficient for failure'. n is NOT excluded as a cause: in PR #160 E2 (same generator law and X SNR) n=75 -> n=150 changed C_Q from 0/4 to 3/4 (weak) and 2/4 to 4/4 (strong); failure needs small n together with weak signal")
     g = ci.groupby("condition")[["x_snr", "x_info", "y_info_median"]].median()
-    add("N3", "the PR #160 n=75 failures come from low information per node (X signal-to-noise), not from n alone",
-        "conditions where C_Q fails have much less X information per node than conditions where it succeeds",
-        "condition_information.csv (true parameters; no fit)", "MULTI_FACTOR_COMPARISON (descriptive only)",
-        "; ".join(f"{c}: X SNR {r.x_snr:.2f}, X info {r.x_info:.1f}, Y info {r.y_info_median:.1f}" for c, r in g.iterrows()),
-        "HYPOTHESIS (consistent with the data; not tested one factor at a time: X noise, F, w, Z, mask and K candidates differ)")
+    g["total_info"] = g.x_info + g.y_info_median + 5
+    add("N3", "the PR #160 n=75 failures come from low X signal-to-noise per node",
+        "every condition where C_Q fails has much less X information than every condition where it succeeds",
+        "condition_information.csv (true parameters; no fit) + PR #160 success_failure_conditions.csv", "MULTI_FACTOR_COMPARISON (descriptive only)",
+        "; ".join(f"{c}: X SNR {r.x_snr:.2f}, X info {r.x_info:.1f}, Y info {r.y_info_median:.1f}, total {r.total_info:.1f}" for c, r in g.iterrows()) + " | " + p160txt,
+        "FALSIFIED as stated: E2 Gaussian n=150 weak has the same X SNR (0.68) and X info (10) as n=75 weak but C_Q 3/4 vs 0/4. "
+        "Post-hoc exploratory HYPOTHESIS (not pre-registered, not tested): what matters is the total information per node (X + Y, Y growing with n), "
+        "i.e. n and signal strength act together; ordering of total info matches the ordering of success in these cells but conditions differ in several factors")
     add("N4", "fewer observed Y pairs (80%) causes under-selection",
         "80% mask lowers exact share / under-side slack versus all pairs, same data and seeds",
         "D vs B (lineage E)", "ONE_FACTOR_COMPARISON (mask)",
