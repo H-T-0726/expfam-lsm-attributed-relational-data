@@ -601,9 +601,9 @@ def run_gates() -> int:
     Zs = e_step(m, X, Y, th0, Z0, L_CHAIN, rng)
     th1 = m_step(m, X, Y, Zs, th0)
     rd, cd = dyads_of(train)
-    dg = _step_diagnostics(th1["F"], th0["F"], th1["w"], th0["w"], th1["w0"], th0["w0"],
-                           *_predictors(Zs[:, :, -1], th1["F"], th1["w0"], th1["w"], rd, cd),
-                           *_predictors(Z0, th0["F"], th0["w0"], th0["w"], rd, cd))
+    ex1, ey1 = _predictors(Zs[:, :, -1], th1["F"], th1["w0"], th1["w"], rd, cd)
+    ex0, ey0 = _predictors(Z0, th0["F"], th0["w0"], th0["w"], rd, cd)
+    dg = _step_diagnostics(th1["F"], th0["F"], th1["w"], th0["w"], th1["w0"], th0["w0"], ex1, ex0, ey1, ey0)
     d1 = max(float(np.max(np.abs(Zs - rec["Zs"]))), float(np.max(np.abs(th1["F"] - rec["F"]))),
              abs(th1["w0"] - rec["w0"]), abs(th1["w"] - rec["w"]))
     d2 = max(abs(dg[kk] - res["iteration_diagnostics"][0][kk]) for kk in ("gram_rel_change", "eta_x_rel_change", "eta_y_rel_change"))
