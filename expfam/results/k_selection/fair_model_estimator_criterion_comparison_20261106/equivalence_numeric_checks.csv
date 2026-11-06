@@ -1,0 +1,20 @@
+check,value,tolerance,pass,layer,note
+"Gaussian-X: paper N(Fz,Sigma) log-density minus ExpFam form",0.0,1e-09,True,model,
+Gaussian-X: ExpFam form minus evaluator,0.0,1e-09,True,model,
+Bernoulli-Y: paper Eq.(16) 1/2 * ordered pairs minus unordered pairs,0.0,1e-09,True,model,
+"rotation invariance (Z R, F R) of log p(Z,X,Y)",0.0,1e-09,True,model,DERIVED: R orthogonal
+lineage-E calc_Q_dual_strict_exp with model.params['sigma'] NOT set to the argument (hazard),-5.896808100833908,inf,True,implementation,FINDING: the Gaussian-X term reads model.params['sigma'] and ignores the sigma argument; harmless in the runners (params hold the fitted sigma) but a latent hazard
+lineage-E calc_Q_dual_strict_exp minus evaluator complete log density (params set),0.0,1e-08,True,implementation,
+Python reproduction calc_log_likelihood minus evaluator complete log density,0.0,1e-06,True,implementation,"reproduction clips S to [1e-10, 1-1e-10]"
+Poisson-X: lineage-E strict Q minus evaluator,0.0,1e-08,True,implementation,
+gaussian: evaluator gradient vs FD (rel),1.6640759433442881e-09,1e-06,True,derivation,
+gaussian: evaluator -Hessian vs FD (rel),2.272556070040173e-08,1e-05,True,derivation,
+gaussian: lineage-E E-step gradient vs FD (rel),1.6640760745109895e-09,1e-06,True,implementation,
+gaussian: lineage-E precision vs FD (rel),2.2725560606488173e-08,1e-05,True,implementation,
+gaussian: Python reproduction E-step gradient vs FD (rel),0.3258481545506558,1e-06,False,implementation,expected to FAIL: 1/2 on the Y score (paper Eq.23)
+gaussian: Python reproduction precision vs FD (rel),0.09272504716659055,1e-05,False,implementation,expected to FAIL: 1/2 on the Y curvature (paper Eq.22); ridge 1e-6 removed before comparing
+gaussian: Python reproduction Y-score / true Y-score (ratio - 0.5),-1.370411228940327e-09,1e-06,True,implementation,ratio 0.5 = the extra 1/2
+poisson: evaluator gradient vs FD (rel),3.9347414520952175e-09,1e-06,True,derivation,
+poisson: evaluator -Hessian vs FD (rel),2.2200185077178888e-07,1e-05,True,derivation,
+poisson: lineage-E E-step gradient vs FD (rel),3.934741476722803e-09,1e-06,True,implementation,
+poisson: lineage-E precision vs FD (rel),2.2200185077178888e-07,1e-05,True,implementation,

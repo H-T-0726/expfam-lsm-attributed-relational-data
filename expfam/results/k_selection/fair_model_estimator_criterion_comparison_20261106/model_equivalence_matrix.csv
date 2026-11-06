@@ -1,0 +1,13 @@
+item,paper,expfam_gauss_bern,verdict,layer,label
+prior of Z,"N(0, sigma_z^2 I), sigma_z^2 estimated (Sect.2.2, Eq.14)","N(0, I), var_z fixed 1 + scale_Z",same at sigma_z^2=1,model,FACT
+X | Z,"N(F z + mu_x, Sigma) (Eq.1)","N(F z, Sigma) (no intercept)",same at mu_x = 0,model,FACT
+Y | Z,Bern(sigmoid(w0 + w z_i'z_j)) (Eq.2),same,same,model,FACT
+pair counting,{prod_{i!=j}}^{1/2} (Eq.16),prod over i<j,same for symmetric Y (numeric diff 0),objective,DERIVED+OBSERVED
+diagonal of Y,y_ii = 1 by convention (Sect.2.2),unused,no effect on likelihood (i != j only),model,FACT
+Gaussian dispersion,"Sigma diagonal, estimated (Eq.12)","Sigma diagonal, estimated",same,model,FACT
+rotation,not stated; penalty subtracts k(k-1)/2,"(Z,F)->(ZR,FR) invariant",same (numeric diff 0),model,DERIVED+OBSERVED
+normalisation of data,not stated (MATLAB/Python z-score Z and X),canonical: none,"generator difference, not a model difference",generator,FACT
+complete-data log density,ln p(Z)+ln p(X|Z)+ln p(Y|Z) (Eq.18),same,"equal at the same (Z, theta): diff 0",objective,OBSERVED
+E-step gradient (Y part),(1/2) sum_j (y_ij - s_ij) w z_j (Eq.23),w sum_j (y_ij - s_ij) z_j,paper print has an extra 1/2; adopted = exact derivative of Eq.20 (FD),implementation,DERIVED+OBSERVED
+E-step precision (Y part),(1/2) sum_j s(1-s) w^2 z_j z_j' (Eq.22),w^2 sum_j s(1-s) z_j z_j',same as above,implementation,DERIVED+OBSERVED
+overall,-,-,"MODEL: equivalent (mu_x=0, sigma_z^2=1); OBJECTIVE: equivalent; IMPLEMENTATION: not equivalent (1/2, mask, numerics)",verdict,DERIVED+OBSERVED
