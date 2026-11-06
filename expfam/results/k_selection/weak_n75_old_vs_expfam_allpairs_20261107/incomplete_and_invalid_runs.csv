@@ -1,0 +1,3 @@
+cell,dataset,stage,key,estimator,mask,k,s,seed,status,runtime_s,exception,lap_status,lap_seconds,src
+all pairs | E,3,W,W_r3_k4_s2_E,E,all_pairs,4,2,1405342,OK,5.84,,NOT_STATIONARY,2.41,new
+80% (PR #160) | E,2,P160_80,e2_gaussian_weak_n75_r2_k2_s2,E,mask_80,2,2,1405222,OK,5.78,,NOT_STATIONARY,2.09,"PR #160 E2 (reused, read-only)"

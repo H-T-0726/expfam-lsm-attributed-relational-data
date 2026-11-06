@@ -1,0 +1,40 @@
+{
+ "stage": "W",
+ "key": "W_r4_k7_s2_OLD",
+ "rep": 4,
+ "k": 7,
+ "s": 2,
+ "estimator": "OLD",
+ "mask": "all_pairs",
+ "seed": 1405472,
+ "protocol_hash": "3bbf0b77efc444e6d51a53029674b6bd8d30977adf7ae394537a2eb8cdc7e017",
+ "git_head": "025b17666412e19acf2544c3e621cbc1162806ab",
+ "code_sha": {
+  "run_weak.py": "fc80a3cb6db6b2ae92857c12cb8a5ada6efbf5e0272867718a716c7ebd262d80",
+  "weak_protocol.py": "8f7424835d07f2da4445068747ae9eb95124bd0b311f7011b2bad063a913b23c",
+  "run_fair_comparison.py": "1b5f87689e4249addbe174b54e8445b31aed8d5291e58d2e438fc9f8c40365b1",
+  "run_n75.py": "4ddbf7241eb0728c8fac824b845e24096c5c98ce043d8b49bf9ca8d46c2219b4"
+ },
+ "data_seed": 860754,
+ "x_sha256": "878b1c5373abc384acddf97dd94905fd3b6e47561d6f699327a32b9c40bc5add",
+ "y_sha256": "054d8a96347d7efc42ab70e3389a6b016698edbb7fa708c0214c2db9a834b808",
+ "train_sha256": "b806c7f0667b42d389bedd1a48e3029f03a3825e7406a53018f872d9ea9d423b",
+ "note": "PR #155 condition A; all pairs observed (PR #155 test pairs used as training pairs, no held-out)",
+ "init_Z_sha": "192852cb750ad1fe46673f46d45f9ebde463a39a9c365a6c5b13c285ef3a3f5b",
+ "init_F_sha": "283f6542587285a07afba77c36712f2ae00d8b58db5528d9ba177b08edbe45ca",
+ "init_sigma_sha": "b56128a10d8a2798ce4efb73ac058def5d1fdccfe72b55dadc6a4b6fcb47e5d6",
+ "init_w0_sha": "70b6272f919ade48cff7f101916ed394543e186c2a4c930373d0f97f1b65ae3b",
+ "init_w_sha": "4cfa5b42ca669328764e67cd9a34bb8f90b16ed7ca8d85e8443783d7ccce15ed",
+ "init_identical_OLD_E": true,
+ "env": {
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "threads": "1"
+ },
+ "npz_sha256": "e78c0f625e9c08a1b3541caaf44d1ccd9d7df5b8cf3792befd88bb0bd0ac0506",
+ "status": "OK",
+ "exception": "",
+ "runtime_s": 5.83,
+ "avail_gb": 6.93,
+ "rss_mb": 130.6
+}
