@@ -1,0 +1,2 @@
+phase,condition,replicate,k_fit,start,L_fit,checkpoint,kind,detail
+3,A,6,4,1,,16,LAPLACE_NOT_STATIONARY,grad_inf=2.0656445025302173e-07
