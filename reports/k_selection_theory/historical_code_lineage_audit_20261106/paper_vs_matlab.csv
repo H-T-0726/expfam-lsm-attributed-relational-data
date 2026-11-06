@@ -1,0 +1,19 @@
+item,paper,matlab,difference,label
+Z generation,"z_i ~ N(0, sigma_z^2 I), sigma_z^2=1 (Sect.4.1 Step 1)","normalize(normrnd(0,1,[n,k])) column z-score (setTrueParams.m:22)",differs (sample normalisation),FACT
+F generation,"each entry of F* ~ N(0,10) (Sect.4.1 Step 3)","normrnd(0, sqrt(5)); each row rescaled to norm sqrt(1-0.1) (setTrueParams.m:16,23,26-28)",differs: var 5 not 10; row norm fixed -> F^T F trace = 13.5 for every k,FACT
+Sigma,"diag(0.1,...,0.1)","diag(0.1) (setTrueParams.m:15,20)",same,FACT
+mu_x / X post-processing,"mu_x = 0; X ~ N(F z, Sigma)","X = normalize(mvnrnd(Z F', Sigma)) column z-score (setTrueParams.m:38-41)",differs (X z-scored),FACT
+"w0, w",'random values' (distribution not stated),"w0 = randn(); w = 3*randn() after rng(1980) (setTrueParams.m:12,30-31)",paper silent,FACT
+seed,not stated,rng(1980) inside setTrueParams: same stream every call (setTrueParams.m:12),paper silent,FACT
+Y,y_ij ~ Bern(s_ij); y_ii = 1 by convention (Sect.2.2),"triu(binornd(...),1) + transpose; y_ii = 0 (setTrueParams.m:49-51)",diagonal convention differs (diagonal excluded in fit anyway),FACT
+L,10 (Table I),batch: L = 11 (NOLTA_exp_ver3_revise_batch.m:19); live script Exp.3: L = 10,batch differs,FACT
+iterations,10,numIter = 10 (setParamsDesc.m:4),same,FACT
+trials,10 trials with different initial values,batch loop 'for k=1:10' = 10 restarts of the same K (NOLTA_exp_ver3_revise_batch.m:30-33),the loop variable k is never used for the fitted dimension,FACT
+fitted dimension,k = 1..10 for each k* (Exp.2),"setParamsDesc(trueParams, kT, i) and calcdescmetric_ver4(X, Y, kT, ...) -> always kT = 3 (batch L32-33)",no repository MATLAB script varies the fitted K,FACT
+BIC Eq.(26),"-2 ln L + ((k+1)d - k(k-1)/2) ln n, L from Eq.(16)","no Exp.2 BIC code; DecideNumFactor.m = X-only factoran BIC with -2*n*loglike (L11-14), never called",Exp.2 code path absent,FACT
+Q function,"Eq.(18): (1/L) sum_l ln p(Z^(l), X, Y | theta) (includes ln p(Z))",Q = (1/L) sum_l [p_X + p_Y + p_Z] (calcdescmetric_ver4.m:37-47),same quantity (Q2 MC mean),FACT
+E-step gradient,Eq.(23): ... + (1/2) sum_j (y_ij - s_ij) w z_j,calcGrad: (Y - S) Z without w and without 1/2 (calcEtaNewton.m:43-49),MATLAB omits w; paper has an extra 1/2 (KI-001),FACT
+precision A_i,Eq.(22): (1/2) sum_j s(1-s) w^2 z_j z_j^T,"calcAi: w^2 sum_j s(1-s) z_j z_j^T, self term removed with an extra factor (calcEtaNewton.m:56-63)",no 1/2 in MATLAB; diagonal-removal defect,FACT
+Newton step,Newton method (step size not stated),"alpha = 0.01, at most 9 steps per node; 'diff' not reset between nodes (calcEtaNewton.m:3-22)",MATLAB effectively takes ~1e-2 Newton steps,FACT
+w0/w update,Adam (Eq.24-25),"Adam-like with m <- b1 m + (1 - b1^t) g (non-standard), lr 0.01, <=49 steps (calcw.m, calcw0.m)",close but non-standard moment update,FACT
+sigma_z update,Eq.(14)/(B-13),"varZ fixed at 1 and Z rescaled (scaleZ) so mean ||z||^2 = k (calcdescmetric_ver4.m:29,65-79)",differs (fixed + rescale),FACT

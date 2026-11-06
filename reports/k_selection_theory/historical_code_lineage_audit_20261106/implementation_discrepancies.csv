@@ -1,0 +1,18 @@
+id,where,file_lines,finding,consequence,label,impact_on_results
+D1,MATLAB,NOLTA_exp_ver3_revise_batch.m:30-33,loop 'for k=1:10' passes kT (=3) to setParamsDesc and calcdescmetric_ver4; every run fits K=3,the only batch script cannot have produced Exp.2,FACT,none on paper results (path not the Exp.2 path)
+D2,MATLAB,calcdescmetric_ver4.m:10,argument i assigned to m but m never used; dimension comes from params.Z,harmless given D1,FACT,-
+D3,MATLAB,calcEtaNewton.m:43-49,Y part of the gradient lacks the factor w,Newton target is not the posterior mode unless w=1,FACT (finite-difference check),UNRESOLVED (no MATLAB Exp.2 run available)
+D4,MATLAB,calcEtaNewton.m:61,"self-term removal uses sig(ind,ind)*(1-sig(ind,ind))*w^2 where sig already holds w^2 s(1-s)",precision slightly wrong,FACT,UNRESOLVED
+D5,MATLAB,"calcEtaNewton.m:8,15","Newton step size alpha = 0.01, <= 9 steps","E-step moves about 9% toward the mode; sampler is then N(near-current z, A^-1)",FACT,Python report says alpha=0.01 made BIC select k=1 (no primary CSV)
+D6,MATLAB,calcEtaNewton.m:5-22,"'diff' is not reset per node; if one node converges, later nodes skip Newton and reuse the previous node's invAi",latent defect,FACT,UNRESOLVED
+D7,MATLAB,setTrueParams.m:12,rng(1980) inside the generator: all calls share one stream,datasets for different calls are not independent draws,FACT,-
+D8,MATLAB,DecideNumFactor.m:14,BIC uses -2*n*loglike (n times factoran's loglike),scale depends on factoran's loglike definition,FACT / UNRESOLVED,never called
+D9,paper,"Eq.(23), (A-5)",1/2 in the gradient although Eq.(20) already counts each pair once (KI-001),-,FACT + DERIVED,-
+D10,paper,Eq.(A-6),"contains 1/(2 sigma_y^2), a symbol not in the binary model",typo-level inconsistency,FACT,-
+D11,paper,Eq.(16) vs Eq.(26) vs Eq.(18),"BIC's ln L (no p(Z), Z fixed) differs from Q (with p(Z), integrated over posterior)",the paper's 'BIC' is neither Q nor the marginal likelihood,FACT + DERIVED,-
+D12,paper,Sect.4.1,"generator text (F ~ N(0,10)) differs from MATLAB/Python generator (row norm sqrt(0.9))",signal per direction differs by about 50-100x,FACT + DERIVED,which generator made Fig.3 is UNRESOLVED
+D13,Python,experiment_paper_2.py:124-170,ln L includes ln p(Z) and uses one Z; Eq.(16) has no p(Z),-2 ln p(Z) adds about +426 per extra dimension at n=150,FACT + DERIVED,acts as an extra penalty; selection still correct because under-fit loss >> 426
+D14,Python,"experiment_paper_2.py:234-245, 289-297",best iteration and best of 3 inits,optimistic selection of the fit term,FACT,-
+D15,Python,experiment_paper_2.py:215 and report L166-176,alpha changed from 0.01 to 0.5 after the selection result was seen,post-hoc tuning on the outcome,FACT (code) / report claim UNRESOLVED,-
+D16,Python,"model.py:276,337","1/2 in E-step (paper print), not the adopted formula",posterior targeted with half the Y information,FACT,KI-001
+D17,early ExpFam,data_generator_expfam.py:304,"Poisson eta clipped to [-20, 10]",minor for ||f||^2=0.9,FACT,-

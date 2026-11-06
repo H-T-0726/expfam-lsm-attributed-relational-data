@@ -1,0 +1,4 @@
+implementation,grad_rel_err,precision_rel_err,y_grad_component_ratio,note
+"adopted (no extra 1/2), = model_dual_expfam_fixed / lineage E",2.1012523580623908e-11,2.2064544335980037e-06,1.0,"target: d/dz_i and -d2/dz_i2 of Eq.(20) (prior+X+1/2*ordered-pair Y = unordered pairs), finite differences h=1e-05; n=12,k=3,d=5,w=1.7"
+paper Eq.(23)/(22) and Python reproduction / 0.5 lineage (1/2),0.13502518412907413,0.0662452608295674,0.5000000000000001,"target: d/dz_i and -d2/dz_i2 of Eq.(20) (prior+X+1/2*ordered-pair Y = unordered pairs), finite differences h=1e-05; n=12,k=3,d=5,w=1.7"
+MATLAB calcEtaNewton.m (calcGrad / calcAi as written),0.11119721046208125,0.001980737206257636,0.5882352941176472,"target: d/dz_i and -d2/dz_i2 of Eq.(20) (prior+X+1/2*ordered-pair Y = unordered pairs), finite differences h=1e-05; n=12,k=3,d=5,w=1.7"
