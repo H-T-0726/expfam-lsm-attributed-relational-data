@@ -1,0 +1,61 @@
+{
+ "addendum": "operational-addendum-v2",
+ "experiment_id": "mcem_noise_separation_20261106",
+ "stage": "phase3",
+ "fit_key": "C_r3_k4_s1",
+ "condition": "C",
+ "replicate": 3,
+ "k_fit": 4,
+ "start": 1,
+ "L_fit": 5,
+ "fit_id": 12341,
+ "model_seed": 1405341,
+ "max_iter": 64,
+ "probe_seed": "[7700000, fit_id, checkpoint, r]",
+ "status": "OK",
+ "exception": "",
+ "config_hash": "9e40a0b864f9e61c28eaf2d4ea76c6a86b9f7e493f9a204568ca59846ee4580d",
+ "config": {
+  "prereg_sha256": "f2f49e5d9b5bd75423ae69c1c28924283a867708fedd74749f19a7249e3f6c34",
+  "code_sha256": "2133c76f1b0c02876250b5bda63eb0a42c83633215694bf95a5e31ba91e51c09",
+  "spec": {
+   "stage": "phase3",
+   "fit_key": "C_r3_k4_s1",
+   "condition": "C",
+   "replicate": 3,
+   "k_fit": 4,
+   "start": 1,
+   "L_fit": 5,
+   "fit_id": 12341,
+   "model_seed": 1405341,
+   "max_iter": 64,
+   "probe_seed": "[7700000, fit_id, checkpoint, r]"
+  },
+  "inputs": {
+   "X": "b5d6c193bcf6279ecf98c11a42feffb526b8d6034f453e8a95cecf1ddbfd3dd2",
+   "Y": "1729451c5fa76ce73e01d06dbaf78e50267420833f5c4134e66a6dca5c4a7fbe",
+   "train": "cddc284e0fc9b99b688bbd917a5c31ca1fbca853235332dcaab8b7f7ca2c7b24",
+   "pr156_states_npz": "d2f1d90962c1489cde72a96f273952ea268528df57324acc524dd1d049ae9408"
+  },
+  "thread_vars": {
+   "OPENBLAS_NUM_THREADS": "1",
+   "OMP_NUM_THREADS": "1",
+   "MKL_NUM_THREADS": "1",
+   "NUMEXPR_NUM_THREADS": "1",
+   "VECLIB_MAXIMUM_THREADS": "1"
+  }
+ },
+ "files": {
+  "__npz__": "d75094863ce9ddec6aafa4d74f328b35a2f9652a682f02b5f693b73065ddc70d",
+  "state_rows.csv": "f4f618de826bcf10b7a15ebb3a4e7343067aeb659d01c644d9d1b0043b426241",
+  "probe_rows.csv": "577fbd229f162f0fa2eaa9d8f4bb73c1a72405896e3edbf141c5d2abd2520a06",
+  "replicate_rows.csv": "10c542823b06db5c7ca76e83a3ce8029eb6f5c05905e24909ace7b75b95aa583"
+ },
+ "npz_path": "D:\\tento\\kennkyu_artifacts\\mcem_noise_separation_20261106\\exec_v2\\phase3\\C_r3_k4_s1.npz",
+ "seconds": 33.7,
+ "peak_rss_mb": 109.7,
+ "available_mb_after": 8760,
+ "pid": 17868,
+ "git_head": "7340ef05a41256c2c44e9cc3c25e0817dae3976f",
+ "finished_at": "2026-11-06T12:25:21"
+}
