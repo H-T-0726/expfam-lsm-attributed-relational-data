@@ -1,0 +1,1046 @@
+series,condition,k_gen,n,d,replicate,criterion,candidate_k,k_hat,label,best_minus_second
+canonical A1 n-sweep,A,1,50,15,1,A_CQ,1..7,1.0,exact,133.0524008465768
+canonical A1 n-sweep,A,1,50,15,1,B_CQ_minus_PZ,1..7,4.0,over,7.94213051050383
+canonical A1 n-sweep,A,1,50,15,1,C_cond_last,1..7,4.0,over,5.236592897560968
+canonical A1 n-sweep,A,1,50,15,1,D_cond_mode,1..7,7.0,over,25.428524676575762
+canonical A1 n-sweep,A,1,50,15,1,E_CLap,1..7,1.0,exact,65.7033642563838
+canonical A1 n-sweep,A,1,50,15,2,A_CQ,1..7,1.0,exact,132.6119800931965
+canonical A1 n-sweep,A,1,50,15,2,B_CQ_minus_PZ,1..7,4.0,over,7.9296402597829
+canonical A1 n-sweep,A,1,50,15,2,C_cond_last,1..7,3.0,over,3.083884100983596
+canonical A1 n-sweep,A,1,50,15,2,D_cond_mode,1..7,7.0,over,19.578521342902604
+canonical A1 n-sweep,A,1,50,15,2,E_CLap,1..7,1.0,exact,67.77190267479318
+canonical A1 n-sweep,A,1,50,15,3,A_CQ,1..7,1.0,exact,134.88814210907276
+canonical A1 n-sweep,A,1,50,15,3,B_CQ_minus_PZ,1..7,4.0,over,1.5811640693636946
+canonical A1 n-sweep,A,1,50,15,3,C_cond_last,1..7,5.0,over,0.6293250069870737
+canonical A1 n-sweep,A,1,50,15,3,D_cond_mode,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,50,15,3,E_CLap,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,50,15,4,A_CQ,1..7,1.0,exact,142.58442809363487
+canonical A1 n-sweep,A,1,50,15,4,B_CQ_minus_PZ,1..7,3.0,over,7.151562213829038
+canonical A1 n-sweep,A,1,50,15,4,C_cond_last,1..7,3.0,over,3.0372173625273717
+canonical A1 n-sweep,A,1,50,15,4,D_cond_mode,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,50,15,4,E_CLap,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,75,15,1,A_CQ,1..7,1.0,exact,182.99847458470867
+canonical A1 n-sweep,A,1,75,15,1,B_CQ_minus_PZ,1..7,7.0,over,25.9099008424746
+canonical A1 n-sweep,A,1,75,15,1,C_cond_last,1..7,7.0,over,20.642291030293563
+canonical A1 n-sweep,A,1,75,15,1,D_cond_mode,1..7,7.0,over,82.09001666709992
+canonical A1 n-sweep,A,1,75,15,1,E_CLap,1..7,1.0,exact,87.07629213598375
+canonical A1 n-sweep,A,1,75,15,2,A_CQ,1..7,1.0,exact,168.5361142701404
+canonical A1 n-sweep,A,1,75,15,2,B_CQ_minus_PZ,1..7,7.0,over,12.745753048330698
+canonical A1 n-sweep,A,1,75,15,2,C_cond_last,1..7,5.0,over,30.97381383717402
+canonical A1 n-sweep,A,1,75,15,2,D_cond_mode,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,75,15,2,E_CLap,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,1,75,15,3,A_CQ,1..7,1.0,exact,194.02868047922493
+canonical A1 n-sweep,A,1,75,15,3,B_CQ_minus_PZ,1..7,6.0,over,2.246037897156384
+canonical A1 n-sweep,A,1,75,15,3,C_cond_last,1..7,6.0,over,12.221387676060658
+canonical A1 n-sweep,A,1,75,15,3,D_cond_mode,1..7,7.0,over,72.60939864723332
+canonical A1 n-sweep,A,1,75,15,3,E_CLap,1..7,1.0,exact,77.6715819548499
+canonical A1 n-sweep,A,1,75,15,4,A_CQ,1..7,1.0,exact,173.05974239605803
+canonical A1 n-sweep,A,1,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,35.192870474369556
+canonical A1 n-sweep,A,1,75,15,4,C_cond_last,1..7,7.0,over,11.242144290969009
+canonical A1 n-sweep,A,1,75,15,4,D_cond_mode,1..7,7.0,over,71.19600695278132
+canonical A1 n-sweep,A,1,75,15,4,E_CLap,1..7,1.0,exact,68.42751740700987
+canonical A1 n-sweep,A,1,100,15,1,A_CQ,1..7,1.0,exact,235.90121565601476
+canonical A1 n-sweep,A,1,100,15,1,B_CQ_minus_PZ,1..7,7.0,over,28.948406023338066
+canonical A1 n-sweep,A,1,100,15,1,C_cond_last,1..7,7.0,over,4.918996271998367
+canonical A1 n-sweep,A,1,100,15,1,D_cond_mode,1..7,7.0,over,106.10698827224314
+canonical A1 n-sweep,A,1,100,15,1,E_CLap,1..7,1.0,exact,106.85473412773172
+canonical A1 n-sweep,A,1,100,15,2,A_CQ,1..7,1.0,exact,232.23502428561096
+canonical A1 n-sweep,A,1,100,15,2,B_CQ_minus_PZ,1..7,5.0,over,0.4831982252489979
+canonical A1 n-sweep,A,1,100,15,2,C_cond_last,1..7,4.0,over,5.161118661473665
+canonical A1 n-sweep,A,1,100,15,2,D_cond_mode,1..7,7.0,over,93.01907315890094
+canonical A1 n-sweep,A,1,100,15,2,E_CLap,1..7,1.0,exact,101.54049097972711
+canonical A1 n-sweep,A,1,100,15,3,A_CQ,1..7,1.0,exact,233.9474965100053
+canonical A1 n-sweep,A,1,100,15,3,B_CQ_minus_PZ,1..7,7.0,over,28.248786458532777
+canonical A1 n-sweep,A,1,100,15,3,C_cond_last,1..7,7.0,over,47.24377761838605
+canonical A1 n-sweep,A,1,100,15,3,D_cond_mode,1..7,7.0,over,122.21662581704732
+canonical A1 n-sweep,A,1,100,15,3,E_CLap,1..7,1.0,exact,101.89222161361067
+canonical A1 n-sweep,A,1,100,15,4,A_CQ,1..7,1.0,exact,215.09117105772748
+canonical A1 n-sweep,A,1,100,15,4,B_CQ_minus_PZ,1..7,7.0,over,27.970167348586983
+canonical A1 n-sweep,A,1,100,15,4,C_cond_last,1..7,6.0,over,15.958787696657055
+canonical A1 n-sweep,A,1,100,15,4,D_cond_mode,1..7,7.0,over,134.07732688594297
+canonical A1 n-sweep,A,1,100,15,4,E_CLap,1..7,1.0,exact,94.30771905504844
+canonical A1 n-sweep,A,1,150,15,1,A_CQ,1..7,1.0,exact,342.7114340125281
+canonical A1 n-sweep,A,1,150,15,1,B_CQ_minus_PZ,1..7,6.0,over,28.802492446304313
+canonical A1 n-sweep,A,1,150,15,1,C_cond_last,1..7,7.0,over,3.1034832860605093
+canonical A1 n-sweep,A,1,150,15,1,D_cond_mode,1..7,7.0,over,194.4151720368136
+canonical A1 n-sweep,A,1,150,15,1,E_CLap,1..7,1.0,exact,153.2356080706886
+canonical A1 n-sweep,A,1,150,15,2,A_CQ,1..7,1.0,exact,357.00120351095757
+canonical A1 n-sweep,A,1,150,15,2,B_CQ_minus_PZ,1..7,7.0,over,80.10512130623101
+canonical A1 n-sweep,A,1,150,15,2,C_cond_last,1..7,7.0,over,130.55281548733183
+canonical A1 n-sweep,A,1,150,15,2,D_cond_mode,1..7,7.0,over,193.26204421727925
+canonical A1 n-sweep,A,1,150,15,2,E_CLap,1..7,1.0,exact,166.03615551491384
+canonical A1 n-sweep,A,1,150,15,3,A_CQ,1..7,1.0,exact,325.3607921816274
+canonical A1 n-sweep,A,1,150,15,3,B_CQ_minus_PZ,1..7,7.0,over,66.40126651886567
+canonical A1 n-sweep,A,1,150,15,3,C_cond_last,1..7,7.0,over,162.6717444112037
+canonical A1 n-sweep,A,1,150,15,3,D_cond_mode,1..7,7.0,over,210.61773482516946
+canonical A1 n-sweep,A,1,150,15,3,E_CLap,1..7,1.0,exact,122.88083112955792
+canonical A1 n-sweep,A,1,150,15,4,A_CQ,1..7,1.0,exact,348.4433987941211
+canonical A1 n-sweep,A,1,150,15,4,B_CQ_minus_PZ,1..7,7.0,over,24.655485927805785
+canonical A1 n-sweep,A,1,150,15,4,C_cond_last,1..7,6.0,over,24.823463455461024
+canonical A1 n-sweep,A,1,150,15,4,D_cond_mode,1..7,7.0,over,191.331278171745
+canonical A1 n-sweep,A,1,150,15,4,E_CLap,1..7,1.0,exact,152.9042484976526
+canonical A1 n-sweep,A,3,50,15,1,A_CQ,1..7,3.0,exact,12.591181117697033
+canonical A1 n-sweep,A,3,50,15,1,B_CQ_minus_PZ,1..7,4.0,over,10.872540067497994
+canonical A1 n-sweep,A,3,50,15,1,C_cond_last,1..7,4.0,over,0.32181564971688204
+canonical A1 n-sweep,A,3,50,15,1,D_cond_mode,1..7,7.0,over,21.290154043826988
+canonical A1 n-sweep,A,3,50,15,1,E_CLap,1..7,3.0,exact,39.99059387602347
+canonical A1 n-sweep,A,3,50,15,2,A_CQ,1..7,2.0,under,24.069350830627627
+canonical A1 n-sweep,A,3,50,15,2,B_CQ_minus_PZ,1..7,7.0,over,13.123907652902744
+canonical A1 n-sweep,A,3,50,15,2,C_cond_last,1..7,7.0,over,55.13363127628418
+canonical A1 n-sweep,A,3,50,15,2,D_cond_mode,1..7,7.0,over,52.8627843193708
+canonical A1 n-sweep,A,3,50,15,2,E_CLap,1..7,3.0,exact,28.273715551393252
+canonical A1 n-sweep,A,3,50,15,3,A_CQ,1..7,3.0,exact,49.09889308169113
+canonical A1 n-sweep,A,3,50,15,3,B_CQ_minus_PZ,1..7,4.0,over,10.14203152387654
+canonical A1 n-sweep,A,3,50,15,3,C_cond_last,1..7,6.0,over,3.312741032248141
+canonical A1 n-sweep,A,3,50,15,3,D_cond_mode,1..7,7.0,over,31.99617064299082
+canonical A1 n-sweep,A,3,50,15,3,E_CLap,1..7,3.0,exact,45.215278713227235
+canonical A1 n-sweep,A,3,50,15,4,A_CQ,1..7,2.0,under,25.853717446517294
+canonical A1 n-sweep,A,3,50,15,4,B_CQ_minus_PZ,1..7,7.0,over,9.182630758249616
+canonical A1 n-sweep,A,3,50,15,4,C_cond_last,1..7,7.0,over,24.959477141629122
+canonical A1 n-sweep,A,3,50,15,4,D_cond_mode,1..7,7.0,over,40.067915362063104
+canonical A1 n-sweep,A,3,50,15,4,E_CLap,1..7,3.0,exact,28.96237125810285
+canonical A1 n-sweep,A,3,75,15,1,A_CQ,1..7,3.0,exact,153.321148467101
+canonical A1 n-sweep,A,3,75,15,1,B_CQ_minus_PZ,1..7,6.0,over,0.19494095549816848
+canonical A1 n-sweep,A,3,75,15,1,C_cond_last,1..7,5.0,over,14.176257567967696
+canonical A1 n-sweep,A,3,75,15,1,D_cond_mode,1..7,7.0,over,52.08500743721561
+canonical A1 n-sweep,A,3,75,15,1,E_CLap,1..7,3.0,exact,61.436381322728266
+canonical A1 n-sweep,A,3,75,15,2,A_CQ,1..7,2.0,under,22.80054930262486
+canonical A1 n-sweep,A,3,75,15,2,B_CQ_minus_PZ,1..7,6.0,over,3.1832831774991064
+canonical A1 n-sweep,A,3,75,15,2,C_cond_last,1..7,6.0,over,27.101098802073466
+canonical A1 n-sweep,A,3,75,15,2,D_cond_mode,1..7,7.0,over,60.067138934797185
+canonical A1 n-sweep,A,3,75,15,2,E_CLap,1..7,3.0,exact,51.2106220893038
+canonical A1 n-sweep,A,3,75,15,3,A_CQ,1..7,3.0,exact,5.764946616905945
+canonical A1 n-sweep,A,3,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,31.256672257764876
+canonical A1 n-sweep,A,3,75,15,3,C_cond_last,1..7,7.0,over,51.8098230054502
+canonical A1 n-sweep,A,3,75,15,3,D_cond_mode,1..7,7.0,over,91.22276266240806
+canonical A1 n-sweep,A,3,75,15,3,E_CLap,1..7,3.0,exact,47.745132302742604
+canonical A1 n-sweep,A,3,75,15,4,A_CQ,1..7,3.0,exact,92.51814189497054
+canonical A1 n-sweep,A,3,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,16.814071812844304
+canonical A1 n-sweep,A,3,75,15,4,C_cond_last,1..7,7.0,over,9.983406815412309
+canonical A1 n-sweep,A,3,75,15,4,D_cond_mode,1..7,7.0,over,77.42320458751965
+canonical A1 n-sweep,A,3,75,15,4,E_CLap,1..7,3.0,exact,62.852586706377224
+canonical A1 n-sweep,A,3,100,15,1,A_CQ,1..7,3.0,exact,231.021781392501
+canonical A1 n-sweep,A,3,100,15,1,B_CQ_minus_PZ,1..7,7.0,over,44.458683832194765
+canonical A1 n-sweep,A,3,100,15,1,C_cond_last,1..7,7.0,over,55.06379566648047
+canonical A1 n-sweep,A,3,100,15,1,D_cond_mode,1..7,7.0,over,118.10166203113477
+canonical A1 n-sweep,A,3,100,15,1,E_CLap,1..7,3.0,exact,83.91265721954551
+canonical A1 n-sweep,A,3,100,15,2,A_CQ,1..7,3.0,exact,6.395883174742266
+canonical A1 n-sweep,A,3,100,15,2,B_CQ_minus_PZ,1..7,7.0,over,43.104435802979424
+canonical A1 n-sweep,A,3,100,15,2,C_cond_last,1..7,7.0,over,35.24964867834478
+canonical A1 n-sweep,A,3,100,15,2,D_cond_mode,1..7,7.0,over,128.17479798026397
+canonical A1 n-sweep,A,3,100,15,2,E_CLap,1..7,3.0,exact,72.35197791182873
+canonical A1 n-sweep,A,3,100,15,3,A_CQ,1..7,3.0,exact,235.1349506911465
+canonical A1 n-sweep,A,3,100,15,3,B_CQ_minus_PZ,1..7,7.0,over,38.48607951743816
+canonical A1 n-sweep,A,3,100,15,3,C_cond_last,1..7,7.0,over,34.328949613417535
+canonical A1 n-sweep,A,3,100,15,3,D_cond_mode,1..7,7.0,over,121.14354182435454
+canonical A1 n-sweep,A,3,100,15,3,E_CLap,1..7,3.0,exact,70.91824235512104
+canonical A1 n-sweep,A,3,100,15,4,A_CQ,1..7,3.0,exact,133.27446133470767
+canonical A1 n-sweep,A,3,100,15,4,B_CQ_minus_PZ,1..7,7.0,over,115.97000575570291
+canonical A1 n-sweep,A,3,100,15,4,C_cond_last,1..7,7.0,over,73.8416099630931
+canonical A1 n-sweep,A,3,100,15,4,D_cond_mode,1..7,7.0,over,153.0565826439679
+canonical A1 n-sweep,A,3,100,15,4,E_CLap,1..7,3.0,exact,57.64099658577288
+canonical A1 n-sweep,A,3,150,15,1,A_CQ,1..7,3.0,exact,325.3101423901844
+canonical A1 n-sweep,A,3,150,15,1,B_CQ_minus_PZ,1..7,7.0,over,81.96770675979678
+canonical A1 n-sweep,A,3,150,15,1,C_cond_last,1..7,7.0,over,7.182074665552136
+canonical A1 n-sweep,A,3,150,15,1,D_cond_mode,1..7,7.0,over,222.00139439440682
+canonical A1 n-sweep,A,3,150,15,1,E_CLap,1..7,3.0,exact,105.77211341728616
+canonical A1 n-sweep,A,3,150,15,2,A_CQ,1..7,3.0,exact,304.9902394871133
+canonical A1 n-sweep,A,3,150,15,2,B_CQ_minus_PZ,1..7,7.0,over,53.71401000869264
+canonical A1 n-sweep,A,3,150,15,2,C_cond_last,1..7,7.0,over,30.35737467218496
+canonical A1 n-sweep,A,3,150,15,2,D_cond_mode,1..7,7.0,over,216.5943924121475
+canonical A1 n-sweep,A,3,150,15,2,E_CLap,1..7,3.0,exact,105.08419423669875
+canonical A1 n-sweep,A,3,150,15,3,A_CQ,1..7,3.0,exact,318.714309530993
+canonical A1 n-sweep,A,3,150,15,3,B_CQ_minus_PZ,1..7,7.0,over,33.49481102279242
+canonical A1 n-sweep,A,3,150,15,3,C_cond_last,1..7,7.0,over,40.4943774136791
+canonical A1 n-sweep,A,3,150,15,3,D_cond_mode,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,3,150,15,3,E_CLap,1..7,,INCOMPLETE,
+canonical A1 n-sweep,A,3,150,15,4,A_CQ,1..7,3.0,exact,361.6770579163058
+canonical A1 n-sweep,A,3,150,15,4,B_CQ_minus_PZ,1..7,7.0,over,10.525540698654368
+canonical A1 n-sweep,A,3,150,15,4,C_cond_last,1..7,7.0,over,24.399407079064986
+canonical A1 n-sweep,A,3,150,15,4,D_cond_mode,1..7,7.0,over,203.24568312354495
+canonical A1 n-sweep,A,3,150,15,4,E_CLap,1..7,3.0,exact,119.58594822568921
+canonical A1 n-sweep,A,5,50,15,1,A_CQ,1..7,2.0,under,25.181988539834947
+canonical A1 n-sweep,A,5,50,15,1,B_CQ_minus_PZ,1..7,6.0,over,7.36574861500776
+canonical A1 n-sweep,A,5,50,15,1,C_cond_last,1..7,6.0,over,16.648063944796377
+canonical A1 n-sweep,A,5,50,15,1,D_cond_mode,1..7,7.0,over,39.92898453681437
+canonical A1 n-sweep,A,5,50,15,1,E_CLap,1..7,2.0,under,3.5102844757293497
+canonical A1 n-sweep,A,5,50,15,2,A_CQ,1..7,1.0,under,32.130926799381086
+canonical A1 n-sweep,A,5,50,15,2,B_CQ_minus_PZ,1..7,7.0,over,9.71970218234901
+canonical A1 n-sweep,A,5,50,15,2,C_cond_last,1..7,5.0,exact,1.3540203927332186
+canonical A1 n-sweep,A,5,50,15,2,D_cond_mode,1..7,7.0,over,49.780326685900036
+canonical A1 n-sweep,A,5,50,15,2,E_CLap,1..7,2.0,under,3.7908913779215254
+canonical A1 n-sweep,A,5,50,15,3,A_CQ,1..7,1.0,under,10.123737215239089
+canonical A1 n-sweep,A,5,50,15,3,B_CQ_minus_PZ,1..7,6.0,over,6.075555566787898
+canonical A1 n-sweep,A,5,50,15,3,C_cond_last,1..7,6.0,over,31.15698511497567
+canonical A1 n-sweep,A,5,50,15,3,D_cond_mode,1..7,7.0,over,29.46628805256296
+canonical A1 n-sweep,A,5,50,15,3,E_CLap,1..7,4.0,under,4.9568564933179005
+canonical A1 n-sweep,A,5,50,15,4,A_CQ,1..7,2.0,under,6.154152734925901
+canonical A1 n-sweep,A,5,50,15,4,B_CQ_minus_PZ,1..7,5.0,exact,17.33159515042871
+canonical A1 n-sweep,A,5,50,15,4,C_cond_last,1..7,7.0,over,16.66980079520681
+canonical A1 n-sweep,A,5,50,15,4,D_cond_mode,1..7,7.0,over,34.316638496038195
+canonical A1 n-sweep,A,5,50,15,4,E_CLap,1..7,4.0,under,4.765746347335153
+canonical A1 n-sweep,A,5,50,15,5,A_CQ,1..7,2.0,under,13.653926652915288
+canonical A1 n-sweep,A,5,50,15,5,B_CQ_minus_PZ,1..7,7.0,over,8.12128581108118
+canonical A1 n-sweep,A,5,50,15,5,C_cond_last,1..7,6.0,over,3.5773983016079
+canonical A1 n-sweep,A,5,50,15,5,D_cond_mode,1..7,7.0,over,40.55826888474985
+canonical A1 n-sweep,A,5,50,15,5,E_CLap,1..7,4.0,under,13.087091367905487
+canonical A1 n-sweep,A,5,50,15,6,A_CQ,1..7,2.0,under,14.971543850276703
+canonical A1 n-sweep,A,5,50,15,6,B_CQ_minus_PZ,1..7,5.0,exact,15.327178849733173
+canonical A1 n-sweep,A,5,50,15,6,C_cond_last,1..7,5.0,exact,50.69202521323814
+canonical A1 n-sweep,A,5,50,15,6,D_cond_mode,1..7,7.0,over,40.59562126183209
+canonical A1 n-sweep,A,5,50,15,6,E_CLap,1..7,3.0,under,14.658639804300947
+canonical A1 n-sweep,A,5,50,15,7,A_CQ,1..7,2.0,under,8.10492477396383
+canonical A1 n-sweep,A,5,50,15,7,B_CQ_minus_PZ,1..7,7.0,over,10.273338510301073
+canonical A1 n-sweep,A,5,50,15,7,C_cond_last,1..7,7.0,over,4.2021581469352896
+canonical A1 n-sweep,A,5,50,15,7,D_cond_mode,1..7,7.0,over,55.865184707347
+canonical A1 n-sweep,A,5,50,15,7,E_CLap,1..7,3.0,under,15.981467497821086
+canonical A1 n-sweep,A,5,50,15,8,A_CQ,1..7,2.0,under,20.40074346192432
+canonical A1 n-sweep,A,5,50,15,8,B_CQ_minus_PZ,1..7,5.0,exact,22.5961958172943
+canonical A1 n-sweep,A,5,50,15,8,C_cond_last,1..7,5.0,exact,15.639381262453753
+canonical A1 n-sweep,A,5,50,15,8,D_cond_mode,1..7,7.0,over,31.567779161444832
+canonical A1 n-sweep,A,5,50,15,8,E_CLap,1..7,4.0,under,5.252107111718487
+canonical A1 n-sweep,A,5,75,15,1,A_CQ,1..7,2.0,under,10.087938826760364
+canonical A1 n-sweep,A,5,75,15,1,B_CQ_minus_PZ,1..7,7.0,over,44.100294266682795
+canonical A1 n-sweep,A,5,75,15,1,C_cond_last,1..7,7.0,over,56.53201893843743
+canonical A1 n-sweep,A,5,75,15,1,D_cond_mode,1..7,7.0,over,84.88285840229491
+canonical A1 n-sweep,A,5,75,15,1,E_CLap,1..7,4.0,under,33.58437425393549
+canonical A1 n-sweep,A,5,75,15,2,A_CQ,1..7,4.0,under,32.549537225271706
+canonical A1 n-sweep,A,5,75,15,2,B_CQ_minus_PZ,1..7,6.0,over,4.072267841519533
+canonical A1 n-sweep,A,5,75,15,2,C_cond_last,1..7,7.0,over,0.8313389442992047
+canonical A1 n-sweep,A,5,75,15,2,D_cond_mode,1..7,7.0,over,80.7994911616579
+canonical A1 n-sweep,A,5,75,15,2,E_CLap,1..7,4.0,under,9.568829782470857
+canonical A1 n-sweep,A,5,75,15,3,A_CQ,1..7,4.0,under,26.329974061837675
+canonical A1 n-sweep,A,5,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,27.46164535394928
+canonical A1 n-sweep,A,5,75,15,3,C_cond_last,1..7,7.0,over,0.5183097344834096
+canonical A1 n-sweep,A,5,75,15,3,D_cond_mode,1..7,7.0,over,103.48026506659153
+canonical A1 n-sweep,A,5,75,15,3,E_CLap,1..7,5.0,exact,28.261984605748694
+canonical A1 n-sweep,A,5,75,15,4,A_CQ,1..7,3.0,under,24.166735957585843
+canonical A1 n-sweep,A,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,68.04177484950378
+canonical A1 n-sweep,A,5,75,15,4,C_cond_last,1..7,7.0,over,76.41596756295621
+canonical A1 n-sweep,A,5,75,15,4,D_cond_mode,1..7,7.0,over,82.84794266785593
+canonical A1 n-sweep,A,5,75,15,4,E_CLap,1..7,4.0,under,42.929589784780546
+canonical A1 n-sweep,A,5,75,15,5,A_CQ,1..7,4.0,under,22.42900624009235
+canonical A1 n-sweep,A,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,57.70353389695538
+canonical A1 n-sweep,A,5,75,15,5,C_cond_last,1..7,7.0,over,77.41949343382566
+canonical A1 n-sweep,A,5,75,15,5,D_cond_mode,1..7,7.0,over,105.23171744293359
+canonical A1 n-sweep,A,5,75,15,5,E_CLap,1..7,4.0,under,49.11411560524812
+canonical A1 n-sweep,A,5,75,15,6,A_CQ,1..7,4.0,under,14.672094739449676
+canonical A1 n-sweep,A,5,75,15,6,B_CQ_minus_PZ,1..7,7.0,over,11.228421527747741
+canonical A1 n-sweep,A,5,75,15,6,C_cond_last,1..7,7.0,over,33.50773081547504
+canonical A1 n-sweep,A,5,75,15,6,D_cond_mode,1..7,7.0,over,91.08166223195985
+canonical A1 n-sweep,A,5,75,15,6,E_CLap,1..7,5.0,exact,45.78402326437299
+canonical A1 n-sweep,A,5,75,15,7,A_CQ,1..7,2.0,under,22.070495745799235
+canonical A1 n-sweep,A,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,1.0075470016126928
+canonical A1 n-sweep,A,5,75,15,7,C_cond_last,1..7,6.0,over,1.7681460811672878
+canonical A1 n-sweep,A,5,75,15,7,D_cond_mode,1..7,7.0,over,81.64069675535393
+canonical A1 n-sweep,A,5,75,15,7,E_CLap,1..7,4.0,under,12.946264895317654
+canonical A1 n-sweep,A,5,75,15,8,A_CQ,1..7,3.0,under,51.19865279767782
+canonical A1 n-sweep,A,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,14.762559850707476
+canonical A1 n-sweep,A,5,75,15,8,C_cond_last,1..7,7.0,over,15.328456638690113
+canonical A1 n-sweep,A,5,75,15,8,D_cond_mode,1..7,7.0,over,93.7879577170097
+canonical A1 n-sweep,A,5,75,15,8,E_CLap,1..7,5.0,exact,8.49394455089714
+canonical A1 n-sweep,A,5,100,15,1,A_CQ,1..7,4.0,under,53.98136584389795
+canonical A1 n-sweep,A,5,100,15,1,B_CQ_minus_PZ,1..7,7.0,over,3.9671275750370114
+canonical A1 n-sweep,A,5,100,15,1,C_cond_last,1..7,6.0,over,41.05962636613731
+canonical A1 n-sweep,A,5,100,15,1,D_cond_mode,1..7,7.0,over,138.8516976445826
+canonical A1 n-sweep,A,5,100,15,1,E_CLap,1..7,5.0,exact,37.4173539879157
+canonical A1 n-sweep,A,5,100,15,2,A_CQ,1..7,3.0,under,53.74280235364495
+canonical A1 n-sweep,A,5,100,15,2,B_CQ_minus_PZ,1..7,7.0,over,56.985270353723536
+canonical A1 n-sweep,A,5,100,15,2,C_cond_last,1..7,7.0,over,56.895956296951226
+canonical A1 n-sweep,A,5,100,15,2,D_cond_mode,1..7,7.0,over,132.66096185330116
+canonical A1 n-sweep,A,5,100,15,2,E_CLap,1..7,5.0,exact,19.645011808732306
+canonical A1 n-sweep,A,5,100,15,3,A_CQ,1..7,4.0,under,26.63975854727869
+canonical A1 n-sweep,A,5,100,15,3,B_CQ_minus_PZ,1..7,7.0,over,78.99153768063934
+canonical A1 n-sweep,A,5,100,15,3,C_cond_last,1..7,7.0,over,63.62285578200044
+canonical A1 n-sweep,A,5,100,15,3,D_cond_mode,1..7,7.0,over,146.04708509888042
+canonical A1 n-sweep,A,5,100,15,3,E_CLap,1..7,5.0,exact,60.93441507396528
+canonical A1 n-sweep,A,5,100,15,4,A_CQ,1..7,4.0,under,34.759804188528506
+canonical A1 n-sweep,A,5,100,15,4,B_CQ_minus_PZ,1..7,7.0,over,18.34150111380677
+canonical A1 n-sweep,A,5,100,15,4,C_cond_last,1..7,7.0,over,34.986818015890094
+canonical A1 n-sweep,A,5,100,15,4,D_cond_mode,1..7,7.0,over,133.93927632641226
+canonical A1 n-sweep,A,5,100,15,4,E_CLap,1..7,5.0,exact,57.81111773935845
+canonical A1 n-sweep,A,5,100,15,5,A_CQ,1..7,4.0,under,16.662012228040112
+canonical A1 n-sweep,A,5,100,15,5,B_CQ_minus_PZ,1..7,7.0,over,30.063025147295775
+canonical A1 n-sweep,A,5,100,15,5,C_cond_last,1..7,7.0,over,73.09688879059377
+canonical A1 n-sweep,A,5,100,15,5,D_cond_mode,1..7,7.0,over,150.74767759722818
+canonical A1 n-sweep,A,5,100,15,5,E_CLap,1..7,5.0,exact,50.62761130175568
+canonical A1 n-sweep,A,5,100,15,6,A_CQ,1..7,3.0,under,29.49110005505827
+canonical A1 n-sweep,A,5,100,15,6,B_CQ_minus_PZ,1..7,7.0,over,57.94386916145595
+canonical A1 n-sweep,A,5,100,15,6,C_cond_last,1..7,7.0,over,35.99071852664292
+canonical A1 n-sweep,A,5,100,15,6,D_cond_mode,1..7,7.0,over,146.30983353773718
+canonical A1 n-sweep,A,5,100,15,6,E_CLap,1..7,5.0,exact,48.86048089828546
+canonical A1 n-sweep,A,5,100,15,7,A_CQ,1..7,2.0,under,26.806520844187617
+canonical A1 n-sweep,A,5,100,15,7,B_CQ_minus_PZ,1..7,7.0,over,50.92128407865948
+canonical A1 n-sweep,A,5,100,15,7,C_cond_last,1..7,7.0,over,20.327988320796067
+canonical A1 n-sweep,A,5,100,15,7,D_cond_mode,1..7,7.0,over,120.0384497666546
+canonical A1 n-sweep,A,5,100,15,7,E_CLap,1..7,5.0,exact,53.0211576734273
+canonical A1 n-sweep,A,5,100,15,8,A_CQ,1..7,5.0,exact,24.27160335272856
+canonical A1 n-sweep,A,5,100,15,8,B_CQ_minus_PZ,1..7,7.0,over,56.195301867111084
+canonical A1 n-sweep,A,5,100,15,8,C_cond_last,1..7,7.0,over,18.886664521834973
+canonical A1 n-sweep,A,5,100,15,8,D_cond_mode,1..7,7.0,over,146.54996182164723
+canonical A1 n-sweep,A,5,100,15,8,E_CLap,1..7,5.0,exact,63.621899608846434
+canonical A1 n-sweep,A,5,150,15,1,A_CQ,1..7,5.0,exact,90.8573455450387
+canonical A1 n-sweep,A,5,150,15,1,B_CQ_minus_PZ,1..7,7.0,over,97.96843547450044
+canonical A1 n-sweep,A,5,150,15,1,C_cond_last,1..7,7.0,over,65.04696709016753
+canonical A1 n-sweep,A,5,150,15,1,D_cond_mode,1..7,7.0,over,247.8902285124259
+canonical A1 n-sweep,A,5,150,15,1,E_CLap,1..7,5.0,exact,80.19053308459297
+canonical A1 n-sweep,A,5,150,15,2,A_CQ,1..7,5.0,exact,150.91148692704155
+canonical A1 n-sweep,A,5,150,15,2,B_CQ_minus_PZ,1..7,7.0,over,52.13036509551603
+canonical A1 n-sweep,A,5,150,15,2,C_cond_last,1..7,7.0,over,37.52264099708373
+canonical A1 n-sweep,A,5,150,15,2,D_cond_mode,1..7,7.0,over,222.44105930793557
+canonical A1 n-sweep,A,5,150,15,2,E_CLap,1..7,5.0,exact,83.51168831246468
+canonical A1 n-sweep,A,5,150,15,3,A_CQ,1..7,5.0,exact,301.64736428453034
+canonical A1 n-sweep,A,5,150,15,3,B_CQ_minus_PZ,1..7,7.0,over,113.80318668756809
+canonical A1 n-sweep,A,5,150,15,3,C_cond_last,1..7,7.0,over,98.67519834960513
+canonical A1 n-sweep,A,5,150,15,3,D_cond_mode,1..7,7.0,over,235.77842137295738
+canonical A1 n-sweep,A,5,150,15,3,E_CLap,1..7,5.0,exact,79.017144689009
+canonical A1 n-sweep,A,5,150,15,4,A_CQ,1..7,4.0,under,89.80376594361587
+canonical A1 n-sweep,A,5,150,15,4,B_CQ_minus_PZ,1..7,7.0,over,112.29183069732426
+canonical A1 n-sweep,A,5,150,15,4,C_cond_last,1..7,7.0,over,21.695503010518223
+canonical A1 n-sweep,A,5,150,15,4,D_cond_mode,1..7,7.0,over,221.9912285111186
+canonical A1 n-sweep,A,5,150,15,4,E_CLap,1..7,5.0,exact,79.51251449887059
+canonical A1 n-sweep,A,5,150,15,5,A_CQ,1..7,5.0,exact,144.39126845221108
+canonical A1 n-sweep,A,5,150,15,5,B_CQ_minus_PZ,1..7,7.0,over,96.07230959838853
+canonical A1 n-sweep,A,5,150,15,5,C_cond_last,1..7,7.0,over,49.52501035842943
+canonical A1 n-sweep,A,5,150,15,5,D_cond_mode,1..7,7.0,over,226.59460714743182
+canonical A1 n-sweep,A,5,150,15,5,E_CLap,1..7,5.0,exact,77.13156570284264
+canonical A1 n-sweep,A,5,150,15,6,A_CQ,1..7,5.0,exact,161.1802901533083
+canonical A1 n-sweep,A,5,150,15,6,B_CQ_minus_PZ,1..7,7.0,over,104.94319653136336
+canonical A1 n-sweep,A,5,150,15,6,C_cond_last,1..7,7.0,over,165.6559258053785
+canonical A1 n-sweep,A,5,150,15,6,D_cond_mode,1..7,7.0,over,228.36753027311534
+canonical A1 n-sweep,A,5,150,15,6,E_CLap,1..7,5.0,exact,73.63151046499479
+canonical A1 n-sweep,A,5,150,15,7,A_CQ,1..7,5.0,exact,156.3568745720586
+canonical A1 n-sweep,A,5,150,15,7,B_CQ_minus_PZ,1..7,7.0,over,102.27850967635095
+canonical A1 n-sweep,A,5,150,15,7,C_cond_last,1..7,7.0,over,182.79090323019773
+canonical A1 n-sweep,A,5,150,15,7,D_cond_mode,1..7,7.0,over,244.17180285875838
+canonical A1 n-sweep,A,5,150,15,7,E_CLap,1..7,5.0,exact,67.3053711044522
+canonical A1 n-sweep,A,5,150,15,8,A_CQ,1..7,5.0,exact,265.82384747308606
+canonical A1 n-sweep,A,5,150,15,8,B_CQ_minus_PZ,1..7,7.0,over,91.5603836643204
+canonical A1 n-sweep,A,5,150,15,8,C_cond_last,1..7,7.0,over,100.29627122655984
+canonical A1 n-sweep,A,5,150,15,8,D_cond_mode,1..7,7.0,over,231.23714390186979
+canonical A1 n-sweep,A,5,150,15,8,E_CLap,1..7,5.0,exact,68.8862579989036
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,1,A_CQ,1..7,2.0,under,14.936969829923328
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,1,B_CQ_minus_PZ,1..7,7.0,over,12.56745644660441
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,1,C_cond_last,1..7,7.0,over,30.27926199288595
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,1,D_cond_mode,1..7,7.0,over,79.48170727700199
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,1,E_CLap,1..7,4.0,under,31.730792862294038
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,2,A_CQ,1..7,4.0,under,38.24211378000018
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,2,B_CQ_minus_PZ,1..7,7.0,over,6.1901545261544015
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,2,C_cond_last,1..7,7.0,over,55.44894902719989
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,2,D_cond_mode,1..7,7.0,over,78.17612599077074
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,2,E_CLap,1..7,4.0,under,9.41668221799955
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,3,A_CQ,1..7,4.0,under,9.21926143073506
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,33.55536737156126
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,3,C_cond_last,1..7,7.0,over,27.11883706583285
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,3,D_cond_mode,1..7,7.0,over,108.03122647655073
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,3,E_CLap,1..7,5.0,exact,29.266063881955233
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,4,A_CQ,1..7,3.0,under,32.03269416084004
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,7.308538840215988
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,4,C_cond_last,1..7,6.0,over,20.779434414538628
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,4,D_cond_mode,1..7,7.0,over,68.69587234941082
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,4,E_CLap,1..7,4.0,under,38.909132929435145
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,5,A_CQ,1..7,4.0,under,8.978540582060305
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,19.466612183962752
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,5,C_cond_last,1..7,6.0,over,87.41248645087944
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,5,D_cond_mode,1..7,7.0,over,91.75277213445042
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,5,E_CLap,1..7,4.0,under,36.0051565539552
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,6,A_CQ,1..7,4.0,under,41.34213685445502
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,6,B_CQ_minus_PZ,1..7,6.0,over,1.2370603256422328
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,6,C_cond_last,1..7,7.0,over,14.371545597150543
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,6,D_cond_mode,1..7,7.0,over,82.46205572533745
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,6,E_CLap,1..7,5.0,exact,44.22180787572324
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,7,A_CQ,1..7,2.0,under,14.345800701394182
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,22.940897179239983
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,7,C_cond_last,1..7,7.0,over,18.447141562694014
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,7,D_cond_mode,1..7,7.0,over,88.70173191307276
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,7,E_CLap,1..7,4.0,under,13.99075753121906
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,8,A_CQ,1..7,3.0,under,60.90950851006164
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,15.428011874033473
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,8,C_cond_last,1..7,6.0,over,5.095748177005589
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,8,D_cond_mode,1..7,7.0,over,74.39297813413577
+"canonical R1 (L=10, it=16, d=15)",A,5,75,15,8,E_CLap,1..7,5.0,exact,7.7535596605957835
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,1,A_CQ,1..7,4.0,under,66.92229802513248
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,1,B_CQ_minus_PZ,1..7,6.0,over,11.020615442581402
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,1,C_cond_last,1..7,5.0,exact,25.370743911586032
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,1,D_cond_mode,1..7,7.0,over,49.90766699532742
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,1,E_CLap,1..7,4.0,under,62.00672868573747
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,2,A_CQ,1..7,4.0,under,47.136952572847804
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,2,B_CQ_minus_PZ,1..7,5.0,exact,9.16795636594179
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,2,C_cond_last,1..7,6.0,over,23.625967069729086
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,2,D_cond_mode,1..7,7.0,over,43.985925456705445
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,2,E_CLap,1..7,4.0,under,7.760510537344089
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,3,A_CQ,1..7,5.0,exact,29.1219348201339
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,3,B_CQ_minus_PZ,1..7,7.0,over,1.519568045176129
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,3,C_cond_last,1..7,5.0,exact,16.428605500141202
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,3,D_cond_mode,1..7,7.0,over,72.8517031082547
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,3,E_CLap,1..7,5.0,exact,88.78523308240256
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,4,A_CQ,1..7,3.0,under,14.499808383687196
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,4,B_CQ_minus_PZ,1..7,6.0,over,2.8756523877691507
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,4,C_cond_last,1..7,6.0,over,3.2659861511292547
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,4,D_cond_mode,1..7,7.0,over,46.34791380602928
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,4,E_CLap,1..7,4.0,under,56.73605057986788
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,5,A_CQ,1..7,4.0,under,87.10456438661276
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,5,B_CQ_minus_PZ,1..7,6.0,over,5.05441429538223
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,5,C_cond_last,1..7,6.0,over,34.83353239864118
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,5,D_cond_mode,1..7,7.0,over,56.705253454512786
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,5,E_CLap,1..7,4.0,under,35.7784485470238
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,6,A_CQ,1..7,5.0,exact,27.1539982215254
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,6,B_CQ_minus_PZ,1..7,6.0,over,17.538016743130356
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,6,C_cond_last,1..7,5.0,exact,7.422198048659993
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,6,D_cond_mode,1..7,7.0,over,42.98667162687616
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,6,E_CLap,1..7,5.0,exact,83.52772792622454
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,7,A_CQ,1..7,4.0,under,5.74672634597664
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,7,B_CQ_minus_PZ,1..7,7.0,over,2.4066540945477755
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,7,C_cond_last,1..7,5.0,exact,9.812736763560679
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,7,D_cond_mode,1..7,7.0,over,65.10676456405963
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,7,E_CLap,1..7,4.0,under,13.376388224063703
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,8,A_CQ,1..7,5.0,exact,43.05306528897381
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,8,B_CQ_minus_PZ,1..7,5.0,exact,4.998127406830463
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,8,C_cond_last,1..7,6.0,over,11.594616559812494
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,8,D_cond_mode,1..7,7.0,over,40.65626137887284
+"canonical R1 (L=10, it=16, d=30)",A,5,75,30,8,E_CLap,1..7,5.0,exact,93.10644256637715
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,1,A_CQ,1..7,4.0,under,112.02233782753137
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,1,B_CQ_minus_PZ,1..7,5.0,exact,87.72197429055814
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,1,C_cond_last,1..7,5.0,exact,117.44318431967804
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,1,D_cond_mode,1..7,5.0,exact,25.935914305715414
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,1,E_CLap,1..7,4.0,under,46.11391492189796
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,2,A_CQ,1..7,4.0,under,2.1027398914284277
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,2,B_CQ_minus_PZ,1..7,5.0,exact,91.98740349643049
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,2,C_cond_last,1..7,5.0,exact,54.02669548870472
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,2,D_cond_mode,1..7,5.0,exact,22.08417129917143
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,2,E_CLap,1..7,5.0,exact,27.36806041998898
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,3,A_CQ,1..7,5.0,exact,194.6735022619414
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,3,B_CQ_minus_PZ,1..7,5.0,exact,88.3956858229376
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,3,C_cond_last,1..7,5.0,exact,138.57306691856138
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,3,D_cond_mode,1..7,5.0,exact,9.189139313259147
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,3,E_CLap,1..7,5.0,exact,190.6752708007516
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,4,A_CQ,1..7,4.0,under,102.23878978500034
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,4,B_CQ_minus_PZ,1..7,5.0,exact,80.06815383020148
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,4,C_cond_last,1..7,5.0,exact,105.85932791423875
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,4,D_cond_mode,1..7,5.0,exact,29.18216442288758
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,4,E_CLap,1..7,4.0,under,42.63962549444659
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,5,A_CQ,1..7,4.0,under,19.437461752339004
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,5,B_CQ_minus_PZ,1..7,5.0,exact,66.84832164665568
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,5,C_cond_last,1..7,5.0,exact,27.340079538460486
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,5,D_cond_mode,1..7,5.0,exact,3.617903579344784
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,5,E_CLap,1..7,5.0,exact,26.315370776825148
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,6,A_CQ,1..7,5.0,exact,54.984467056332505
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,6,B_CQ_minus_PZ,1..7,5.0,exact,41.61612178542964
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,6,C_cond_last,1..7,5.0,exact,62.51574155601884
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,6,D_cond_mode,1..7,6.0,over,15.105197321581727
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,6,E_CLap,1..7,5.0,exact,97.15840656375804
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,7,A_CQ,1..7,5.0,exact,15.13161521220536
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,7,B_CQ_minus_PZ,1..7,5.0,exact,93.1174337092034
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,7,C_cond_last,1..7,5.0,exact,103.58771092045208
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,7,D_cond_mode,1..7,5.0,exact,33.999725054025475
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,7,E_CLap,1..7,5.0,exact,70.12173802399775
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,8,A_CQ,1..7,5.0,exact,147.82158210401394
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,8,B_CQ_minus_PZ,1..7,5.0,exact,85.62937670113752
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,8,C_cond_last,1..7,5.0,exact,63.489186606508156
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,8,D_cond_mode,1..7,5.0,exact,17.132021529765552
+"canonical R1 (L=10, it=16, d=60)",A,5,75,60,8,E_CLap,1..7,5.0,exact,173.6796597997618
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,1,A_CQ,1..7,2.0,under,2.556636428535967
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,1,B_CQ_minus_PZ,1..7,6.0,over,20.368689328192886
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,1,C_cond_last,1..7,6.0,over,34.77051865077101
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,1,D_cond_mode,1..7,7.0,over,66.74620321035127
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,1,E_CLap,1..7,4.0,under,32.34363470164317
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,2,A_CQ,1..7,4.0,under,16.768525187089836
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,2,B_CQ_minus_PZ,1..7,7.0,over,13.732201553310006
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,2,C_cond_last,1..7,7.0,over,7.025120233032794
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,2,D_cond_mode,1..7,7.0,over,82.092114333469
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,2,E_CLap,1..7,4.0,under,8.495251468346396
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,3,A_CQ,1..7,2.0,under,0.3774568796279709
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,15.949655922698184
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,3,C_cond_last,1..7,6.0,over,32.299624001398115
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,3,D_cond_mode,1..7,7.0,over,104.8965665123178
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,3,E_CLap,1..7,5.0,exact,29.70298615216052
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,4,A_CQ,1..7,3.0,under,4.229688611352685
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,20.688597645495065
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,4,C_cond_last,1..7,6.0,over,28.172114292805418
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,4,D_cond_mode,1..7,7.0,over,71.83747401584333
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,4,E_CLap,1..7,4.0,under,39.292720438475044
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,5,A_CQ,1..7,4.0,under,14.013676447676517
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,47.77064873172276
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,5,C_cond_last,1..7,7.0,over,32.31312613279351
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,5,D_cond_mode,1..7,7.0,over,100.2425229777682
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,5,E_CLap,1..7,4.0,under,36.62447723560581
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,6,A_CQ,1..7,4.0,under,9.581076214747554
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,6,B_CQ_minus_PZ,1..7,7.0,over,5.054311078822138
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,6,C_cond_last,1..7,7.0,over,6.500505740599692
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,6,D_cond_mode,1..7,7.0,over,81.40302232851991
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,6,E_CLap,1..7,5.0,exact,44.0272111002123
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,7,A_CQ,1..7,2.0,under,29.591019528238576
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,30.10001371528506
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,7,C_cond_last,1..7,7.0,over,32.89119521885186
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,7,D_cond_mode,1..7,7.0,over,94.69255338080347
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,7,E_CLap,1..7,4.0,under,13.254768557751959
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,8,A_CQ,1..7,3.0,under,55.7904328562945
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,25.312567007364123
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,8,C_cond_last,1..7,7.0,over,5.024196111568926
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,8,D_cond_mode,1..7,7.0,over,83.09439690278123
+"canonical R1 (L=10, it=8, d=15)",A,5,75,15,8,E_CLap,1..7,5.0,exact,8.973854234923238
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,1,A_CQ,1..7,4.0,under,72.57484894377194
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,1,B_CQ_minus_PZ,1..7,6.0,over,9.27494143689546
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,1,C_cond_last,1..7,6.0,over,15.506116247361206
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,1,D_cond_mode,1..7,7.0,over,57.28241449501911
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,1,E_CLap,1..7,4.0,under,62.076691599490005
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,2,A_CQ,1..7,4.0,under,56.814199336904494
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,2,B_CQ_minus_PZ,1..7,5.0,exact,13.67590364957141
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,2,C_cond_last,1..7,6.0,over,26.185057750573833
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,2,D_cond_mode,1..7,7.0,over,32.81572565587885
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,2,E_CLap,1..7,4.0,under,4.70971156017913
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,3,A_CQ,1..7,5.0,exact,43.14133395042154
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,3,B_CQ_minus_PZ,1..7,6.0,over,0.4850083906239888
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,3,C_cond_last,1..7,6.0,over,36.41660106760173
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,3,D_cond_mode,1..7,7.0,over,68.56436759161625
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,3,E_CLap,1..7,5.0,exact,92.96373133780799
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,4,A_CQ,1..7,4.0,under,14.244082952958706
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,4,B_CQ_minus_PZ,1..7,5.0,exact,16.08791115544227
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,4,C_cond_last,1..7,6.0,over,12.40804035191104
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,4,D_cond_mode,1..7,7.0,over,35.96988744998907
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,4,E_CLap,1..7,4.0,under,56.35707259416813
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,5,A_CQ,1..7,4.0,under,89.97294660113766
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,5,B_CQ_minus_PZ,1..7,7.0,over,10.310960777980654
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,5,C_cond_last,1..7,7.0,over,30.95358029583349
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,5,D_cond_mode,1..7,7.0,over,65.48417369606159
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,5,E_CLap,1..7,4.0,under,35.89713707050578
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,6,A_CQ,1..7,5.0,exact,68.11846216959202
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,6,B_CQ_minus_PZ,1..7,5.0,exact,10.557063915495746
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,6,C_cond_last,1..7,5.0,exact,25.0026541247571
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,6,D_cond_mode,1..7,7.0,over,42.55501131143865
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,6,E_CLap,1..7,5.0,exact,96.32514172723677
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,7,A_CQ,1..7,4.0,under,31.892769591042452
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,7,B_CQ_minus_PZ,1..7,7.0,over,0.3299944446553127
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,7,C_cond_last,1..7,6.0,over,11.88250615164361
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,7,D_cond_mode,1..7,7.0,over,67.70534169409439
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,7,E_CLap,1..7,4.0,under,12.830280802210837
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,8,A_CQ,1..7,5.0,exact,46.90185106651188
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,8,B_CQ_minus_PZ,1..7,5.0,exact,16.262294238214963
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,8,C_cond_last,1..7,5.0,exact,35.45578276109518
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,8,D_cond_mode,1..7,7.0,over,41.117718239998794
+"canonical R1 (L=10, it=8, d=30)",A,5,75,30,8,E_CLap,1..7,5.0,exact,96.3345630546246
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,1,A_CQ,1..7,4.0,under,119.16146540034242
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,1,B_CQ_minus_PZ,1..7,5.0,exact,85.96465971216458
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,1,C_cond_last,1..7,5.0,exact,51.12803195250672
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,1,D_cond_mode,1..7,5.0,exact,30.65878724887807
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,1,E_CLap,1..7,4.0,under,46.224689944767306
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,2,A_CQ,1..7,4.0,under,23.800918961882417
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,2,B_CQ_minus_PZ,1..7,5.0,exact,101.22414068023863
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,2,C_cond_last,1..7,5.0,exact,83.66977926610707
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,2,D_cond_mode,1..7,5.0,exact,35.970166002964106
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,2,E_CLap,1..7,5.0,exact,28.206658461289408
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,3,A_CQ,1..7,5.0,exact,218.3496907249355
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,3,B_CQ_minus_PZ,1..7,5.0,exact,75.14496371609312
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,3,C_cond_last,1..7,5.0,exact,35.276325666363846
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,3,D_cond_mode,1..7,5.0,exact,18.867374215031305
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,3,E_CLap,1..7,5.0,exact,194.8639770115151
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,4,A_CQ,1..7,4.0,under,112.85963580909265
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,4,B_CQ_minus_PZ,1..7,5.0,exact,99.9811441716065
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,4,C_cond_last,1..7,5.0,exact,54.410800142766675
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,4,D_cond_mode,1..7,5.0,exact,43.15479054566458
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,4,E_CLap,1..7,4.0,under,42.66257005657826
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,5,A_CQ,1..7,5.0,exact,40.45583123161123
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,5,B_CQ_minus_PZ,1..7,5.0,exact,79.3009294079202
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,5,C_cond_last,1..7,5.0,exact,23.472355262199926
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,5,D_cond_mode,1..7,5.0,exact,15.087434090833995
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,5,E_CLap,1..7,5.0,exact,82.37148221139068
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,6,A_CQ,1..7,5.0,exact,63.658972293766055
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,6,B_CQ_minus_PZ,1..7,5.0,exact,74.91902561567258
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,6,C_cond_last,1..7,5.0,exact,121.43148045050475
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,6,D_cond_mode,1..7,5.0,exact,9.798433365587698
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,6,E_CLap,1..7,5.0,exact,98.41766051186642
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,7,A_CQ,1..7,5.0,exact,32.42763811672921
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,7,B_CQ_minus_PZ,1..7,5.0,exact,94.38332567284851
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,7,C_cond_last,1..7,5.0,exact,77.80419710707065
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,7,D_cond_mode,1..7,5.0,exact,37.198372320657654
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,7,E_CLap,1..7,5.0,exact,74.05620942014139
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,8,A_CQ,1..7,5.0,exact,137.9789761974207
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,8,B_CQ_minus_PZ,1..7,5.0,exact,98.49707093968391
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,8,C_cond_last,1..7,5.0,exact,117.31796448345267
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,8,D_cond_mode,1..7,5.0,exact,30.029130340653865
+"canonical R1 (L=10, it=8, d=60)",A,5,75,60,8,E_CLap,1..7,5.0,exact,176.04574442485682
+canonical d-sweep / R2 (d=30),A,5,50,30,1,A_CQ,1..7,2.0,under,1.9920582359745822
+canonical d-sweep / R2 (d=30),A,5,50,30,1,B_CQ_minus_PZ,1..7,5.0,exact,15.348709440168022
+canonical d-sweep / R2 (d=30),A,5,50,30,1,C_cond_last,1..7,5.0,exact,12.606732955297957
+canonical d-sweep / R2 (d=30),A,5,50,30,1,D_cond_mode,1..7,7.0,over,6.338990235384699
+canonical d-sweep / R2 (d=30),A,5,50,30,1,E_CLap,1..7,4.0,under,4.453092714217746
+canonical d-sweep / R2 (d=30),A,5,50,30,2,A_CQ,1..7,3.0,under,10.132772061193464
+canonical d-sweep / R2 (d=30),A,5,50,30,2,B_CQ_minus_PZ,1..7,5.0,exact,26.728466830508296
+canonical d-sweep / R2 (d=30),A,5,50,30,2,C_cond_last,1..7,5.0,exact,18.25375058310692
+canonical d-sweep / R2 (d=30),A,5,50,30,2,D_cond_mode,1..7,7.0,over,1.5170993549563718
+canonical d-sweep / R2 (d=30),A,5,50,30,2,E_CLap,1..7,3.0,under,28.914032818567648
+canonical d-sweep / R2 (d=30),A,5,50,30,3,A_CQ,1..7,3.0,under,26.779762551228487
+canonical d-sweep / R2 (d=30),A,5,50,30,3,B_CQ_minus_PZ,1..7,5.0,exact,17.31053662550221
+canonical d-sweep / R2 (d=30),A,5,50,30,3,C_cond_last,1..7,5.0,exact,26.425647606610255
+canonical d-sweep / R2 (d=30),A,5,50,30,3,D_cond_mode,1..7,6.0,over,6.111042854625339
+canonical d-sweep / R2 (d=30),A,5,50,30,3,E_CLap,1..7,4.0,under,1.0618927327359415
+canonical d-sweep / R2 (d=30),A,5,50,30,4,A_CQ,1..7,4.0,under,7.0730739266000455
+canonical d-sweep / R2 (d=30),A,5,50,30,4,B_CQ_minus_PZ,1..7,5.0,exact,38.638241639435364
+canonical d-sweep / R2 (d=30),A,5,50,30,4,C_cond_last,1..7,5.0,exact,21.512458164203963
+canonical d-sweep / R2 (d=30),A,5,50,30,4,D_cond_mode,1..7,7.0,over,6.440489843643263
+canonical d-sweep / R2 (d=30),A,5,50,30,4,E_CLap,1..7,4.0,under,38.23669731521659
+canonical d-sweep / R2 (d=30),A,5,50,30,5,A_CQ,1..7,3.0,under,15.740652069166572
+canonical d-sweep / R2 (d=30),A,5,50,30,5,B_CQ_minus_PZ,1..7,5.0,exact,20.613282408810846
+canonical d-sweep / R2 (d=30),A,5,50,30,5,C_cond_last,1..7,5.0,exact,22.416303739144496
+canonical d-sweep / R2 (d=30),A,5,50,30,5,D_cond_mode,1..7,7.0,over,9.790147333334062
+canonical d-sweep / R2 (d=30),A,5,50,30,5,E_CLap,1..7,4.0,under,19.43273413800125
+canonical d-sweep / R2 (d=30),A,5,50,30,6,A_CQ,1..7,3.0,under,54.70635446452252
+canonical d-sweep / R2 (d=30),A,5,50,30,6,B_CQ_minus_PZ,1..7,5.0,exact,38.98059393175845
+canonical d-sweep / R2 (d=30),A,5,50,30,6,C_cond_last,1..7,5.0,exact,48.92645082714989
+canonical d-sweep / R2 (d=30),A,5,50,30,6,D_cond_mode,1..7,6.0,over,6.619094309535285
+canonical d-sweep / R2 (d=30),A,5,50,30,6,E_CLap,1..7,4.0,under,8.28810522387721
+canonical d-sweep / R2 (d=30),A,5,50,30,7,A_CQ,1..7,2.0,under,20.870330437941448
+canonical d-sweep / R2 (d=30),A,5,50,30,7,B_CQ_minus_PZ,1..7,5.0,exact,11.656683361305113
+canonical d-sweep / R2 (d=30),A,5,50,30,7,C_cond_last,1..7,6.0,over,16.972703596225983
+canonical d-sweep / R2 (d=30),A,5,50,30,7,D_cond_mode,1..7,7.0,over,18.59625142758341
+canonical d-sweep / R2 (d=30),A,5,50,30,7,E_CLap,1..7,3.0,under,10.83681995902134
+canonical d-sweep / R2 (d=30),A,5,50,30,8,A_CQ,1..7,3.0,under,40.131439437899644
+canonical d-sweep / R2 (d=30),A,5,50,30,8,B_CQ_minus_PZ,1..7,5.0,exact,21.070315474790732
+canonical d-sweep / R2 (d=30),A,5,50,30,8,C_cond_last,1..7,5.0,exact,27.99960576839385
+canonical d-sweep / R2 (d=30),A,5,50,30,8,D_cond_mode,1..7,7.0,over,3.3908515219973197
+canonical d-sweep / R2 (d=30),A,5,50,30,8,E_CLap,1..7,4.0,under,12.809032016798483
+canonical d-sweep / R2 (d=30),A,5,75,30,1,A_CQ,1..7,4.0,under,80.21720376285339
+canonical d-sweep / R2 (d=30),A,5,75,30,1,B_CQ_minus_PZ,1..7,5.0,exact,1.0768102205383911
+canonical d-sweep / R2 (d=30),A,5,75,30,1,C_cond_last,1..7,7.0,over,42.31573192790347
+canonical d-sweep / R2 (d=30),A,5,75,30,1,D_cond_mode,1..7,7.0,over,56.76724833465687
+canonical d-sweep / R2 (d=30),A,5,75,30,1,E_CLap,1..7,4.0,under,68.20166829652226
+canonical d-sweep / R2 (d=30),A,5,75,30,2,A_CQ,1..7,4.0,under,40.83218414596013
+canonical d-sweep / R2 (d=30),A,5,75,30,2,B_CQ_minus_PZ,1..7,6.0,over,15.232041705066877
+canonical d-sweep / R2 (d=30),A,5,75,30,2,C_cond_last,1..7,6.0,over,16.888259246508824
+canonical d-sweep / R2 (d=30),A,5,75,30,2,D_cond_mode,1..7,7.0,over,44.018965730142554
+canonical d-sweep / R2 (d=30),A,5,75,30,2,E_CLap,1..7,4.0,under,6.309028157353168
+canonical d-sweep / R2 (d=30),A,5,75,30,3,A_CQ,1..7,5.0,exact,42.21157538993975
+canonical d-sweep / R2 (d=30),A,5,75,30,3,B_CQ_minus_PZ,1..7,5.0,exact,15.042217050777253
+canonical d-sweep / R2 (d=30),A,5,75,30,3,C_cond_last,1..7,5.0,exact,27.243747415590406
+canonical d-sweep / R2 (d=30),A,5,75,30,3,D_cond_mode,1..7,7.0,over,57.314861984287745
+canonical d-sweep / R2 (d=30),A,5,75,30,3,E_CLap,1..7,5.0,exact,95.26685769126561
+canonical d-sweep / R2 (d=30),A,5,75,30,4,A_CQ,1..7,4.0,under,2.050251852529982
+canonical d-sweep / R2 (d=30),A,5,75,30,4,B_CQ_minus_PZ,1..7,7.0,over,5.696521377036333
+canonical d-sweep / R2 (d=30),A,5,75,30,4,C_cond_last,1..7,7.0,over,0.011804198271420319
+canonical d-sweep / R2 (d=30),A,5,75,30,4,D_cond_mode,1..7,7.0,over,57.624061756405354
+canonical d-sweep / R2 (d=30),A,5,75,30,4,E_CLap,1..7,4.0,under,56.593529321839014
+canonical d-sweep / R2 (d=30),A,5,75,30,5,A_CQ,1..7,4.0,under,100.42199252005958
+canonical d-sweep / R2 (d=30),A,5,75,30,5,B_CQ_minus_PZ,1..7,5.0,exact,11.710631999623729
+canonical d-sweep / R2 (d=30),A,5,75,30,5,C_cond_last,1..7,5.0,exact,7.207021836029526
+canonical d-sweep / R2 (d=30),A,5,75,30,5,D_cond_mode,1..7,7.0,over,59.57333706107238
+canonical d-sweep / R2 (d=30),A,5,75,30,5,E_CLap,1..7,4.0,under,37.138917501786636
+canonical d-sweep / R2 (d=30),A,5,75,30,6,A_CQ,1..7,5.0,exact,70.3241040511275
+canonical d-sweep / R2 (d=30),A,5,75,30,6,B_CQ_minus_PZ,1..7,6.0,over,6.057006795566849
+canonical d-sweep / R2 (d=30),A,5,75,30,6,C_cond_last,1..7,7.0,over,1.4387902923153888
+canonical d-sweep / R2 (d=30),A,5,75,30,6,D_cond_mode,1..7,7.0,over,51.70852487447428
+canonical d-sweep / R2 (d=30),A,5,75,30,6,E_CLap,1..7,5.0,exact,98.3592087149791
+canonical d-sweep / R2 (d=30),A,5,75,30,7,A_CQ,1..7,4.0,under,13.554175767201741
+canonical d-sweep / R2 (d=30),A,5,75,30,7,B_CQ_minus_PZ,1..7,6.0,over,7.767633379649851
+canonical d-sweep / R2 (d=30),A,5,75,30,7,C_cond_last,1..7,5.0,exact,1.8247823071233142
+canonical d-sweep / R2 (d=30),A,5,75,30,7,D_cond_mode,1..7,7.0,over,60.68095588410142
+canonical d-sweep / R2 (d=30),A,5,75,30,7,E_CLap,1..7,4.0,under,13.347571301328571
+canonical d-sweep / R2 (d=30),A,5,75,30,8,A_CQ,1..7,5.0,exact,30.878603508368542
+canonical d-sweep / R2 (d=30),A,5,75,30,8,B_CQ_minus_PZ,1..7,6.0,over,4.028488094842032
+canonical d-sweep / R2 (d=30),A,5,75,30,8,C_cond_last,1..7,5.0,exact,38.667870569504885
+canonical d-sweep / R2 (d=30),A,5,75,30,8,D_cond_mode,1..7,7.0,over,38.32992106129859
+canonical d-sweep / R2 (d=30),A,5,75,30,8,E_CLap,1..7,5.0,exact,98.45772355800545
+canonical d-sweep / R2 (d=30),A,5,100,30,1,A_CQ,1..7,4.0,under,4.9512161508773715
+canonical d-sweep / R2 (d=30),A,5,100,30,1,B_CQ_minus_PZ,1..7,5.0,exact,11.251923693287608
+canonical d-sweep / R2 (d=30),A,5,100,30,1,C_cond_last,1..7,5.0,exact,0.44606315032797283
+canonical d-sweep / R2 (d=30),A,5,100,30,1,D_cond_mode,1..7,7.0,over,103.92793795503894
+canonical d-sweep / R2 (d=30),A,5,100,30,1,E_CLap,1..7,5.0,exact,66.85894747705242
+canonical d-sweep / R2 (d=30),A,5,100,30,2,A_CQ,1..7,4.0,under,82.37557449742053
+canonical d-sweep / R2 (d=30),A,5,100,30,2,B_CQ_minus_PZ,1..7,6.0,over,10.086601941695335
+canonical d-sweep / R2 (d=30),A,5,100,30,2,C_cond_last,1..7,7.0,over,3.4697473086125683
+canonical d-sweep / R2 (d=30),A,5,100,30,2,D_cond_mode,1..7,7.0,over,88.61633666191847
+canonical d-sweep / R2 (d=30),A,5,100,30,2,E_CLap,1..7,5.0,exact,4.408882015844938
+canonical d-sweep / R2 (d=30),A,5,100,30,3,A_CQ,1..7,5.0,exact,94.43620424983965
+canonical d-sweep / R2 (d=30),A,5,100,30,3,B_CQ_minus_PZ,1..7,5.0,exact,15.029831964362529
+canonical d-sweep / R2 (d=30),A,5,100,30,3,C_cond_last,1..7,6.0,over,0.5322452477957995
+canonical d-sweep / R2 (d=30),A,5,100,30,3,D_cond_mode,1..7,7.0,over,95.0639279510051
+canonical d-sweep / R2 (d=30),A,5,100,30,3,E_CLap,1..7,5.0,exact,119.74882580718258
+canonical d-sweep / R2 (d=30),A,5,100,30,4,A_CQ,1..7,5.0,exact,142.5219709226003
+canonical d-sweep / R2 (d=30),A,5,100,30,4,B_CQ_minus_PZ,1..7,6.0,over,20.847441794730912
+canonical d-sweep / R2 (d=30),A,5,100,30,4,C_cond_last,1..7,5.0,exact,6.644485987169901
+canonical d-sweep / R2 (d=30),A,5,100,30,4,D_cond_mode,1..7,7.0,over,87.3883048290736
+canonical d-sweep / R2 (d=30),A,5,100,30,4,E_CLap,1..7,5.0,exact,99.30566793100843
+canonical d-sweep / R2 (d=30),A,5,100,30,5,A_CQ,1..7,4.0,under,24.41518286027349
+canonical d-sweep / R2 (d=30),A,5,100,30,5,B_CQ_minus_PZ,1..7,6.0,over,16.694167597912383
+canonical d-sweep / R2 (d=30),A,5,100,30,5,C_cond_last,1..7,5.0,exact,11.693951201577875
+canonical d-sweep / R2 (d=30),A,5,100,30,5,D_cond_mode,1..7,7.0,over,79.86007939979208
+canonical d-sweep / R2 (d=30),A,5,100,30,5,E_CLap,1..7,5.0,exact,75.13270809357891
+canonical d-sweep / R2 (d=30),A,5,100,30,6,A_CQ,1..7,5.0,exact,58.0405107180577
+canonical d-sweep / R2 (d=30),A,5,100,30,6,B_CQ_minus_PZ,1..7,7.0,over,31.87081221029439
+canonical d-sweep / R2 (d=30),A,5,100,30,6,C_cond_last,1..7,7.0,over,13.737722187377585
+canonical d-sweep / R2 (d=30),A,5,100,30,6,D_cond_mode,1..7,7.0,over,110.37654757421842
+canonical d-sweep / R2 (d=30),A,5,100,30,6,E_CLap,1..7,5.0,exact,99.50517163934637
+canonical d-sweep / R2 (d=30),A,5,100,30,7,A_CQ,1..7,4.0,under,1.0791842034304864
+canonical d-sweep / R2 (d=30),A,5,100,30,7,B_CQ_minus_PZ,1..7,7.0,over,25.02038098781304
+canonical d-sweep / R2 (d=30),A,5,100,30,7,C_cond_last,1..7,7.0,over,25.091086456106495
+canonical d-sweep / R2 (d=30),A,5,100,30,7,D_cond_mode,1..7,7.0,over,95.9533414193611
+canonical d-sweep / R2 (d=30),A,5,100,30,7,E_CLap,1..7,5.0,exact,98.51032679283162
+canonical d-sweep / R2 (d=30),A,5,100,30,8,A_CQ,1..7,5.0,exact,124.89526534020843
+canonical d-sweep / R2 (d=30),A,5,100,30,8,B_CQ_minus_PZ,1..7,7.0,over,17.4772927002723
+canonical d-sweep / R2 (d=30),A,5,100,30,8,C_cond_last,1..7,5.0,exact,27.289518485871668
+canonical d-sweep / R2 (d=30),A,5,100,30,8,D_cond_mode,1..7,7.0,over,104.13242847963556
+canonical d-sweep / R2 (d=30),A,5,100,30,8,E_CLap,1..7,5.0,exact,118.08619353861832
+canonical d-sweep / R2 (d=30),A,5,150,30,1,A_CQ,1..7,5.0,exact,253.63354926160173
+canonical d-sweep / R2 (d=30),A,5,150,30,1,B_CQ_minus_PZ,1..7,7.0,over,57.01141662117152
+canonical d-sweep / R2 (d=30),A,5,150,30,1,C_cond_last,1..7,7.0,over,10.205717786582682
+canonical d-sweep / R2 (d=30),A,5,150,30,1,D_cond_mode,1..7,,INCOMPLETE,
+canonical d-sweep / R2 (d=30),A,5,150,30,1,E_CLap,1..7,,INCOMPLETE,
+canonical d-sweep / R2 (d=30),A,5,150,30,2,A_CQ,1..7,5.0,exact,357.86518966612493
+canonical d-sweep / R2 (d=30),A,5,150,30,2,B_CQ_minus_PZ,1..7,7.0,over,17.54258401919651
+canonical d-sweep / R2 (d=30),A,5,150,30,2,C_cond_last,1..7,6.0,over,8.084754259398323
+canonical d-sweep / R2 (d=30),A,5,150,30,2,D_cond_mode,1..7,7.0,over,181.81763374912407
+canonical d-sweep / R2 (d=30),A,5,150,30,2,E_CLap,1..7,5.0,exact,151.04480313161548
+canonical d-sweep / R2 (d=30),A,5,150,30,3,A_CQ,1..7,5.0,exact,390.5151347548381
+canonical d-sweep / R2 (d=30),A,5,150,30,3,B_CQ_minus_PZ,1..7,7.0,over,18.719585383296362
+canonical d-sweep / R2 (d=30),A,5,150,30,3,C_cond_last,1..7,7.0,over,47.47422775426821
+canonical d-sweep / R2 (d=30),A,5,150,30,3,D_cond_mode,1..7,7.0,over,159.19723663180048
+canonical d-sweep / R2 (d=30),A,5,150,30,3,E_CLap,1..7,5.0,exact,150.9563022364673
+canonical d-sweep / R2 (d=30),A,5,150,30,4,A_CQ,1..7,5.0,exact,7.893135684851586
+canonical d-sweep / R2 (d=30),A,5,150,30,4,B_CQ_minus_PZ,1..7,7.0,over,28.29544029779572
+canonical d-sweep / R2 (d=30),A,5,150,30,4,C_cond_last,1..7,6.0,over,29.013100389896863
+canonical d-sweep / R2 (d=30),A,5,150,30,4,D_cond_mode,1..7,7.0,over,155.26937799688676
+canonical d-sweep / R2 (d=30),A,5,150,30,4,E_CLap,1..7,5.0,exact,146.84300340497794
+canonical d-sweep / R2 (d=30),A,5,150,30,5,A_CQ,1..7,5.0,exact,366.45459803723134
+canonical d-sweep / R2 (d=30),A,5,150,30,5,B_CQ_minus_PZ,1..7,7.0,over,102.83947648112735
+canonical d-sweep / R2 (d=30),A,5,150,30,5,C_cond_last,1..7,7.0,over,36.902861326831044
+canonical d-sweep / R2 (d=30),A,5,150,30,5,D_cond_mode,1..7,7.0,over,183.42946916656365
+canonical d-sweep / R2 (d=30),A,5,150,30,5,E_CLap,1..7,5.0,exact,136.85229882627755
+canonical d-sweep / R2 (d=30),A,5,150,30,6,A_CQ,1..7,5.0,exact,226.33530584131586
+canonical d-sweep / R2 (d=30),A,5,150,30,6,B_CQ_minus_PZ,1..7,7.0,over,16.65792511053587
+canonical d-sweep / R2 (d=30),A,5,150,30,6,C_cond_last,1..7,7.0,over,53.4367097542854
+canonical d-sweep / R2 (d=30),A,5,150,30,6,D_cond_mode,1..7,7.0,over,162.30892567921546
+canonical d-sweep / R2 (d=30),A,5,150,30,6,E_CLap,1..7,5.0,exact,138.30349810952612
+canonical d-sweep / R2 (d=30),A,5,150,30,7,A_CQ,1..7,5.0,exact,290.76500776052126
+canonical d-sweep / R2 (d=30),A,5,150,30,7,B_CQ_minus_PZ,1..7,7.0,over,95.86037400390705
+canonical d-sweep / R2 (d=30),A,5,150,30,7,C_cond_last,1..7,7.0,over,142.11873879430277
+canonical d-sweep / R2 (d=30),A,5,150,30,7,D_cond_mode,1..7,7.0,over,222.1640800681198
+canonical d-sweep / R2 (d=30),A,5,150,30,7,E_CLap,1..7,5.0,exact,112.57496410975364
+canonical d-sweep / R2 (d=30),A,5,150,30,8,A_CQ,1..7,5.0,exact,346.2229611115399
+canonical d-sweep / R2 (d=30),A,5,150,30,8,B_CQ_minus_PZ,1..7,7.0,over,46.36131931523414
+canonical d-sweep / R2 (d=30),A,5,150,30,8,C_cond_last,1..7,7.0,over,18.530450387239398
+canonical d-sweep / R2 (d=30),A,5,150,30,8,D_cond_mode,1..7,7.0,over,187.6616629886812
+canonical d-sweep / R2 (d=30),A,5,150,30,8,E_CLap,1..7,5.0,exact,144.38642776610868
+canonical d-sweep / R2 (d=60),A,5,75,60,1,A_CQ,1..7,4.0,under,192.35291946666985
+canonical d-sweep / R2 (d=60),A,5,75,60,1,B_CQ_minus_PZ,1..7,5.0,exact,20.487860514029308
+canonical d-sweep / R2 (d=60),A,5,75,60,1,C_cond_last,1..7,5.0,exact,11.063546336317813
+canonical d-sweep / R2 (d=60),A,5,75,60,1,D_cond_mode,1..7,6.0,over,17.19383772235051
+canonical d-sweep / R2 (d=60),A,5,75,60,1,E_CLap,1..7,4.0,under,87.8737258527326
+canonical d-sweep / R2 (d=60),A,5,75,60,2,A_CQ,1..7,4.0,under,20.24558708209588
+canonical d-sweep / R2 (d=60),A,5,75,60,2,B_CQ_minus_PZ,1..7,5.0,exact,94.30491398149934
+canonical d-sweep / R2 (d=60),A,5,75,60,2,C_cond_last,1..7,5.0,exact,91.80845919251624
+canonical d-sweep / R2 (d=60),A,5,75,60,2,D_cond_mode,1..7,5.0,exact,50.58398367587324
+canonical d-sweep / R2 (d=60),A,5,75,60,2,E_CLap,1..7,5.0,exact,27.337453032097983
+canonical d-sweep / R2 (d=60),A,5,75,60,3,A_CQ,1..7,5.0,exact,188.65868851528649
+canonical d-sweep / R2 (d=60),A,5,75,60,3,B_CQ_minus_PZ,1..7,5.0,exact,81.2167439245004
+canonical d-sweep / R2 (d=60),A,5,75,60,3,C_cond_last,1..7,5.0,exact,60.084213019215895
+canonical d-sweep / R2 (d=60),A,5,75,60,3,D_cond_mode,1..7,5.0,exact,19.24529049267585
+canonical d-sweep / R2 (d=60),A,5,75,60,3,E_CLap,1..7,5.0,exact,194.92159369403453
+canonical d-sweep / R2 (d=60),A,5,75,60,4,A_CQ,1..7,4.0,under,92.46656287159931
+canonical d-sweep / R2 (d=60),A,5,75,60,4,B_CQ_minus_PZ,1..7,5.0,exact,120.37421710910348
+canonical d-sweep / R2 (d=60),A,5,75,60,4,C_cond_last,1..7,5.0,exact,100.45438956030921
+canonical d-sweep / R2 (d=60),A,5,75,60,4,D_cond_mode,1..7,5.0,exact,48.78757903790756
+canonical d-sweep / R2 (d=60),A,5,75,60,4,E_CLap,1..7,4.0,under,44.560260609781835
+canonical d-sweep / R2 (d=60),A,5,75,60,5,A_CQ,1..7,5.0,exact,87.09546566007884
+canonical d-sweep / R2 (d=60),A,5,75,60,5,B_CQ_minus_PZ,1..7,5.0,exact,101.75450461140645
+canonical d-sweep / R2 (d=60),A,5,75,60,5,C_cond_last,1..7,5.0,exact,113.6591444099904
+canonical d-sweep / R2 (d=60),A,5,75,60,5,D_cond_mode,1..7,5.0,exact,11.524809072565404
+canonical d-sweep / R2 (d=60),A,5,75,60,5,E_CLap,1..7,5.0,exact,101.44105356922591
+canonical d-sweep / R2 (d=60),A,5,75,60,6,A_CQ,1..7,5.0,exact,68.67220259628266
+canonical d-sweep / R2 (d=60),A,5,75,60,6,B_CQ_minus_PZ,1..7,5.0,exact,80.0534586028225
+canonical d-sweep / R2 (d=60),A,5,75,60,6,C_cond_last,1..7,5.0,exact,45.392747796837284
+canonical d-sweep / R2 (d=60),A,5,75,60,6,D_cond_mode,1..7,5.0,exact,22.896336453952244
+canonical d-sweep / R2 (d=60),A,5,75,60,6,E_CLap,1..7,5.0,exact,97.6547527159255
+canonical d-sweep / R2 (d=60),A,5,75,60,7,A_CQ,1..7,5.0,exact,12.810855735493533
+canonical d-sweep / R2 (d=60),A,5,75,60,7,B_CQ_minus_PZ,1..7,5.0,exact,79.67544853749496
+canonical d-sweep / R2 (d=60),A,5,75,60,7,C_cond_last,1..7,5.0,exact,62.477416225217894
+canonical d-sweep / R2 (d=60),A,5,75,60,7,D_cond_mode,1..7,5.0,exact,39.82566700663665
+canonical d-sweep / R2 (d=60),A,5,75,60,7,E_CLap,1..7,5.0,exact,71.50408692845485
+canonical d-sweep / R2 (d=60),A,5,75,60,8,A_CQ,1..7,5.0,exact,136.65977790582474
+canonical d-sweep / R2 (d=60),A,5,75,60,8,B_CQ_minus_PZ,1..7,5.0,exact,97.59718437265656
+canonical d-sweep / R2 (d=60),A,5,75,60,8,C_cond_last,1..7,5.0,exact,117.85647711074125
+canonical d-sweep / R2 (d=60),A,5,75,60,8,D_cond_mode,1..7,5.0,exact,27.190816893828014
+canonical d-sweep / R2 (d=60),A,5,75,60,8,E_CLap,1..7,5.0,exact,176.25012093140867
+canonical signal-strength (PR #155),B,5,75,15,1,A_CQ,1..7,4.0,under,121.78467339985218
+canonical signal-strength (PR #155),B,5,75,15,1,B_CQ_minus_PZ,1..7,7.0,over,21.232341254833045
+canonical signal-strength (PR #155),B,5,75,15,1,C_cond_last,1..7,7.0,over,59.00520884435082
+canonical signal-strength (PR #155),B,5,75,15,1,D_cond_mode,1..7,7.0,over,77.33562563317264
+canonical signal-strength (PR #155),B,5,75,15,1,E_CLap,1..7,4.0,under,10.77947546500036
+canonical signal-strength (PR #155),B,5,75,15,2,A_CQ,1..7,4.0,under,75.24230679103403
+canonical signal-strength (PR #155),B,5,75,15,2,B_CQ_minus_PZ,1..7,7.0,over,8.206329789170923
+canonical signal-strength (PR #155),B,5,75,15,2,C_cond_last,1..7,7.0,over,28.426481176315974
+canonical signal-strength (PR #155),B,5,75,15,2,D_cond_mode,1..7,7.0,over,80.68144213317282
+canonical signal-strength (PR #155),B,5,75,15,2,E_CLap,1..7,5.0,exact,27.094995780000318
+canonical signal-strength (PR #155),B,5,75,15,3,A_CQ,1..7,5.0,exact,19.56047348159518
+canonical signal-strength (PR #155),B,5,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,30.61963800407102
+canonical signal-strength (PR #155),B,5,75,15,3,C_cond_last,1..7,7.0,over,27.20554845341303
+canonical signal-strength (PR #155),B,5,75,15,3,D_cond_mode,1..7,7.0,over,99.62414030317268
+canonical signal-strength (PR #155),B,5,75,15,3,E_CLap,1..7,5.0,exact,48.09725541999978
+canonical signal-strength (PR #155),B,5,75,15,4,A_CQ,1..7,4.0,under,81.15021631822492
+canonical signal-strength (PR #155),B,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,43.82503293165337
+canonical signal-strength (PR #155),B,5,75,15,4,C_cond_last,1..7,6.0,over,0.5684587920222839
+canonical signal-strength (PR #155),B,5,75,15,4,D_cond_mode,1..7,7.0,over,70.8379478731731
+canonical signal-strength (PR #155),B,5,75,15,4,E_CLap,1..7,4.0,under,7.761051649999899
+canonical signal-strength (PR #155),B,5,75,15,5,A_CQ,1..7,4.0,under,68.97982144917478
+canonical signal-strength (PR #155),B,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,35.2873290413354
+canonical signal-strength (PR #155),B,5,75,15,5,C_cond_last,1..7,7.0,over,1.6324161588363495
+canonical signal-strength (PR #155),B,5,75,15,5,D_cond_mode,1..7,7.0,over,102.82337455817287
+canonical signal-strength (PR #155),B,5,75,15,5,E_CLap,1..7,5.0,exact,11.834130139999615
+canonical signal-strength (PR #155),B,5,75,15,6,A_CQ,1..7,5.0,exact,93.2604992640754
+canonical signal-strength (PR #155),B,5,75,15,6,B_CQ_minus_PZ,1..7,7.0,over,42.61887239578573
+canonical signal-strength (PR #155),B,5,75,15,6,C_cond_last,1..7,7.0,over,41.71406037115139
+canonical signal-strength (PR #155),B,5,75,15,6,D_cond_mode,1..7,7.0,over,97.3733280331744
+canonical signal-strength (PR #155),B,5,75,15,6,E_CLap,1..7,5.0,exact,45.389671900000394
+canonical signal-strength (PR #155),B,5,75,15,7,A_CQ,1..7,4.0,under,60.52845313033231
+canonical signal-strength (PR #155),B,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,46.54122966966497
+canonical signal-strength (PR #155),B,5,75,15,7,C_cond_last,1..7,7.0,over,38.62805199294053
+canonical signal-strength (PR #155),B,5,75,15,7,D_cond_mode,1..7,7.0,over,95.30939673317243
+canonical signal-strength (PR #155),B,5,75,15,7,E_CLap,1..7,5.0,exact,32.03826226000001
+canonical signal-strength (PR #155),B,5,75,15,8,A_CQ,1..7,5.0,exact,58.07804274309092
+canonical signal-strength (PR #155),B,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,9.770369480378577
+canonical signal-strength (PR #155),B,5,75,15,8,C_cond_last,1..7,6.0,over,1.3579387008867343
+canonical signal-strength (PR #155),B,5,75,15,8,D_cond_mode,1..7,7.0,over,89.79905298317317
+canonical signal-strength (PR #155),B,5,75,15,8,E_CLap,1..7,5.0,exact,39.11090746000082
+canonical signal-strength (PR #155),B,5,150,15,1,A_CQ,1..7,5.0,exact,321.81525620343746
+canonical signal-strength (PR #155),B,5,150,15,1,B_CQ_minus_PZ,1..7,7.0,over,110.26073487343456
+canonical signal-strength (PR #155),B,5,150,15,1,C_cond_last,1..7,7.0,over,31.948993782416437
+canonical signal-strength (PR #155),B,5,150,15,1,D_cond_mode,1..7,7.0,over,255.06568295313627
+canonical signal-strength (PR #155),B,5,150,15,1,E_CLap,1..7,5.0,exact,92.05452960000184
+canonical signal-strength (PR #155),B,5,150,15,2,A_CQ,1..7,5.0,exact,299.70162751963653
+canonical signal-strength (PR #155),B,5,150,15,2,B_CQ_minus_PZ,1..7,7.0,over,52.88014248762738
+canonical signal-strength (PR #155),B,5,150,15,2,C_cond_last,1..7,7.0,over,21.279057810459562
+canonical signal-strength (PR #155),B,5,150,15,2,D_cond_mode,1..7,7.0,over,224.31223810313531
+canonical signal-strength (PR #155),B,5,150,15,2,E_CLap,1..7,5.0,exact,63.24137184999927
+canonical signal-strength (PR #155),B,5,150,15,3,A_CQ,1..7,5.0,exact,311.55619492988626
+canonical signal-strength (PR #155),B,5,150,15,3,B_CQ_minus_PZ,1..7,7.0,over,106.45061562386036
+canonical signal-strength (PR #155),B,5,150,15,3,C_cond_last,1..7,7.0,over,146.87881258562084
+canonical signal-strength (PR #155),B,5,150,15,3,D_cond_mode,1..7,7.0,over,262.3067206031337
+canonical signal-strength (PR #155),B,5,150,15,3,E_CLap,1..7,5.0,exact,72.08976890000486
+canonical signal-strength (PR #155),B,5,150,15,4,A_CQ,1..7,5.0,exact,60.616693118623516
+canonical signal-strength (PR #155),B,5,150,15,4,B_CQ_minus_PZ,1..7,7.0,over,105.16086090794124
+canonical signal-strength (PR #155),B,5,150,15,4,C_cond_last,1..7,7.0,over,66.34625332824362
+canonical signal-strength (PR #155),B,5,150,15,4,D_cond_mode,1..7,7.0,over,224.82541540313468
+canonical signal-strength (PR #155),B,5,150,15,4,E_CLap,1..7,5.0,exact,78.8671368999967
+canonical signal-strength (PR #155),B,5,150,15,5,A_CQ,1..7,5.0,exact,373.9658980166205
+canonical signal-strength (PR #155),B,5,150,15,5,B_CQ_minus_PZ,1..7,7.0,over,130.8709192012866
+canonical signal-strength (PR #155),B,5,150,15,5,C_cond_last,1..7,7.0,over,68.89277479611337
+canonical signal-strength (PR #155),B,5,150,15,5,D_cond_mode,1..7,,INCOMPLETE,
+canonical signal-strength (PR #155),B,5,150,15,5,E_CLap,1..7,,INCOMPLETE,
+canonical signal-strength (PR #155),B,5,150,15,6,A_CQ,1..7,5.0,exact,285.1603044450276
+canonical signal-strength (PR #155),B,5,150,15,6,B_CQ_minus_PZ,1..7,7.0,over,113.99192852278247
+canonical signal-strength (PR #155),B,5,150,15,6,C_cond_last,1..7,7.0,over,152.7676258541469
+canonical signal-strength (PR #155),B,5,150,15,6,D_cond_mode,1..7,7.0,over,233.7346219531355
+canonical signal-strength (PR #155),B,5,150,15,6,E_CLap,1..7,5.0,exact,71.73574960000042
+canonical signal-strength (PR #155),B,5,150,15,7,A_CQ,1..7,5.0,exact,309.68018367826517
+canonical signal-strength (PR #155),B,5,150,15,7,B_CQ_minus_PZ,1..7,7.0,over,64.42157213011706
+canonical signal-strength (PR #155),B,5,150,15,7,C_cond_last,1..7,7.0,over,87.08678591682474
+canonical signal-strength (PR #155),B,5,150,15,7,D_cond_mode,1..7,7.0,over,238.53449965313666
+canonical signal-strength (PR #155),B,5,150,15,7,E_CLap,1..7,5.0,exact,73.37594674999855
+canonical signal-strength (PR #155),B,5,150,15,8,A_CQ,1..7,5.0,exact,341.4003780281564
+canonical signal-strength (PR #155),B,5,150,15,8,B_CQ_minus_PZ,1..7,7.0,over,114.22108312165437
+canonical signal-strength (PR #155),B,5,150,15,8,C_cond_last,1..7,7.0,over,54.497989738310935
+canonical signal-strength (PR #155),B,5,150,15,8,D_cond_mode,1..7,7.0,over,233.07150540313705
+canonical signal-strength (PR #155),B,5,150,15,8,E_CLap,1..7,5.0,exact,71.21649184999842
+canonical signal-strength (PR #155),C,5,75,15,1,A_CQ,1..7,4.0,under,71.84214320487081
+canonical signal-strength (PR #155),C,5,75,15,1,B_CQ_minus_PZ,1..7,7.0,over,49.80954760615441
+canonical signal-strength (PR #155),C,5,75,15,1,C_cond_last,1..7,7.0,over,32.14055719471162
+canonical signal-strength (PR #155),C,5,75,15,1,D_cond_mode,1..7,7.0,over,88.18006277817312
+canonical signal-strength (PR #155),C,5,75,15,1,E_CLap,1..7,4.0,under,37.65797234499951
+canonical signal-strength (PR #155),C,5,75,15,2,A_CQ,1..7,4.0,under,42.52057941379189
+canonical signal-strength (PR #155),C,5,75,15,2,B_CQ_minus_PZ,1..7,6.0,over,15.223617129197919
+canonical signal-strength (PR #155),C,5,75,15,2,C_cond_last,1..7,6.0,over,15.988354646096923
+canonical signal-strength (PR #155),C,5,75,15,2,D_cond_mode,1..7,7.0,over,75.84648756317256
+canonical signal-strength (PR #155),C,5,75,15,2,E_CLap,1..7,5.0,exact,19.30139410999982
+canonical signal-strength (PR #155),C,5,75,15,3,A_CQ,1..7,5.0,exact,3.148391727150738
+canonical signal-strength (PR #155),C,5,75,15,3,B_CQ_minus_PZ,1..7,6.0,over,4.443539947624231
+canonical signal-strength (PR #155),C,5,75,15,3,C_cond_last,1..7,6.0,over,45.02498979650409
+canonical signal-strength (PR #155),C,5,75,15,3,D_cond_mode,1..7,7.0,over,91.66171046817362
+canonical signal-strength (PR #155),C,5,75,15,3,E_CLap,1..7,5.0,exact,46.99733403500068
+canonical signal-strength (PR #155),C,5,75,15,4,A_CQ,1..7,4.0,under,30.37856561907938
+canonical signal-strength (PR #155),C,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,70.52363500517185
+canonical signal-strength (PR #155),C,5,75,15,4,C_cond_last,1..7,7.0,over,75.28516575445337
+canonical signal-strength (PR #155),C,5,75,15,4,D_cond_mode,1..7,7.0,over,94.3321108981736
+canonical signal-strength (PR #155),C,5,75,15,4,E_CLap,1..7,4.0,under,28.814809199999218
+canonical signal-strength (PR #155),C,5,75,15,5,A_CQ,1..7,4.0,under,49.44244534531299
+canonical signal-strength (PR #155),C,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,27.759991334633014
+canonical signal-strength (PR #155),C,5,75,15,5,C_cond_last,1..7,7.0,over,48.63519303897192
+canonical signal-strength (PR #155),C,5,75,15,5,D_cond_mode,1..7,7.0,over,85.13691959817334
+canonical signal-strength (PR #155),C,5,75,15,5,E_CLap,1..7,4.0,under,13.66680672000075
+canonical signal-strength (PR #155),C,5,75,15,6,A_CQ,1..7,5.0,exact,15.52035993836762
+canonical signal-strength (PR #155),C,5,75,15,6,B_CQ_minus_PZ,1..7,7.0,over,29.031467675826207
+canonical signal-strength (PR #155),C,5,75,15,6,C_cond_last,1..7,7.0,over,16.077489621573477
+canonical signal-strength (PR #155),C,5,75,15,6,D_cond_mode,1..7,7.0,over,88.0504006531728
+canonical signal-strength (PR #155),C,5,75,15,6,E_CLap,1..7,5.0,exact,45.62660597500053
+canonical signal-strength (PR #155),C,5,75,15,7,A_CQ,1..7,3.0,under,21.832479751607025
+canonical signal-strength (PR #155),C,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,49.654489257975
+canonical signal-strength (PR #155),C,5,75,15,7,C_cond_last,1..7,7.0,over,11.011011679946023
+canonical signal-strength (PR #155),C,5,75,15,7,D_cond_mode,1..7,7.0,over,99.96265482817398
+canonical signal-strength (PR #155),C,5,75,15,7,E_CLap,1..7,4.0,under,1.4626718250001431
+canonical signal-strength (PR #155),C,5,75,15,8,A_CQ,1..7,3.0,under,1.5822532139554824
+canonical signal-strength (PR #155),C,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,1.0997679159017935
+canonical signal-strength (PR #155),C,5,75,15,8,C_cond_last,1..7,6.0,over,18.094670649913496
+canonical signal-strength (PR #155),C,5,75,15,8,D_cond_mode,1..7,7.0,over,83.76735505817305
+canonical signal-strength (PR #155),C,5,75,15,8,E_CLap,1..7,5.0,exact,18.16428154500045
+canonical signal-strength (PR #155),D,5,75,15,1,A_CQ,1..7,4.0,under,100.87316461304727
+canonical signal-strength (PR #155),D,5,75,15,1,B_CQ_minus_PZ,1..7,6.0,over,5.0126750419185555
+canonical signal-strength (PR #155),D,5,75,15,1,C_cond_last,1..7,7.0,over,13.628420023795115
+canonical signal-strength (PR #155),D,5,75,15,1,D_cond_mode,1..7,7.0,over,66.57483712317298
+canonical signal-strength (PR #155),D,5,75,15,1,E_CLap,1..7,4.0,under,11.172618825001337
+canonical signal-strength (PR #155),D,5,75,15,2,A_CQ,1..7,4.0,under,18.37633283586092
+canonical signal-strength (PR #155),D,5,75,15,2,B_CQ_minus_PZ,1..7,6.0,over,6.59349720888531
+canonical signal-strength (PR #155),D,5,75,15,2,C_cond_last,1..7,7.0,over,21.516737477796596
+canonical signal-strength (PR #155),D,5,75,15,2,D_cond_mode,1..7,7.0,over,77.65716802817406
+canonical signal-strength (PR #155),D,5,75,15,2,E_CLap,1..7,5.0,exact,55.083339089999754
+canonical signal-strength (PR #155),D,5,75,15,3,A_CQ,1..7,5.0,exact,79.40924191313115
+canonical signal-strength (PR #155),D,5,75,15,3,B_CQ_minus_PZ,1..7,7.0,over,37.0521983353583
+canonical signal-strength (PR #155),D,5,75,15,3,C_cond_last,1..7,7.0,over,14.83356432961682
+canonical signal-strength (PR #155),D,5,75,15,3,D_cond_mode,1..7,7.0,over,102.06773165817322
+canonical signal-strength (PR #155),D,5,75,15,3,E_CLap,1..7,5.0,exact,49.47193703999983
+canonical signal-strength (PR #155),D,5,75,15,4,A_CQ,1..7,4.0,under,62.82707980682062
+canonical signal-strength (PR #155),D,5,75,15,4,B_CQ_minus_PZ,1..7,7.0,over,59.269175103682755
+canonical signal-strength (PR #155),D,5,75,15,4,C_cond_last,1..7,7.0,over,54.10763766409491
+canonical signal-strength (PR #155),D,5,75,15,4,D_cond_mode,1..7,7.0,over,92.7397830281734
+canonical signal-strength (PR #155),D,5,75,15,4,E_CLap,1..7,5.0,exact,8.894715435000762
+canonical signal-strength (PR #155),D,5,75,15,5,A_CQ,1..7,4.0,under,6.82936739557681
+canonical signal-strength (PR #155),D,5,75,15,5,B_CQ_minus_PZ,1..7,7.0,over,72.18759623519509
+canonical signal-strength (PR #155),D,5,75,15,5,C_cond_last,1..7,7.0,over,77.05481452356344
+canonical signal-strength (PR #155),D,5,75,15,5,D_cond_mode,1..7,7.0,over,113.4994349081735
+canonical signal-strength (PR #155),D,5,75,15,5,E_CLap,1..7,5.0,exact,43.62347913999929
+canonical signal-strength (PR #155),D,5,75,15,6,A_CQ,1..7,5.0,exact,159.9418160128571
+canonical signal-strength (PR #155),D,5,75,15,6,B_CQ_minus_PZ,1..7,7.0,over,60.133344427977136
+canonical signal-strength (PR #155),D,5,75,15,6,C_cond_last,1..7,7.0,over,63.84690454365773
+canonical signal-strength (PR #155),D,5,75,15,6,D_cond_mode,1..7,7.0,over,109.49162534317293
+canonical signal-strength (PR #155),D,5,75,15,6,E_CLap,1..7,5.0,exact,47.53951697499906
+canonical signal-strength (PR #155),D,5,75,15,7,A_CQ,1..7,4.0,under,54.6985810727374
+canonical signal-strength (PR #155),D,5,75,15,7,B_CQ_minus_PZ,1..7,7.0,over,48.76596795186106
+canonical signal-strength (PR #155),D,5,75,15,7,C_cond_last,1..7,7.0,over,56.51947193891192
+canonical signal-strength (PR #155),D,5,75,15,7,D_cond_mode,1..7,7.0,over,111.74762063817252
+canonical signal-strength (PR #155),D,5,75,15,7,E_CLap,1..7,5.0,exact,40.34868122500029
+canonical signal-strength (PR #155),D,5,75,15,8,A_CQ,1..7,5.0,exact,93.67560011439491
+canonical signal-strength (PR #155),D,5,75,15,8,B_CQ_minus_PZ,1..7,7.0,over,11.737889622415423
+canonical signal-strength (PR #155),D,5,75,15,8,C_cond_last,1..7,7.0,over,0.09968628256592638
+canonical signal-strength (PR #155),D,5,75,15,8,D_cond_mode,1..7,7.0,over,94.02212181317373
+canonical signal-strength (PR #155),D,5,75,15,8,E_CLap,1..7,5.0,exact,46.81841067500045
+paper-type #139 (Gaussian-X),paper-type,1,150,15,1,A_CQ,1..10,1.0,exact,357.2528290962382
+paper-type #139 (Gaussian-X),paper-type,1,150,15,1,B_CQ_minus_PZ,1..10,10.0,over,57.117861605427606
+paper-type #139 (Gaussian-X),paper-type,1,150,15,1,C_cond_last,1..10,10.0,over,56.19621509288481
+paper-type #139 (Gaussian-X),paper-type,1,150,15,1,D_cond_mode,1..10,10.0,over,204.21809233803287
+paper-type #139 (Gaussian-X),paper-type,1,150,15,1,E_CLap,1..10,1.0,exact,211.1106358455836
+paper-type #139 (Gaussian-X),paper-type,1,150,15,2,A_CQ,1..10,1.0,exact,454.96177247720334
+paper-type #139 (Gaussian-X),paper-type,1,150,15,2,B_CQ_minus_PZ,1..10,9.0,over,28.808819170622883
+paper-type #139 (Gaussian-X),paper-type,1,150,15,2,C_cond_last,1..10,10.0,over,2.9769715788752364
+paper-type #139 (Gaussian-X),paper-type,1,150,15,2,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,1,150,15,2,E_CLap,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,1,150,15,3,A_CQ,1..10,1.0,exact,418.0684408202924
+paper-type #139 (Gaussian-X),paper-type,1,150,15,3,B_CQ_minus_PZ,1..10,9.0,over,13.354185173735459
+paper-type #139 (Gaussian-X),paper-type,1,150,15,3,C_cond_last,1..10,10.0,over,19.113325107276978
+paper-type #139 (Gaussian-X),paper-type,1,150,15,3,D_cond_mode,1..10,10.0,over,176.50814073167294
+paper-type #139 (Gaussian-X),paper-type,1,150,15,3,E_CLap,1..10,1.0,exact,316.16233121282676
+paper-type #139 (Gaussian-X),paper-type,1,150,15,4,A_CQ,1..10,1.0,exact,384.79877206015226
+paper-type #139 (Gaussian-X),paper-type,1,150,15,4,B_CQ_minus_PZ,1..10,10.0,over,1.3679803075738164
+paper-type #139 (Gaussian-X),paper-type,1,150,15,4,C_cond_last,1..10,9.0,over,12.8218106107106
+paper-type #139 (Gaussian-X),paper-type,1,150,15,4,D_cond_mode,1..10,10.0,over,14.232202647881422
+paper-type #139 (Gaussian-X),paper-type,1,150,15,4,E_CLap,1..10,1.0,exact,49.175337938866505
+paper-type #139 (Gaussian-X),paper-type,1,150,15,5,A_CQ,1..10,1.0,exact,348.7973257303165
+paper-type #139 (Gaussian-X),paper-type,1,150,15,5,B_CQ_minus_PZ,1..10,10.0,over,46.19999395516243
+paper-type #139 (Gaussian-X),paper-type,1,150,15,5,C_cond_last,1..10,9.0,over,6.672475543928158
+paper-type #139 (Gaussian-X),paper-type,1,150,15,5,D_cond_mode,1..10,10.0,over,190.98587149134983
+paper-type #139 (Gaussian-X),paper-type,1,150,15,5,E_CLap,1..10,1.0,exact,426.29652822729986
+paper-type #139 (Gaussian-X),paper-type,3,150,15,1,A_CQ,1..10,3.0,exact,337.8819792883078
+paper-type #139 (Gaussian-X),paper-type,3,150,15,1,B_CQ_minus_PZ,1..10,9.0,over,9.492634746296972
+paper-type #139 (Gaussian-X),paper-type,3,150,15,1,C_cond_last,1..10,10.0,over,48.744974942919725
+paper-type #139 (Gaussian-X),paper-type,3,150,15,1,D_cond_mode,1..10,10.0,over,171.13018851782363
+paper-type #139 (Gaussian-X),paper-type,3,150,15,1,E_CLap,1..10,3.0,exact,74.21683304830003
+paper-type #139 (Gaussian-X),paper-type,3,150,15,2,A_CQ,1..10,3.0,exact,147.26498956078467
+paper-type #139 (Gaussian-X),paper-type,3,150,15,2,B_CQ_minus_PZ,1..10,10.0,over,40.55725156625704
+paper-type #139 (Gaussian-X),paper-type,3,150,15,2,C_cond_last,1..10,10.0,over,5.073594925591351
+paper-type #139 (Gaussian-X),paper-type,3,150,15,2,D_cond_mode,1..10,10.0,over,182.80914106728142
+paper-type #139 (Gaussian-X),paper-type,3,150,15,2,E_CLap,1..10,3.0,exact,277.586890904995
+paper-type #139 (Gaussian-X),paper-type,3,150,15,3,A_CQ,1..10,3.0,exact,136.591000777511
+paper-type #139 (Gaussian-X),paper-type,3,150,15,3,B_CQ_minus_PZ,1..10,10.0,over,103.02027308014294
+paper-type #139 (Gaussian-X),paper-type,3,150,15,3,C_cond_last,1..10,10.0,over,67.45952836803008
+paper-type #139 (Gaussian-X),paper-type,3,150,15,3,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,3,150,15,3,E_CLap,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,3,150,15,4,A_CQ,1..10,3.0,exact,306.04972751685455
+paper-type #139 (Gaussian-X),paper-type,3,150,15,4,B_CQ_minus_PZ,1..10,10.0,over,44.01740125636752
+paper-type #139 (Gaussian-X),paper-type,3,150,15,4,C_cond_last,1..10,10.0,over,74.01334250683067
+paper-type #139 (Gaussian-X),paper-type,3,150,15,4,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,3,150,15,4,E_CLap,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,3,150,15,5,A_CQ,1..10,3.0,exact,318.2586891251558
+paper-type #139 (Gaussian-X),paper-type,3,150,15,5,B_CQ_minus_PZ,1..10,10.0,over,50.60036964628853
+paper-type #139 (Gaussian-X),paper-type,3,150,15,5,C_cond_last,1..10,10.0,over,69.55669558039972
+paper-type #139 (Gaussian-X),paper-type,3,150,15,5,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,3,150,15,5,E_CLap,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,5,150,15,1,A_CQ,1..10,5.0,exact,279.2351319486743
+paper-type #139 (Gaussian-X),paper-type,5,150,15,1,B_CQ_minus_PZ,1..10,10.0,over,90.6523977387169
+paper-type #139 (Gaussian-X),paper-type,5,150,15,1,C_cond_last,1..10,10.0,over,143.45833409970783
+paper-type #139 (Gaussian-X),paper-type,5,150,15,1,D_cond_mode,1..10,10.0,over,262.0136458584311
+paper-type #139 (Gaussian-X),paper-type,5,150,15,1,E_CLap,1..10,5.0,exact,163.75590316751914
+paper-type #139 (Gaussian-X),paper-type,5,150,15,2,A_CQ,1..10,5.0,exact,202.67994607582204
+paper-type #139 (Gaussian-X),paper-type,5,150,15,2,B_CQ_minus_PZ,1..10,10.0,over,107.98748843246176
+paper-type #139 (Gaussian-X),paper-type,5,150,15,2,C_cond_last,1..10,10.0,over,156.7484102332528
+paper-type #139 (Gaussian-X),paper-type,5,150,15,2,D_cond_mode,1..10,10.0,over,235.48685328462807
+paper-type #139 (Gaussian-X),paper-type,5,150,15,2,E_CLap,1..10,5.0,exact,154.4370451327486
+paper-type #139 (Gaussian-X),paper-type,5,150,15,3,A_CQ,1..10,5.0,exact,320.73972811474414
+paper-type #139 (Gaussian-X),paper-type,5,150,15,3,B_CQ_minus_PZ,1..10,10.0,over,78.16516780574966
+paper-type #139 (Gaussian-X),paper-type,5,150,15,3,C_cond_last,1..10,10.0,over,59.62005691055674
+paper-type #139 (Gaussian-X),paper-type,5,150,15,3,D_cond_mode,1..10,10.0,over,216.5652512944289
+paper-type #139 (Gaussian-X),paper-type,5,150,15,3,E_CLap,1..10,5.0,exact,98.56879145060884
+paper-type #139 (Gaussian-X),paper-type,5,150,15,4,A_CQ,1..10,5.0,exact,315.0650930458014
+paper-type #139 (Gaussian-X),paper-type,5,150,15,4,B_CQ_minus_PZ,1..10,10.0,over,132.70985617484075
+paper-type #139 (Gaussian-X),paper-type,5,150,15,4,C_cond_last,1..10,10.0,over,88.79741457109321
+paper-type #139 (Gaussian-X),paper-type,5,150,15,4,D_cond_mode,1..10,10.0,over,248.60870897244877
+paper-type #139 (Gaussian-X),paper-type,5,150,15,4,E_CLap,1..10,5.0,exact,172.43224605358773
+paper-type #139 (Gaussian-X),paper-type,5,150,15,5,A_CQ,1..10,5.0,exact,270.7519235022173
+paper-type #139 (Gaussian-X),paper-type,5,150,15,5,B_CQ_minus_PZ,1..10,10.0,over,112.84049723492444
+paper-type #139 (Gaussian-X),paper-type,5,150,15,5,C_cond_last,1..10,10.0,over,119.50258384100744
+paper-type #139 (Gaussian-X),paper-type,5,150,15,5,D_cond_mode,1..10,10.0,over,299.6154142182304
+paper-type #139 (Gaussian-X),paper-type,5,150,15,5,E_CLap,1..10,5.0,exact,178.22213333334003
+paper-type #139 (Gaussian-X),paper-type,7,150,15,1,A_CQ,1..10,7.0,exact,90.59394043741213
+paper-type #139 (Gaussian-X),paper-type,7,150,15,1,B_CQ_minus_PZ,1..10,10.0,over,106.84170606471525
+paper-type #139 (Gaussian-X),paper-type,7,150,15,1,C_cond_last,1..10,10.0,over,83.08692845588303
+paper-type #139 (Gaussian-X),paper-type,7,150,15,1,D_cond_mode,1..10,10.0,over,260.04693841045537
+paper-type #139 (Gaussian-X),paper-type,7,150,15,1,E_CLap,1..10,7.0,exact,69.8651194565864
+paper-type #139 (Gaussian-X),paper-type,7,150,15,2,A_CQ,1..10,7.0,exact,213.09822942340998
+paper-type #139 (Gaussian-X),paper-type,7,150,15,2,B_CQ_minus_PZ,1..10,10.0,over,50.838441175294065
+paper-type #139 (Gaussian-X),paper-type,7,150,15,2,C_cond_last,1..10,9.0,over,31.618828443452003
+paper-type #139 (Gaussian-X),paper-type,7,150,15,2,D_cond_mode,1..10,10.0,over,265.1082660937982
+paper-type #139 (Gaussian-X),paper-type,7,150,15,2,E_CLap,1..10,7.0,exact,120.62217493148091
+paper-type #139 (Gaussian-X),paper-type,7,150,15,3,A_CQ,1..10,7.0,exact,342.977260316271
+paper-type #139 (Gaussian-X),paper-type,7,150,15,3,B_CQ_minus_PZ,1..10,10.0,over,119.38130185935552
+paper-type #139 (Gaussian-X),paper-type,7,150,15,3,C_cond_last,1..10,10.0,over,105.10866243592136
+paper-type #139 (Gaussian-X),paper-type,7,150,15,3,D_cond_mode,1..10,10.0,over,239.52057453380803
+paper-type #139 (Gaussian-X),paper-type,7,150,15,3,E_CLap,1..10,7.0,exact,88.82011303420586
+paper-type #139 (Gaussian-X),paper-type,7,150,15,4,A_CQ,1..10,7.0,exact,292.4968598650448
+paper-type #139 (Gaussian-X),paper-type,7,150,15,4,B_CQ_minus_PZ,1..10,10.0,over,79.00674314430671
+paper-type #139 (Gaussian-X),paper-type,7,150,15,4,C_cond_last,1..10,10.0,over,104.08860422950329
+paper-type #139 (Gaussian-X),paper-type,7,150,15,4,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,7,150,15,4,E_CLap,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,7,150,15,5,A_CQ,1..10,7.0,exact,374.4905957319261
+paper-type #139 (Gaussian-X),paper-type,7,150,15,5,B_CQ_minus_PZ,1..10,10.0,over,123.02900041506473
+paper-type #139 (Gaussian-X),paper-type,7,150,15,5,C_cond_last,1..10,10.0,over,92.29505491396776
+paper-type #139 (Gaussian-X),paper-type,7,150,15,5,D_cond_mode,1..10,10.0,over,241.6086229508128
+paper-type #139 (Gaussian-X),paper-type,7,150,15,5,E_CLap,1..10,7.0,exact,75.3985713733855
+paper-type #139 (Gaussian-X),paper-type,9,150,15,1,A_CQ,1..10,9.0,exact,305.9993032089478
+paper-type #139 (Gaussian-X),paper-type,9,150,15,1,B_CQ_minus_PZ,1..10,10.0,over,119.68225675245412
+paper-type #139 (Gaussian-X),paper-type,9,150,15,1,C_cond_last,1..10,10.0,over,156.519262765054
+paper-type #139 (Gaussian-X),paper-type,9,150,15,1,D_cond_mode,1..10,10.0,over,274.57364843860796
+paper-type #139 (Gaussian-X),paper-type,9,150,15,1,E_CLap,1..10,9.0,exact,123.91493101872584
+paper-type #139 (Gaussian-X),paper-type,9,150,15,2,A_CQ,1..10,9.0,exact,325.08906431371724
+paper-type #139 (Gaussian-X),paper-type,9,150,15,2,B_CQ_minus_PZ,1..10,10.0,over,100.59249564768379
+paper-type #139 (Gaussian-X),paper-type,9,150,15,2,C_cond_last,1..10,10.0,over,79.30857786304296
+paper-type #139 (Gaussian-X),paper-type,9,150,15,2,D_cond_mode,1..10,10.0,over,284.8974121611668
+paper-type #139 (Gaussian-X),paper-type,9,150,15,2,E_CLap,1..10,9.0,exact,137.59786336150864
+paper-type #139 (Gaussian-X),paper-type,9,150,15,3,A_CQ,1..10,9.0,exact,266.75873965289065
+paper-type #139 (Gaussian-X),paper-type,9,150,15,3,B_CQ_minus_PZ,1..10,10.0,over,158.92282030850947
+paper-type #139 (Gaussian-X),paper-type,9,150,15,3,C_cond_last,1..10,10.0,over,106.00203009990582
+paper-type #139 (Gaussian-X),paper-type,9,150,15,3,D_cond_mode,1..10,10.0,over,282.6716396759498
+paper-type #139 (Gaussian-X),paper-type,9,150,15,3,E_CLap,1..10,9.0,exact,138.1822593501165
+paper-type #139 (Gaussian-X),paper-type,9,150,15,4,A_CQ,1..10,9.0,exact,319.315619003939
+paper-type #139 (Gaussian-X),paper-type,9,150,15,4,B_CQ_minus_PZ,1..10,10.0,over,106.36594095746113
+paper-type #139 (Gaussian-X),paper-type,9,150,15,4,C_cond_last,1..10,10.0,over,128.89386551332427
+paper-type #139 (Gaussian-X),paper-type,9,150,15,4,D_cond_mode,1..10,10.0,over,258.74001247246906
+paper-type #139 (Gaussian-X),paper-type,9,150,15,4,E_CLap,1..10,9.0,exact,128.2856575042806
+paper-type #139 (Gaussian-X),paper-type,9,150,15,5,A_CQ,1..10,9.0,exact,257.8336419014031
+paper-type #139 (Gaussian-X),paper-type,9,150,15,5,B_CQ_minus_PZ,1..10,10.0,over,167.84791805999885
+paper-type #139 (Gaussian-X),paper-type,9,150,15,5,C_cond_last,1..10,10.0,over,154.15662397829692
+paper-type #139 (Gaussian-X),paper-type,9,150,15,5,D_cond_mode,1..10,,INCOMPLETE,
+paper-type #139 (Gaussian-X),paper-type,9,150,15,5,E_CLap,1..10,,INCOMPLETE,

@@ -1,0 +1,8 @@
+{
+ "max_abs_CQ_recompute_minus_stored": 4.968023858964443e-08,
+ "max_abs_B_identity_CQminusPZ_vs_condMC": 7.275957614183426e-12,
+ "max_abs_PZ_minus_nK(1+ln2pi)": 9.094947017729282e-13,
+ "max_abs_var_z_minus_1": 0.0,
+ "last_sample_identity_all": true,
+ "max_abs_D_recompute_minus_stored_fitmode(nsweep)": 1.8189894035458565e-12
+}

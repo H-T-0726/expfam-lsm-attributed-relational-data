@@ -1,0 +1,12 @@
+path_under_kennkyu_artifacts,study,k_gen,n,d,candidate_k,saved_latent_states,use
+clap_clean_nsweep_20261006/full/states.npz + EMC checkpoint-8 npz,canonical A1 n-sweep,"1,3,5","50,75,100,150",15,1..7,"Zsamples(L=5), Z_last, F, scalars, Zhat","USED (A-E, full K)"
+"historical_canonical_causal_20261106/fit_states_n75.npz, _n150.npz","PR #155 signal strength B/C/D (n=75), B (n=150)",5,"75,150",15,1..7,"Zsamples, Z_last, F, sigma, scalars (no Zhat; D from stored lap_fit_mode)","USED (A-E, full K)"
+dsweep_k_selection_20261105/fit_states.npz,d-sweep,5,75,"30,60",1..7,"Zsamples, Z_last, F, sigma, scalars","USED (A-E, full K)"
+"k_selection_robustness_20261105/r2_n{50,100,150}_fit_states.npz",R2,5,"50,100,150",30,1..7,same,"USED (A-E, full K)"
+k_selection_robustness_20261105/r1_fit_states.npz,"R1 (L=10, checkpoints 8/16)",5,75,"15,30,60",1..7,same,"USED (A-E, full K)"
+paper_condition_k_criteria_20261006/full/states.npz,#139 paper-type (Gaussian-X),"1,3,5,7,9",150,15,1..10,"Zsamples, F, sigma, Zhat; criteria stored by the same panel code","USED via stored panel CSV (A-E, full K; not re-scored)"
+mcem_stability_signal_matched_20261106/rq1_*_states.npz,PR #156 RQ1 (64 iterations),5,75,15,"4,5","Zsamples, Z, F, sigma, scalars at checkpoints","LOCAL only (A, B, D, E from stored checkpoint rows)"
+mcem_stability_signal_matched_20261106/rq2_states.npz,PR #156 RQ2 (K_GEN 3 vs 5),"3,5",75,15,K_GEN +/- 1,same,NOT USED (only K_GEN +/- 1; different generator)
+mcem_noise_separation_20261106/exec_v2,PR #157 fixed-theta probes,5,75,15,"4,5",probe arrays,"NOT USED (local, probe states)"
+em_convergence_sensitivity_20260905/checkpoint_states.npz,EM convergence sensitivity,?,?,?,?,"Zsamples, Z, F, sigma, scalars",NOT USED (not mapped in this study)
+z_point_estimator_e1 / seed_separation_e2a / em_iterations_e2c,Z point-estimator studies,-,-,-,not a K sweep,"Zsamples, Zmode, mean5",NOT USED (no K sweep)
