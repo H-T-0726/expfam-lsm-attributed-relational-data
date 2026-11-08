@@ -1,0 +1,199 @@
+{
+ "rule": "pilot (6 fixed existing states, see PILOT) measures ONLY the per-state MC standard error of C_ELBO and the wall time; choose the smallest M in {256, 512, 1024, 2048} whose pilot MEDIAN C_ELBO MCSE is <= 1.0 and whose MAX per-state time is <= 60 s; if none qualifies take 2048. The same M is used for every state of both phases. No selection result is computed in the pilot.",
+ "pilot": [
+  {
+   "M": 256,
+   "key": "e2_gaussian_weak_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 4.581349105239966,
+   "seconds": 0.15294680000806693
+  },
+  {
+   "M": 256,
+   "key": "e2_gaussian_weak_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 12.144422995031638,
+   "seconds": 0.35826799999631476
+  },
+  {
+   "M": 256,
+   "key": "e2_gaussian_weak_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 13.192175150932403,
+   "seconds": 1.2852130999963265
+  },
+  {
+   "M": 256,
+   "key": "reuse_A1emc_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 4.8677193013635796,
+   "seconds": 0.09361759999592323
+  },
+  {
+   "M": 256,
+   "key": "reuse_A1emc_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 11.370687673076322,
+   "seconds": 0.4025015999941388
+  },
+  {
+   "M": 256,
+   "key": "reuse_A1emc_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 14.292442156273687,
+   "seconds": 0.9611258999939309
+  },
+  {
+   "M": 512,
+   "key": "e2_gaussian_weak_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 3.259318481301579,
+   "seconds": 0.13467600000149105
+  },
+  {
+   "M": 512,
+   "key": "e2_gaussian_weak_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 7.615679977068998,
+   "seconds": 0.5423697999940487
+  },
+  {
+   "M": 512,
+   "key": "e2_gaussian_weak_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 10.345703999360673,
+   "seconds": 1.448704299997189
+  },
+  {
+   "M": 512,
+   "key": "reuse_A1emc_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 3.0521519017599563,
+   "seconds": 0.13499120000051335
+  },
+  {
+   "M": 512,
+   "key": "reuse_A1emc_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 7.907964748496897,
+   "seconds": 0.5313196999923093
+  },
+  {
+   "M": 512,
+   "key": "reuse_A1emc_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 11.286076007027216,
+   "seconds": 1.1355814000125974
+  },
+  {
+   "M": 1024,
+   "key": "e2_gaussian_weak_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 2.2896856551672458,
+   "seconds": 0.2109896000038134
+  },
+  {
+   "M": 1024,
+   "key": "e2_gaussian_weak_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 5.681324600801092,
+   "seconds": 0.8561766000057105
+  },
+  {
+   "M": 1024,
+   "key": "e2_gaussian_weak_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 6.750562690575227,
+   "seconds": 1.735863200010499
+  },
+  {
+   "M": 1024,
+   "key": "reuse_A1emc_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 2.3177080629637605,
+   "seconds": 0.2131366999965394
+  },
+  {
+   "M": 1024,
+   "key": "reuse_A1emc_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 5.629517964022298,
+   "seconds": 0.8446831000037491
+  },
+  {
+   "M": 1024,
+   "key": "reuse_A1emc_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 7.594560034170096,
+   "seconds": 1.4774335000111023
+  },
+  {
+   "M": 2048,
+   "key": "e2_gaussian_weak_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 1.5979966936605787,
+   "seconds": 0.41731679999793414
+  },
+  {
+   "M": 2048,
+   "key": "e2_gaussian_weak_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 3.9842103996893203,
+   "seconds": 1.5529070000047795
+  },
+  {
+   "M": 2048,
+   "key": "e2_gaussian_weak_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 4.8302999370502775,
+   "seconds": 2.4138543000008212
+  },
+  {
+   "M": 2048,
+   "key": "reuse_A1emc_n75_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 1.672129489894909,
+   "seconds": 0.39877420000266284
+  },
+  {
+   "M": 2048,
+   "key": "reuse_A1emc_n150_r1_k5_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 3.990006167014362,
+   "seconds": 1.4729778999899281
+  },
+  {
+   "M": 2048,
+   "key": "reuse_A1emc_n150_r1_k7_s1",
+   "status": "OK",
+   "C_ELBO_mcse": 5.321545414224146,
+   "seconds": 2.067139300008421
+  }
+ ],
+ "summary": [
+  {
+   "M": 256,
+   "median_mcse": 11.75755533405398,
+   "max_seconds": 1.2852130999963265
+  },
+  {
+   "M": 512,
+   "median_mcse": 7.761822362782947,
+   "max_seconds": 1.448704299997189
+  },
+  {
+   "M": 1024,
+   "median_mcse": 5.6554212824116945,
+   "max_seconds": 1.735863200010499
+  },
+  {
+   "M": 2048,
+   "median_mcse": 3.987108283351841,
+   "max_seconds": 2.4138543000008212
+  }
+ ],
+ "chosen_M": 2048,
+ "note": "pilot seeds use phase code 9 (not reused in scoring); no selection computed",
+ "protocol_hash": "3742ffe808c2f01975c439686e6969df6e36a039d9079cc5a6404054b9c32ea8",
+ "git_head": "b6302881d4503faa91953baf45561cccc41be60f"
+}
