@@ -1,0 +1,11 @@
+fit_key,event,action,time_utc
+rep01_dense_oracle,OK,first and only execution,2026-11-08T18:39:01.238379+00:00
+rep01_dense_wrong,OK,first and only execution,2026-11-08T18:39:18.559688+00:00
+rep01_dense_support_only,OK,first and only execution,2026-11-08T18:39:27.876882+00:00
+rep01_dense_auto_first,OK,first and only execution,2026-11-08T18:40:00.203042+00:00
+rep01_dense_auto_last,OK,first and only execution,2026-11-08T18:40:32.622271+00:00
+rep01_sparse_oracle,OK,first and only execution,2026-11-08T18:40:49.543763+00:00
+rep01_sparse_wrong,OK,first and only execution,2026-11-08T18:41:06.745911+00:00
+rep01_sparse_support_only,OK,first and only execution,2026-11-08T18:41:15.983573+00:00
+rep01_sparse_auto_first,OK,first and only execution,2026-11-08T18:41:48.531013+00:00
+rep01_sparse_auto_last,OK,first and only execution,2026-11-08T18:42:19.218104+00:00

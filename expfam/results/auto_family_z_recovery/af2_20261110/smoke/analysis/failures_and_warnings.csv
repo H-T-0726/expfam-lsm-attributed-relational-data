@@ -1,0 +1,5 @@
+fit_key,kind,stage,detail
+rep01_dense_auto_first,CANDIDATE_NONCONVERGENCE_WARNING,exploration,rows=25 max_grad_inf=4.004619569508705e-06
+rep01_dense_auto_last,CANDIDATE_NONCONVERGENCE_WARNING,exploration,rows=28 max_grad_inf=6.123372696320573e-06
+rep01_sparse_auto_first,CANDIDATE_NONCONVERGENCE_WARNING,exploration,rows=35 max_grad_inf=7.189393239981356e-06
+rep01_sparse_auto_last,CANDIDATE_NONCONVERGENCE_WARNING,exploration,rows=35 max_grad_inf=5.918876120247773e-06

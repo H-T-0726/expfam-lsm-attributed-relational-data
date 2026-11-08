@@ -1,0 +1,35 @@
+{
+  "experiment": "AF2",
+  "script": "expfam/src/experimental/run_af2_poisson_cmp.py",
+  "git_head": "5b85ff78a02f838f1f1eb78f8cb8c442a90ca9cd",
+  "git_branch": "experiment/af2-poisson-cmp-selection",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "sklearn": "1.8.0",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "889557abbbf939bcb31064b5bf0f2cf85acaf4f55b5f54b7ccb552591e8d1c17",
+  "command": "expfam/src/experimental/run_af2_poisson_cmp.py --smoke",
+  "stage": "smoke",
+  "planned_fits": 10,
+  "finished_fits": 10,
+  "state_dir": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110\\smoke\\fits",
+  "sessions": [
+    {
+      "started_utc": "2026-11-08T18:38:42.334058+00:00",
+      "finished_utc": "2026-11-08T18:42:19.234728+00:00",
+      "runtime_s": 216.9,
+      "fits_run": 10,
+      "git_head": "5b85ff78a02f838f1f1eb78f8cb8c442a90ca9cd",
+      "command": "expfam/src/experimental/run_af2_poisson_cmp.py --smoke"
+    }
+  ],
+  "seeds": {
+    "data": "1661001 + r",
+    "model": "1662000 + r",
+    "search": "1663000 + r",
+    "bootstrap": 20261110
+  }
+}

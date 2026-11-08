@@ -1,0 +1,161 @@
+{
+  "experiment": "AF2",
+  "mode": "CONFIRMATORY (pre-registered before any AF2 result was read)",
+  "research_question": "When the attribute family choice is a genuine statistical decision (Poisson vs COM-Poisson nu=2 count columns), how often does automatic selection recover the true family, and how much of the Z-recovery loss from misspecification does it prevent?",
+  "lineage": "E-consistent per-column + PR #129 generic model (experimental prototype; not adoptable for the manuscript)",
+  "pr129": {
+    "commit": "4fa6159",
+    "merged": false,
+    "copied_unchanged_blobs": {
+      "family_specs.py": "24d257d5fed588d69843ab5ccbec302c09db6bf3",
+      "model_dual_expfam_generic.py": "52e52b05a871ce8e95c54cdeabd321e5223e6691",
+      "family_selection_multisupport.py": "1790930fc7822be3833a1c8b1076104e6c79761d",
+      "data_generator_multisupport.py": "053ff3e63ca15a50c3f284636f21ac3c1c67545e"
+    },
+    "local_change": "opt-in train_mask pass-through in run_em_generic, run_generic_exploration, run_generic_hybrid"
+  },
+  "generator": "data_generator_multisupport.generate_multisupport_data (PR #129, unchanged)",
+  "data": {
+    "n": 75,
+    "K_true": 3,
+    "K_fit": 3,
+    "d": 9,
+    "true_models": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "poisson",
+      "poisson",
+      "poisson",
+      "cmp_nu2p0",
+      "cmp_nu2p0",
+      "cmp_nu2p0"
+    ],
+    "tau": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0
+    ],
+    "tau_source": "PR #129: Gaussian tau_real_mixed = 1; COUNT calibration value 2.0 (label 'EASY' there; chosen here because the count columns then carry a strong latent signal)",
+    "family_y": "bernoulli",
+    "w0": -1.0,
+    "w": 1.0,
+    "data_seeds": [
+      1661001,
+      1661002,
+      1661003,
+      1661004,
+      1661005,
+      1661006,
+      1661007,
+      1661008,
+      1661009,
+      1661010,
+      1661011,
+      1661012,
+      1661013,
+      1661014,
+      1661015,
+      1661016,
+      1661017,
+      1661018,
+      1661019,
+      1661020
+    ]
+  },
+  "masks": {
+    "source": "run_misspecification_m1.build_masks(r) (same seeds as M1/AF1)",
+    "test_ratio": 0.1,
+    "regimes": {
+      "dense": 1.0,
+      "sparse": 0.1
+    }
+  },
+  "candidates": {
+    "count": [
+      "poisson",
+      "cmp_nu2p0"
+    ],
+    "real": [
+      "gaussian"
+    ],
+    "other_groups": "PR #129 PRIMARY_PRIORITY (not expected to occur)",
+    "route": "trust_exact",
+    "tie_rule": "priority order (poisson first)",
+    "failed_candidate_rule": "PR #129: the Auto fit stops (SelectorStop); no other candidate wins by default"
+  },
+  "methods": {
+    "oracle": "true candidate models",
+    "wrong": "Poisson <-> CMP2 swap on every count column",
+    "support_only": "PR #129 rule: first admissible candidate (poisson on every count column)",
+    "auto_first": "hybrid selector, START_FIRST (Poisson start) -- PRIMARY",
+    "auto_last": "hybrid selector, START_LAST (CMP2 start) -- sensitivity",
+    "note": "support_only equals the one-directional misspecification (CMP2 columns as Poisson); wrong misspecifies all six count columns"
+  },
+  "em": {
+    "L": 5,
+    "exploration_iters": 8,
+    "refit_iters": 8,
+    "newton_alpha": 0.5,
+    "numerics": "consistent / generic",
+    "fail_fast": true
+  },
+  "seeds": {
+    "model_seed": "1662000 + r (all fits incl. Auto refit)",
+    "search_seed": "1663000 + r (both Auto starts)",
+    "series": 1
+  },
+  "primary_metric": "Procrustes RMSE(Z) of the joint posterior mode (E1 evaluator)",
+  "primary_contrasts": {
+    "delta_wrong": "RMSE(wrong) - RMSE(oracle)",
+    "delta_auto": "RMSE(auto_first) - RMSE(oracle)",
+    "benefit_wrong": "RMSE(wrong) - RMSE(auto_first)"
+  },
+  "key_secondary_contrasts": {
+    "delta_support_only": "RMSE(support_only) - RMSE(oracle)",
+    "benefit_support_only": "RMSE(support_only) - RMSE(auto_first)",
+    "auto_last_minus_auto_first": "RMSE(auto_last) - RMSE(auto_first)"
+  },
+  "statistical_unit": "replicate (20 independent datasets per regime)",
+  "interval": {
+    "type": "percentile bootstrap of the mean of replicate-level contrasts",
+    "resamples": 10000,
+    "seed": 20261110
+  },
+  "secondary_metrics": [
+    "true-family recovery per column (count columns, by true family)",
+    "gate-decided / score-decided columns",
+    "final margins and scores",
+    "start agreement",
+    "candidate optimiser convergence and failures",
+    "E-step backtracks",
+    "held-out Y log score / AUC",
+    "RMSE(Z) last / mean5",
+    "fit and mode failure rates"
+  ],
+  "planned_fits": 200,
+  "planned_em_runs": 280,
+  "missing_and_failure_rule": "FAILED fits and non-OK modes are kept, never retried or imputed; contrasts only where both members are OK, exclusions counted next to every summary, together with failure rates. Success-only accuracy is always reported with the failure rate.",
+  "technical_stop_conditions": [
+    "a test pair inside any train mask",
+    "data/mask hash differing between methods",
+    "Auto refit train mask differing from the cell's train mask",
+    "protocol.json differing from this protocol"
+  ],
+  "warnings_not_stops": [
+    "candidate optimiser non-convergence",
+    "non-OK joint mode",
+    "E-step backtracks",
+    "selector failures (they are results)"
+  ],
+  "artifacts": {
+    "results": "expfam/results/auto_family_z_recovery/af2_20261110",
+    "states_outside_repo": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110"
+  }
+}

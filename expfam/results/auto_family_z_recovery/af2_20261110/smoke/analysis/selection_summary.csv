@@ -1,0 +1,5 @@
+regime,method,n_fits,n_failed,count_columns_all_fits,correct_all_fits,count_columns_ok_fits,correct_ok_fits,fits_all_count_correct,score_decided_columns,true_poisson_columns_ok,true_poisson_sel_poisson,true_poisson_sel_cmp_nu2p0,true_cmp_nu2p0_columns_ok,true_cmp_nu2p0_sel_poisson,true_cmp_nu2p0_sel_cmp_nu2p0,margin_min,margin_median,margin_lt_2,final_nonconverged_columns
+dense,auto_first,1,0,6,6,6,6,1,6,3,3,0,3,0,3,11.068936974758515,18.407697318639606,0,2
+dense,auto_last,1,0,6,6,6,6,1,6,3,3,0,3,0,3,10.816309148810149,17.290948401937428,0,2
+sparse,auto_first,1,0,6,5,6,5,0,6,3,3,0,3,1,2,8.051881248813828,15.827915958531364,0,3
+sparse,auto_last,1,0,6,4,6,4,0,6,3,3,0,3,2,1,7.514520271037384,13.255241733151536,0,4

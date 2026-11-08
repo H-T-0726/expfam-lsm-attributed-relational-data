@@ -1,0 +1,11 @@
+regime,method,n_fits,n_failed,n_mode_not_ok,failure_reasons
+dense,oracle,1,0,0,
+dense,wrong,1,0,0,
+dense,support_only,1,0,0,
+dense,auto_first,1,0,0,
+dense,auto_last,1,0,0,
+sparse,oracle,1,0,0,
+sparse,wrong,1,0,0,
+sparse,support_only,1,0,0,
+sparse,auto_first,1,0,0,
+sparse,auto_last,1,0,0,
