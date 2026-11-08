@@ -1,0 +1,143 @@
+{
+ "protocol_hash": "2c61b2594ce3fed7edbd13ce15865fc77ea31c281a7de95142f0561ad11a3ef4",
+ "git_head": "433fc073d53855caf8494bb6032a977c72ca8f4d",
+ "datasets": [
+  {
+   "K_GEN": 1,
+   "data_seed": 9260100,
+   "w0_true": -1.5819995406403207,
+   "w_true": 2.4826997589526894,
+   "y_density": 0.268993288590604,
+   "frac_p_outside_0.01_0.99": 0.10335570469798658,
+   "x_var_mean": 18.391114013103927,
+   "FtF_eig_min": 267.57649547863326,
+   "x_finite": true,
+   "x_sha256": "790fb05348f9556c5bc0b0ff238d1b034aeb8141dd0b679f101c93d5cadc0b9a",
+   "y_sha256": "03bb65006822a3d90bb36588be8d8ab7c444d98377a43b965900821bda96201d"
+  },
+  {
+   "K_GEN": 3,
+   "data_seed": 9260300,
+   "w0_true": 0.07523698968984863,
+   "w_true": -5.086578880510187,
+   "y_density": 0.5039821029082774,
+   "frac_p_outside_0.01_0.99": 0.5208053691275167,
+   "x_var_mean": 19.696986032510697,
+   "FtF_eig_min": 46.88807761965585,
+   "x_finite": true,
+   "x_sha256": "492e311c90c1ba283db02c6007ca59f016a9ad3bf223bd5940745bf1e34f2715",
+   "y_sha256": "82af9565f6352c68bea5b96534dfd8a1b7229a611a3aff545603781cabcf22aa"
+  },
+  {
+   "K_GEN": 5,
+   "data_seed": 9260500,
+   "w0_true": 0.003059923909307645,
+   "w_true": -1.4092315952725527,
+   "y_density": 0.4986129753914989,
+   "frac_p_outside_0.01_0.99": 0.13225950782997764,
+   "x_var_mean": 36.50706691167454,
+   "FtF_eig_min": 27.098968925668565,
+   "x_finite": true,
+   "x_sha256": "4adad3c38d0c7f5335f3244baf62a99ae848b29eea40af6c1e7d0aff742b58d8",
+   "y_sha256": "54497fdd4e4fa1ec49382b9fb3d0099b4a0f798f05423d94c9e2af389fe20ab7"
+  },
+  {
+   "K_GEN": 7,
+   "data_seed": 9260700,
+   "w0_true": 0.4494814608887625,
+   "w_true": -4.403259953381799,
+   "y_density": 0.5175838926174496,
+   "frac_p_outside_0.01_0.99": 0.6423266219239374,
+   "x_var_mean": 58.336601651769485,
+   "FtF_eig_min": 51.705217565803764,
+   "x_finite": true,
+   "x_sha256": "d83be010012f7e1bec15cce18a43bff3f0ec2cc2320d3e2531036c9081744d83",
+   "y_sha256": "d07be8e53e3edec54495cf7f4bf6e35ec4f96c428ffee7594bdeb955b4f16fd5"
+  },
+  {
+   "K_GEN": 9,
+   "data_seed": 9260900,
+   "w0_true": -2.961355787318598,
+   "w_true": -4.315949398927865,
+   "y_density": 0.41217002237136463,
+   "frac_p_outside_0.01_0.99": 0.7260850111856824,
+   "x_var_mean": 93.61545190649899,
+   "FtF_eig_min": 13.969934052113084,
+   "x_finite": true,
+   "x_sha256": "fd7e3c10ad7557e2359611e53d07abdb73c8f026ccb6b06453334455a0f14ba3",
+   "y_sha256": "251fd4ffc88b0f2a5e7df96f75293e03ef960a267d7841a50394a4a38b7b9482"
+  }
+ ],
+ "true_state_scores": [
+  {
+   "key": "truth_K1",
+   "A_CQ": 10418.290998045248,
+   "B_CQ_minus_PZ": 9988.635082618584,
+   "C_cond_last": 9988.635082618584,
+   "lap_status": "OK",
+   "E_CLap": 11172.628486554415,
+   "D_cond_mode": 9829.83286725256,
+   "elbo_status": "OK",
+   "F_CELBO": 11175.276104752495,
+   "id1_resid": 1.5916157281026244e-12,
+   "id2_resid": 1.8189894035458565e-12
+  },
+  {
+   "key": "truth_K3",
+   "A_CQ": 6821.195915199365,
+   "B_CQ_minus_PZ": 5550.748774893489,
+   "C_cond_last": 5550.748774893489,
+   "lap_status": "OK",
+   "E_CLap": 8720.497191975777,
+   "D_cond_mode": 5123.0956209404085,
+   "elbo_status": "OK",
+   "F_CELBO": 8708.429400610908,
+   "id1_resid": -1.3642420526593924e-12,
+   "id2_resid": -1.8189894035458565e-12
+  },
+  {
+   "key": "truth_K5",
+   "A_CQ": 12283.780720212237,
+   "B_CQ_minus_PZ": 10163.14191789215,
+   "C_cond_last": 10163.14191789215,
+   "lap_status": "OK",
+   "E_CLap": 15265.085959126578,
+   "D_cond_mode": 9409.45438763503,
+   "elbo_status": "OK",
+   "F_CELBO": 15260.7522350935,
+   "id1_resid": 2.7284841053187847e-12,
+   "id2_resid": 1.8189894035458565e-12
+  },
+  {
+   "key": "truth_K7",
+   "A_CQ": 7504.9340526922515,
+   "B_CQ_minus_PZ": 4593.967728579498,
+   "C_cond_last": 4593.967728579498,
+   "lap_status": "OK",
+   "E_CLap": 12060.44214751065,
+   "D_cond_mode": 3593.3161389641086,
+   "elbo_status": "OK",
+   "F_CELBO": 12068.7607929365,
+   "id1_resid": -5.4569682106375694e-12,
+   "id2_resid": -4.547473508864641e-12
+  },
+  {
+   "key": "truth_K9",
+   "A_CQ": 7815.8733099529245,
+   "B_CQ_minus_PZ": 3889.772763144194,
+   "C_cond_last": 3889.7727631441935,
+   "lap_status": "OK",
+   "E_CLap": 13412.93063115067,
+   "D_cond_mode": 2529.228621654739,
+   "elbo_status": "OK",
+   "F_CELBO": 13432.194043063946,
+   "id1_resid": 2.7284841053187847e-11,
+   "id2_resid": 2.7284841053187847e-11
+  }
+ ],
+ "seed_check": {
+  "n_new": 505,
+  "prior_values_scanned": 3344,
+  "collisions": []
+ }
+}
