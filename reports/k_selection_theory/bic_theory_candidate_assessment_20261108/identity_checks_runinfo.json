@@ -1,0 +1,19 @@
+{
+  "script": "tools/research_audit/bic_theory_identity_checks_20261108.py",
+  "git_head": "bfa946e8cfe23d577c8165104f4d6a05df8d37a1",
+  "tools_or_reproduction_dirty": false,
+  "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "numpy": "2.3.5",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "n_identity_checks": 39,
+  "n_identity_pass": 39,
+  "n_informative_values": 7,
+  "tiny_model_values": {
+    "l_marg": -10.622952209501134,
+    "l_lap": -10.518122841256705,
+    "elbo_lap": -10.66985424571007,
+    "kl_q_post": 0.0469020364766029,
+    "R3": 0.15173140445336486
+  },
+  "note": "THEORY/AUDIT identity checks; no MCEM fit, no K selection"
+}

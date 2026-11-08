@@ -1,0 +1,47 @@
+check_id,kind,description,lhs,rhs,abs_diff,tol,pass
+T0,identity,posterior integrates to 1 on the grid,1,1,4.441e-16,1.0e-10,True
+T2a,identity,"E_post log p(X,Y|Z) = l_marg + KL(post||prior)",-9.93445090364,-9.93445090364,5.329e-15,1.0e-09,True
+T2b,identity,E_post log p(Z) = -KL(post||prior) - H(post),-4.13858620998,-4.13858620998,0.000e+00,1.0e-09,True
+T2c,identity,"-2 E_post log p(X,Y,Z) = -2 l_marg + 2 H(post)  (C_Q core)",28.1460742272,28.1460742272,1.421e-14,1.0e-08,True
+T2d,identity,"-2 E_post log p(X,Y|Z) = -2 l_marg - 2 KL(post||prior)  (C_Q - P_Z core)",19.8689018073,19.8689018073,1.066e-14,1.0e-08,True
+T3,identity,"d/dc l_marg(cF, w0, c^2 w)|c=1 = E_post||Z||^2 - nK (generic theta)",-0.236458777501,-0.236458779258,1.757e-09,1.0e-06,True
+T4pre,identity,joint mode is stationary (max|grad Phi|),1.66533453694e-16,0,1.665e-16,1.0e-10,True
+T1,identity,"l_marg = E_q log p(X,Y,Z) + H(q) + KL(q||post), q = N(Zhat,H^-1)",-10.6229522095,-10.6229522092,2.677e-10,1.0e-08,True
+T1b,informative_value,"KL(q_Lap || post) >= 0 (value reported; lhs=KL, rhs=0)",0.0469020364766,0,4.690e-02,4.7e-02,n/a
+T1c,identity,same identity for an arbitrary Gaussian q (not the mode),-10.6229522095,-10.6229522089,5.875e-10,1.0e-08,True
+T4,identity,ELBO(q_Lap) = l_Lap - R3,-10.6698542457,-10.6698542457,0.000e+00,1.0e-09,True
+T4b,informative_value,"Laplace error l_marg - l_Lap (value; rhs=0, informative)",-0.104829368244,0,1.048e-01,1.0e-01,n/a
+T4c,informative_value,"R3 (value; rhs=0, informative)",0.151731404453,0,1.517e-01,1.5e-01,n/a
+T5a,identity,FA exact MLE: E_post||Z||^2 = nK,80,80,2.444e-12,1.0e-07,True
+T5b,informative_value,"FA non-stationary theta (1.3 F): E_post||Z||^2 - nK (value; rhs=0, informative, expected != 0)",-26.3355387533,0,2.634e+01,2.6e+01,n/a
+T5c,identity,FA: Laplace l_Lap = exact l_marg,-207.615183413,-207.615183413,2.842e-14,1.0e-08,True
+T5d,identity,FA: R3 = 0 for quadratic Phi,0,0,0.000e+00,1.0e-09,True
+T5e,identity,FA exact MLE: -2 E_post log p(Z) = nK(1+ln 2pi),227.030165313,227.030165313,2.444e-12,1.0e-07,True
+T6_K1,identity,"rank J(F,Psi) generic, d=15, K=1 vs min(dK+d-K(K-1)/2, d(d+1)/2)",30,30,0.000e+00,0.0e+00,True
+T6F_K1,identity,"rank J(F -> FF^T) generic, d=15, K=1 vs dK-K(K-1)/2",15,15,0.000e+00,0.0e+00,True
+T6_K2,identity,"rank J(F,Psi) generic, d=15, K=2 vs min(dK+d-K(K-1)/2, d(d+1)/2)",44,44,0.000e+00,0.0e+00,True
+T6F_K2,identity,"rank J(F -> FF^T) generic, d=15, K=2 vs dK-K(K-1)/2",29,29,0.000e+00,0.0e+00,True
+T6_K3,identity,"rank J(F,Psi) generic, d=15, K=3 vs min(dK+d-K(K-1)/2, d(d+1)/2)",57,57,0.000e+00,0.0e+00,True
+T6F_K3,identity,"rank J(F -> FF^T) generic, d=15, K=3 vs dK-K(K-1)/2",42,42,0.000e+00,0.0e+00,True
+T6_K4,identity,"rank J(F,Psi) generic, d=15, K=4 vs min(dK+d-K(K-1)/2, d(d+1)/2)",69,69,0.000e+00,0.0e+00,True
+T6F_K4,identity,"rank J(F -> FF^T) generic, d=15, K=4 vs dK-K(K-1)/2",54,54,0.000e+00,0.0e+00,True
+T6_K5,identity,"rank J(F,Psi) generic, d=15, K=5 vs min(dK+d-K(K-1)/2, d(d+1)/2)",80,80,0.000e+00,0.0e+00,True
+T6F_K5,identity,"rank J(F -> FF^T) generic, d=15, K=5 vs dK-K(K-1)/2",65,65,0.000e+00,0.0e+00,True
+T6_K6,identity,"rank J(F,Psi) generic, d=15, K=6 vs min(dK+d-K(K-1)/2, d(d+1)/2)",90,90,0.000e+00,0.0e+00,True
+T6F_K6,identity,"rank J(F -> FF^T) generic, d=15, K=6 vs dK-K(K-1)/2",75,75,0.000e+00,0.0e+00,True
+T6_K7,identity,"rank J(F,Psi) generic, d=15, K=7 vs min(dK+d-K(K-1)/2, d(d+1)/2)",99,99,0.000e+00,0.0e+00,True
+T6F_K7,identity,"rank J(F -> FF^T) generic, d=15, K=7 vs dK-K(K-1)/2",84,84,0.000e+00,0.0e+00,True
+T6_K8,identity,"rank J(F,Psi) generic, d=15, K=8 vs min(dK+d-K(K-1)/2, d(d+1)/2)",107,107,0.000e+00,0.0e+00,True
+T6F_K8,identity,"rank J(F -> FF^T) generic, d=15, K=8 vs dK-K(K-1)/2",92,92,0.000e+00,0.0e+00,True
+T6_K9,identity,"rank J(F,Psi) generic, d=15, K=9 vs min(dK+d-K(K-1)/2, d(d+1)/2)",114,114,0.000e+00,0.0e+00,True
+T6F_K9,identity,"rank J(F -> FF^T) generic, d=15, K=9 vs dK-K(K-1)/2",99,99,0.000e+00,0.0e+00,True
+T6_K10,identity,"rank J(F,Psi) generic, d=15, K=10 vs min(dK+d-K(K-1)/2, d(d+1)/2)",120,120,0.000e+00,0.0e+00,True
+T6F_K10,identity,"rank J(F -> FF^T) generic, d=15, K=10 vs dK-K(K-1)/2",105,105,0.000e+00,0.0e+00,True
+T6_K11,identity,"rank J(F,Psi) generic, d=15, K=11 vs min(dK+d-K(K-1)/2, d(d+1)/2)",120,120,0.000e+00,0.0e+00,True
+T6F_K11,identity,"rank J(F -> FF^T) generic, d=15, K=11 vs dK-K(K-1)/2",110,110,0.000e+00,0.0e+00,True
+T6_K12,identity,"rank J(F,Psi) generic, d=15, K=12 vs min(dK+d-K(K-1)/2, d(d+1)/2)",120,120,0.000e+00,0.0e+00,True
+T6F_K12,identity,"rank J(F -> FF^T) generic, d=15, K=12 vs dK-K(K-1)/2",114,114,0.000e+00,0.0e+00,True
+T6sing_K3,informative_value,"rank J(F,Psi) with zero last column, K=3 (value vs generic count; informative, expected lower)",44,57,1.300e+01,1.3e+01,n/a
+T6sing_K5,informative_value,"rank J(F,Psi) with zero last column, K=5 (value vs generic count; informative, expected lower)",69,80,1.100e+01,1.1e+01,n/a
+T7a,identity,after scale_Z: -2 Q_Z (L-sample mean) = nK(1+ln 2pi),1064.2038999,1064.2038999,0.000e+00,1.0e-08,True
+T7b,informative_value,"after scale_Z: ||Z_last||^2 - nK (value; informative, identity is for the L-sample mean only)",-2.82239883106,0,2.822e+00,2.8e+00,n/a
