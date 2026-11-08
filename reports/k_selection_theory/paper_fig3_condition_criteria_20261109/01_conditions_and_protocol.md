@@ -3,7 +3,7 @@
 ## 位置づけ
 
 - **ブランチ**：`research/paper-fig3-condition-criteria-20261109`。PR #164 の先端 `433fc07` から分岐した。
-- **系列**：E（prototype）。本文採用は未決定。
+- **系列**：E（prototype）。原稿採用は**不可**（`EXPERIMENT_REGISTRY.md` の行）。prototype の昇格は Human Gate である。
 - **本研究は原論文 Experiment 2 の再現ではない。**
   - 推定器は系列 E である。
   - 原論文の条件には、記載がないものがある（下表の ASSUMED・UNKNOWN）。
@@ -45,7 +45,7 @@
 | 初期値 | 記載なし | `em_runner` の informed init | IMPLEMENTED / 原論文は UNKNOWN |
 | BIC の Z の評価点 | 記載なし | 同じ fit の状態に 6 基準を適用 | UNKNOWN（原論文） |
 | 試行の集計（Exp.2） | 記載なし | 試行ごとの選択（主）＋平均・最小（副） | UNKNOWN（原論文） |
-| 罰則 | ((K+1)d − K(K−1)/2) ln n | Kd − K(K−1)/2 + d（Gaussian-X） | **EXACT**（同じ式） |
+| 罰則 | ((K+1)d − K(K−1)/2) ln n | Kd − K(K−1)/2 + d（Gaussian-X） | 式は **EXACT**（同じ値）。数えているパラメータの内訳は違う（原論文の +d は μ_x か Σ か不明。系列 E は Σ を数える。どちらも w0・w を数えない） |
 
 **既存の再現コードとの違い**：MATLAB/Python の生成器（PR #139 の paper-type）は、原論文の本文と違う。
 
@@ -59,13 +59,13 @@
 | 項目 | 内容 |
 |---|---|
 | プロトコル | `tools/research_audit/paper_fig3_protocol.py`（hash `2c61b2594ce3…`） |
-| commit | runner と no-fit の preflight は `16e4deb`。fit の前である |
+| commit | プロトコルと runner は `16e4deb`（22:05:40）。fit（22:05:50 開始）の前である。**no-fit の preflight は、その 9 秒前（22:05:31）に、commit 前のコードで実行された**（preflight.json の git_head は `433fc07`）。preflight には、作業ツリーのチェックがない。protocol hash と、データの x/y hash は fit と一致する |
 | 解析スクリプト | `d975c5d`。どの採点値も読む前に commit した。合成データでのドライランの後、空のケースへの対処と相対曲線の計算を直した（`d609dfa`）。実際の値は読んでいない |
 | データ | K_GEN ごとに 1 データ。data_seed = 9260000 + 100·K_GEN |
 | 試行 | model_seed = 9300000 + 10000·K_GEN + 100·K + t。初期化と E-step の乱数に使う |
 | fit の数 | 5 × 10 × 10 = **500** |
 | 推定器 | `run_em_instrumented`（Gaussian-X、Bernoulli-Y、L=10、10 反復、全ペア、consistent、on_nan=fail）。コードは変更していない |
-| C_ELBO の MC | M=2048、8 バッチ（PR #164 と同じ予算） |
+| C_ELBO の MC | M=2048、8 バッチ（PR #164 と同じ予算）。**seed の先頭は、プロトコルの記載 20261109 ではなく、実装上 20261108 だった**（`run_criterion_impact.score_state` の既定。phase=3・signal=3 の値で、過去の seed とは重ならない）。妥当性には影響しないが、プロトコルとの相違として記録する |
 | 選択 | 試行ごとの argmin（主）。1e−12 以内の同点は小さい K。欠けている K があれば INCOMPLETE（補完しない）。副として、10 試行の平均（全試行が有限なとき）と最小（参考）でも選ぶ |
 | 失敗の扱い | 再試行・seed の変更・反復の追加はしない |
 
@@ -87,5 +87,5 @@
 **仮定した w の規則の結果**
 - w = 3·N(0,1) により、|w| は 1.4〜5.1 になった（K_GEN=1 だけ正）。
 - **Y は強く飽和している**（多くのペアで確率が 0 か 1 に近い）。w の符号は、seed による偶然である。
-- X の信号は非常に強い。$F^	op F$ の最小固有値は 14〜268 で、雑音の分散は 0.1 である。
+- X の信号は非常に強い。$F^\top F$ の最小固有値は 14〜268 で、雑音の分散は 0.1 である。
 - これらは、**論文の記載ではない仮定に依存する**。
