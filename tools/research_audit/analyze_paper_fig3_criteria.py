@@ -135,7 +135,9 @@ def main():
                          "abs_change_last": abs(q[-1] - q[-2]), "rel_change_last": abs(q[-1] - q[-2]) / abs(q[-1]),
                          "abs_change_last3_max": max(abs(q[i] - q[i - 1]) for i in range(len(q) - 3, len(q))),
                          "q_increase_last3": sum(q[i] > q[i - 1] for i in range(len(q) - 3, len(q)))})
-    fits, conv = pd.DataFrame(fits), pd.DataFrame(conv)
+    fits = pd.DataFrame(fits)
+    conv = pd.DataFrame(conv, columns=["kgen", "k", "trial", "q_last", "abs_change_last", "rel_change_last",
+                                       "abs_change_last3_max", "q_increase_last3"])
     convs = conv.groupby(["kgen", "k"]).agg(median_abs_change_last=("abs_change_last", "median"),
                                             max_abs_change_last=("abs_change_last", "max"),
                                             median_rel_change_last=("rel_change_last", "median")).reset_index()
@@ -161,7 +163,8 @@ def main():
             cmp_rows.append(r)
     cmp_ = pd.DataFrame(cmp_rows)
     for c in ("paper_bic_read", "CQ_median_over_trials", "CLap_median_over_trials", "CELBO_median_over_trials", "cond_MC_median_over_trials"):
-        cmp_[c + "_minus_at_KGEN"] = cmp_.groupby("K_GEN")[c].transform(lambda s: s - s.iloc[cmp_.loc[s.index, "k"].tolist().index(cmp_.loc[s.index, "K_GEN"].iloc[0])])
+        ref = cmp_[cmp_.k == cmp_.K_GEN].set_index("K_GEN")[c]
+        cmp_[c + "_minus_at_KGEN"] = cmp_[c] - cmp_.K_GEN.map(ref)
     write(df, "score_by_state.csv")
     write(sel, "selection_per_trial.csv")
     write(summ, "selection_summary.csv")
