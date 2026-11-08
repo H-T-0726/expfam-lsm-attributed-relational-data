@@ -1,0 +1,20 @@
+{"event": "STARTED", "fit_key": "rep01_dense_oracle", "time_utc": "2026-11-08T18:38:42.351371+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_dense_oracle", "status": "OK", "time_utc": "2026-11-08T18:39:01.241984+00:00"}
+{"event": "STARTED", "fit_key": "rep01_dense_wrong", "time_utc": "2026-11-08T18:39:01.242404+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_dense_wrong", "status": "OK", "time_utc": "2026-11-08T18:39:18.564249+00:00"}
+{"event": "STARTED", "fit_key": "rep01_dense_support_only", "time_utc": "2026-11-08T18:39:18.564731+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_dense_support_only", "status": "OK", "time_utc": "2026-11-08T18:39:27.881564+00:00"}
+{"event": "STARTED", "fit_key": "rep01_dense_auto_first", "time_utc": "2026-11-08T18:39:27.881947+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_dense_auto_first", "status": "OK", "time_utc": "2026-11-08T18:40:00.212305+00:00"}
+{"event": "STARTED", "fit_key": "rep01_dense_auto_last", "time_utc": "2026-11-08T18:40:00.212898+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_dense_auto_last", "status": "OK", "time_utc": "2026-11-08T18:40:32.632587+00:00"}
+{"event": "STARTED", "fit_key": "rep01_sparse_oracle", "time_utc": "2026-11-08T18:40:32.633035+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_sparse_oracle", "status": "OK", "time_utc": "2026-11-08T18:40:49.554737+00:00"}
+{"event": "STARTED", "fit_key": "rep01_sparse_wrong", "time_utc": "2026-11-08T18:40:49.555379+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_sparse_wrong", "status": "OK", "time_utc": "2026-11-08T18:41:06.757141+00:00"}
+{"event": "STARTED", "fit_key": "rep01_sparse_support_only", "time_utc": "2026-11-08T18:41:06.757663+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_sparse_support_only", "status": "OK", "time_utc": "2026-11-08T18:41:15.994402+00:00"}
+{"event": "STARTED", "fit_key": "rep01_sparse_auto_first", "time_utc": "2026-11-08T18:41:15.994864+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_sparse_auto_first", "status": "OK", "time_utc": "2026-11-08T18:41:48.543046+00:00"}
+{"event": "STARTED", "fit_key": "rep01_sparse_auto_last", "time_utc": "2026-11-08T18:41:48.544110+00:00"}
+{"event": "FINISHED", "fit_key": "rep01_sparse_auto_last", "status": "OK", "time_utc": "2026-11-08T18:42:19.231777+00:00"}

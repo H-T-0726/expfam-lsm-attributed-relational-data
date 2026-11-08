@@ -1,0 +1,13 @@
+replicate,regime,column,auto_first,auto_last,agree
+rep01,dense,3,poisson,poisson,True
+rep01,dense,4,poisson,poisson,True
+rep01,dense,5,poisson,poisson,True
+rep01,dense,6,cmp_nu2p0,cmp_nu2p0,True
+rep01,dense,7,cmp_nu2p0,cmp_nu2p0,True
+rep01,dense,8,cmp_nu2p0,cmp_nu2p0,True
+rep01,sparse,3,poisson,poisson,True
+rep01,sparse,4,poisson,poisson,True
+rep01,sparse,5,poisson,poisson,True
+rep01,sparse,6,poisson,poisson,True
+rep01,sparse,7,cmp_nu2p0,cmp_nu2p0,True
+rep01,sparse,8,cmp_nu2p0,poisson,False

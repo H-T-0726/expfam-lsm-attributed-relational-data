@@ -1,0 +1,5 @@
+regime,method,trace_rows,rows_not_selected,rows_nonconverged,max_grad_inf_median,max_grad_inf_max
+dense,auto_first,48,0,25,1.130984821351433e-08,4.004619569508705e-06
+dense,auto_last,48,0,28,2.9530803386662585e-08,6.123372696320573e-06
+sparse,auto_first,48,0,35,4.525875576533167e-08,7.189393239981356e-06
+sparse,auto_last,48,0,35,9.423758648985369e-08,5.918876120247773e-06
