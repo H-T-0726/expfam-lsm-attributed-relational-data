@@ -1059,6 +1059,7 @@ def run_family_exploration(
     newton_alpha: float = 0.5,
     verbose: bool = False,
     candidate_optimizer: str = PHASE9C_CANDIDATE_OPTIMIZER,
+    train_mask: np.ndarray | None = None,
 ) -> ExplorationResult:
     """Exploration MCEM with an A-type family update inside each M-step.
 
@@ -1074,6 +1075,13 @@ def run_family_exploration(
     The reported fit does NOT come from this loop.  It comes from the fresh
     fixed-assignment refit in ``run_hybrid_family_selection``, which uses the
     unmodified ``run_em_experimental``.
+
+    ``train_mask`` (opt-in, default ``None``) is the symmetric (n, n) boolean
+    mask of the Y pairs the fit may see.  It is handed unchanged to the model
+    constructor, exactly as ``em_runner.build_model`` does, so the E-step, the
+    w0 / w updates and the informed init read only the masked pairs.  ``None``
+    keeps the historical behaviour (every off-diagonal pair).  The candidate
+    score uses X and the E-step samples only; nothing about it changes.
     """
 
     n, d = X.shape
@@ -1081,7 +1089,7 @@ def run_family_exploration(
     model = FamilySelectingPerColumnLSM(
         gates=gates, n=n, d=d, k=k, L=L,
         family_x_list=list(initial_families), family_y=family_y,
-        candidate_optimizer=candidate_optimizer)
+        candidate_optimizer=candidate_optimizer, train_mask=train_mask)
     model.initialize_params(true_params=None, seed=seed)
 
     # Informed init, Y side (mirrors em_runner.run_em_experimental).
@@ -1206,6 +1214,7 @@ def run_hybrid_family_selection(
     verbose: bool = False,
     execution_hook: Any = None,
     candidate_optimizer: str = PHASE9C_CANDIDATE_OPTIMIZER,
+    train_mask: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Scheme C: A-type exploration, then a fresh fixed-assignment refit.
 
@@ -1241,7 +1250,7 @@ def run_hybrid_family_selection(
     exploration = run_family_exploration(
         X, Y, k=k, gates=gates, initial_families=start, family_y=family_y,
         L=L, num_iter=exploration_num_iter, seed=search_seed, verbose=verbose,
-        candidate_optimizer=candidate_optimizer)
+        candidate_optimizer=candidate_optimizer, train_mask=train_mask)
     _notify("exploration", "SUCCESS", search_seed)
 
     # failure_policy='fail_fast' is required here, not optional. The legacy
@@ -1255,7 +1264,7 @@ def run_hybrid_family_selection(
         num_iter=refit_num_iter, seed=refit_seed,
         family_x_list=exploration.selected_assignment,
         compute_strict_Q=True, numerics_mode="consistent",
-        failure_policy="fail_fast", verbose=verbose)
+        failure_policy="fail_fast", verbose=verbose, train_mask=train_mask)
     _notify("refit", "SUCCESS", refit_seed)
     _require(refit.get("failure_policy") == "fail_fast",
              "the reported refit did not run under failure_policy='fail_fast'")
