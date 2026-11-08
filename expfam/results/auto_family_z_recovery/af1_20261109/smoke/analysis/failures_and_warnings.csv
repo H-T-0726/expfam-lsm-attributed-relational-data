@@ -1,0 +1,5 @@
+fit_key,kind,detail,stage
+A_rep01_dense_auto_pstart,CANDIDATE_NONCONVERGENCE_WARNING,rows=10 final_candidates=3,exploration
+A_rep01_dense_auto_bstart,CANDIDATE_NONCONVERGENCE_WARNING,rows=11 final_candidates=3,exploration
+A_rep01_sparse_auto_pstart,CANDIDATE_NONCONVERGENCE_WARNING,rows=8 final_candidates=1,exploration
+A_rep01_sparse_auto_bstart,CANDIDATE_NONCONVERGENCE_WARNING,rows=12 final_candidates=2,exploration
