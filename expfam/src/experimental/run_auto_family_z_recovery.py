@@ -486,6 +486,15 @@ def main(argv=None) -> int:
     tables = {n: load(n) for n in ("fit_runs.csv", "fit_estimators.csv", "selection_columns.csv",
                                     "selection_trace.csv", "candidate_scores.csv")}
     attempts = load("attempts.csv")
+    # D3 (pre-run audit): rows already written for a fit that never logged
+    # FINISHED belong to an interrupted attempt; drop them before the re-run so
+    # no fit_key appears twice.  The interruption itself stays in attempts.csv.
+    if interrupted:
+        for name in tables:
+            tables[name] = [r for r in tables[name]
+                            if r.get("fit_key", "_".join([r.get("series", ""), r.get("replicate", ""),
+                                                          r.get("regime", ""), r.get("method", "")]))
+                            not in set(interrupted)]
     for k in interrupted:
         attempts.append({"fit_key": k, "event": "INTERRUPTED_BEFORE_FINISH",
                          "action": "re-run on resume with identical seeds (not a failure retry)",

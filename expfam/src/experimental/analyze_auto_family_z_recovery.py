@@ -128,6 +128,8 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
         "missing_planned_fits": sorted(planned_keys - present) if stage.name == "full" else [],
         "fits_recorded": len(runs),
         "unknown_fit_keys": sorted(present - planned_keys),
+        "duplicate_fit_keys": sorted({r["fit_key"] for r in runs
+                                      if sum(x["fit_key"] == r["fit_key"] for x in runs) > 1}),
         "hash_mismatches": hash_mismatch,
         "train_test_overlap_total": int(sum(int(r["train_test_overlap"]) for r in runs)),
         "refit_mask_mismatch": [r["fit_key"] for r in ok_runs if r.get("refit_mask_matches") != "True"],
@@ -137,6 +139,7 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
         "nan_occurred": [r["fit_key"] for r in ok_runs if r.get("nan_occurred") == "True"],
     }
     integrity["pass"] = not (integrity["unknown_fit_keys"] or hash_mismatch
+                             or integrity["duplicate_fit_keys"]
                              or integrity["train_test_overlap_total"]
                              or integrity["missing_planned_fits"]
                              or integrity["refit_mask_mismatch"]
@@ -230,8 +233,9 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
                     rs_rows.append({"series": s, "regime": reg, "estimator": est, "method": m,
                                     "n_fits": len(fits),
                                     "n_fit_failed": sum(r["status"] != "OK" for r in fits),
-                                    "n_estimator_not_ok": sum(not np.isfinite(v) for v in vals)
-                                    - sum(r["status"] != "OK" for r in fits),
+                                    # estimator rows exist only for fits whose EM finished
+                                    "n_estimator_not_ok": sum(not np.isfinite(v) for v in vals),
+                                    "n_with_value": sum(np.isfinite(v) for v in vals),
                                     **{f"rmse_{k}": v for k, v in dist(vals).items()}})
     write(out / "rmse_summary.csv", rs_rows)
 
