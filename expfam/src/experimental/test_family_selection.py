@@ -474,6 +474,14 @@ UNTOUCHED_EXPERIMENTAL = (
 # test_failure_policy_defaults_to_legacy in the harness test module.
 AUTHORISED_MODIFICATIONS = (
     "expfam/src/experimental/em_runner.py",
+    # AF1 (2026-11-09, researcher-approved scope): opt-in train_mask
+    # pass-through only (no E-step / objective / score / optimiser change),
+    # the signature test that names that argument, this list itself, and the
+    # append-only registry row.
+    "expfam/src/experimental/family_selection.py",
+    "expfam/src/experimental/test_joint_family_k_selection.py",
+    "expfam/src/experimental/test_family_selection.py",
+    "EXPERIMENT_REGISTRY.md",
 )
 
 

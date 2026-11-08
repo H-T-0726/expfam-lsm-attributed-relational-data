@@ -1,0 +1,189 @@
+{
+  "experiment": "AF1",
+  "mode": "CONFIRMATORY (pre-registered before any AF1 result was read)",
+  "research_question": "When misspecifying the observation family of attribute data X degrades recovery of the shared latent structure Z, how much of that degradation does automatic per-column family selection prevent?",
+  "lineage": "E-consistent per-column (experimental prototype; not adoptable for the manuscript)",
+  "half_factor": "adopted equations, no extra 1/2 (fixed lineage via DualExpFamLSMMasked)",
+  "generator": "canonical-clean-mixed-v1 via run_misspecification_m1.generate (M1, unchanged)",
+  "data": {
+    "n": 75,
+    "d": 12,
+    "K_true": 3,
+    "K_fit": 3,
+    "family_x_true": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "poisson",
+      "poisson",
+      "poisson"
+    ],
+    "family_y": "bernoulli",
+    "w0": -1.0,
+    "w": 1.0,
+    "f_scale": 1.4142135623730951,
+    "gaussian_x_variance": 1.0,
+    "data_seeds": [
+      1001001,
+      1001002,
+      1001003,
+      1001004,
+      1001005,
+      1001006,
+      1001007,
+      1001008,
+      1001009,
+      1001010,
+      1001011,
+      1001012,
+      1001013,
+      1001014,
+      1001015,
+      1001016,
+      1001017,
+      1001018,
+      1001019,
+      1001020
+    ],
+    "n_replicates": 20
+  },
+  "masks": {
+    "source": "run_misspecification_m1.build_masks(r) (unchanged)",
+    "test_ratio": 0.1,
+    "regimes": {
+      "dense": 1.0,
+      "sparse": 0.1
+    },
+    "split_seed": "1341000 + r",
+    "thin_seed": "1342000 + 10 r + i",
+    "rule": "all methods and both Auto stages see the same train mask; test pairs are never in any train mask"
+  },
+  "methods": {
+    "oracle": {
+      "families": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "bernoulli",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "fit": "run_em_experimental, fixed"
+    },
+    "wrong": {
+      "families": [
+        "gaussian",
+        "gaussian",
+        "gaussian",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson",
+        "poisson"
+      ],
+      "fit": "run_em_experimental, fixed"
+    },
+    "auto_pstart": {
+      "selector": "family_selection.run_hybrid_family_selection",
+      "ambiguous_start": "poisson",
+      "role": "PRIMARY Auto"
+    },
+    "auto_bstart": {
+      "selector": "family_selection.run_hybrid_family_selection",
+      "ambiguous_start": "bernoulli",
+      "role": "sensitivity (start dependence)"
+    },
+    "auto_settings": {
+      "exploration_iters": 8,
+      "refit_iters": 8,
+      "candidate_optimizer": "bfgs",
+      "candidate_set_for_01_columns": [
+        "bernoulli",
+        "poisson"
+      ],
+      "score": "Q_l(m) = mean over the L fixed E-step samples of sum_i log p_m(x_il | f_lm^T z_i), full normaliser, f_lm optimised per candidate",
+      "tie_rule": "bernoulli > poisson > gaussian (exact ties only)"
+    },
+    "primary_auto_start_rationale": "The Poisson start begins at the Wrong assignment, so any recovery is attributable to the selector and not to the initial assignment."
+  },
+  "em": {
+    "L": 5,
+    "num_iter": 8,
+    "numerics_mode": "consistent",
+    "failure_policy": "fail_fast",
+    "K_fixed": 3
+  },
+  "seeds": {
+    "series": {
+      "A": "1343000 + r",
+      "B": "1344000 + r"
+    },
+    "oracle_wrong_seed": "series model seed (identical to E1 Part A / B)",
+    "auto_refit_seed": "series model seed",
+    "auto_search_seed": {
+      "A": "1345000 + r",
+      "B": "1346000 + r"
+    },
+    "note": "the two series and the two starts reuse the same data; they are NOT independent datasets"
+  },
+  "primary_metric": "Procrustes RMSE(Z) of the joint posterior mode (E1 'mode', Z0 = last)",
+  "primary_contrasts": {
+    "delta_wrong": "RMSE(wrong) - RMSE(oracle)",
+    "delta_auto": "RMSE(auto_pstart) - RMSE(oracle)",
+    "benefit": "RMSE(wrong) - RMSE(auto_pstart)"
+  },
+  "statistical_unit": "replicate (20 independent datasets per regime)",
+  "replicate_aggregation": "per replicate and regime, the contrast is the mean over the seed series in which both fits and both modes are OK; series results are also reported separately",
+  "interval": {
+    "type": "percentile bootstrap of the mean of replicate-level contrasts",
+    "resamples": 10000,
+    "seed": 20261109
+  },
+  "secondary_metrics": [
+    "RMSE(Z) for last and mean5",
+    "true-family recovery per column",
+    "number of gate-decided and score-decided columns",
+    "final margins and scores",
+    "Bernoulli-start vs Poisson-start agreement",
+    "held-out Y mean log score and AUC",
+    "gram correlation",
+    "candidate optimiser convergence",
+    "fit and mode failure rates",
+    "reproduction of E1 oracle/wrong RMSE (diagnostic)"
+  ],
+  "planned_fits": 320,
+  "planned_em_runs": 480,
+  "missing_and_failure_rule": "FAILED fits and non-OK modes are kept, never retried or imputed. A contrast is computed only where both members are OK; the number excluded is reported next to every summary together with the failure rate.",
+  "technical_stop_conditions": [
+    "a test pair inside any train mask",
+    "data or mask hash differing between methods of a cell",
+    "Auto refit train mask differing from the cell's train mask",
+    "retry / replacement / seed-rescue count > 0",
+    "protocol.json on disk differing from this protocol"
+  ],
+  "warnings_not_stops": [
+    "candidate optimiser non-convergence (recorded; the selection stands)",
+    "non-OK joint mode (recorded; excluded pairwise)",
+    "E1 reproduction mismatch (diagnostic)"
+  ],
+  "artifacts": {
+    "results": "expfam/results/auto_family_z_recovery/af1_20261109",
+    "states_outside_repo": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af1_20261109"
+  }
+}

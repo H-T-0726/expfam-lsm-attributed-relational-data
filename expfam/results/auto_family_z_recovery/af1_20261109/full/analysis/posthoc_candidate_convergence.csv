@@ -1,0 +1,5 @@
+candidate,regime,trace_rows,nonconverged_rows,nonconverged_grad_inf_median,nonconverged_grad_inf_max,tolerance
+bernoulli,dense,3840,324,2.9580371968540575e-08,4.392641626771443e-07,1e-08
+bernoulli,sparse,3840,302,3.250367787144271e-08,4.402044162965524e-07,1e-08
+poisson,dense,3840,573,3.4935346171494075e-08,1.0313873445966238e-06,1e-08
+poisson,sparse,3840,526,4.1608437428841685e-08,8.20449923644162e-07,1e-08

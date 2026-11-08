@@ -1,0 +1,40 @@
+{
+  "experiment": "AF1",
+  "script": "expfam/src/experimental/run_auto_family_z_recovery.py",
+  "git_head": "0ec4379b325a0575ad2417b6e15d95f6ae7f630a",
+  "git_branch": "experiment/auto-family-selection-z-recovery",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "sklearn": "1.8.0",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "eb71be5d622c8325c3e456a812def8518e73f62ff3fc32ad1deb60b236e5bcea",
+  "command": "expfam/src/experimental/run_auto_family_z_recovery.py --execute",
+  "stage": "full",
+  "planned_fits": 320,
+  "finished_fits": 320,
+  "state_dir": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af1_20261109\\full\\fits",
+  "sessions": [
+    {
+      "started_utc": "2026-11-08T16:13:57.559997+00:00",
+      "finished_utc": "2026-11-08T17:38:02.335096+00:00",
+      "runtime_s": 5044.8,
+      "fits_run": 320,
+      "git_head": "0ec4379b325a0575ad2417b6e15d95f6ae7f630a",
+      "command": "expfam/src/experimental/run_auto_family_z_recovery.py --execute"
+    }
+  ],
+  "seeds": {
+    "series_model_seed_base": {
+      "A": 1343000,
+      "B": 1344000
+    },
+    "search_seed_base": {
+      "A": 1345000,
+      "B": 1346000
+    },
+    "bootstrap_seed": 20261109
+  }
+}

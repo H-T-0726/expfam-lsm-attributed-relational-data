@@ -268,7 +268,12 @@ def test_C_the_driver_has_no_warm_start_input():
     assert params == {"X", "Y", "k", "ambiguous_start", "family_y", "L",
                       "exploration_num_iter", "refit_num_iter",
                       "search_seed", "refit_seed", "verbose",
-                      "execution_hook", "candidate_optimizer"}
+                      "execution_hook", "candidate_optimizer",
+                      # AF1 (2026-11-09): opt-in Y train-mask pass-through.
+                      # It selects which Y pairs are observed; it carries no
+                      # parameter state, so it is not a warm-start input.
+                      "train_mask"}
+    assert not any("init" in p or "warm" in p for p in params)
 
 
 def test_C_every_call_gets_fresh_unmodified_data(tmp_path):

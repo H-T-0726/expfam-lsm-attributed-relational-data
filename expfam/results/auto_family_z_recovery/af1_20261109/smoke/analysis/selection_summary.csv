@@ -1,0 +1,13 @@
+series,regime,method,n_fits,n_failed,n_all_columns_correct,n_selected_equals_oracle,columns_total,columns_correct,gate_decided_columns,score_decided_columns,score_decided_correct,bernoulli_columns,bernoulli_selected_bernoulli,bernoulli_selected_poisson,poisson_columns,poisson_columns_score_decided,poisson_selected_poisson,final_margin_min,final_margin_median,final_nonconverged_columns,fits_convergence_gate_blocked,nonconverged_selection_rows_total
+A,dense,auto_pstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,52.40029337765074,56.58203169341218,3,1,10
+A,dense,auto_bstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,52.4868532448275,55.52850542807567,3,1,11
+A,sparse,auto_pstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,48.295512042454675,55.504176763849685,1,1,8
+A,sparse,auto_bstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,48.14972824821763,57.15636785942055,2,1,12
+B,dense,auto_pstart,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,,0,0,0
+B,dense,auto_bstart,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,,0,0,0
+B,sparse,auto_pstart,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,,0,0,0
+B,sparse,auto_bstart,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,,0,0,0
+all,dense,auto_pstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,52.40029337765074,56.58203169341218,3,1,10
+all,dense,auto_bstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,52.4868532448275,55.52850542807567,3,1,11
+all,sparse,auto_pstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,48.295512042454675,55.504176763849685,1,1,8
+all,sparse,auto_bstart,1,0,1,1,12,12,6,6,6,6,6,0,3,0,3,48.14972824821763,57.15636785942055,2,1,12

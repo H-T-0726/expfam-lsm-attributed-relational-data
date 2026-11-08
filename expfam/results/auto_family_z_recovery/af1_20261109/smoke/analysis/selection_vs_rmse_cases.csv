@@ -1,0 +1,5 @@
+series,replicate,regime,method,all_correct,n_correct_columns,delta_auto,delta_wrong
+A,rep01,dense,auto_pstart,True,12,0.0,-0.002450140642420273
+A,rep01,dense,auto_bstart,True,12,0.0,-0.002450140642420273
+A,rep01,sparse,auto_pstart,True,12,0.0,0.10189022859130659
+A,rep01,sparse,auto_bstart,True,12,0.0,0.10189022859130659

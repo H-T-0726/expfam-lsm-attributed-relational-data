@@ -1,0 +1,2 @@
+replicate,data_seed,x_sha,y_sha,z_true_sha,dense_sha,sparse_sha,test_sha,n_test,n_dense,n_sparse,dense_test_overlap,sparse_test_overlap,sparse_subset_of_dense,dense_equals_pool,symmetric,no_diagonal,pool_plus_test_is_all_pairs,x_col_max,train_density_dense,train_density_sparse
+rep01,1001001,762d278dfa33eb50,aea9e482203c824b,3a9fa451b58823eb,9a6768233293bf8b,f3113de6962baae3,9a64e8573ee6d45f,278,2497,250,0,0,True,True,True,True,True,2.859|2.377|3.065|1|1|1|1|1|1|20|8|8,0.34281137364837805,0.36
