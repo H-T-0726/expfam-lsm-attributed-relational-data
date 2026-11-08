@@ -341,7 +341,10 @@ def run_fit(fit, ds, masks):
             run.update({"status": "FAILED", "error": f"{type(exc).__name__}: {exc}"[:500],
                         "failed_stage": stage, "traceback_tail": traceback.format_exc()[-800:]})
             if fit["method"] in AUTO_START:
-                # every count column still counts in the recovery denominator
+                # every column still counts in the recovery denominator; rows
+                # written before the failure are replaced, never duplicated
+                # (pre-run audit D5)
+                col_rows = []
                 for g_col in range(D):
                     col_rows.append(dict(base, column=g_col, true_model=TRUE_MODELS[g_col],
                                          selected_model="", correct=False,
