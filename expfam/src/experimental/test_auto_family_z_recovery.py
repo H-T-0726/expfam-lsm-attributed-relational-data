@@ -17,10 +17,18 @@ the tests stay fast; the contracts do not depend on the iteration count.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pytest
 
-import family_selection as fs
+_HERE = Path(__file__).resolve().parent
+for _p in (_HERE, _HERE.parent, _HERE.parent.parent.parent / "tools" / "research_audit"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+import family_selection as fs                                           # noqa: E402
 import run_auto_family_z_recovery as af
 import run_misspecification_m1 as m1
 from em_runner import run_em_experimental
