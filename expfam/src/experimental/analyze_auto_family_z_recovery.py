@@ -354,10 +354,76 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
                             "agree": sum(r["agree"] for r in agree_rows)},
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
-    (out / "results_tables.md").write_text(tables_md(summ, rs_rows, sel_rows, agree_rows, summary),
-                                          encoding="utf-8")
+    post = posthoc_descriptives(stage, out, comp_rows)
+    (out / "results_tables.md").write_text(tables_md(summ, rs_rows, sel_rows, agree_rows, summary)
+                                          + post, encoding="utf-8")
     figures(out, rep_rows, sel_rows)
     return summary
+
+
+def posthoc_descriptives(stage: Path, out: Path, comp_rows) -> str:
+    """POST-HOC descriptive tables added after the AF1 full results were read.
+
+    They summarise columns that the pre-registered analysis already saved
+    (held-out Y per method, candidate-optimiser diagnostics per trace row,
+    switching iteration).  They change no pre-registered number or rule.
+    """
+    L = ["", "### 事後に追加した記述表（post-hoc、事前登録外）", ""]
+    # held-out Y (mode estimator, fit level, both series pooled)
+    rows = []
+    for reg in af.REGIMES:
+        for m in af.METHODS:
+            sub = [r for r in comp_rows if r["regime"] == reg and r["estimator"] == "mode"]
+            ls = [r[f"heldout_mean_log_score_{m}"] for r in sub]
+            auc = [r[f"heldout_auc_{m}"] for r in sub]
+            d = [r[f"heldout_mean_log_score_{m}"] - r["heldout_mean_log_score_oracle"] for r in sub]
+            rows.append({"regime": reg, "method": m, "n_fits": len(sub),
+                         "heldout_mean_log_score_mean": float(np.nanmean(ls)),
+                         "heldout_auc_mean": float(np.nanmean(auc)),
+                         "minus_oracle_log_score_mean": float(np.nanmean(d)),
+                         "n_below_oracle": int(sum(x < 0 for x in d)),
+                         "n_equal_oracle": int(sum(x == 0 for x in d))})
+    write(out / "posthoc_heldout_y_summary.csv", rows)
+    L += ["held-out Y（test ペア、joint mode の plug-in η、fit 単位、2 系列プール）", "",
+          "| regime | method | n | mean log score | mean AUC | − Oracle（log score）平均 | Oracle 未満 | Oracle と同値 |",
+          "|---|---|---:|---:|---:|---:|---:|---:|"]
+    for r in rows:
+        L.append(f"| {r['regime']} | {r['method']} | {r['n_fits']} | {_f(r['heldout_mean_log_score_mean'])} | "
+                 f"{_f(r['heldout_auc_mean'])} | {_f(r['minus_oracle_log_score_mean'])} | "
+                 f"{r['n_below_oracle']} | {r['n_equal_oracle']} |")
+    # candidate optimiser diagnostics
+    tr = read(stage / "selection_trace.csv")
+    crow = []
+    for fam in ("bernoulli", "poisson"):
+        for reg in af.REGIMES:
+            sub = [t for t in tr if t["regime"] == reg]
+            bad = [fnum(t[f"{fam}_grad_inf"]) for t in sub if t[f"{fam}_converged"] == "False"]
+            crow.append({"candidate": fam, "regime": reg, "trace_rows": len(sub),
+                         "nonconverged_rows": len(bad),
+                         "nonconverged_grad_inf_median": float(np.median(bad)) if bad else "",
+                         "nonconverged_grad_inf_max": float(np.max(bad)) if bad else "",
+                         "tolerance": 1e-8})
+    margins = [fnum(t["margin_neg2"]) for t in tr]
+    write(out / "posthoc_candidate_convergence.csv", crow)
+    L += ["", "候補 loading 最適化（BFGS、収束判定 grad_inf ≤ 1e-8）の未収束（全 8 反復の trace 行）", "",
+          "| candidate | regime | trace 行 | 未収束行 | 未収束時 grad_inf 中央値 | 最大 |",
+          "|---|---|---:|---:|---:|---:|"]
+    for r in crow:
+        L.append(f"| {r['candidate']} | {r['regime']} | {r['trace_rows']} | {r['nonconverged_rows']} | "
+                 f"{r['nonconverged_grad_inf_median']:.2e} | {r['nonconverged_grad_inf_max']:.2e} |"
+                 if r["nonconverged_rows"] else
+                 f"| {r['candidate']} | {r['regime']} | {r['trace_rows']} | 0 | | |")
+    L.append(f"\n- 全 trace 行（全反復）の margin（−2 スケール）の最小値: {_f(min(margins), 2)}"
+             f"（{len(margins)} 行）")
+    cols = read(stage / "selection_columns.csv")
+    sc = [c for c in cols if c["decided_by"] == "score"]
+    for m in ("auto_pstart", "auto_bstart"):
+        cm = [c for c in sc if c["method"] == m]
+        fc = sorted({c["first_change_iteration"] or "変化なし" for c in cm})
+        nc = sorted({c["n_changes"] for c in cm})
+        L.append(f"- {m}: score 決定列 {len(cm)}、最初に族が変わった反復 = {fc}、反復中の変更回数 = {nc}")
+    L.append("")
+    return "\n".join(L)
 
 
 def _f(x, nd=4) -> str:
