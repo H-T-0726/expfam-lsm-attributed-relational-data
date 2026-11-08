@@ -364,7 +364,8 @@ def informed_init(model: DualExpFamLSMGeneric, Y: np.ndarray, family_y: str) -> 
 def run_em_generic(X, Y, *, column_specs: Sequence[FamilySpec], family_y: str,
                    k: int, L: int = 5, num_iter: int = 8, seed: int = 42,
                    newton_alpha: float = 0.5, compute_strict_Q: bool = True,
-                   model_factory=None, verbose: bool = False) -> dict[str, Any]:
+                   model_factory=None, verbose: bool = False,
+                   train_mask: np.ndarray | None = None) -> dict[str, Any]:
     """Fail-fast MCEM with fixed per-column specs.
 
     The loop is ``em_runner.run_em_experimental`` with
@@ -377,8 +378,10 @@ def run_em_generic(X, Y, *, column_specs: Sequence[FamilySpec], family_y: str,
     t0 = time.perf_counter()
     rng = np.random.default_rng(seed)
     factory = model_factory or DualExpFamLSMGeneric
+    # AF2: opt-in Y train mask, handed unchanged to the model (None = all pairs,
+    # the historical behaviour).  Nothing else in the loop changes.
     model = factory(n=n, d=d, k=k, L=L, column_specs=list(column_specs),
-                    family_y=family_y)
+                    family_y=family_y, train_mask=train_mask)
     model.initialize_params(true_params=None, seed=seed)
     informed_init(model, Y, family_y)
 

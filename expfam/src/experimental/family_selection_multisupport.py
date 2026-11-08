@@ -471,13 +471,15 @@ class FamilySelectingGenericLSM(DualExpFamLSMGeneric):
 
 def run_generic_exploration(X, Y, *, k, gates, registry, initial_models,
                             family_y="bernoulli", L=5, num_iter=8, seed=42,
-                            newton_alpha=0.5, route=ROUTE_PHASE9C) -> dict[str, Any]:
+                            newton_alpha=0.5, route=ROUTE_PHASE9C,
+                            train_mask=None) -> dict[str, Any]:
     """Exploration MCEM (A-type updates); mirrors run_family_exploration."""
     n, d = X.shape
     rng = np.random.default_rng(seed)
     model = FamilySelectingGenericLSM(
         gates=gates, registry=registry, route=route, n=n, d=d, k=k, L=L,
-        column_specs=[registry[c] for c in initial_models], family_y=family_y)
+        column_specs=[registry[c] for c in initial_models], family_y=family_y,
+        train_mask=train_mask)
     model.initialize_params(true_params=None, seed=seed)
     informed_init(model, Y, family_y)
 
@@ -516,18 +518,20 @@ def run_generic_exploration(X, Y, *, k, gates, registry, initial_models,
 def run_generic_hybrid(X, Y, *, k, registry, priority, start, family_y="bernoulli",
                        L=5, exploration_num_iter=8, refit_num_iter=8,
                        search_seed=42, refit_seed=43, newton_alpha=0.5,
-                       route=ROUTE_PHASE9C) -> dict[str, Any]:
+                       route=ROUTE_PHASE9C, train_mask=None) -> dict[str, Any]:
     """Scheme C: exploration with A-type updates, then a fresh fixed refit."""
     gates = gate_columns(X, registry, priority)
     init = start_assignment(gates, start)
     exploration = run_generic_exploration(
         X, Y, k=k, gates=gates, registry=registry, initial_models=init,
         family_y=family_y, L=L, num_iter=exploration_num_iter, seed=search_seed,
-        newton_alpha=newton_alpha, route=route)
+        newton_alpha=newton_alpha, route=route, train_mask=train_mask)
+    # AF2: the same train mask reaches exploration and refit (None = all pairs)
     refit = run_em_generic(X, Y, column_specs=[registry[c] for c in
                                                exploration["selected_models"]],
                            family_y=family_y, k=k, L=L, num_iter=refit_num_iter,
-                           seed=refit_seed, newton_alpha=newton_alpha)
+                           seed=refit_seed, newton_alpha=newton_alpha,
+                           train_mask=train_mask)
     return {"gates": gates, "start_models": init, "exploration": exploration,
             "refit": refit}
 
