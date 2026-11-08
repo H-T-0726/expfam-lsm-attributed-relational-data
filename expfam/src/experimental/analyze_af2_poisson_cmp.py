@@ -276,9 +276,62 @@ def analyze(stage: Path, out: Path):
                "start_agreement": {"columns": len(agree), "agree": sum(a["agree"] for a in agree)},
                "failure_summary": fail_by}
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
-    (out / "results_tables.md").write_text(tables_md(summ, rs, sel, fail_by, tr_rows, summary), encoding="utf-8")
+    (out / "results_tables.md").write_text(tables_md(summ, rs, sel, fail_by, tr_rows, summary)
+                                          + posthoc(out, comp, pairs, cols), encoding="utf-8")
     figures(out, pairs, sel)
     return summary
+
+
+def posthoc(out, comp, pairs, cols):
+    """POST-HOC descriptive tables added after the AF2 full results were read.
+
+    They regroup columns the pre-registered analysis already saved and change
+    no pre-registered number: (1) Auto - Oracle and Support-only - Auto by the
+    number of misselected count columns (questions F/G), (2) held-out Y.
+    """
+    L = ["", "### 事後に追加した記述表（post-hoc、事前登録外）", ""]
+    rows = []
+    for reg in af2.REGIMES:
+        sub = [p for p in pairs if p["regime"] == reg and p["estimator"] == "mode"
+               and p["auto_first_status"] == "OK"]
+        for nwrong in sorted({6 - int(p["auto_first_n_correct_count_columns"]) for p in sub}):
+            g = [p for p in sub if 6 - int(p["auto_first_n_correct_count_columns"]) == nwrong]
+            da = [p["delta_auto"] for p in g]
+            bs = [p["benefit_support_only"] for p in g]
+            rows.append({"regime": reg, "n_misselected_count_columns": nwrong, "replicates": len(g),
+                         "delta_auto_mean": float(np.mean(da)), "delta_auto_max": float(np.max(da)),
+                         "n_delta_auto_zero": sum(x == 0 for x in da),
+                         "benefit_support_only_mean": float(np.mean(bs)),
+                         "n_benefit_support_only_pos": sum(x > 0 for x in bs)})
+    write(out / "posthoc_by_misselection.csv", rows)
+    L += ["Auto（Poisson 開始）の誤選択列数ごとの paired 差（mode、replicate 単位）", "",
+          "| regime | 誤選択列数 | replicate | Auto − Oracle 平均 | 最大 | =0 | Support-only − Auto 平均 | >0 |",
+          "|---|---:|---:|---:|---:|---:|---:|---:|"]
+    for r in rows:
+        L.append(f"| {r['regime']} | {r['n_misselected_count_columns']} | {r['replicates']} | "
+                 f"{_f(r['delta_auto_mean'])} | {_f(r['delta_auto_max'])} | {r['n_delta_auto_zero']} | "
+                 f"{_f(r['benefit_support_only_mean'])} | {r['n_benefit_support_only_pos']} |")
+    hy = []
+    for reg in af2.REGIMES:
+        sub = [c for c in comp if c["regime"] == reg and c["estimator"] == "mode"]
+        for m in af2.METHODS:
+            nan = float("nan")
+            ls = [c.get(f"heldout_mean_log_score_{m}", nan) for c in sub]
+            au = [c.get(f"heldout_auc_{m}", nan) for c in sub]
+            d = [c.get(f"heldout_mean_log_score_{m}", nan) - c.get("heldout_mean_log_score_oracle", nan)
+                 for c in sub]
+            hy.append({"regime": reg, "method": m, "n": len(sub), "log_score_mean": float(np.nanmean(ls)),
+                       "auc_mean": float(np.nanmean(au)), "minus_oracle_mean": float(np.nanmean(d)),
+                       "n_below_oracle": sum(x < 0 for x in d)})
+    write(out / "posthoc_heldout_y_summary.csv", hy)
+    L += ["", "held-out Y（test ペア、joint mode の plug-in η）", "",
+          "| regime | method | n | mean log score | mean AUC | − Oracle 平均 | Oracle 未満 |",
+          "|---|---|---:|---:|---:|---:|---:|"]
+    for r in hy:
+        L.append(f"| {r['regime']} | {r['method']} | {r['n']} | {_f(r['log_score_mean'])} | {_f(r['auc_mean'])} | "
+                 f"{_f(r['minus_oracle_mean'])} | {r['n_below_oracle']} |")
+    L.append("")
+    return "\n".join(L)
 
 
 def tables_md(summ, rs, sel, fail_by, tr_rows, summary):

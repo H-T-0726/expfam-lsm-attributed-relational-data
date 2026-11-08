@@ -108,3 +108,27 @@
 - 開始分布間の列単位一致（両方成功）: 11/12
 - fit: OK 10 / 記録 10、FAILED 0、joint mode 非 OK 0
 - integrity pass: True
+
+### 事後に追加した記述表（post-hoc、事前登録外）
+
+Auto（Poisson 開始）の誤選択列数ごとの paired 差（mode、replicate 単位）
+
+| regime | 誤選択列数 | replicate | Auto − Oracle 平均 | 最大 | =0 | Support-only − Auto 平均 | >0 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| dense | 0 | 1 | 0.0000 | 0.0000 | 1 | 0.0050 | 1 |
+| sparse | 1 | 1 | 0.0041 | 0.0041 | 0 | 0.0114 | 1 |
+
+held-out Y（test ペア、joint mode の plug-in η）
+
+| regime | method | n | mean log score | mean AUC | − Oracle 平均 | Oracle 未満 |
+|---|---|---:|---:|---:|---:|---:|
+| dense | oracle | 20 | -0.4811 | 0.8162 | 0.0000 | 0 |
+| dense | wrong | 20 | -0.4805 | 0.8149 | 0.0006 | 0 |
+| dense | support_only | 20 | -0.4806 | 0.8213 | 0.0005 | 0 |
+| dense | auto_first | 20 | -0.4811 | 0.8162 | 0.0000 | 0 |
+| dense | auto_last | 20 | -0.4811 | 0.8162 | 0.0000 | 0 |
+| sparse | oracle | 20 | -0.5109 | 0.7777 | 0.0000 | 0 |
+| sparse | wrong | 20 | -0.5004 | 0.7947 | 0.0105 | 0 |
+| sparse | support_only | 20 | -0.4924 | 0.8025 | 0.0186 | 0 |
+| sparse | auto_first | 20 | -0.5061 | 0.7834 | 0.0048 | 0 |
+| sparse | auto_last | 20 | -0.4951 | 0.7964 | 0.0159 | 0 |
