@@ -1,0 +1,29 @@
+level,phase,key,xfam,signal,n,rep,k,s,reason,affected_criteria,criterion
+state,1,e2_gaussian_weak_n75_r2_k2_s2,gaussian,weak,75,2,2.0,2.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,1,e2_gaussian_strong_n75_r3_k6_s1,gaussian,strong,75,3,6.0,1.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,1,e2_gaussian_strong_n150_r2_k1_s1,gaussian,strong,150,2,1.0,1.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,1,e2_gaussian_strong_n150_r3_k3_s1,gaussian,strong,150,3,3.0,1.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,1,e2_poisson_strong_n150_r4_k5_s2,poisson,strong,150,4,5.0,2.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,2,cf_poisson_weak_n75_r13_k7_s1,poisson,weak,75,13,7.0,1.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+state,2,cf_poisson_strong_n150_r14_k5_s2,poisson,strong,150,14,5.0,2.0,laplace NOT_STATIONARY,"CLap, CELBO, cond_mode",
+dataset,1,,gaussian,strong,75,3,,,missing K [6],,cond_mode
+dataset,1,,gaussian,strong,75,3,,,missing K [6],,CLap
+dataset,1,,gaussian,strong,75,3,,,missing K [6],,CELBO
+dataset,1,,gaussian,strong,150,2,,,missing K [1],,cond_mode
+dataset,1,,gaussian,strong,150,2,,,missing K [1],,CLap
+dataset,1,,gaussian,strong,150,2,,,missing K [1],,CELBO
+dataset,1,,gaussian,strong,150,3,,,missing K [3],,cond_mode
+dataset,1,,gaussian,strong,150,3,,,missing K [3],,CLap
+dataset,1,,gaussian,strong,150,3,,,missing K [3],,CELBO
+dataset,1,,gaussian,weak,75,2,,,missing K [2],,cond_mode
+dataset,1,,gaussian,weak,75,2,,,missing K [2],,CLap
+dataset,1,,gaussian,weak,75,2,,,missing K [2],,CELBO
+dataset,1,,poisson,strong,150,4,,,missing K [5],,cond_mode
+dataset,1,,poisson,strong,150,4,,,missing K [5],,CLap
+dataset,1,,poisson,strong,150,4,,,missing K [5],,CELBO
+dataset,2,,poisson,strong,150,14,,,missing K [5],,cond_mode
+dataset,2,,poisson,strong,150,14,,,missing K [5],,CLap
+dataset,2,,poisson,strong,150,14,,,missing K [5],,CELBO
+dataset,2,,poisson,weak,75,13,,,missing K [7],,cond_mode
+dataset,2,,poisson,weak,75,13,,,missing K [7],,CLap
+dataset,2,,poisson,weak,75,13,,,missing K [7],,CELBO

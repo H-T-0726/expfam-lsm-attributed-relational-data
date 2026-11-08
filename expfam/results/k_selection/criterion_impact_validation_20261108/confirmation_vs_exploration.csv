@@ -1,0 +1,61 @@
+x_family,metric,CONFIRMATORY_new,EXPLORATORY_existing
+all,M1_KQ_le_KLap,30/30,27/27
+all,M2_KLap_eq_KELBO,28/30,27/27
+all,M3_over_cond_MC,32/32,32/32
+all,M3_over_cond_last,32/32,32/32
+all,M3_over_cond_mode,30/30,27/27
+all,M4_d2H_45_positive,26/31,27/31
+all,M5_sign_match,58/62,60/61
+all,M6_Lap_ELBO_differ,2/30,0/27
+all,M7_exact_CELBO,25/30,21/27
+all,M7_exact_CLap,27/30,21/27
+all,M7_exact_CQ,23/32,17/32
+all,M7_exact_cond_MC,0/32,0/32
+all,M7_exact_cond_last,0/32,0/32
+all,M7_exact_cond_mode,0/30,0/27
+all,M8_under_over_CELBO,5/0 of 30,6/0 of 27
+all,M8_under_over_CLap,3/0 of 30,6/0 of 27
+all,M8_under_over_CQ,9/0 of 32,15/0 of 32
+all,M8_under_over_cond_MC,0/32 of 32,0/32 of 32
+all,M8_under_over_cond_last,0/32 of 32,0/32 of 32
+all,M8_under_over_cond_mode,0/30 of 30,0/27 of 27
+gaussian,M1_KQ_le_KLap,16/16,12/12
+gaussian,M2_KLap_eq_KELBO,16/16,12/12
+gaussian,M3_over_cond_MC,16/16,16/16
+gaussian,M3_over_cond_last,16/16,16/16
+gaussian,M3_over_cond_mode,16/16,12/12
+gaussian,M4_d2H_45_positive,12/16,13/16
+gaussian,M5_sign_match,30/32,31/31
+gaussian,M6_Lap_ELBO_differ,0/16,0/12
+gaussian,M7_exact_CELBO,14/16,10/12
+gaussian,M7_exact_CLap,14/16,10/12
+gaussian,M7_exact_CQ,12/16,9/16
+gaussian,M7_exact_cond_MC,0/16,0/16
+gaussian,M7_exact_cond_last,0/16,0/16
+gaussian,M7_exact_cond_mode,0/16,0/12
+gaussian,M8_under_over_CELBO,2/0 of 16,2/0 of 12
+gaussian,M8_under_over_CLap,2/0 of 16,2/0 of 12
+gaussian,M8_under_over_CQ,4/0 of 16,7/0 of 16
+gaussian,M8_under_over_cond_MC,0/16 of 16,0/16 of 16
+gaussian,M8_under_over_cond_last,0/16 of 16,0/16 of 16
+gaussian,M8_under_over_cond_mode,0/16 of 16,0/12 of 12
+poisson,M1_KQ_le_KLap,14/14,15/15
+poisson,M2_KLap_eq_KELBO,12/14,15/15
+poisson,M3_over_cond_MC,16/16,16/16
+poisson,M3_over_cond_last,16/16,16/16
+poisson,M3_over_cond_mode,14/14,15/15
+poisson,M4_d2H_45_positive,14/15,14/15
+poisson,M5_sign_match,28/30,29/30
+poisson,M6_Lap_ELBO_differ,2/14,0/15
+poisson,M7_exact_CELBO,11/14,11/15
+poisson,M7_exact_CLap,13/14,11/15
+poisson,M7_exact_CQ,11/16,8/16
+poisson,M7_exact_cond_MC,0/16,0/16
+poisson,M7_exact_cond_last,0/16,0/16
+poisson,M7_exact_cond_mode,0/14,0/15
+poisson,M8_under_over_CELBO,3/0 of 14,4/0 of 15
+poisson,M8_under_over_CLap,1/0 of 14,4/0 of 15
+poisson,M8_under_over_CQ,5/0 of 16,8/0 of 16
+poisson,M8_under_over_cond_MC,0/16 of 16,0/16 of 16
+poisson,M8_under_over_cond_last,0/16 of 16,0/16 of 16
+poisson,M8_under_over_cond_mode,0/14 of 14,0/15 of 15
