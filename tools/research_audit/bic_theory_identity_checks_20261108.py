@@ -16,7 +16,8 @@ T2  Exact-posterior decompositions used for C_Q / C_Q - P_Z:
 T3  Scale-direction identity (any theta, sigma_z^2 = 1):
       d/dc l_marg(cF, w0, c^2 w) |_{c=1} = E_post ||Z||_F^2 - nK
 T4  Laplace-q ELBO: ELBO(q_Lap) = l_Lap - R3,  R3 = Phi(Z_hat) - nK/2 - E_qLap Phi
-T5  Linear-Gaussian factor model (Gaussian-X): Laplace is exact and R3 = 0;
+T5  Linear-Gaussian factor model (Gaussian-X ONLY, no Y / w = 0): Laplace is
+    exact and R3 = 0 (NOT true for the joint model with w != 0);
     at the exact MLE (EM run to convergence) E_post ||Z||^2 = nK.
 T6  Parameter count: rank of the Jacobian of (F, Psi) -> F F^T + Psi
     equals min(dK + d - K(K-1)/2, d(d+1)/2) at generic F (d=15, K=1..12),
@@ -52,12 +53,17 @@ LN2PI = math.log(2.0 * math.pi)
 rows: list[dict] = []
 
 
+INFORMATIVE = {"T1b", "T4b", "T4c", "T5b", "T6sing_K3", "T6sing_K5", "T7b"}
+
+
 def record(check_id, description, lhs, rhs, tol):
     diff = abs(float(lhs) - float(rhs))
-    rows.append({"check_id": check_id, "description": description,
+    kind = "informative_value" if check_id in INFORMATIVE else "identity"
+    rows.append({"check_id": check_id, "kind": kind,
+                 "description": description,
                  "lhs": f"{float(lhs):.12g}", "rhs": f"{float(rhs):.12g}",
                  "abs_diff": f"{diff:.3e}", "tol": f"{tol:.1e}",
-                 "pass": bool(diff <= tol)})
+                 "pass": (bool(diff <= tol) if kind == "identity" else "n/a")})
 
 
 # ---------------------------------------------------------------------------
@@ -362,14 +368,18 @@ def main():
             "git_head": head, "tools_or_reproduction_dirty": dirty,
             "python": sys.version, "numpy": np.__version__,
             "platform": platform.platform(),
-            "n_checks": len(rows), "n_pass": sum(r["pass"] for r in rows),
+            "n_identity_checks": sum(r["kind"] == "identity" for r in rows),
+            "n_identity_pass": sum(r["pass"] is True for r in rows),
+            "n_informative_values": sum(r["kind"] != "identity" for r in rows),
             "tiny_model_values": tiny,
             "note": "THEORY/AUDIT identity checks; no MCEM fit, no K selection"}
     (OUT / "identity_checks_runinfo.json").write_text(
         json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8")
     for r in rows:
         print(r["check_id"], r["pass"], r["lhs"], r["rhs"], r["abs_diff"])
-    print("pass", info["n_pass"], "/", info["n_checks"])
+    print("identity pass", info["n_identity_pass"], "/",
+          info["n_identity_checks"], "; informative values",
+          info["n_informative_values"])
 
 
 if __name__ == "__main__":
