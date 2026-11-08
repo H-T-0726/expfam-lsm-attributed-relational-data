@@ -24,7 +24,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import math
 import shutil
 import sys
 from collections import defaultdict
@@ -125,7 +124,9 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
                 hash_mismatch.append({"cell": rep, "hash": h})
     ok_runs = [r for r in runs if r["status"] == "OK"]
     integrity = {
-        "planned_fits_in_stage": None, "fits_recorded": len(runs),
+        "planned_fits_in_stage": len(planned_keys) if stage.name == "full" else len(runs),
+        "missing_planned_fits": sorted(planned_keys - present) if stage.name == "full" else [],
+        "fits_recorded": len(runs),
         "unknown_fit_keys": sorted(present - planned_keys),
         "hash_mismatches": hash_mismatch,
         "train_test_overlap_total": int(sum(int(r["train_test_overlap"]) for r in runs)),
@@ -137,6 +138,7 @@ def analyze(stage: Path, out: Path) -> dict[str, Any]:
     }
     integrity["pass"] = not (integrity["unknown_fit_keys"] or hash_mismatch
                              or integrity["train_test_overlap_total"]
+                             or integrity["missing_planned_fits"]
                              or integrity["refit_mask_mismatch"]
                              or integrity["nonzero_retry_replacement_rescue"])
 
@@ -376,7 +378,8 @@ def figures(out: Path, rep_rows, sel_rows) -> None:
             if len(v):
                 ax.plot([i - 0.28, i + 0.28], [v.mean()] * 2, color="#1f1f1c", lw=2, zorder=3)
         ax.set_xticks(range(len(show)), [s[1] for s in show])
-        ax.set_title(f"{reg}-Y (n_rep={len(sub)}), joint-mode RMSE(Z)", fontsize=9, color="#1f1f1c")
+        n_fin = sum(np.isfinite(r["benefit_p"]) for r in sub)
+        ax.set_title(f"{reg}-Y (replicates with a value: {n_fin}), joint-mode RMSE(Z)", fontsize=9, color="#1f1f1c")
     axes[0].set_ylabel("replicate-level difference in RMSE(Z)\n(mean over seed series A, B)")
     fig.text(0.01, 0.005, "black bar = mean over replicates; points = replicates (sorted)",
              fontsize=7.5, color="#6b6b65")
@@ -394,10 +397,12 @@ def figures(out: Path, rep_rows, sel_rows) -> None:
     ax.bar(range(len(rows)), p, bottom=b, color=COLORS["wrong"], width=0.6,
            label="selected Poisson (wrong)", edgecolor="white", linewidth=2)
     for i, (bb, pp) in enumerate(zip(b, p)):
-        ax.text(i, bb + pp + 2, f"{int(bb)}/{int(bb + pp)}", ha="center", fontsize=8, color="#33332f")
+        ax.text(i, (bb + pp) * 1.02, f"{int(bb)}/{int(bb + pp)}", ha="center", va="bottom",
+                fontsize=8, color="#33332f")
     ax.set_xticks(range(len(rows)), labels)
     ax.set_ylabel("true-Bernoulli columns\n(6 × replicates × series)")
-    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.set_ylim(0, max(1.0, float((b + p).max())) * 1.12)
+    ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, 1.22), ncol=2)
     fig.tight_layout()
     fig.savefig(out / "fig2_bernoulli_column_selection.png", dpi=160)
     plt.close(fig)
