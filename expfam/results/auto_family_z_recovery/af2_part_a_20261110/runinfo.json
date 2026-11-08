@@ -1,0 +1,9 @@
+{
+  "script": "expfam/src/experimental/af2_part_a_zero_one_poisson.py",
+  "seed": 20261110,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "sim_columns_per_intercept": 200,
+  "sim_loading_norm": 1.0,
+  "note": "true Z used (L = 1); no MCEM; intercepts b < 0 are outside the research model"
+}

@@ -1,0 +1,5 @@
+intercept_b,group,columns,main_bernoulli,main_poisson,count_poisson,count_cmp_nu2p0,count_failures,median_cos_bern_loading_true,median_cos_pois_loading_true
+-2.0,all_01,14,14,0,0,14,0,0.837748922125449,0.7548576872508361
+-2.0,has_value_ge2,186,0,186,0,186,0,,
+-3.0,all_01,114,114,0,0,114,0,0.6299856289795116,0.4620709041729584
+-3.0,has_value_ge2,85,0,85,0,85,0,,
