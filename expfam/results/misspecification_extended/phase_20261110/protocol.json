@@ -1,0 +1,128 @@
+{
+  "experiment": "MX2 extended X-family misspecification",
+  "frozen_before_new_fits": true,
+  "source_head": "1b5030b2417a314927fb3a60d4d9016307f28d3b",
+  "lineage": "E-consistent per-column, experimental prototype; manuscript adoption requires human gate",
+  "generator": "canonical-clean-mixed-v1",
+  "n": 75,
+  "d": 12,
+  "K_true": 3,
+  "K_fit": 3,
+  "family_x_true": [
+    "gaussian",
+    "gaussian",
+    "gaussian",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "bernoulli",
+    "poisson",
+    "poisson",
+    "poisson"
+  ],
+  "family_y": "bernoulli",
+  "sigma_x_var": 1.0,
+  "f_scale": 1.4142135623730951,
+  "w0_true": -1.0,
+  "w_true": 1.0,
+  "data_seeds": [
+    1001001,
+    1001002,
+    1001003,
+    1001004,
+    1001005,
+    1001006,
+    1001007,
+    1001008,
+    1001009,
+    1001010,
+    1001011,
+    1001012,
+    1001013,
+    1001014,
+    1001015,
+    1001016,
+    1001017,
+    1001018,
+    1001019,
+    1001020
+  ],
+  "model_seed_series": {
+    "A": 1343000,
+    "B": 1344000
+  },
+  "test_seed_rule": "1341000+r, exact M1 test",
+  "sparse_seed_rule": "1342000+10r+1, exact M1 10% train",
+  "extension_seed_rule": "1620000+r permutes pool excluding sparse; extend to rounded 25%,50%",
+  "column_seed_rule": "1610000+10r+{0 Bernoulli,1 Poisson}; nested prefixes",
+  "rates_of_train_candidate_pool": [
+    1.0,
+    0.5,
+    0.25,
+    0.1
+  ],
+  "test_ratio_of_all_pairs": 0.1,
+  "arms_primary": [
+    "correct",
+    "bp6",
+    "bg6",
+    "pg3",
+    "allg"
+  ],
+  "arms_intermediate": [
+    "bp2",
+    "bp4",
+    "bg2",
+    "bg4",
+    "pg1",
+    "pg2"
+  ],
+  "planned_unique_fits": 1280,
+  "planned_reused_e1": 160,
+  "planned_new_fits": 1120,
+  "pilot_new_fits": 10,
+  "L": 5,
+  "mcem_iterations": 8,
+  "numerics_mode": "consistent",
+  "failure_policy": "fail_fast",
+  "validate_support": true,
+  "allow_support_mismatch": false,
+  "retry": false,
+  "family_selection": false,
+  "primary": [
+    "mode Procrustes rotation-only absolute RMSE",
+    "paired wrong-minus-correct RMSE"
+  ],
+  "secondary": [
+    "last and mean5 RMSE",
+    "Gram correlation",
+    "norm ratio",
+    "heldout Bernoulli log score/AUC/AP",
+    "w and w0 error",
+    "mode gradient/curvature",
+    "warnings",
+    "runtime"
+  ],
+  "mode": {
+    "start": "last sample",
+    "grad_tol": 1e-08,
+    "max_iter": 200,
+    "secondary_start": "mean5",
+    "valid_status": "OK"
+  },
+  "paired_validity": "both EM and mode status OK and all scored metrics finite",
+  "failure_handling": "record failed cell once; no retry/reseed/replacement/imputation",
+  "scientific_success": "no threshold or favorable-direction requirement",
+  "reproduction_tolerances": {
+    "exact": 1e-12,
+    "investigate_fp": 1e-06
+  },
+  "bootstrap_unit": "data replicate; average two model seeds within replicate",
+  "e1_source_sha256": {
+    "fit_runs.csv": "c0dbfeaeef21758695deb25af6da65c33a207da637d342e5be4f1366a7bc7e82",
+    "fit_estimators.csv": "e25d3366ddd566089024bd3cbd27eb87b7664dfeb43d5b2a3817cd78d4b295fc"
+  },
+  "mask_provenance_sha256": "183a5276ebe8db570973f969edf268835707fb5201aa5c0121949695777abd86"
+}

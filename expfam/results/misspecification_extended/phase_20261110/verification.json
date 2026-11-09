@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "planned": 1280,
+  "attempted": 1280,
+  "valid_pairs": 1118,
+  "failed": 2
+}
