@@ -547,3 +547,12 @@ A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変�
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | k_selection_robustness_20261105 | R1：d-sweep と同じデータ（n=75、K_GEN=5、d ∈ {15,30,60}、8 rep、K 1..7、2 start）を L=10、16 反復で再推定し、checkpoint 8 と 16 を評価した（新規 336 fit）。R2：L=5、8 反復、d=30 で n ∈ {50,100,150} を新規に fit した（各 112 fit）。d=30 の拡張は d-sweep と同じ規則で、各 n の A1 データに適用した。d=15 と n=75・d=30 は既存の状態を再評価した | `tools/research_audit/run_k_selection_robustness.py`、`tools/research_audit/analyze_k_selection_robustness.py` | `expfam/results/k_selection/k_selection_robustness_20261105/` | なし | current_support | ✗ | 新規 672 fit と smoke 4 fit は、いずれも非有限値による失敗 0。Laplace は n=150・d=30・rep1 の K=3（start 1）だけ NOT_STATIONARY（max\|∇Φ\| = 3.9e−8、許容値 1e−8）で、事前規則によりそのデータセットの C_Lap を INCOMPLETE とした（補完なし）。外部の npz の sha256：r1 `50aebf21…3267`、n50 `8583d501…bba1`、n100 `cacf488c…147c`、n150 `f4428bec…a6a8`。異なる n のデータは入れ子ではなく、独立な条件として扱う。MCEM は収束していない（K=5 の Gram 相対変化の中央値は 6〜14%） |
+
+
+## MX2：属性X分布の誤指定を種類・列数・Y学習ペア数で比較（2026-11-10、lineage E、append-only 追記）
+
+事前監査：`reports/misspecification_extended/preflight_audit_20261110.md`。結果・解釈：`reports/misspecification_extended/results_20261110.md`。M1・E1 の成果物は変更していない。per-column の experimental prototype であり、本文採用には Human Gate が必要。
+
+| 実験ID | 内容 | 実装/スクリプト | 一次結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| MX2 extended misspecification | M1 と同じ n=75、d=12、K=3、G3/B6/P3、Bernoulli-Y、20 データ。正指定／B6→P6／B6→G6／P3→G3／全Gを Y 学習候補の 100/50/25/10%・2 モデルシードで比較し、中間列数6条件を100/10%で追加。主要指標は事後モードの回転のみ Procrustes RMSE と対応差 | `expfam/src/experimental/run_misspecification_extended.py`、`analyze_misspecification_extended.py`、`verify_misspecification_extended.py`、`test_misspecification_extended.py` | `expfam/results/misspecification_extended/phase_20261110/`（`protocol.json`、`manifest.csv`、`fit_results.csv`、`paired_rmse_z.csv`、`dataset_mean_delta.csv`、`summary_by_condition.csv`、`interaction_by_dataset.csv`、`verification.json`） | 同ディレクトリ `figures/fig1_*.png`～`fig6_*.png` と PDF | current_support | ✗ | 計画1,280一意セル＝E1再利用160＋新規1,120。1,278 OK、モード基準未達2、MCEM例外・非有限値・warning 0。valid paired 1,118/1,120。mean Δ はB6→P6でY100% +0.012／10% +0.082、B6→G6で+0.271／+0.146、P3→G3で+0.105／+0.147、全Gで+0.322／+0.176。Y情報量との関係は誤指定の種類に依存し、Gaussian化では sparse のほうが対応差が小さい。中間列数の平均はY10%で3系列とも増加したが、個々の反復の単調性は保証しない。重複実行事故で10件の余分な完了fitがあったため、生CSVと監査表を保存し、最初の記録のみ採用（`duplicate_run_incident_20261110.md`）。異系列・自動分布選択・一般法則として扱わない |

@@ -1,0 +1,13 @@
+{
+  "planned": 1280,
+  "attempted": 1280,
+  "successful": 1278,
+  "failed": 2,
+  "em_or_scoring_failed": 0,
+  "mode_invalid": 2,
+  "warning_count": 0,
+  "excluded_duplicate_completed_executions": 10,
+  "remaining": 0,
+  "valid_pairs": 1118,
+  "completed": true
+}
