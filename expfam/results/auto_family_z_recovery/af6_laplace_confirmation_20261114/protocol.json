@@ -1,0 +1,95 @@
+{
+  "experiment": "AF6",
+  "study_type": "CONFIRMATORY for the single primary endpoint; all other endpoints secondary/diagnostic",
+  "lineage": "E + PR #129 generic model (unmerged prototype; not manuscript evidence)",
+  "phase_a": "independent audit of AF5 (phase_a/, independent_audit.md) completed before this protocol",
+  "data": {
+    "generator": "AF2 generate (data_generator_multisupport), truth gaussian|gaussian|gaussian|poisson|poisson|poisson|cmp_nu2p0|cmp_nu2p0|cmp_nu2p0",
+    "n": 75,
+    "K": 3,
+    "tau": [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0
+    ],
+    "w0": -1.0,
+    "w": 1.0,
+    "nu_cmp": 2.0,
+    "datasets": 40,
+    "seeds": "seed_manifest.csv",
+    "masks": "m1 algorithm (test ratio 0.10; dense keep 1.0, sparse keep 0.1 of the pool) with new seeds",
+    "seed_disjointness": "seed values checked against AF1-AF5 seed sets before generation (seed_disjointness.json); X/Y hashes compared with the 20 AF2 datasets after generation (analysis)"
+  },
+  "mcem": {
+    "fits": "auto_first only (AF2 run_fit: START_FIRST exploration + refit)",
+    "planned_fits": 80,
+    "L": 5,
+    "exploration_iters": 8,
+    "refit_iters": 8,
+    "newton_alpha": 0.5,
+    "route": "trust_exact",
+    "states": "D:\\tento\\kennkyu_artifacts\\af6_laplace_confirmation_20261114\\fits",
+    "no_oracle_or_wrong_fits": true
+  },
+  "methods": {
+    "A_laplace": "AF5 run_column unchanged (protocol sha b0601adb...; settings INNER/OUTER/IS as AF5), Auto anchor; Delta = S(CMP2) - S(Poisson); selection by sign of Delta",
+    "B_q_same_anchor": "family_selection_multisupport.score_candidate on the Auto refit Zsamples (L=5), zero start, trust_exact, select_column (= AF3 arm Z7)",
+    "C_af2_auto": "the Auto exploration's own selection (assignment of the fit)",
+    "D_conservative": "Laplace selection where AF5 status == DECIDED (IS readable and passed); otherwise B. No label information; rule fixed here",
+    "E_jointmap": "sign of AF5 delta_jointmap_variant (diagnostic; never promoted)"
+  },
+  "laplace_status_rule": "AF5 rule unchanged: FAILED / UNDECIDED_NOT_CONVERGED / UNDECIDED_NUMERIC / UNDECIDED_LAPLACE / DECIDED_LAPLACE_UNASSESSED / DECIDED",
+  "primary_endpoint": {
+    "regime": "sparse",
+    "D_r": "number of count columns (6 per dataset) correctly selected by A minus by B, per dataset",
+    "A_column_rule": "A uses the sign of Delta for every column with a finite Delta (statuses DECIDED, DECIDED_LAPLACE_UNASSESSED, UNDECIDED_LAPLACE, UNDECIDED_NUMERIC); columns with no finite Delta (FAILED / UNDECIDED_NOT_CONVERGED) use B's selection",
+    "B_column_rule": "if B fails for a column, that column counts as incorrect for B",
+    "fit_failure": "if the Auto fit of a dataset x regime fails, both A and B have no selection: D_r = 0 (recorded in failure_registry.csv; no regeneration, no exclusion)",
+    "statistic": "mean of D_r over the 40 datasets",
+    "interval": "percentile bootstrap over datasets, 10000 resamples, seed 20261116, 95%",
+    "success": "mean D_r > 0 AND lower 95% bound > 0",
+    "unit": "dataset (40); dense and sparse are not independent replicates"
+  },
+  "secondary_endpoints": [
+    "dense D_r (expected: no improvement; same statistic)",
+    "A vs C (AF2 Auto) D_r, dense and sparse",
+    "column accuracy by true family (CMP2 / Poisson) for A, B, C, D, E (denominator: all 240 columns per regime)",
+    "corrections (B wrong, A right) and harms (B right, A wrong), also vs C; Poisson->CMP2 harms separately",
+    "status rates (undecided, IS-unassessed)",
+    "D (conservative) accuracy, D_r vs B, and the share of columns where D differs from B",
+    "E (joint-MAP) D_r vs B and agreement with A",
+    "computation time"
+  ],
+  "approximation_diagnostic": {
+    "method": "thermodynamic integration of Delta at the Laplace optima (f_P*, f_C*): log p_C - log p_P = int_0^1 E_t[l_C(x_j|Z f_C*) - l_P(x_j|Z f_P*)] dt, 6 Gauss-Legendre nodes, whitened HMC (eps 0.3, 8 steps, 2 chains x 150+600)",
+    "subset": "every sparse column; dense columns with |Delta_L| < 2.0 (rule by Laplace, not by labels)",
+    "ti_verified": "sign(Delta_TI) == sign(Delta_L) and |Delta_TI| > 2 SE_TI",
+    "ti_selection": "sign(Delta_TI) where TI was run, else sign(Delta_L); the primary statistic is recomputed with it (RQ4: improvement at the exact Z-marginal at f*, not the profile maximum)",
+    "reporting": "all-column and TI-verified-column results are reported separately; columns are never dropped from the primary endpoint",
+    "limits": "TI targets the marginal at the Laplace optima f*; the exact profile maximum over f_j differs by second-order terms; HMC Monte Carlo error is reported as SE_TI"
+  },
+  "multiplicity": "one primary test; secondary results are descriptive",
+  "not_claimed": [
+    "Z recovery after re-fitting a corrected assignment",
+    "a final adopted algorithm",
+    "generality beyond this one condition"
+  ],
+  "deviations_policy": "any deviation is recorded in README with reason; no setting is changed after AF6 selection results are seen",
+  "smoke": "one extra dataset (data seed 1689001, mask seeds +1..+3) ran the whole pipeline before this protocol was frozen (scratch output, pipeline check only: 2 fits OK, 12 columns, 0 failures); never analysed",
+  "compute_plan": "fits ~75 s per dataset (2 regimes); selection ~95 s (dense) + ~540 s (sparse incl. TI) per dataset; 40 datasets ~8 h serial, run as 5 shards (OMP threads 2); shards do not change any seed",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 20261116
+  },
+  "power_note": "planning only, from AF5 (exploratory, likely inflated): sparse D_r SD 0.75; normal-approx power at n=40 is 0.92 / 0.71 / 0.39 for true means 0.4 / 0.3 / 0.2",
+  "budget": {
+    "mcem_fits": 80,
+    "laplace_columns": 480
+  }
+}
