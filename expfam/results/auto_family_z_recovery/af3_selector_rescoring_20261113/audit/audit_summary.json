@@ -1,0 +1,38 @@
+{
+  "n_npz": 200,
+  "all_npz_sha_match": true,
+  "all_data_sha_match": true,
+  "all_shapes_ok": true,
+  "all_theta_match": true,
+  "all_fits_ok": true,
+  "all_count_cols_score_decided": true,
+  "pr129_repro_rows": 102,
+  "pr129_repro_all_found": true,
+  "pr129_repro_max_abs_diff": 0.0,
+  "oracle_calibration": {
+    "dense": {
+      "rmse_per_sample": 0.36991228583816377,
+      "rmse_mean5": 0.29569498377020864,
+      "within_sd": 0.22578045141155545,
+      "rmse_mode": 0.27547337488154144,
+      "matched_a": 0.27329712835476794,
+      "matched_b": 0.2524302186734132
+    },
+    "sparse": {
+      "rmse_per_sample": 0.558040010448922,
+      "rmse_mean5": 0.44110131528520746,
+      "within_sd": 0.3353777108063229,
+      "rmse_mode": 0.41072801565742334,
+      "matched_a": 0.40798384541537625,
+      "matched_b": 0.3749636797506019
+    }
+  },
+  "noise_level_rmse_median": {
+    "0.1": 0.09908944369184065,
+    "0.2": 0.20553654796969129,
+    "0.3": 0.2981612709637699,
+    "0.45": 0.4495170426231505,
+    "0.6": 0.5881900261209425
+  },
+  "git_head": "b0a2398fdfb997ea165154394e214d93f78edbd1"
+}
