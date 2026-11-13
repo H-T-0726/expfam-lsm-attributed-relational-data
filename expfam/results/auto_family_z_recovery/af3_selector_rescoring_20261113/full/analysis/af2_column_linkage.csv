@@ -1,0 +1,17 @@
+arm,regime,true_model,columns,af2_wrong_s0_wrong,af2_wrong_s0_right,af2_right_s0_wrong,af2_right_s0_right
+Z3,dense,cmp_nu2p0,60,0,11,0,49
+Z3,dense,poisson,60,1,0,0,59
+Z3,sparse,cmp_nu2p0,60,0,27,0,33
+Z3,sparse,poisson,60,0,1,0,59
+Z5,dense,cmp_nu2p0,60,8,3,5,44
+Z5,dense,poisson,60,0,1,0,59
+Z5,sparse,cmp_nu2p0,60,23,4,5,28
+Z5,sparse,poisson,60,0,1,0,59
+Z7,dense,cmp_nu2p0,60,8,3,0,49
+Z7,dense,poisson,60,1,0,0,59
+Z7,sparse,cmp_nu2p0,60,25,2,0,33
+Z7,sparse,poisson,60,1,0,0,59
+Z4,dense,cmp_nu2p0,60,0,11,0,49
+Z4,dense,poisson,60,1,0,13,46
+Z4,sparse,cmp_nu2p0,60,0,27,0,33
+Z4,sparse,poisson,60,1,0,41,18

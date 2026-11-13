@@ -1,0 +1,31 @@
+{
+  "experiment": "AF3-S0",
+  "script": "expfam/src/experimental/run_af3_selector_rescoring.py",
+  "git_head": "e55796d123ff711b2ff339a148b61cb05c9b6077",
+  "git_branch": "experiment/af3-selector-rescoring",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "9a2e3dd9ef6c3c84dd5677b124beec681ef91fd7184af08d4aa076539c8bc18d",
+  "command": "expfam/src/experimental/run_af3_selector_rescoring.py --smoke",
+  "stage": "smoke",
+  "replicates": [
+    "rep01"
+  ],
+  "instances": 79,
+  "started_utc": "2026-11-13T12:37:04.083361+00:00",
+  "finished_utc": "2026-11-13T12:37:08.874263+00:00",
+  "runtime_s": 4.8,
+  "n_warnings": 0,
+  "warning_messages": [],
+  "seeds": {
+    "data": "1661001 + r",
+    "noise": "[1664000, r, arm_code, index, seed]",
+    "bootstrap": 20261113
+  },
+  "af2_state_dir": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110\\full\\fits",
+  "mcem_fits": 0
+}

@@ -254,7 +254,8 @@ def figures(out: Path, summ: pd.DataFrame, c: pd.DataFrame) -> None:
         ax.boxplot(data, showfliers=True, flierprops={"markersize": 2})
         ax.set_xticks(range(1, len(labels) + 1), labels, fontsize=7)
         ax.axhline(0, color="k", lw=0.8)
-        ax.set_title(f"true {tm}: signed margin 2(Q_true - Q_wrong)", fontsize=9)
+        ax.set_yscale("symlog", linthresh=10)
+        ax.set_title(f"true {tm}: signed margin 2(Q_true - Q_wrong) [symlog]", fontsize=9)
     fig.tight_layout()
     fig.savefig(out / "fig2_signed_margin_by_arm.png", dpi=150)
     plt.close(fig)
@@ -281,6 +282,33 @@ def md_table(df: pd.DataFrame, cols: list[str], fmt: int = 3) -> str:
             d[k] = d[k].map(lambda v: "" if pd.isna(v) else f"{v:.{fmt}f}")
     head = "| " + " | ".join(cols) + " |\n|" + "---|" * len(cols) + "\n"
     return head + "\n".join("| " + " | ".join(str(v) for v in r) + " |" for r in d.values) + "\n"
+
+
+def posthoc(stage: Path, c: pd.DataFrame, out: Path) -> dict:
+    """POST-HOC (added after the full results were read; not pre-registered).
+    Descriptive only: optimiser error scale, zero vs incumbent start, and the
+    character of the misselections (margin size, descriptive Vuong-type z,
+    per-sample sign disagreement)."""
+    s = pd.read_csv(stage / "candidate_scores.csv", keep_default_na=False, na_values=[""])
+    z = c[c.arm.isin(["Z3", "Z5", "Z6", "Z7"])]
+    p = z.pivot_table(index=["arm", "regime", "replicate", "column"], columns="start", values="signed_margin")
+    sel = z.pivot_table(index=["arm", "regime", "replicate", "column"], columns="start",
+                        values="correct", aggfunc="first")
+    m = c[(c.start == "zero") & ~c.correct & ~c.failed]
+    props = m.groupby(["arm", "regime", "true_model"], dropna=False).agg(
+        n=("correct", "size"), abs_margin_median=("signed_margin", lambda x: x.abs().median()),
+        abs_margin_lt2=("signed_margin", lambda x: int((x.abs() < 2).sum())),
+        vuong_z_median=("vuong_z_descriptive", "median"),
+        samples_sign_disagree_mean=("n_samples_sign_disagree", "mean")).reset_index()
+    props.to_csv(out / "posthoc_misselection_properties.csv", index=False)
+    res = {"label": "POST-HOC descriptive (not pre-registered)",
+           "grad_inf_max": float(s.grad_inf.max()), "score_gap_bound_max": float(s.score_gap_bound.max()),
+           "hess_min_eig_min": float(s.hess_min_eig.min()),
+           "per_obs_sum_check_max": float(s.per_obs_sum_check_abs.max()),
+           "zero_vs_incumbent_max_abs_margin_diff": float((p["zero"] - p["incumbent"]).abs().max()),
+           "zero_vs_incumbent_selection_disagreements": int((sel.nunique(axis=1) > 1).sum())}
+    (out / "posthoc_summary.json").write_text(json.dumps(res, indent=2), encoding="utf-8")
+    return res
 
 
 def main(stage: Path) -> None:
@@ -338,6 +366,11 @@ def main(stage: Path) -> None:
           "\n### AF2 Auto（Poisson 開始）との列単位の対応\n",
           md_table(link, list(link.columns)) if len(link) else "(none)\n",
           "\n### 事前宣言した読み方（G1–G5）\n```json\n" + json.dumps(guide, indent=2, default=float) + "\n```\n"]
+    ph = posthoc(stage, c, out)
+    props = pd.read_csv(out / "posthoc_misselection_properties.csv", keep_default_na=False, na_values=[""])
+    md += ["\n### 事後に追加した記述表（post-hoc、事前登録外）\n",
+           "最適化誤差の規模と開始値: ```" + json.dumps(ph) + "```\n\n",
+           md_table(props, list(props.columns), 2)]
     (out / "results_tables.md").write_text("".join(md), encoding="utf-8")
     print(f"wrote {out}")
 
