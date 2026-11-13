@@ -1,0 +1,5 @@
+contrast,regime,sd_delta_phi_x_gauss,sd_delta_phi_y_train,sd_delta_neg_half_logdet,sd_delta_laplace
+oracle - support_only,dense,,,,
+oracle - support_only,sparse,,,,
+oracle - wrong,dense,,,,
+oracle - wrong,sparse,,,,

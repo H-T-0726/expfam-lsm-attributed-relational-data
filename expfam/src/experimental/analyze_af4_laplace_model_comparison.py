@@ -192,6 +192,43 @@ def md_table(df: pd.DataFrame, cols: list[str], fmt: int = 3) -> str:
             + "\n".join("| " + " | ".join(str(v) for v in r) + " |" for r in d.values) + "\n")
 
 
+def posthoc(mc: pd.DataFrame, p: pd.DataFrame, out: Path) -> str:
+    """POST-HOC (added after the full results were read; not pre-registered).
+    Paired differences by the number of count columns whose family differs from
+    Oracle, the list of datasets where Oracle is lower, and the spread of the
+    nuisance terms (Gaussian X, Y) between separately fitted models."""
+    orc = mc[mc.method == "oracle"].set_index(["replicate", "regime"]).assignment
+    asg = mc.set_index(["replicate", "regime", "method"]).assignment
+
+    def ndiff(r):
+        a = orc[(r.replicate, r.regime)].split("|")
+        b = asg[(r.replicate, r.regime, r.contrast.split(" - ")[1])].split("|")
+        return sum(x != y for x, y in zip(a, b))
+    q = p[p.both_ok].copy()
+    q["n_diff_cols"] = q.apply(ndiff, axis=1)
+    by = q.groupby(["contrast", "regime", "n_diff_cols"]).agg(
+        datasets=("delta_laplace", "size"), n_oracle_higher=("delta_laplace", lambda x: int((x > 0).sum())),
+        mean_delta=("delta_laplace", "mean"), mean_delta_phi_x_true_cmp_cols=("delta_phi_x_true_cmp_cols", "mean"),
+        mean_delta_neg_half_logdet=("delta_neg_half_logdet", "mean"),
+        mean_delta_phi_y_train=("delta_phi_y_train", "mean"), mean_delta_phi_x_gauss=("delta_phi_x_gauss", "mean")
+    ).reset_index()
+    by.to_csv(out / "posthoc_by_n_differing_columns.csv", index=False)
+    neg = q[q.delta_laplace < 0][["contrast", "regime", "replicate", "n_diff_cols", "delta_laplace", "delta_phi",
+                                  "delta_neg_half_logdet", "delta_phi_x_true_cmp_cols", "delta_phi_x_gauss",
+                                  "delta_phi_y_train", "delta_is_corrected", "is_readable"]]
+    neg.to_csv(out / "posthoc_oracle_lower_cases.csv", index=False)
+    nuis = q[q.contrast.isin(["oracle - support_only", "oracle - wrong"])].groupby(["contrast", "regime"]).agg(
+        sd_delta_phi_x_gauss=("delta_phi_x_gauss", "std"), sd_delta_phi_y_train=("delta_phi_y_train", "std"),
+        sd_delta_neg_half_logdet=("delta_neg_half_logdet", "std"), sd_delta_laplace=("delta_laplace", "std")).reset_index()
+    nuis.to_csv(out / "posthoc_nuisance_spread.csv", index=False)
+    return ("\n### 事後に追加した記述表（post-hoc、事前登録外）\n"
+            "Oracle と割当てが異なる count 列の数ごとの paired 差\n\n"
+            + md_table(by, list(by.columns), 2)
+            + "\nOracle の方が低かったケース\n\n" + md_table(neg, list(neg.columns), 2)
+            + "\n別々に推定した fit の間の nuisance 項のばらつき（データセット間 SD）\n\n"
+            + md_table(nuis, list(nuis.columns), 2))
+
+
 def main(stage: Path) -> None:
     out = stage / "analysis"
     out.mkdir(parents=True, exist_ok=True)
@@ -222,7 +259,8 @@ def main(stage: Path) -> None:
                                           "mean_delta_heldout_y_pred"], 4),
           "\n### 数値診断\n",
           md_table(dsum, list(dsum.columns), 4),
-          "\n### 事前宣言した読み方（R1–R4）\n```json\n" + json.dumps(guide, indent=2) + "\n```\n"]
+          "\n### 事前宣言した読み方（R1–R4）\n```json\n" + json.dumps(guide, indent=2) + "\n```\n",
+          posthoc(mc, p, out)]
     (out / "results_tables.md").write_text("".join(md), encoding="utf-8")
     print(f"wrote {out}")
 

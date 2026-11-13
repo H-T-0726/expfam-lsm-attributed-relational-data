@@ -1,0 +1,28 @@
+{
+  "experiment": "AF4-S1",
+  "script": "expfam/src/experimental/run_af4_laplace_model_comparison.py",
+  "git_head": "27452add5143f38148f93a5d7200c4df978e35fa",
+  "git_branch": "experiment/af4-model-comparison",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "2d063ac208b565f66606fc949a07207485202296daf9a4f95f899af5196187d6",
+  "command": "expfam/src/experimental/run_af4_laplace_model_comparison.py --smoke",
+  "stage": "smoke",
+  "replicates": [
+    "rep01"
+  ],
+  "cases": 10,
+  "mode_optimisations": 30,
+  "is_samples": 20000,
+  "started_utc": "2026-11-13T12:59:23.180943+00:00",
+  "finished_utc": "2026-11-13T12:59:43.753007+00:00",
+  "runtime_s": 20.6,
+  "n_warnings": 0,
+  "warning_messages": [],
+  "af2_state_dir": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110\\full\\fits",
+  "mcem_fits": 0
+}
