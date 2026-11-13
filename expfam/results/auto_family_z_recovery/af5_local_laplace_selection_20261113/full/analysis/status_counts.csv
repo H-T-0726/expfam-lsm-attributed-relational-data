@@ -1,0 +1,7 @@
+anchor,regime,DECIDED,DECIDED_LAPLACE_UNASSESSED,UNDECIDED_LAPLACE,UNDECIDED_NUMERIC
+auto_first,dense,112,5,3,0
+auto_first,sparse,71,45,3,1
+oracle,dense,108,10,2,0
+oracle,sparse,83,35,2,0
+support_only,dense,106,13,1,0
+support_only,sparse,70,47,2,1

@@ -591,6 +591,7 @@ def main(argv=None) -> int:
     g.add_argument("--pilot", action="store_true")
     g.add_argument("--execute", action="store_true")
     g.add_argument("--analyze", action="store_true")
+    g.add_argument("--posthoc", action="store_true", help="POST-HOC analyses (not pre-registered)")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--stage", default="full")
     ap.add_argument("--out-root", default=str(OUT_ROOT))
@@ -614,6 +615,10 @@ def main(argv=None) -> int:
     if args.analyze:
         import analyze_af5_local_laplace_selection as an
         an.main(out_root / args.stage)
+        return 0
+    if args.posthoc:
+        import analyze_af5_local_laplace_selection as an
+        an.posthoc(out_root / args.stage, out_root / "pilot")
         return 0
     frozen = json.loads((out_root / "protocol.json").read_text(encoding="utf-8"))
     if hashlib.sha256(json.dumps(frozen, sort_keys=True).encode()).hexdigest() != protocol_sha256():

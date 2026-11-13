@@ -1,0 +1,13 @@
+anchor,regime,true_model,n,laplace_wrong,af2_auto_wrong,q_same_anchor_wrong
+auto_first,dense,cmp_nu2p0,60,6,11,8
+auto_first,dense,poisson,60,4,1,1
+auto_first,sparse,cmp_nu2p0,59,8,26,24
+auto_first,sparse,poisson,60,9,1,1
+oracle,dense,cmp_nu2p0,60,6,11,0
+oracle,dense,poisson,60,3,1,1
+oracle,sparse,cmp_nu2p0,60,5,27,0
+oracle,sparse,poisson,60,8,1,0
+support_only,dense,cmp_nu2p0,60,5,11,13
+support_only,dense,poisson,60,3,1,0
+support_only,sparse,cmp_nu2p0,59,9,26,27
+support_only,sparse,poisson,60,10,1,0

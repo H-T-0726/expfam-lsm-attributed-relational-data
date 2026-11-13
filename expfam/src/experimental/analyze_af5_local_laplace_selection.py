@@ -247,5 +247,69 @@ def main(stage: Path) -> None:
     print(f"wrote {out}")
 
 
+AF2_SCORE_COLS = ["replicate", "regime", "column", "final_score_poisson", "final_score_cmp_nu2p0"]
+
+
+def posthoc(stage: Path, pilot_stage: Path | None = None) -> None:
+    """POST-HOC (not pre-registered; added after the full results were read).
+
+    1. error direction by true family (AF2 Auto / Q same anchor / Laplace)
+    2. signed 'towards-truth' margin of wrong vs right columns: Laplace Δ vs
+       the AF2 Auto final Q margin (same sign convention: >0 favours the truth)
+    3. pilot vs full recomputation of rep01-03 (same settings, determinism)
+    """
+    out = stage / "analysis" / "posthoc"
+    out.mkdir(parents=True, exist_ok=True)
+    c = load(stage)
+    e = c[c.sign_eligible].copy()
+    wrong = lambda s: int((~s.astype(bool)).sum())  # noqa: E731
+    d1 = (e.groupby(["anchor", "regime", "true_model"])
+          .agg(n=("lap_correct", "size"), laplace_wrong=("lap_correct", wrong),
+               af2_auto_wrong=("af2_auto_correct", wrong), q_same_anchor_wrong=("q_same_anchor_correct", wrong))
+          .reset_index())
+    d1.to_csv(out / "posthoc_error_direction.csv", index=False)
+
+    s2 = pd.read_csv(AF2_COLS)
+    s2 = s2[(s2.method == "auto_first") & (s2.decided_by == "score")][AF2_SCORE_COLS]
+    e = e.merge(s2, on=["replicate", "regime", "column"], how="left")
+    sgn = np.where(e.true_model == "cmp_nu2p0", 1.0, -1.0)
+    e["laplace_margin_to_truth"] = sgn * e.delta
+    e["af2_q_margin_to_truth"] = sgn * (e.final_score_cmp_nu2p0 - e.final_score_poisson)
+    rows = []
+    for (a, reg), g in e.groupby(["anchor", "regime"]):
+        for name, mcol, ccol in (("laplace", "laplace_margin_to_truth", "lap_correct"),
+                                 ("af2_auto_q", "af2_q_margin_to_truth", "af2_auto_correct")):
+            for ok in (True, False):
+                v = g.loc[g[ccol].astype(bool) == ok, mcol].abs()
+                rows.append({"anchor": a, "regime": reg, "score": name, "correct": ok, "n": int(v.size),
+                             "abs_margin_q25": v.quantile(.25) if v.size else np.nan,
+                             "abs_margin_median": v.median() if v.size else np.nan,
+                             "abs_margin_q75": v.quantile(.75) if v.size else np.nan,
+                             "abs_margin_max": v.max() if v.size else np.nan})
+    pd.DataFrame(rows).to_csv(out / "posthoc_margin_wrong_vs_right.csv", index=False)
+    rows = []
+    for (a, reg), g in e.groupby(["anchor", "regime"]):
+        for thr in (0.5, 1.0, 2.0):
+            k = g[g.delta.abs() > thr]
+            rows.append({"anchor": a, "regime": reg, "abs_delta_gt": thr, "n_kept": int(len(k)),
+                         "share_kept": len(k) / len(g), "acc_kept": float(k.lap_correct.mean()) if len(k) else np.nan,
+                         "n_wrong_kept": wrong(k.lap_correct)})
+    pd.DataFrame(rows).to_csv(out / "posthoc_abs_delta_threshold.csv", index=False)
+    (c.groupby(["anchor", "regime", "status"])
+      .agg(n=("lap_correct", "size"), laplace_sign_acc=("lap_correct", "mean"),
+           af2_auto_acc=("af2_auto_correct", "mean"), q_same_anchor_acc=("q_same_anchor_correct", "mean"))
+      .reset_index().to_csv(out / "posthoc_accuracy_by_status.csv", index=False))
+
+    if pilot_stage is not None and (pilot_stage / "column_selection.csv").exists():
+        p = pd.read_csv(pilot_stage / "column_selection.csv")
+        f = pd.read_csv(stage / "column_selection.csv")
+        k = ["replicate", "regime", "anchor", "column"]
+        m = p[k + ["delta", "status"]].merge(f[k + ["delta", "status"]], on=k, suffixes=("_pilot", "_full"))
+        pd.DataFrame([{"n_matched": len(m), "max_abs_delta_diff": float((m.delta_pilot - m.delta_full).abs().max()),
+                       "status_identical": int((m.status_pilot == m.status_full).sum())}]
+                     ).to_csv(out / "posthoc_pilot_vs_full.csv", index=False)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     main(Path(sys.argv[1]))
