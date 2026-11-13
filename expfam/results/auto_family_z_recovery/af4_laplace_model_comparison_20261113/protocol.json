@@ -1,0 +1,92 @@
+{
+  "experiment": "AF4-S1",
+  "mode": {
+    "starts": [
+      "saved_mode",
+      "last_sample",
+      "mean5"
+    ],
+    "primary_start": "saved_mode (AF2 joint mode, re-polished)",
+    "optimizer": "laplace_k_criterion.find_joint_mode (damped full Newton, backtracking on Phi)",
+    "grad_tol": 1e-08,
+    "max_iter": 200,
+    "sensitivity": "best-of-starts Laplace; mode differences across starts recorded"
+  },
+  "research_question": "Does a whole-model Laplace approximation of log p(X, Y_train | theta_c, c), with Z integrated out at each candidate's saved theta-hat, rank the true assignment above Support-only and Wrong on the same data?",
+  "not_claimed": "a new automatic selection method; Oracle is a diagnostic reference that knows the truth",
+  "lineage": "E-consistent per-column + PR #129 generic model (experimental prototype; not adoptable). PR #129 not merged; AF1/AF2 (#166/#167) Draft; AF3 unpushed",
+  "mcem_fits": 0,
+  "quantity": {
+    "target": "log p(X, Y_train | theta_hat_c, c) = log \u222b p(X, Y_train, Z | theta_hat_c, c) dZ (latent marginal likelihood at plug-in theta; NOT Bayesian evidence, NOT Schwarz BIC, NOT a Q value)",
+    "laplace": "Phi(Z_hat) + (nK/2) log 2\u03c0 \u2212 \u00bd log|H|, Z_hat = joint mode at fixed theta_hat_c, H = full nK\u00d7nK negative Hessian including the Y cross blocks",
+    "phi": "independent implementation log_joint_parts: N(0, var_z I) prior with constant; Gaussian X with sigma^2 and 2\u03c0; Poisson \u2212log x!; CMP2 \u22122 log x! and log-normaliser; Bernoulli Y over unordered train pairs i<j only; test pairs never enter",
+    "gradient_hessian": "laplace_k_criterion.gradient / negative_hessian (existing), validated by finite differences of the independent Phi in Phase A",
+    "penalty": "none: all candidate assignments have identical free-parameter counts"
+  },
+  "data": {
+    "datasets": "AF2, 20 (seed 1661001+r)",
+    "regimes": [
+      "dense",
+      "sparse"
+    ],
+    "masks": "AF2 / M1 build_masks(r); Y_train = regime mask; test pairs only for secondary held-out Y"
+  },
+  "assignments": {
+    "primary": [
+      "oracle",
+      "support_only",
+      "wrong"
+    ],
+    "secondary": [
+      "auto_first",
+      "auto_last"
+    ],
+    "theta": "each assignment's own saved AF2 refit theta-hat (F, sigma, w0, w, var_z)"
+  },
+  "hessian": "full analytic, symmetrised; logdet by slogdet and by Cholesky (agreement recorded); no ridge, no jitter; OK only if max|grad| <= grad_tol and H positive definite",
+  "importance_sampling": {
+    "purpose": "diagnostic of the Laplace error only (secondary)",
+    "proposal": "N(Z_hat, H^-1)",
+    "batches": 5,
+    "per_batch": 400,
+    "seed": "1665000 + 100*case_index + batch"
+  },
+  "heldout_y": {
+    "secondary": true,
+    "plugin": "mean Bernoulli log-lik of test pairs at Z_hat",
+    "laplace_predictive": "mean log of E_q[p] with q = N(Z_hat, H^-1), 2000 draws, seed 1666000 + case_index",
+    "caution": "Y prediction alone does not identify the X family"
+  },
+  "x_caution": "all X entries were used to fit; any X log-likelihood here is in-sample, never 'held-out X'",
+  "primary_metrics": {
+    "per regime": "number of datasets (of 20 with both OK) with Laplace(oracle) > Laplace(support_only), and > Laplace(wrong); mean paired difference with bootstrap CI",
+    "note": "a post-truth diagnostic of discriminability, not a selection accuracy"
+  },
+  "secondary_metrics": [
+    "decomposition of each paired difference into \u0394 Phi(Z_hat) [prior, X gauss, X true-Poisson cols, X true-CMP cols, Y] and \u0394(\u2212\u00bd log|H|)",
+    "oracle vs auto_first / auto_last on datasets where the Auto assignment differs from Oracle",
+    "oracle vs support_only on datasets where the AF3 Z5 Q-score misselected at least one CMP2 column",
+    "best-of-starts sensitivity",
+    "IS-corrected Laplace and IS diagnostics (ESS, batch spread)",
+    "held-out Y plug-in and Laplace-predictive log score",
+    "Hessian eigenvalues, condition number, iterations"
+  ],
+  "statistical_unit": "dataset (20 per regime); columns and models within a dataset are never independent units",
+  "interval": "percentile bootstrap over datasets (10000, seed 20261114)",
+  "failure_rule": "a non-OK primary-start Laplace (NOT_STATIONARY, HESSIAN_NOT_PD, ERROR) is kept and reported; a paired comparison uses only datasets where both members are OK; exclusions counted; nothing is retried, re-seeded or ridged",
+  "reading_guide_predeclared": {
+    "note": "judgement aids, not significance tests",
+    "R1": "Oracle > Support-only AND Oracle > Wrong in >= 18/20 datasets in both regimes -> the Laplace whole-model comparison discriminates in this setting",
+    "R2": "Oracle > Support-only in <= 14/20 in a regime -> not reliably discriminative there",
+    "R3": "if the sign of a paired difference differs from the sign of its \u0394 Phi in >= 3 datasets, the Hessian term is decisive",
+    "R4": "if best-of-starts or IS-corrected values reverse the sign of a primary paired difference in >= 2 datasets of a regime, the Laplace result is fragile there (IS read only where relative ESS >= 0.01)"
+  },
+  "budget": {
+    "cases": 200,
+    "mode_optimisations": 600,
+    "is_samples": 400000
+  },
+  "artifacts": {
+    "results": "expfam/results/auto_family_z_recovery/af4_laplace_model_comparison_20261113"
+  }
+}

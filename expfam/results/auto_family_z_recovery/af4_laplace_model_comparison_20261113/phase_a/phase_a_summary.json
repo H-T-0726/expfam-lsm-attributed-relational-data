@@ -1,0 +1,30 @@
+{
+  "cases": 200,
+  "all_npz_sha_match": true,
+  "all_data_sha_match": true,
+  "all_train_mask_sha_match": true,
+  "all_no_train_test_overlap": true,
+  "all_mask_symmetric_zero_diag": true,
+  "all_theta_match": true,
+  "var_z_values": [
+    1.0
+  ],
+  "gauss_sigma2_min": 0.37885839170188307,
+  "all_nongauss_sigma_one": true,
+  "max_saved_mode_grad_inf_recomputed": 8.869163625746523e-09,
+  "max_abs_phi_existing_minus_mode_phi": 0.0,
+  "max_offset_spread_over_Z": 1.3642420526593924e-12,
+  "max_abs_offset_minus_expected": 9.094947017729282e-13,
+  "fd_cases": 36,
+  "max_grad_rel_err": 4.567475714312152e-08,
+  "max_hess_rel_err": 1.489236253999782e-10,
+  "max_offdiag_rel_err": 6.975584167566424e-12,
+  "min_offdiag_norm": 11.337370923909011,
+  "all_cholesky_ok_at_saved_mode": true,
+  "max_phi_change_test_flip": 0.0,
+  "max_grad_change_test_flip": 0.0,
+  "min_phi_change_train_flip": 0.12183885041326903,
+  "runtime_s": 33.2,
+  "git_head": "86fba01be9b323d93ab96783e9a740eebe2b7663",
+  "gate_pass": true
+}
