@@ -1,0 +1,4 @@
+stage,replicate,regime,column,detail
+laplace,rep09,dense,3,FAILED
+laplace,rep15,dense,3,FAILED
+laplace,rep15,sparse,3,FAILED

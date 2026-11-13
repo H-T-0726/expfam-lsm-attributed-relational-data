@@ -1,0 +1,3 @@
+regime,fits,fit_wall_s_mean,fit_wall_h_total,select_columns,select_s_mean_per_column,select_h_total
+dense,40,40.4645,0.44960555555555554,240,40.709125,2.713941666666667
+sparse,40,39.343,0.43714444444444445,240,112.13924999999999,7.475949999999999

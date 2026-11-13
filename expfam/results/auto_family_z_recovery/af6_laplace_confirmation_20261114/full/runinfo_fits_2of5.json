@@ -1,0 +1,28 @@
+{
+  "experiment": "AF6",
+  "script": "expfam/src/experimental/run_af6_laplace_confirmation.py",
+  "git_head": "9e7775a70e5dd487d51f82fb306137b6cc7e6cf0",
+  "git_branch": "experiment/af6-laplace-confirmation",
+  "git_dirty_tracked": false,
+  "git_untracked_experimental": "",
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 12,
+  "omp_num_threads": "2",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "eea15292171dfec2ee3ea1001b5613fdf034cc9a88749e931b3dfedceba0e71f",
+  "command": "expfam/src/experimental/run_af6_laplace_confirmation.py --fits --shard 2/5",
+  "stage": "fits",
+  "shard": "2/5",
+  "sessions": [
+    {
+      "started_utc": "2026-11-13T19:35:56.662209+00:00",
+      "finished_utc": "2026-11-13T19:46:46.934713+00:00",
+      "runtime_s": 650.3,
+      "git_head": "9e7775a70e5dd487d51f82fb306137b6cc7e6cf0"
+    }
+  ],
+  "state_dir": "D:\\tento\\kennkyu_artifacts\\af6_laplace_confirmation_20261114\\fits"
+}
