@@ -1,0 +1,14 @@
+{
+  "cases": 24,
+  "max_grad_rel_err": 4.547480481065235e-08,
+  "max_hess_rel_err": 6.902473325650549e-11,
+  "min_offdiag_norm": 14.656451043581782,
+  "min_eig": 1.6986924998336295,
+  "all_target_base_measure_ok": true,
+  "max_abs_legacy_offset_minus_count_logfact": 4.547473508864641e-13,
+  "max_envelope_grad_rel_err": 3.704037321305975e-08,
+  "max_S_fd_grad_step_diff": 4.963555966241984e-05,
+  "all_repeat_identical": true,
+  "git_head": "69709e50b8ae537f3ceb1b0448238cc3509e2dbd",
+  "gate_pass": true
+}

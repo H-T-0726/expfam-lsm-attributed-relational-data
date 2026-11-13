@@ -1,0 +1,97 @@
+{
+  "experiment": "AF5-S2B",
+  "study_type": "EXPLORATORY (algorithm development; the 20 AF2 datasets were already analysed in AF2-AF4, so freezing this protocol does not make AF5 an independent confirmatory test)",
+  "lineage": "E-consistent per-column + PR #129 generic model (experimental prototype; not adoptable). PR #129 not merged; AF1/AF2 Draft PRs; AF3/AF4 unpushed",
+  "mcem_fits": 0,
+  "objective": {
+    "primary": "S_j(m;a) = max_f [Phi_m(Z_hat_m(f), f) + (nK/2) log 2\u03c0 \u2212 \u00bd log|H_m(f)|]; the Laplace-corrected objective is what is maximised over f_j",
+    "secondary_variant": "joint-MAP: f_j maximises Phi_m(Z_hat(f), f) (envelope gradient), Laplace term added afterwards; recorded only",
+    "fixed": "theta_{-j} (other loadings, Gaussian variances, w0, w, var_z) and families of other columns, from the anchor's saved AF2 refit state; identical for both candidates",
+    "free": "family m of column j, loading f_j, Z (joint mode re-solved per candidate and per f_j)",
+    "phi": "AF4 log_joint_parts (independent; base measures included: Poisson \u2212log x!, CMP2 \u22122 log x!)",
+    "hessian": "full nK\u00d7nK with Y cross blocks (laplace_k_criterion.negative_hessian)",
+    "not": "not Bayesian evidence (theta not integrated), not BIC, not a Q value; equal parameter counts"
+  },
+  "anchors": {
+    "auto_first": "PRIMARY (AF2 Auto refit, Poisson start; usable without the truth)",
+    "support_only": "SECONDARY",
+    "oracle": "DIAGNOSTIC only, never in the primary improvement"
+  },
+  "unit_of_decision": "each count column independently; other columns keep the anchor's families; no sequential update",
+  "delta": "\u0394_j = S_j(cmp2) \u2212 S_j(poisson); > 0 supports CMP2",
+  "optimisation": {
+    "inner": "find_joint_mode (damped full Newton) aiming at 1e-11 (max_iter 50), then up to 5 pure Newton polish steps; accepted when max|grad| <= 1e-08; warm start from the previous accepted mode, first start = anchor Zmode",
+    "change_log": "Phase 0 attempt 1 (kept in phase0_attempt1/) required 1e-10 and failed the gate on floating-point stalls; changed before any \u0394 was computed",
+    "outer": "BFGS on \u2212S with central finite-difference gradient (step 0.0001), gtol 1e-05, maxiter 200",
+    "starts": "anchor's own loading for column j; candidate-specific plug-in (Q-type optimum on anchor Zmode, L=1)",
+    "selection_of_start": "maximum S over OK starts"
+  },
+  "decision_status": {
+    "FAILED": "computation failed for a candidate (recorded, not retried)",
+    "UNDECIDED_NOT_CONVERGED": "either candidate: |FD grad S|_inf > 0.001 at the optimum, or S recomputed from the anchor Zmode differs by > 1e-06",
+    "UNDECIDED_NUMERIC": "|\u0394| <= max(0.01, start disagreement of either candidate)",
+    "UNDECIDED_LAPLACE": "IS readable (relative ESS >= 0.01 for both) and (sign(\u0394 + \u0394c) != sign(\u0394) or |\u0394| < 2 SE_batch(\u0394c)); \u0394c from common-random-number IS",
+    "DECIDED_LAPLACE_UNASSESSED": "IS not readable; decided by the sign of \u0394, flagged",
+    "DECIDED": "otherwise"
+  },
+  "importance_sampling": {
+    "proposal": "N(Z_hat_m, H_m^-1) per candidate with COMMON eps",
+    "batches": 5,
+    "per_batch": 400,
+    "seed": "1667000 + case_index",
+    "caution": "with low ESS the correction is not a high-precision truth"
+  },
+  "data": {
+    "datasets": "AF2, 20 (seed 1661001+r)",
+    "regimes": [
+      "dense",
+      "sparse"
+    ],
+    "count_columns": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "masks": "AF2 / M1 build_masks(r): Y train mask of the regime; test pairs never used"
+  },
+  "primary_metrics": [
+    "Auto anchor: column accuracy by sign of \u0394 (all non-FAILED, non-UNDECIDED_NOT_CONVERGED/NUMERIC columns), by true family and regime; and 'confident' accuracy among DECIDED",
+    "corrections: AF2 Auto (Poisson start) misselected columns that the Auto-anchor Laplace gets right",
+    "harms: AF2 Auto correct columns that the Auto-anchor Laplace gets wrong",
+    "dataset-level change in the number of correct count columns (Laplace \u2212 AF2 Auto), bootstrap CI",
+    "\u0394 distribution and undecided rates"
+  ],
+  "secondary_metrics": [
+    "Support-only anchor (same metrics)",
+    "agreement Auto vs Support-only anchors",
+    "dense vs sparse",
+    "true loading norm",
+    "decomposition (target column, other terms, \u2212\u00bd log|H|)",
+    "start / joint-MAP sensitivity",
+    "paired with the Q-score on the SAME anchor (AF3: Z7 Auto refit, Z5 Support-only, Z3 Oracle samples, zero start)"
+  ],
+  "diagnostic": "Oracle anchor accuracy and \u0394",
+  "statistical_unit": "dataset (20 per regime); columns within a dataset are not independent",
+  "interval": "percentile bootstrap over datasets (10000, seed 20261115)",
+  "pilot": {
+    "replicates": [
+      "rep01",
+      "rep02",
+      "rep03"
+    ],
+    "purpose": "feasibility, time, memory, reproducibility, numerical error; settings are NOT tuned on pilot accuracy; the pilot replicates are recomputed in the full run with the same settings",
+    "stop_rule": "stop before Phase 2 if > 10% of pilot columns are FAILED or UNDECIDED_NOT_CONVERGED, or the Phase 0 gate fails"
+  },
+  "not_claimed": "Z recovery after re-fitting (no MCEM refit of a corrected assignment); a confirmed algorithm (a new-seed confirmation study is required)",
+  "budget": {
+    "columns": 720,
+    "outer_optimisations": 2880,
+    "is_draws": 2880000
+  },
+  "artifacts": {
+    "results": "expfam/results/auto_family_z_recovery/af5_local_laplace_selection_20261113"
+  }
+}
