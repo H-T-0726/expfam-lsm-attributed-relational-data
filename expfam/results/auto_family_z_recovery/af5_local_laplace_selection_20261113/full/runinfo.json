@@ -1,0 +1,50 @@
+{
+  "experiment": "AF5-S2B",
+  "script": "expfam/src/experimental/run_af5_local_laplace_selection.py",
+  "git_head": "7c7e0a8c502e03cf005438f7698f392ee3d981d5",
+  "git_branch": "experiment/af5-local-laplace-selection",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+  "protocol_sha256": "b0601adb3bf5956e2a4985e506b41e5b9285b28c4243e7fa68781e37ca78aa74",
+  "command": "expfam/src/experimental/run_af5_local_laplace_selection.py --execute",
+  "stage": "full",
+  "replicates": [
+    "rep01",
+    "rep02",
+    "rep03",
+    "rep04",
+    "rep05",
+    "rep06",
+    "rep07",
+    "rep08",
+    "rep09",
+    "rep10",
+    "rep11",
+    "rep12",
+    "rep13",
+    "rep14",
+    "rep15",
+    "rep16",
+    "rep17",
+    "rep18",
+    "rep19",
+    "rep20"
+  ],
+  "columns": 720,
+  "sessions": [
+    {
+      "started_utc": "2026-11-13T14:10:10.473285+00:00",
+      "finished_utc": "2026-11-13T18:09:43.571976+00:00",
+      "runtime_s": 14373.0,
+      "git_head": "7c7e0a8c502e03cf005438f7698f392ee3d981d5",
+      "n_warnings": 0,
+      "warning_messages": []
+    }
+  ],
+  "af2_state_dir": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110\\full\\fits",
+  "mcem_fits": 0
+}

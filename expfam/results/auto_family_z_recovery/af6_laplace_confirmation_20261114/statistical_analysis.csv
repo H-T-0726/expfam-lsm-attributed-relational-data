@@ -1,0 +1,17 @@
+comparison,regime,datasets,mean_D,ci_low,ci_high,sd_D,n_pos,n_zero,n_neg,endpoint,success
+A-B,sparse,40,0.225,-0.075,0.525,0.9996794357987836,16,14,10,PRIMARY,False
+A-B,dense,40,0.0,-0.2,0.2,0.6793662204867574,8,25,7,secondary,
+A-C,sparse,40,0.2,-0.125,0.5,1.0177904675803542,16,13,11,secondary,
+A-C,dense,40,0.0,-0.2,0.2,0.6793662204867574,8,25,7,secondary,
+D-B,sparse,40,0.125,-0.125,0.35,0.7905694150420949,12,21,7,secondary,
+D-B,dense,40,-0.025,-0.225,0.175,0.6597396533909496,7,26,7,secondary,
+E-B,sparse,40,0.275,0.05,0.5,0.7506407519323332,14,21,5,diagnostic,
+E-B,dense,40,-0.025,-0.2,0.15,0.5767948575466911,5,30,5,diagnostic,
+E-A,sparse,40,0.05,-0.225,0.325,0.8755950357709131,12,19,9,diagnostic,
+E-A,dense,40,-0.025,-0.125,0.075,0.3571611716915804,2,35,3,diagnostic,
+TI-B,sparse,40,0.25,-0.05,0.525,0.9540735874430285,15,17,8,approximation,
+TI-B,dense,40,-0.025,-0.25,0.175,0.6975230903263788,8,24,8,approximation,
+B-C,sparse,40,-0.025,-0.075,0.0,0.15811388300841897,0,39,1,secondary,
+B-C,dense,40,0.0,0.0,0.0,0.0,0,40,0,secondary,
+A-B,dense,40,0.0,-0.2,0.2,0.6793662204867574,8,25,7,approximation: TI-verified columns only (+ dense columns outside the TI subset),
+A-B,sparse,40,0.225,-0.075,0.525,0.9996794357987836,16,14,10,approximation: TI-verified columns only (+ dense columns outside the TI subset),

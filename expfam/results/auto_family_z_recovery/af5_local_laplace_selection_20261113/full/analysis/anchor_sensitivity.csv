@@ -1,0 +1,7 @@
+regime,anchor_a,anchor_b,both_eligible,agree,agree_true_cmp,n_true_cmp
+dense,auto_first,support_only,120,118,59,60
+dense,auto_first,oracle,120,119,60,60
+dense,support_only,oracle,120,119,59,60
+sparse,auto_first,support_only,119,115,58,59
+sparse,auto_first,oracle,119,111,56,59
+sparse,support_only,oracle,119,107,55,59

@@ -1,0 +1,138 @@
+{
+  "experiment": "AF3-S0",
+  "mode": "CONFIRMATORY for the primary questions (written before any AF3 selection result); Z2c / Z2m / Z4 / Z6 / Z7 / incumbent start are secondary",
+  "research_question": "If the Z used by the Q-score is less accurate, does the rate of selecting the true family (Poisson vs COM-Poisson nu=2) fall, and do the errors go CMP2 -> Poisson?",
+  "hypothesis_not_assumed": "true Z selects correctly; adding error to Z increases CMP2 -> Poisson",
+  "lineage": "E-consistent per-column + PR #129 generic model (experimental prototype; not adoptable for the manuscript). PR #129 not merged; AF1/AF2 PRs (#166/#167) Draft",
+  "mcem_fits": 0,
+  "data": {
+    "source": "AF2 datasets regenerated with af2.generate(r) (PR #129 generator, unchanged)",
+    "n": 75,
+    "K": 3,
+    "d": 9,
+    "true_models": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "poisson",
+      "poisson",
+      "poisson",
+      "cmp_nu2p0",
+      "cmp_nu2p0",
+      "cmp_nu2p0"
+    ],
+    "count_columns": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "data_seeds": [
+      1661001,
+      1661002,
+      1661003,
+      1661004,
+      1661005,
+      1661006,
+      1661007,
+      1661008,
+      1661009,
+      1661010,
+      1661011,
+      1661012,
+      1661013,
+      1661014,
+      1661015,
+      1661016,
+      1661017,
+      1661018,
+      1661019,
+      1661020
+    ],
+    "check": "x/y/z_true sha16 equal to AF2 fit_runs.csv for every fit"
+  },
+  "af2_states": {
+    "dir_outside_repo": "D:\\tento\\kennkyu_artifacts\\auto_family_z_recovery_af2_20261110\\full\\fits",
+    "check": "sha256 equal to AF2 fit_runs.csv state_sha256 (200 files)",
+    "used": {
+      "Z3": "oracle Zsamples",
+      "Z5": "support_only Zsamples",
+      "Z6": "wrong Zsamples",
+      "Z7": "auto_first (refit) Zsamples",
+      "Z4": "oracle Zmode",
+      "incumbent start": "the same fit's F row"
+    }
+  },
+  "candidates": [
+    "poisson",
+    "cmp_nu2p0"
+  ],
+  "nu": 2.0,
+  "route": "trust_exact",
+  "selector": "family_selection_multisupport.score_candidate + select_column (unchanged); tie rule poisson first; complete log-pmf",
+  "start": {
+    "primary": "zero loading for both candidates (as PR #129 selector_only)",
+    "sensitivity": "incumbent = the AF2 fit's own refit loading for that column"
+  },
+  "arms": {
+    "Z1": "true Z, L=1 [PRIMARY]",
+    "Z2": "true Z + s*eps, eps iid N(0,I) per sample, L=5, s in [0.1, 0.2, 0.3, 0.45, 0.6], noise seeds [0, 1, 2, 3, 4] [PRIMARY]",
+    "Z3": "Oracle refit Zsamples, dense and sparse [PRIMARY]",
+    "Z5": "Support-only refit Zsamples, dense and sparse [PRIMARY]",
+    "Z4": "Oracle Zmode (plug-in, L=1) [secondary]",
+    "Z6": "Wrong refit Zsamples [secondary]",
+    "Z7": "Auto (Poisson start) refit Zsamples [secondary; for column-level linkage to AF2]",
+    "Z2c": "true Z + one common draw s*eps, L=1 [secondary]",
+    "Z2m": "true Z + a*e0 + b*e_l, L=5, (a,b) {'dense': {'a': 0.27, 'b': 0.25}, 'sparse': {'a': 0.41, 'b': 0.38}} [secondary]",
+    "incumbent_start": "Z3/Z5/Z6/Z7 re-scored from the incumbent loading [secondary]"
+  },
+  "noise_interpretation": "Q_j is invariant to any invertible linear map of Z applied to all samples (no intercept: f^T z = (A^-T f)^T (A z)), so rotation and global scale of Z do not matter for selection; translation would. s is the per-coordinate SD of an isotropic error on N(0,I) latent positions; for one draw the rotation-Procrustes RMSE is about s (audit/noise_level_interpretation.csv). The grid adds 0.6 to the proposed {0.1,0.2,0.3,0.45} because the Oracle per-sample RMSE is ~0.37 dense / ~0.56 sparse (audit/z_error_calibration.csv; Z geometry only, no selection result).",
+  "noise_seed_rule": "np.random.default_rng([1664000, r, arm_code, level_or_regime_index, noise_seed]); arm_code 1=Z2, 2=Z2c, 3=Z2m",
+  "signed_margin": "dQ = 2 (Q_true - Q_wrong); also dQ / n",
+  "primary_metrics": [
+    "true-CMP2 column correct rate",
+    "true-CMP2 signed margin",
+    "Z2 noise level vs CMP2 -> Poisson misselection rate"
+  ],
+  "secondary_metrics": [
+    "true-Poisson correct rate",
+    "Z5 vs Z3 (paired)",
+    "true loading norm vs selection",
+    "per-observation score differences (descriptive Vuong-type z, conditional on the given Z; NOT a test)",
+    "per-sample margins (L=5 chain draws; NOT an MC standard error)",
+    "optimizer gradient, Hessian min eigenvalue, score-gap bound g^2/(2 lam)"
+  ],
+  "statistical_unit": "replicate (20 independent datasets). Columns within a replicate and noise seeds are averaged inside the replicate first; never counted as independent",
+  "aggregation": {
+    "rate": "per replicate: share of its 3 true-CMP2 (or true-Poisson) columns correct; Z2/Z2c/Z2m averaged over the 5 noise seeds inside the replicate; then mean over replicates",
+    "interval": "percentile bootstrap over replicates (10000, seed 20261113)",
+    "dose_response": "per replicate OLS slope of the seed-averaged CMP2->Poisson misselection rate on s (5 levels); mean slope with bootstrap CI and the count of positive slopes; Z1 is reported as s=0 but not used in the slope",
+    "paired": "Z5 - Z3 per replicate and regime (CMP2 misselection rate), bootstrap CI, sign counts"
+  },
+  "failure_rule": "a FAILED candidate makes the column FAILURE (existing rule); it counts as not correct in every rate and is reported separately; nothing is retried, reseeded or excluded silently",
+  "technical_stop_conditions": [
+    "data hash mismatch with AF2",
+    "npz sha256 mismatch",
+    "npz shape mismatch",
+    "PR #129 selector reproduction abs diff > 1e-9",
+    "protocol.json differs from protocol()"
+  ],
+  "reading_guide_predeclared": {
+    "note": "pre-declared guides for the next step, not significance tests; the thresholds are judgement aids without a formal statistical basis",
+    "G1": "Z1 true-CMP2 correct rate < 0.90 -> selector/candidate problem first",
+    "G2": "Z1 >= 0.90, Z2 mean slope > 0 with CI excluding 0, and >= 80% of Z2 errors are CMP2->Poisson -> Z error drives CMP2->Poisson (for this noise model)",
+    "G3": "Z3 CMP2 misselection >= 0.10 in a regime -> even Oracle-fit Z misselects -> S1 priority: selection robust to Z uncertainty (candidate-wise refit + predictive comparison)",
+    "G4": "Z3 CMP2 misselection <= 0.05 and Z5 - Z3 >= 0.10 -> incumbent-dependent q -> S1 priority: burn-in / outer cycle",
+    "G5": ">= 50% of Z3+Z5 misselections with |dQ| < 2 -> near ties -> stabilised selection (B) justified"
+  },
+  "budget": {
+    "instances": 79,
+    "replicates": 20,
+    "candidate_optimisations": 18960
+  },
+  "artifacts": {
+    "results": "expfam/results/auto_family_z_recovery/af3_selector_rescoring_20261113"
+  }
+}

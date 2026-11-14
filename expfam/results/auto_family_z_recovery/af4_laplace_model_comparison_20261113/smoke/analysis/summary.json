@@ -1,0 +1,37 @@
+{
+  "reading_guide": {
+    "dense": {
+      "oracle_gt_support_only": "1/1",
+      "oracle_gt_wrong": "1/1",
+      "R1_component": false,
+      "R2_not_reliable_vs_support_only": true,
+      "R3_hessian_decisive": {
+        "support_only": 0,
+        "wrong": 0
+      },
+      "R4_fragile": {
+        "support_only": false,
+        "wrong": false
+      }
+    },
+    "sparse": {
+      "oracle_gt_support_only": "1/1",
+      "oracle_gt_wrong": "1/1",
+      "R1_component": false,
+      "R2_not_reliable_vs_support_only": true,
+      "R3_hessian_decisive": {
+        "support_only": 0,
+        "wrong": 0
+      },
+      "R4_fragile": {
+        "support_only": false,
+        "wrong": false
+      }
+    },
+    "R1": false,
+    "note": "pre-declared judgement aids, not significance tests"
+  },
+  "statuses": {
+    "OK": 10
+  }
+}

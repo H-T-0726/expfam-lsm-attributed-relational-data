@@ -1,0 +1,64 @@
+{
+  "columns": 480,
+  "status_mismatch": 0,
+  "laplace_selection_mismatch": 0,
+  "delta_max_abs_diff": 7.748894859105349e-10,
+  "dense_acc_A": 0.9458333333333333,
+  "dense_acc_B": 0.9458333333333333,
+  "dense_D_mean": 0.0,
+  "dense_D_ci": [
+    -0.2,
+    0.2
+  ],
+  "dense_D_pos_zero_neg": [
+    8,
+    25,
+    7
+  ],
+  "sparse_acc_A": 0.85,
+  "sparse_acc_B": 0.8125,
+  "sparse_D_mean": 0.225,
+  "sparse_D_ci": [
+    -0.075,
+    0.525
+  ],
+  "sparse_D_pos_zero_neg": [
+    16,
+    14,
+    10
+  ],
+  "primary_success_indep": false,
+  "independence_all_x_new": true,
+  "independence_all_y_new": true,
+  "provenance_all_match": true,
+  "af6_x_unique": true,
+  "scores_recomputed": 957,
+  "S_max_abs_diff": 7.757989806123078e-10,
+  "min_eig_indep_min": 0.9255888170307642,
+  "grad_inf_indep_max": 9.988880833589064e-10,
+  "primary_reported": [
+    0.225,
+    -0.075,
+    0.525
+  ],
+  "primary_matches_reported": true,
+  "note": "Q (AF3 score_candidate) is not re-implemented; B uses the stored same-anchor Q selection.",
+  "runinfo": {
+    "experiment": "AF6",
+    "script": "expfam/src/experimental/verify_af6_results.py",
+    "git_head": "9e7775a70e5dd487d51f82fb306137b6cc7e6cf0",
+    "git_branch": "experiment/af6-laplace-confirmation",
+    "git_dirty_tracked": false,
+    "git_untracked_experimental": "?? expfam/src/experimental/verify_af6_results.py",
+    "python": "3.13.14",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cpu_count": 12,
+    "omp_num_threads": "4",
+    "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+    "protocol_sha256": "eea15292171dfec2ee3ea1001b5613fdf034cc9a88749e931b3dfedceba0e71f",
+    "command": "expfam/src/experimental/verify_af6_results.py",
+    "stage": "verification"
+  }
+}

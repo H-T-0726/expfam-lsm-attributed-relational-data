@@ -1,0 +1,25 @@
+anchor,regime,reference,laplace_mode,datasets,mean_change_correct_cols,ci,n_improved,n_same,n_worse
+auto_first,dense,af2_auto,sign,20,0.1,"[-0.2, 0.4]",3,16,1
+auto_first,dense,af2_auto,confident,20,0.25,"[0.05, 0.5]",4,16,0
+auto_first,dense,q_same_anchor,sign,20,-0.05,"[-0.3, 0.15]",1,18,1
+auto_first,dense,q_same_anchor,confident,20,0.1,"[0.0, 0.25]",2,18,0
+support_only,dense,af2_auto,sign,20,0.2,"[-0.15, 0.5]",5,14,1
+support_only,dense,af2_auto,confident,20,0.2,"[-0.15, 0.5]",5,14,1
+support_only,dense,q_same_anchor,sign,20,0.25,"[-0.15, 0.65]",6,12,2
+support_only,dense,q_same_anchor,confident,20,0.25,"[-0.15, 0.65]",6,12,2
+oracle,dense,af2_auto,sign,20,0.15,"[-0.15, 0.45]",4,15,1
+oracle,dense,af2_auto,confident,20,0.2,"[0.0, 0.45]",3,17,0
+oracle,dense,q_same_anchor,sign,20,-0.4,"[-0.7, -0.15]",0,14,6
+oracle,dense,q_same_anchor,confident,20,-0.35,"[-0.6, -0.1]",0,14,6
+auto_first,sparse,af2_auto,sign,20,0.5,"[0.1, 0.85]",11,6,3
+auto_first,sparse,af2_auto,confident,20,0.1,"[-0.25, 0.45]",5,11,4
+auto_first,sparse,q_same_anchor,sign,20,0.4,"[0.05, 0.7]",11,6,3
+auto_first,sparse,q_same_anchor,confident,20,0.0,"[-0.3, 0.3]",5,10,5
+support_only,sparse,af2_auto,sign,20,0.4,"[-0.05, 0.85]",9,8,3
+support_only,sparse,af2_auto,confident,20,0.3,"[-0.1, 0.7]",5,14,1
+support_only,sparse,q_same_anchor,sign,20,0.4,"[0.05, 0.75]",10,7,3
+support_only,sparse,q_same_anchor,confident,20,0.3,"[0.0, 0.55]",8,10,2
+oracle,sparse,af2_auto,sign,20,0.75,"[0.25, 1.25]",12,5,3
+oracle,sparse,af2_auto,confident,20,0.4,"[-0.1, 0.9]",11,3,6
+oracle,sparse,q_same_anchor,sign,20,-0.65,"[-1.0, -0.35]",0,10,10
+oracle,sparse,q_same_anchor,confident,20,-1.0,"[-1.4, -0.65]",0,6,14

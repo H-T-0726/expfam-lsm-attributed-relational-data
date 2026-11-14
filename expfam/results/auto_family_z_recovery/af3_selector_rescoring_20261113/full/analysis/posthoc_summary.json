@@ -1,0 +1,9 @@
+{
+  "label": "POST-HOC descriptive (not pre-registered)",
+  "grad_inf_max": 3.634386144124591e-05,
+  "score_gap_bound_max": 4.3095008046031495e-11,
+  "hess_min_eig_min": 14.207850104536268,
+  "per_obs_sum_check_max": 2.273736754432321e-13,
+  "zero_vs_incumbent_max_abs_margin_diff": 4.298783551348606e-13,
+  "zero_vs_incumbent_selection_disagreements": 0
+}

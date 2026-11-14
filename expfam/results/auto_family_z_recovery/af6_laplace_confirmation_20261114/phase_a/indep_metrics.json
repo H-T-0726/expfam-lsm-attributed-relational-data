@@ -1,0 +1,29 @@
+{
+  "n_rows": 720,
+  "status_mismatch": 0,
+  "selection_mismatch": 0,
+  "delta_max_abs_diff": 8.312781574204564e-10,
+  "primary_rows": 240,
+  "af2_missing": 0,
+  "q_missing": 0,
+  "dense_sign_acc": 0.9166666666666666,
+  "dense_q_acc": 0.925,
+  "dense_af2_acc": 0.9,
+  "dense_corr_vs_af2": 5,
+  "dense_harm_vs_af2": 3,
+  "dense_dataset_change_vs_q_mean": -0.05,
+  "dense_dataset_change_vs_q_ci": [
+    -0.3,
+    0.15
+  ],
+  "sparse_sign_acc": 0.8571428571428571,
+  "sparse_q_acc": 0.7833333333333333,
+  "sparse_af2_acc": 0.7666666666666667,
+  "sparse_corr_vs_af2": 18,
+  "sparse_harm_vs_af2": 8,
+  "sparse_dataset_change_vs_q_mean": 0.4,
+  "sparse_dataset_change_vs_q_ci": [
+    0.05,
+    0.7
+  ]
+}
