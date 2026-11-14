@@ -1,6 +1,7 @@
 """AF8-v2 pilot audit (numerical only: no selection accuracy, no AUC, no labels).
 
 --pilot-audit : stop rules S1-S7, diagnostics, AF8-vs-v2 comparison
+--pilot-diagnose : root cause of failed IS draws / cells without a valid outer start (numerical only)
 """
 
 from __future__ import annotations
@@ -96,7 +97,7 @@ def pilot_audit() -> dict:
     pr.to_csv(out / "pilot_pairs_v2.csv", index=False)
     main = pr[pr.prior == a8.MAIN_PRIOR]
     cm = c[c.prior == a8.MAIN_PRIOR]
-    failed = c.status.isin(["FAILED", "EXCEPTION"])
+    failed = c.status.isin(["FAILED", "EXCEPTION"]) | (c.E2_status != "OK")   # protocol S1: E2 without a valid local maximum = failed
     dis = c.D_multistart.isin(["SAME_POINT_VALUE_MISMATCH", "MULTIMODAL_NONNEGLIGIBLE", "MULTIMODAL_DOMINANT"])
     e_dis = c.E_multistart.isin(["SAME_POINT_VALUE_MISMATCH", "MULTIMODAL_NONNEGLIGIBLE", "MULTIMODAL_DOMINANT"])
     ok_is = main.dropna(subset=["Delta_IS"])
@@ -118,7 +119,7 @@ def pilot_audit() -> dict:
         "S2_detail": c.D_multistart.value_counts().to_dict(),
         "E_multistart_detail_diagnostic": c.E_multistart.value_counts().to_dict(),
         "E_disagreement_share_diagnostic": float(e_dis.mean()),
-        "start_status_counts": inv.groupby(["method", "status"]).size().to_dict() if len(inv) else {},
+        "start_status_counts": {f"{m}:{s}": int(n) for (m, s), n in inv.groupby(["method", "status"]).size().items()} if len(inv) else {},
         "invalid_start_share_D": float((inv[inv.method == "D"].status != "GRAD_OK").mean()) if len(inv) else None,
         "invalid_start_share_E": float((~inv[inv.method == "E"].status.isin(["OK", "OK_FLOOR"])).mean()) if len(inv) else None,
         "main_pairs": len(main), "main_pairs_with_IS_both_OK": len(ok_is),
@@ -138,8 +139,9 @@ def pilot_audit() -> dict:
         "diag_median_abs_DeltaE_minus_DeltaE2": float((main.Delta_E - main.Delta_E2).abs().median()),
         "diag_max_abs_DeltaE_minus_DeltaE2": float((main.Delta_E - main.Delta_E2).abs().max()),
         "diag_median_abs_DeltaE_minus_DeltaIS": float((ok_is.Delta_E - ok_is.Delta_IS).abs().median()),
-        "diag_sign_disagree_E_vs_E2": int((np.sign(main.Delta_E) != np.sign(main.Delta_E2)).sum()),
-        "diag_sign_disagree_E2_vs_IS": int((np.sign(ok_is.Delta_E2) != np.sign(ok_is.Delta_IS)).sum()),
+        "diag_sign_disagree_E_vs_E2": int(((main.Delta_E * main.Delta_E2) < 0).sum()),  # NaN pairs excluded
+        "diag_pairs_E_and_E2_finite": int((main.Delta_E.notna() & main.Delta_E2.notna()).sum()),
+        "diag_sign_disagree_E2_vs_IS": int(((ok_is.Delta_E2 * ok_is.Delta_IS) < 0).sum()),
         "diag_D_min_eig_f_min": float(pd.to_numeric(c.D_min_eig_f, errors="coerce").min()),
         "diag_E_min_eig_min": float(pd.to_numeric(c.E_min_eig, errors="coerce").min()),
         "selection_state_counts_label_free": pr.groupby(["prior", "selection_state"]).size().unstack(fill_value=0).to_dict("index"),
@@ -183,10 +185,106 @@ def pilot_audit() -> dict:
     return res
 
 
+def pilot_diagnose():
+    """root cause of the pilot stop (numerical only; recomputes existing pilot cells deterministically, no labels).
+    (a) main-prior cells whose IS had failed draws: which draw failed and why (status of S at the draw);
+        a warm start of the Z problem from Z(f_D) is tried ONLY as a diagnostic to separate
+        'S undefined at f' from 'cold-start optimiser failure' (not used by any score).
+    (b) cells with no valid outer start (D/E2 undefined): final outer state per start."""
+    out = v2.OUT / "pilot"
+    c = pd.read_csv(out / "candidate_scores.csv")
+    rows = []
+    sel = c[(c.prior == a8.MAIN_PRIOR) & (pd.to_numeric(c.IS_failed, errors="coerce").fillna(0) > 0)]
+    cache = {}
+    from scipy.stats import multivariate_t
+    for _, r in sel.iterrows():
+        ri, g, j, cand = int(r.replicate[3:]) - 1, r.regime, int(r.column), r.candidate
+        if (ri, g) not in cache:
+            cache[(ri, g)] = a8.load_case(ri, g)
+            cache[(ri, g)]["regime"] = g
+        case = cache[(ri, g)]
+        J, _ = a8.joint_for(case, j, cand, a8.MAIN_PRIOR)
+        Za = np.asarray(case["st"]["Zmode"], float)
+        L = v2.Local(J, Za)
+        starts = {"plugin_anchorZ": a8.fixed_z_start(cand, case["X"][:, j], Za), "zero": np.zeros(v2.K)}
+        fl = a8.af6_fstar(case["label"], g, j, cand)
+        if fl is not None:
+            starts["af6_fL"] = fl
+        de = v2.method_D_E2(L, starts)
+        f_D, H, Z_D = de["f_D"], de["hess_f"], de["Z_D"]
+        ci = (ri * 2 + v2.REGIMES.index(g)) * 100 + j * 2 + v2.CANDS.index(cand)
+        q = multivariate_t(loc=f_D, shape=np.linalg.inv(H), df=v2.IS_DF, seed=np.random.default_rng(v2.IS_SEED_BASE + ci))
+        fs = np.atleast_2d(q.rvs(size=v2.IS_DRAWS))
+        Hi = H
+        failed_idx = [s_idx for s_idx, f in enumerate(fs) if not L.S(f).ok]
+        n_fail_pilot = int(r.IS_failed)
+        for s_idx in failed_idx:
+            f = fs[s_idx]
+            sv = L.S(f)
+            d = f - f_D
+            # diagnostic only: warm start from Z(f_D)
+            wres = v2.newton_max(L._vgh_Z(f), np.asarray(Z_D, float).ravel(), v2.INNER_GTOL, v2.INNER_MAXITER, v2.INNER_STEP_CAP)
+            wpd, wval = None, float("nan")
+            if wres.status in ("OK", "OK_FLOOR"):
+                J.F[J.j] = f
+                wpd = v2.chol_logdet(J.negHZZ(wres.x.reshape(v2.N, v2.K)))[0]
+                wval = wres.value
+            # diagnostic only: the same cold start with 2x the iteration budget (AF8 modeZ used 200)
+            cres = v2.newton_max(L._vgh_Z(f), np.asarray(Za, float).ravel(), v2.INNER_GTOL, 2 * v2.INNER_MAXITER, v2.INNER_STEP_CAP)
+            cold100 = v2.newton_max(L._vgh_Z(f), np.asarray(Za, float).ravel(), v2.INNER_GTOL, v2.INNER_MAXITER, v2.INNER_STEP_CAP)
+            rows.append({"kind": "IS_failed_draw", "replicate": r.replicate, "regime": g, "column": j, "candidate": cand,
+                         "draw": s_idx, "n_failed_rerun": len(failed_idx), "n_failed_pilot": n_fail_pilot,
+                         "rerun_count_matches_pilot": len(failed_idx) == n_fail_pilot,
+                         "f": "|".join(f"{a:.6g}" for a in f),
+                         "f_norm": float(np.linalg.norm(f)), "fD_norm": float(np.linalg.norm(f_D)),
+                         "mahalanobis_sq_wrt_hess": float(d @ Hi @ d),
+                         "S_status_coldstart": sv.status, "S_min_eig": sv.min_eig, "S_iters": sv.iters,
+                         "S_message": sv.message,
+                         "diag_warmstart_from_ZD_status": wres.status, "diag_warmstart_HZZ_pd": wpd,
+                         "diag_warmstart_grad_inf": wres.grad_inf, "diag_warmstart_min_eig": wres.min_eig,
+                         "diag_warmstart_phi": wval,
+                         "cold100_phi_last": cold100.value, "cold100_grad_inf_last": cold100.grad_inf,
+                         "cold100_n_rejected": cold100.n_rejected_trials, "cold100_n_negcurv_escape": cold100.n_negcurv_escape,
+                         "diag_cold200_status": cres.status, "diag_cold200_iters": cres.iters, "diag_cold200_phi": cres.value,
+                         "diag_cold200_minus_warm_phi": cres.value - wval if np.isfinite(wval) else float("nan")})
+            print(rows[-1], flush=True)
+    fl = c[c.D_multistart == "NO_VALID_START"]
+    for _, r in fl.iterrows():
+        ri, g, j, cand, pr = int(r.replicate[3:]) - 1, r.regime, int(r.column), r.candidate, r.prior
+        case = a8.load_case(ri, g)
+        case["regime"] = g
+        J, _ = a8.joint_for(case, j, cand, pr)
+        Za = np.asarray(case["st"]["Zmode"], float)
+        L = v2.Local(J, Za)
+        starts = {"plugin_anchorZ": a8.fixed_z_start(cand, case["X"][:, j], Za), "zero": np.zeros(v2.K)}
+        fl6 = a8.af6_fstar(case["label"], g, j, cand)
+        if fl6 is not None:
+            starts["af6_fL"] = fl6
+        for nm, f0 in starts.items():
+            m = v2.maximise_T(L, f0)
+            fe = np.asarray(m["f"], float)
+            gh = {}
+            for h in (2.5e-5, 5e-5, 1e-4, 2e-4, 4e-4):     # FD gradient at the final f vs step (noise floor check)
+                try:
+                    gh[h] = float(np.max(np.abs(v2.fd_grad(L, fe, h))))
+                except Exception as exc:          # recorded, not hidden
+                    gh[h] = f"FAIL:{exc}"
+            rows.append({"kind": "no_valid_outer_start", "replicate": r.replicate, "regime": g, "column": j,
+                         "candidate": cand, "prior": pr, "start": nm, "outer_status": m["status"],
+                         "outer_iters": m.get("iters"), "outer_grad_inf": m.get("grad_inf"), "T_last": m.get("T"),
+                         "f": "|".join(f"{a:.6g}" for a in fe), "f_norm": float(np.linalg.norm(fe)),
+                         "n_rejected": m.get("n_rejected"), "message": m.get("message"),
+                         **{f"fd_grad_inf_h{h:g}": val for h, val in gh.items()}})
+            print(rows[-1], flush=True)
+    pd.DataFrame(rows).to_csv(out / "pilot_failure_diagnosis_v2.csv", index=False)
+
+
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if "--pilot-audit" in argv:
         pilot_audit()
+    if "--pilot-diagnose" in argv:
+        pilot_diagnose()
     return 0
 
 

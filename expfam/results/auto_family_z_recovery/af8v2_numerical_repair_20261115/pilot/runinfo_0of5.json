@@ -1,0 +1,16 @@
+{
+  "experiment": "AF8-v2",
+  "script": "expfam/src/experimental/run_af8v2_integrated_loading.py",
+  "git_head": "ac0fb25616ab81310819ed38eb741574842834c1",
+  "git_branch": "experiment/af8-v2-numerical-repair",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "2",
+  "protocol_sha256": "57f0a37935eed694aff639728310101d3dedc6709dcc23b28423882fed6fb777",
+  "command": "expfam/src/experimental/run_af8v2_integrated_loading.py --pilot --shard 0/5",
+  "stage": "pilot",
+  "shard": "0/5"
+}
