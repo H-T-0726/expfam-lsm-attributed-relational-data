@@ -1,0 +1,101 @@
+{
+  "experiment": "AF8",
+  "study_type": "exploratory (re-uses AF6 datasets and saved Auto anchors; NOT an independent confirmation)",
+  "lineage": "lineage E + PR #129 generic model (prototype); AF6 anchors at 75012e8",
+  "fixed": "theta_{-j} of the AF6 auto_first anchor (other F, families, Gaussian variances, w0, w, var_z), X, Y_train mask; same for every method",
+  "mcem_fits": 0,
+  "new_data": "none (AF6 seeds regenerated; X/Y/mask hashes asserted against AF6 fit_manifest)",
+  "methods": {
+    "B_Q": "AF6 q_selected (same anchor), unchanged",
+    "A_laplace_fopt": "AF6 delta (AF5 S_L: f_j maximises the Z-Laplace objective, no prior), unchanged incl. AF6 fallback for FAILED",
+    "J_jointmap_then_laplace": "AF6 delta_jointmap_variant, unchanged",
+    "D_prior_map": "max_f [S(f) + log p(f|m)], Z by Laplace, f optimised (no f volume term)",
+    "E_joint_laplace": "Laplace over u = (vec Z, f_j), 228 dims, full negative Hessian incl. Z-f cross blocks and prior; selection by sign",
+    "E2_nested_laplace": "D + (K/2) log 2pi - 1/2 log|-d2T/df2| (FD Hessian), main prior only: numerical check of E",
+    "IS_f": "f integrated by importance sampling (multivariate t df=5 around f_D, cov = inverse FD Hessian, 400 draws), Z by Laplace; main prior only: numerical check of E"
+  },
+  "priors": {
+    "B_sg2_0.667": {
+      "kind": "B",
+      "scale": 0.6666666666666666
+    },
+    "B_sg2_0.167": {
+      "kind": "B",
+      "scale": 0.16666666666666666
+    },
+    "B_sg2_0.333": {
+      "kind": "B",
+      "scale": 0.3333333333333333
+    },
+    "B_sg2_1.333": {
+      "kind": "B",
+      "scale": 1.3333333333333333
+    },
+    "B_sg2_2.667": {
+      "kind": "B",
+      "scale": 2.6666666666666665
+    },
+    "A_sf2_0.167": {
+      "kind": "A",
+      "scale": 0.16666666666666666
+    },
+    "A_sf2_0.667": {
+      "kind": "A",
+      "scale": 0.6666666666666666
+    },
+    "A_sf2_2.667": {
+      "kind": "A",
+      "scale": 2.6666666666666665
+    },
+    "B_EB": {
+      "kind": "B",
+      "scale": null
+    }
+  },
+  "prior_main": "B_sg2_0.667",
+  "prior_rationale": "B: g = sqrt(A''_m(0)) f ~ N(0, s I) with s = tau/K = 2/3, the per-component second moment of the generator's standardised loadings (design knowledge, not labels; the generator's loadings are NOT Gaussian). Sensitivity range fixed here: B x{1/4,1/2,2,4}, A with s in {1/6, 2/3, 8/3}, empirical-Bayes B from the anchor's other count columns. Not tuned on AF6 accuracy.",
+  "selection_rule": "CMP2 if Delta > 0 else Poisson; |Delta| <= max(0.01, start disagreement) flagged UNDECIDED_NUMERIC but the sign is still used (as AF6 method A); every column kept",
+  "failure_rule": "a FAILED cell (either candidate) -> the method falls back to Q for the main tables; sensitivity: counted wrong. Never re-run.",
+  "metrics": [
+    "accuracy on true Poisson",
+    "accuracy on true CMP2",
+    "balanced accuracy",
+    "AUC of Delta (rank, descriptive)",
+    "per-dataset #correct difference vs A, B, D, J (40 datasets, percentile bootstrap 10000)",
+    "dataset-cluster bootstrap (2000) CIs for accuracies, balanced accuracy, AUC and their differences",
+    "transitions A->E, B->E, D->E, J->E",
+    "Delta_E - Delta_D and Delta_E - Delta_A by truth",
+    "prior sensitivity (all metrics for every prior)",
+    "numerical: E vs E2 vs IS, start disagreement, min eigenvalues, FD checks",
+    "computation time"
+  ],
+  "statistical_unit": "dataset (40); columns and regimes are not independent units; dense and sparse reported separately",
+  "pilot": "rep01-rep03 (both regimes, all count columns, main prior + all priors) for the numerical audit only; accuracy is not computed in the pilot",
+  "stop_rules": {
+    "fd_rel_err_max": 0.0001,
+    "mode_start_disagreement_share_max": 0.05,
+    "pilot_median_abs_DeltaE_minus_DeltaIS_max": 0.25,
+    "pilot_median_abs_DeltaE_minus_DeltaIS_below_half_median_abs_DeltaE": true,
+    "pilot_E_failed_share_max": 0.05
+  },
+  "numerics": {
+    "FD_STEP_GRAD": 0.0001,
+    "FD_STEP_HESS": 0.001,
+    "OUTER_GTOL": 1e-05,
+    "INNER_TOL": 1e-09,
+    "JOINT_TOL": 1e-08,
+    "IS_DRAWS": 400,
+    "IS_DF": 5,
+    "IS_SEED_BASE": 1688000,
+    "BOOT_SEED": 20261118,
+    "cmp2": "A = log I0(u), u = 2 e^{eta/2}; 1 - I1/I0 by asymptotic series for u > 1e3"
+  },
+  "not_claimed": [
+    "Bayesian evidence of the whole model (theta_{-j} fixed)",
+    "BIC",
+    "independent confirmation",
+    "posterior probability of a family",
+    "Z recovery",
+    "real data"
+  ]
+}

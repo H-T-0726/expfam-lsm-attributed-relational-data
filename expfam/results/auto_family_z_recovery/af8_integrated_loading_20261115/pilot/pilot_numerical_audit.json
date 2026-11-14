@@ -1,0 +1,26 @@
+{
+  "cells": 648,
+  "failed_cells": 22,
+  "failed_share": 0.033950617283950615,
+  "start_disagreement_gt_1e-6_share": 0.05555555555555555,
+  "E_min_eig_min": 0.9330676801757658,
+  "main_columns": 36,
+  "main_both_ok": 33,
+  "median_abs_DeltaE_minus_DeltaIS": 0.19048634230807693,
+  "max_abs_DeltaE_minus_DeltaIS": 1.1776267961206486,
+  "median_abs_DeltaE2_minus_DeltaIS": 0.017356438566821453,
+  "max_abs_DeltaE2_minus_DeltaIS": 0.06636418445646086,
+  "median_IS_se_delta": 0.024721921712577442,
+  "min_IS_ess": 342.1341572105026,
+  "median_abs_DeltaE": 4.537357305800924,
+  "sign_agree_E_IS": 32,
+  "sign_agree_E2_IS": 33,
+  "seconds_total": 5226.6900000000005,
+  "stop": {
+    "failed_share": false,
+    "start_disagreement": true,
+    "E_vs_IS_abs": false,
+    "E_vs_IS_relative": false
+  },
+  "proceed": false
+}

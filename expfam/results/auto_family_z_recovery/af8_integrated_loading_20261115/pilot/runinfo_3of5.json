@@ -1,0 +1,16 @@
+{
+  "experiment": "AF8",
+  "script": "expfam/src/experimental/run_af8_integrated_loading.py",
+  "git_head": "a37584bef71adf773595e401e026e1c53b249587",
+  "git_branch": "experiment/af8-integrated-loading-selection",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "2",
+  "protocol_sha256": "5c8f4b2eec511de602ffaf28e2cdf15737d2b48a3d82bd61d9ffaac6a13e5815",
+  "command": "expfam/src/experimental/run_af8_integrated_loading.py --pilot --shard 3/5",
+  "stage": "pilot",
+  "shard": "3/5"
+}
