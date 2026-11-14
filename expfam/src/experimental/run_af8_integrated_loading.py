@@ -657,6 +657,7 @@ def main(argv=None) -> int:
         print("protocol sha256", protocol_sha256(), "cells", len(man))
     if "--pilot" in argv:
         run("pilot", PILOT_REPS, sh)
+    if "--collect-pilot" in argv:
         collect("pilot")
     if "--full" in argv:
         run("full", range(40), sh)
