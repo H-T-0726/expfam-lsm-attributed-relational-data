@@ -289,10 +289,56 @@ def figures(main, ps, an):
     plt.close(fig)
 
 
+def pilot_diagnose() -> dict:
+    """Root-cause diagnostics for the pilot stop (numerical only; no selection/accuracy)."""
+    import traceback
+    import warnings
+    warnings.filterwarnings("ignore")
+    res = {}
+    # (a) joint Newton from f = 0: which kind of stationary point?
+    case = a8.load_case(0, "sparse")
+    case["regime"] = "sparse"
+    x, Za = case["X"][:, 3], np.asarray(case["st"]["Zmode"], float)
+    rows = []
+    for cand in a8.CANDS:
+        J, _ = a8.joint_for(case, 3, cand, a8.MAIN_PRIOR)
+        starts = {"plugin_anchorZ": a8.fixed_z_start(cand, x, Za), "zero": np.zeros(a8.K)}
+        fl = a8.af6_fstar("rep01", "sparse", 3, cand)
+        if fl is not None:
+            starts["af6_fL"] = fl
+        for nm, f0 in starts.items():
+            Z, f, it, gi = J.mode_u(Za, f0)
+            ev = np.linalg.eigvalsh(J.negH_u(Z, f))
+            rows.append({"case": "rep01 sparse col3", "candidate": cand, "start": nm, "f_end": np.round(f, 4).tolist(),
+                         "grad_inf": gi, "psi": J.psi(Z, f), "negH_min_eig": float(ev[0]), "negH_n_negative": int((ev < 0).sum())})
+    res["a_joint_newton_stationary_points"] = rows
+    # (b) where D raises for rep01 sparse col3 Poisson
+    J, _ = a8.joint_for(case, 3, P, a8.MAIN_PRIOR)
+    try:
+        a8.method_D(J, Za, {"plugin_anchorZ": a8.fixed_z_start(P, x, Za), "zero": np.zeros(a8.K)})
+        res["b_D_failure"] = "no exception"
+    except Exception as exc:
+        res["b_D_failure"] = {"exception": f"{type(exc).__name__}: {exc}",
+                              "trace": traceback.format_exc(limit=4).splitlines()[-4:]}
+    Zt, it, gi = J.modeZ(Za.copy())
+    res["b_column_x_max"], res["b_column_x_mean"] = float(x.max()), float(x.mean())
+    # (c) the Z-only problem at f = 0 (D's zero start)
+    case2 = a8.load_case(1, "sparse")
+    case2["regime"] = "sparse"
+    J2, _ = a8.joint_for(case2, 8, P, a8.MAIN_PRIOR)
+    s, Zh, gi, me = J2.S(np.zeros(a8.K), np.asarray(case2["st"]["Zmode"], float))
+    res["c_D_zero_start_rep02_sparse_col8"] = {"S": s, "inner_grad_inf": gi, "min_eig_ZZ": me}
+    (a8.OUT / "pilot" / "pilot_failure_diagnosis.json").write_text(json.dumps(res, indent=2, default=str), encoding="utf-8")
+    print(json.dumps(res, indent=2, default=str))
+    return res
+
+
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if "--pilot-audit" in argv:
         pilot_audit()
+    if "--pilot-diagnose" in argv:
+        pilot_diagnose()
     if "--analyze" in argv:
         analyze()
     return 0
