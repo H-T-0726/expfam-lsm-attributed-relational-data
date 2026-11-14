@@ -1,0 +1,104 @@
+{
+  "a_joint_newton_stationary_points": [
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "poisson",
+      "start": "plugin_anchorZ",
+      "f_end": [
+        -1.4182,
+        1.0207,
+        -1.0512
+      ],
+      "grad_inf": 1.1579626146840383e-13,
+      "psi": -1164.9304752848122,
+      "negH_min_eig": 1.4948811405267768,
+      "negH_n_negative": 0
+    },
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "poisson",
+      "start": "zero",
+      "f_end": [
+        0.0275,
+        0.0188,
+        0.1261
+      ],
+      "grad_inf": 3.269606807521086e-14,
+      "psi": -1759.1091192319532,
+      "negH_min_eig": -72.62362092375383,
+      "negH_n_negative": 3
+    },
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "poisson",
+      "start": "af6_fL",
+      "f_end": [
+        -1.4182,
+        1.0207,
+        -1.0512
+      ],
+      "grad_inf": 4.729550084903167e-13,
+      "psi": -1164.9304752848122,
+      "negH_min_eig": 1.494881140526766,
+      "negH_n_negative": 0
+    },
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "cmp_nu2p0",
+      "start": "plugin_anchorZ",
+      "f_end": [
+        -2.887,
+        1.8605,
+        -1.7579
+      ],
+      "grad_inf": 4.423582146417804e-09,
+      "psi": -1153.875928377493,
+      "negH_min_eig": 1.3797500310914765,
+      "negH_n_negative": 0
+    },
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "cmp_nu2p0",
+      "start": "zero",
+      "f_end": [
+        0.0287,
+        0.0178,
+        0.1181
+      ],
+      "grad_inf": 1.1712852909795402e-14,
+      "psi": -2344.7916636753507,
+      "negH_min_eig": -83.85923285103036,
+      "negH_n_negative": 3
+    },
+    {
+      "case": "rep01 sparse col3",
+      "candidate": "cmp_nu2p0",
+      "start": "af6_fL",
+      "f_end": [
+        -2.887,
+        1.8605,
+        -1.7579
+      ],
+      "grad_inf": 1.13773413260021e-09,
+      "psi": -1153.875928377493,
+      "negH_min_eig": 1.379750030977338,
+      "negH_n_negative": 0
+    }
+  ],
+  "b_D_failure": {
+    "exception": "LinAlgError: Eigenvalues did not converge",
+    "trace": [
+      "                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "                         amax=1e100, c1=c1, c2=c2)",
+      "                         ^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "numpy.linalg.LinAlgError: Eigenvalues did not converge"
+    ]
+  },
+  "b_column_x_max": 86.0,
+  "b_column_x_mean": 3.8,
+  "c_D_zero_start_rep02_sparse_col8": {
+    "S": -Infinity,
+    "inner_grad_inf": 0.2796110912401446,
+    "min_eig_ZZ": -0.010154251010805198
+  }
+}
