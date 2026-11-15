@@ -667,7 +667,45 @@ def main(argv=None) -> int:
         numerical_audit("full", vf.FULL_REPS, with_s7=False)
     if "--analyze" in argv:
         analyze()
+    if "--compare-full-repilot" in argv:
+        compare_full_vs_repilot()
     return 0
+
+
+def compare_full_vs_repilot() -> dict:
+    """full-run rep01-03 vs the re-pilot (same code; OMP_NUM_THREADS 1 vs 2): per-cell differences and sign changes
+    of Delta for D, E2, E, IS. Added after the independent audit (W2) so that this comparison is script output."""
+    a = pd.read_csv(OUT / "pilot" / "candidate_scores.csv", low_memory=False)
+    b = pd.read_csv(OUT / "full" / "candidate_scores.csv", low_memory=False)
+    b = b[b.replicate.isin(a.replicate.unique())]
+    k = ["replicate", "regime", "column", "candidate", "prior"]
+    m = a.merge(b, on=k, how="outer", suffixes=("_pilot", "_full"), indicator=True)
+    summ: dict = {"cells_pilot": len(a), "cells_full_same_reps": len(b), "unmatched": int((m["_merge"] != "both").sum())}
+    m = m[m["_merge"] == "both"]
+    for q in ("D", "E2", "E", "IS"):
+        x, y = num(m[f"{q}_pilot"]), num(m[f"{q}_full"])
+        both = np.isfinite(x) & np.isfinite(y)
+        summ[f"max_abs_diff_{q}"] = float(np.max(np.abs(x[both] - y[both]))) if both.any() else None
+        summ[f"finite_mismatch_{q}"] = int((np.isfinite(x) != np.isfinite(y)).sum())
+    summ["status_changes"] = int((m.status_pilot != m.status_full).sum())
+    kk = ["replicate", "regime", "column", "prior"]
+    sign_changes = {}
+    for q in ("D", "E2", "E", "IS"):
+        d = {}
+        for tag in ("pilot", "full"):
+            s = m[kk + ["candidate", f"{q}_{tag}"]].copy()
+            s["v"] = num(s[f"{q}_{tag}"])
+            w = s.pivot_table(index=kk, columns="candidate", values="v", aggfunc="first")
+            d[tag] = np.sign(w[C] - w[P])
+        j = pd.concat(d, axis=1).dropna()
+        sign_changes[q] = {"pairs_compared": len(j), "sign_changes": int((j["pilot"] != j["full"]).sum())}
+    summ["Delta_sign_changes"] = sign_changes
+    (OUT / "full" / "full_vs_repilot_rep01_03_summary.json").write_text(json.dumps(summ, indent=2), encoding="utf-8")
+    write_runinfo(OUT / "full" / "runinfo_full_vs_repilot.json",
+                  [OUT / "pilot" / "candidate_scores.csv", OUT / "full" / "candidate_scores.csv"],
+                  {"stage": "full_vs_repilot", "command": "analyze_af8v3_full_integrated_loading.py --compare-full-repilot"})
+    print(json.dumps(summ, indent=2))
+    return summ
 
 
 if __name__ == "__main__":
