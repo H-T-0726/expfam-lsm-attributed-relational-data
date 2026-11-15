@@ -1,0 +1,20 @@
+{
+  "script": "expfam/src/experimental/analyze_af8v3_full_integrated_loading.py",
+  "git_head": "e8943d31fc2557cd291a1261376dda27d88f3b55",
+  "git_branch": "experiment/af8-v3-numerical-stability",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "python_executable": "D:\\tento\\kennkyu\\.venv\\Scripts\\python.exe",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "pandas": "2.3.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "2",
+  "protocol_sha256": "e7dfd0ca06c1ad59646052081b393c8529f9230e227b86d4401492de4abd0e22",
+  "command": "expfam/src/experimental/analyze_af8v3_full_integrated_loading.py --pilot-audit",
+  "inputs": {
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\pilot\\candidate_scores.csv": "57645a25100d5492d33dabf70e0b49511df2975b72f58d084dde6316880fbcd5",
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\protocol.json": "adc440680277e7e2c024d95256a28015bf39f8d447a09e4fa4e2b780ff54e496"
+  },
+  "stage": "pilot-audit"
+}
