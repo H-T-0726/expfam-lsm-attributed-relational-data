@@ -1,0 +1,63 @@
+{
+  "experiment": "AF8-v2",
+  "study_type": "exploratory numerical repair + pilot (no selection accuracy, no main experiment)",
+  "parent": {
+    "AF8_head": "0643fa550c78127cd02d56886330df64ed9c644d",
+    "AF8_protocol_sha256": "5c8f4b2eec511de602ffaf28e2cdf15737d2b48a3d82bd61d9ffaac6a13e5815",
+    "AF8_stop": "pre-registered stop rule fired at the pilot (start disagreement share 5.6% > 5%); root causes: joint Newton converging to saddle points, failed line searches accepting non-finite trial points, LinAlgError escaping from S during BFGS (22 Poisson cells on one heavy-tailed column), sentinel 1e300 counted as start disagreement; IS divided by the number of finite draws"
+  },
+  "unchanged_from_AF8": [
+    "model, theta_{-j} (AF6 auto_first anchor), data, masks",
+    "log density, gradient, full negative Hessian (AF8 JointU, FD-verified)",
+    "CMP2 Bessel normaliser",
+    "priors: main B_sg2_0.667 and the 8 sensitivity priors",
+    "FD steps 1e-4 (gradient) / 1e-3 (Hessian)",
+    "tolerances: inner 1e-9, joint 1e-8, outer 1e-5"
+  ],
+  "changed_numerics": {
+    "newton": "aim tolerance as AF8 (inner 1e-9, joint 1e-8) and acceptance 1e-6 at the floating-point floor (as AF5/AF8 accepted 1e-6): OK_FLOOR when the objective no longer changes (|dv|<=1e-12|v| for 3 accepted steps or no improving step) with grad <= 1e-6 and negH PD; inner max 100 iterations; modified Newton (|eigenvalue| with floor 1e-8*max|eig| when negH not PD), Armijo c=1e-4, rejected trials never accepted, step caps (Z: 2.0 inf-norm; f: 0.5 2-norm), convergence = grad_inf < tol AND Cholesky(negH) succeeds; stationary non-PD points escaped along the most negative curvature direction, else SADDLE",
+    "S_determinism": "every S(f) starts the Z-mode search from the anchor Zmode (no warm start); results cached by exact f (pure function)",
+    "outer": "BFGS on T with FD gradient, capped steps, Armijo; trial points with invalid T are rejected (no sentinel values); one restart along the gradient; local max requires FD Hessian of T positive definite",
+    "failures": "NaN/Inf/overflow/LinAlgError inside an evaluation raise EvalFail, which is a REJECTED trial (inside searches) or a recorded status (never a value)",
+    "IS": "all 400 draws in the denominator; draw categories finite / zero-weight / failed recorded; failed draws make the IS estimate invalid (IS_lower_bound_if_failed reported separately); seeds 1689500+case"
+  },
+  "main_score": "E2 (nested Laplace): first integrate Z by Laplace -> S(f), then integrate f by Laplace around argmax T. E (joint Laplace) kept as a diagnostic; IS checks only the OUTER f integral (same integrand as E2), it is not a check of the Z integral. The choice of E2 was made before any v2 result and is not based on accuracy; the AF8 pilot (which included rep01-03, datasets that are part of the 40 and whose labels are known from AF6) had shown E2 closer to IS, which is partly by construction — disclosed.",
+  "starts": {
+    "f": [
+      "plugin_anchorZ (fixed-Z MLE of the candidate at the anchor Zmode)",
+      "zero",
+      "af6_fL (AF6 optimum, if present)"
+    ],
+    "E_extra": "f_D with Z at f_D",
+    "Z_inner": "anchor Zmode always"
+  },
+  "start_validity": "valid = optimiser status GRAD_OK (outer) / OK (Newton) AND local-maximum curvature check (FD Hessian of T PD / Cholesky of negH)",
+  "multistart_rule": "valid starts are the same local maximum if ||f_a-f_b||_inf <= 0.001; AGREE if one cluster with value spread <= 1e-06; SAME_POINT_VALUE_MISMATCH otherwise; >1 cluster = distinct local maxima: MULTIMODAL_NONNEGLIGIBLE if the second is within log 20 of the best (score flagged, not used for a decision), MULTIMODAL_DOMINANT otherwise. Invalid starts are counted and reported, never silently dropped.",
+  "selection_states": "DECIDED (both candidates OK, |Delta| > max(0.01, 2*FD-step sensitivity)); UNCERTAIN_NUMERIC; UNDECIDED_ONE_FAILED; UNDECIDED_BOTH_FAILED. No fallback to Q (a Q-hybrid would have to be pre-registered separately).",
+  "stop_rules_v2": {
+    "S1_cell_numerical_failure_share_max": 0.05,
+    "S2_multistart_disagreement_share_max": 0.05,
+    "S3_main_median_abs_DeltaE2_minus_DeltaIS_max": 0.25,
+    "S3b_main_median_abs_DeltaE2_minus_DeltaIS_below_half_median_abs_DeltaE2": true,
+    "S4_IS_cells_with_failed_draws_share_max": 0.05,
+    "S4b_IS_min_ess": 40.0,
+    "S5_determinism_max_abs_diff": 1e-08,
+    "S6_fd_step_sensitivity_median_abs_DeltaE2_max": 0.05,
+    "S7_fd_derivative_rel_err_max": 0.0001
+  },
+  "stop_rules_changes_vs_AF8": {
+    "failed share (AF8 5%)": "kept at 5% (S1); a cell counts as failed if E2 has no valid local maximum",
+    "start disagreement (AF8: max-min over ALL starts incl. sentinels > 1e-6, share > 5%)": "kept at 5% (S2) but defined over VALID starts only: share of cells with SAME_POINT_VALUE_MISMATCH or distinct local maxima (any gap). Reason: AF8 counted saddles/sentinels as disagreement. Invalid starts are reported separately (count and reason) and do not disappear",
+    "E vs IS (AF8)": "same thresholds now applied to the main score E2 (S3); E vs IS reported as diagnostic",
+    "new": "S4 IS failed draws / ESS, S5 determinism, S6 FD-step sensitivity of E2, S7 FD derivative check (AF8 rule fd_rel_err_max was not evaluated in the AF8 pilot)"
+  },
+  "fd_check": "S7 evaluated on the main prior for the first column of every pilot (dataset, regime): analytic vs central FD gradient and Hessian of Psi at (Z_D + 0.01, f_D + 0.01)",
+  "pilot": "rep01-rep03, 648 cells (same as AF8); numerical quantities only; no selection accuracy, AUC or label summaries",
+  "independent_audit": "read-only research-auditor after the pilot: formulae vs code, maximum conditions, Hessian blocks, E vs E2, prior normalisation, IS weights/denominator, stop rules, AF8-vs-v2 comparison, claim scope",
+  "not_claimed": [
+    "selection accuracy",
+    "improvement of family selection",
+    "Bayesian evidence of the whole model",
+    "confirmation"
+  ]
+}
