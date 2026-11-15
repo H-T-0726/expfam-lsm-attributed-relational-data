@@ -1,0 +1,132 @@
+{
+  "source": "AF8-v2 saved CSVs (a5cffa1): pilot/candidate_scores.csv, pilot/pilot_failure_diagnosis_v2.csv",
+  "IS_failed_draws": 9,
+  "IS_draws": 28400,
+  "IS_cells_with_failed_draws": 9,
+  "IS_main_cells": 72,
+  "IS_main_cells_with_IS": 71,
+  "IS_failed_cells_by_candidate": {
+    "cmp_nu2p0": 5,
+    "poisson": 4
+  },
+  "IS_failed_cells_by_regime": {
+    "sparse": 5,
+    "dense": 4
+  },
+  "cells_E2_not_ok": 2,
+  "cells_E2_not_ok_by_candidate": {
+    "cmp_nu2p0": 2
+  },
+  "start_status_by_method_candidate": {
+    "D:cmp_nu2p0:GRAD_OK": 926,
+    "D:cmp_nu2p0:HESS_FD_FAIL": 4,
+    "D:cmp_nu2p0:LINESEARCH_FAIL": 1,
+    "D:cmp_nu2p0:NOT_CONVERGED": 41,
+    "D:poisson:GRAD_OK": 953,
+    "D:poisson:HESS_FD_FAIL": 1,
+    "D:poisson:LINESEARCH_FAIL": 5,
+    "D:poisson:NOT_CONVERGED": 13,
+    "E:cmp_nu2p0:NOT_CONVERGED": 3,
+    "E:cmp_nu2p0:OK": 1203,
+    "E:cmp_nu2p0:OK_FLOOR": 88,
+    "E:poisson:NOT_CONVERGED": 1,
+    "E:poisson:OK": 1190,
+    "E:poisson:OK_FLOOR": 105
+  },
+  "valid_D_starts_per_cell": {
+    "0": 2,
+    "1": 9,
+    "2": 41,
+    "3": 596
+  },
+  "failed_draw_cold_grad_inf_last": {
+    "count": 9.0,
+    "mean": 2.682074447411963e-06,
+    "std": 2.560529531904818e-06,
+    "min": 1.0612579082192042e-06,
+    "25%": 1.398005787967005e-06,
+    "50%": 1.7332638650446874e-06,
+    "75%": 2.7216256021367347e-06,
+    "max": 9.302181417925048e-06
+  },
+  "failed_draw_warm_minus_cold200_phi_absmax": 9.094947017729282e-13,
+  "failed_draw_warm_min_eig_HZZ": {
+    "count": 9.0,
+    "mean": 2.550057665741435,
+    "std": 1.0613794616306689,
+    "min": 1.5489878635608545,
+    "25%": 1.701845615085828,
+    "50%": 1.82587461937905,
+    "75%": 3.76808478263444,
+    "max": 3.9838643678007934
+  },
+  "failed_draw_mahalanobis_sq": {
+    "count": 9.0,
+    "mean": 4.464074688544055,
+    "std": 3.8795803134307776,
+    "min": 0.5541064533203953,
+    "25%": 1.7822911158231691,
+    "50%": 2.0239112833188333,
+    "75%": 6.339493984005995,
+    "max": 11.280660259099443
+  },
+  "outer_fail_grad_inf_last": {
+    "count": 6.0,
+    "mean": 7.278572411449542e-05,
+    "std": 6.572026024067355e-05,
+    "min": 1.58286184159806e-05,
+    "25%": 2.5048336738109356e-05,
+    "50%": 5.148365289642243e-05,
+    "75%": 0.0001016167061606621,
+    "max": 0.0001833541318774
+  },
+  "outer_fail_fd_grad_by_h": [
+    {
+      "fd_grad_inf_h2.5e-05": 0.0006347499947878,
+      "fd_grad_inf_h5e-05": 5.069296094006859e-05,
+      "fd_grad_inf_h0.0001": 5.0681592256296426e-05,
+      "fd_grad_inf_h0.0002": 5.064237029728247e-05,
+      "fd_grad_inf_h0.0004": 5.048889306635829e-05
+    },
+    {
+      "fd_grad_inf_h2.5e-05": 1.5838850231375545e-05,
+      "fd_grad_inf_h5e-05": 0.0007319090400415,
+      "fd_grad_inf_h0.0001": 1.58286184159806e-05,
+      "fd_grad_inf_h0.0002": 7.121343514882028e-05,
+      "fd_grad_inf_h0.0004": 4.6925663355068536e-05
+    },
+    {
+      "fd_grad_inf_h2.5e-05": 0.0001180524122901,
+      "fd_grad_inf_h5e-05": 0.0001278522177017,
+      "fd_grad_inf_h0.0001": 0.0001180603703687,
+      "fd_grad_inf_h0.0002": 0.0001181001607619,
+      "fd_grad_inf_h0.0004": 0.000118254206427
+    },
+    {
+      "fd_grad_inf_h2.5e-05": 0.0003184459274052,
+      "fd_grad_inf_h5e-05": 1.6502781363669783e-05,
+      "fd_grad_inf_h0.0001": 1.6503918232047e-05,
+      "fd_grad_inf_h0.0002": 1.6516423784196377e-05,
+      "fd_grad_inf_h0.0004": 3.93464461012627e-05
+    },
+    {
+      "fd_grad_inf_h2.5e-05": 5.229139787843451e-05,
+      "fd_grad_inf_h5e-05": 0.0002576734914327,
+      "fd_grad_inf_h0.0001": 5.228571353654843e-05,
+      "fd_grad_inf_h0.0002": 5.2262976169004105e-05,
+      "fd_grad_inf_h0.0004": 9.369983899887302e-05
+    },
+    {
+      "fd_grad_inf_h2.5e-05": 5.642505129799247e-05,
+      "fd_grad_inf_h5e-05": 5.64273250347469e-05,
+      "fd_grad_inf_h0.0001": 0.0001833541318774,
+      "fd_grad_inf_h0.0002": 0.0001728244569676,
+      "fd_grad_inf_h0.0004": 9.103700904233848e-05
+    }
+  ],
+  "outer_fail_T_spread_per_cell": {
+    "rep01-4": 6.596110324608162e-10,
+    "rep02-5": 1.2641976354643703e-10
+  },
+  "note": "labels (true family) are not used; candidate = fitted family of the cell"
+}

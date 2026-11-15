@@ -1,0 +1,32 @@
+{
+  "cells_pilot": 648,
+  "cells_full_same_reps": 648,
+  "unmatched": 0,
+  "max_abs_diff_D": 1.3642420526593924e-12,
+  "finite_mismatch_D": 0,
+  "max_abs_diff_E2": 1.4807801562710665e-07,
+  "finite_mismatch_E2": 0,
+  "max_abs_diff_E": 1.5916157281026244e-12,
+  "finite_mismatch_E": 0,
+  "max_abs_diff_IS": 7.323660611291416e-08,
+  "finite_mismatch_IS": 0,
+  "status_changes": 0,
+  "Delta_sign_changes": {
+    "D": {
+      "pairs_compared": 324,
+      "sign_changes": 0
+    },
+    "E2": {
+      "pairs_compared": 324,
+      "sign_changes": 0
+    },
+    "E": {
+      "pairs_compared": 324,
+      "sign_changes": 0
+    },
+    "IS": {
+      "pairs_compared": 36,
+      "sign_changes": 0
+    }
+  }
+}
