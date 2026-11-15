@@ -1,0 +1,69 @@
+{
+  "experiment": "AF8-v3",
+  "study_type": "exploratory numerical-stability revision + pilot (no selection accuracy, no main experiment). Written AFTER seeing the AF8-v2 pilot numerics; not the AF8 pre-registration",
+  "parent": {
+    "AF8_v2_head": "a5cffa1b7364988786b984137ffb1055a3ec947f",
+    "AF8_v2_protocol_sha256": "57f0a37935eed694aff639728310101d3dedc6709dcc23b28423882fed6fb777",
+    "AF8_v2_stop": "S4 fired: 9/72 main-prior cells had one failed IS draw (9/28,400 draws). Diagnosis at the exact draws: inner Newton stall with ||g||_inf 1e-6..9e-6 because the Armijo test is decided by floating-point rounding of phi (Newton decrement/2 ~ 1e-14 < 1 ulp of |phi|); 2 cells without a valid outer start because the outer FD gradient carried noise ~1e-5..7e-4 > OUTER_GTOL 1e-5, consistent with O(1e-8) Laplace-value errors of floor-accepted inner points divided by h"
+  },
+  "unchanged_from_v2": [
+    "model, theta_{-j}, data, masks, priors (main B_sg2_0.667 + 8)",
+    "log density/gradient/negative Hessian (AF8 JointU)",
+    "starts (plugin_anchorZ, zero, af6_fL; E also from f_D)",
+    "Armijo phase of Newton (aim tolerances inner 1e-9 / joint 1e-8, max iterations 100 / 300, step caps, modified Newton, negative-curvature escape, SADDLE)",
+    "outer BFGS phase (v2.maximise_T)",
+    "FD steps 1e-4 / 1e-3, alternative Hessian steps 5e-4 / 2e-3",
+    "IS proposal (t5 at f_D, inverse FD Hessian), 400 draws, seeds 1689500 + case index (identical draws if f_D identical)",
+    "multistart clustering (same point ||df||_inf <= 1e-3, value spread <= 1e-6, multimodal gap log 20)",
+    "selection states and the 0.01 decision floor",
+    "E2 is the main score; E and IS diagnostics"
+  ],
+  "changed_numerics": {
+    "inner_and_joint_acceptance": "absolute-gradient floor acceptance (OK_FLOOR: ||g||_inf<=1e-6) REMOVED. After the Armijo phase (ending at gtol, when negH is PD and the predicted gain lambda^2/2 is <= 64 ulp of |phi| so that the Armijo comparison of phi values is uninformative, at a line-search failure with negH PD, or at max iterations), up to 10 pure Newton steps are taken, each accepted only if the trial is finite, negH stays PD (Cholesky) and the Newton decrement strictly decreases (no phi comparison: phi cannot resolve the change). The point is ACCEPTED only with a certificate: negH PD, lambda^2/2 = g^T negH^-1 g / 2 <= 1e-12, and |Lap(x+p) - Lap(x)| <= 1e-10 where p is the full Newton step and Lap = phi - 1/2 log|negH|. Otherwise NOT_CERTIFIED / NOT_CONVERGED / LINESEARCH_FAIL / SADDLE (a failure, never a value).",
+    "outer_acceptance": "OUTER_GTOL (FD ||g||_inf < 1e-5) is no longer the acceptance criterion. After the v2 BFGS phase (whatever its status, if the point is valid), an outer Newton stage with FD gradient (h=1e-4) and FD Hessian (h=1e-3): if FD Hessian of -T not PD -> T_STATIONARY_NOT_MAX; lambda_f^2/2 > 1e-06 -> Armijo Newton step; lambda_f^2/2 <= 1e-06 -> evaluate T(f + H^-1 g): if the gain > 1e-06 move and repeat, else CERT_OK (at most 8 rounds). A start is valid only with CERT_OK.",
+    "IS": "same draws as v2. A draw whose cold-start S is not certified gets ONE deterministic additional mode search from Z(f_D); its value is used only if certified and the cold start's last phi is within 1e-06 (same mode). Otherwise the draw is FAILED: the IS estimate is invalid (NaN; lower bound reported). Rescued draws are logged (draw, f, original status, gradient, decrement, phi difference, outcome) and counted separately (S4r). Zero-weight draws: T is finite wherever S is defined for this model, so the category exists but cannot occur; it is never used for failures.",
+    "diagnostics_added": "per certified point: lambda^2/2, Laplace step change, min eigenvalue, condition number of the outer FD Hessian; main prior: FD gradient at h in {5e-5,1e-4,2e-4} and the implied gap spread^2/(2 lambda_min); Nelder-Mead (derivative-free) from f_D with gain over T(f_D)"
+  },
+  "certificate_rationale": {
+    "TAU_E2": "0.001 = (decision floor 0.01) / 10: total numerical error budget per candidate E2",
+    "CERT_DEC": "1e-12: phi-gap of the local quadratic model at the Z mode; contributes <= 1e-12 to S",
+    "CERT_LAP": "1e-10: S error is first order in dZ = H^-1 g through log|H| (observed 3.9e-8 at a v2 floor point). An S error eps produces FD-gradient noise eps/h = 1e-06 at h=1e-4 and FD-Hessian noise ~4 eps/h^2 = 0.0004 at h=1e-3, i.e. a log-det error <= K * 4e-4 / lambda_min(outer) ~ 2e-4 for lambda_min >= 6 (v2 minimum 6.28) -> E2 error 1e-4 < TAU_E2",
+    "OUTER_CERT_DEC": "1e-06: T-gap at f_D (quadratic model and actual extra Newton step) enters E2 directly; 1e-6 << TAU_E2. Gradient noise 1e-6 (from CERT_LAP) implies a gap ~ (1e-6)^2/(2*6) ~ 1e-13, so the certificate is not noise-limited",
+    "S8": "Nelder-Mead gain over T(f_D) <= TAU_E2 = 0.001: an FD-free optimiser must not find a higher T by more than the E2 error budget",
+    "S9": "FD-noise implied gap <= OUTER_CERT_DEC: the FD gradient used for the certificate must be resolved at the level of the certificate",
+    "limits": "lambda^2 and the extra-step checks are LOCAL (quadratic model at a PD point). They do not establish a global maximum of a non-concave problem; global questions are addressed only by multistart (f, E) and are not addressed for the Z problem beyond the deterministic cold start and the logged rescue."
+  },
+  "multistart_success": "a cell's E2 is valid if >= 1 start is CERT_OK and the certified starts form one cluster (AGREE) or a dominant one; S2b additionally limits cells with < 2 certified starts; invalid starts are counted with their status",
+  "stop_rules_v3": {
+    "S1_cell_numerical_failure_share_max": 0.05,
+    "S2_multistart_disagreement_share_max": 0.05,
+    "S2b_cells_with_fewer_than_2_certified_starts_share_max": 0.05,
+    "S3_main_median_abs_DeltaE2_minus_DeltaIS_max": 0.25,
+    "S3b_main_median_abs_DeltaE2_minus_DeltaIS_below_half_median_abs_DeltaE2": true,
+    "S4_IS_cells_with_failed_draws_share_max": 0.05,
+    "S4r_IS_cells_with_any_rescued_draw_share_max": 0.05,
+    "S4b_IS_min_ess": 40.0,
+    "S5_determinism_max_abs_diff": 1e-08,
+    "S6_fd_step_sensitivity_median_abs_DeltaE2_max": 0.05,
+    "S7_fd_derivative_rel_err_max": 0.0001,
+    "S8_nelder_mead_gain_over_fD_max": 0.001,
+    "S9_fd_noise_implied_gap_max": 1e-06
+  },
+  "stop_rules_changes_vs_v2": {
+    "S1, S2, S3, S3b, S4b, S5, S6, S7": "same definitions and thresholds",
+    "S4": "same threshold and definition (cells with >= 1 failed draw); with v3 a draw is failed if neither the cold start nor the pre-registered same-mode rescue is certified. The v2-definition value (any cold-start failure, i.e. rescued draws counted as failed) is reported as S4_v2_definition AND bounded separately by S4r (same 5%)",
+    "new": "S2b (< 2 certified starts), S4r (rescues), S8 (Nelder-Mead), S9 (FD noise). No threshold relaxed"
+  },
+  "units": "rules S1, S2, S2b are over the 648 cells (cell = dataset x regime x column x candidate x prior); S3/S3b over main-prior candidate pairs with both IS valid (the number excluded is reported); S4, S4r, S4b, S5, S8, S9 over the 72 main-prior cells. The dataset (3) is the statistical unit of any later inference; the pilot rules are numerical acceptance criteria, not inference",
+  "regression_first": "before the pilot, the 9 known failed IS draws (exact f regenerated from the v2 seeds) and the 2 cells without a valid outer start are re-evaluated as regression tests",
+  "post_hoc": "anything computed after the pilot that is not listed here is labelled exploratory/post-hoc; thresholds are not changed after the pilot",
+  "pilot": "rep01-rep03, 648 cells (same as AF8 / v2); numerical quantities only; no selection accuracy, AUC or label summaries",
+  "independent_audit": "read-only research-auditor after the pilot",
+  "not_claimed": [
+    "selection accuracy",
+    "improvement of family selection",
+    "Bayesian evidence of the whole model",
+    "E2 ~ IS implies closeness to the exact marginal over (Z, f)",
+    "confirmation"
+  ]
+}
