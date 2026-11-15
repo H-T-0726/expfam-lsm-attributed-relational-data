@@ -1,0 +1,14 @@
+quantity,v2,v3
+cells,648,648
+S1 share of cells with E2 not OK,0.0030864197530864196,0.0
+S2 disagreement among valid starts (v2 valid = GRAD_OK + PD FD Hessian; v3 valid = CERT_OK),0.0,0.0
+invalid D start share,0.03343621399176955,0.0
+invalid E start share (v2 valid = OK/OK_FLOOR; v3 valid = certified OK),0.0015444015444015444,0.0
+S4 with the v2 definition: main cells with >=1 cold-start failed draw / 72,0.125,0.0
+S4 v3: main cells with >=1 draw failed after the same-mode rescue / 72,,0.0
+IS failed draws / total,9/28400,0/28800
+S3 median |dE2-dIS| (number of pairs),0.01323 (26),0.01242 (36)
+median |dE-dE2|,0.19023355787930996,0.20375951942912707
+S4b min ESS,339.2366111820785,339.2366605780639
+S6 median FD-step sensitivity of dE2,7.093218891895958e-05,4.142259513173485e-07
+CPU seconds total,15039.59,12289.689999999999

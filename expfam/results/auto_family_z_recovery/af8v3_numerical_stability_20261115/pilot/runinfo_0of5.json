@@ -1,0 +1,17 @@
+{
+  "experiment": "AF8-v3",
+  "script": "expfam/src/experimental/run_af8v3_integrated_loading.py",
+  "git_head": "e183c4505532c8607456dc2bbe1e300ba6a13ac2",
+  "git_branch": "experiment/af8-v3-numerical-stability",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "python_executable": "D:\\tento\\kennkyu\\.venv\\Scripts\\python.exe",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "2",
+  "protocol_sha256": "c853c0092167a089a19ff285bcd42d262204be499efbc80151478607a71897cb",
+  "command": "expfam/src/experimental/run_af8v3_integrated_loading.py --pilot --shard 0/5",
+  "stage": "pilot",
+  "shard": "0/5"
+}
