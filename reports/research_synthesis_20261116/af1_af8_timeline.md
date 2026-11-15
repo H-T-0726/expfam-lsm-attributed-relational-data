@@ -16,7 +16,7 @@
 | 時期 | 出来事 | 出典 |
 |---|---|---|
 | 2026-09-23〜27 | 列ごとの family 選択の設計（Phase 9C）。0/1 列で Bernoulli と Poisson を選ぶ pilot は 36/36 正解。この段階では「確証的な証拠を得ることは目的ではない」としていた | [`reports/distribution_selection/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/f71c04d/reports/distribution_selection) |
-| 2026-10-06 | PR #129：複数の support の候補（count / positive / bounded）からの選択。真の Z では COUNT の 0.984 で family を回復した。Auto の RMSE(Z) は Oracle とほぼ同じだった。CMP の候補で 16 fit が失敗した | [PR #129](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/pull/129)（head [`4fa6159`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/4fa6159)） |
+| 2026-10-06 | PR #129：複数の support の候補（count / positive / bounded）からの選択。真の Z では COUNT の 0.984（1181/1200）で family を回復した。Auto の RMSE(Z) は Oracle とほぼ同じだった。失敗は 22 fit（main 18、pilot 4、[`failures.csv`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/4fa6159/expfam/results/family_selection/expanded_multisupport_20261006_034826/tables/failures.csv)）。PR 本文によると、main の 18 のうち 16 は CMP の候補を incumbent の loading で認証できなかったもの | [PR #129](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/pull/129)（head [`4fa6159`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/4fa6159)） |
 | 2026-10-13 | 先生の質問：「正しい分布で生成して正しい分布を仮定するだけでは、拡張の意味の説明として弱い。間違った分布を仮定すると何が起きるか」。既存の結果を統合し（#130）、M1 を設計した | [`distribution_misspecification_synthesis_20261013.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/f71c04d/reports/advisor_feedback/distribution_misspecification_synthesis_20261013.md) |
 | 2026-10-13 | M1：真の Bernoulli 属性 6 列を Poisson で fit した（support-compatible な誤指定）。RMSE_Z の差（wrong − correct）は dense +0.020（15/20）、sparse +0.066（17/20） | [`misspecification_m1_bernoulli_to_poisson_20261013.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/f71c04d/reports/advisor_feedback/misspecification_m1_bernoulli_to_poisson_20261013.md) |
 | 2026-11-04 | E1・E2a：Z の点推定（joint mode）で M1 を再評価した。sparse の悪化は別の seed 系列でも再現した（+0.076 / +0.087、18/20・20/20）。dense の last 推定は再現しなかった | [`e1_z_point_estimator_m1_20261104.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/f71c04d/reports/research_improvement/e1_z_point_estimator_m1_20261104.md) |
@@ -57,6 +57,7 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
   - 160/160 fit で、12 列すべてを正しく選んだ。
   - Auto は Oracle と bit 単位で一致した（refit の seed を共有しているため）。
   - Benefit（= Wrong の悪化）は sparse で 0.0816 [0.0642, 0.0991]（20/20）、dense で 0.0122（13/20）。
+- **事前登録**：protocol は CONFIRMATORY として結果の前に固定した。主対比（Benefit = Wrong − Auto）は正で、CI は sparse [0.0642, 0.0991]、dense [0.0013, 0.0270] とも 0 を含まない。
 - **解釈**：最も易しいケースでは、選択は確実に機能する。ただし、それは解析的な不等式から来ている。
 - **否定された仮説**：なし。ただし「選択器が誤りうる状況での有効性」は、この実験では何も検証されていない。
 - **未解決**：family の尤度差が小さい組（例：Poisson と過小分散の count）で、選択がどれだけ正しいか。
@@ -81,7 +82,15 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
     - Wrong − Auto：dense 0.0238、sparse 0.0542。
     - Support-only − Auto：dense 0.0051 [0.0023, 0.0079]、sparse 0.0059 [0.0013, 0.0109]。
     - Auto − Oracle：dense 0.0029、sparse 0.0116。
-- **解釈**：完全な誤指定に比べると損失を大きく減らすが、もっともらしい既定（すべて Poisson）からの上積みは小さい。Y が疎になると、X の分布選択まで悪化した。
+- **事前登録**：protocol は CONFIRMATORY として結果の前に固定した。
+  - 主対比 Benefit（Wrong − Auto）は、dense・sparse とも正で CI は 0 を含まない。
+  - 主要な副対比 Support-only − Auto も正で CI は 0 を含まない（dense 15/20、sparse 13/20）（**主指標の joint mode だけ**。副指標の last と mean5 では、sparse の CI は 0 を含む）。
+  - sparse で 2 列以上を誤選択したデータでは、Support-only より良くならなかった（事後表）。
+  - 成功の閾値は protocol で定めていない。1 回の実行で、新しいデータでの再現はない。
+- **解釈**：
+  - 選択は多くの列で正解した（dense 0.900、sparse 0.767）。
+  - Z の推定も、完全な誤指定（Wrong）だけでなく、もっともらしい既定（すべて Poisson）より小さく改善した。
+  - ただし、既定に対する上積みは小さく、Oracle には届かなかった。Y が疎になると、X の分布選択まで悪化した。
 - **否定された仮説**：「Auto で Oracle の水準に戻る」は、sparse では成り立たなかった。
 - **次へ進んだ理由**：CMP2→Poisson の誤りの原因が、Z の不正確さにあるのかを調べる必要があった。
 
@@ -96,7 +105,9 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
   Q_j(m) = max_f (1/L) Σ_l Σ_i log p_m(x_ij | fᵀ z_i^(l))
   ```
 
-  - 母集団レベルでは、厳密な事後分布から Z を取れば E[log p_true − log p_m] = E_z KL ≥ 0 が成り立つ（DERIVED）。
+  - Z を**真のモデル（真の割当てと真の θ）の下での厳密な事後分布**から取ると、データについての期待値で、(z_i, x_ij) は生成の同時分布に従う。
+  - そのため、f を固定すれば E_{(z,x)}[log p_true(x|f*ᵀz) − log p_m(x|fᵀz)] = E_z KL ≥ 0 が成り立つ（DERIVED、母集団レベル）。
+  - 個々の有限標本で真の分布が勝つことは保証しない（`mathematical_open_questions.md` §2.1）。
   - この保証が崩れる場合として、次の 3 つを説明仮説とした（HYPOTHESIS）。
     - (a) 独立な誤差を含む Z では、混合によって過分散になり Poisson が有利になる。
     - (b) 別の分布の事後分布から作った Z では、その分布が有利になる（自己確認的な偏り）。
@@ -108,7 +119,7 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
   - Support-only の Z では、0.783（dense）と 0.533（sparse）に下がった。
   - Oracle の plug-in mode では、逆向きの誤り（Poisson→CMP2）が出た。
 - **解釈**：決め手は Z の誤差の大きさではなく、「Z をどの分布の下で作ったか」だった。
-- **否定された仮説**：「Z の誤差（RMSE）の大きさで選択の成否が決まる」は否定された。
+- **否定された仮説**：「Z の誤差（RMSE）の大きさで選択の成否が決まる」は、この設定（同じ 20 データの統制比較）では支持されなかった。
 - **次へ進んだ理由**：q を共有しない評価（Z を積分する評価）を試す必要があった。
 
 ## AF4（2026-11-13）：割当て全体を Laplace で評価する
@@ -148,7 +159,7 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
   - 正解率は dense 0.917、sparse 0.857（同じ anchor の Q は 0.925 と 0.783）。
   - Q との paired 比較は、sparse で +0.40 [0.05, 0.70]、dense で −0.05。
   - 誤りの向きの偏り（CMP2→Poisson）は消えた。
-- **解釈**：sparse での改善は、IS で確かめられない列に偏っていた（判定できる列では +0.10 [−0.25, 0.45]）。同じデータで手法を作ったので、確認が必要だった。
+- **解釈**：sparse での改善は、IS で確かめられない列に偏っていた（AF2 Auto を参照にし、confident（DECIDED）だけで判定すると +0.10 [−0.25, 0.45]。IS で確かめた DECIDED 71 列の正解率は Laplace 0.859、AF2 0.831）。同じデータで手法を作ったので、確認が必要だった。
 - **次へ進んだ理由**：新しい seed のデータで、事前登録して確かめる必要があった。
 
 ## AF6（2026-11-14）：Laplace 分布選択の確認実験（事前登録、新しい 40 データ）
@@ -259,7 +270,8 @@ AF6 の anchor・データ → AF8 → AF8-v2 → AF8-v3 → AF8-v3 final（40 �
 |---|---|---|---|
 | 1 | {0,1} 列の Bernoulli と Poisson は自動選択で確実に区別できる | **支持**（ただし解析的に自明） | AF1 |
 | 2 | 自動選択で Oracle の Z の精度に戻る | **否定**（sparse の Poisson/CMP2 で） | AF2 |
-| 3 | Z の誤差の大きさが選択の成否を決める | **否定**（Z を作った分布が決め手） | AF3 |
+| 2b | Poisson/CMP2 の自動選択は、Support-only より Z の推定を改善する | **支持（小さい、1 条件、joint mode だけ）**：事前登録の副対比で、CI は 0 を含まない。last と mean5 では、sparse の CI は 0 を含む。新しいデータでの再評価はなし | AF2（PR #129 も同じ向き） |
+| 3 | Z の誤差の大きさが選択の成否を決める | **この設定では支持されず**（Z を作った分布が決め手） | AF3 |
 | 4 | Z を積分した全体評価で、1 列の誤りを区別できる | **支持されず** | AF4 |
 | 5 | 列ごとの Laplace 選択は Q より良い（新しいデータで） | **未達成**（主要評価項目の CI が 0 を含む） | AF6 |
 | 6 | Laplace 型基準の Poisson→CMP2 の偏りは、Laplace 近似の誤差による | **否定**（TI でも同じ） | AF6 |
