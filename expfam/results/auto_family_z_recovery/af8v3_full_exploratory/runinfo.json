@@ -1,0 +1,29 @@
+{
+  "script": "expfam/src/experimental/analyze_af8v3_full_integrated_loading.py",
+  "git_head": "fe98694fdb778422b83a821b8d6b2d7ea72746a2",
+  "git_branch": "experiment/af8-v3-numerical-stability",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "python_executable": "D:\\tento\\kennkyu\\.venv\\Scripts\\python.exe",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "pandas": "2.3.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "",
+  "protocol_sha256": "e7dfd0ca06c1ad59646052081b393c8529f9230e227b86d4401492de4abd0e22",
+  "command": "expfam/src/experimental/analyze_af8v3_full_integrated_loading.py --analyze",
+  "inputs": {
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\full\\candidate_scores.csv": "886ac8fa297b17ae73592cef697783885c330d02cc2dca6fd77dc9c0e396fd15",
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\full\\full_pairs.csv": "a542e48e2d51523ed0859097930e1be9b93740f97bc72fd99d8e2b24f143e0be",
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\protocol.json": "adc440680277e7e2c024d95256a28015bf39f8d447a09e4fa4e2b780ff54e496",
+    "expfam\\results\\auto_family_z_recovery\\af6_laplace_confirmation_20261114\\full\\column_selection.csv": "8ca0cb622085186e283bb6b0199a6350fe933383ce9038b0e6dc1f1163cc1e63",
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\manifest.csv": "60c6742a8dc79e315bf00d6af5e8dcf70ded87465b7272b6f21c7534c1e1dbaf",
+    "expfam\\results\\auto_family_z_recovery\\af8v3_full_exploratory\\full\\full_numerical_audit.json": "edbddd47c5178d531430016c6c4e73b7389a39e78907b0dd345ee6b1fa2e2828"
+  },
+  "stage": "analysis",
+  "bootstrap": {
+    "seed": 20261118,
+    "B": 10000,
+    "B_auc": 2000
+  }
+}

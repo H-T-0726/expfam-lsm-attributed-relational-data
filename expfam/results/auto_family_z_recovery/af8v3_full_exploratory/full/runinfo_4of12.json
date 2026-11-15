@@ -1,0 +1,19 @@
+{
+  "experiment": "AF8-v3 final",
+  "script": "expfam/src/experimental/run_af8v3_full_integrated_loading.py",
+  "git_head": "fe98694fdb778422b83a821b8d6b2d7ea72746a2",
+  "git_branch": "experiment/af8-v3-numerical-stability",
+  "git_dirty_tracked": false,
+  "python": "3.13.14",
+  "python_executable": "D:\\tento\\kennkyu\\.venv\\Scripts\\python.exe",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "pandas": "2.3.3",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "omp_num_threads": "1",
+  "protocol_sha256": "e7dfd0ca06c1ad59646052081b393c8529f9230e227b86d4401492de4abd0e22",
+  "command": "expfam/src/experimental/run_af8v3_full_integrated_loading.py --full --shard 4/12",
+  "stage": "full",
+  "shard": "4/12",
+  "started": "2026-11-15T16:38:37"
+}
