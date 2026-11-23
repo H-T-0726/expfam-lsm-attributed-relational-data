@@ -444,9 +444,13 @@ def test_two_canary_fit_invariance():
 
 
 def test_manifest_shape_and_seed_sharing():
+    # v2 protocol: 5 splits x 2 K x 3 seeds x {BX, GX, YO} + GXc at K=6 only
     cells = csh.build_manifest()
-    assert len(cells) == 90
-    assert len({c["cell_id"] for c in cells}) == 90
+    assert len(cells) == 105
+    assert len({c["cell_id"] for c in cells}) == 105
+    gxc = [c for c in cells if c["arm"] == "GXc"]
+    assert len(gxc) == 15 and {c["K"] for c in gxc} == {6}
+    assert len(csh.build_manifest(secondary_cells=[])) == 90
     groups = {}
     for c in cells:
         groups.setdefault((c["split_index"], c["K"], c["seed_index"]), set()).add(
@@ -454,3 +458,114 @@ def test_manifest_shape_and_seed_sharing():
     assert all(len(v) == 1 for v in groups.values())
     assert len({next(iter(v)) for v in groups.values()}) == 30
     assert all(c["split_index"] != SMOKE for c in cells)
+
+
+# ── v2: exact per-column Newton F update for Bernoulli X ──────────────────
+
+def _random_qx_problem(seed=0, n=120, k=3, d=6, L=4):
+    r = np.random.default_rng(seed)
+    Zs = r.standard_normal((n, k, L))
+    X = (r.random((n, d)) < 0.15).astype(float)
+    X[0, :] = 1.0                       # every column has both values
+    X[1, :] = 0.0
+    F0 = r.standard_normal((d, k)) * 0.3
+    return X, Zs, F0
+
+
+def test_qx_gradient_hessian_match_finite_differences():
+    X, Zs, F = _random_qx_problem(1)
+    g, H = csh.bernoulli_qx_grad_hess(X, Zs, F)
+    e = 1e-6
+    for j in range(F.shape[0]):
+        for a in range(F.shape[1]):
+            E = np.zeros_like(F)
+            E[j, a] = e
+            num = (csh.bernoulli_qx_cols(X, Zs, F + E).sum()
+                   - csh.bernoulli_qx_cols(X, Zs, F - E).sum()) / (2 * e)
+            assert abs(num - g[j, a]) < 1e-5
+            gp, _ = csh.bernoulli_qx_grad_hess(X, Zs, F + E)
+            assert np.allclose(-(gp[j] - g[j]) / e, H[j, a], atol=1e-4)
+    # same objective as the model's Q_X term (calc_log_likelihood_X)
+    m = _model(csh.CoraConsistentFast, X.shape[0], X.shape[1], 3, "bernoulli",
+               ~np.eye(X.shape[0], dtype=bool))
+    assert abs(m.calc_log_likelihood_X(X, Zs, F)
+               - csh.bernoulli_qx_cols(X, Zs, F).sum()) < 1e-8
+    # same gradient as the Adam M-step uses
+    grad = sum((X - m._mean_function_x(Zs[:, :, l] @ F.T)).T @ Zs[:, :, l]
+               for l in range(Zs.shape[2])) / Zs.shape[2]
+    assert np.allclose(grad, g, atol=1e-12)
+
+
+def test_newton_f_matches_independent_solver_and_improves_qx():
+    from scipy.optimize import minimize
+    X, Zs, F0 = _random_qx_problem(2)
+    d, k = F0.shape
+    F, info = csh.bernoulli_f_newton(X, Zs, F0)
+    assert info["status"] == "converged"
+    assert info["q_after"] >= info["q_before"]
+    assert info["grad_max"] < 1e-6
+    o = minimize(lambda v: -csh.bernoulli_qx_cols(X, Zs, v.reshape(d, k)).sum(),
+                 F0.ravel(), method="L-BFGS-B",
+                 jac=lambda v: -csh.bernoulli_qx_grad_hess(X, Zs, v.reshape(d, k))[0].ravel(),
+                 options={"gtol": 1e-12, "ftol": 1e-15, "maxiter": 5000})
+    assert np.max(np.abs(o.x.reshape(d, k) - F)) < 1e-6
+    assert abs(-o.fun - info["q_after"]) < 1e-8
+    # Adam-50 from the same start does not exceed the exact maximiser
+    m = _model(csh.CoraConsistentFast, X.shape[0], d, k, "bernoulli",
+               ~np.eye(X.shape[0], dtype=bool))
+    m.params["F"] = F0.copy()
+    Fa = m._calc_F_adam(X, Zs)
+    assert csh.bernoulli_qx_cols(X, Zs, Fa).sum() <= info["q_after"] + 1e-9
+
+
+def test_newton_f_detects_separation_and_nonfinite():
+    X, Zs, F0 = _random_qx_problem(3)
+    Xc = X.copy()
+    Xc[:, 2] = 0.0
+    with pytest.raises(csh.FNewtonError):
+        csh.bernoulli_f_newton(Xc, Zs, F0)
+    Zb = Zs.copy()
+    Zb[0, 0, 0] = np.nan
+    with pytest.raises(csh.FNewtonError):
+        csh.bernoulli_f_newton(X, Zb, F0)
+
+
+def test_newton_fit_bx_diagnostics_and_default_kind():
+    sp = _synthetic_split(seed=21, n=40, d=6)
+    tech, _, st = csh.run_cell(sp, "BX", 2, 31, 32, num_iter=4)
+    assert tech["fit_status"] == "OK", tech.get("fit_error")
+    assert tech["model_kind"] == "fast_newton" and tech["f_update"] == "newton"
+    assert tech["fnewton_msteps"] == 4 and tech["fnewton_all_converged"]
+    assert tech["fnewton_qx_decreases"] == 0
+    assert tech["mstep_q_decreases"] == 0
+    g, _ = csh.bernoulli_qx_grad_hess(sp.X_raw, st["Z_samples"], st["F"])
+    assert np.max(np.abs(g)) < 1e-6
+    assert len(tech["_f_newton_log"]) == 4 and len(tech["_mstep_q_history"]) == 4
+
+
+@pytest.mark.parametrize("arm", ["GX", "YO", "GXc"])
+def test_newton_kind_leaves_non_bernoulli_arms_bitwise_unchanged(arm):
+    sp = _synthetic_split(seed=22, n=36, d=6)
+    out = {}
+    for kind in ("fast", "fast_newton"):
+        tech, scores, st = csh.run_cell(sp, arm, 2, 41, 42, num_iter=3, model_kind=kind)
+        assert tech["fit_status"] == "OK"
+        assert "fnewton_msteps" not in tech
+        out[kind] = (scores, st)
+    for key in out["fast"][1]:
+        assert np.array_equal(out["fast"][1][key], out["fast_newton"][1][key]), key
+    for a, b in zip(out["fast"][0], out["fast_newton"][0]):
+        assert a["log_score"] == b["log_score"]
+
+
+def test_two_canary_fit_invariance_newton_bx():
+    sp = _synthetic_split(seed=23)
+    Y1 = np.where(sp.test_mask, 1.0, sp.Y_fit)
+    st = []
+    for Y in (sp.Y_fit, Y1):
+        tech, _, s = csh.run_cell(sp, "BX", 2, 51, 52, num_iter=3,
+                                  Y_fit_override=Y, model_kind="fast_newton")
+        assert tech["fit_status"] == "OK" and tech["f_update"] == "newton"
+        st.append(s)
+    for key in st[0]:
+        assert np.array_equal(st[0][key], st[1][key]), key

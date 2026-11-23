@@ -60,9 +60,12 @@ from objective_consistent_numerics import (                       # noqa: E402
 )
 
 DATA_DIR = _ROOT / "expfam" / "data" / "cora"
-RUNNER_VERSION = "cora-sh1-runner-v1"
+RUNNER_VERSION = "cora-sh1-runner-v2-newtonF"
 
-# ── draft protocol values (section 9 of the design report; NOT frozen) ──────
+# ── protocol values.  v2 (2026-11-24): frozen for the main run by the
+#    researcher's instruction "Newton法の採用と本実験" (BX F update = exact
+#    per-column Newton; GXc as K=6 secondary; 105 fits).  The smoke run used
+#    v1 (Adam F update, model_kind "fast") and stays reproducible with it. ──
 CONFIG: dict[str, Any] = {
     "test_fraction": 0.2,
     "selection": "full",        # primary candidate (Y-free, no selection)
@@ -90,6 +93,11 @@ CONFIG: dict[str, Any] = {
     "init_seed_base": 7_310_000,
     "mc_seed_base": 7_320_000,
     "smoke_split_index": 90,     # reserved; never one of the main splits 0..4
+    # v2 additions
+    "model_kind": "fast_newton",  # BX: exact per-column Newton F; GX: closed form
+    "f_newton_max_iter": 100,
+    "f_newton_tol_dec": 1e-12,    # stop when max_j g'H^{-1}g/2 < tol (per column)
+    "secondary_cells": [["GXc", 6]],   # GXc only at K=6 (pre-registered secondary)
 }
 
 ARMS: dict[str, dict[str, Any]] = {
@@ -409,7 +417,112 @@ class CoraConsistentFast(CoraConsistentCounting):
         return term1 + term2 + term3
 
 
-MODEL_CLASSES = {"fast": CoraConsistentFast, "original": CoraConsistentCounting}
+# ── Bernoulli-X F M-step: exact maximiser of Q_X (v2) ─────────────────────
+#
+# Q_X(F) = (1/L) sum_l sum_i sum_j [x_ij eta - log(1+e^eta)],  eta = f_j' z_i^(l)
+# (canonical Bernoulli, no bias, phi=1).  Separable over columns j and concave
+# in each f_j:  grad_j = (1/L) sum (x_ij - s(eta)) z,
+#               H_j    = (1/L) sum s(eta)(1-s(eta)) z z'.
+# Damped Newton with Armijo backtracking per column; a column whose line
+# search fails keeps its current value, so Q_X never decreases.  Same
+# objective that DualExpFamLSM._calc_F_adam only ascends for 50 Adam steps.
+
+class FNewtonError(FloatingPointError):
+    """Non-finite value, singular curvature or separation in the F M-step."""
+
+
+def bernoulli_qx_cols(X, Zs, F):
+    L = Zs.shape[2]
+    q = np.zeros(F.shape[0])
+    for l in range(L):
+        eta = Zs[:, :, l] @ F.T
+        q += (X * eta - np.logaddexp(0.0, eta)).sum(axis=0)
+    return q / L
+
+
+def bernoulli_qx_grad_hess(X, Zs, F):
+    L = Zs.shape[2]
+    d, k = F.shape
+    g = np.zeros((d, k))
+    H = np.zeros((d, k, k))
+    for l in range(L):
+        Z = Zs[:, :, l]
+        p = bernoulli_mean(Z @ F.T)
+        g += (X - p).T @ Z
+        H += np.einsum("ik,id,im->dkm", Z, p * (1.0 - p), Z, optimize=True)
+    return g / L, H / L
+
+
+def bernoulli_f_newton(X, Zs, F0, max_iter=100, tol_dec=1e-12):
+    """Exact per-column maximiser of Q_X.  Returns (F, info)."""
+    n = X.shape[0]
+    colsum = X.sum(axis=0)
+    if np.any((colsum == 0) | (colsum == n)):
+        raise FNewtonError("complete separation: an X column is constant")
+    if not (np.all(np.isfinite(Zs)) and np.all(np.isfinite(F0))):
+        raise FNewtonError("non-finite input to the F M-step")
+    F = np.array(F0, dtype=float, copy=True)
+    q = bernoulli_qx_cols(X, Zs, F)
+    q_start = float(q.sum())
+    status, it, ls_fail = "max_iter", 0, 0
+    for it in range(1, max_iter + 1):
+        g, H = bernoulli_qx_grad_hess(X, Zs, F)
+        try:
+            delta = np.linalg.solve(H, g[:, :, None])[:, :, 0]
+        except np.linalg.LinAlgError as exc:
+            raise FNewtonError(f"singular Q_X Hessian: {exc}") from exc
+        dec = np.einsum("dk,dk->d", g, delta)
+        if not np.all(np.isfinite(dec)):
+            raise FNewtonError("non-finite Newton decrement")
+        if np.max(dec) / 2.0 < tol_dec:
+            status = "converged"
+            break
+        t = np.ones(F.shape[0])
+        accepted = np.zeros(F.shape[0], bool)
+        qc = q
+        for _ in range(40):
+            qc = bernoulli_qx_cols(X, Zs, F + t[:, None] * delta)
+            accepted = qc >= q + 1e-4 * t * dec
+            if accepted.all():
+                break
+            t = np.where(accepted, t, t / 2.0)
+        ls_fail += int((~accepted).sum())
+        F = F + np.where(accepted[:, None], t[:, None] * delta, 0.0)
+        q = np.where(accepted, qc, q)
+        if not accepted.any():
+            status = "line_search_stalled"
+            break
+    if not np.all(np.isfinite(F)):
+        raise FNewtonError("non-finite F after Newton")
+    g, H = bernoulli_qx_grad_hess(X, Zs, F)
+    eta_max = max(float(np.max(np.abs(Zs[:, :, l] @ F.T))) for l in range(Zs.shape[2]))
+    return F, {"q_before": q_start, "q_after": float(q.sum()),
+               "iters": it, "status": status, "line_search_failures": ls_fail,
+               "grad_max": float(np.max(np.abs(g))),
+               "min_eig_H": float(np.min(np.linalg.eigvalsh(H))),
+               "F_absmax": float(np.max(np.abs(F))), "eta_absmax": eta_max}
+
+
+class CoraConsistentFastNewton(CoraConsistentFast):
+    """``CoraConsistentFast`` whose Bernoulli-X F update is the exact
+    per-column Newton maximiser of Q_X instead of Adam-50.  Gaussian X keeps the
+    inherited closed form (``calc_F`` sends only non-Gaussian X to
+    ``_calc_F_adam``); likelihood, bias, dispersion and the Y side unchanged."""
+
+    def _calc_F_adam(self, X, Z_samples, **kwargs):
+        if self.family_x != "bernoulli":
+            raise NotImplementedError("Newton F update is for Bernoulli X only")
+        F, info = bernoulli_f_newton(X, Z_samples, self.params["F"],
+                                     max_iter=CONFIG["f_newton_max_iter"],
+                                     tol_dec=CONFIG["f_newton_tol_dec"])
+        log = self.__dict__.setdefault("f_newton_log", [])
+        info["mstep"] = len(log) + 1
+        log.append(info)
+        return F
+
+
+MODEL_CLASSES = {"fast": CoraConsistentFast, "original": CoraConsistentCounting,
+                 "fast_newton": CoraConsistentFastNewton}
 
 
 @contextlib.contextmanager
@@ -447,13 +560,18 @@ def seeds_for(split_index: int, K: int, seed_index: int,
 
 
 def build_manifest(cfg: dict[str, Any] = CONFIG,
-                   arms=PRIMARY_MANIFEST_ARMS) -> list[dict[str, Any]]:
+                   arms=PRIMARY_MANIFEST_ARMS,
+                   secondary_cells=None) -> list[dict[str, Any]]:
+    """Primary arms at every K plus the (arm, K) secondary cells (v2: GXc K=6)."""
+    if secondary_cells is None:
+        secondary_cells = cfg.get("secondary_cells", [])
     cells = []
     for s in range(cfg["n_splits"]):
         for K in cfg["K_values"]:
             for r in range(cfg["n_seeds"]):
                 init_seed, mc_seed = seeds_for(s, K, r, cfg)
-                for arm in arms:
+                extra = [a for a, kk in secondary_cells if kk == K]
+                for arm in list(arms) + extra:
                     cells.append({"cell_id": f"s{s}-K{K}-r{r}-{arm}",
                                   "split_index": s, "K": K, "seed_index": r,
                                   "arm": arm, "init_seed": init_seed,
@@ -568,7 +686,7 @@ def f_gradient_diagnostic(model, X, Z_samples, F, sigma) -> float:
 
 
 def run_cell(split: SplitData, arm: str, K: int, init_seed: int, mc_seed: int,
-             cfg: dict[str, Any] = CONFIG, *, model_kind: str = "fast",
+             cfg: dict[str, Any] = CONFIG, *, model_kind: str | None = None,
              num_iter: int | None = None, Y_fit_override: np.ndarray | None = None,
              mode_second_start: bool = False, compute_mode: bool = False,
              ) -> tuple[dict, list[dict], dict[str, np.ndarray]]:
@@ -581,6 +699,7 @@ def run_cell(split: SplitData, arm: str, K: int, init_seed: int, mc_seed: int,
     X = split.X_raw if spec["x_variant"] == "raw" else split.X_centered
     Y_fit = split.Y_fit if Y_fit_override is None else Y_fit_override
     n_iter = cfg["num_iter"] if num_iter is None else num_iter
+    model_kind = cfg["model_kind"] if model_kind is None else model_kind
     tech: dict[str, Any] = {
         "arm": arm, "family_x": spec["family_x"], "fix_x": spec["fix_x"],
         "x_variant": spec["x_variant"], "K": K, "split_index": split.split_index,
@@ -636,6 +755,23 @@ def run_cell(split: SplitData, arm: str, K: int, init_seed: int, mc_seed: int,
         "sigma_x_min": float(np.min(np.diag(res["sigma"]))),
         "Z_mean_norm": float(np.linalg.norm(res["Z_samples"][:, :, -1].mean(axis=0))),
     })
+    flog = list(getattr(model, "f_newton_log", []))
+    tech["f_update"] = ("none" if spec["fix_x"] else
+                        "closed_form" if spec["family_x"] == "gaussian" else
+                        "newton" if flog else "adam50")
+    if flog:
+        tech.update({
+            "fnewton_msteps": len(flog),
+            "fnewton_all_converged": all(r["status"] == "converged" for r in flog),
+            "fnewton_max_iters": max(r["iters"] for r in flog),
+            "fnewton_qx_decreases": sum(r["q_after"] < r["q_before"] for r in flog),
+            "fnewton_final_grad_max": flog[-1]["grad_max"],
+            "fnewton_min_eig_H": min(r["min_eig_H"] for r in flog),
+            "fnewton_eta_absmax": max(r["eta_absmax"] for r in flog),
+            "fnewton_line_search_failures": sum(r["line_search_failures"] for r in flog),
+        })
+    tech["_f_newton_log"] = flog
+    tech["_mstep_q_history"] = list(hist)
     states.update(Z_samples=res["Z_samples"], F=res["F"], sigma=res["sigma"],
                   w0=np.array(res["w0"]), w=np.array(res["w"]))
 

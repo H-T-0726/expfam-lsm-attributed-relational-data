@@ -9,8 +9,13 @@ smoke    : TECHNICAL pre-check on the reserved smoke split (index 90, never a
            fast-vs-original equivalence and a real-data two-canary check.
            Held-out scores are written ONLY to a sealed file outside the
            technical output (``--sealed-dir``); they are not summarised.
-execute  : the main 90-fit experiment.  Refused unless an approved, frozen
-           protocol file and an explicit confirmation flag are given.
+freeze   : write the frozen protocol JSON (config, arms, manifest, analysis
+           plan, sha256 of the code files).  Commit it before execute.
+execute  : the main 105-fit experiment (v2).  Refused unless the frozen
+           protocol matches the code/config/manifest exactly, the tracked tree
+           is clean and the confirmation flag is given.  Results are appended
+           cell by cell; --resume skips cells already recorded (whatever their
+           status) and never reruns a failed cell.
 
 Every fit runs in a fresh worker process (max_tasks_per_child=1) so that the
 peak working set per fit can be measured.  No retry, replacement or seed
@@ -94,7 +99,11 @@ def _worker(job: dict) -> dict:
             Path(job["state_path"]).read_bytes()).hexdigest()[:16]
     for r in scores:
         r["tag"] = job["tag"]
-    return {"tech": tech, "scores": scores}
+    flog = tech.pop("_f_newton_log", [])
+    qh = tech.pop("_mstep_q_history", [])
+    return {"tech": tech, "scores": scores,
+            "f_newton_log": [{"tag": job["tag"], **r} for r in flog],
+            "mstep_q_history": [{"tag": job["tag"], **r} for r in qh]}
 
 
 _BLAS_VARS = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
@@ -233,13 +242,144 @@ def cmd_smoke(args):
     print(json.dumps(checks, indent=2))
 
 
+CODE_FILES = ("expfam/src/experimental/cora_strict_heldout.py",
+              "expfam/src/experimental/run_cora_strict_heldout_family.py",
+              "expfam/src/experimental/em_runner.py",
+              "expfam/src/experimental/model_dual_expfam_consistent.py",
+              "expfam/src/experimental/model_dual_expfam_masked.py",
+              "expfam/src/experimental/objective_consistent_numerics.py",
+              "expfam/src/model_dual_expfam_fixed.py",
+              "expfam/src/model_dual_expfam.py",
+              "expfam/src/model_expfam.py",
+              "reproduction/src/model.py")
+
+ANALYSIS_PLAN = {
+    "primary_metric": "mean Bernoulli log score over ALL test pairs (natural "
+                      "positive rate), predictor = mc_predictive",
+    "primary_contrast": "Delta = log_score(BX) - log_score(GX raw), paired by "
+                        "(split, seed), K=6",
+    "secondary": ["K=3 Delta (sensitivity)", "GXc at K=6 (secondary)",
+                  "BX/GX vs YO", "AP, AUC, Brier, log_score_pos/neg",
+                  "constant train-density baseline",
+                  "plug-in estimators last/mean5"],
+    "statistical_unit": "one network (Cora); splits and seeds are not independent "
+                        "samples; descriptive summaries only, no p-values",
+    "em_note": "8 EM iterations, not converged; fixed computational budget",
+    "lineage": "E (DualExpFamLSMConsistent) prototype; model-specification "
+               "comparison under a fixed budget",
+    "failure_policy": "fail_fast; failures are recorded rows, never rerun or replaced",
+}
+
+
+def _code_hashes() -> dict:
+    return {f: csh.file_sha256(csh._ROOT / f) for f in CODE_FILES}
+
+
+def _manifest_hash(cells) -> str:
+    return hashlib.sha256(json.dumps(cells, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def cmd_freeze(args):
+    cells = csh.build_manifest()
+    proto = {"protocol": "CORA-SH1 main v2", "frozen_on": time.strftime("%Y-%m-%d"),
+             "runner_version": csh.RUNNER_VERSION, "config": csh.CONFIG,
+             "config_hash": csh.config_hash(csh.CONFIG), "arms": csh.ARMS,
+             "n_fits": len(cells), "manifest_hash": _manifest_hash(cells),
+             "workers": 3, "blas_threads": 2,
+             "analysis_plan": ANALYSIS_PLAN, "code_sha256": _code_hashes()}
+    if args.out.exists():
+        raise SystemExit(f"refusing to overwrite {args.out}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(proto, indent=2, default=str))
+    print(json.dumps({k: proto[k] for k in ("n_fits", "manifest_hash", "config_hash")}))
+
+
+def _append_csv(path: Path, rows: list[dict]):
+    if rows:
+        pd.DataFrame(rows).to_csv(path, mode="a", header=not path.exists(), index=False)
+
+
 def cmd_execute(args):
     if not (args.approved_protocol and args.i_confirm_human_approval):
-        raise SystemExit("REFUSED: the main experiment needs a frozen, human-approved "
-                         "protocol file (--approved-protocol) and "
+        raise SystemExit("REFUSED: needs --approved-protocol and "
                          "--i-confirm-human-approval.  Not run.")
-    raise SystemExit("REFUSED: execute is intentionally not wired before the protocol "
-                     "is frozen; bind it to the approved protocol first.")
+    proto = json.loads(Path(args.approved_protocol).read_text())
+    cells = csh.build_manifest()
+    problems = []
+    if proto["config_hash"] != csh.config_hash(csh.CONFIG):
+        problems.append("config hash differs")
+    if proto["manifest_hash"] != _manifest_hash(cells) or proto["n_fits"] != len(cells):
+        problems.append("manifest differs")
+    if proto["code_sha256"] != _code_hashes():
+        problems.append("code files differ from the frozen protocol")
+    env = csh.environment_info()
+    if env["git_dirty_tracked"]:
+        problems.append("tracked working tree is dirty")
+    if problems:
+        raise SystemExit("REFUSED: " + "; ".join(problems))
+    out = Path(args.out)
+    if out.exists() and any(out.iterdir()) and not args.resume:
+        raise SystemExit(f"output directory exists and is not empty: {out}")
+    (out / "states").mkdir(parents=True, exist_ok=True)
+    tech_csv = out / "fit_technical.csv"
+    done = set(pd.read_csv(tech_csv)["tag"]) if (args.resume and tech_csv.exists()) else set()
+    if not (out / "manifest.csv").exists():
+        pd.DataFrame(cells).to_csv(out / "manifest.csv", index=False)
+        data = csh.load_cora()
+        splits = [csh.build_split(data, s) for s in range(csh.CONFIG["n_splits"])]
+        pd.DataFrame([sp.summary for sp in splits]).to_csv(out / "split_summary.csv",
+                                                           index=False)
+        pd.DataFrame([{"split_index": sp.split_index, "arm": "REF_constant",
+                       **csh.constant_reference_scores(sp)} for sp in splits]
+                     ).to_csv(out / "reference_scores.csv", index=False)
+        (out / "protocol_frozen.json").write_text(json.dumps(proto, indent=2))
+    ri = out / "runinfo.json"
+    runs = json.loads(ri.read_text()) if ri.exists() else {"sessions": []}
+    runs["sessions"].append({"started": time.strftime("%Y-%m-%d %H:%M:%S"),
+                             "resume": bool(args.resume), "skipped": len(done), **env})
+    ri.write_text(json.dumps(runs, indent=2, default=str))
+    seed_index = {c["cell_id"]: c["seed_index"] for c in cells}
+    order = sorted(cells, key=lambda c: (-c["K"], c["split_index"], c["seed_index"],
+                                         c["arm"]))
+    jobs = [dict(tag=c["cell_id"], split_index=c["split_index"], selection="full",
+                 arm=c["arm"], K=c["K"], init_seed=c["init_seed"],
+                 mc_seed=c["mc_seed"], model_kind=csh.CONFIG["model_kind"],
+                 compute_mode=False, mode_second_start=False, num_iter=None,
+                 canary=None, blas_threads=proto["blas_threads"],
+                 state_path=str(out / "states" / f"{c['cell_id']}.npz"))
+            for c in order if c["cell_id"] not in done]
+    print(f"{len(jobs)} fits to run ({len(done)} already recorded)", flush=True)
+    saved = {v: os.environ.get(v) for v in _BLAS_VARS}
+    for v in _BLAS_VARS:                  # spawned children read this at import
+        os.environ[v] = str(proto["blas_threads"])
+    t0 = time.perf_counter()
+    try:
+        with cf.ProcessPoolExecutor(max_workers=proto["workers"],
+                                    max_tasks_per_child=1) as ex:
+            futures = {ex.submit(_worker, j): j for j in jobs}
+            for fut in cf.as_completed(futures):
+                j = futures[fut]
+                try:
+                    r = fut.result()
+                except Exception as exc:       # recorded, never rerun
+                    r = {"tech": {"tag": j["tag"], "arm": j["arm"], "K": j["K"],
+                                  "split_index": j["split_index"],
+                                  "fit_status": f"WORKER_CRASH:{type(exc).__name__}",
+                                  "fit_error": str(exc)[:300]},
+                         "scores": [], "f_newton_log": [], "mstep_q_history": []}
+                r["tech"]["seed_index"] = seed_index[j["tag"]]
+                _append_csv(out / "heldout_scores.csv", r["scores"])
+                _append_csv(out / "f_newton_log.csv", r["f_newton_log"])
+                _append_csv(out / "mstep_q_history.csv", r["mstep_q_history"])
+                _append_csv(tech_csv, [r["tech"]])     # last: marks the cell done
+                print(f"[done {time.perf_counter() - t0:8.0f}s] {j['tag']} "
+                      f"{r['tech'].get('fit_status')}", flush=True)
+    finally:
+        for v, val in saved.items():
+            if val is None:
+                os.environ.pop(v, None)
+            else:
+                os.environ[v] = val
 
 
 def main():
@@ -254,11 +394,16 @@ def main():
     b.add_argument("--sealed-dir", type=Path, required=True)
     b.add_argument("--groups", nargs="+", default=list(SMOKE_GROUPS),
                    choices=list(SMOKE_GROUPS))
+    f = sub.add_parser("freeze")
+    f.add_argument("--out", type=Path, required=True)
     c = sub.add_parser("execute")
+    c.add_argument("--out", type=Path, required=True)
     c.add_argument("--approved-protocol", type=Path)
     c.add_argument("--i-confirm-human-approval", action="store_true")
+    c.add_argument("--resume", action="store_true")
     args = p.parse_args()
-    {"prepare": cmd_prepare, "smoke": cmd_smoke, "execute": cmd_execute}[args.mode](args)
+    {"prepare": cmd_prepare, "smoke": cmd_smoke, "freeze": cmd_freeze,
+     "execute": cmd_execute}[args.mode](args)
 
 
 if __name__ == "__main__":
