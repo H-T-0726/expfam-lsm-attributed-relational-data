@@ -1,0 +1,163 @@
+{
+  "summaries": [
+    {
+      "path": "adam",
+      "K": 6,
+      "split_index": 90,
+      "init_seed": 8210600,
+      "mc_seed": 8220600,
+      "em_seconds": 2705.9,
+      "w0": -8.131269507610845,
+      "w": 0.6413870352912764,
+      "Q_strict": -81855.79958613781,
+      "mstep_q_decreases": 0,
+      "mstep_q_diffs": [
+        27678.70710274024,
+        8412.733804457894,
+        2683.544567441131,
+        1457.360244954427,
+        897.5331025523046,
+        594.1626978248678,
+        433.4922837359627,
+        357.4021523885749
+      ],
+      "Z_mean_norm": 0.7203069397274282,
+      "F_grad_max_final": 9.051431137088118,
+      "sampling_fallbacks": 0,
+      "retry_count": 0
+    },
+    {
+      "path": "adam",
+      "K": 3,
+      "split_index": 90,
+      "init_seed": 8210300,
+      "mc_seed": 8220300,
+      "em_seconds": 2618.8,
+      "w0": -8.00213269924367,
+      "w": 0.8002122757632407,
+      "Q_strict": -76300.5964269926,
+      "mstep_q_decreases": 0,
+      "mstep_q_diffs": [
+        7843.428523465671,
+        17546.51944626875,
+        4911.9078983134095,
+        1649.5997895099572,
+        748.0532567743794,
+        388.70451819934533,
+        235.77843548340024,
+        140.18791959024384
+      ],
+      "Z_mean_norm": 0.80269409576902,
+      "F_grad_max_final": 29.913449537853673,
+      "sampling_fallbacks": 0,
+      "retry_count": 0
+    },
+    {
+      "path": "newton",
+      "K": 6,
+      "split_index": 90,
+      "init_seed": 8210600,
+      "mc_seed": 8220600,
+      "em_seconds": 2706.2,
+      "w0": -8.139038183735058,
+      "w": 0.6479524554296261,
+      "Q_strict": -81612.00043216735,
+      "mstep_q_decreases": 0,
+      "mstep_q_diffs": [
+        33515.80218281863,
+        2852.2216995332565,
+        1544.1425831755623,
+        1013.2090599071234,
+        638.1604035031341,
+        448.08302527583146,
+        380.5179964454437,
+        331.2995876162604
+      ],
+      "Z_mean_norm": 0.6236197268652718,
+      "F_grad_max_final": 9.742304195370365e-07,
+      "sampling_fallbacks": 0,
+      "retry_count": 0
+    },
+    {
+      "path": "newton",
+      "K": 3,
+      "split_index": 90,
+      "init_seed": 8210300,
+      "mc_seed": 8220300,
+      "em_seconds": 2624.9,
+      "w0": -7.876833639746808,
+      "w": 0.7543188970053584,
+      "Q_strict": -76153.63311268055,
+      "mstep_q_decreases": 0,
+      "mstep_q_diffs": [
+        8491.349946214206,
+        15755.631655539866,
+        1754.7309844093106,
+        613.2282697494666,
+        351.2865326500032,
+        208.1786560514156,
+        164.64174269307114,
+        98.93818473002466
+      ],
+      "Z_mean_norm": 0.7453440131984854,
+      "F_grad_max_final": 1.0208269216605003e-07,
+      "sampling_fallbacks": 0,
+      "retry_count": 0
+    }
+  ],
+  "adam_vs_newton_training_gram": {
+    "K3": {
+      "gram_mean5_corr_adam_vs_newton": 0.928718543532301,
+      "gram_mean5_maxabs_diff": 9.770308494567871
+    },
+    "K6": {
+      "gram_mean5_corr_adam_vs_newton": 0.672313618943574,
+      "gram_mean5_maxabs_diff": 15.316728115081787
+    }
+  },
+  "wall_seconds": 2711.0,
+  "blas_threads": "2",
+  "environment": {
+    "runner_version": "cora-sh1-runner-v1",
+    "git_head": "893f346c2361af70efa2a41ce2eed681c721f8c8",
+    "git_branch": "experiment/cora-strict-heldout-family",
+    "git_dirty_tracked": false,
+    "python_version": "3.13.14",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "sklearn": "1.8.0",
+    "requirements_sha256": "1b773ed97fd6a53fdd19de18477edcbb045764a47c9f1fe67ed8f83d5712d5fa",
+    "cora_content_sha256": "b8ebed0fd45e53995abafd1b70cf6a9fcc8f86abc5826d69b97fe6ca46e9c8ee",
+    "cora_cites_sha256": "ec1a372391b7f0f60a6aff0084e8abd8f19f0faa7e1f2441a41c492042d5945e",
+    "config": {
+      "test_fraction": 0.2,
+      "selection": "full",
+      "per_class": 100,
+      "selection_seed_base": 733000,
+      "d_vocab": 50,
+      "K_values": [
+        6,
+        3
+      ],
+      "L": 5,
+      "num_iter": 8,
+      "newton_max_iter": 10,
+      "newton_alpha": 0.5,
+      "family_y": "bernoulli",
+      "numerics_mode": "consistent",
+      "failure_policy": "fail_fast",
+      "mode_grad_tol": 1e-08,
+      "mode_max_iter": 200,
+      "primary_estimator": "mc_predictive",
+      "n_splits": 5,
+      "n_seeds": 3,
+      "split_seed_base": 731000,
+      "init_seed_base": 7310000,
+      "mc_seed_base": 7320000,
+      "smoke_split_index": 90
+    },
+    "config_hash": "55986b0578edffc7"
+  },
+  "note": "training-side only; no held-out score computed or read"
+}
