@@ -1,0 +1,19 @@
+{
+  "group_wall_seconds": {
+    "equivalence": 467.5,
+    "canary": 215.1,
+    "full_K6_parallel": 2034.2,
+    "full_K3_parallel": 1971.5
+  },
+  "fast_vs_original_Z_samples_max_abs_diff": 0.0,
+  "fast_vs_original_F_max_abs_diff": 0.0,
+  "fast_vs_original_w0_abs_diff": 0.0,
+  "fast_vs_original_w_abs_diff": 0.0,
+  "canary_bitwise_identical_states": true,
+  "canary_scores_identical": true,
+  "canary_y_fit_hashes_differ": true,
+  "sealed_scores_rows": 30,
+  "sealed_scores_all_finite": true,
+  "sealed_scores_sha256": "e6ae819e989444f0",
+  "smoke_total_seconds": 4688.9
+}
