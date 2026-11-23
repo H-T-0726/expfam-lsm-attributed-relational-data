@@ -1,0 +1,100 @@
+{
+  "protocol": "CORA-SH1 main v2",
+  "frozen_on": "2026-11-24",
+  "runner_version": "cora-sh1-runner-v2-newtonF",
+  "config": {
+    "test_fraction": 0.2,
+    "selection": "full",
+    "per_class": 100,
+    "selection_seed_base": 733000,
+    "d_vocab": 50,
+    "K_values": [
+      6,
+      3
+    ],
+    "L": 5,
+    "num_iter": 8,
+    "newton_max_iter": 10,
+    "newton_alpha": 0.5,
+    "family_y": "bernoulli",
+    "numerics_mode": "consistent",
+    "failure_policy": "fail_fast",
+    "mode_grad_tol": 1e-08,
+    "mode_max_iter": 200,
+    "primary_estimator": "mc_predictive",
+    "n_splits": 5,
+    "n_seeds": 3,
+    "split_seed_base": 731000,
+    "init_seed_base": 7310000,
+    "mc_seed_base": 7320000,
+    "smoke_split_index": 90,
+    "model_kind": "fast_newton",
+    "f_newton_max_iter": 100,
+    "f_newton_tol_dec": 1e-12,
+    "secondary_cells": [
+      [
+        "GXc",
+        6
+      ]
+    ]
+  },
+  "config_hash": "8e4b063a057ce859",
+  "arms": {
+    "BX": {
+      "family_x": "bernoulli",
+      "fix_x": false,
+      "x_variant": "raw",
+      "role": "primary"
+    },
+    "GX": {
+      "family_x": "gaussian",
+      "fix_x": false,
+      "x_variant": "raw",
+      "role": "primary"
+    },
+    "YO": {
+      "family_x": "bernoulli",
+      "fix_x": true,
+      "x_variant": "raw",
+      "role": "secondary"
+    },
+    "GXc": {
+      "family_x": "gaussian",
+      "fix_x": false,
+      "x_variant": "centered",
+      "role": "secondary_sensitivity_optional"
+    }
+  },
+  "n_fits": 105,
+  "manifest_hash": "c25478e3c6c19af1",
+  "workers": 3,
+  "blas_threads": 2,
+  "analysis_plan": {
+    "primary_metric": "mean Bernoulli log score over ALL test pairs (natural positive rate), predictor = mc_predictive",
+    "primary_contrast": "Delta = log_score(BX) - log_score(GX raw), paired by (split, seed), K=6",
+    "secondary": [
+      "K=3 Delta (sensitivity)",
+      "GXc at K=6 (secondary)",
+      "BX/GX vs YO",
+      "AP, AUC, Brier, log_score_pos/neg",
+      "constant train-density baseline",
+      "plug-in estimators last/mean5"
+    ],
+    "statistical_unit": "one network (Cora); splits and seeds are not independent samples; descriptive summaries only, no p-values",
+    "em_note": "8 EM iterations, not converged; fixed computational budget",
+    "lineage": "E (DualExpFamLSMConsistent) prototype; model-specification comparison under a fixed budget",
+    "failure_policy": "fail_fast; failures are recorded rows, never rerun or replaced"
+  },
+  "code_sha256": {
+    "expfam/src/experimental/cora_strict_heldout.py": "95b4742f13684fa3146839b7a7efd823f158250a67a107806d39ac7a25465192",
+    "expfam/src/experimental/run_cora_strict_heldout_family.py": "64d502c99a58dda02ddad82cf594fcfb133c99c4563289fc2da30798d0e1966f",
+    "expfam/src/experimental/em_runner.py": "8eea7a9b6bcef80b9a9e9c778bf3022431e62f1dd2c94ff411eb0896d13232cd",
+    "expfam/src/experimental/model_dual_expfam_consistent.py": "c058bf87bae1f7890b9729e5106ad05df3ce04ef6e2ae3a3992a8106f97ba22c",
+    "expfam/src/experimental/model_dual_expfam_masked.py": "c75e55700d9837e1d285bdc75ac4bf3ea098c8e71e999e339fbdcc7817da59ae",
+    "expfam/src/experimental/objective_consistent_numerics.py": "63f89ebb1b9206c975f4e671ff987e1924a07adb375f6467b0f345a46dcc12ff",
+    "expfam/src/model_dual_expfam_fixed.py": "a610ad61bb31ae527ae039156306aedac56fa358801332d39c9ea89c5313cca3",
+    "expfam/src/model_dual_expfam.py": "f56e3843790948acc4c8a92b2640c06153730b1e9be7c68343ae99b36823d357",
+    "expfam/src/model_expfam.py": "e47bbc60b53bcd9ab9385918875b84158ca83c9c6f904c82a3da137681fd8bca",
+    "reproduction/src/model.py": "f95620f45695156bd8c0864d51625fced0719d2f7dcaa1ab3f466f01b16fc499"
+  }
+}
