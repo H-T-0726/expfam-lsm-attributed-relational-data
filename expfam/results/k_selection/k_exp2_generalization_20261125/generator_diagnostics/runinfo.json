@@ -1,0 +1,15 @@
+{
+  "script": "tools/research_audit/diag_k_exp2_generators.py",
+  "n": 150,
+  "d": 15,
+  "k_trues": [
+    1,
+    3,
+    5,
+    7,
+    9
+  ],
+  "seeds_per_cell": 5,
+  "em_fits": 0,
+  "purpose": "zero-EM generator validity diagnostics (no criterion, no K selection)"
+}

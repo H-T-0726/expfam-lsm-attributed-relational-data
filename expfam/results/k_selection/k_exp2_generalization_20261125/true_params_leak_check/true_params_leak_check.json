@@ -1,0 +1,58 @@
+{
+  "poisson/bernoulli": {
+    "full_truth": {
+      "Q_strict_identical": true
+    },
+    "no_var_f": {
+      "Q_strict_identical": true
+    },
+    "var_f_absurd": {
+      "Q_strict_identical": true
+    },
+    "corrupted_ZFw_for_init": {
+      "Q_strict_identical": true
+    }
+  },
+  "gaussian/poisson": {
+    "full_truth": {
+      "Q_strict_identical": true
+    },
+    "no_var_f": {
+      "Q_strict_identical": true
+    },
+    "var_f_absurd": {
+      "Q_strict_identical": true
+    },
+    "corrupted_ZFw_for_init": {
+      "Q_strict_identical": true
+    }
+  },
+  "bernoulli/gaussian": {
+    "full_truth": {
+      "Q_strict_identical": true
+    },
+    "no_var_f": {
+      "Q_strict_identical": true
+    },
+    "var_f_absurd": {
+      "Q_strict_identical": true
+    },
+    "corrupted_ZFw_for_init": {
+      "Q_strict_identical": true
+    }
+  },
+  "gaussian/bernoulli": {
+    "full_truth": {
+      "Q_strict_identical": true
+    },
+    "no_var_f": {
+      "Q_strict_identical": true
+    },
+    "var_f_absurd": {
+      "Q_strict_identical": true
+    },
+    "corrupted_ZFw_for_init": {
+      "Q_strict_identical": true
+    }
+  }
+}
