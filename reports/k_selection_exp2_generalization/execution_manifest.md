@@ -110,3 +110,12 @@ test は **54 件すべて合格**。次を確認した。
 - `.../protocol/protocol.json`：SHA-256 `1a6a4484d3e2abd7eaf1abc651b126bfe6f7c472ff89e402719646059bfdc161`
 - `.../protocol/manifest.csv`：8,000 行
 - 凍結の commit は、この追記を含む commit（`git log` で確認する）。execute は、その commit の上で working tree が clean であることを確認してから開始する。
+
+### 5.5 最初の execute の中断と再凍結（fit 0 件）
+
+- 2026-11-25 01:01 に `c1755de` から execute を開始した。runinfo を書く段階で、protocol のパスを処理する行の例外（`Path.relative_to`）で停止した。**fit は 1 件も実行していない**（`per_fit.csv` は作られていない）。
+- 開始の記録は `main_aborted_before_first_fit_20261125T0101/run_events.jsonl` に残した（空の `states/` だけを削除した）。
+- 修正したのは runner の 1 行だけ（`proto_path.as_posix()`）。設計・seed・基準・解析・manifest は変えていない。
+- protocol v1 との差は、runner の code hash と凍結時刻だけである。
+- **再凍結**：`.../protocol_v2/protocol.json`、SHA-256 `14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad`。**本実験はこの v2 で実行する。** v1（`protocol/`）は記録として残し、使わない。
+- test は 54 件すべて合格（再実行）。

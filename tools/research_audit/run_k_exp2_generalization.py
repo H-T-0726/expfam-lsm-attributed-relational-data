@@ -417,7 +417,7 @@ def execute(proto_path: Path, out: Path, resume: bool):
         f.write(json.dumps(event) + "\n")
     if not (out / "runinfo.json").exists():
         (out / "runinfo.json").write_text(json.dumps({
-            "protocol": str(proto_path.relative_to(ROOT)), "protocol_sha256": event["protocol_sha256"],
+            "protocol": proto_path.as_posix(), "protocol_sha256": event["protocol_sha256"],
             "git_head_at_start": event["git_head"], "python": sys.version, "platform": platform.platform(),
             "numpy": np.__version__, "workers": N_WORKERS, "blas_threads": 1,
             "n_fits_planned": len(rows)}, indent=2))
