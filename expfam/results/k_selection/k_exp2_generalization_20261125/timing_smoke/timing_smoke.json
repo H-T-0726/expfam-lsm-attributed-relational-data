@@ -1,0 +1,40 @@
+{
+  "purpose": "runtime/memory only; no criterion computed",
+  "k_true": 9,
+  "L": 10,
+  "num_iter": 10,
+  "rows": [
+    {
+      "lineage": "E",
+      "k": 1,
+      "seconds": 93.2,
+      "peak_traced_mb": 1.6,
+      "status": "OK",
+      "finished_finite": true
+    },
+    {
+      "lineage": "E",
+      "k": 10,
+      "seconds": 98.2,
+      "peak_traced_mb": 1.7,
+      "status": "OK",
+      "finished_finite": true
+    },
+    {
+      "lineage": "C",
+      "k": 1,
+      "seconds": 79.9,
+      "peak_traced_mb": 1.3,
+      "status": "OK",
+      "finished_finite": true
+    },
+    {
+      "lineage": "C",
+      "k": 10,
+      "seconds": 89.8,
+      "peak_traced_mb": 1.5,
+      "status": "OK",
+      "finished_finite": true
+    }
+  ]
+}
