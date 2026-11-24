@@ -1,0 +1,3 @@
+K,fnewton_max_iters,fnewton_final_grad_max,fnewton_min_eig_H,fnewton_eta_absmax,fnewton_qx_decreases,fnewton_ls_failures
+3,8.0,1.0994003393705042e-05,4.317437844708643,37.45036581530883,0.0,0.0
+6,100.0,9.219922802827797e-06,2.422207323986321,40.37011261507495,0.0,0.0

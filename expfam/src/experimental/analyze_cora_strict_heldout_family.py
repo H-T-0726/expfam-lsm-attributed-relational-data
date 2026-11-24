@@ -33,6 +33,48 @@ CONTRASTS = [("BX", "GX", 6, "primary"), ("BX", "GX", 3, "sensitivity_K3"),
              ("BX", "YO", 3, "secondary_vs_YO"), ("GX", "YO", 3, "secondary_vs_YO")]
 
 
+FNEWTON_COLS = ["fnewton_msteps", "fnewton_all_converged", "fnewton_max_iters",
+                "fnewton_qx_decreases", "fnewton_final_grad_max", "fnewton_min_eig_H",
+                "fnewton_eta_absmax", "fnewton_line_search_failures"]
+
+
+def read_fit_technical(path: Path) -> pd.DataFrame:
+    """Read the appended fit_technical.csv.
+
+    Recording-format defect of the v2 runner: rows were appended with their
+    own key order but the header came from the first (non-BX) row, so BX rows
+    carry 8 extra fields (FNEWTON_COLS, inserted right after ``f_update`` by
+    ``run_cell``).  The columns are restored deterministically from that key
+    order and checked (arm, f_update, tag, field count); values are untouched.
+    The raw file is not modified."""
+    import csv
+    with open(path, newline="") as fh:
+        rows = list(csv.reader(fh))
+    header, body = rows[0], rows[1:]
+    i = header.index("f_update") + 1
+    long_header = header[:i] + FNEWTON_COLS + header[i:]
+    recs = []
+    for r in body:
+        if len(r) == len(header):
+            rec = dict(zip(header, r))
+        elif len(r) == len(long_header):
+            rec = dict(zip(long_header, r))
+            if not (rec["arm"] == "BX" and rec["f_update"] == "newton"):
+                raise ValueError(f"unexpected long row: {r[:3]}")
+        else:
+            raise ValueError(f"unexpected field count {len(r)}")
+        if not rec["tag"].endswith("-" + rec["arm"]):
+            raise ValueError(f"tag/arm mismatch: {rec['tag']}")
+        recs.append(rec)
+    import io
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=long_header, lineterminator="\n")
+    w.writeheader()
+    w.writerows(recs)
+    buf.seek(0)
+    return pd.read_csv(buf)          # same type inference as a well-formed file
+
+
 def paired(scores, a, b, K, estimator, metric):
     s = scores[(scores.K == K) & (scores.estimator == estimator)]
     pa = s[s.arm == a].set_index(["split_index", "seed_index"])[metric]
@@ -91,7 +133,8 @@ def main():
     plt.rcParams.update({"font.family": "DejaVu Sans", "figure.facecolor": "#fcfcfb",
                          "axes.facecolor": "#fcfcfb", "savefig.facecolor": "#fcfcfb"})
 
-    tech = pd.read_csv(run / "fit_technical.csv")
+    tech = read_fit_technical(run / "fit_technical.csv")
+    tech.to_csv(out / "fit_technical_columns_restored.csv", index=False)
     scores = pd.read_csv(run / "heldout_scores.csv")
     ref = pd.read_csv(run / "reference_scores.csv")
     manifest = pd.read_csv(run / "manifest.csv")
