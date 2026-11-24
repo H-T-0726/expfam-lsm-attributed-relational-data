@@ -80,3 +80,12 @@
 | 既存の K 選択研究との比較 | K_TRUE=3 の Exp1 だけ | Phase 7e〜9、clean n-sweep、Fig.3 条件、d-sweep などすべて |
 
 **どちらで主実験を行うかは、本文で使う実装系列の決定そのものであり、Human Gate である。** 両系列の結果を同じ表に混ぜない（KI-002）。
+
+## 6. 追記（2026-11-25、研究者の決定 D1 の反映）
+
+- **系列**：lineage E の scalar 版（`DualExpFamLSMConsistent`、consistent numerics、fail_fast）。正式な実装への昇格ではない。
+- **runner**：`tools/research_audit/run_k_exp2_generalization.py`（新規）。
+  - estimator には `em_runner.run_em_experimental` を変更せずに使う。
+  - 渡すのは X・Y・family・K・L・反復数・seed だけで、真値は渡さない（test：estimator を monkeypatch して、受け取った配列が観測データと一致し、配列の形の kwargs がないことを確認）。
+- **C_Q**：`calc_bic_exp`（eval_utils）で計算する。runner は −2Q + p̂ ln n を再計算し、差を `C_Q_recomputed_absdiff` に記録する。
+- **C_Lap**：この実行では計算しない。θ̂ と Z（最後のサンプルと L 個の平均）を `states/*.npz` に保存する（gitignore 対象。SHA-256 の先頭 16 桁を CSV に記録）。後で MCEM なしで評価できるようにするため。

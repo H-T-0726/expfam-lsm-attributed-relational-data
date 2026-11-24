@@ -1,0 +1,12 @@
+{
+  "n_fits": 8000,
+  "expected": 8000,
+  "fit_ids_unique": true,
+  "data_seeds_unique_per_dataset": true,
+  "init_mc_seeds_unique": true,
+  "data_seeds_disjoint_from_init_mc": true,
+  "rank_F_equals_K_TRUE": true,
+  "mean_row_norm_sq_matches_target_max_absdiff": 4.440892098500626e-16,
+  "Z_shared_across_regimes": true,
+  "Q_shared_across_regimes": true
+}

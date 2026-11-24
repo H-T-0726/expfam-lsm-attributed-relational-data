@@ -56,3 +56,57 @@
    - fail_fast
 3. `protocol.json` を凍結して commit し、SHA-256 をここに記録する。
 4. 実行し、事前に決めた解析を行う。
+
+---
+
+## 5. 追記（2026-11-25、研究者の決定 D1〜D6 の後）
+
+### 5.1 実装と test
+
+| 種類 | ファイル |
+|---|---|
+| 設計規則（新規） | `expfam/src/experimental/k_exp2_design.py` |
+| runner（新規） | `tools/research_audit/run_k_exp2_generalization.py` |
+| 事前に決めた解析（新規） | `tools/research_audit/analyze_k_exp2_generalization.py` |
+| test（新規） | `tools/research_audit/test_k_exp2_generalization.py` |
+
+test は **54 件すべて合格**。次を確認した。
+- Poisson-Y で \|w\| < 1/4、母集団平均が 1（解析式と独立な数値積分）
+- Bernoulli-Y の w0 の 3 経路の一致と、MC による確認
+- rank F と行ノルム、regime 間での Z・Q の共有
+- 生成の決定性と、候補 K によらないこと
+- 台とモーメント、Poisson-X の exp link
+- 真値を渡さないこと、fail_fast の記録、非有限の Q
+- CSV の往復と再開の集合
+- K=1・10 の実際の EM、選択規則・同点・INCOMPLETE、Clopper–Pearson
+
+解析スクリプトは、偽の 8,000 fit のデータだけで最後まで動作を確認した。
+
+### 5.2 preflight（fit なし）
+
+`expfam/results/k_selection/k_exp2_generalization_20261125/preflight/` に出力した。
+
+- manifest は 8,000、fit_id は一意。
+- data seed はデータごとに一意で、init・mc の seed とは重ならない。
+- 400 データすべてで次を確認した。
+  - rank F = K_TRUE
+  - 行ノルムが目標値と一致
+  - Z・Q が regime 間で共有されている
+- 較正表は `calibration.json`。
+
+### 5.3 技術 smoke（main と別の seed：data seed + 5,000,000）
+
+`.../smoke/` に出力した。
+
+- 構成：4 系列 × {K_TRUE=1, 9} × {候補 K=1, 10}（regime a）。K_TRUE=9・K=10 については regime b も加えた。計 20 fit、8 worker。
+- 結果：20/20 が OK。retry・置換・seed 救済は 0。C_Q の再計算差は 0。
+- 実行時間（8 並列で実行中の 1 fit）：平均で K=1 が 54.4 s、K=10 が 66.1 s、最大 85.0 s。wall 175 s。
+- **見積もり：8,000 fit で CPU 約 134 h、8 worker で wall 約 16.7 h**（上限 45 h を下回る）。
+- 空きメモリは約 6.9 GB、D ドライブの空きは 831 GB。
+- **smoke の C_Q の値と選択 K は見ていない**（per_fit.csv には残っている）。
+
+### 5.4 凍結
+
+- `.../protocol/protocol.json`：SHA-256 `1a6a4484d3e2abd7eaf1abc651b126bfe6f7c472ff89e402719646059bfdc161`
+- `.../protocol/manifest.csv`：8,000 行
+- 凍結の commit は、この追記を含む commit（`git log` で確認する）。execute は、その commit の上で working tree が clean であることを確認してから開始する。

@@ -1,0 +1,18 @@
+{
+  "purpose": "technical smoke on seeds disjoint from the main run; values not inspected",
+  "n_fits": 20,
+  "status_counts": {
+    "OK": 20
+  },
+  "mean_runtime_s_by_k": {
+    "1": 54.39375,
+    "10": 66.06916666666667
+  },
+  "max_runtime_s": 84.99,
+  "wall_s": 175.4,
+  "workers": 8,
+  "budget_estimate_cpu_h": 133.8,
+  "budget_estimate_wall_h_8_workers": 16.7,
+  "C_Q_recomputed_absdiff_max": 0.0,
+  "retry_replacement_rescue_all_zero": true
+}
