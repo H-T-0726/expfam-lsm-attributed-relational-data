@@ -119,3 +119,13 @@ test は **54 件すべて合格**。次を確認した。
 - protocol v1 との差は、runner の code hash と凍結時刻だけである。
 - **再凍結**：`.../protocol_v2/protocol.json`、SHA-256 `14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad`。**本実験はこの v2 で実行する。** v1（`protocol/`）は記録として残し、使わない。
 - test は 54 件すべて合格（再実行）。
+
+### 5.6 本実験の実行（protocol v2）
+
+- 開始は 2026-11-25 01:02:58、git head `d4e5eb9`、protocol v2（SHA-256 `14757d4a…`）。終了は 19:22:46（wall 65,988 s = 18.3 h。見積もり 16.7 h）。
+- 再開なし（`run_events.jsonl` は start と finished_batch の 2 行）。
+- **8,000 / 8,000 fit が OK。** FAILED 0、欠損 0、retry・置換・seed 救済・NaN は 0。`failures.csv` はヘッダーだけ。
+- CPU 合計 146.4 h。1 fit は平均 65.9 s（40.7〜158.4 s）。
+- 事前に決めた解析を `.../analysis/` に出力した。解析スクリプトとは別のコードで `per_fit.csv` から選択を独立に集計し直し、40 セルすべてで一致した。
+- fit の状態 `main/states/`（8,000 npz、132 MB）は gitignore の対象で、commit していない。
+- 結果は `results_report.md`。

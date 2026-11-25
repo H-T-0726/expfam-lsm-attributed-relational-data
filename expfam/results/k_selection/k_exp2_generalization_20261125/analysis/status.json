@@ -1,0 +1,10 @@
+{
+  "n_manifest": 8000,
+  "n_recorded": 8000,
+  "n_ok": 8000,
+  "n_failed": 0,
+  "n_missing": 0,
+  "datasets_primary_incomplete": 0,
+  "all_datasets_data_identical_across_fits": true,
+  "runtime_total_cpu_h": 146.38922499999998
+}

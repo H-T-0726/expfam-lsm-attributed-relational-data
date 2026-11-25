@@ -547,3 +547,11 @@ A1、EM 収束感度実験、checkpoint 再評価、d-sweep の artifact は変�
 | 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
 |---|---|---|---|---|---|---|---|
 | k_selection_robustness_20261105 | R1：d-sweep と同じデータ（n=75、K_GEN=5、d ∈ {15,30,60}、8 rep、K 1..7、2 start）を L=10、16 反復で再推定し、checkpoint 8 と 16 を評価した（新規 336 fit）。R2：L=5、8 反復、d=30 で n ∈ {50,100,150} を新規に fit した（各 112 fit）。d=30 の拡張は d-sweep と同じ規則で、各 n の A1 データに適用した。d=15 と n=75・d=30 は既存の状態を再評価した | `tools/research_audit/run_k_selection_robustness.py`、`tools/research_audit/analyze_k_selection_robustness.py` | `expfam/results/k_selection/k_selection_robustness_20261105/` | なし | current_support | ✗ | 新規 672 fit と smoke 4 fit は、いずれも非有限値による失敗 0。Laplace は n=150・d=30・rep1 の K=3（start 1）だけ NOT_STATIONARY（max\|∇Φ\| = 3.9e−8、許容値 1e−8）で、事前規則によりそのデータセットの C_Lap を INCOMPLETE とした（補完なし）。外部の npz の sha256：r1 `50aebf21…3267`、n50 `8583d501…bba1`、n100 `cacf488c…147c`、n150 `f4428bec…a6a8`。異なる n のデータは入れ子ではなく、独立な条件として扱う。MCEM は収束していない（K=5 の Gram 相対変化の中央値は 6〜14%） |
+
+## 追記：K 選択実験（元論文 Exp.2 に対応する条件、指数型分布族への一般化、2026-11-25）
+
+lineage E の scalar 版（`DualExpFamLSMConsistent`、prototype）による追加検証。本文採用不可（Human Gate 未通過）。fixed 系列・0.5 系列の結果と混ぜない（KI-002）。基準 C_Q は Schwarz BIC ではない。作業ブランチ `experiment/k-selection-exp2-generalization-20261125`（local commit のみ。main 未統合）。
+
+| 実験ID | 内容 | 実装/スクリプト | 結果 | 図 | 状態 | 原稿採用 | 注意 |
+|---|---|---|---|---|---|---|---|
+| k_exp2_generalization_20261125 | canonical-clean-v1、n=150、d=15、Series O（G/B）・A（P/B）・B（G/P）・C（B/G）× K_TRUE {1,3,5,7,9} × 候補 K 1..10 × 10 データ × 2 初期値 × 信号 regime a（方向ごと固定、PRIMARY）・b（全体固定、感度分析）= 8,000 fit。L=10、10 反復、fail_fast。protocol v2 SHA-256 `14757d4a…ad`、実行 head `d4e5eb9` | `expfam/src/experimental/k_exp2_design.py`、`tools/research_audit/run_k_exp2_generalization.py`、`tools/research_audit/analyze_k_exp2_generalization.py` | `expfam/results/k_selection/k_exp2_generalization_20261125/`（`main/`、`analysis/`）、`reports/k_selection_exp2_generalization/results_report.md` | `analysis/fig_*.png` | current_support | ✗ | 8,000/8,000 OK。regime a は 20 セルすべて 10/10。regime b は A の K_TRUE=7（1/10）・9（0/10）と B の K_TRUE=9（5/10）で過小選択、他は 10/10。過大選択 0/400。生成時 K との一致で、O・B では K*=K_TRUE 未証明。B-b-9 は MCEM 打ち切りの影響を否定できない。regime a・b の K_TRUE=3 は設計上同一。fit の状態 `main/states/`（132 MB）は git 外 |

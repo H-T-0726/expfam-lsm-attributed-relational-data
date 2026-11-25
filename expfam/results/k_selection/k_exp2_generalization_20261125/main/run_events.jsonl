@@ -1,0 +1,2 @@
+{"time": "2026-11-25T01:02:58+09:00", "event": "start", "already_recorded": 0, "to_run": 8000, "git_head": "d4e5eb91c264ba8f52f9488d6b0d73897b88aef4", "protocol_sha256": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad"}
+{"time": "2026-11-25T19:22:46+09:00", "event": "finished_batch", "ran": 8000, "wall_s": 65987.9, "recorded_total": 8000}
