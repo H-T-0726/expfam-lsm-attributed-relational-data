@@ -1,0 +1,75 @@
+{
+  "L": 10,
+  "analysis_plan": {
+    "not_claimed": "40-iteration convergence, consistency or optimality of C_Q",
+    "primary": "per cell and checkpoint (10, 20, 40): number of datasets whose selected K equals K_TRUE = 9 (Clopper-Pearson 95% CI), under/over",
+    "secondary": [
+      "transitions of selected K 10->20->40 per dataset",
+      "per-init selected K and init disagreement per checkpoint",
+      "gap C_Q_bar(9) - C_Q_bar(selected K) and G(t) = C_Q_bar(9) - min_{K!=9} C_Q_bar(K) for t = 1..40",
+      "per-K C_Q_bar improvement 10->20->40 and mean per-iteration improvement over the last 3 iterations before each checkpoint",
+      "numerical anomalies: failures, M-step strict-Q decreases, NaN"
+    ],
+    "unit": "dataset (inits are not independent evidence; checkpoints of one dataset are not independent evidence)"
+  },
+  "blas_threads": 1,
+  "cells": [
+    "B-b-9",
+    "O-b-9",
+    "A-b-9"
+  ],
+  "checkpoints": [
+    10,
+    20,
+    40
+  ],
+  "code_sha256": {
+    "expfam/src/experimental/data_generator_canonical.py": "fcd494849ea16fc576b24daf442a5f5490d5add9c2f2ce29c66bce1a2c2a6763",
+    "expfam/src/experimental/em_runner.py": "8eea7a9b6bcef80b9a9e9c778bf3022431e62f1dd2c94ff411eb0896d13232cd",
+    "expfam/src/experimental/eval_utils.py": "29cf72cbbb4366db6e693b8f340fbb20295b08b75f7e1a3eb3f2f8bb0b209821",
+    "expfam/src/experimental/k_exp2_design.py": "9f9435a55eab09062378c69f982762478328f23e57408d02c0a7ffdd6a2124a5",
+    "expfam/src/experimental/matched_k_true_design.py": "5d218bcf23304c7750820560c81e2d695db39f5c40f133e105a1b0772e249c64",
+    "expfam/src/experimental/model_dual_expfam_consistent.py": "c058bf87bae1f7890b9729e5106ad05df3ce04ef6e2ae3a3992a8106f97ba22c",
+    "expfam/src/experimental/model_dual_expfam_masked.py": "c75e55700d9837e1d285bdc75ac4bf3ea098c8e71e999e339fbdcc7817da59ae",
+    "expfam/src/model_dual_expfam.py": "e7dda301ee5b606289dbf276575aa4cb8dc3fe4466554c71d295f59f10e74699",
+    "expfam/src/model_dual_expfam_fixed.py": "8258e663da3689ec865bd2d9a17e8d9686052ac92d7724d10e77ed2ebe16f898",
+    "expfam/src/model_expfam.py": "9b7ff7edb3ae723404799adb2fc9303e223c8737ba26f21a4dfb3477df6d89b3",
+    "reproduction/src/model.py": "257704b23c310d598448e817f760c56a9e60cb845c383ae629a1160f3e0a4176",
+    "tools/research_audit/run_k_exp2_convergence_sensitivity.py": "8419e5200d6c4427f9f7b90d5c11275cec3d408193f9f89c8537c6f0f4cc3176"
+  },
+  "criterion": "C_Q = -2 Q_strict + p ln n (Q-based complete-data / ICL-type; NOT Schwarz BIC); its ln p(Z) term adds n(1+ln 2pi) per latent dimension",
+  "definition": "new deterministic run with the frozen seeds; not a resume; C_Q(t) = calc_bic_exp(q_after[t]); gate: C_Q(10) == main C_Q bitwise",
+  "experiment_id": "k_exp2_convergence_sensitivity",
+  "failure_rule": "a failed fit is recorded once (failures.csv) and never replaced; a dataset with any missing/FAILED fit is INCOMPLETE at that checkpoint",
+  "frozen_at": "2026-11-25T21:56:58+09:00",
+  "main_protocol_sha256": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad",
+  "manifest_sha256": "1a0f1b9e9f49c8476238ffad534d9601e9c5db302d4424c3b965fe9e96f9fb93",
+  "n_fits": 600,
+  "no_adaptive_changes": "no extra iterations, seeds, cells, checkpoints, init rules or criterion changes after results",
+  "num_iter": 40,
+  "outputs": [
+    "per_fit.csv",
+    "checkpoint_scores.csv",
+    "convergence_history.csv",
+    "failures.csv",
+    "seed_manifest.csv",
+    "runinfo.json",
+    "run_events.jsonl",
+    "states/ (git-ignored) + states_sha256_manifest.csv"
+  ],
+  "researcher_decisions_20261125": {
+    "D-A": "lineage E results are a candidate for the thesis body; Human Gate NOT passed; not treated as adopted",
+    "D-B": "run B-b-9, O-b-9, A-b-9 (600 fits) convergence sensitivity",
+    "D-C": "C_Lap is a separate future exploratory analysis; not run here"
+  },
+  "resume_rule": "a fit is done iff its fit_id has a row in per_fit.csv (any status); done fits are never re-run; FAILED fits are never retried or re-seeded; not-done fits are run with their frozen seeds; orphan history/checkpoint rows of not-done fits (crash between writes) are kept and must be bitwise identical to the re-run rows (checked by --analyze)",
+  "seeds": "copied from the main manifest (no new seeds)",
+  "selection": "per dataset and checkpoint: mean of C_Q over 2 inits, argmin, ties within 1e-9 -> smallest K (same as main)",
+  "status": "EXPLORATORY (planned after the main results were seen)",
+  "stop_rules": [
+    "any checkpoint-10 C_Q differs bitwise from the main per_fit C_Q",
+    "any regenerated X/Y hash differs from the main run",
+    "code hash mismatch / dirty tree / output exists without --resume"
+  ],
+  "workers": 8
+}

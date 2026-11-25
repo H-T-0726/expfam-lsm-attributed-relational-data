@@ -27,11 +27,12 @@ Modes:
                      (2) prefix identity 10/20/40 on smoke-seed data,
                      (3) runtime of 40-iteration fits.
   --freeze OUT --cells B-b-9,O-b-9,A-b-9   write protocol.json + manifest.csv
-  --execute --protocol P OUT [--resume]    run a frozen protocol
-  --analyze RUN --out OUT                  pre-specified analysis
+  --execute OUT --protocol P [--resume]    run a frozen protocol
+  --analyze RUN --out OUT                  pre-specified analysis + figures
 
-Human Gate: --freeze/--execute are for after the researcher approves the cell
-set. Nothing here was executed beyond --tech-check at the time of writing.
+Human Gate: the researcher approved the 3-cell, 600-fit run on 2026-11-25
+(decision D-B). Analysis and figures were written and tested on fake data before
+the protocol was frozen and before any 20/40-iteration score of the main data.
 """
 from __future__ import annotations
 
@@ -93,6 +94,13 @@ FIT_FIELDS = ["fit_id", "dataset_id", "series", "regime", "k_true", "rep", "k", 
               "x_hash", "y_hash", "data_equal_main", "final_q_equals_last_q_after",
               "repro10_equal", "mstep_q_decreases", "retry_count", "replacement_count",
               "nan_count", "runtime_s", "state_file", "state_sha256"]
+HIST_FIELDS = ["fit_id", "iteration", "q_before", "q_after", "q_diff", "decreased"]
+CELL_COLORS = {"B-b-9": "#2a78d6", "O-b-9": "#eb6834", "A-b-9": "#1baf7a"}  # fixed per cell
+RESUME_RULE = ("a fit is done iff its fit_id has a row in per_fit.csv (any status); done fits "
+               "are never re-run; FAILED fits are never retried or re-seeded; not-done fits "
+               "are run with their frozen seeds; orphan history/checkpoint rows of not-done "
+               "fits (crash between writes) are kept and must be bitwise identical to the "
+               "re-run rows (checked by --analyze)")
 
 
 def now() -> str:
@@ -247,9 +255,9 @@ class Writers:
         mode = "a" if append else "w"
         self.files = {}
         self.w = {}
-        for name, fields in (("per_fit.csv", FIT_FIELDS), ("checkpoints.csv", CP_FIELDS),
-                             ("mstep_q_history.csv", ["fit_id", "iteration", "q_before",
-                                                      "q_after", "q_diff", "decreased"])):
+        for name, fields in (("checkpoint_scores.csv", CP_FIELDS),
+                             ("convergence_history.csv", HIST_FIELDS),
+                             ("per_fit.csv", FIT_FIELDS)):
             p = out / name
             new = not p.exists() or not append
             f = open(p, mode, encoding="utf-8", newline="")
@@ -259,13 +267,16 @@ class Writers:
             self.files[name], self.w[name] = f, w
 
     def write(self, row):
-        self.w["per_fit.csv"].writerow(row)
+        # history and checkpoint rows first, per_fit last: a per_fit row implies the
+        # fit's other rows are on disk (the resume rule keys on per_fit only)
         for c in row["_cps"]:
-            self.w["checkpoints.csv"].writerow(c)
+            self.w["checkpoint_scores.csv"].writerow(c)
         for h in row["_hist"]:
-            self.w["mstep_q_history.csv"].writerow(h)
-        for f in self.files.values():
-            f.flush()
+            self.w["convergence_history.csv"].writerow(h)
+        self.files["checkpoint_scores.csv"].flush()
+        self.files["convergence_history.csv"].flush()
+        self.w["per_fit.csv"].writerow(row)
+        self.files["per_fit.csv"].flush()
 
     def close(self):
         for f in self.files.values():
@@ -422,7 +433,37 @@ def freeze(out: Path, cells):
                       "C_Q(t) = calc_bic_exp(q_after[t]); gate: C_Q(10) == main C_Q bitwise",
         "selection": "per dataset and checkpoint: mean of C_Q over 2 inits, argmin, "
                      "ties within 1e-9 -> smallest K (same as main)",
-        "no_adaptive_changes": "no extra iterations, seeds, cells or checkpoints after results",
+        "no_adaptive_changes": "no extra iterations, seeds, cells, checkpoints, init rules "
+                               "or criterion changes after results",
+        "researcher_decisions_20261125": {
+            "D-A": "lineage E results are a candidate for the thesis body; Human Gate NOT "
+                   "passed; not treated as adopted",
+            "D-B": "run B-b-9, O-b-9, A-b-9 (600 fits) convergence sensitivity",
+            "D-C": "C_Lap is a separate future exploratory analysis; not run here"},
+        "criterion": "C_Q = -2 Q_strict + p ln n (Q-based complete-data / ICL-type; NOT "
+                     "Schwarz BIC); its ln p(Z) term adds n(1+ln 2pi) per latent dimension",
+        "resume_rule": RESUME_RULE,
+        "failure_rule": "a failed fit is recorded once (failures.csv) and never replaced; a "
+                        "dataset with any missing/FAILED fit is INCOMPLETE at that checkpoint",
+        "stop_rules": ["any checkpoint-10 C_Q differs bitwise from the main per_fit C_Q",
+                       "any regenerated X/Y hash differs from the main run",
+                       "code hash mismatch / dirty tree / output exists without --resume"],
+        "analysis_plan": {
+            "primary": "per cell and checkpoint (10, 20, 40): number of datasets whose "
+                       "selected K equals K_TRUE = 9 (Clopper-Pearson 95% CI), under/over",
+            "secondary": ["transitions of selected K 10->20->40 per dataset",
+                          "per-init selected K and init disagreement per checkpoint",
+                          "gap C_Q_bar(9) - C_Q_bar(selected K) and G(t) = C_Q_bar(9) - "
+                          "min_{K!=9} C_Q_bar(K) for t = 1..40",
+                          "per-K C_Q_bar improvement 10->20->40 and mean per-iteration "
+                          "improvement over the last 3 iterations before each checkpoint",
+                          "numerical anomalies: failures, M-step strict-Q decreases, NaN"],
+            "unit": "dataset (inits are not independent evidence; checkpoints of one "
+                    "dataset are not independent evidence)",
+            "not_claimed": "40-iteration convergence, consistency or optimality of C_Q"},
+        "outputs": ["per_fit.csv", "checkpoint_scores.csv", "convergence_history.csv",
+                    "failures.csv", "seed_manifest.csv", "runinfo.json", "run_events.jsonl",
+                    "states/ (git-ignored) + states_sha256_manifest.csv"],
         "n_fits": len(man), "workers": N_WORKERS, "blas_threads": 1,
         "code_sha256": code_hashes(),
         "manifest_sha256": sha256_file(out / "manifest.csv"),
@@ -465,10 +506,26 @@ def execute(proto_path: Path, out: Path, resume: bool):
             "git_head_at_start": ev["git_head"], "python": sys.version,
             "platform": platform.platform(), "numpy": np.__version__,
             "workers": N_WORKERS, "blas_threads": 1}, indent=2), encoding="utf-8")
+    if not (out / "seed_manifest.csv").exists():
+        (out / "seed_manifest.csv").write_bytes(man_p.read_bytes())
     t0 = time.perf_counter()
     run_jobs(todo, out, out / "states", append=bool(done))
+    fits = read_csv(out / "per_fit.csv")
+    with open(out / "failures.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["fit_id", "status", "failure_reason"])
+        for r in fits:
+            if r["status"] != "OK":
+                w.writerow([r["fit_id"], r["status"], r["failure_reason"]])
+    with open(out / "states_sha256_manifest.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["state_file", "bytes", "sha256"])
+        for p in sorted((out / "states").glob("*.npz")):
+            w.writerow([p.name, p.stat().st_size, sha256_file(p)])
     with open(out / "run_events.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps({"time": now(), "event": "finished_batch", "ran": len(todo),
+                            "recorded": len(fits),
+                            "ok": sum(r["status"] == "OK" for r in fits),
                             "wall_s": round(time.perf_counter() - t0, 1)}) + "\n")
 
 
@@ -478,60 +535,130 @@ def select(cqbar: dict, tol=1e-9) -> int:
     return min(k for k, v in cqbar.items() if v - mn <= tol)
 
 
-def analyze(run: Path, out: Path):
-    """Per dataset and checkpoint: selected K (2-init mean), per-init K, outcome,
-    gap G(t) = C_Q_bar(K_TRUE) - min_{K != K_TRUE} C_Q_bar(K) (negative = K_TRUE wins),
-    transitions 10 -> 20 -> 40. A dataset is INCOMPLETE at a checkpoint if any of its
-    20 fits is missing / FAILED. Gate: every checkpoint-10 C_Q equals the main C_Q."""
+def clopper_pearson(x: int, n: int, a: float = 0.05):
+    from scipy.stats import beta
+    lo = 0.0 if x == 0 else float(beta.ppf(a / 2, x, n - x + 1))
+    hi = 1.0 if x == n else float(beta.ppf(1 - a / 2, x + 1, n - x))
+    return lo, hi
+
+
+def _write(path: Path, rows, fields=None):
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields or list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+
+
+def _dedupe(rows, key):
+    """Orphan rows from an interrupted write must be bitwise identical to re-run rows."""
+    seen = {}
+    for r in rows:
+        k = tuple(r[c] for c in key)
+        if k in seen:
+            if seen[k] != r:
+                raise SystemExit(f"STOP: duplicate rows differ for {k}")
+            continue
+        seen[k] = r
+    return list(seen.values())
+
+
+def _cell(r) -> str:
+    return f"{r['series']}-{r['regime']}-{r['k_true']}"
+
+
+def analyze(run: Path, out: Path, figures: bool = True):
+    """Pre-specified analysis (frozen with the protocol; see analysis_plan).
+
+    Per dataset and checkpoint: selected K (2-init mean, ties within 1e-9 -> smallest K),
+    per-init K, outcome, gaps. Per cell x K x iteration: C_Q_bar trajectories from the
+    M-step strict-Q history (C_Q(t) = calc_bic_exp(q_after[t]), the frozen rule). A
+    dataset is INCOMPLETE at a checkpoint / iteration if any of its 20 fits is missing
+    or FAILED. Gate: every checkpoint-10 C_Q equals the main per_fit C_Q bitwise."""
     if out.exists():
         raise SystemExit(f"STOP: {out} exists")
     fits = {r["fit_id"]: r for r in read_csv(run / "per_fit.csv")}
-    cps = read_csv(run / "checkpoints.csv")
+    cps = _dedupe(read_csv(run / "checkpoint_scores.csv"), ("fit_id", "checkpoint"))
+    cps = [c for c in cps if c["fit_id"] in fits]
+    hp = run / "convergence_history.csv"
+    hist = _dedupe(read_csv(hp), ("fit_id", "iteration")) if hp.exists() else []
+    hist = [h for h in hist if h["fit_id"] in fits]
     out.mkdir(parents=True)
     rows = analyze_rows(cps, fits)
-    gate = all(c["repro_equal"] == "True" for c in cps if int(c["checkpoint"]) == 10)
-    with open(out / "selection_by_checkpoint.csv", "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]))
-        w.writeheader()
-        w.writerows(rows)
-    cell = defaultdict(Counter)
+    gate = bool(cps) and all(c["repro_equal"] == "True"
+                             for c in cps if int(c["checkpoint"]) == 10)
+    _write(out / "selected_k_by_dataset.csv", rows)
+    cell = defaultdict(list)
     for r in rows:
-        cell[(r["series"], r["regime"], r["k_true"], r["checkpoint"])][r["outcome"]] += 1
-    with open(out / "summary_by_cell_checkpoint.csv", "w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["series", "regime", "k_true", "checkpoint", "exact", "under", "over",
-                    "incomplete"])
-        for c in sorted(cell):
-            w.writerow([*c, *(cell[c][o] for o in ("exact", "under", "over", "INCOMPLETE"))])
+        cell[(r["series"], r["regime"], r["k_true"], r["checkpoint"])].append(r)
+    summ = []
+    for c in sorted(cell):
+        rs = cell[c]
+        cnt = Counter(r["outcome"] for r in rs)
+        comp = [r for r in rs if r["outcome"] != "INCOMPLETE"]
+        lo, hi = clopper_pearson(cnt["exact"], len(comp)) if comp else ("", "")
+        gaps = [r["gap_k9_minus_selected"] for r in comp]
+        gs = [r["gap_ktrue_vs_best_other"] for r in comp]
+        summ.append(dict(cell="-".join(map(str, c[:3])), series=c[0], regime=c[1],
+                         k_true=c[2], checkpoint=c[3], n_complete=len(comp),
+                         exact=cnt["exact"], under=cnt["under"], over=cnt["over"],
+                         incomplete=cnt["INCOMPLETE"], exact_ci95_lo=lo, exact_ci95_hi=hi,
+                         init_disagree=sum(r["init_disagree"] for r in comp),
+                         init_both_exact=sum(r["init0_k"] == r["init1_k"] == c[2]
+                                             for r in comp),
+                         median_selected_k=float(np.median([r["selected_k"] for r in comp]))
+                         if comp else "",
+                         median_gap_ktrue_minus_selected=float(np.median(gaps)) if gaps else "",
+                         median_G=float(np.median(gs)) if gs else ""))
+    _write(out / "summary_by_cell_checkpoint.csv", summ)
     trans = Counter()
     by = defaultdict(dict)
     for r in rows:
-        by[r["dataset_id"]][r["checkpoint"]] = r["selected_k"]
-    for ds, d in by.items():
-        trans[(ds.rsplit("-", 1)[0], tuple(d.get(c) for c in CHECKPOINTS))] += 1
-    with open(out / "transitions.csv", "w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["cell", "k10", "k20", "k40", "n_datasets"])
-        for (c, ks), n in sorted(trans.items(), key=lambda x: (x[0][0], str(x[0][1]))):
-            w.writerow([c, *ks, n])
-    (out / "status.json").write_text(json.dumps({
-        "repro_gate_checkpoint10_equals_main": gate, "n_fits": len(fits),
-        "n_ok": sum(r["status"] == "OK" for r in fits.values()),
+        by[(r["dataset_id"], _cell(r))][r["checkpoint"]] = r["selected_k"]
+    for (ds, c), d in by.items():
+        trans[(c, tuple(d.get(cp) for cp in CHECKPOINTS))] += 1
+    _write(out / "transitions.csv",
+           [dict(cell=c, k10=ks[0], k20=ks[1], k40=ks[2], n_datasets=n)
+            for (c, ks), n in sorted(trans.items(), key=lambda x: (x[0][0], str(x[0][1])))],
+           ["cell", "k10", "k20", "k40", "n_datasets"])
+    traj = trajectories(hist, fits) if hist else {}
+    if traj and traj["by_dataset"]:
+        _write(out / "cq_trajectory_by_dataset.csv", traj["by_dataset"])
+        _write(out / "cq_trajectory_median_by_cell_k.csv", traj["median"])
+    if traj and traj["improvement"]:
+        _write(out / "per_k_improvement.csv", traj["improvement"])
+        _write(out / "per_k_improvement_median.csv", traj["improvement_median"])
+    dec = Counter()
+    for r in fits.values():
+        dec[_cell(r)] += int(r["mstep_q_decreases"] or 0)
+    status = {
+        "repro_gate_checkpoint10_equals_main": gate,
+        "data_equal_main_all": all(r["data_equal_main"] == "True" for r in fits.values()),
+        "n_fits": len(fits), "n_ok": sum(r["status"] == "OK" for r in fits.values()),
+        "n_failed": sum(r["status"] != "OK" for r in fits.values()),
         "n_dataset_checkpoints": len(rows),
-        "n_incomplete": sum(r["outcome"] == "INCOMPLETE" for r in rows)}, indent=2),
-        encoding="utf-8")
+        "n_incomplete": sum(r["outcome"] == "INCOMPLETE" for r in rows),
+        "history_rows": len(hist),
+        "final_q_equals_last_q_after_all": all(
+            r["final_q_equals_last_q_after"] == "True" for r in fits.values()
+            if r["status"] == "OK"),
+        "retry_total": sum(int(r["retry_count"] or 0) for r in fits.values()),
+        "replacement_total": sum(int(r["replacement_count"] or 0) for r in fits.values()),
+        "nan_total": sum(int(r["nan_count"] or 0) for r in fits.values()),
+        "mstep_q_decreases_by_cell": dict(dec),
+    }
+    (out / "status.json").write_text(json.dumps(status, indent=2), encoding="utf-8")
+    if figures and rows and traj and traj["by_dataset"]:
+        make_figures(out, summ, rows, traj)
+    return status
 
 
 def analyze_rows(cps, fits):
     ok = {f for f, r in fits.items() if r["status"] == "OK"}
     d = defaultdict(dict)
-    meta = {}
     for c in cps:
         if c["fit_id"] not in ok:
             continue
-        key = (c["dataset_id"], int(c["checkpoint"]))
-        d[key][(int(c["k"]), int(c["t"]))] = float(c["C_Q"])
-        meta[c["dataset_id"]] = (c["series"], c["regime"], int(c["k_true"]), int(c["rep"]))
+        d[(c["dataset_id"], int(c["checkpoint"]))][(int(c["k"]), int(c["t"]))] = float(c["C_Q"])
     all_ds = {r["dataset_id"]: (r["series"], r["regime"], int(r["k_true"]), int(r["rep"]))
               for r in fits.values()}
     rows = []
@@ -542,19 +669,204 @@ def analyze_rows(cps, fits):
             base = dict(dataset_id=ds, series=s, regime=rg, k_true=kt, rep=rep, checkpoint=cp)
             if len(dct) != 20 or ks != list(kd.K_CANDIDATES):
                 rows.append({**base, "selected_k": "", "outcome": "INCOMPLETE", "init0_k": "",
-                             "init1_k": "", "margin": "", "gap_ktrue_vs_best_other": ""})
+                             "init1_k": "", "init_disagree": "", "margin": "",
+                             "gap_k9_minus_selected": "", "gap_ktrue_vs_best_other": "",
+                             "cq_bar_ktrue": "", "cq_bar_selected": ""})
                 continue
             bar = {k: (dct[(k, 0)] + dct[(k, 1)]) / 2.0 for k in ks}
             sel = select(bar)
             srt = sorted(bar.values())
             other = min(v for k, v in bar.items() if k != kt)
+            i0 = select({k: dct[(k, 0)] for k in ks})
+            i1 = select({k: dct[(k, 1)] for k in ks})
             rows.append({**base, "selected_k": sel,
                          "outcome": "exact" if sel == kt else ("under" if sel < kt else "over"),
-                         "init0_k": select({k: dct[(k, 0)] for k in ks}),
-                         "init1_k": select({k: dct[(k, 1)] for k in ks}),
+                         "init0_k": i0, "init1_k": i1, "init_disagree": int(i0 != i1),
                          "margin": srt[1] - srt[0],
-                         "gap_ktrue_vs_best_other": bar[kt] - other})
+                         "gap_k9_minus_selected": bar[kt] - bar[sel],
+                         "gap_ktrue_vs_best_other": bar[kt] - other,
+                         "cq_bar_ktrue": bar[kt], "cq_bar_selected": bar[sel]})
     return rows
+
+
+def trajectories(hist, fits):
+    """C_Q_bar(K, t) for t = 1..NUM_ITER_MAX from q_after (frozen C_Q rule at every t)."""
+    from eval_utils import calc_bic_exp
+    ok = {f: r for f, r in fits.items() if r["status"] == "OK"}
+    q = defaultdict(dict)
+    for h in hist:
+        if h["fit_id"] in ok:
+            q[h["fit_id"]][int(h["iteration"])] = float(h["q_after"])
+    cq = defaultdict(dict)          # (ds, k, t) -> {iter: C_Q}
+    meta = {r["dataset_id"]: (_cell(r), int(r["k_true"])) for r in fits.values()}
+    for fid, r in ok.items():
+        k = int(r["k"])
+        fx, fy = kd.SERIES[r["series"]]
+        for it, qa in q[fid].items():
+            cq[(r["dataset_id"], k, int(r["t"]))][it] = float(
+                calc_bic_exp(qa, k, kd.N, kd.D, fx, fy)[0])
+    its = range(1, NUM_ITER_MAX + 1)
+    bar = {}
+    for ds in meta:
+        for k in kd.K_CANDIDATES:
+            a, b = cq.get((ds, k, 0), {}), cq.get((ds, k, 1), {})
+            for it in its:
+                if it in a and it in b:
+                    bar[(ds, k, it)] = (a[it] + b[it]) / 2.0
+    by_ds = []
+    for ds, (cell, kt) in sorted(meta.items()):
+        for it in its:
+            vals = {k: bar.get((ds, k, it)) for k in kd.K_CANDIDATES}
+            if any(v is None for v in vals.values()):
+                continue
+            other = min(v for k, v in vals.items() if k != kt)
+            sel = select(vals)
+            for k, v in vals.items():
+                by_ds.append(dict(cell=cell, dataset_id=ds, k=k, iteration=it, cq_bar=v,
+                                  cq_bar_minus_ktrue=v - vals[kt],
+                                  G=vals[kt] - other, selected_k=sel))
+    grp = defaultdict(list)
+    for r in by_ds:
+        grp[(r["cell"], r["k"], r["iteration"])].append(r)
+    med = [dict(cell=c, k=k, iteration=it, n_datasets=len(rs),
+                median_cq_bar=float(np.median([r["cq_bar"] for r in rs])),
+                median_cq_bar_minus_ktrue=float(np.median([r["cq_bar_minus_ktrue"]
+                                                           for r in rs])),
+                median_G=float(np.median([r["G"] for r in rs])))
+           for (c, k, it), rs in sorted(grp.items())]
+    imp = []
+    for ds, (cell, kt) in sorted(meta.items()):
+        for k in kd.K_CANDIDATES:
+            v = {it: bar.get((ds, k, it)) for it in its}
+            if any(x is None for x in v.values()):
+                continue
+            imp.append(dict(cell=cell, dataset_id=ds, k=k,
+                            impr_10_to_20=v[10] - v[20], impr_20_to_40=v[20] - v[40],
+                            impr_10_to_40=v[10] - v[40],
+                            rate_last3_at10=(v[7] - v[10]) / 3.0,
+                            rate_last3_at20=(v[17] - v[20]) / 3.0,
+                            rate_last3_at40=(v[37] - v[40]) / 3.0))
+    g2 = defaultdict(list)
+    for r in imp:
+        g2[(r["cell"], r["k"])].append(r)
+    cols = ("impr_10_to_20", "impr_20_to_40", "impr_10_to_40", "rate_last3_at10",
+            "rate_last3_at20", "rate_last3_at40")
+    imp_med = [dict(cell=c, k=k, n_datasets=len(rs),
+                    **{f"median_{x}": float(np.median([r[x] for r in rs])) for x in cols})
+               for (c, k), rs in sorted(g2.items())]
+    return {"by_dataset": by_ds, "median": med, "improvement": imp,
+            "improvement_median": imp_med}
+
+
+def make_figures(out: Path, summ, rows, traj):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({"font.size": 9, "axes.spines.top": False,
+                         "axes.spines.right": False, "axes.grid": True,
+                         "grid.color": "#e4e3df", "grid.linewidth": 0.6,
+                         "axes.edgecolor": "#8a8984", "text.color": "#0b0b0b",
+                         "axes.labelcolor": "#52514e", "xtick.color": "#52514e",
+                         "ytick.color": "#52514e"})
+    order = ("B-b-9", "O-b-9", "A-b-9")
+    cells = [c for c in order if any(s["cell"] == c for s in summ)]
+    cells += sorted({s["cell"] for s in summ} - set(cells))
+    color = {c: CELL_COLORS.get(c, "#6250d6") for c in cells}
+    # 1: exact count by checkpoint (95% CP CI)
+    fig, ax = plt.subplots(figsize=(5.6, 3.4))
+    for c in cells:
+        ss = sorted([s for s in summ if s["cell"] == c and s["n_complete"]],
+                    key=lambda s: s["checkpoint"])
+        if not ss:
+            continue
+        x = [s["checkpoint"] for s in ss]
+        y = [s["exact"] for s in ss]
+        lo = [s["exact"] - s["exact_ci95_lo"] * s["n_complete"] for s in ss]
+        hi = [s["exact_ci95_hi"] * s["n_complete"] - s["exact"] for s in ss]
+        ax.errorbar(x, y, yerr=[lo, hi], marker="o", ms=6, lw=2, capsize=3,
+                    color=color[c], label=c)
+        ax.annotate(c, (x[-1], y[-1]), xytext=(8, 0), textcoords="offset points",
+                    va="center", color="#52514e")
+    ax.set_xticks(list(CHECKPOINTS))
+    ax.set_xlabel("MCEM iteration (checkpoint)")
+    ax.set_ylabel("datasets with selected K = K_TRUE")
+    ax.set_ylim(-0.5, 10.5)
+    ax.set_xlim(6, 50)
+    ax.legend(frameon=False, loc="lower left", bbox_to_anchor=(1.0, 0.0))
+    ax.set_title("C_Q selection = K_TRUE (mean of 2 inits; 95% CP CI)")
+    fig.tight_layout()
+    fig.savefig(out / "fig_exact_by_checkpoint.png", dpi=150)
+    plt.close(fig)
+    bd = traj["by_dataset"]
+    # 2: per-dataset G(t)
+    fig, axs = plt.subplots(1, len(cells), figsize=(4 * len(cells), 3.4), squeeze=False)
+    for ax, c in zip(axs[0], cells):
+        g = defaultdict(dict)
+        for r in bd:
+            if r["cell"] == c and r["k"] == 1:
+                g[r["dataset_id"]][r["iteration"]] = r["G"]
+        for ds, d in sorted(g.items()):
+            it = sorted(d)
+            ax.plot(it, [d[i] for i in it], lw=1.2, color=color[c], alpha=0.8)
+        ax.axhline(0, color="#52514e", lw=1)
+        for cp in CHECKPOINTS:
+            ax.axvline(cp, color="#b9b8b2", lw=0.8, ls=":")
+        ax.set_yscale("symlog", linthresh=50)
+        ax.set_title(f"{c}: G(t), one line per dataset")
+        ax.set_xlabel("MCEM iteration")
+    axs[0][0].set_ylabel("G(t) = C̄_Q(K_TRUE) − min other C̄_Q\n(< 0: K_TRUE selected)")
+    fig.tight_layout()
+    fig.savefig(out / "fig_gap_trajectories.png", dpi=150)
+    plt.close(fig)
+    # 3: median C_Q_bar(K) - C_Q_bar(K_TRUE) per K (ordinal blue ramp)
+    med = traj["median"]
+    ramp = ["#b7d3f6", "#9ec5f4", "#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6",
+            "#256abf", "#1c5cab", "#104281"]
+    fig, axs = plt.subplots(1, len(cells), figsize=(4.3 * len(cells), 3.6), squeeze=False)
+    for ax, c in zip(axs[0], cells):
+        kt = int(c.split("-")[2])
+        for k in kd.K_CANDIDATES:
+            if k == kt:
+                continue
+            rs = [r for r in med if r["cell"] == c and r["k"] == k]
+            if not rs:
+                continue
+            ax.plot([r["iteration"] for r in rs], [r["median_cq_bar_minus_ktrue"] for r in rs],
+                    lw=1.6, color=ramp[k - 1], ls="-" if k < kt else "--", label=f"K={k}")
+            ax.annotate(str(k), (rs[-1]["iteration"], rs[-1]["median_cq_bar_minus_ktrue"]),
+                        xytext=(3, 0), textcoords="offset points", fontsize=7,
+                        va="center", color="#52514e")
+        ax.axhline(0, color="#52514e", lw=1)
+        ax.set_yscale("symlog", linthresh=50)
+        ax.set_title(f"{c}: median C̄_Q(K) − C̄_Q(K_TRUE)")
+        ax.set_xlabel("MCEM iteration")
+    axs[0][0].set_ylabel("< 0: K beats K_TRUE")
+    axs[0][-1].legend(frameon=False, fontsize=7, loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    fig.tight_layout()
+    fig.savefig(out / "fig_cq_trajectories.png", dpi=150)
+    plt.close(fig)
+    # 4: per-init selected K by checkpoint
+    fig, axs = plt.subplots(1, len(cells), figsize=(4 * len(cells), 3.4), sharey=True,
+                            squeeze=False)
+    for ax, c in zip(axs[0], cells):
+        kt = int(c.split("-")[2])
+        rs = [r for r in rows if _cell(r) == c and r["outcome"] != "INCOMPLETE"]
+        for j, cp in enumerate(CHECKPOINTS):
+            sub = sorted([r for r in rs if r["checkpoint"] == cp], key=lambda r: r["rep"])
+            for i, r in enumerate(sub):
+                x0 = j * 12 + i
+                ax.plot([x0, x0], [r["init0_k"], r["init1_k"]], color="#b9b8b2", lw=1)
+                ax.plot(x0, r["init0_k"], "o", ms=4, mfc="white", mec=color[c])
+                ax.plot(x0, r["init1_k"], "s", ms=4, mfc="white", mec=color[c])
+                ax.plot(x0, r["selected_k"], "D", ms=4, color=color[c])
+        ax.set_xticks([4.5, 16.5, 28.5], [f"t={cp}" for cp in CHECKPOINTS])
+        ax.axhline(kt, color="#52514e", lw=0.8, ls=":")
+        ax.set_title(f"{c}: selected K per dataset")
+        ax.set_yticks(range(1, 11))
+    axs[0][0].set_ylabel("selected K (◆ mean, ○ init 0, □ init 1)")
+    fig.tight_layout()
+    fig.savefig(out / "fig_init_dependence.png", dpi=150)
+    plt.close(fig)
 
 
 def main():
@@ -577,7 +889,9 @@ def main():
             raise SystemExit("--execute needs --protocol")
         return execute(ROOT / a.protocol, ROOT / a.execute, a.resume)
     if a.analyze:
-        return analyze(ROOT / a.analyze, ROOT / a.out)
+        st = analyze(ROOT / a.analyze, ROOT / a.out)
+        print(json.dumps(st, indent=2))
+        return 0
     ap.print_help()
     return 2
 

@@ -1,0 +1,41 @@
+{
+  "written": "2026-11-25, before --execute; no 20/40-iteration score of the main data had been computed",
+  "checks": {
+    "data_and_seeds": "manifest seeds copied from main manifest (unit test); tech check repro10 4/4 data hash + C_Q bitwise",
+    "generator_and_model_code": "13/13 main-run code files hash-equal to main protocol_v2 code_sha256 (working-tree bytes)",
+    "checkpoint_rule": "tech check prefix 12/12 bitwise; unit test of C_Q formula",
+    "init_aggregation": "unit tests (mean of 2 inits, tie rule, INCOMPLETE)",
+    "output_format": "unit tests on fake data incl. trajectories, figures, duplicate-row stop",
+    "determinism": "tech check: main 10-iter fits reproduced bitwise in a new process; 10/20/40 prefix identity",
+    "anomaly_recording": "per_fit status/failure_reason/nan_count/retry/replacement/mstep_q_decreases; failures.csv; never retried",
+    "resources": {
+      "cpu_logical": 12,
+      "workers": 8,
+      "free_ram_gb_at_check": 4.75,
+      "total_ram_gb": 15.85,
+      "free_disk_D_gb": 831,
+      "budget_wall_h": "5.5-9.5 (tech-check estimate)"
+    },
+    "unit_tests": "14 passed (tools/research_audit/test_k_exp2_convergence_sensitivity.py)"
+  },
+  "existing_results_sha256_before_run": {
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/failures.csv": "0519ba9c26afa9c0319e9e18b734f37f00eb97bd84d5eedd9e772253022b45dc",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/mstep_q_history.csv": "73899837437f5e1a55f451eaa392ef72e6834b3dd08e2f53131076f81be67d43",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/per_fit.csv": "549b0be0f005555de6d2a2b8fc4a7226569085dd6523cb6879b466d92bcf9af2",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/run_events.jsonl": "1576d75ad1bdab63617598d192bc917a1c1b8debedec57c4173bfa1aa5a05795",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/runinfo.json": "c4dbba9ebc31e9bdf1664b731ae347ffecc3c83b4313a9b485a7eff361ddda62",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/states_sha256_manifest.csv": "1b58f5d48e6edb60534ba1e64fc8c4e53b9782a653746ea374ff570a4e968473",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/confusion.csv": "bf42e704dea7a5d52d8fcce32f462f43115e3ce86b427e54bd7b7ed7d4141870",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/convergence_by_cell.csv": "a5a02ee5c0aee56d08aa7ab8d8a9e45b48d023a6fce5a899e2a48d010a7f4678",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/criterion_curves_median.csv": "7983f9c7bbceeaa273965145cda93eb1646c6215c96f4d188c4c48e1454418b0",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/failures_and_missing.csv": "3e7c7a8ab471da8950b1ee84da597e3709f6c693b3c368537e01a8c2ef171dda",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/fig_confusion.png": "38a4f897c4d7c64b90101c550f2870a215cf77d56fbe92afb339220272aaa721",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/fig_criterion_curves.png": "1f825e5621a842ec28729a2cb6367381d5623aa3b0815270db5908d4408979ee",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/fig_exact_under_over.png": "ffffdc05f5fac5386f448f8f76524ad4e51be2f27e5c501fbd305f036a77e3d6",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/paired_regimes.csv": "aa5bfeb4b929c819baac130a6f6d0a70b71982ba866938ef4febec014c2a9845",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/selection_per_dataset.csv": "5e4e4e53d7840b727ef7fd2e2706623e8c5916c5d0758689cfdb230ff965d4f7",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/status.json": "fc96f003b8ae97a3cc116a8a8c48c29b6f38c429c50f86088c89e7d8c2a99247",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/analysis/summary_by_cell.csv": "0f41d5dbfad6107f694ce5ee09d3d03e8ff65a68aeee3c1ce4d37eef6a87e078",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/protocol_v2/protocol.json": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad"
+  }
+}

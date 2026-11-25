@@ -58,19 +58,30 @@ def test_select_tie_rule_smallest_k():
     assert cs.select({1: 5.0, 2: 4.0, 3: 4.0}) == 2
 
 
-def _fake(tmp_path, cells_cq):
-    fits, cps = {}, []
+def _fake(tmp_path, cells_cq, n_hist=0):
+    fits, cps, hist = {}, [], []
     for (ds, kt), by_cp in cells_cq.items():
         for k in range(1, 11):
             for t in (0, 1):
                 fid = f"{ds}-k{k:02d}-t{t}"
                 fits[fid] = {"fit_id": fid, "dataset_id": ds, "series": "B", "regime": "b",
-                             "k_true": str(kt), "rep": "0", "status": "OK"}
+                             "k_true": str(kt), "rep": "0", "k": str(k), "t": str(t),
+                             "status": "OK", "data_equal_main": "True",
+                             "final_q_equals_last_q_after": "True", "retry_count": "0",
+                             "replacement_count": "0", "nan_count": "0",
+                             "mstep_q_decreases": "0"}
+                for it in range(1, n_hist + 1):
+                    hist.append({"fit_id": fid, "iteration": str(it),
+                                 "q_before": "0", "q_after": repr(-1000.0 * k + 50.0 * it
+                                                                  - (it * 30.0 if k == 9 else 0)),
+                                 "q_diff": "0", "decreased": "False"})
                 for cp, fn in by_cp.items():
                     cps.append({"fit_id": fid, "dataset_id": ds, "series": "B", "regime": "b",
                                 "k_true": str(kt), "rep": "0", "k": str(k), "t": str(t),
                                 "checkpoint": str(cp), "C_Q": repr(fn(k, t)),
                                 "repro_equal": "True" if cp == 10 else ""})
+    if n_hist:
+        return fits, cps, hist
     return fits, cps
 
 
@@ -94,19 +105,70 @@ def test_analysis_incomplete_when_a_fit_failed():
     assert all(r["outcome"] == "INCOMPLETE" for r in rows)
 
 
+def _write_run(run, fits, cps, hist=None):
+    run.mkdir()
+    for name, rows in (("per_fit.csv", list(fits.values())), ("checkpoint_scores.csv", cps),
+                       ("convergence_history.csv", hist or [])):
+        if not rows:
+            continue
+        with open(run / name, "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+            w.writeheader()
+            w.writerows(rows)
+
+
+def test_analyze_full_outputs_with_history_and_figures(tmp_path):
+    f = {c: (lambda k, t: abs(k - 9) * 3.0) for c in (10, 20, 40)}
+    fits, cps, hist = _fake(None, {("B-b-KT9-r0", 9): f, ("B-b-KT9-r1", 9): f}, n_hist=40)
+    for r in fits.values():
+        if r["dataset_id"].endswith("r1"):
+            r["rep"] = "1"
+    for c in cps:
+        if c["dataset_id"].endswith("r1"):
+            c["rep"] = "1"
+    run = tmp_path / "run"
+    _write_run(run, fits, cps, hist + hist[:5])          # orphan duplicates are identical
+    out = tmp_path / "ana"
+    st = cs.analyze(run, out)
+    assert st["repro_gate_checkpoint10_equals_main"] is True and st["n_ok"] == 40
+    for n in ("selected_k_by_dataset.csv", "summary_by_cell_checkpoint.csv",
+              "transitions.csv", "cq_trajectory_by_dataset.csv",
+              "cq_trajectory_median_by_cell_k.csv", "per_k_improvement.csv",
+              "per_k_improvement_median.csv", "fig_exact_by_checkpoint.png",
+              "fig_gap_trajectories.png", "fig_cq_trajectories.png",
+              "fig_init_dependence.png"):
+        assert (out / n).exists(), n
+    summ = cs.read_csv(out / "summary_by_cell_checkpoint.csv")
+    assert [int(r["exact"]) for r in summ] == [2, 2, 2]
+    imp = [r for r in cs.read_csv(out / "per_k_improvement.csv") if r["k"] == "1"][0]
+    # C_Q = -2 q + p ln n; q improves by 50 per iteration -> C_Q falls by 100 per iteration
+    assert float(imp["rate_last3_at10"]) == pytest.approx(100.0)
+    assert float(imp["impr_10_to_40"]) == pytest.approx(3000.0)
+    k9 = [r for r in cs.read_csv(out / "per_k_improvement.csv") if r["k"] == "9"][0]
+    assert float(k9["rate_last3_at40"]) == pytest.approx(40.0)
+
+
+def test_analyze_stops_on_differing_duplicate_rows(tmp_path):
+    f = {c: (lambda k, t: float(k)) for c in (10, 20, 40)}
+    fits, cps = _fake(None, {("B-b-KT9-r0", 9): f})
+    bad = dict(cps[0], C_Q="123.0")
+    run = tmp_path / "run"
+    _write_run(run, fits, cps + [bad])
+    with pytest.raises(SystemExit, match="duplicate"):
+        cs.analyze(run, tmp_path / "ana", figures=False)
+
+
+def test_clopper_pearson_known_values():
+    assert cs.clopper_pearson(10, 10)[0] == pytest.approx(0.6915, abs=1e-4)
+    lo, hi = cs.clopper_pearson(5, 10)
+    assert (lo, hi) == (pytest.approx(0.1871, abs=1e-4), pytest.approx(0.8129, abs=1e-4))
+
+
 def test_analyze_writes_outputs(tmp_path):
     f = {c: (lambda k, t: abs(k - 9) * 3.0) for c in (10, 20, 40)}
     fits, cps = _fake(None, {("B-b-KT9-r0", 9): f})
     run = tmp_path / "run"
-    run.mkdir()
-    with open(run / "per_fit.csv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(next(iter(fits.values()))))
-        w.writeheader()
-        w.writerows(fits.values())
-    with open(run / "checkpoints.csv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(cps[0]))
-        w.writeheader()
-        w.writerows(cps)
+    _write_run(run, fits, cps)
     out = tmp_path / "ana"
     cs.analyze(run, out)
     st = json.loads((out / "status.json").read_text())
@@ -114,6 +176,14 @@ def test_analyze_writes_outputs(tmp_path):
     assert (out / "transitions.csv").exists()
     with pytest.raises(SystemExit):
         cs.analyze(run, out)          # never overwrite
+
+
+def test_writer_orders_per_fit_last_and_resume_rule_in_protocol(tmp_path):
+    wr = cs.Writers(tmp_path, append=False)
+    assert list(wr.files) == ["checkpoint_scores.csv", "convergence_history.csv",
+                              "per_fit.csv"]
+    wr.close()
+    assert "never retried" in cs.RESUME_RULE
 
 
 def test_execute_refuses_on_hash_mismatch(tmp_path):
