@@ -1,0 +1,167 @@
+{
+  "all_ok": true,
+  "checks": {
+    "protocol_sha256_matches_runinfo": {
+      "ok": true,
+      "protocol_sha256": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad"
+    },
+    "manifest_rows_hash_matches_protocol": {
+      "ok": true,
+      "manifest_rows_sha256": "ef77c48807cbb205b1388347256e03ef3c4325328c3bb8877b4cc7fca68297db",
+      "file_sha256": "d58108cdcad516c89e3fcc0cc6bdb3c14ca7b2a55eed770d41ce547f319a4d26"
+    },
+    "code_at_exec_head_matches_frozen_hashes": {
+      "ok": true,
+      "head": "d4e5eb91c264ba8f52f9488d6b0d73897b88aef4",
+      "matched_as": {
+        "crlf": 12,
+        "raw": 1
+      },
+      "mismatches": {},
+      "note": "frozen hashes are of working-tree bytes; blob compared raw and after LF->CRLF (core.autocrlf=true)"
+    },
+    "code_in_worktree_unchanged_since_freeze": {
+      "ok": true,
+      "mismatches": []
+    },
+    "runinfo_conditions": {
+      "ok": true,
+      "runinfo": {
+        "workers": 8,
+        "blas_threads": 1,
+        "n_fits_planned": 8000,
+        "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+        "numpy": "2.3.5"
+      }
+    },
+    "run_events_single_start_finish_no_resume": {
+      "ok": true,
+      "events": [
+        "start",
+        "finished_batch"
+      ]
+    },
+    "manifest_equals_protocol_grid_and_seed_rule": {
+      "ok": true,
+      "n_manifest": 8000,
+      "n_expected": 8000
+    },
+    "per_fit_seeds_equal_manifest": {
+      "ok": true,
+      "n_bad": 0
+    },
+    "all_8000_recorded_once": {
+      "ok": true,
+      "n_rows": 8000
+    },
+    "all_status_OK": {
+      "ok": true,
+      "status": {
+        "OK": 8000
+      }
+    },
+    "failures_csv_empty": {
+      "ok": true,
+      "n": 0
+    },
+    "no_retry_replacement_rescue_nan": {
+      "ok": true,
+      "total": 0
+    },
+    "family_columns_match_series": {
+      "ok": true
+    },
+    "each_fit_has_exactly_num_iter_iterations": {
+      "ok": true,
+      "num_iter": 10,
+      "n_bad": 0
+    },
+    "Q_strict_equals_mstep_q_after_at_last_iteration_bitwise": {
+      "ok": true,
+      "n_equal": 8000
+    },
+    "mstep_q_decreases_total": {
+      "ok": true,
+      "count": 1,
+      "note": "descriptive; not a gate"
+    },
+    "generating_w_w0_fscale_match_protocol_rules": {
+      "ok": true,
+      "n_bad": 0,
+      "tol": 1e-12
+    },
+    "poisson_y_abs_w_below_quarter": {
+      "ok": true
+    },
+    "num_params_matches_frozen_formula": {
+      "ok": true,
+      "n_bad": 0
+    },
+    "C_Q_equals_minus2Q_plus_p_ln_n": {
+      "ok": true,
+      "max_abs_diff": 0.0,
+      "n_bitwise_equal": 8000
+    },
+    "one_dataset_per_dataset_id": {
+      "ok": true,
+      "n_datasets": 400
+    },
+    "selection_matches_prespecified_analysis": {
+      "ok": true,
+      "n_disagree": 0
+    },
+    "no_ties_within_1e-9": {
+      "ok": true
+    },
+    "regime_a_200_of_200": {
+      "ok": true,
+      "counts": {
+        "exact": 200
+      }
+    },
+    "regime_b_176_of_200": {
+      "ok": true,
+      "counts": {
+        "exact": 176,
+        "under": 24
+      }
+    },
+    "under_24_over_0": {
+      "ok": true,
+      "under": 24,
+      "over": 0
+    },
+    "no_incomplete_dataset": {
+      "ok": true
+    },
+    "K_TRUE3_regime_a_b_identical": {
+      "ok": true,
+      "n_fit_pairs_differing": 0,
+      "note": "w=1=sqrt(3/3) and sqrt(d/6)=sqrt(0.5d/3): same condition, count once"
+    },
+    "unique_evidence_counts": {
+      "ok": true,
+      "distinct_conditions": 360,
+      "regime_a_exact": "200/200",
+      "regime_b_excluding_KTRUE3_exact": "136/160"
+    },
+    "state_npz_present_for_every_fit": {
+      "ok": true,
+      "n_missing": 0
+    },
+    "regeneration_spot_check": {
+      "ok": true,
+      "datasets": [
+        "A-a-KT1-r0",
+        "A-b-KT1-r0",
+        "B-a-KT1-r0",
+        "B-b-KT1-r0",
+        "C-a-KT1-r0",
+        "C-b-KT1-r0",
+        "O-a-KT1-r0",
+        "O-b-KT1-r0"
+      ],
+      "mismatches": []
+    }
+  }
+}

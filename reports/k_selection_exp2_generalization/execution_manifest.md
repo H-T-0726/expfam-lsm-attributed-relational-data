@@ -129,3 +129,20 @@ test は **54 件すべて合格**。次を確認した。
 - 事前に決めた解析を `.../analysis/` に出力した。解析スクリプトとは別のコードで `per_fit.csv` から選択を独立に集計し直し、40 セルすべてで一致した。
 - fit の状態 `main/states/`（8,000 npz、132 MB）は gitignore の対象で、commit していない。
 - 結果は `results_report.md`。
+
+### 5.7 独立監査と収束感度実験の準備（2026-11-25、本実験の後）
+
+- **独立監査**：`tools/research_audit/audit_k_exp2_independent.py` を実行した。出力は `.../independent_audit/`、結果は 31/31 合格（`independent_audit.md`）。
+  - 凍結した code hash は CRLF の作業ツリーのバイト列から計算されている。監査では、git の blob を raw と CRLF 変換後の両方で比べた。
+- **NPZ の保全**：
+  - 完全な SHA-256 の一覧 `main/states_sha256_manifest.csv`（8,000 件）を作った。
+  - 退避用アーカイブ `D:/tento/research_backups/k_exp2_generalization_20261125/k_exp2_main_states_20261125.zip` を作った。SHA-256 は `26e6d8b5…6c6d` で、全メンバーを読み戻して確認した。
+  - 保存先はローカルだけで、別の媒体へのコピーはまだである。
+- **push**：本実験の commit `b8f2e3a` を `origin/experiment/k-selection-exp2-generalization-20261125` へ通常 push した。main へは merge していない。NPZ は push していない。
+- **収束感度実験**：設計（`convergence_sensitivity_design.md`）と runner・解析・test を用意した。
+  - runner：`tools/research_audit/run_k_exp2_convergence_sensitivity.py`
+  - test：`test_k_exp2_convergence_sensitivity.py`、10 件合格
+  - 技術検証（`--tech-check`、22 fit）は `.../convergence_sensitivity_tech_check/` に出力し、すべて合格した。
+    - 本実験データでの 10 反復の再現は、4/4 でビット単位で一致した。
+    - smoke データでの prefix の一致は、12/12 で成り立った。
+  - **protocol は未凍結で、本実験は未実行である**（Human Gate：対象セルの決定）。
