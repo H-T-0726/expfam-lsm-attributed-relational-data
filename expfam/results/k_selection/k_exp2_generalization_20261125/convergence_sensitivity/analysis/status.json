@@ -1,0 +1,19 @@
+{
+  "repro_gate_checkpoint10_equals_main": true,
+  "data_equal_main_all": true,
+  "n_fits": 600,
+  "n_ok": 600,
+  "n_failed": 0,
+  "n_dataset_checkpoints": 90,
+  "n_incomplete": 0,
+  "history_rows": 24000,
+  "final_q_equals_last_q_after_all": true,
+  "retry_total": 0,
+  "replacement_total": 0,
+  "nan_total": 0,
+  "mstep_q_decreases_by_cell": {
+    "O-b-9": 0,
+    "A-b-9": 0,
+    "B-b-9": 0
+  }
+}

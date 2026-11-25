@@ -1,0 +1,40 @@
+{
+  "interruption_1": {
+    "when": "2026-11-26 ~00:44-00:50 JST (last progress line 00:44:09, 272/600)",
+    "cause": "Claude Code reaped its background shells because the system was critically low on physical memory while the session was idle; the runner was killed with its pool. Not a runner error.",
+    "state_verified_before_resume_20261126": {
+      "per_fit_rows": 272,
+      "unique": true,
+      "all_status_OK": true,
+      "repro10_equal_all": true,
+      "data_equal_main_all": true,
+      "checkpoint_rows": 816,
+      "history_rows": 10880,
+      "orphan_or_missing_rows": 0,
+      "duplicate_keys": 0,
+      "states_sha256_ok": 272,
+      "sha256_before_resume": {
+        "per_fit.csv": "33908e5aba0cf74f51a5182efe3f0c2d74f8ae114ad756ddb7e5d346342aec1d",
+        "checkpoint_scores.csv": "53fbc710f4262f395808deb5012275b5e7fd8be71cbb50ce2b214d3230bff160",
+        "convergence_history.csv": "f773d171670501ee2adc13fcdafe4cb657b52a2e913a4320f07f807129b13a09"
+      }
+    },
+    "resources_before_resume": {
+      "total_ram_gb": 15.85,
+      "available_mb": 7958,
+      "python_processes_running": 0,
+      "per_worker_peak_working_set_mb": 109,
+      "probe": "fit_one on smoke-seed data (offset 5,000,000), K=10, num_iter=3, cells B/O/A-b-9; no main-data score computed"
+    },
+    "worker_decision": {
+      "workers": 8,
+      "changed": false,
+      "reason": "measured worker peak ~110 MB -> 8 workers ~0.9 GB of ~7.8 GB available; the pressure came from the rest of the system, so halving workers would save <0.5 GB and double the exposure time. Frozen runner and protocol unchanged.",
+      "safeguard": "external watchdog stops the run (process tree) if Available MBytes < 1200 on two consecutive 30 s samples; the frozen resume rule then applies"
+    },
+    "resume": {
+      "approved_by": "researcher, 2026-11-26",
+      "rule": "frozen resume_rule in protocol.json; 272 recorded fits not re-run; 328 run with frozen seeds"
+    }
+  }
+}

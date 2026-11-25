@@ -146,3 +146,13 @@ test は **54 件すべて合格**。次を確認した。
     - 本実験データでの 10 反復の再現は、4/4 でビット単位で一致した。
     - smoke データでの prefix の一致は、12/12 で成り立った。
   - **protocol は未凍結で、本実験は未実行である**（Human Gate：対象セルの決定）。
+
+### 5.8 収束感度実験の実行（2026-11-25〜26、研究者の決定 D-A・D-B・D-C の後）
+
+- 決定：D-A は lineage E を本文採用の候補とする（Human Gate は未通過）。D-B は B-b-9・O-b-9・A-b-9 の 600 fit を実行する。D-C は C_Lap を今回は扱わない。
+- 凍結：commit `ab6163d`。protocol SHA-256 `4ff80adc…65b9`、manifest `1a0f1b9e…`。runner・解析・図・独立集計のコードと、14 件の unit test も同じ commit。`protocol/preflight.json` に、実行前の確認と既存の結果の SHA-256 を記録した。
+- 1 回目の実行：2026-11-25 21:57 開始、8 worker。00:44 に 272/600 fit を記録した後、PC のメモリ逼迫で Claude Code がバックグラウンドのシェルを強制終了した。
+- 再開前の確認：記録はすべて整合していた（`run/resume_record.json`）。worker のピークは約 110 MB で、worker 数は 8 のまま（変更なし）。空きメモリ 1.2 GB 未満で止める監視を付けた（発動なし、最小 7,400 MB）。
+- 再開：2026-11-26 01:50、研究者の承認による。凍結した再開規則に従い、328 fit を実行して 04:55 に終了した（3.07 h）。272 fit の記録は、再開前とバイト単位で同じだった。
+- 結果：600/600 OK。checkpoint 10 の C_Q は本実験と 600/600 でビット単位で一致した。独立集計は 17/17 合格。結果は `convergence_sensitivity_results.md`。
+- NPZ：`run/states/`（600 件、9.0 MB）は gitignore の対象。完全な SHA-256 の一覧は `run/states_sha256_manifest.csv`。退避用アーカイブは `D:/tento/research_backups/k_exp2_generalization_20261125/k_exp2_convsens_states_20261126.zip`（SHA-256 `1c11cad1…c828`、全メンバーを確認済み。ローカルのみ）。

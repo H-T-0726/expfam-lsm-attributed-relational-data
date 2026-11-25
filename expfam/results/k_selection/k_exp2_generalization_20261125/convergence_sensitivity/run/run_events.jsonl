@@ -1,0 +1,3 @@
+{"time": "2026-11-25T21:57:14+09:00", "event": "start", "already_recorded": 0, "to_run": 600, "git_head": "ab6163d1ea035942cb2cf2978c769a3f96d41a4e", "protocol_sha256": "4ff80adc934c1b9bebe29d3841e28550cb743fa451d9ad67306afdda6e4765b9"}
+{"time": "2026-11-26T01:50:56+09:00", "event": "start", "already_recorded": 272, "to_run": 328, "git_head": "ab6163d1ea035942cb2cf2978c769a3f96d41a4e", "protocol_sha256": "4ff80adc934c1b9bebe29d3841e28550cb743fa451d9ad67306afdda6e4765b9"}
+{"time": "2026-11-26T04:55:13+09:00", "event": "finished_batch", "ran": 328, "recorded": 600, "ok": 600, "wall_s": 11057.0}

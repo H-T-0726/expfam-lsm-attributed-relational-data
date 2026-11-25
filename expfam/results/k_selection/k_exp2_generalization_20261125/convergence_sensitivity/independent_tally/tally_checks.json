@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "protocol_sha256_matches_runinfo": true,
+    "manifest_sha256_matches_protocol": true,
+    "seed_manifest_is_frozen_manifest": true,
+    "seeds_equal_main_manifest": true,
+    "num_iter_40_all": true,
+    "each_planned_fit_recorded_once": true,
+    "failures_csv_matches_per_fit": true,
+    "data_equal_main_all": true,
+    "history_40_iterations_per_ok_fit": true,
+    "C_Q_recomputed_equals_checkpoint_scores_bitwise": true,
+    "C_Q_at_10_equals_main_per_fit_bitwise": true,
+    "final_Q_equals_q_after_40_all": true,
+    "selection_equals_prespecified_analysis": true,
+    "cell_counts_equal_prespecified_summary": true,
+    "no_ties_within_1e-9": true,
+    "state_sha256_manifest_matches_per_fit": true,
+    "states_present_on_disk_hash_ok": true
+  },
+  "all_ok": true,
+  "status_counts": {
+    "OK": 600
+  },
+  "n_fits": 600,
+  "mismatch_checkpoint_scores": [],
+  "mismatch_main_c_q": [],
+  "selection_diff": []
+}
