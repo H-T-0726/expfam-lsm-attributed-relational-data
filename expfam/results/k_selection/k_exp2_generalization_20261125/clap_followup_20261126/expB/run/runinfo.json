@@ -1,0 +1,12 @@
+{
+  "protocol": "expfam\\results\\k_selection\\k_exp2_generalization_20261125\\clap_followup_20261126\\expB\\protocol\\protocol.json",
+  "environment": {
+    "python": "3.13.14",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "blas_threads": "1"
+  },
+  "rows": 57,
+  "wall_s": 705.7
+}

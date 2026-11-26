@@ -1,0 +1,36 @@
+{
+  "rows": 57,
+  "all_repro200_equal": true,
+  "NS_converged_at_400": 6,
+  "NS_total": 52,
+  "it400_status": {
+    "OK": 6,
+    "NOT_STATIONARY": 46
+  },
+  "totals": {
+    "main10": {
+      "official": {
+        "exact": 249,
+        "INCOMPLETE": 47,
+        "under": 4
+      },
+      "Brule": {
+        "exact": 252,
+        "INCOMPLETE": 44,
+        "under": 4
+      }
+    },
+    "conv40": {
+      "official": {
+        "under": 4,
+        "exact": 23,
+        "INCOMPLETE": 3
+      },
+      "Brule": {
+        "under": 4,
+        "exact": 23,
+        "INCOMPLETE": 3
+      }
+    }
+  }
+}

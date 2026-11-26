@@ -1,0 +1,43 @@
+{
+  "created": "2026-11-26T14:39:38+09:00",
+  "git_head": "4a470f8a27b94966cac05e7202cedf6e1a322f4b",
+  "checks": {
+    "rank_F_equals_K_TRUE_all": true,
+    "mean_row_norm_sq_0.5": true,
+    "generation_reproducible_bitwise": true,
+    "Y_symmetric_zero_diag": true,
+    "poisson_lambda_below_1e3": true,
+    "strict_Q_equals_scipy_loglik": true,
+    "family_terms_equal_strict_Q": true,
+    "num_params_Kd_minus_rot_plus_5": true,
+    "estep_gradient_matches_fd": true,
+    "estep_precision_matches_fd_jacobian": true,
+    "laplace_gradient_hessian_match_fd": true,
+    "laplace_evaluator_runs_on_mixed_model": true
+  },
+  "all_ok": true,
+  "notes": {
+    "generator": {
+      "n_datasets": 34,
+      "max_lambda_poisson": 32.6046286614431,
+      "y_density_range": [
+        0.18595078299776285,
+        0.21655480984340045
+      ],
+      "gauss_resid_var_range": [
+        0.09001479456206922,
+        0.10854166524060077
+      ],
+      "poisson_mean_obs_vs_expected_max_absdiff": 0.1345596810248335
+    },
+    "estep_fd_rel": {
+      "gradient": 1.5188787626413028e-08,
+      "precision": 1.966343570225411e-11
+    },
+    "laplace_fd_rel": {
+      "gradient": 6.253015222836146e-08,
+      "hessian": 5.490583729600847e-10
+    },
+    "laplace_status_random_theta": "OK"
+  }
+}

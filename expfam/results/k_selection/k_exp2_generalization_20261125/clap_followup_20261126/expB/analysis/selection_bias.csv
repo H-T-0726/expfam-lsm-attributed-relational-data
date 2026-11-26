@@ -1,0 +1,9 @@
+source,rule,group,n,k_true_dist,C_Q_outcome_dist
+main10,official,complete,253,"{""1"": 46, ""3"": 44, ""5"": 51, ""7"": 56, ""9"": 56}","{""exact"": 229, ""under"": 24}"
+main10,official,incomplete,47,"{""1"": 14, ""3"": 16, ""5"": 9, ""7"": 4, ""9"": 4}","{""exact"": 47}"
+main10,Brule,complete,256,"{""1"": 48, ""3"": 44, ""5"": 52, ""7"": 56, ""9"": 56}","{""exact"": 232, ""under"": 24}"
+main10,Brule,incomplete,44,"{""1"": 12, ""3"": 16, ""5"": 8, ""7"": 4, ""9"": 4}","{""exact"": 44}"
+conv40,official,complete,27,"{""9"": 27}","{""under"": 13, ""exact"": 14}"
+conv40,official,incomplete,3,"{""9"": 3}","{""exact"": 3}"
+conv40,Brule,complete,27,"{""9"": 27}","{""under"": 13, ""exact"": 14}"
+conv40,Brule,incomplete,3,"{""9"": 3}","{""exact"": 3}"

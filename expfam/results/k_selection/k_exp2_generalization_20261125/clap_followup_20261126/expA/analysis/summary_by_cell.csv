@@ -1,0 +1,8 @@
+source,cell,n_datasets,exact_Zlast,exact_Zmean,incomplete_Zlast,incomplete_Zmean,under_Zlast,under_Zmean,over_Zlast,over_Zmean,selection_agree,both_complete,evals,evals_same_mode,evals_both_OK,median_abs_d_C_Lap,max_abs_d_C_Lap,status_pairs
+conv40,A-b-9,10,6,6,0,0,4,4,0,0,10,10,200,200,200,3.4397089621052146e-09,2.45181581703946e-07,"{""OK->OK"": 200}"
+conv40,B-b-9,10,8,10,2,0,0,0,0,0,8,8,200,200,196,2.371962182223797e-09,7.493144948966801e-07,"{""OK->OK"": 196, ""NOT_STATIONARY->OK"": 4}"
+conv40,O-b-9,10,9,5,1,5,0,0,0,0,5,5,200,200,194,8.676579454913735e-09,4.787507350556552e-07,"{""OK->OK"": 194, ""OK->NOT_STATIONARY"": 5, ""NOT_STATIONARY->OK"": 1}"
+main10,A-b-7,10,10,10,0,0,0,0,0,0,10,10,200,198,200,2.6338966563344e-09,8.000215993670281,"{""OK->OK"": 200}"
+main10,A-b-9,10,6,6,0,0,4,4,0,0,10,10,200,199,200,3.3924152376130223e-09,3.7054286641759973,"{""OK->OK"": 200}"
+main10,B-b-9,10,10,7,0,3,0,0,0,0,7,7,200,196,197,3.9217411540448666e-09,1.7479726044184645,"{""OK->OK"": 197, ""OK->NOT_STATIONARY"": 3}"
+main10,O-b-9,10,9,10,1,0,0,0,0,0,9,9,200,200,199,8.400093065574765e-09,3.1023046176414937e-07,"{""OK->OK"": 199, ""NOT_STATIONARY->OK"": 1}"
