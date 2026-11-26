@@ -1,0 +1,75 @@
+{
+  "created": "2026-11-26T12:34:20+09:00",
+  "git_head": "1b59fb9e39eb86a82c5b74b3b08202f3c83d7c4d",
+  "environment": {
+    "python": "3.13.14",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "blas_threads": "1"
+  },
+  "checks": {
+    "npz_6600_sha256_keys_shapes_finite_var_z1": true,
+    "regenerated_xy_equal_recorded_hash_all_datasets": true,
+    "Y_symmetric_zero_diagonal": true,
+    "smoke_data_regenerated_equal_hash": true,
+    "model_restore_loglik_equals_independent_formula": true,
+    "fd_gradient_hessian_agree": true,
+    "evaluator_status_ok_on_all_smoke_states": true,
+    "deterministic_repeat_bitwise": true,
+    "failure_NOT_STATIONARY_recorded_no_value": true,
+    "failure_exception_recorded_as_status_no_value": true,
+    "parallel_4_workers_equal_serial_bitwise": true
+  },
+  "all_ok": true,
+  "notes": {
+    "npz_bad": [],
+    "npz_checked": 6600,
+    "datasets_regenerated": 300,
+    "dataset_mismatch": [],
+    "fd_worst_rel": {
+      "grad": 8.562409543155411e-08,
+      "hess": 4.959363759899445e-10
+    },
+    "start_dependence_absdiff_C_Lap_Zlast_vs_Zmean": {
+      "n": 14,
+      "max": 1.4509372503944178,
+      "median": 2.5942426873371005e-08
+    },
+    "forced_failure_statuses": {
+      "max_iter0": "NOT_STATIONARY",
+      "nan_theta": [
+        "ERROR",
+        "LinAlgError: Eigenvalues did not converge"
+      ]
+    },
+    "timing_by_k": {
+      "1": {
+        "n": 6,
+        "median_s": 0.018000000000000002,
+        "max_s": 0.052,
+        "max_peak_MB": 98.21484375
+      },
+      "9": {
+        "n": 9,
+        "median_s": 1.069,
+        "max_s": 1.743,
+        "max_peak_MB": 143.265625
+      },
+      "10": {
+        "n": 9,
+        "median_s": 1.461,
+        "max_s": 2.955,
+        "max_peak_MB": 153.2734375
+      }
+    },
+    "machine": {
+      "total_MB": 16231,
+      "available_MB_now": 6740,
+      "physical_cores": 6,
+      "logical_cores": 12
+    },
+    "wall_s": 202.6
+  },
+  "scope": "NPZ/data integrity on the 6,600 planned inputs (no score computed); every C_Lap value here is on SMOKE states (data seeds offset by 5,000,000), never on main data"
+}
