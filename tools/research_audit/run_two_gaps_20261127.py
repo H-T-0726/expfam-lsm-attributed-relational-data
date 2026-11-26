@@ -838,7 +838,7 @@ def _fig_A(comp, out):
         ax.hlines(np.mean(v), i - 0.25, i + 0.25, color="k", lw=2)
     ax.axhline(0, color="#52514e", lw=1)
     ax.set_xticks([0, 1], ["dense Y (100% of pool)", "sparse Y (10% of pool)"])
-    ax.set_ylabel("Delta = RMSE_Z(wrong: Poisson) - RMSE_Z(correct: Bernoulli)\n(points = datasets, bar = mean)")
+    ax.set_ylabel("Delta RMSE_Z (Poisson - Bernoulli)\n(points = datasets, bar = mean)")
     ax.set_title("Per-dataset misspecification effect")
     ax = axes[1]
     v = [r["I_rmse_Z_last"] for r in comp]
