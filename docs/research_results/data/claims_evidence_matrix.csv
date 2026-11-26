@@ -1,0 +1,37 @@
+claim_id,domain,claim,label,claimability,lineage,evidence,result_ids,required_qualifiers,forbidden_overclaim
+CL-01,A,X 側と Y 側の分布を Gaussian / Bernoulli / Poisson から独立に指定するモデルを定式化し実装した,FACT,言える,B（C・E が継承）,AGENTS.md §1、expfam/src/model_dual_expfam.py、test_dual_expfam.py,,実装レベルの一般化で性能の主張ではない。Categorical は未対応（KI-005）。family_x は全列共通,指数型分布族すべてに対応した
+CL-02,A,E-step の勾配・精度行列は V(η)=A''(η)/φ を通じて family に依存し、本研究の採用式は unique pair の条件付きで extra 1/2 を持たない,DERIVED,言える,採用式,RESEARCH_MASTER §6、docs/math_notes/half_factor_math_explanation.md,,原論文の印刷式には 1/2 がある（2026-08-18 確認）。差は独立導出に基づく意図的な差,原論文にも 1/2 がない／原論文が誤り
+CL-03,A,先行研究と同条件で、一般化実装は再現実装と同じ挙動をする（k_est=3・4 で RMSE(Z) 差 <0.001）,OBSERVED,限定付きなら言える,B と reproduction（どちらも 0.5）,reproduction/results/comparison/comparison_main_table.csv,A-01;A-02-k3;A-02-k4;A-02-k6,5 試行、k_est=3・4 のみ（k_est=6 では差 0.024）、両方 0.5 系統,採用式の正しさを示した
+CL-04,B,fixed 系列の人工データで、n=50→300 で RMSE(Z) が A 49.3%・B 41.2%・C 58.6% 減少した,OBSERVED,限定付きなら言える,C,fixed_official/exp2/,B-02-A;B-02-B;B-02-C,明示した生成設定（historical generator、K_TRUE=3）の中,一致性、一般に n で改善、0.5 系列と同じ表
+CL-05,B,fixed 系列で分布の誤指定は RMSE(Z) を悪化させ、最悪は A 4.34×・B 9.04×・C 40.37×,OBSERVED,限定付きなら言える,C,fixed_official/exp4/,B-04-A;B-04-B;B-04-C,最大値は X・Y 両側の誤指定セル、平均の比、10 trial,倍率を別系列の 23.6×/41.45× と同条件として並べる
+CL-06,B,属性次元 d の効果はシナリオに依存した（A は改善、B は平均が d=15 で最小・中央値は単調減少、C は平坦）,OBSERVED,限定付きなら言える,C,fixed_official/exp3/,B-03-A;B-03-B;B-03-C,fixed 系列・1 生成設定。B の平均の増加は少数 trial の外れ値による,d を増やせば改善する
+CL-07,B,学会予稿（旧 0.5 系列）の n 依存 49/31/62% と誤指定 3.41×/7.35×/41.45× は一次 CSV から再計算できる,OBSERVED,限定付きなら言える,B（0.5）,expfam/results/exp_scenario_*,B-05-A;B-05-B;B-05-C;B-06-A;B-06-B;B-06-C,KI-001：Newton 方向が全体として正しいとは断定できない。予稿時点の記録として,fixed 系列と同じ表、差を 0.5 除去の効果と読む
+CL-08,B,現行の K 選択基準 C_Q（関数 calc_bic_dual、列名 BIC）は Schwarz BIC ではなく Q ベースの完全データ型（ICL 型）基準である,DERIVED,言える,B/C/E,KI-010、RESEARCH_MASTER §12.6・§17.4,,関数名・列名は変更しない,Schwarz BIC で K を選んだ
+CL-09,B,C_Q は 1 次元あたり n(1+ln2π)（n=150 で 425.68）の K だけで決まる項を含む,DERIVED,言える,E（コード確認）,eval_utils.py calc_Q_dual_strict_exp、K-exp2 claim_ledger 命題 D、#159,,scale_Z による var_z=1 の正規化下。#163 命題 C-1 でスケール恒等式,これが過小選択の唯一の原因
+CL-10,D,sparse-Y・補完的 block の人工設定で、per-column の同時利用は RMSE_Z を改善した（y_only 比 +0.51、single_gaussian 比 +0.20）,OBSERVED,限定付きなら言える,E+F（prototype）,complementary_blocks_consistent_20260821_paired.csv,D-01-0.1-y_only;D-01-0.1-single_gaussian;D-01-1.0-single_gaussian;D-01-1.0-y_only,prototype、2 設定。dense では最良の単独 block 比 +0.009（y_only 比は +0.051）,一般に優れる、実データで有効、正式手法
+CL-11,D,改善の機構は latent coverage である,HYPOTHESIS,現在は言ってはいけない,E+F,matched_latent_coverage_ablation,D-02,secondary comparator で一貫しない、D_J=+0.201,latent coverage が原因
+CL-12,D,列ごとの family 設定で、Bernoulli 列の Poisson 誤指定の悪影響は sparse-Y で大きかった（dense +0.020、sparse +0.066）,OBSERVED,限定付きなら言える,E-3,misspecification_m1、z_point_estimator_e1,D-03-dense;D-03-sparse;D-04;D-05,拡張モデル（G3/B6/P3）、1 条件、dense の last は再現しない,正式モデルの結果、一般法則
+CL-13,D,誤指定の悪影響と Y の量の交互作用の向きは、誤指定の種類で逆になる,OBSERVED,限定付きなら言える,E-3,misspecification_extended（PR #168、未 merge）,D-06-0.1;D-06-1.0,未 merge、重複実行事故あり,一般法則
+CL-14,D,正式モデル（全列共通 family）で Y の量 × 誤指定の実験,UNRESOLVED,追加検証が必要,—,claim_adoption_matrix.md MS-3,,該当する実験が存在しない,正式モデルで Y が少ないほど誤指定の影響が大きい
+CL-15,E,"{0,1} 列では Bernoulli と Poisson の選択は解析的にほぼ決まり、AF1 では Auto の誤り 0（160 fit）",DERIVED+OBSERVED,限定付きなら言える,E-3,af1_20261109,E-01,解析的な性質による。Auto=Oracle は seed 共有,自動選択は一般に機能する
+CL-16,E,Laplace 型の列ごとの分布選択が Q より優れる,OBSERVED（否定的）,現在は言ってはいけない,E-3,af6_laplace_confirmation statistical_analysis.csv,E-02,"事前登録した確認で主要評価項目は未達成（+0.225 [−0.075, 0.525]）",Laplace / 積分基準は Q より優れる
+CL-17,E,積分型の選択基準は prior（測度）に依存し、非入れ子の 2 候補で O(1) の差が残る,DERIVED,限定付きなら言える,E-3 + PR #129,AF8 mathematical_derivation.md,,未 merge、規範的な prior 選択は未解決,積分すれば正しく選べる
+CL-18a,F,fixed 系列の強信号条件（n=150、K_TRUE=3、historical generator）で C_Q は 30/30 trial で K=3 を選んだ,OBSERVED,限定付きなら言える,C,fixed_official/exp1_k9,B-01,1 条件、historical generator、Schwarz BIC ではない,BIC で正しい K を選べる、一致性、系列 E の結果と同じ表に並べる
+CL-18b,F,系列 E の強信号条件では C_Q は過小選択しなかった。K-exp2 regime a（canonical-clean-v1、方向ごとの信号を固定）は 200/200 正解・過大 0。#165（原論文本文どおりの生成、1 データ × 10 試行）は 29/50 正解で、誤りはすべて過大,OBSERVED,限定付きなら言える,E-scalar,K-exp2 main、#165,F-12;F-15;F-07;F-08,2 つの実験は生成器・集計規則が違う。過大選択が出たのは #165 だけ。K_TRUE と K* は別,一致性、「強信号では C_Q は過大に誤る」と一般化する、系列 C の結果と同じ表に並べる
+CL-19,F,弱い信号・高い K_TRUE では、同じ fit の上で C_Q は C_Lap より小さい K を選び、過小選択が起きた（9K、#164、K-exp2 A-b-7/9・B-b-9、混合 X）,OBSERVED,限定付きなら言える,E（prototype）,lap_vs_cq_20、criterion_impact、clap_comparison、mixedx_highk,F-05;F-10-p2-CQ;F-10-p2-CLap;F-13-Ab9;F-19-main10;F-20;F-23-9;F-24-9,探索的が多い、C_Lap は近似、INCOMPLETE を別記,C_Lap が正しい、C_Lap は一般に優れる
+CL-20,F,C_Q と C_Lap の差は、理想化のもとで事後エントロピーの項（C_Q ≈ C_marg + 2H）に対応する,DERIVED,限定付きなら言える,—,#163 03_cq_qz_derived_analysis.md、#164 05,,厳密な事後分布での理想化。数値の一致は termA と R3 の打ち消し合いによる（未説明）,C_Q の過小選択の原因を解明した
+CL-21,F,C_Lap は過大選択しない,OBSERVED（矛盾あり）,現在は言ってはいけない,E,#159（過大なし）vs #165（過大 20/50、評価不能 6）、K-exp2（完了データで過大 0、ただし INCOMPLETE は余分な次元に偏る）,F-08b;F-21,条件によって結果が逆,C_Lap は過大選択しない
+CL-22,F,原論文型の条件付き尤度（Z 固定、p(Z) なし）の基準は、本研究の条件では過大選択する,OBSERVED,限定付きなら言える,E,#159、#164、#165,,原論文の BIC そのものではない（Z の評価点を明示した近似版）,原論文の BIC は誤り
+CL-23,F,C_Q の過小選択は MCEM の打ち切りだけでは説明できない（A-b-9 は 40 反復でも 0/10、#156 の A は 64 反復でも 0/8）,OBSERVED,限定付きなら言える,E,convergence_sensitivity、mcem_stability,F-16-A;F-16-B,B-b-9 は反復で 5→8→7 と変わる。収束したとは言えない,反復を増やせば正しい K を選ぶ／収束させても変わらない
+CL-24,F,K 選択の成否は「追加次元の当てはまり改善」と「K だけで決まるコスト」の大小で決まる（恒等式）。信号を強めると余裕が増える,DERIVED+OBSERVED,限定付きなら言える,E,#155、#156、#157,,4 vs 5 の局所比較、n=75,原因の完全な分離
+CL-25,F,原論文 Fig.3 の結果を再現した,—,現在は言ってはいけない,—,#158、#165,F-07,原論文の手順が特定できない,再現した
+CL-26,F,K 選択基準の一致性,UNRESOLVED,追加検証が必要,—,RESEARCH_MASTER §17.6・§19（U6）,,特異モデル・RLCT 未知,一致性を確認
+CL-27,G,Bernoulli-Y で K が識別できるか,UNRESOLVED,追加検証が必要,—,RESEARCH_MASTER §17.6（U2）,,実験の大部分が Bernoulli-Y,識別可能／不可能のどちらの結論も
+CL-28,G,Poisson-X（P1）と Gaussian-Y（P2、w≠0）では population で K が識別できる,DERIVED,限定付きなら言える,—,true_k_identifiability_hardened_20260904.md,,population の命題、有限標本・一致性なし、canonical（clip なし）,有限標本で K を推定できる
+CL-29,C,Wine で C_Q（列名 BIC）最小は k=3 でクラス数と一致した,OBSERVED,限定付きなら言える,C,wine_clean,C-01,Y はラベル由来、in-sample,自然ネットワークでの有効性、K を正しく選んだ
+CL-30,C,旧 Cora で test_AP 0.43–0.46（random 0.167）,OBSERVED,限定付きなら言える,C,cora_clean,C-02,test 辺を学習時に 0 とする transductive 設計、負例 1:5 のサンプリング評価,strict held-out で予測できた、full Cora に一般化
+CL-31,C,MovieLens user-disjoint で mixed-X の平均は正（+0.0042、23/30）だが split 間変動に比べ小さい,OBSERVED,限定付きなら言える,E+F,movielens_userdisjoint,C-03,30 split は独立 replicate ではない、CI 未計算、prototype,有効性を確認、有意
+CL-32,C,raw-count Poisson は log-count より悪化した（−0.100、29/30）,OBSERVED,限定付きなら言える,E+F,movielens_userdisjoint,C-04,原因は未解明（4 要因が交絡）,Poisson は不適、切片欠如が原因
+CL-33,C,Cora strict held-out で BX raw が GX raw をわずかに上回った（K=6 +1.06e-4、13/15）が、中心化した GXc では逆転した,OBSERVED,限定付きなら言える,E-scalar + BX-Newton,cora_strict_heldout_family_main_20261124,C-06-K6-GX;C-06-K3-GX;C-06-K6-GXc,1 ネットワーク、固定予算、EM 未収束、未 merge,Bernoulli が正しい分布だから良い、有意、一般化
+CL-34,C,実データで正解の潜在構造や分布が分かっている,—,現在は言ってはいけない,—,—,,実データでは真の Z・family は未知,実データで正しい K・分布を選んだ
+CL-35,A,指数型分布族への拡張そのものが新規性である,INTERPRETATION,追加検証が必要,—,reports/prior_art/、#136・#138（main）,,先行研究に混合 family・同時潜在モデルの例がある。新規性の最終判断は Human Gate,無条件に新規と主張する

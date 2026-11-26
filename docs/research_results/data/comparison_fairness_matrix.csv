@@ -1,0 +1,33 @@
+comparison_id,comparison,experiments,grade,same_data,same_seed,same_split_mask,same_conditions,same_lineage,same_budget,same_information,same_metric,failure_handling,prereg_vs_posthoc,reason,allowed_reading,forbidden_reading
+FC-01,Python 再現 vs 一般化実装（Control）,A-REPRO,A,yes,yes,n/a,yes,両方 0.5 系統,yes,yes,yes,失敗なし,事前,同じ生成データ・同じ条件で 2 実装を比較,k_est=3・4 で RMSE(Z) 差 <0.001,採用式（1/2 なし）の正しさの検証
+FC-02,旧 0.5（B）と fixed（C）の数値を並べる（49/31/62% vs 49.3/41.2/58.6%）,B-OLD05-EXP1-4;B-FIXED-EXP2,D,partial,不明,n/a,対応表なし,no,不明,yes,yes,—,—,実装系列が違い、条件対応表が存在しない（RESEARCH_MASTER §15）,それぞれの系列内の記述,差を 0.5 除去の効果と読む、同じ表・図に並べる
+FC-03,fixed Exp4：正指定 vs 誤指定,B-FIXED-EXP4,A,yes,yes,n/a,yes,yes,yes,yes,yes,なし,事前,同一データ・同一 trial で family だけを変える,誤指定で RMSE(Z) が悪化した（倍率は平均の比）,倍率を CI 付きの効果量と読む
+FC-04,誤指定倍率 23.6× / 41.45× / 38.97× / 40.37× を並べる,B-OLD05-EXP1-4;B-FIXED-GRID;B-FIXED-EXP4,D,partial,不明,n/a,no,no,不明,yes,yes,—,—,系列・true/est 条件・集計が異なる（KI-003）,各値を出典条件つきで個別に引用,同一条件の値として並べる
+FC-05,per_column_all vs single block / y_only（complementary）,D-COMPL,B,yes,yes,yes,partial,yes,yes,列数が違う,yes,なし,事前,同じデータだが比較対象が使う属性列数が異なる,この人工設定で joint のほうが RMSE_Z が小さかった,情報量をそろえた比較・一般の優越
+FC-06,dense-Y vs sparse-Y（M1）,D-M1,A,yes,yes,観測率のみ違う（test 10% 固定）,yes,yes,yes,Y の量だけ違う,yes,なし,事前,同一データ・同一 test で学習 Y の量だけを変える,B→P の悪影響は sparse で大きかった（この設定）,一般法則、正式モデルの結果
+FC-07,M1 と E1 Part B（再現性）,D-M1;D-E1,B,yes,no,yes,yes,yes,yes,yes,Z 点推定が違う,なし,事前,同じデータ・別 seed。Z の点推定 3 種,sparse の向きは別 seed でも再現（joint mode）,新しいデータでの再現
+FC-08,MX2：誤指定の種類 × Y の量,D-MX2,B,yes,2 系列,yes,partial,yes,yes,yes,yes,重複実行は最初の記録のみ採用,事前（report）,同じデータで誤指定の種類を変えるが、列数・family も同時に違う,交互作用の向きは種類に依存,「Y が少ないほど誤指定の悪影響が大きい」という一般則
+FC-09,AF1：Auto vs Oracle vs Wrong,E-AF1,A,yes,Auto=Oracle は refit seed 共有,yes,yes,yes,yes,yes,yes,なし,事前（confirmatory）,"同一データ。ただし結果は {0,1} 列の解析的性質でほぼ決まる",この条件で Wrong の悪化を回避,自動選択は一般に機能する
+FC-10,AF5（Laplace）vs Q を同じ 20 データで評価,E-AF3-5,C,yes,yes,yes,yes,yes,yes,yes,yes,—,事後（手法を同じデータで設計）,手法の設計と評価に同じデータを使った,仮説の生成,改善の証拠
+FC-11,AF6：Laplace vs Q（新 40 データ、事前登録）,E-AF6,A,yes,yes,yes,yes,yes,yes,yes,yes,事前規則,事前（confirmatory）,新しいデータで事前登録,主要評価項目は未達成,効果がないことの証明（検出力 0.30）
+FC-12,AF8-v3 E2 vs AF6 Laplace,E-AF8V3,C,yes,yes,yes,yes,yes,n/a,yes,yes,—,探索（データ再利用・forking paths）,AF6 データを再利用し主手法の選び方に自由度がある,探索的観察,確認的証拠
+FC-13,Bernoulli vs Poisson、Poisson vs CMP2 の尤度比較,E-AF1;E-AF2;E-129,B,yes,yes,yes,yes,yes,yes,yes,support・正規化定数が違う,CMP 候補の認証不可 22 fit,事前,"support が違う分布の尤度は同じ点で比べても前提が要る（{0,1} では Bernoulli が常に勝つ）",条件付きの記述,無条件に公平な比較とみなす
+FC-14,C_Q vs C_Lap（同じ fit）,F-9K;F-164;F-KEXP2-CLAP;F-KEXP2-C,B,yes,yes,yes,yes,yes,yes,yes,基準の定義が違う（目的）,C_Lap の INCOMPLETE（非 OK）を分母 10 のまま記録,多くは事後・探索,データ・θ̂ は対応している（同じ fit）。ただし θ̂ は C_Lap の停留点ではなく（Phase 9M）、INCOMPLETE は C_Lap 側だけに偏り、2 基準は推定目標が違うので、どちらが正しいかは判断できない,同じ fit の上で選ばれる K が違った,どちらが正しいか、C_Lap の全体成功率（INCOMPLETE 除外）
+FC-15,K-exp2 regime a vs b,F-KEXP2-MAIN,A,Z・Q 共有,yes,yes,信号の配分だけ違う,yes,yes,yes,yes,なし,事前（b は感度分析）,Z・Q を共有した対応比較,regime の切り替えが選択を変えた,信号の「配分」が原因（複数成分が同時に変わる）
+FC-16,K-exp2 series O/A/B/C の比較,F-KEXP2-MAIN,C,no,no,yes,family・ノイズ・w 規則が違う,yes,yes,no,yes,なし,事前,family 以外の生成規則も同時に違う,記述,family の効果
+FC-17,単一分布 X（K-exp2 本実験）vs 混合分布 X（追加 C）,F-KEXP2-MAIN;F-KEXP2-C,C,no,no,yes,列構成・信号量が違う,scalar vs per-column,yes,no,yes,なし,C は事後に計画,生成条件と実装クラスが違う。Gaussian 列の情報量が大きい,共通する向き（高い K_TRUE で C_Q が過小）を記述,分布を混ぜたことの効果、混合分布の優位性
+FC-18,原論文 Fig.3 と本研究（#165、K-exp2）,F-165;F-KEXP2-MAIN;A-PAPER,D,no,no,no,手順が特定できない,no,不明,不明,Eq.(26) と C_Q は別物,—,—,原論文の集計・Z の評価点・正規化が不明,定性的な対比,数値の比較、「再現した」
+FC-19,歴史的な成功（Python 5/5、初期 ExpFam 25/25）vs canonical の失敗,F-158;F-160,C,no,no,no,6 要因が同時に違う,partial,no,no,partial,—,事後,n・観測・信号・生成器・推定器・基準が同時に違う（#160）,条件が違うことの記述,成功率の横比較・原因の断定
+FC-20,強信号（#165）vs 弱信号（#164・K-exp2）,F-165;F-164;F-KEXP2-MAIN,C,no,no,partial,no,yes,partial,no,yes,—,—,信号・n・試行の集計規則が違う,条件によって過大と過小の向きが逆になった（記述）,矛盾の解消・一般化
+FC-21,OLD（0.5）vs 系列 E の推定器（n=75、全ペア）,F-161;F-162,B,yes,yes,yes,yes,no,yes,yes,yes,なし,事前,同じデータ・初期値・seed の系列をまたぐ統制比較（KI-002 の例外として参考扱い）,この条件で選択は一致,同じ表で成功率を比べる
+FC-22,Phase 9K（C_Q 14/20）と 9E（C_Q 17/20）,F-9K;F-9E,C,no,no,yes,yes,yes,yes,yes,yes,なし,—,同条件だが seed が違う 2 組のデータ,seed の組で変わる変動の大きさ,どちらかを正しい率とする
+FC-23,clean n-sweep の n 間比較,F-CLEAN-N,B,n ごとに別データ,yes,yes,partial,yes,固定 EM 予算,yes,yes,なし,事前,固定の反復数が n と交絡,n とともに選択 K が K_TRUE に近づいた（単調ではない）,一致性
+FC-24,EM checkpoint 間（反復数）の比較,F-EMCONV;F-KEXP2-CONV;F-156,B,yes,yes,yes,yes,yes,反復だけ違う,yes,yes,なし,事前/探索,追加反復で MC サンプルも引き直すため、最適化と MC 変動が交絡,反復で選択が変わった／変わらなかった,収束した、純粋な最適化効果
+FC-25,CORA-SH1：BX vs GX vs GXc,C-CORA-SH1,B,yes,yes,yes,yes,yes,yes,前処理（中心化）が違う arm がある,yes,なし（105/105 OK）,事前（primary は BX−GX）,同じ split・seed の対比較。統計単位は 1 ネットワーク,固定予算・現行仕様で BX raw が GX raw をわずかに上回った,family の優越、有意、一般化
+FC-26,旧 Cora held-out と CORA-SH1,C-CORA-OLD;C-CORA-SH1,D,no,no,no,no,no,no,no,AP（負例 1:5）vs 平均 log score,旧：NaN 時 seed 変更 retry,—,旧は test 辺を 0 として学習する transductive 設計、subset も違う,別々に記述,数値を並べて比較
+FC-27,MovieLens in-sample（Pearson 0.96）と user-disjoint,C-ML-INSAMPLE;C-ML-USERDISJ,D,no,no,no,no,no,no,no,no,—,—,評価が in-sample 再構成と strict 予測で違う。旧 subset に selection leakage,別々に記述,予測性能の比較
+FC-28,MovieLens mixed_train_log vs genre_only（#33）,C-ML-USERDISJ,B,yes,yes,yes,yes,yes,yes,属性が違う（比較の目的）,yes,なし,事前,同じ split の対比較。30 split は同じ 943 users の再利用,平均の向きは正だが split 間変動に比べ小さい,有意、30 independent
+FC-29,Wine の C_Q 最小 k=3 とクラス数 3,C-WINE,C,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,—,—,Y がラベル由来なので一致は設計に依存,in-sample の記述,K を正しく選んだ
+FC-30,Gaussian-Y の K 回復と Bernoulli-Y の K 選択,F-GAUSSY;F-KEXP2-MAIN,C,no,no,n/a,no,yes,partial,no,yes,—,—,Y family・生成器が違う。識別可能性の理論的状態も違う（P2 vs U2）,記述,Bernoulli-Y でも識別できる
+FC-31,C_Lap の INCOMPLETE を除いた正解率,F-KEXP2-CLAP;F-KEXP2-C,D,yes,yes,yes,yes,yes,yes,yes,yes,INCOMPLETE は K_TRUE が小さい・余分な次元に偏る,—,除外すると選択バイアスが入る,分母 10 のまま INCOMPLETE を別記,完了データの率を全体の成功率と呼ぶ
+FC-32,1 データ × 複数初期値（#165 の 10 試行）と独立データ,F-165,D,同じデータ,no,yes,yes,yes,yes,yes,yes,—,—,試行は初期値・MC 系列の違いだけで、データは共有,試行間のばらつき,10 試行を 10 個の独立な replicate と数える

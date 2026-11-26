@@ -1,0 +1,30 @@
+source,kind,ref,coverage,notes
+AGENTS.md / CLAUDE.md,canonical,main@1b5030b,READ_FULL,研究指示の正本
+EXPERIMENT_REGISTRY.md,canonical,main@1b5030b,READ_FULL,全 549 行。experiment_inventory.csv の骨格
+RESEARCH_MASTER.md,canonical,main@1b5030b,READ_PARTIAL,§8b・§9・§14 Claim Ledger・節見出しを読んだ。§16–§22 は見出しと registry 経由
+KNOWN_ISSUES.md,canonical,main@1b5030b,READ_VIA_CITATIONS,KI-001/002/003/004/007/010/011/014/015/018/019/021 を他文書経由で参照。全文精読はしていない
+docs/research_operating_policy.md,canonical,main@1b5030b,NOT_READ_IN_FULL,AGENTS.md の要約で代替
+README.md / conference_submission_final_draft.md,canonical,main@1b5030b,NOT_READ_IN_FULL,予稿の数値は registry と一次 CSV で確認
+paper/（原論文 PDF）,primary,main@1b5030b,VIA_PRIOR_AUDIT,PDF は本監査で再読していない。2026-08-18 の一次確認と #158 の図読み取りに依拠
+reproduction/results/comparison/,primary,main@1b5030b,RECOMPUTED,"A-01, A-02"
+expfam/results/（main の主要 CSV）,primary,main@1b5030b,RECOMPUTED_SUBSET,primary_results_index.csv の MAIN 行
+reports/thesis_adoption/（4 文書 + 追補）,synthesis,docs/thesis-adoption-20261124@8a66894,READ_FULL,11/24 の採用判定表。数値は本監査で独立に再計算
+reports/research_synthesis_20261116/evidence_matrix.md,synthesis,docs/thesis-adoption-20261124@8a66894,READ_FULL,AF1–AF8 の総括
+AF1–AF8 の結果ディレクトリ,primary,docs/thesis-adoption-20261124@8a66894（f71c04d を含む）,RECOMPUTED_SUBSET,AF1 の列選択と AF6 の PRIMARY 行のみ再計算
+CORA-SH1,primary,docs/thesis-adoption-20261124@8a66894（d383cb5 を含む）,RECOMPUTED,heldout_scores.csv から対差を再計算
+#155–#165 の stack,primary+reports,research/paper-fig3-condition-criteria-20261109@bada1d2,READ_SUMMARIES+RECOMPUTED_SUBSET,各 advisor summary を読み、#164・#165 の選択を再計算
+"K-exp2（8,000 / 600 / 6,600 / A・B・C）",primary,experiment/k-selection-exp2-generalization-20261125@9d12dc4,RECOMPUTED,per_fit.csv・checkpoint_scores.csv・evaluations.csv から選択を再計算
+MX2（PR #168）,primary,experiment/misspecification-extended@856d475,RECOMPUTED_SUBSET,bp6 の Y 観測率別平均
+per-column mixed-X K / canonical Gaussian-Y,primary,experiment/per-column-mixed-x-k-selection-20260907@d610a8d,RECOMPUTED,selection_by_trial.csv
+historical P/B K5 n-sweep,primary,research/historical-pb-k5-n-sweep-20260906@600108d,RECOMPUTED,summary.json の trial 選択から
+multisupport（PR #129）,primary,exp/multisupport-family-selection@4fa6159,LISTED_ONLY,結果ディレクトリの存在のみ確認。数値は AF 総括の引用
+family-selection hard-case audit,report,research/family-selection-hard-case-audit@9beadce,LISTED_ONLY,文書の存在のみ
+E2c runner（#142）,code,experiment/142-em-iterations-e2c@11f42bf,LISTED_ONLY,結果なし（設計のみ）
+"Notion / advisor 向け文書（2026-09-06, 10-01）",report,"docs/notion-k-selection-story-20260906, docs/k-selection-theory-20260906, docs/phase9-progress-material-audit",LISTED_ONLY,派生資料（一次根拠にしない）
+docs/untracked-reports-preservation-20261124,report,d946910,LISTED_ONLY,2026-09-07 の未追跡理論監査 4 件（不採用の historical record）
+docs/additional-experiment-design-20261123,design,59eac14,LISTED_ONLY,thesis-adoption に含まれる追加実験の設計監査
+integration/* ブランチ,merge,"f8149ab, 21075e6",CHECKED,main に統合済みの内容と同じ（PR #150–#154）
+GitHub PR #1–#174,index,gh pr list,LISTED,タイトルと状態を確認。PR 本文・コメントは読んでいない
+GitHub Issue（#136・#138 ほか）,index,—,NOT_READ,Issue 本文は読んでいない。#136・#138 の内容は main の reports/prior_art/・reports/research_framing/ 経由
+git 管理外の NPZ・fit 状態,local,D:/tento/research_backups ほか,NOT_ACCESSED,NPZ を使う再評価（C_Lap、checkpoint）は本監査では再実行していない
+作業 PC の未追跡ファイル（D:/tento/kennkyu の reports/research_scope/ ほか）,local,—,NOT_ACCESSED,d946910 で保存された版を参照

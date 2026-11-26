@@ -1,0 +1,64 @@
+# 11 限界と未解決問題
+
+[← README](README.md)
+
+## 1. 理論の未解決問題
+
+| # | 問題 | 状態 | 出典 |
+|---|---|---|---|
+| T1 | Bernoulli-Y で $K$ が識別できるか | UNRESOLVED（実験の大部分が Bernoulli-Y） | RESEARCH_MASTER §17.6（U2） |
+| T2 | どの $K$ 選択基準についても一致性 | UNRESOLVED（特異モデル、RLCT 未知） | §17.6・§19（U6、U5） |
+| T3 | C_Lap（ラプラス近似）の誤差の大きさ・向き・$K$ 依存性 | UNRESOLVED | #163（T-U1） |
+| T4 | MCEM の θ̂ が C_Lap の最大化点ではないことの影響 | UNRESOLVED | #163（T-U2）、Phase 9M |
+| T5 | C_Q − C_Lap ≈ 2H_Lap が数値で成り立つ理由（termA と R3 の打ち消し合い） | UNRESOLVED | #163 §6 |
+| T6 | Gaussian-X 系列で $K^\ast = K_{TRUE}$ か（$K_{TRUE}=9$ は Anderson–Rubin の十分条件を満たさない） | 未証明 | K-exp2 claim_ledger U4 |
+| T7 | 混合分布 X での $K$ の識別可能性 | 未証明 | K-exp2 追加 C |
+| T8 | 積分型の分布選択基準で「正しい」prior | 規範的な問題で未解決 | AF8 |
+| T9 | Y 側は入れ子にならない（スカラー $w$ を全次元が共有）。過大側の候補は誤指定になる | Gaussian-Y で証明、Bernoulli-Y は未解決 | #163 §2-9 |
+
+## 2. 実験の未解決問題
+
+| # | 問題 | 何が足りないか |
+|---|---|---|
+| E1 | 原論文 Fig.3 で正しい $K$ を選べた理由 | 原論文の集計・$Z$ の評価点・$\ln L$ の正規化・$w_0,w$ の生成が特定できない |
+| E2 | A-b の過小選択の原因（基準の性質か、Poisson-X の情報量か、局所解か） | C_Q では打ち切りで説明できない。C_Lap でも 4/10 は過小 |
+| E3 | regime a/b のどの成分が選択を変えたか | 信号の成分を 1 つずつ変える設計 |
+| E4 | family 固有の効果 | 系列間で信号・ノイズ・$w$ の規則をそろえた設計 |
+| E5 | C_Lap の NOT_STATIONARY 34 件（max_iter=400 でも勾配が大きい） | 原因未調査 |
+| E6 | 正式モデル（全列共通 family）で Y の量 × 誤指定 | 実験が存在しない |
+| E7 | per-column の改善機構 | #31 で同定に失敗 |
+| E8 | raw-count Poisson が悪化した原因 | 切片・raw scale・曲率・X の過分散が交絡（KI-018） |
+| E9 | 実データでの自動選択・per-column の有効性 | 未検証 |
+| E10 | Cora subset の結果が full Cora に一般化するか | 未検証（KI-011） |
+| E11 | 旧 0.5 系列と fixed 系列の条件対応 | 対応表が存在しない（§15） |
+| E12 | MCEM の推定値の揺らぎの中心が最尤推定の近くにあるか | 近似 Gibbs の偏りを測っていない（#157） |
+| E13 | $n$・$d$・family 構成・反復数を変えたときの K-exp2 の一般性 | 1 つの $n$・$d$・生成規則 |
+
+## 3. 再現性・証拠管理の限界
+
+- **未統合の成果が多い**：#155–#165、AF1–AF8、MX2、CORA-SH1、K-exp2 は `main` に入っていない。
+- **NPZ（fit の状態）は git 管理外**：K-exp2 は SHA-256 の一覧と同じドライブ上の zip があるが、別の媒体へのバックアップはまだない。
+- **提出用図の生成元が未特定**：fig1a・fig1b（registry）、`comparison_old_vs_fixed.png`（KI-004）。
+- **Phase 7e の stdout capture 方式は復元できない**（§12.8）。
+- **AI 生成レポート（GEMINI_REPORT 系）**は一次根拠にしない（KI-007）。
+
+## 4. 現在は書いてはいけないこと（主なもの）
+
+| 書いてはいけないこと | 理由 |
+|---|---|
+| Schwarz BIC で $K$ を選んだ | C_Q は Q ベースの ICL 型（KI-010） |
+| C_Lap は厳密な周辺尤度・正しい基準・一般に優れる・過大選択しない | 近似で誤差未測定。過大選択は #165 で 20/50（評価不能 6） |
+| 原論文 Exp.2・Fig.3 を再現した | 手順が特定できない |
+| $K$ 選択の一致性を確認した | 未証明 |
+| $K^\ast$ を選んだ | $K_{TRUE}$ との一致を見ただけ |
+| per-column が一般に優れる・実データで有効・正式手法 | prototype、dense-Y・実データでは小さい |
+| 自動選択で $Z$ の推定が一般に改善する | 1 条件・小さな差 |
+| Laplace / 積分型の分布選択は Q より優れる | AF6 未達成、AF8 は prior 依存 |
+| MovieLens で有効性を確認、有意、30 independent | split は独立でない |
+| 旧 Cora で strict held-out 予測ができた | transductive 設計 |
+| Bernoulli が正しい分布だから Cora の予測が良い | 中心化で逆転、1 ネットワーク |
+| 旧 0.5・fixed・consistent の数値を同じ表で比べる | KI-002 |
+| 分布を混ぜると $K$ 選択が改善・悪化する | 生成条件が違う比較 |
+| 指数型分布族への拡張そのものが新規性である | 先行研究に関連する例がある。新規性の判断は Human Gate |
+
+詳しくは [`claims_evidence_matrix.csv`](data/claims_evidence_matrix.csv) と `RESEARCH_MASTER.md` の Claim Ledger（§14・§16・§18・§19）。
