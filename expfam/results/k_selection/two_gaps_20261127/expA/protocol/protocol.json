@@ -1,0 +1,47 @@
+{
+  "experiment": "A",
+  "frozen_at": "2026-11-27T01:51:21+09:00",
+  "git_head": "1f53d80c695841fd14b8e08e53ebcf799d805ede",
+  "git_dirty": "",
+  "code_sha256": {
+    "tools/research_audit/run_two_gaps_20261127.py": "47a092778e1657fcea464bc2880982eda27e201c30ea2ae20dfeea1e6efa4311",
+    "tools/research_audit/run_k_exp2_clap_comparison.py": "9ee6ff41c8db8d4097c3a02635d949c30adaa44a70cce024b239c00f7ff88d52",
+    "expfam/src/experimental/k_exp2_design.py": "f9dd90063917cd87b942d5b1863721e631cdb86553d5ba64bc32aedab6e59a0b",
+    "expfam/src/experimental/data_generator_canonical.py": "fcd494849ea16fc576b24daf442a5f5490d5add9c2f2ce29c66bce1a2c2a6763",
+    "expfam/src/experimental/em_runner.py": "8eea7a9b6bcef80b9a9e9c778bf3022431e62f1dd2c94ff411eb0896d13232cd",
+    "expfam/src/experimental/model_dual_expfam_consistent.py": "c058bf87bae1f7890b9729e5106ad05df3ce04ef6e2ae3a3992a8106f97ba22c",
+    "expfam/src/experimental/model_dual_expfam_masked.py": "c75e55700d9837e1d285bdc75ac4bf3ea098c8e71e999e339fbdcc7817da59ae",
+    "expfam/src/experimental/eval_utils.py": "29cf72cbbb4366db6e693b8f340fbb20295b08b75f7e1a3eb3f2f8bb0b209821",
+    "expfam/src/experimental/laplace_k_criterion.py": "d96009f97704262dfd390236eb4a026b5546156016a04229471161654d07fcf9",
+    "expfam/src/utils_expfam.py": "b30be9d097cce874514caa84b57522d3764f5fd93d02d7fe06ac4e81e6e0dc6d"
+  },
+  "protected_sha256": {
+    "expfam/results/k_selection/k_exp2_generalization_20261125/main/per_fit.csv": "549b0be0f005555de6d2a2b8fc4a7226569085dd6523cb6879b466d92bcf9af2",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/clap_comparison/run/evaluations.csv": "d7a6aeddd60fb6c27aa8ab899ba8ea92d32cae78be7dff55eb6b5b40b90f2ec3",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/mixedx_highk_20261126/run/per_fit.csv": "0694952b0bb10613d6da794d388f5826f3af46261f2bd1a0d4a1dd3054b09fed",
+    "expfam/results/k_selection/k_exp2_generalization_20261125/protocol_v2/protocol.json": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad",
+    "expfam/results/misspecification_m1/phase_m1_20261013/paired_rmse_z.csv": "8506b7e252ae6ff1da39d5c62cc4ad21df409a02095f02000a1caccded7878cb"
+  },
+  "tech_dir": "expfam\\results\\k_selection\\two_gaps_20261127\\expA\\tech_check",
+  "pilot_dir": "expfam\\results\\k_selection\\two_gaps_20261127\\expA\\pilot",
+  "pilot_status": {
+    "P-A-r100-sparse-bern-t0": "OK",
+    "P-A-r100-sparse-pois-t0": "OK",
+    "P-A-r100-dense-bern-t0": "OK",
+    "P-A-r100-dense-pois-t0": "OK",
+    "P-A-r101-dense-bern-t0": "OK",
+    "P-A-r101-dense-pois-t0": "OK",
+    "P-A-r101-sparse-bern-t0": "OK",
+    "P-A-r101-sparse-pois-t0": "OK",
+    "P-A-r100-dense-bern-t0-repro": "OK"
+  },
+  "n_jobs": 160,
+  "jobs_sha256": "9bfdd6589a40b453115599f1c26cde9ed9632feedff15a52f1fefb505b95e00b",
+  "frozen_doc": "expfam\\results\\k_selection\\two_gaps_20261127\\frozen_protocol_A.md",
+  "frozen_doc_sha256": "d5c8ae70d16ff76715280f86771047601596762518c394d73293d0d80f553b2f",
+  "design": {
+    "f_scale": 1.5811388300841898,
+    "w": 1.0,
+    "w0": -1.9672705203239662
+  }
+}
