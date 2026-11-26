@@ -1,0 +1,35 @@
+{
+  "created": "2026-11-26T15:04:57+09:00",
+  "checks": {
+    "all_80_recorded": true,
+    "no_failed_fit": true,
+    "C_Q_recomputed_exact": true,
+    "family_terms_closure": true,
+    "clap_evaluated_every_ok_fit": true,
+    "npz_reload_reproduces_C_Lap_bitwise": true
+  },
+  "all_ok": true,
+  "notes": {
+    "wall_s": 1496.9,
+    "mean_runtime_s": 73.812,
+    "runtime_by_k": {
+      "1": 64.7,
+      "2": 70.0,
+      "3": 70.1,
+      "4": 70.7,
+      "5": 72.7,
+      "6": 74.2,
+      "7": 77.6,
+      "8": 77.4,
+      "9": 80.0,
+      "10": 80.8
+    },
+    "projected_main_hours_4_workers": 3.5368249999999994,
+    "lap_status": {
+      "OK": 80
+    },
+    "mstep_q_decreases_total": 0,
+    "failures": []
+  },
+  "scope": "technical pilot on pilot seeds; selections are NOT computed or used"
+}

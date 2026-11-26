@@ -1,0 +1,159 @@
+{
+  "experiment_id": "k_exp2_mixedx_highk_20261126",
+  "status": "FROZEN_NOT_EXECUTED",
+  "frozen_at": "2026-11-26T15:05:20+09:00",
+  "git_head_at_freeze": "e38313de62e75e477d8ee9413f907cdc7ff5cc08",
+  "nature": "EXPLORATORY; planned after single-X 8,000/600-fit and C_Lap results",
+  "lineage": "E (DualExpFamLSMPerColumnConsistent via em_runner family_x_list); prototype",
+  "design": {
+    "n": 150,
+    "d": 15,
+    "family_x_list": [
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "gaussian",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "bernoulli",
+      "poisson",
+      "poisson",
+      "poisson",
+      "poisson",
+      "poisson"
+    ],
+    "family_y": "bernoulli",
+    "generator": "canonical-clean-mixed-v1",
+    "regime": "b (total signal fixed)",
+    "per_k_true": {
+      "5": {
+        "f_scale": 1.224744871391589,
+        "w": 0.7745966692414834,
+        "w0": -1.999005791110501,
+        "sigma_x_var": 0.1
+      },
+      "7": {
+        "f_scale": 1.0350983390135313,
+        "w": 0.6546536707079771,
+        "w0": -2.014093864417409,
+        "sigma_x_var": 0.1
+      },
+      "9": {
+        "f_scale": 0.9128709291752769,
+        "w": 0.5773502691896257,
+        "w0": -2.022924128527151,
+        "sigma_x_var": 0.1
+      }
+    },
+    "k_true": [
+      5,
+      7,
+      9
+    ],
+    "candidates": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "datasets": 10,
+    "inits": [
+      0,
+      1
+    ],
+    "L": 10,
+    "num_iter": 10,
+    "seeds": "data = 30,261,126,000 + 1000 K_TRUE + rep; init = 10 data + t; mc = 10 data + 5 + t"
+  },
+  "n_fits": 600,
+  "manifest_sha256": "dbfd0986119d6aba3034e20e5e1ca690535ecc4847b1d3448d31a98c29c3db70",
+  "code_sha256": {
+    "tools/research_audit/run_k_exp2_clap_comparison.py": "126d139ee4e6084c306ece330dff9b79e3d0e0e9e8db5e23c5555e00fd7482e1",
+    "expfam/src/experimental/laplace_k_criterion.py": "d96009f97704262dfd390236eb4a026b5546156016a04229471161654d07fcf9",
+    "expfam/src/experimental/eval_utils.py": "29cf72cbbb4366db6e693b8f340fbb20295b08b75f7e1a3eb3f2f8bb0b209821",
+    "expfam/src/experimental/em_runner.py": "8eea7a9b6bcef80b9a9e9c778bf3022431e62f1dd2c94ff411eb0896d13232cd",
+    "expfam/src/experimental/k_exp2_design.py": "9f9435a55eab09062378c69f982762478328f23e57408d02c0a7ffdd6a2124a5",
+    "expfam/src/experimental/data_generator_canonical.py": "fcd494849ea16fc576b24daf442a5f5490d5add9c2f2ce29c66bce1a2c2a6763",
+    "expfam/src/experimental/matched_k_true_design.py": "5d218bcf23304c7750820560c81e2d695db39f5c40f133e105a1b0772e249c64",
+    "expfam/src/experimental/model_dual_expfam_consistent.py": "c058bf87bae1f7890b9729e5106ad05df3ce04ef6e2ae3a3992a8106f97ba22c",
+    "expfam/src/experimental/model_dual_expfam_masked.py": "c75e55700d9837e1d285bdc75ac4bf3ea098c8e71e999e339fbdcc7817da59ae",
+    "expfam/src/model_dual_expfam_fixed.py": "8258e663da3689ec865bd2d9a17e8d9686052ac92d7724d10e77ed2ebe16f898",
+    "expfam/src/model_dual_expfam.py": "e7dda301ee5b606289dbf276575aa4cb8dc3fe4466554c71d295f59f10e74699",
+    "expfam/src/model_expfam.py": "9b7ff7edb3ae723404799adb2fc9303e223c8737ba26f21a4dfb3477df6d89b3",
+    "reproduction/src/model.py": "257704b23c310d598448e817f760c56a9e60cb845c383ae629a1160f3e0a4176",
+    "tools/research_audit/run_k_exp2_mixedx_highk.py": "632d94fdccff55a7ff91c0aefa40e6fd995e787e64f4226c767c1e2e0c4e8a00",
+    "expfam/src/experimental/data_generator_canonical_mixed.py": "0f31cceb46c10a73a159992ad8d8bbd1690c61a9095f52c0b8dc8e7ee7d54dc6",
+    "expfam/src/experimental/model_dual_expfam_percolumn.py": "ade325d2b1b1a01f7344cbd9d116a1974eadf12201f60f65daa6248390736059"
+  },
+  "calibration_source": {
+    "protocol_v2_sha256": "14757d4a161712859601d52aba0e86308903a723f29baee0a6b3d5118ec5a7ad"
+  },
+  "criteria": {
+    "C_Q": "-2 Q_strict + p ln n, p = Kd - K(K-1)/2 + 5",
+    "C_Lap": "laplace_k_criterion v1 via rc.evaluate_state; Z0 = Z_last; grad_tol 1e-8; max_iter 200; d_K ln n",
+    "C_Lap_secondary": "NOT_STATIONARY evaluations once with max_iter 400 (pre-specified, reported separately)"
+  },
+  "selection_rule": "argmin_K of 2-init unweighted mean; ties <= 1e-9 -> smaller K",
+  "failure_rule": {
+    "fit": "fail_fast; exception / non-finite / retry>0 -> FAILED once, never re-run or re-seeded; any FAILED fit -> dataset INCOMPLETE for both criteria",
+    "clap": "any non-OK of the 20 evaluations -> C_Lap INCOMPLETE",
+    "generator": "GeneratorStop -> dataset INCOMPLETE (no reseed)",
+    "stop": [
+      "family-term closure failure",
+      "mode recomputation mismatch",
+      "code sha256 mismatch",
+      "dirty working tree"
+    ]
+  },
+  "execution": {
+    "workers": 4,
+    "blas_threads": 1,
+    "resume_rule": "a fit is done iff its fit_id is in per_fit.csv",
+    "memory_rule": "stop dispatching if available < 1500 MB twice",
+    "deadline_rule": "stop dispatching new fits at the deadline; running fits finish; resumable",
+    "states": "states/*.npz (gitignored; sha256 in per_fit.csv)"
+  },
+  "metrics": [
+    "exact",
+    "|K_hat - K_TRUE| <= 1",
+    "MAE over complete datasets (n stated)",
+    "under",
+    "over",
+    "INCOMPLETE",
+    "criterion curves K=1..10",
+    "adjacent gaps K_TRUE-1 / K_TRUE+1",
+    "C_Q vs C_Lap crosstab",
+    "family-wise likelihood steps (MC samples and joint mode)",
+    "convergence (relative Q change, M-step decreases)",
+    "init dependence"
+  ],
+  "interpretation_rules": [
+    "match to the generating K_TRUE, not to a population minimal dimension; identifiability of K for mixed X is unproven (UNRESOLVED)",
+    "comparisons with the single-X runs and Phase 9X are across different generators/families/inits: descriptive only, never a direct causal comparison",
+    "an improvement is not attributed to family mixing itself",
+    "pilot results were not used to change any setting",
+    "INCOMPLETE never imputed; denominator 10"
+  ],
+  "pilot": {
+    "dir": "expfam\\results\\k_selection\\k_exp2_generalization_20261125\\mixedx_highk_20261126\\pilot",
+    "checks": {
+      "all_80_recorded": true,
+      "no_failed_fit": true,
+      "C_Q_recomputed_exact": true,
+      "family_terms_closure": true,
+      "clap_evaluated_every_ok_fit": true,
+      "npz_reload_reproduces_C_Lap_bitwise": true
+    },
+    "projected_main_hours": 3.5368249999999994
+  },
+  "tech_check": "expfam\\results\\k_selection\\k_exp2_generalization_20261125\\mixedx_highk_20261126\\tech_check_v3"
+}
