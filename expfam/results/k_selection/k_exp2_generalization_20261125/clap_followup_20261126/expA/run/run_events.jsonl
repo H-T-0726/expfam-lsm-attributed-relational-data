@@ -1,0 +1,2 @@
+{"event": "start", "time": "2026-11-26T14:20:48+09:00", "git_head": "6d48883ae4005b6ffa01954f92e837b6229f0035", "protocol_sha256": "c8479a7a2a0f0c743809ede429dd84dded586d9064d15b31359cde10d6359b8d", "jobs": 70, "workers": 4}
+{"event": "finished", "time": "2026-11-26T14:24:35+09:00", "rows": 1400, "wall_s": 226.5}
