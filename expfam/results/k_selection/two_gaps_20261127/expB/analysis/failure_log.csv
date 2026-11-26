@@ -1,0 +1,3 @@
+fit_id,status,failure_reason,lap_status,lap_error,lap_grad_inf,lap_min_eig_H
+B-G01-r000-k02-t1,OK,,NOT_STATIONARY,,3.000354353854817e-08,2.497438283317202
+B-P-r007-k03-t1,OK,,NOT_STATIONARY,,1.8910564225649296e-07,1.4790346963943484

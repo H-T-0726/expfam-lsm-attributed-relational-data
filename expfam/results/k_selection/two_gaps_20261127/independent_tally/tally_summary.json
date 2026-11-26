@@ -1,0 +1,52 @@
+{
+  "results": {
+    "A": {
+      "I_mean": 0.21127777941521084,
+      "I_median": 0.21449080442960258,
+      "I_pos": 20,
+      "n": 20,
+      "delta_dense_mean": 0.011573761206999345,
+      "delta_sparse_mean": 0.2228515406222102
+    },
+    "B": {
+      "G01|C_Q": {
+        "exact": 10,
+        "under": 0,
+        "over": 0,
+        "INCOMPLETE": 0
+      },
+      "G01|C_Lap": {
+        "INCOMPLETE": 1,
+        "exact": 9,
+        "under": 0,
+        "over": 0
+      },
+      "GM|C_Q": {
+        "under": 10,
+        "exact": 0,
+        "over": 0,
+        "INCOMPLETE": 0
+      },
+      "GM|C_Lap": {
+        "exact": 8,
+        "under": 2,
+        "over": 0,
+        "INCOMPLETE": 0
+      },
+      "P|C_Q": {
+        "under": 10,
+        "exact": 0,
+        "over": 0,
+        "INCOMPLETE": 0
+      },
+      "P|C_Lap": {
+        "exact": 9,
+        "INCOMPLETE": 1,
+        "under": 0,
+        "over": 0
+      }
+    }
+  },
+  "n_checks": 25,
+  "n_pass": 25
+}

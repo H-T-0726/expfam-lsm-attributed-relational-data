@@ -1,0 +1,26 @@
+check,pass,detail
+A: fit count = manifest,True,"160 rows, 160 unique, expected 160"
+A: fit ids = frozen manifest,True,
+A: no retry/replacement,True,
+A: C_Q = -2Q + p ln n,True,[]
+A: NPZ sha256,True,[]
+"A: same X, Y, test mask within dataset",True,
+A: same init/mc seed across rate x family (paired),True,
+"A: I_rmse_Z_last (n, mean, median, n_pos)",True,tally n=20 mean=0.211278 median=0.214491 pos=20
+"A: delta_rmse_Z_last_dense (n, mean, median, n_pos)",True,tally n=20 mean=0.0115738 median=0.00877003 pos=17
+"A: delta_rmse_Z_last_sparse (n, mean, median, n_pos)",True,tally n=20 mean=0.222852 median=0.22132 pos=20
+B: fit count = manifest,True,"600 rows, 600 unique, expected 600"
+B: fit ids = frozen manifest,True,
+B: no retry/replacement,True,
+B: C_Q = -2Q + p ln n,True,[]
+B: NPZ sha256,True,[]
+"B: Z, F, Y shared across the 3 conditions",True,
+B: X differs between the 3 conditions,True,
+B: G01 C_Q outcome counts,True,"{'exact': 10, 'under': 0, 'over': 0, 'INCOMPLETE': 0}"
+B: G01 C_Lap outcome counts,True,"{'INCOMPLETE': 1, 'exact': 9, 'under': 0, 'over': 0}"
+B: GM C_Q outcome counts,True,"{'under': 10, 'exact': 0, 'over': 0, 'INCOMPLETE': 0}"
+B: GM C_Lap outcome counts,True,"{'exact': 8, 'under': 2, 'over': 0, 'INCOMPLETE': 0}"
+B: P C_Q outcome counts,True,"{'under': 10, 'exact': 0, 'over': 0, 'INCOMPLETE': 0}"
+B: P C_Lap outcome counts,True,"{'exact': 9, 'INCOMPLETE': 1, 'under': 0, 'over': 0}"
+B: per-dataset selected K matches analysis,True,[]
+earlier results unchanged (protected sha256),True,[]

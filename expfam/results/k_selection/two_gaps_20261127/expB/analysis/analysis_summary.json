@@ -1,0 +1,82 @@
+{
+  "fits": 600,
+  "fit_ok": 600,
+  "lap_status": {
+    "OK": 598,
+    "NOT_STATIONARY": 2
+  },
+  "primary": [
+    {
+      "cond": "G01",
+      "criterion": "C_Q",
+      "datasets": 10,
+      "exact": 10,
+      "under": 0,
+      "over": 0,
+      "INCOMPLETE": 0,
+      "selected_k": "[9, 9, 9, 9, 9, 9, 9, 9, 9, 9]",
+      "mean_k_minus_ktrue": 0.0,
+      "inits_disagree": 0
+    },
+    {
+      "cond": "G01",
+      "criterion": "C_Lap",
+      "datasets": 10,
+      "exact": 9,
+      "under": 0,
+      "over": 0,
+      "INCOMPLETE": 1,
+      "selected_k": "[9, 9, 9, 9, 9, 9, 9, 9, 9]",
+      "mean_k_minus_ktrue": 0.0,
+      "inits_disagree": 0
+    },
+    {
+      "cond": "GM",
+      "criterion": "C_Q",
+      "datasets": 10,
+      "exact": 0,
+      "under": 10,
+      "over": 0,
+      "INCOMPLETE": 0,
+      "selected_k": "[2, 4, 4, 5, 5, 5, 6, 6, 6, 7]",
+      "mean_k_minus_ktrue": -4.0,
+      "inits_disagree": 3
+    },
+    {
+      "cond": "GM",
+      "criterion": "C_Lap",
+      "datasets": 10,
+      "exact": 8,
+      "under": 2,
+      "over": 0,
+      "INCOMPLETE": 0,
+      "selected_k": "[8, 8, 9, 9, 9, 9, 9, 9, 9, 9]",
+      "mean_k_minus_ktrue": -0.2,
+      "inits_disagree": 0
+    },
+    {
+      "cond": "P",
+      "criterion": "C_Q",
+      "datasets": 10,
+      "exact": 0,
+      "under": 10,
+      "over": 0,
+      "INCOMPLETE": 0,
+      "selected_k": "[4, 5, 5, 5, 5, 5, 5, 6, 7, 7]",
+      "mean_k_minus_ktrue": -3.6,
+      "inits_disagree": 5
+    },
+    {
+      "cond": "P",
+      "criterion": "C_Lap",
+      "datasets": 10,
+      "exact": 9,
+      "under": 0,
+      "over": 0,
+      "INCOMPLETE": 1,
+      "selected_k": "[9, 9, 9, 9, 9, 9, 9, 9, 9]",
+      "mean_k_minus_ktrue": 0.0,
+      "inits_disagree": 1
+    }
+  ]
+}

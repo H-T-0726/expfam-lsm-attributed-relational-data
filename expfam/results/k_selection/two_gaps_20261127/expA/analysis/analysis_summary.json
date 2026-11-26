@@ -1,0 +1,24 @@
+{
+  "fits": 160,
+  "ok": 160,
+  "failed": 0,
+  "datasets_complete": 20,
+  "primary": {
+    "quantity": "I (RMSE_Z last)",
+    "column": "I_rmse_Z_last",
+    "role": "PRIMARY",
+    "datasets_complete": 20,
+    "datasets_total": 20,
+    "n": 20,
+    "mean": 0.21127777941521084,
+    "median": 0.21449080442960258,
+    "sd": 0.07417399382430037,
+    "n_pos": 20,
+    "n_neg": 0,
+    "boot95_lo": 0.17943781527385605,
+    "boot95_hi": 0.24231544444433847,
+    "t95_lo": 0.17656328172373686,
+    "t95_hi": 0.2459922771066848,
+    "sign_test_p_two_sided": 1.9073486328125e-06
+  }
+}

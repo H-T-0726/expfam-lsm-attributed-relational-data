@@ -1,0 +1,2 @@
+{"event": "start", "time": "2026-11-27T02:31:29+09:00", "git_head": "027b012ecfeb779c092a6969fff1d745ba1995bf", "done": 0, "todo": 600, "workers": 4, "deadline": "2026-11-27T07:40:00+09:00"}
+{"event": "finished", "time": "2026-11-27T04:26:52+09:00", "fits_run": 600, "wall_s": 6922.6}
