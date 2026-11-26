@@ -1,0 +1,28 @@
+{
+  "checks": {
+    "expected_poisson_fisher_mc": true,
+    "poisson_fisher_equals_neg_hessian": false,
+    "gaussian_fisher_equals_neg_hessian": false,
+    "shared_Z_F_Y_across_conditions": true,
+    "trace_matching_exact": true,
+    "generator_support_rank_determinism": true
+  },
+  "notes": {
+    "expected_poisson_fisher_mc_rel_err": 0.0014035117426760338,
+    "design": {
+      "f_scale": 0.9128709291752769,
+      "w": 0.5773502691896257,
+      "w0": -2.022924128527151
+    },
+    "sigma2_matched_range": [
+      0.7578921570130828,
+      0.7728528454262328
+    ],
+    "y_density_range": [
+      0.19293064876957494,
+      0.21172259507829977
+    ]
+  },
+  "time": "2026-11-27T01:51:34+09:00",
+  "all_pass": false
+}

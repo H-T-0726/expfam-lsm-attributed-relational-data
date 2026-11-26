@@ -608,24 +608,28 @@ def tech_B(out: Path):
     # 2. Hessians of the per-node log-likelihood (finite differences): Poisson and Gaussian
     x = rng.poisson(1.0, size=D).astype(float)
     z0 = rng.standard_normal(B_K) * 0.5
+    # v2 (2026-11-27): v1 differentiated the log-likelihood twice numerically (nested FD,
+    # rel. error ~2.6e-4 > its 1e-5 gate; record kept in tech_check/).  v2 checks in two
+    # single-level steps: FD(log-lik) vs analytic gradient, then FD(analytic gradient) vs -Fisher.
+    def _jac(g, z, h=1e-6):
+        return np.column_stack([(g(z + h * np.eye(B_K)[a]) - g(z - h * np.eye(B_K)[a])) / (2 * h)
+                                for a in range(B_K)])
     lp = lambda z: float(np.sum(x * (F @ z) - np.exp(F @ z)))            # noqa: E731
-    Hp = np.zeros((B_K, B_K))
-    for a in range(B_K):
-        e = np.zeros(B_K)
-        e[a] = 1e-5
-        Hp[:, a] = (_fd_grad(lp, z0 + e) - _fd_grad(lp, z0 - e)) / 2e-5
+    gp = lambda z: F.T @ (x - np.exp(F @ z))                              # noqa: E731
     Ip = F.T @ (np.exp(F @ z0)[:, None] * F)
-    checks["poisson_fisher_equals_neg_hessian"] = float(np.linalg.norm(Hp + Ip) / np.linalg.norm(Ip)) < 1e-5
+    e_gp = float(np.linalg.norm(_fd_grad(lp, z0) - gp(z0)) / np.linalg.norm(gp(z0)))
+    e_hp = float(np.linalg.norm(_jac(gp, z0) + Ip) / np.linalg.norm(Ip))
     s2 = 0.37
     xg = rng.standard_normal(D)
     lg = lambda z: float(-0.5 * np.sum((xg - F @ z) ** 2) / s2)          # noqa: E731
-    Hg = np.zeros((B_K, B_K))
-    for a in range(B_K):
-        e = np.zeros(B_K)
-        e[a] = 1e-5
-        Hg[:, a] = (_fd_grad(lg, z0 + e) - _fd_grad(lg, z0 - e)) / 2e-5
-    checks["gaussian_fisher_equals_neg_hessian"] = float(
-        np.linalg.norm(Hg + F.T @ F / s2) / np.linalg.norm(F.T @ F / s2)) < 1e-5
+    gg = lambda z: F.T @ (xg - F @ z) / s2                                # noqa: E731
+    e_gg = float(np.linalg.norm(_fd_grad(lg, z0) - gg(z0)) / np.linalg.norm(gg(z0)))
+    e_hg = float(np.linalg.norm(_jac(gg, z0) + F.T @ F / s2) / np.linalg.norm(F.T @ F / s2))
+    checks["poisson_gradient_fd"] = e_gp < 1e-6
+    checks["poisson_fisher_equals_neg_hessian"] = e_hp < 1e-6
+    checks["gaussian_gradient_fd"] = e_gg < 1e-6
+    checks["gaussian_fisher_equals_neg_hessian"] = e_hg < 1e-6
+    notes["fd_rel_errors"] = {"poisson_grad": e_gp, "poisson_hess": e_hp, "gauss_grad": e_gg, "gauss_hess": e_hg}
     # 3. generator: shared Z/F/Y, trace matching, support, determinism, density
     rows = []
     for pilot, reps in ((False, range(B_N_REP)), (True, (B_PILOT_REP,))):
