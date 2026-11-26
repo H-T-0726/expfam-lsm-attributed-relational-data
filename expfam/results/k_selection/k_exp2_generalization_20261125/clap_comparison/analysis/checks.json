@@ -1,0 +1,10 @@
+{
+  "C_Q_selection_equals_recorded": true,
+  "K_TRUE3_a_b_identical_C_Lap": true,
+  "n_evaluations": 6600,
+  "lap_status_total": {
+    "OK": 6543,
+    "NOT_STATIONARY": 52,
+    "HESSIAN_NOT_PD": 5
+  }
+}

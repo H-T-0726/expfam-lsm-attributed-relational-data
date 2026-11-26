@@ -1,0 +1,68 @@
+{
+  "checks": {
+    "6600_rows_each_planned_evaluation_once": true,
+    "C_Q_equals_manifest_strings": true,
+    "C_Q_equals_recorded_runs": true,
+    "state_sha_and_data_flags_true": true,
+    "C_Lap_algebra_consistent_1e-10": true,
+    "OK_rows_stationary_PD_no_value_on_failures": true,
+    "C_Q_selection_equals_recorded_analyses": true,
+    "selection_equals_prespecified_analysis": true,
+    "cell_counts_equal_prespecified_summary": true,
+    "K_TRUE3_regime_a_b_identical": true,
+    "recorded_inputs_unchanged": true,
+    "all_6600_npz_unchanged": true
+  },
+  "all_ok": true,
+  "notes": {
+    "lap_status_counts": {
+      "OK": 6543,
+      "NOT_STATIONARY": 52,
+      "HESSIAN_NOT_PD": 5
+    },
+    "lap_status_by_source": {
+      "main10": {
+        "OK": 5948,
+        "NOT_STATIONARY": 47,
+        "HESSIAN_NOT_PD": 5
+      },
+      "conv40": {
+        "OK": 595,
+        "NOT_STATIONARY": 5
+      }
+    },
+    "worst_relative_algebra_error": {
+      "C_Lap_vs_logobs": 0.0,
+      "logobs_vs_phi": 0.0,
+      "fit_mode": 0.0,
+      "closure": 4.23142109338986e-16
+    },
+    "validity_violations": [],
+    "totals": {
+      "main10": {
+        "Q": {
+          "exact": 276,
+          "under": 24
+        },
+        "Lap": {
+          "exact": 249,
+          "INCOMPLETE": 47,
+          "under": 4
+        },
+        "changed_complete": 24
+      },
+      "conv40": {
+        "Q": {
+          "under": 13,
+          "exact": 17
+        },
+        "Lap": {
+          "under": 4,
+          "exact": 23,
+          "INCOMPLETE": 3
+        },
+        "changed_complete": 13
+      }
+    }
+  }
+}

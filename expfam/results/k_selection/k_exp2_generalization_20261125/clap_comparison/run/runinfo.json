@@ -1,0 +1,17 @@
+{
+  "protocol": "expfam\\results\\k_selection\\k_exp2_generalization_20261125\\clap_comparison\\protocol\\protocol.json",
+  "environment": {
+    "python": "3.13.14",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "blas_threads": "1"
+  },
+  "event": "start",
+  "time": "2026-11-26T13:14:37+09:00",
+  "git_head": "dd95ff9a2bbd6dd5b6c264e1d229e717bd644fb6",
+  "protocol_sha256": "ae62f0413ec0b2ad5196bdd945847808fe3defe2f687fcbcd0dc103050f53432",
+  "jobs_done": 0,
+  "jobs_todo": 330,
+  "workers": 4
+}
