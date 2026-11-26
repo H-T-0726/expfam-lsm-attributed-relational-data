@@ -1,0 +1,11 @@
+{
+  "created": "2026-11-26T14:20:32+09:00",
+  "checks": {
+    "max_iter400_equals_200_on_smoke_states": true,
+    "max_iter400_equals_official_on_40_OK_rows": true,
+    "n_smoke": 15,
+    "n_official_sample": 40,
+    "all_ok": true
+  },
+  "git_head": "0fb58244eebcaa416a768ee5e37420882cc6510a"
+}
