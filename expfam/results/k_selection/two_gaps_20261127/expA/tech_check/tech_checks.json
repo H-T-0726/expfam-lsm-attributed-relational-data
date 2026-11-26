@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "generator_support_rank_masks": true,
+    "estep_gradient_fd": true,
+    "estep_precision_fd": true,
+    "estep_ignores_unobserved_Y": true,
+    "strictQ_ignores_unobserved_Y": true,
+    "mstep_w0_ignores_unobserved_Y": true
+  },
+  "notes": {
+    "design": {
+      "f_scale": 1.5811388300841898,
+      "w": 1.0,
+      "w0": -1.9672705203239662
+    },
+    "grad_sign": [
+      -1.0
+    ]
+  },
+  "time": "2026-11-27T01:48:11+09:00",
+  "all_pass": true
+}

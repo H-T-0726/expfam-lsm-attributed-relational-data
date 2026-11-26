@@ -1,0 +1,9 @@
+Q_value,calc_w0_invariant_to_unobserved_Y,family,grad_invariant_to_unobserved_Y,grad_rel_err,grad_sign_vs_logpost,i,precision_rel_err_vs_neg_hessian,strictQ_invariant_to_unobserved_Y
+,,bernoulli,True,1.0089185323204115e-09,-1.0,0,6.0213410958323484e-05,
+,,bernoulli,True,6.135700978694359e-10,-1.0,7,4.168869468896778e-05,
+,,bernoulli,True,5.409233484830638e-10,-1.0,77,4.3472676146699285e-05,
+-2454.316965302155,True,bernoulli,,,,Q/M-step,,True
+,,poisson,True,9.344109858833617e-10,-1.0,0,3.206820241279358e-05,
+,,poisson,True,8.526039188349854e-10,-1.0,7,3.9630539988862454e-05,
+,,poisson,True,1.3860603350811868e-09,-1.0,77,2.8468196232595876e-05,
+-3650.364856093089,True,poisson,,,,Q/M-step,,True
