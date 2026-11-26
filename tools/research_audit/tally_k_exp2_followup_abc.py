@@ -113,7 +113,8 @@ def tally_C(checks, notes):
         p = k * D - k * (k - 1) // 2 + 5
         q = float(r["Q_strict"])
         worst["cq"] = max(worst["cq"], abs(float(r["C_Q"]) - (-2 * q + p * math.log(N))))
-        tot = sum(float(r[c]) for c in ("llZ", "llX_gauss", "llX_bern", "llX_pois", "llY"))
+        tot = sum(float(str(r[c]).replace("np.float64(", "").rstrip(")"))
+                  for c in ("llZ", "llX_gauss", "llX_bern", "llX_pois", "llY"))
         worst["closure"] = max(worst["closure"], abs(tot - q) / max(1, abs(q)))
         worst["llz"] = max(worst["llz"], abs(float(r["llZ"]) + N * k * (1 + LN2PI) / 2))
         if r["lap_status"] == "OK":

@@ -1,0 +1,17 @@
+{
+  "n_fits": 600,
+  "fit_status": {
+    "OK": 600
+  },
+  "lap_status": {
+    "OK": 596,
+    "HESSIAN_NOT_PD": 1,
+    "NOT_STATIONARY": 3
+  },
+  "lap400_status": {
+    "OK": 1,
+    "NOT_STATIONARY": 2
+  },
+  "max_C_Q_recomputed_absdiff": 0.0,
+  "max_terms_closure_absdiff": 2.7284841053187847e-12
+}

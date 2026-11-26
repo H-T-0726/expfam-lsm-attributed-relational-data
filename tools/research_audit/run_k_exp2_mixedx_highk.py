@@ -557,6 +557,15 @@ def execute(proto_path: Path, out: Path, resume: bool, deadline):
 # analysis
 # --------------------------------------------------------------------------
 
+def num(s):
+    """Parse a recorded number; family-term columns were written as 'np.float64(x)'
+    (repr of a numpy scalar) by fit_one - same value, different spelling."""
+    s = str(s)
+    if s.startswith("np.float64(") and s.endswith(")"):
+        s = s[len("np.float64("):-1]
+    return float(s)
+
+
 def _sel(f, col, statuscol=None):
     if any(f.get((k, t)) is None for k in K_CANDS for t in (0, 1)):
         return None, {}
@@ -612,7 +621,7 @@ def analyze_rows(rows):
                              "gap_minus1": bar[kt - 1] - bar[kt],
                              "gap_plus1": bar[kt + 1] - bar[kt] if kt < 10 else ""})
         if bq:
-            mean = lambda k, c: (float(f[(k, 0)][c]) + float(f[(k, 1)][c])) / 2   # noqa: E731
+            mean = lambda k, c: (num(f[(k, 0)][c]) + num(f[(k, 1)][c])) / 2   # noqa: E731
             for k in K_CANDS[:-1]:
                 for c in ("llX_gauss", "llX_bern", "llX_pois", "llY"):
                     steps[(kt, k)][f"MC_{c}"].append(-2 * (mean(k + 1, c) - mean(k, c)))

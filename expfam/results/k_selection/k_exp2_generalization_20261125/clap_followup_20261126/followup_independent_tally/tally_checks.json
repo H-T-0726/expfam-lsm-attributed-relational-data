@@ -1,0 +1,61 @@
+{
+  "checks": {
+    "A_1400_rows_unique": true,
+    "A_selections_equal_analysis": true,
+    "B_57_targets_exactly": true,
+    "B_repro200_all_equal": true,
+    "B_converged_rows_stationary": true,
+    "B_incomplete_equals_analysis": true,
+    "C_each_recorded_fit_planned_once": true,
+    "C_CQ_formula_p_with_5_gaussian_dispersions": true,
+    "C_family_terms_close_to_Q": true,
+    "C_llZ_equals_minus_nK(1+ln2pi)/2": true,
+    "C_CLap_four_term_closure": true,
+    "C_npz_sha256": true,
+    "C_selection_equals_analysis": true,
+    "C_counts_equal_summary": true,
+    "official_6600_run_unchanged": true,
+    "official_evaluations_unchanged": true
+  },
+  "all_ok": true,
+  "notes": {
+    "A_agree_when_both_complete": 59,
+    "A_both_complete": 59,
+    "A_status_pairs": {
+      "OK->OK": 1386,
+      "NOT_STATIONARY->OK": 6,
+      "OK->NOT_STATIONARY": 8
+    },
+    "B_it400_status": {
+      "OK": 6,
+      "NOT_STATIONARY": 46
+    },
+    "B_converged_k_gt_ktrue": 6,
+    "B_rule_incomplete": {
+      "conv40": 3,
+      "main10": 44
+    },
+    "C_recorded": 600,
+    "C_missing": 0,
+    "C_fit_status": {
+      "OK": 600
+    },
+    "C_worst": {
+      "cq": 0.0,
+      "closure": 3.847885793001518e-16,
+      "llz": 4.547473508864641e-13,
+      "clap": 2.640862737134969e-16
+    },
+    "C_counts": {
+      "5-Lap-INCOMPLETE": 4,
+      "5-Lap-exact": 6,
+      "5-Q-exact": 10,
+      "7-Lap-exact": 10,
+      "7-Q-exact": 6,
+      "7-Q-under": 4,
+      "9-Lap-exact": 9,
+      "9-Lap-under": 1,
+      "9-Q-under": 10
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "protocol": "expfam\\results\\k_selection\\k_exp2_generalization_20261125\\mixedx_highk_20261126\\protocol\\protocol.json",
+  "protocol_sha256": "5ed0cc129c4e505e8ba98ace8ab4b6e58291c0cc1191f5ee4f9881cb5f29653e",
+  "environment": {
+    "python": "3.13.14",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "blas_threads": "1"
+  },
+  "started": "2026-11-26T15:05:32+09:00"
+}
