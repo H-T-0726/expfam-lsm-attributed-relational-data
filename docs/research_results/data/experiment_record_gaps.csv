@@ -1,0 +1,308 @@
+gap_id,experiment_id,field,current_record,issue_type,severity,primary_source,resolvable,action_needed,check_result
+GAP-001,D-E2A,evidence,expfam/results/（e2a）,LINK_AMBIGUOUS,NOTATION,experiment_inventory.csv,yes,evidence 列に具体的なパスを書く（台帳の改訂は Human Gate）,台帳の evidence 列が「expfam/results/（e2a）」で場所を特定できない。registry（E2a 節）の結果パスで補った
+GAP-002,F-8B-SMOKE,evidence,expfam/results/k_selection/（8b smoke）,LINK_AMBIGUOUS,NOTATION,experiment_inventory.csv,yes,evidence 列に具体的なパスを書く（台帳の改訂は Human Gate）,台帳の evidence 列が「expfam/results/k_selection/（8b smoke）」で場所を特定できない。同名ディレクトリで補った
+GAP-003,F-EMCONV,evidence,expfam/results/k_selection/（em convergence）,LINK_AMBIGUOUS,NOTATION,experiment_inventory.csv,yes,evidence 列に具体的なパスを書く（台帳の改訂は Human Gate）,台帳の evidence 列が「expfam/results/k_selection/（em convergence）」で場所を特定できない。registry の結果パスで補った
+GAP-004,F-128,evidence,expfam/results/k_selection/k_criterion_comparison_analysis_20261104/,LINK_AMBIGUOUS,NOTATION,experiment_inventory.csv,yes,evidence 列に具体的なパスを書く（台帳の改訂は Human Gate）,evidence 列は派生表だけを指し、fit の一次出力の場所を特定できない。registry の #128 A1・B 行の結果パスで補った
+GAP-005,A-REPRO,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-006,A-REPRO,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-007,A-REPRO,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-008,A-REPRO,data_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成 seed を一次資料・台帳の両方で特定できなかった
+GAP-009,A-REPRO,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-010,A-REPRO,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-011,A-REPRO,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-012,A-REPRO,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-013,A-REPRO,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-014,A-REPRO,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-015,A-HALF,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-016,A-HALF,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-017,A-HALF,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-018,A-HALF,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-019,A-HALF,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-020,A-HALF,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-021,A-HALF,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-022,A-HALF,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-023,A-HALF,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-024,A-HALF,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-025,A-HALF,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-026,A-HALF,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-027,B-OLD05-EXP1-4,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-028,B-OLD05-EXP1-4,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-029,B-OLD05-AUX,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-030,B-OLD05-AUX,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-031,B-OLD05-AUX,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-032,B-OLD05-AUX,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-033,B-OLD05-AUX,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-034,B-OLD05-AUX,data_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成 seed を一次資料・台帳の両方で特定できなかった
+GAP-035,B-OLD05-AUX,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-036,B-OLD05-AUX,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-037,B-OLD05-AUX,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-038,B-OLD05-AUX,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-039,B-OLD05-AUX,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-040,B-OLD05-AUX,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-041,B-OLD05-AUX,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-042,B-FIXED-EXP1,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-043,B-FIXED-EXP1,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-044,B-FIXED-EXP1,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-045,B-FIXED-EXP1,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-046,B-FIXED-EXP1,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-047,B-FIXED-EXP1,code,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行コード を一次資料・台帳の両方で特定できなかった
+GAP-048,B-FIXED-EXP2,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-049,B-FIXED-EXP2,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-050,B-FIXED-EXP2,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-051,B-FIXED-EXP2,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-052,B-FIXED-EXP3,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-053,B-FIXED-EXP3,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-054,B-FIXED-EXP3,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-055,B-FIXED-EXP3,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-056,B-FIXED-EXP3,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-057,B-FIXED-EXP3,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-058,B-FIXED-EXP4,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-059,B-FIXED-EXP4,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-060,B-FIXED-EXP4,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-061,B-FIXED-EXP4,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-062,B-FIXED-EXP4,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-063,B-FIXED-EXP4,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-064,B-FIXED-EXP4,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-065,B-FIXED-EXP4,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-066,B-FIXED-GRID,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-067,B-FIXED-GRID,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-068,B-FIXED-GRID,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-069,B-FIXED-GRID,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-070,B-FIXED-GRID,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-071,B-FIXED-GRID,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-072,C-WINE,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-073,C-WINE,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-074,C-WINE,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-075,C-WINE,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-076,C-WINE,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-077,C-WINE,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-078,C-WINE,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-079,C-WINE,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-080,C-WINE,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-081,C-WINE-AUDIT,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-082,C-WINE-AUDIT,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-083,C-WINE-AUDIT,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-084,C-CORA-BFS,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-085,C-CORA-BFS,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-086,C-CORA-BFS,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-087,C-CORA-BFS,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-088,C-CORA-BFS,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-089,C-CORA-BFS,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-090,C-CORA-BFS,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-091,C-CORA-BFS,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-092,C-CORA-OLD,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-093,C-CORA-OLD,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-094,C-CORA-OLD,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-095,C-CORA-OLD,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-096,C-CORA-OLD,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-097,C-CORA-OLD,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-098,C-CORA-OLD,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-099,C-ML-INSAMPLE,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-100,C-ML-INSAMPLE,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-101,C-ML-INSAMPLE,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-102,C-ML-INSAMPLE,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-103,C-ML-INSAMPLE,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-104,C-ML-INSAMPLE,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-105,C-ML-INSAMPLE,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-106,C-ML-INSAMPLE,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-107,C-ML-INSAMPLE,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-108,C-ML-INSAMPLE,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-109,C-ML-INSAMPLE,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-110,C-ML-INSAMPLE,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-111,C-ML-INSAMPLE,code,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行コード を一次資料・台帳の両方で特定できなかった
+GAP-112,C-RECON,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-113,C-RECON,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-114,C-RECON,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-115,C-RECON,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-116,C-RECON,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-117,C-RECON,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-118,C-RECON,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-119,C-RECON,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-120,C-RECON,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-121,C-RECON,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-122,C-OD-DIAG,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-123,C-OD-DIAG,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-124,C-OD-DIAG,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-125,C-OD-DIAG,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-126,C-OD-DIAG,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-127,C-OD-DIAG,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-128,C-OD-DIAG,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-129,C-OD-STRICT,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-130,C-OD-STRICT,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-131,C-OD-STRICT,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-132,C-OD-STRICT,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-133,C-OD-SYN,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-134,C-OD-SYN,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-135,C-OD-SYN,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-136,C-OD-SYN,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-137,C-OD-SYN,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-138,C-OD-SYN,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-139,C-ML-SHAREDZ,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-140,C-ML-SHAREDZ,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-141,C-ML-SHAREDZ,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-142,C-ML-SHAREDZ,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-143,C-ML-MIXED,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-144,C-ML-MIXED,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-145,C-ML-MIXED,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-146,C-ML-MIXED,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-147,C-ML-MIXED,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-148,C-ML-USERDISJ,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-149,C-ML-USERDISJ,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-150,C-ML-USERDISJ,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-151,C-CORA-SH1,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-152,D-PC-DEMO,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-153,D-PC-DEMO,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-154,D-PC-DEMO,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-155,D-YSPARSE,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-156,D-YSPARSE,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-157,D-YSPARSE,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-158,D-YSPARSE,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-159,D-COMPL,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-160,D-COMPL,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-161,D-COMPL,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-162,D-COMPL,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-163,D-COMPL,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-164,D-COVER,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-165,D-COVER,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-166,D-COVER,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-167,D-COVER,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-168,D-COVER,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-169,D-E1,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-170,D-E2A,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-171,D-E2C,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-172,D-MX2,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-173,D-MX2,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-174,D-PCMIX-K,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-175,E-9C,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-176,E-9C,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-177,E-9C,code,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行コード を一次資料・台帳の両方で特定できなかった
+GAP-178,E-9D,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-179,E-9D,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-180,E-129,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-181,E-129,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-182,E-129,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-183,E-AF1,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-184,E-AF2,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-185,E-AF2,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-186,E-AF2,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-187,E-AF3-5,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-188,E-AF3-5,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-189,E-AF3-5,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-190,E-AF3-5,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-191,E-AF3-5,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-192,E-AF3-5,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-193,E-AF3-5,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-194,E-AF6,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-195,E-AF6,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-196,E-AF6,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-197,E-AF6,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-198,E-AF6,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-199,E-AF6,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-200,E-AF7,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-201,E-AF8,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-202,E-AF8,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-203,E-AF8,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-204,E-AF8,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-205,E-AF8,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-206,E-AF8,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-207,E-AF8,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-208,E-AF8,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-209,E-AF8,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-210,E-AF8,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-211,E-AF8,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-212,F-7B,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-213,F-7B,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-214,F-7E,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-215,F-7E,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-216,F-8B-SMOKE,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-217,F-8B-SMOKE,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-218,F-8B-SMOKE,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-219,F-8B-A1,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-220,F-8B-A1,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-221,F-8B-A1,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-222,F-8B-A1,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-223,F-8B-A1,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-224,F-8B-A1,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-225,F-8B-A1,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-226,F-8B-A1,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-227,F-8B-A1,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-228,F-8B-A2,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-229,F-HPB,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-230,F-HPB,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-231,F-GAUSSY,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-232,F-9E,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-233,F-9H-9J,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-234,F-9K,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-235,F-9M-9O,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-236,F-9M-9O,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-237,F-9M-9O,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-238,F-9M-9O,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-239,F-9M-9O,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-240,F-9M-9O,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-241,F-9P-9V,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-242,F-9W-9Y,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-243,F-9W-9Y,n_fits,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,実行した fit 数 を一次資料・台帳の両方で特定できなかった
+GAP-244,F-CLAP-REEVAL,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-245,F-DSWEEP,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-246,F-DSWEEP,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-247,F-R1R2,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-248,F-R1R2,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-249,F-R1R2,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-250,F-R1R2,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-251,F-155,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-252,F-155,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-253,F-155,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-254,F-156,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-255,F-156,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-256,F-156,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-257,F-156,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-258,F-157,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-259,F-157,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-260,F-157,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-261,F-157,k_true,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,生成に使った潜在次元 K_TRUE を一次資料・台帳の両方で特定できなかった
+GAP-262,F-157,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-263,F-157,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-264,F-157,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-265,F-157,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-266,F-158,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-267,F-158,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-268,F-158,primary_metric,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Primary Metric を一次資料・台帳の両方で特定できなかった
+GAP-269,F-158,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-270,F-159,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-271,F-159,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-272,F-159,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-273,F-159,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-274,F-159,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-275,F-160,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-276,F-161,family_x,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,X の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-277,F-161,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-278,F-162,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-279,F-162,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-280,F-162,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-281,F-162,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-282,F-164,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-283,F-164,family_y,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,Y の分布族 を一次資料・台帳の両方で特定できなかった
+GAP-284,F-164,k_candidates,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,推定した K・候補 K を一次資料・台帳の両方で特定できなかった
+GAP-285,F-164,mcem_iters,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,MCEM の反復数 を一次資料・台帳の両方で特定できなかった
+GAP-286,F-164,mc_samples_L,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,E-step の MC サンプル数 L を一次資料・台帳の両方で特定できなかった
+GAP-287,F-164,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-288,F-165,data_generator,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,データ生成器（または実データの前処理） を一次資料・台帳の両方で特定できなかった
+GAP-289,F-165,init_seed,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,初期値 seed を一次資料・台帳の両方で特定できなかった
+GAP-290,F-KEXP2-CONV,n,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,ノード数 n を一次資料・台帳の両方で特定できなかった
+GAP-291,F-KEXP2-CONV,d,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,属性次元 d を一次資料・台帳の両方で特定できなかった
+GAP-292,TG-DIAG,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-293,TG-CORR,runinfo,—,MISSING,REPRODUCIBILITY,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,runinfo を一次資料・台帳の両方で特定できなかった
+GAP-294,TG-CORR,protocol,—,MISSING,INTERPRETATION,固定 SHA の runinfo / protocol / 結果 CSV / registry / 台帳,unknown,当時の実行記録（ログ・runinfo・引数）を探す。見つからなければ「不明」のまま残す,protocol を一次資料・台帳の両方で特定できなかった
+GAP-295,TG-A,main_result（gram 相関・sparse・正指定）,results_report.md・台帳・13 章（初出）: 0.241 ／ 一次 CSV primary_results.csv: 0.24046（四捨五入 0.240）,CONFLICT,NOTATION,expfam/results/k_selection/two_gaps_20261127/expA/analysis/primary_results.csv@1ef9096,yes,既存記録は書き換えない。引用時は 0.240 と書く（13 章に記載済み）,verify_addendum_20261127.py の TG-A-06 で MISMATCH として記録済み。主張は変わらない
+GAP-296,TG-B,dist_params（Poisson の Fisher 情報行列の条件数）,fairness_audit.md・frozen_protocol_B.md: 1.14〜1.17 ／ 一次 CSV tech_check_v2/information_diagnostics.csv: 1.11〜1.22,CONFLICT,NOTATION,expfam/results/k_selection/two_gaps_20261127/expB/tech_check_v2/information_diagnostics.csv@1ef9096,yes,既存記録は書き換えない。引用時は一次 CSV の範囲を使う（13 章に記載済み）,trace をそろえる設計判断（GM の分散）には影響しない。範囲の記載だけの差
+GAP-297,TG-DIAG,C_Q の K 増加条件（符号・定数）,diagnostic_report.md（2f71e61）: 誤った不等式 ／ forward_correction.md（c035df7）: 2Δℓ > n(1+ln2π)+(d−K+1)ln n,CONFLICT,INTERPRETATION,expfam/results/k_selection/two_gaps_20261127/diagnostics_20261127/forward_correction_20261127/forward_correction.md@c035df7,resolved,forward correction を正とする（2f71e61 の報告書は書き換えない）,13 章 §4 と 07 章 §5 は訂正後の式を使用。270/270 一致・別プロセス確認 17/17
+GAP-298,TG-B,k_selection_rule（C_Q と C_Lap の罰則）,C_Q: p_K = Kd − K(K−1)/2 + d（Gaussian-X の分散 15 個を含む） ／ C_Lap: d_K は分散を含まない（K に依存しない定数のため）,CONFLICT,INTERPRETATION,expfam/results/k_selection/two_gaps_20261127/diagnostics_20261127/forward_correction_20261127/clap_formula_check.csv@c035df7,no（定義の違い）,C_Q と C_Lap の絶対値・条件間の基準値を直接比べない（公平性 D）,定義上の違いで誤りではない。K の選択（argmin）には影響しないが、値の比較は不可
+GAP-299,ALL,lineage（旧 0.5 系列と fixed 系列）,A-HALF（B と C）・B-FIXED-GRID（C と B）・C-WINE-AUDIT（B/C）・F-160/F-161/F-162（E-scalar + OLD）など、1 記録に複数系列,CONFLICT,INTERPRETATION,experiment_inventory.csv の lineage 列 / KI-002,no（設計上の比較）,表・図では系列ごとに列を分け、系列名を併記する。0.5 系列には KI-001 の注記を付ける,結果集 03・04・07 章は系列を分けて記載していることを確認（混在表は見つからない）。比較自体が目的の記録である
+GAP-300,ALL,件数の計上（88 件と追補）,experiment_inventory.csv 88 件は実験・監査・理論・文献を含む記録数。追補は TG-A・TG-B（新規 fit）と TG-DIAG・TG-CORR（fit なし）,CONFLICT,INTERPRETATION,experiment_inventory.csv / addendum_20261127_inventory.csv,yes,「88 件の実験」と書かない。「88 記録（うち新しい fit を伴う記録は involves_new_fits=yes の行）」と書く,本台帳の involves_new_fits 列で区別した。TG-DIAG・TG-CORR は実験件数に数えない
+GAP-301,TG-A;TG-B,registry 登録,EXPERIMENT_REGISTRY.md（main・結果集ブランチ）に A・B の行が無い。K-exp2 の行は experiment/k-selection-exp2-generalization-20261125 にだけある,MISSING,REPRODUCIBILITY,EXPERIMENT_REGISTRY.md@8da446a / @9d12dc4,yes（Human Gate）,14 章 §7 の統合案に従い、実験ブランチを main へ統合した後に registry へ追記する（追記のみ）,今回は registry を変更しない
+GAP-302,F-CLAP-REEVAL;F-162,runinfo（状態ファイル）,保存状態 NPZ が repository 外（D:\tento\kennkyu_artifacts\…）。sha256 は runinfo / STATE_ARCHIVE に記録,MISSING,REPRODUCIBILITY,runinfo.json（states_file / npz キー）,partial,NPZ の保管先を研究者が確認する。GitHub だけでは再評価を再現できない,completeness=NEEDS_LOCAL_NPZ（既存台帳と一致）
+GAP-303,G-LOCAL-ONLY,evidence,reports/research_scope/ ほか。main の作業ツリーでは untracked,MISSING,INTERPRETATION,docs/untracked-reports-preservation-20261124@d946910,yes（Human Gate）,保存ブランチの統合可否を研究者が判断する,d946910 には存在（GitHub で閲覧可能）。main には無い
+GAP-304,A-PAPER,aggregation（原論文 Exp.2 の集計手順）,原論文本文から Exp.2 の集計手順・Z の評価点・ln L の正規化を特定できない,MISSING,INTERPRETATION,paper/A_study_on_latent_structural_models_for_binary_rel.pdf@1b5030b,no,著者への確認が必要。再現の比較では「手順不明」と併記する,既存台帳 limitations 列と一致
+GAP-305,E-AF6,n_fits,台帳 run_count=未確認 ／ completeness=CONFIRMED,MISSING,INTERPRETATION,expfam/results/auto_family_z_recovery/af6_laplace_confirmation_20261114/@8a66894,yes,AF6 の runinfo を探して fit 数を記入する（台帳の改訂は Human Gate）,主要数値（statistical_analysis.csv）は検証済みだが、fit 数は台帳に無い
+GAP-306,D-MX2,n_fits / replicates,台帳 run_count=未確認（2 seed 系列）。duplicate_incident.csv あり（重複実行事故：最初の記録のみ採用）,MISSING,INTERPRETATION,expfam/results/misspecification_extended/phase_20261110/@856d475,yes,manifest.csv から fit 数を数え、重複の扱いを台帳に記す（Human Gate）,重複は事故として記録済み。分母の明記が必要
+GAP-307,F-KEXP2-MAIN;F-155;F-156;F-157;F-158;F-159;F-160;F-161;F-162;F-163;F-164;C-CORA-SH1;E-AF1;E-AF2;E-AF3-5;E-AF6;E-AF7;E-AF8;E-AF8V3,commit,台帳の commit 列（結果を作った commit）と where 列の SHA（ファイルを読んだ commit）が異なる,CONFLICT,NOTATION,experiment_inventory.csv（where・commit 列）,yes,provenance_map の read_sha と result_commit を分けて読む,どちらの SHA も repository・remote に存在（本台帳で確認）
