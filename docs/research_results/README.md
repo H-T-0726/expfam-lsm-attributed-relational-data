@@ -141,6 +141,7 @@ flowchart LR
 | [11 限界と未解決問題](11_limitations_and_open_questions.md) | 未解決の理論・実験課題 |
 | [12 指導教員向けの要約](12_advisor_summary.md) | 5 分で読める総括と相談事項 |
 | [13 追加実験 A・B と原因分析・訂正](13_two_gaps_followup_20261127.md) | 2026-11-27 の追補：Y の量 × 誤指定、Fisher 情報量と K 選択、C_Q の厳密な K 増加条件 |
+| [14 実験条件・再現性・記録完全性の総点検](14_experiment_conditions_and_reproducibility.md) | 2026-11-28：92 記録の条件・seed・runner・一次資料の所在、記録不足と食い違い、記録品質 A/B/C（新しい fit なし） |
 
 ## 7. データと再現
 
@@ -152,6 +153,7 @@ flowchart LR
 | [`data/claims_evidence_matrix.csv`](data/claims_evidence_matrix.csv) | 36 の主張と根拠・採用可能性 |
 | [`data/source_coverage.csv`](data/source_coverage.csv) | どの情報源をどこまで読んだか |
 | [`data/addendum_20261127_*.csv`](data/addendum_20261127_primary_results.csv) | 追補の 4 種（主要数値 38 項目の再計算・追加の 4 記録・11 の比較・10 の主張）。上の 5 つとは別に集計 |
+| [`data/experiment_conditions_audit.csv`](data/experiment_conditions_audit.csv)・[`experiment_provenance_map.csv`](data/experiment_provenance_map.csv)・[`experiment_record_gaps.csv`](data/experiment_record_gaps.csv) | 14 章の 3 種（条件の値と状態・一次資料の対応・記録不足と食い違い）。`scripts/build_experiment_records_audit.py` が固定 SHA の一次資料から生成 |
 | [`scripts/`](scripts/) | 上の CSV と図を生成するスクリプト。`primary_results_index.csv` と図は一次データから計算する。台帳・公平性・主張・情報源の 4 つの CSV は、`build_tables.py` 内に**監査者が編集して書いた記録**を出力したもので、一次データから計算したものではない |
 
 再現手順（repository root で実行。参照する commit が fetch されている必要があります）：
