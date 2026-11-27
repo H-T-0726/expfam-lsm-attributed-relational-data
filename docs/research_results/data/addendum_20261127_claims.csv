@@ -1,0 +1,11 @@
+claim_id,domain,claim,label,claimability,lineage,evidence,result_ids,required_qualifiers,forbidden_overclaim
+CL-TG-01,B,X の全列が Bernoulli の設定で、学習 Y を 10% にすると Bernoulli→Poisson の誤指定による RMSE_Z の悪化が大きくなった（I = +0.211、20/20）,OBSERVED,限定付き,E-scalar,1ef9096 expA/analysis,TG-A-02;TG-A-03;TG-A-04,sparse では正指定でも回復が弱い（RMSE_Z ≈ 1.02、gram ≈ 0.24）。1 設定・1 種類の誤指定,一般法則として書く
+CL-TG-02,B,sparse-Y では、正指定のほうが予測の順位付け（AUC・AP）で 20/20 データとも良かった,OBSERVED,限定付き,E-scalar,2f71e61 prediction_diagnostics.csv,TG-A-09;TG-A-10,Z_last による plug-in 予測,—
+CL-TG-03,B,sparse-Y の Z_last plug-in 予測では、対数スコアと ECE は誤指定のほうが良く（19/20、20/20）、予測確率の SD は小さかった。校正の傾きは正指定のほうが 1 に近かった（18/20）,OBSERVED,限定付き,E-scalar,2f71e61・c035df7,TG-A-11;TG-A-12;TG-A-14;TG-A-15,両モデルとも定数予測より悪い（20/20）。Z_mean では逆転が消える,「誤指定のほうが校正が良い」「誤指定のほうが予測モデルとして優れている」
+CL-TG-04,B,Z_mean による plug-in 予測では、対数スコアの逆転が消えた（正指定が良いデータ 14/20）,OBSERVED,限定付き,E-scalar,2f71e61・c035df7,TG-A-16,Z_mean は縮んでいる。事後予測分布ではない,事後予測分布でも逆転が消える
+CL-TG-05,F,期待 Fisher 情報の trace を Poisson（約 9.8）にそろえた Gaussian-X（GM）は、C_Q で 0/10（すべて過小）だった。G01（trace 75）は 10/10,OBSERVED,限定付き,E-scalar,1ef9096 expB/analysis,TG-B-02;TG-B-04;TG-B-06;TG-B-08,trace だけの一致。1 つの K_TRUE,Poisson 分布そのものが失敗の原因／分布族は無関係
+CL-TG-06,F,scale_Z と var_z = 1 のもとでは、保存 C_Q の Z の事前密度の項は nK(1+ln2π) に等しく、C_Q(K) < C_Q(K−1) ⇔ 2Δℓ > n(1+ln2π)+(d−K+1)ln n,DERIVED,言える（この実装条件）,E-scalar,c035df7 forward_correction.md §1、コード,TG-B-11;TG-B-14,E-scalar の実装条件（scale_Z、var_z=1）。他の系列は別途確認,C_Q を Schwarz BIC と呼ぶ
+CL-TG-07,F,K=8→9 の X+Y の改善 2Δℓ（10 データ中央値）は G01 901.83、GM 311.63、P 290.30 で、必要量 460.756 を超えたのは G01 だけ（10/0/0）,OBSERVED,限定付き,E-scalar,c035df7 cq_exact_increment_summary.csv,TG-B-12;TG-B-13,ℓ は最後の E-step の MC サンプルでの平均。2 初期値平均の中央値,X 側・Y 側の正確な配分
+CL-TG-08,F,C_Q の過小選択は、1 次元あたりの改善が K に比例する固定のコストに届かないことと整合する。推定後の X 情報は GM と P で同程度（1.37・1.17）,INTERPRETATION,限定付き,E-scalar,2f71e61・c035df7,TG-B-10;TG-B-12;TG-B-15,探索的・事後。隣接条件と大域 argmin は 29/30 で一致（1 データは非単峰）,因果の証明
+CL-TG-09,F,同じ fit で C_Lap は GM 8/10（過小 2）、P 9/10（INCOMPLETE 1）、G01 9/10（INCOMPLETE 1）,OBSERVED,限定付き,E-scalar,1ef9096 expB/analysis,TG-B-03;TG-B-05;TG-B-07,C_Lap は厳密な周辺尤度ではない。θ̂ は MCEM の値、単一モード。INCOMPLETE は分母に残す,C_Lap が正しい・常に優れる・過大選択しない
+CL-TG-10,F,10 反復で MCEM が収束したか,UNRESOLVED,言えない,E-scalar,Q の履歴は保存されていない,,保存は最後の相対変化（中央値 2e-4〜1.9e-3）と Q の減少回数（0）だけ,収束した

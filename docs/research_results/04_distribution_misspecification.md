@@ -74,6 +74,7 @@ M1 の dense は学習 Y = pool の 100%、sparse は 10%（どちらも test 10
 ## 9. 分からないこと
 
 - **正式モデル（全列共通 family）で、Y の観測量と誤指定の交互作用を調べた実験は存在しない**（[claim matrix MS-3](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/8a66894/reports/thesis_adoption/claim_adoption_matrix.md)）。
+  - **追補（2026-11-27）**：全列共通の family を使う構造で、この問いを調べた Experiment A を行った（系列 E-scalar、prototype。fixed 系列（C）ではないので、上の文の「正式モデル」の空白はまだ埋まっていない）。Bernoulli→Poisson で dense +0.012 → sparse +0.223（交互作用 +0.211、20/20）と、M1 と同じ向きだった。ただし sparse では正指定でも Z の回復は弱く（RMSE_Z ≈ 1.02）、Y の予測は指標によって良い側が違った（AUC・AP は正指定、Z_last 予測の対数スコアは誤指定）。[13 章 §2](13_two_gaps_followup_20261127.md#2-experiment-ay-の観測量と-x-の分布誤指定)
 - 倍率は平均の比で、信頼区間は計算されていない。
 - dense-Y の M1 の結果は、E1 の last 推定では再現しなかった（+0.0021、9/20）。
 - 「Y が少ないほど誤指定の悪影響が大きい」は一般法則ではない（MX2）。
@@ -93,6 +94,7 @@ M1 の dense は学習 Y = pool の 100%、sparse は 10%（どちらも test 10
 - 自動選択で誤指定を避けられるか：[06 章](06_family_selection.md)（AF1 は M1 と同じデータ）
 - MovieLens の raw-count Poisson の悪化：[08 章](08_real_data_experiments.md)
 - 過分散 Y を Poisson で推定した人工実験（NB-Y）：registry の過分散節（本監査では未再計算）
+- 全列共通 family での Y の量 × 誤指定（Experiment A、2026-11-27 追補）：[13 章](13_two_gaps_followup_20261127.md)。A と M1・MX2 の比較は C、A と fixed Exp4 の数値比較は D（FC-TG-03・04）
 
 ## 12. 一次データとリンク
 

@@ -10,6 +10,7 @@
 > - 数値は一次 CSV から独立に再集計しました（[`data/primary_results_index.csv`](data/primary_results_index.csv)）。
 > - **修論本文に採用するかどうかは、研究者と指導教員が決めます（Human Gate）。** ここで「言える」「限定付き」と書いているのは推奨区分で、決定ではありません。
 > - `main` に統合されていない作業ブランチの結果も含みます。その場合は必ず commit とブランチ名を書いています。**未統合の結果を `main` 採用済みとして読まないでください。**
+> - **追補（2026-11-27）**：スナップショットの作成後に行った追加実験 A・B（`1ef9096`）、その原因分析（`2f71e61`）、数理的な最終訂正（`c035df7`）を [13 章](13_two_gaps_followup_20261127.md) にまとめました。下の 88 件・96 項目などの件数はスナップショットの値のままで、追補の分は別の台帳に記録しています（§3b）。
 
 ## 1. この研究は何をしているか（専門外の人向け）
 
@@ -82,6 +83,19 @@ flowchart LR
 | 6 | 同じ推定結果の上で、C_Q（Q ベース、ICL 型）と C_Lap（ラプラス近似）は違う $K$ を選び、C_Q が失敗した弱信号のセルでは C_Lap のほうが $K_{TRUE}$ を多く選んだ。K-exp2 の 300 データ全体では C_Lap は正解 249・過小 4・**評価不能（INCOMPLETE）47**（全体の分母で数えた値。$K_{TRUE}=3$ の重複を除くと 270 データ中 227・4・39） | E | F-05、F-19、F-24、F-18c、F-18d |
 | 7 | 実データでの属性・分布族による差は小さかった。MovieLens は分割間のばらつきに比べて小さい（+0.0042、23/30、std/\|mean\| 2.89）。Cora は絶対値が小さい（+1.1×10⁻⁴ nats/pair）が raw 同士では 13/15 で符号がそろい、中心化すると逆転した | E/F | C-03、C-06 |
 
+### 3b. 追補（2026-11-27）：追加実験 A・B
+
+系列 E-scalar（prototype）の探索的実験です。詳細・数式・限界は [13 章](13_two_gaps_followup_20261127.md)。
+
+| # | 結果 | 確認 |
+|---|---|---|
+| A | X の全列が Bernoulli の設定で、学習 Y を 10% にすると、Bernoulli→Poisson の誤指定による RMSE(Z) の悪化が大きくなった（dense +0.012 → sparse +0.223、交互作用 +0.211、20/20）。ただし sparse では正指定でも Z の回復は弱い。Y の予測では、順位付け（AUC・AP）は正指定が 20/20 で良く、Z_last による plug-in 予測の対数スコアは誤指定が 19/20 で良かった（両モデルとも定数予測より悪い） | TG-A-02〜16 |
+| B | 期待 Fisher 情報の trace を Poisson（約 9.8）にそろえた Gaussian-X（GM）は、Poisson と同じく C_Q で 0/10（すべて過小）。分散 0.1 の Gaussian（trace 75）は 10/10。C_Lap は G01 9/10・GM 8/10・P 9/10（INCOMPLETE は G01・P で各 1） | TG-B-02〜08 |
+| 数式 | C_Q で K を 1 つ増やす条件は $2\Delta\ell > n(1+\ln 2\pi)+(d-K+1)\ln n$（この実装条件で厳密）。K=8→9 の必要量 460.756 に対し、X+Y の改善は G01 901.83・GM 311.63・P 290.30（10 データの中央値） | TG-B-11〜15 |
+
+- 新しい実験は A・B の 2 件です。原因分析と訂正は同じ fit の分析なので、実験としては数えません。
+- 追補の主要数値 38 項目を一次 CSV から再計算し、37 項目が一致、1 項目（gram 相関の丸め 0.241 → 0.240）が不一致でした。上の 96 項目とは別に集計しています。
+
 **悪化・差なし・失敗も同じ重みで記録しています**（[10 章](10_all_results_summary.md)）。
 たとえば、per-column は Y が密だと最良の単独 block との差がほぼなく、raw-count の Poisson は MovieLens で悪化し、AF6 は事前登録した主要評価項目を達成しませんでした。
 
@@ -110,7 +124,7 @@ flowchart LR
 
 ## 6. 各章
 
-読む順番の目安：研究目的（01）→ 元論文（02）→ モデルの拡張と実験条件・結果（03〜08）→ 比較の公平性（09）→ 分かったこと（10）→ 分からないこと（11）→ 修論への活用（12）。
+読む順番の目安：研究目的（01）→ 元論文（02）→ モデルの拡張と実験条件・結果（03〜08）→ 比較の公平性（09）→ 分かったこと（10）→ 分からないこと（11）→ 修論への活用（12）→ 追補（13）。
 
 | 章 | 内容 |
 |---|---|
@@ -126,6 +140,7 @@ flowchart LR
 | [10 全結果のまとめ](10_all_results_summary.md) | 領域ごとの成功・失敗・証拠の強さ |
 | [11 限界と未解決問題](11_limitations_and_open_questions.md) | 未解決の理論・実験課題 |
 | [12 指導教員向けの要約](12_advisor_summary.md) | 5 分で読める総括と相談事項 |
+| [13 追加実験 A・B と原因分析・訂正](13_two_gaps_followup_20261127.md) | 2026-11-27 の追補：Y の量 × 誤指定、Fisher 情報量と K 選択、C_Q の厳密な K 増加条件 |
 
 ## 7. データと再現
 
@@ -136,6 +151,7 @@ flowchart LR
 | [`data/comparison_fairness_matrix.csv`](data/comparison_fairness_matrix.csv) | 32 の比較の公平性評価（A〜D） |
 | [`data/claims_evidence_matrix.csv`](data/claims_evidence_matrix.csv) | 36 の主張と根拠・採用可能性 |
 | [`data/source_coverage.csv`](data/source_coverage.csv) | どの情報源をどこまで読んだか |
+| [`data/addendum_20261127_*.csv`](data/addendum_20261127_primary_results.csv) | 追補の 4 種（主要数値 38 項目の再計算・追加の 4 記録・11 の比較・10 の主張）。上の 5 つとは別に集計 |
 | [`scripts/`](scripts/) | 上の CSV と図を生成するスクリプト。`primary_results_index.csv` と図は一次データから計算する。台帳・公平性・主張・情報源の 4 つの CSV は、`build_tables.py` 内に**監査者が編集して書いた記録**を出力したもので、一次データから計算したものではない |
 
 再現手順（repository root で実行。参照する commit が fetch されている必要があります）：
@@ -145,6 +161,8 @@ git fetch origin
 python docs/research_results/scripts/verify_primary_numbers.py   # data/primary_results_index.csv
 python docs/research_results/scripts/build_tables.py             # data/ の台帳 4 種
 python docs/research_results/scripts/make_figures.py             # figures/
+python docs/research_results/scripts/verify_addendum_20261127.py # 追補：data/addendum_20261127_primary_results.csv
+python docs/research_results/scripts/build_addendum_20261127.py  # 追補：台帳 3 種
 ```
 
 スクリプトはモデルを import せず、`git show <commit>:<path>` で CSV を読むだけです。

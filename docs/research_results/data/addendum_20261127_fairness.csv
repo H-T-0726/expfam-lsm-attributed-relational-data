@@ -1,0 +1,12 @@
+comparison_id,comparison,experiments,grade,same_data,same_seed,same_split_mask,same_conditions,same_lineage,same_budget,same_information,same_metric,failure_handling,prereg_vs_posthoc,reason,allowed_reading,forbidden_reading
+FC-TG-01,A：同じデータでの正指定 Bernoulli-X vs 誤指定 Poisson-X,TG-A,A,yes,yes,yes,yes,yes,yes,yes,yes,160/160 OK,事前（protocol 凍結）,family だけが違う（独立集計で確認）,同じデータで誤指定は Z の回復を悪くした,誤指定の一般的な効果
+FC-TG-02,A：dense vs sparse（交互作用 I）,TG-A,A（限定付き）,yes,yes,部分集合,Y の量だけ,yes,yes,no（意図した操作）,yes,160/160 OK,事前,sparse の学習 mask は dense の部分集合。MC・初期化の経路も変わる,この設定で、Y が少ないと誤指定の悪影響が大きかった,「Y が少ないほど誤指定の悪影響が大きい」という一般法則
+FC-TG-03,A と M1（#134）・MX2（PR #168）,TG-A;D-M1;D-MX2,C,no,no,no,no,no（E-scalar vs E-3）,similar,no,yes,—,—,列ごとの family・n=75・d=12 と、全列共通・n=150・d=15,向きが同じだったという記述,数値の横並び比較
+FC-TG-04,A と fixed Exp4（系列 C）,TG-A;B-FIXED-EXP4,D,no,no,no,no,no,no,no,partly,—,—,系列・生成器・Y の観測量の操作の有無が違う,なし（別の実験として並記のみ）,倍率や RMSE の数値比較
+FC-TG-05,A：Z_last plug-in と Z_mean plug-in の予測,TG-DIAG;TG-CORR,B,yes,yes,yes,yes,yes,yes,yes,yes,—,事後,同じ fit だが Z_mean は縮んでいる（二乗平均 0.60・0.42）。どちらも事後予測分布ではない,予測の作り方で逆転が消えた,事後予測分布でも逆転が消える／残る
+FC-TG-06,B：同じ replicate の G01 vs GM,TG-B,A,yes（Z・F・Y 共有）,yes,n/a,X の分散だけ,yes,yes,no（意図した操作）,yes,C_Lap INCOMPLETE は分母に残す,事前,X の雑音の分散だけが違う,X の情報量を下げると C_Q の成否が入れ替わった,—
+FC-TG-07,B：GM vs P（期待 Fisher の trace をそろえた）,TG-B,B,yes（Z・F・Y 共有）,yes,n/a,family が違う,yes,yes,trace のみ,yes,同上,事前,方向ごとの情報・z ごとの変動・分散推定（罰則 +d）・尤度の形が違う,trace をそろえると C_Q の結果は似た,Poisson 分布そのものが原因／分布族は無関係
+FC-TG-08,B：同じ fit での C_Q vs C_Lap,TG-B,B,yes,yes,n/a,yes,yes,yes,yes,基準が違う,INCOMPLETE は C_Lap 側だけ,事前（選択規則）,FC-14 と同じ理由。θ̂ は C_Lap の停留点ではなく単一モード,同じ推定結果で選ぶ K が違った,C_Lap が正しい基準
+FC-TG-09,B と K-exp2 本実験（O-b-9、A-b-9）,TG-B;F-KEXP2-MAIN,C,no（別データ）,no,n/a,同じ設計規則,yes,yes,—,yes,—,—,乱数の使い方とデータが違う,C_Q の差が再現した,C_Lap の正解数の横並び比較
+FC-TG-10,B：family の違う条件間で C_Q・C_Lap の絶対値を比べる,TG-B,D,—,—,—,—,—,—,—,no,—,—,尤度の正規化・罰則の項数（C_Q は Gaussian で +d、C_Lap の d_K は分散を含まない）が違う,選ばれた K だけを比べる,基準値の絶対値の比較
+FC-TG-11,B：K=8→9 の 2Δℓ（厳密）と 1 サンプルの X・Y 項,TG-CORR,B,yes,yes,n/a,yes,yes,yes,yes,近似 vs 厳密,—,事後,X・Y の分離は Z_last 1 サンプルの近似、中央値は足し合わせられない,X+Y の合計は厳密に言える,X と Y の寄与の正確な配分
