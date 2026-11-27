@@ -1,0 +1,12 @@
+check,pass,detail
+A: 160 OK main fits available,True,160
+A: rebuilt X/Y/test/train hashes = per_fit,True,[]
+A: NPZ sha256 = per_fit,True,[]
+A: recomputed heldout_log_score / gram_corr / rmse_Z = per_fit (max abs diff < 1e-9),True,0.0
+B: 600 OK main fits available,True,600
+B: rebuilt X/Y/Z/F hashes = per_fit,True,[]
+B: NPZ sha256 = per_fit,True,[]
+B: lnpZ + lnpX + lnpY = calc_Q_dual_strict_exp on Z_last (max abs < 1e-6),True,1.8189894035458565e-12
+"B: -2 lnpZ(Z_last) vs nK(1 + ln 2pi): max abs deviation recorded (scale_Z normalises over all L samples jointly, not per sample)",True,64.99523501217209
+"B: selection by saved C_Q vs 1-sample C_Q (recorded, not a gate)",True,23/30 equal
+B: saved-C_Q selection = primary analysis k_Q,True,

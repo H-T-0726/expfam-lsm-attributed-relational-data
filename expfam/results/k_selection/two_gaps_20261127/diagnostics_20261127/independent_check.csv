@@ -1,0 +1,10 @@
+check,pass,detail
+A: 2-init means (dataset x rate x family) reproduce,True,0.0
+A: paired mean / median differences reproduce,True,0.0
+A: counts of datasets where the correct family is better reproduce,True,[]
+"A: 8 fits re-predicted independently (log score, Brier, AUC, AP via sklearn)",True,1.1102230246251565e-16
+B: -2(lnpZ + lnpX + lnpY) + penalty = C_Q_1sample,True,0.0
+B: C_Q_saved = per_fit C_Q,True,0.0
+B: estimated variances and X-information traces recomputed from NPZ,True,5.684341886080802e-14
+B: per-K term deltas vs K=9 (median of 2-init means) reproduce,True,0.0
+B: median increment of -2 lnpZ per dimension ~ n(1+ln 2pi)=425.7 (recorded),True,min 414.2 max 435.4; derived 425.7
