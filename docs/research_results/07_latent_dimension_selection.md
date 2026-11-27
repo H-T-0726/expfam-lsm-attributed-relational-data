@@ -65,6 +65,14 @@ $$
 $-2\,\mathbb E\ln p(Z) = nK(1+\ln 2\pi)$
 になる。$n=150$ では 1 次元あたり 425.68、$n=75$ では 212.8。
 
+**追補（2026-11-27）：K を 1 つ増やす正確な条件**（DERIVED、[13 章 §4](13_two_gaps_followup_20261127.md#4-c_q-の数式なぜ情報量が-k-の選択を左右するかderived訂正-c035df7-を反映)）。X と Y の対数尤度の MC 平均を $\ell(K)$ とすると、$C_Q(K)=-2\ell(K)+nK(1+\ln2\pi)+p_K\ln n$ で、
+
+$$
+C_Q(K)<C_Q(K-1)\iff 2\Delta\ell>n(1+\ln 2\pi)+(d-K+1)\ln n
+$$
+
+（$\Delta\ell=\ell(K)-\ell(K-1)$。$n=150$、$d=15$ の K=8→9 で 460.756）。これは隣り合う K の比較で、選ばれる K は全候補での最小（大域的な argmin）である。原因分析（`2f71e61`）の報告にあったこの不等号の符号の誤りは、`c035df7` で訂正した。
+
 **理想化した関係**（DERIVED、#163。厳密な事後分布 $\pi$ で評価した場合）：
 
 $$
@@ -133,6 +141,19 @@ C_Q は、事後分布が広い（データが $Z$ をよく決めない）と�
 - OBSERVED：原論文型の条件付き尤度の基準は、本研究のすべての条件で過大選択した（#159、#164、#165）。
 - OBSERVED：混合分布 X（G5/B5/P5）でも、単一分布 X と同じ向き（$K_{TRUE}$ が高いと C_Q が過小、C_Lap は $K_{TRUE}$ 付近）が見られた。
 
+**追補（2026-11-27）：Experiment B**（系列 E-scalar、探索的、[13 章 §3〜§5](13_two_gaps_followup_20261127.md)）
+
+| 条件（$K_{TRUE}=9$、regime b、10 データ） | 期待 Fisher の trace | C_Q | C_Lap | K=8→9 の X+Y の改善 $2\Delta\ell$（中央値、必要量 460.756） |
+|---|---:|---|---|---:|
+| G01：Gaussian-X、分散 0.1 | 75 | 10/10 | 9/10（INCOMPLETE 1） | 901.83 |
+| GM：Gaussian-X、分散 ≈ 0.76 | ≈ 9.8 | 0/10（過小 10） | 8/10（過小 2） | 311.63 |
+| P：Poisson-X | ≈ 9.8 | 0/10（過小 10） | 9/10（INCOMPLETE 1） | 290.30 |
+
+- OBSERVED：同じ Z・F・Y で X の分散だけを変えると、C_Q の成否が入れ替わった（G01 vs GM は評価 A）。trace をそろえた Gaussian（GM）は Poisson と同じように過小選択した（GM vs P は評価 B、一致させたのは trace だけ）。
+- INTERPRETATION：K-exp2 の「Gaussian-X は成功、Poisson-X は失敗」は、この設定では分布族そのものより情報量の差と整合する。C_Q の 1 次元あたりのコストは固定（約 456〜496）で、情報量が小さいと X+Y の改善がそれに届かない。
+- 書けないこと：「Poisson 分布そのものが原因」「分布族は無関係」「C_Lap が正しい」。X 側と Y 側の寄与の正確な配分（1 サンプル近似しかない）。
+- C_Lap の罰則 $d_K$ には Gaussian-X の分散 $d$ 個が入らず、C_Q の $p_K$ には入る。K に依らないので選択は変わらないが、絶対値は比べられない。
+
 ## 9. 分からないこと
 
 - どの基準についても一致性は証明されていない。
@@ -166,6 +187,7 @@ C_Q は、事後分布が広い（データが $Z$ をよく決めない）と�
 
 - main：[`fixed_official/exp1_k9/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/1b5030b/expfam/results/fixed_official/exp1_k9)、[`clean_true_k_asymptotics_20260904/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/1b5030b/expfam/results/k_selection/clean_true_k_asymptotics_20260904)、[`lap_vs_cq_20/phase9k_20260928/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/1b5030b/expfam/results/lap_vs_cq_20/phase9k_20260928)、[`dsweep_k_selection_20261105/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/1b5030b/expfam/results/k_selection/dsweep_k_selection_20261105)
 - #155–#165（未 merge）：[`expfam/results/k_selection/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/bada1d2/expfam/results/k_selection)、理論：[`bic_theory_candidate_assessment_20261108/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/bada1d2/reports/k_selection_theory/bic_theory_candidate_assessment_20261108)
+- 追加実験 A・B（未 merge）：[`two_gaps_20261127/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/1ef9096/expfam/results/k_selection/two_gaps_20261127)、訂正：[`forward_correction.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/c035df7/expfam/results/k_selection/two_gaps_20261127/diagnostics_20261127/forward_correction_20261127/forward_correction.md)
 - K-exp2（未 merge）：[`k_exp2_generalization_20261125/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/9d12dc4/expfam/results/k_selection/k_exp2_generalization_20261125)、claim ledger：[`claim_ledger.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/9d12dc4/reports/k_selection_exp2_generalization/claim_ledger.md)
 - historical P/B（未 merge）：[`historical_pb_k5_n_sweep_20260906/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/600108d/expfam/results/k_selection/historical_pb_k5_n_sweep_20260906)
 - Gaussian-Y（未 merge）：[`canonical_gaussian_y_k_selection_20260907/`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/tree/d610a8d/expfam/results/canonical_gaussian_y_k_selection_20260907)

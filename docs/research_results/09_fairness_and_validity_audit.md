@@ -214,7 +214,23 @@
 
 どれも書き換えていない。forward update するかは研究者が判断する。
 
-## 13. 関連
+## 13. 追補（2026-11-27）の監査範囲
+
+§1〜§12 はスナップショット（`f8c84d8`）の監査の記録で、**変更していない**。追補（[13 章](13_two_gaps_followup_20261127.md)）の監査は、次のとおり別に行った。
+
+| 項目 | 内容 |
+|---|---|
+| 対象 | 追加実験 A・B（`1ef9096`）、原因分析（`2f71e61`、protocol `7447ef0`）、数理的な最終訂正（`c035df7`） |
+| 件数の扱い | 新しい実験は A・B の 2 件。原因分析と訂正は同じ fit の分析で、実験として数えない。**88 件・96 項目・32 比較・36 主張の分母は変えず**、追補台帳（`data/addendum_20261127_*.csv`）に分けた |
+| 数値の再計算 | [`verify_addendum_20261127.py`](scripts/verify_addendum_20261127.py) が `git show` で一次 CSV を読み、38 項目を再計算。VERIFIED 37、MISMATCH 1（gram 相関の報告値 0.241 は 0.24046 の丸めで、正しくは 0.240。主張は変わらない） |
+| 公平性 | 11 の比較を §3 の A〜D で評価（A 2、A（限定付き）1、B 4、C 2、D 2。[`addendum_20261127_fairness.csv`](data/addendum_20261127_fairness.csv)） |
+| 訂正の反映 | 原因分析の不等号の符号の誤り、1 サンプル項分解の扱い、「校正」の表現、Z_mean 予測の位置づけ、C_Lap の範囲は、最新の訂正（`c035df7`）に従った。元の報告は書き換えていない |
+| 一次資料間の食い違い（報告のみ） | ① gram 相関の丸め（上記）② Poisson の情報行列の条件数：一次 CSV では 1.11〜1.22、`fairness_audit.md` と凍結 protocol B では 1.14〜1.17 |
+| 実施者 | 作成プロセス（スクリプト）。追補について、別の監査プロセス（`research-auditor`）による監査はしていない。**人間による第三者査読ではない** |
+
+追補に関係する各段階の確認（25/25、11/11、9/9、17/17）は、確認した対象がそれぞれ違うので合算しない（[13 章 §9](13_two_gaps_followup_20261127.md#9-確認の種類成功率としてまとめない)）。
+
+## 14. 関連
 
 - 主張の分類：[`claims_evidence_matrix.csv`](data/claims_evidence_matrix.csv)、[10 章](10_all_results_summary.md)
 - 11/24 の採用判定表：[`claim_adoption_matrix.md`](https://github.com/H-T-0726/expfam-lsm-attributed-relational-data/blob/8a66894/reports/thesis_adoption/claim_adoption_matrix.md)（未 merge）
