@@ -1,0 +1,18 @@
+check,pass,detail
+"B: 600 OK fits, 10 datasets x 10 K x 2 inits per condition",True,600
+constant n(1+ln 2pi) = 425.68,True,425.6815599614018
+cost(8->9) = n(1+ln2pi) + (d-9+1) ln n = 460.756,True,460.7560070200756
+num_params == Kd - K(K-1)/2 (+d for Gaussian-X),True,0
+C_Q == -2 Q_strict + p ln n,True,0.0
+var_z == 1 in all 600 B states (premise of the exact lnpZ constant),True,{1.0}
+"aggregation unit: each (cond, dataset, K) cell has exactly 2 inits",True,
+"corrected condition 2*dl > n(1+ln2pi)+(d-K+1)ln n <=> C_Q(K) < C_Q(K-1), all dataset pairs",True,270/270
+printed condition -2*dl > cost (report l.165) is wrong (records its agreement count),True,107/270 agree
+"K=8->9 median 2*dl (10 datasets, 2-init mean) matches G01 901.83 / GM 311.63 / P 290.30",True,"{'G01': 901.8326, 'GM': 311.629, 'P': 290.2983}"
+correction CSV medians reproduce (Q_strict route vs C_Q route),True,2.7284841053187847e-12
+unit check: median over 20 per-init increments (not the protocol unit) recorded for contrast,True,"{'G01': 895.36, 'GM': 314.91, 'P': 286.61}"
+8->9: sum of 1-sample term medians != median of 1-sample totals (reproduced),True,"{'G01': (-399.1, -435.1), 'GM': (148.8, 155.2), 'P': (132.0, 165.7)}"
+C_Lap == -2[Phi(Zhat) + (nK/2)ln2pi - (1/2)ln|H|] + (Kd-K(K-1)/2) ln n (rel.),True,0.0
+"C_Lap status: 598 OK, 2 NOT_STATIONARY (G01 1, P 1); GM all OK",True,598
+"A sparse: Bern>Pois counts (log score 1, ECE 20 [=Pois better], SD 20, AUC 20); slope closer to 1: Bern 18; Z_mean plug-in beats constant: Bern 15, Pois 10",True,"{'plugin_last_log_score': 1, 'plugin_last_ece': 20, 'plugin_last_p_sd': 20, 'plugin_last_auc': 20, 'slope_bern_closer_to_1': 18, 'zmean_ls_bern_gt_const': 15, 'zmean_ls_pois_gt_const': 10}"
+"A sparse: mean square of Z_mean < 1 (shrunk; Bern ~0.60, Pois ~0.42)",True,"{'bernoulli': 0.597, 'poisson': 0.416}"

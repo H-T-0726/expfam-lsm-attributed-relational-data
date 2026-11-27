@@ -1,5 +1,8 @@
 # Experiment A・B の原因分析（事後の探索的分析、2026-11-27）
 
+> **Forward correction（2026-11-27 追記。本文・数値は変更していない）**：165 行の不等号は左辺の符号が誤り。正しくは $2\Delta\ell > n(1+\ln 2\pi)+(d-K+1)\ln n$（$\Delta\ell=\ell(K)-\ell(K-1)$）。
+> 1 サンプル項分解の扱い、A の「校正」の表現、`Z_mean` 予測の位置づけ、C_Lap の範囲の明確化とあわせて、[`forward_correction_20261127/forward_correction.md`](forward_correction_20261127/forward_correction.md) を参照。
+
 ## この報告の位置づけ
 - **事後の探索的分析**。本実験の結果（commit `1ef9096`）を見た後に計画した。protocol（`analysis_protocol.md`）は計算前に commit した（`7447ef0`）。
 - **新しい fit・データ生成・最適化はしていない**。使ったのは次の 3 つ。

@@ -1,0 +1,12 @@
+check,n,max_abs,note
+d_K == K d - K(K-1)/2,600,0,
+lap_penalty == d_K ln n (n=150),600,0.0,
+C_Lap == -2 lap_log_observed + lap_penalty,598,0.0,
+C_Lap == fit_mode + zhat_sq + logdet_H + penalty,598,3.637978807091713e-12,
+"fit_mode == -2 (phi_at_mode - ln p(Z_hat)), ln p = -(nK/2)ln2pi - zhat_sq/2",600,3.637978807091713e-12,
+log_observed == phi + (nK/2)ln2pi - logdet_H/2,598,0.0,
+"num_params(C_Q) - d_K(C_Lap), cond G01",1,0.0,values [15] (constant in K: does not change the argmin)
+"num_params(C_Q) - d_K(C_Lap), cond GM",1,0.0,values [15] (constant in K: does not change the argmin)
+"num_params(C_Q) - d_K(C_Lap), cond P",1,0.0,values [0] (constant in K: does not change the argmin)
+lap_status counts,1,0.0,G01:NOT_STATIONARY=1; G01:OK=199; GM:OK=200; P:NOT_STATIONARY=1; P:OK=199
+lap logdet sign == 1 for OK,598,0.0,
